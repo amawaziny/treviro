@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from "react"
-import { Pie, PieChart, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts"
+import { Pie, PieChart, ResponsiveContainer, Cell, Legend } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import type { Investment } from "@/lib/types"
 import { useInvestments } from "@/hooks/use-investments"
 
