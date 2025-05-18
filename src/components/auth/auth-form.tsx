@@ -1,12 +1,13 @@
+
 "use client";
 
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn } from 'lucide-react'; // Using LogIn as a generic login icon
+import { LogIn } from 'lucide-react'; 
 
 export function AuthForm() {
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -16,13 +17,10 @@ export function AuthForm() {
           <CardDescription>Securely manage your investments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={login} className="w-full" size="lg">
+          <Button onClick={login} className="w-full" size="lg" disabled={isLoading}>
             <LogIn className="mr-2 h-5 w-5" />
-            Login with Google (Mock)
+            {isLoading ? "Logging in..." : "Login with Google"}
           </Button>
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            This is a simulated Google login for demonstration purposes.
-          </p>
         </CardContent>
       </Card>
     </div>

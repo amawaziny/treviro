@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { Investment, CurrencyFluctuationAnalysisResult } from '@/lib/types';
 import { db } from '@/lib/firebase'; // Import Firestore instance
-import { collection, query, where, onSnapshot, addDoc, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 
 interface InvestmentContextType {
@@ -24,7 +24,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { user, isAuthenticated, isLoading: authIsLoading } = useAuth();
 
-  const userId = user?.email; // Using email as a simple UID for mock user
+  const userId = user?.uid; // Using Firebase UID
 
   useEffect(() => {
     if (authIsLoading) {
@@ -48,11 +48,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribeInvestments = onSnapshot(qInvestments, (querySnapshot) => {
       const fetchedInvestments: Investment[] = [];
       querySnapshot.forEach((doc) => {
-        // Explicitly cast to Investment after spreading. Firestore might add extra fields.
         fetchedInvestments.push({ id: doc.id, ...doc.data() } as Investment);
       });
       setInvestments(fetchedInvestments);
-      setIsLoading(false); // Set loading to false after first fetch
+      setIsLoading(false); 
     }, (error) => {
       console.error("Error fetching investments:", error);
       setIsLoading(false);
@@ -86,20 +85,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const analysesCollectionPath = `users/${userId}/currencyAnalyses`;
 
     try {
-      // Firestore generates the ID, so we remove it from the object to be added
-      // However, our current `Investment` type requires an ID from uuidv4.
-      // For Firestore, it's better to let Firestore generate the ID or use the one we have.
-      // Let's assume `investment.id` (from uuidv4) is what we want to use as the document ID.
       const investmentDocRef = doc(db, investmentsCollectionPath, investment.id);
-      await setDoc(investmentDocRef, investment); // Using setDoc to use our predefined ID
+      await setDoc(investmentDocRef, investment);
 
       if (analysis && investment.type === 'Currencies') {
-        const analysisDocRef = doc(db, analysesCollectionPath, investment.id); // Use investment ID for analysis doc ID
+        const analysisDocRef = doc(db, analysesCollectionPath, investment.id);
         await setDoc(analysisDocRef, analysis);
       }
     } catch (error) {
       console.error("Error adding investment to Firestore:", error);
-      // Optionally re-throw or show a toast
     }
   }, [userId, isAuthenticated]);
 
