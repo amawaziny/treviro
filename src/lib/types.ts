@@ -1,3 +1,4 @@
+
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
 
 export interface BaseInvestment {
@@ -7,6 +8,7 @@ export interface BaseInvestment {
   amountInvested: number;
   purchaseDate: string; // ISO string
   currentValue?: number; // Optional, can be updated later
+  createdAt?: string; // Server-generated timestamp, stored as ISO string
 }
 
 export interface StockInvestment extends BaseInvestment {
@@ -63,3 +65,4 @@ export interface ListedStock {
   changePercent: number;
   market: string; // e.g., "SAR", "EGX"
 }
+

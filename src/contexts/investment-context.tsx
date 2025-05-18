@@ -5,12 +5,12 @@ import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { Investment, CurrencyFluctuationAnalysisResult } from '@/lib/types';
 import { db } from '@/lib/firebase'; // Import Firestore instance
-import { collection, query, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 
 interface InvestmentContextType {
   investments: Investment[];
-  addInvestment: (investment: Investment, analysis?: CurrencyFluctuationAnalysisResult) => Promise<void>;
+  addInvestment: (investment: Omit<Investment, 'createdAt'>, analysis?: CurrencyFluctuationAnalysisResult) => Promise<void>;
   getInvestmentsByType: (type: string) => Investment[];
   isLoading: boolean;
   currencyAnalyses: Record<string, CurrencyFluctuationAnalysisResult>;
@@ -24,7 +24,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { user, isAuthenticated, isLoading: authIsLoading } = useAuth();
 
-  const userId = user?.uid; // Using Firebase UID
+  const userId = user?.uid; 
 
   useEffect(() => {
     if (authIsLoading) {
@@ -47,8 +47,17 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const qInvestments = query(collection(db, investmentsCollectionPath));
     const unsubscribeInvestments = onSnapshot(qInvestments, (querySnapshot) => {
       const fetchedInvestments: Investment[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedInvestments.push({ id: doc.id, ...doc.data() } as Investment);
+      querySnapshot.forEach((documentSnapshot) => { // Changed doc to documentSnapshot for clarity
+        const data = documentSnapshot.data();
+        const investment: Investment = {
+          id: documentSnapshot.id,
+          ...data,
+          purchaseDate: data.purchaseDate, // Assuming purchaseDate is already a string
+          createdAt: data.createdAt && data.createdAt instanceof Timestamp 
+            ? data.createdAt.toDate().toISOString() 
+            : data.createdAt, // Keep as is if already string or undefined
+        } as Investment; // Cast needed due to potential Timestamp
+        fetchedInvestments.push(investment);
       });
       setInvestments(fetchedInvestments);
       setIsLoading(false); 
@@ -75,7 +84,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [userId, isAuthenticated, authIsLoading]);
 
-  const addInvestment = useCallback(async (investment: Investment, analysis?: CurrencyFluctuationAnalysisResult) => {
+  const addInvestment = useCallback(async (investmentData: Omit<Investment, 'createdAt'>, analysis?: CurrencyFluctuationAnalysisResult) => {
     if (!isAuthenticated || !userId) {
       console.error("User not authenticated, cannot add investment.");
       return;
@@ -84,12 +93,17 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const investmentsCollectionPath = `users/${userId}/investments`;
     const analysesCollectionPath = `users/${userId}/currencyAnalyses`;
 
-    try {
-      const investmentDocRef = doc(db, investmentsCollectionPath, investment.id);
-      await setDoc(investmentDocRef, investment);
+    const investmentWithTimestamp = {
+      ...investmentData,
+      createdAt: serverTimestamp(),
+    };
 
-      if (analysis && investment.type === 'Currencies') {
-        const analysisDocRef = doc(db, analysesCollectionPath, investment.id);
+    try {
+      const investmentDocRef = doc(db, investmentsCollectionPath, investmentData.id);
+      await setDoc(investmentDocRef, investmentWithTimestamp);
+
+      if (analysis && investmentData.type === 'Currencies') {
+        const analysisDocRef = doc(db, analysesCollectionPath, investmentData.id);
         await setDoc(analysisDocRef, analysis);
       }
     } catch (error) {
@@ -107,3 +121,4 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     </InvestmentContext.Provider>
   );
 };
+
