@@ -68,9 +68,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         router.push('/dashboard');
       }
-    } catch (error) {
-      console.error("Error during Google sign-in:", error);
-      // Handle error (e.g., show a toast to the user)
+    } catch (error: any) { // Type error as any to access 'code' property
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.log("Google sign-in popup closed by user.");
+        // User intentionally closed the popup, usually no need for an error message to the user.
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        console.log("Google sign-in popup request cancelled (e.g., another popup was opened).");
+        // Also a user/browser action, typically no need for a user-facing error.
+      } else if (error.code === 'auth/popup-blocked') {
+        console.warn("Google sign-in popup blocked by the browser. Please enable popups for this site.");
+        // Here you might want to inform the user via UI, e.g., a toast message.
+        // For example: toast({ title: "Popup Blocked", description: "Please enable popups and try again.", variant: "destructive" });
+      }
+      else {
+        console.error("An unexpected error occurred during Google sign-in:", error);
+        // For other errors, you might want to show a generic error message to the user.
+        // For example: toast({ title: "Login Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
