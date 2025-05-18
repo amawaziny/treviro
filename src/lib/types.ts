@@ -14,21 +14,21 @@ export interface StockInvestment extends BaseInvestment {
   tickerSymbol?: string;
   numberOfShares?: number;
   purchasePricePerShare?: number;
-  stockLogoUrl?: string; // Added field for stock logo URL
-  isFund?: boolean; // To differentiate individual stocks vs funds
+  stockLogoUrl?: string;
+  isFund?: boolean;
 }
 
 export interface GoldInvestment extends BaseInvestment {
   type: 'Gold';
   quantityInGrams?: number;
-  isPhysical?: boolean; // Physical gold or gold fund/ETF
+  isPhysical?: boolean;
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
   type: 'Currencies';
-  currencyCode: string; // e.g., USD, EUR
-  baseCurrency: string; // For comparison, e.g., local currency like INR
-  currentExchangeRate?: number; // User-provided for AI analysis
+  currencyCode: string;
+  baseCurrency: string;
+  currentExchangeRate?: number;
 }
 
 export interface RealEstateInvestment extends BaseInvestment {
@@ -41,7 +41,7 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   type: 'Debt Instruments';
   issuer?: string;
   interestRate?: number;
-  maturityDate?: string; // ISO string
+  maturityDate?: string;
 }
 
 export type Investment = StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment;
@@ -50,4 +50,16 @@ export interface CurrencyFluctuationAnalysisResult {
   significantDeviation: boolean;
   deviationPercentage: number;
   analysisSummary: string;
+}
+
+// New type for displaying stocks in a list
+export interface ListedStock {
+  id: string;
+  name: string;
+  symbol: string;
+  logoUrl: string;
+  price: number;
+  currency: string;
+  changePercent: number;
+  market: string; // e.g., "SAR", "EGX"
 }

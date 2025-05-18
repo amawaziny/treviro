@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, PlusCircle, Landmark, Coins, LineChart, FileText, CircleDollarSign } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Landmark, Coins, LineChart, FileText, CircleDollarSign, List } from 'lucide-react'; // Added List icon
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -30,6 +30,11 @@ const navItems: NavItem[] = [
     title: 'Add Investment',
     href: '/investments/add',
     icon: PlusCircle,
+  },
+  {
+    title: 'Browse Stocks',
+    href: '/stocks',
+    icon: List, // Using List icon for stocks
   },
   // Example for future expansion if specific views per asset type are needed
   // {
