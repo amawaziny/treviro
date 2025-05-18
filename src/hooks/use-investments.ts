@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from 'react';
-import { InvestmentContext }_from '@/contexts/investment-context';
+import { InvestmentContext } from '@/contexts/investment-context';
 
 export const useInvestments = () => {
   const context = useContext(InvestmentContext);
