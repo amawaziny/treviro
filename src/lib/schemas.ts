@@ -12,6 +12,7 @@ export const AddInvestmentSchema = z.object({
   tickerSymbol: z.string().optional(),
   numberOfShares: z.coerce.number().optional(),
   purchasePricePerShare: z.coerce.number().optional(),
+  stockLogoUrl: z.string().url({ message: "Please enter a valid URL for the stock logo." }).optional().or(z.literal('')),
   isStockFund: z.boolean().optional().default(false),
 
   // Gold specific

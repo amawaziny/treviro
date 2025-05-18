@@ -14,6 +14,7 @@ export interface StockInvestment extends BaseInvestment {
   tickerSymbol?: string;
   numberOfShares?: number;
   purchasePricePerShare?: number;
+  stockLogoUrl?: string; // Added field for stock logo URL
   isFund?: boolean; // To differentiate individual stocks vs funds
 }
 

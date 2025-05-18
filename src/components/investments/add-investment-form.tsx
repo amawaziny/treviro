@@ -60,6 +60,7 @@ export function AddInvestmentForm() {
       tickerSymbol: "",
       numberOfShares: undefined,
       purchasePricePerShare: undefined,
+      stockLogoUrl: "",
       isStockFund: false,
       // Gold
       quantityInGrams: undefined,
@@ -101,6 +102,7 @@ export function AddInvestmentForm() {
         tickerSymbol: values.tickerSymbol,
         numberOfShares: values.numberOfShares,
         purchasePricePerShare: values.purchasePricePerShare,
+        stockLogoUrl: values.stockLogoUrl,
         isFund: values.isStockFund,
       };
     } else if (values.type === "Gold") {
@@ -253,6 +255,9 @@ export function AddInvestmentForm() {
                   <FormField control={form.control} name="tickerSymbol" render={({ field }) => (
                       <FormItem><FormLabel>Ticker Symbol</FormLabel><FormControl><Input placeholder="e.g., AAPL" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
+                  <FormField control={form.control} name="stockLogoUrl" render={({ field }) => (
+                      <FormItem><FormLabel>Stock Logo URL (Optional)</FormLabel><FormControl><Input placeholder="e.g., https://example.com/logo.png" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
                   <FormField control={form.control} name="numberOfShares" render={({ field }) => (
                       <FormItem><FormLabel>Number of Shares</FormLabel><FormControl><Input type="number" placeholder="e.g., 100" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -260,7 +265,7 @@ export function AddInvestmentForm() {
                       <FormItem><FormLabel>Purchase Price Per Share</FormLabel><FormControl><Input type="number" placeholder="e.g., 150.50" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="isStockFund" render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this a stock fund/ETF?</FormLabel></div></FormItem>
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this a stock fund/ETF?</FormLabel></div></FormItem>
                     )} />
                 </div>
               </div>
