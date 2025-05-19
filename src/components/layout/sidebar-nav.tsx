@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, PlusCircle, Landmark, Coins, LineChart, FileText, CircleDollarSign, List } from 'lucide-react'; // Added List icon
+import { LayoutDashboard, PlusCircle, List, Briefcase, Home, Gem, ScrollText, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -18,6 +19,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   disabled?: boolean;
+  exactMatch?: boolean; // For parent routes like /investments
 }
 
 const navItems: NavItem[] = [
@@ -34,19 +36,33 @@ const navItems: NavItem[] = [
   {
     title: 'Browse Stocks',
     href: '/stocks',
-    icon: List, // Using List icon for stocks
+    icon: List, 
   },
-  // Example for future expansion if specific views per asset type are needed
-  // {
-  //   title: 'Real Estate',
-  //   href: '/investments/real-estate',
-  //   icon: Landmark,
-  // },
-  // {
-  //   title: 'Gold',
-  //   href: '/investments/gold',
-  //   icon: Coins,
-  // },
+  {
+    title: 'My Stocks',
+    href: '/investments/stocks',
+    icon: Briefcase,
+  },
+  {
+    title: 'My Real Estate',
+    href: '/investments/real-estate',
+    icon: Home,
+  },
+  {
+    title: 'My Gold',
+    href: '/investments/gold',
+    icon: Gem,
+  },
+  {
+    title: 'My Debt', // Shortened for sidebar
+    href: '/investments/debt-instruments',
+    icon: ScrollText,
+  },
+  {
+    title: 'My Currencies',
+    href: '/investments/currencies',
+    icon: DollarSign,
+  },
 ];
 
 export function SidebarNav() {
@@ -60,11 +76,33 @@ export function SidebarNav() {
 
   return (
     <SidebarMenu>
-      {navItems.map((item, index) => (
+      {navItems.map((item, index) => {
+        let isActive = false;
+        if (item.exactMatch) {
+          isActive = pathname === item.href;
+        } else {
+          isActive = pathname.startsWith(item.href);
+          // Special case for /dashboard to not highlight when /dashboard/anything else is active
+          if (item.href === '/dashboard' && pathname !== '/dashboard') {
+            isActive = false;
+          }
+          // Ensure that /stocks is active for /stocks, but not for /stocks/[stockId] if we only want exact match there
+          // For this setup, /stocks should be active for /stocks AND /stocks/[stockId]
+        }
+         if (item.href === '/stocks' && pathname.startsWith('/stocks/')) {
+           // Keep 'Browse Stocks' active if viewing a specific stock detail from the browse page
+           isActive = true;
+         }
+          if (item.href === '/investments/stocks' && pathname.startsWith('/investments/stocks')) {
+             isActive = true;
+         }
+
+
+        return (
           <SidebarMenuItem key={index}>
              <Link href={item.href} passHref legacyBehavior>
                 <SidebarMenuButton
-                    isActive={pathname === item.href}
+                    isActive={isActive}
                     disabled={item.disabled}
                     onClick={() => setOpenMobile(false)}
                     tooltip={{ children: item.title, side: 'right' }}
@@ -74,7 +112,9 @@ export function SidebarNav() {
                 </SidebarMenuButton>
              </Link>
           </SidebarMenuItem>
-        ))}
+        );
+        })}
     </SidebarMenu>
   );
 }
+

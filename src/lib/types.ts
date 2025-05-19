@@ -19,6 +19,7 @@ export interface StockInvestment extends BaseInvestment {
   purchasePricePerShare?: number; // User input, label: "Purchase Price"
   stockLogoUrl?: string; // This will be derived from selected stock
   isFund?: boolean;
+  // currentMarketPrice?: number; // Market price at the time of viewing, might be redundant if ListedStock.price is used
 }
 
 export interface GoldInvestment extends BaseInvestment {
@@ -61,9 +62,16 @@ export interface ListedStock {
   name: string;
   symbol: string;
   logoUrl: string;
-  price: number;
+  price: number; // This acts as current market price
   currency: string;
   changePercent: number;
   market: string; // e.g., "SAR", "EGX"
 }
+
+export interface StockChartDataPoint {
+  date: string; // e.g., "2023-01-01"
+  price: number;
+}
+
+export type StockChartTimeRange = '1D' | '1W' | '1M' | '6M' | '1Y' | '5Y';
 
