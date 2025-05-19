@@ -86,21 +86,32 @@ export default function SecurityDetailPage() {
         total: inv.amountInvested,
         isInvestmentRecord: true, 
         tickerSymbol: security.symbol, // Add tickerSymbol for consistency
+        profitOrLoss: undefined, // Explicitly undefined for buy transactions
       }));
 
-    const sellTransactions = transactions
+    const sellTransactionsFromContext = transactions
       .filter(tx => tx.tickerSymbol === security.symbol && tx.type === 'sell')
       .map(tx => ({
         ...tx, // Spread the original transaction
         isInvestmentRecord: false, 
       }));
 
-    return [...buyTransactions, ...sellTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...buyTransactions, ...sellTransactionsFromContext].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [investments, transactions, security]);
 
   const handleDeleteConfirmation = (tx: Transaction) => {
-    setTransactionToDelete(tx);
-    setIsDeleteAlertOpen(true);
+    // Ensure we only try to delete actual sell transactions from the 'transactions' collection
+    const sellTx = transactions.find(t => t.id === tx.id && t.type === 'sell');
+    if (sellTx) {
+      setTransactionToDelete(sellTx);
+      setIsDeleteAlertOpen(true);
+    } else {
+        toast({
+            title: "Invalid Operation",
+            description: "This action is only available for sell transactions.",
+            variant: "destructive",
+        })
+    }
   };
 
   const handleDeleteSellTransaction = async () => {
@@ -153,8 +164,10 @@ export default function SecurityDetailPage() {
   const isProfitable = PnL >= 0;
 
   const pageTitle = security.securityType === 'Fund' 
-    ? `${security.name} (${security.symbol}) - ${security.fundType}`
+    ? `${security.name} (${security.symbol}) - ${security.fundType || 'Fund'}`
     : `${security.name} (${security.symbol})`;
+  
+  const displayCurrency = security.currency || 'USD';
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -171,7 +184,7 @@ export default function SecurityDetailPage() {
             </Avatar>
             <div>
               <CardTitle className="text-2xl font-bold">{pageTitle}</CardTitle>
-              <CardDescription>{security.market} - {security.currency}</CardDescription>
+              <CardDescription>{security.market} - {displayCurrency}</CardDescription>
             </div>
           </div>
           <div className="text-right">
@@ -231,17 +244,17 @@ export default function SecurityDetailPage() {
                 <>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
-                    <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {averagePurchasePrice.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
-                    <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {totalCostBasis.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
-                    <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {currentMarketPrice.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
-                    <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {totalInvestmentValue.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
+                    <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {averagePurchasePrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                    <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {totalCostBasis.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                    <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {currentMarketPrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                    <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {totalInvestmentValue.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between pt-2">
                     <p className="text-lg font-semibold">Profit / Loss:</p>
                     <div className="text-right">
                         <p className={cn("text-2xl font-bold", isProfitable ? "text-accent" : "text-destructive")}>
-                            {PnL.toLocaleString(undefined, { style: 'currency', currency: security.currency, signDisplay: 'always' })}
+                            {PnL.toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' })}
                         </p>
                         <Badge variant={isProfitable ? 'default' : 'destructive'} 
                                className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
@@ -287,13 +300,13 @@ export default function SecurityDetailPage() {
                             {tx.type}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">{tx.shares.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{tx.price.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</TableCell>
-                        <TableCell className="text-right">{tx.fees.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</TableCell>
-                        <TableCell className="text-right">{tx.total.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</TableCell>
+                        <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                        <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                        <TableCell className="text-right">{(tx.total ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
                         {securityTransactions.some(t => t.profitOrLoss !== undefined) && (
                             <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                            {tx.profitOrLoss !== undefined ? tx.profitOrLoss.toLocaleString(undefined, { style: 'currency', currency: security.currency, signDisplay: 'always' }) : 'N/A'}
+                            {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
                             </TableCell>
                         )}
                         <TableCell className="text-right">
@@ -331,7 +344,7 @@ export default function SecurityDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the record of selling {transactionToDelete?.shares.toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? new Date(transactionToDelete.date + "T00:00:00").toLocaleDateString() : ''}.
+              This will remove the record of selling {(transactionToDelete?.shares ?? 0).toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? new Date(transactionToDelete.date + "T00:00:00").toLocaleDateString() : ''}.
               This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -349,8 +362,3 @@ export default function SecurityDetailPage() {
     </div>
   );
 }
-
-
-    
-
-    
