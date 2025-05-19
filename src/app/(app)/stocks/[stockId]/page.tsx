@@ -9,12 +9,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
+import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase } from 'lucide-react';
 import { StockDetailChart } from '@/components/stocks/stock-detail-chart';
 import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge'; // Added Badge import
 
 export default function StockDetailPage() {
   const params = useParams();
@@ -183,4 +184,5 @@ export default function StockDetailPage() {
 }
 
 // Placeholder for Briefcase icon if not already imported
-import { Briefcase } from 'lucide-react'; 
+// import { Briefcase } from 'lucide-react'; // Already imported at the top
+
