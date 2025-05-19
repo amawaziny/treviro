@@ -15,7 +15,7 @@ import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge'; // Added Badge import
+import { Badge } from '@/components/ui/badge';
 
 export default function StockDetailPage() {
   const params = useParams();
@@ -114,7 +114,7 @@ export default function StockDetailPage() {
              </Button>
            </Link>
           {hasPosition && (
-            <Button variant="outline" disabled> {/* Selling not implemented */}
+            <Button variant="outline"> {/* Selling functionality coming soon */}
               <DollarSign className="mr-2 h-4 w-4" /> Sell
             </Button>
           )}
@@ -182,7 +182,3 @@ export default function StockDetailPage() {
     </div>
   );
 }
-
-// Placeholder for Briefcase icon if not already imported
-// import { Briefcase } from 'lucide-react'; // Already imported at the top
-
