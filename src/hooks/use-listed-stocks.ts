@@ -4,61 +4,60 @@
 import { useState, useEffect, useCallback } from 'react';
 import { collection, onSnapshot, query, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { ListedStock } from '@/lib/types';
+import type { ListedSecurity } from '@/lib/types';
 
-export const useListedStocks = () => {
-  const [listedStocks, setListedStocks] = useState<ListedStock[]>([]);
+export const useListedSecurities = () => {
+  const [listedSecurities, setListedSecurities] = useState<ListedSecurity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    const stocksCollectionRef = collection(db, 'listedStocks'); // Top-level collection
-    const q = query(stocksCollectionRef);
+    // Firestore collection is still named 'listedStocks'
+    const securitiesCollectionRef = collection(db, 'listedStocks'); 
+    const q = query(securitiesCollectionRef);
 
     const unsubscribe = onSnapshot(q, 
       (querySnapshot) => {
-        const stocks: ListedStock[] = [];
+        const securities: ListedSecurity[] = [];
         querySnapshot.forEach((doc) => {
-          stocks.push({ id: doc.id, ...doc.data() } as ListedStock);
+          securities.push({ id: doc.id, ...doc.data() } as ListedSecurity);
         });
-        setListedStocks(stocks);
+        setListedSecurities(securities);
         setIsLoading(false);
         setError(null);
       }, 
       (err) => {
-        console.error("Error fetching listed stocks:", err);
+        console.error("Error fetching listed securities:", err);
         setError(err);
-        setListedStocks([]); // Clear stocks on error
+        setListedSecurities([]); 
         setIsLoading(false);
       }
     );
 
-    return () => unsubscribe(); // Cleanup subscription on component unmount
+    return () => unsubscribe(); 
   }, []);
 
-  const getListedStockById = useCallback(async (id: string): Promise<ListedStock | undefined> => {
-    // First, try to find in the already fetched list
-    const existingStock = listedStocks.find(stock => stock.id === id);
-    if (existingStock) {
-      return existingStock;
+  const getListedSecurityById = useCallback(async (id: string): Promise<ListedSecurity | undefined> => {
+    const existingSecurity = listedSecurities.find(sec => sec.id === id);
+    if (existingSecurity) {
+      return existingSecurity;
     }
-    // If not found, try to fetch directly from Firestore (e.g. if list is large or not fully loaded)
-    // This is a fallback and might indicate the main list isn't comprehensive or id is wrong.
     try {
-      const stockDocRef = doc(db, 'listedStocks', id);
-      const stockDocSnap = await getDoc(stockDocRef);
-      if (stockDocSnap.exists()) {
-        return { id: stockDocSnap.id, ...stockDocSnap.data() } as ListedStock;
+      // Firestore collection is still named 'listedStocks'
+      const securityDocRef = doc(db, 'listedStocks', id);
+      const securityDocSnap = await getDoc(securityDocRef);
+      if (securityDocSnap.exists()) {
+        return { id: securityDocSnap.id, ...securityDocSnap.data() } as ListedSecurity;
       }
       return undefined;
     } catch (err) {
-      console.error(`Error fetching stock by ID ${id}:`, err);
+      console.error(`Error fetching security by ID ${id}:`, err);
       return undefined;
     }
-  }, [listedStocks]);
+  }, [listedSecurities]);
 
 
-  return { listedStocks, isLoading, error, getListedStockById };
+  return { listedSecurities, isLoading, error, getListedSecurityById };
 };
 

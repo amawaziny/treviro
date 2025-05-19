@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, PlusCircle, List, Briefcase, Home, Gem, ScrollText, DollarSign } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, Briefcase, Home, Gem, ScrollText, DollarSign, Building } from 'lucide-react'; // Added Building for Funds
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -19,7 +19,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   disabled?: boolean;
-  exactMatch?: boolean; // For parent routes like /investments
+  exactMatch?: boolean; 
 }
 
 const navItems: NavItem[] = [
@@ -34,8 +34,8 @@ const navItems: NavItem[] = [
     icon: PlusCircle,
   },
   {
-    title: 'Browse Stocks',
-    href: '/stocks',
+    title: 'Browse Securities', // Renamed
+    href: '/stocks', // Kept href for now, page at /stocks will be updated
     icon: List, 
   },
   {
@@ -43,6 +43,11 @@ const navItems: NavItem[] = [
     href: '/investments/stocks',
     icon: Briefcase,
   },
+  // { // Placeholder for "My Funds" - can be added in a subsequent step
+  //   title: 'My Funds',
+  //   href: '/investments/funds', // This route would need to be created
+  //   icon: Building,
+  // },
   {
     title: 'My Real Estate',
     href: '/investments/real-estate',
@@ -54,7 +59,7 @@ const navItems: NavItem[] = [
     icon: Gem,
   },
   {
-    title: 'My Debt', // Shortened for sidebar
+    title: 'My Debt', 
     href: '/investments/debt-instruments',
     icon: ScrollText,
   },
@@ -82,20 +87,21 @@ export function SidebarNav() {
           isActive = pathname === item.href;
         } else {
           isActive = pathname.startsWith(item.href);
-          // Special case for /dashboard to not highlight when /dashboard/anything else is active
           if (item.href === '/dashboard' && pathname !== '/dashboard') {
             isActive = false;
           }
-          // Ensure that /stocks is active for /stocks, but not for /stocks/[stockId] if we only want exact match there
-          // For this setup, /stocks should be active for /stocks AND /stocks/[stockId]
         }
+         // For "Browse Securities" (href: /stocks), keep it active if viewing a detail page /stocks/[id]
          if (item.href === '/stocks' && pathname.startsWith('/stocks/')) {
-           // Keep 'Browse Stocks' active if viewing a specific stock detail from the browse page
            isActive = true;
          }
           if (item.href === '/investments/stocks' && pathname.startsWith('/investments/stocks')) {
              isActive = true;
          }
+         // Example for My Funds if added:
+         // if (item.href === '/investments/funds' && pathname.startsWith('/investments/funds')) {
+         //   isActive = true;
+         // }
 
 
         return (

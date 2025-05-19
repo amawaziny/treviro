@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { LineChart, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useListedStocks } from '@/hooks/use-listed-stocks'; // To get current market price
+import { useListedSecurities } from '@/hooks/use-listed-securities'; // Updated hook
+import type { ListedSecurity } from '@/lib/types'; // For current market price
 import Link from 'next/link';
 
 interface MyStockListItemProps {
@@ -15,7 +16,6 @@ interface MyStockListItemProps {
   logoUrl: string;
   totalShares: number;
   averagePurchasePrice: number;
-  // listedStockId?: string; // Optional: to link to the stock detail page
 }
 
 export function MyStockListItem({
@@ -24,13 +24,15 @@ export function MyStockListItem({
   logoUrl,
   totalShares,
   averagePurchasePrice,
-  // listedStockId,
 }: MyStockListItemProps) {
-  const { listedStocks, isLoading: isLoadingListedStocks } = useListedStocks();
+  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   
-  const correspondingListedStock = listedStocks.find(ls => ls.symbol === symbol);
-  const currentMarketPrice = correspondingListedStock?.price;
-  const currency = correspondingListedStock?.currency || 'USD';
+  // Find the corresponding listed security to get its current market price and type
+  const correspondingListedSecurity = listedSecurities.find(ls => ls.symbol === symbol);
+  const currentMarketPrice = correspondingListedSecurity?.price;
+  const currency = correspondingListedSecurity?.currency || 'USD';
+  const isFund = correspondingListedSecurity?.securityType === 'Fund';
+  const fundType = correspondingListedSecurity?.fundType;
 
   let profitLoss = 0;
   let profitLossPercent = 0;
@@ -48,6 +50,8 @@ export function MyStockListItem({
   const formattedMarketPrice = currentMarketPrice ? new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(currentMarketPrice) : 'N/A';
   const formattedProfitLoss = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, signDisplay: 'always' }).format(profitLoss);
   
+  const sharesLabel = isFund ? 'Units' : 'Shares';
+
   const cardContent = (
     <CardContent className="pt-4">
       <div className="flex items-center justify-between">
@@ -58,15 +62,15 @@ export function MyStockListItem({
             width={40}
             height={40}
             className="rounded-full object-cover"
-            data-ai-hint="logo company"
+            data-ai-hint={isFund ? "logo fund" : "logo company"}
           />
           <div>
-            <CardTitle className="text-lg">{name}</CardTitle>
-            <CardDescription>{symbol} - Shares: {totalShares.toLocaleString()}</CardDescription>
+            <CardTitle className="text-lg">{name} {isFund && fundType ? <span className="text-sm text-primary">({fundType})</span> : ''}</CardTitle>
+            <CardDescription>{symbol} - {sharesLabel}: {totalShares.toLocaleString()}</CardDescription>
           </div>
         </div>
         <div className="text-right">
-          {isLoadingListedStocks ? (
+          {isLoadingListedSecurities && !currentMarketPrice ? (
             <p className="text-sm text-muted-foreground">Loading market data...</p>
           ) : currentMarketPrice !== undefined ? (
             <>
@@ -91,12 +95,11 @@ export function MyStockListItem({
     </CardContent>
   );
 
-  // Link to stock detail page if listedStockId is available (and corresponds to a listed stock)
-  const stockDetailLink = correspondingListedStock ? `/stocks/${correspondingListedStock.id}` : undefined;
+  const securityDetailLink = correspondingListedSecurity ? `/stocks/${correspondingListedSecurity.id}` : undefined;
 
-  if (stockDetailLink) {
+  if (securityDetailLink) {
     return (
-      <Link href={stockDetailLink} passHref>
+      <Link href={securityDetailLink} passHref>
         <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
           {cardContent}
         </Card>

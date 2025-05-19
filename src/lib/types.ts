@@ -3,22 +3,22 @@ export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instrumen
 
 export interface BaseInvestment {
   id: string;
-  name: string; // User-defined label for the investment lot
+  name: string; 
   type: InvestmentType;
   amountInvested: number;
   purchaseDate: string; // ISO string
-  currentValue?: number; // Optional, can be updated later
+  currentValue?: number; 
   createdAt?: string; // Server-generated timestamp, stored as ISO string
 }
 
 export interface StockInvestment extends BaseInvestment {
   type: 'Stocks';
-  actualStockName?: string; // Official name of the stock, e.g., "Apple Inc."
-  tickerSymbol?: string; // e.g., AAPL - This will be derived from selected stock
-  numberOfShares?: number; // User input, label: "Number of Securities"
-  purchasePricePerShare?: number; // User input, label: "Purchase Price"
-  stockLogoUrl?: string; // This will be derived from selected stock
-  purchaseFees?: number; // Fees for purchasing this stock lot
+  actualStockName?: string; 
+  tickerSymbol?: string; 
+  numberOfShares?: number; 
+  purchasePricePerShare?: number; 
+  stockLogoUrl?: string; 
+  purchaseFees?: number; 
 }
 
 export interface GoldInvestment extends BaseInvestment {
@@ -55,7 +55,7 @@ export interface CurrencyFluctuationAnalysisResult {
   analysisSummary: string;
 }
 
-export interface ListedStock {
+export interface ListedSecurity {
   id: string;
   name: string;
   symbol: string;
@@ -64,6 +64,8 @@ export interface ListedStock {
   currency: string;
   changePercent: number;
   market: string;
+  securityType?: 'Stock' | 'Fund'; // 'Stock' is default if undefined
+  fundType?: string; // e.g., 'Equity ETF', 'Bond Mutual Fund' - relevant if securityType is 'Fund'
 }
 
 export interface StockChartDataPoint {
@@ -77,16 +79,16 @@ export type TransactionType = 'buy' | 'sell';
 
 export interface Transaction {
   id: string;
-  investmentId?: string; // ID of the specific investment lot if applicable
-  stockId?: string; // ID of the listed stock
+  investmentId?: string; 
+  stockId?: string; 
   tickerSymbol: string;
   type: TransactionType;
   date: string; // ISO string
   numberOfShares: number;
   pricePerShare: number;
   fees: number;
-  totalAmount: number; // Total cost for 'buy', total proceeds for 'sell'
-  profitOrLoss?: number; // For 'sell' transactions
-  createdAt: string; // Server-generated timestamp, ISO string
+  totalAmount: number; 
+  profitOrLoss?: number; 
+  createdAt: string; 
 }
 

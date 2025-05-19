@@ -14,13 +14,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas";
+import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas"; // Schema remains SellStockSchema
 import { useInvestments } from "@/hooks/use-investments";
-import { useListedStocks } from "@/hooks/use-listed-stocks";
+import { useListedSecurities } from "@/hooks/use-listed-securities"; // Updated hook
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import type { ListedStock, StockInvestment } from "@/lib/types";
+import type { ListedSecurity, StockInvestment } from "@/lib/types"; // ListedStock -> ListedSecurity
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -32,40 +32,40 @@ const getCurrentDate = () => {
   return `${year}-${month}-${day}`;
 };
 
-interface SellStockFormProps {
-  stockId: string;
+interface SellSecurityFormProps { // Renamed interface for clarity
+  stockId: string; // This is now securityId
 }
 
-export function SellStockForm({ stockId }: SellStockFormProps) {
+export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { // Renamed prop for clarity
   const { recordSellStockTransaction, investments, isLoading: isLoadingInvestmentsContext } = useInvestments();
-  const { getListedStockById, isLoading: isLoadingListedStocks } = useListedStocks();
+  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); // Updated hook
   const { toast } = useToast();
   const router = useRouter();
 
-  const [stockBeingSold, setStockBeingSold] = useState<ListedStock | null>(null);
+  const [securityBeingSold, setSecurityBeingSold] = useState<ListedSecurity | null>(null);
   const [maxSharesToSell, setMaxSharesToSell] = useState(0);
-  const [isLoading, setIsLoading] = useState(true); // Combined loading state for this form
+  const [isLoading, setIsLoading] = useState(true); 
 
   const form = useForm<SellStockFormValues>({
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
-      stockId: stockId,
+      stockId: securityId, // Schema expects stockId, maps to securityId here
       numberOfSharesToSell: undefined,
       sellPricePerShare: undefined,
       sellDate: getCurrentDate(),
-      fees: 0, // Default fees to 0
+      fees: 0,
     },
   });
 
   useEffect(() => {
     setIsLoading(true);
     async function fetchData() {
-      const listedStockData = await getListedStockById(stockId);
-      setStockBeingSold(listedStockData || null);
+      const listedSecurityData = await getListedSecurityById(securityId);
+      setSecurityBeingSold(listedSecurityData || null);
 
-      if (listedStockData) {
+      if (listedSecurityData) {
         const userOwnedForThisSymbol = investments.filter(
-          (inv) => inv.type === 'Stocks' && inv.tickerSymbol === listedStockData.symbol
+          (inv) => inv.type === 'Stocks' && inv.tickerSymbol === listedSecurityData.symbol
         ) as StockInvestment[];
         
         const totalOwned = userOwnedForThisSymbol.reduce(
@@ -76,20 +76,19 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
       }
       setIsLoading(false);
     }
-    if (stockId && !isLoadingInvestmentsContext) { // Ensure investments are loaded before calculating max shares
+    if (securityId && !isLoadingInvestmentsContext) { 
         fetchData();
     } else if (!isLoadingInvestmentsContext) {
-        setIsLoading(false); // If no stockId, or investments context finished loading but no stockId
+        setIsLoading(false); 
     }
 
-  }, [stockId, getListedStockById, investments, isLoadingInvestmentsContext]);
+  }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext]);
   
-  // Update default sell price if stock data available
   useEffect(() => {
-    if (stockBeingSold && stockBeingSold.price && form.getValues("sellPricePerShare") === undefined) {
-        form.setValue("sellPricePerShare", stockBeingSold.price);
+    if (securityBeingSold && securityBeingSold.price && form.getValues("sellPricePerShare") === undefined) {
+        form.setValue("sellPricePerShare", securityBeingSold.price);
     }
-  }, [stockBeingSold, form]);
+  }, [securityBeingSold, form]);
 
   const handleNumericInputChange = (field: any, value: string) => {
     if (value === '') {
@@ -101,37 +100,34 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
   };
 
   async function onSubmit(values: SellStockFormValues) {
-    if (!stockBeingSold) {
-      toast({ title: "Error", description: "Stock details not found.", variant: "destructive" });
+    if (!securityBeingSold) {
+      toast({ title: "Error", description: "Security details not found.", variant: "destructive" });
       return;
     }
-    // Ensure numberOfSharesToSell and sellPricePerShare are defined and positive, schema should handle this
-    // but an extra client-side check before calling recordSellStockTransaction can be good
     if (values.numberOfSharesToSell === undefined || values.sellPricePerShare === undefined) {
-        toast({ title: "Validation Error", description: "Number of shares and sell price must be provided.", variant: "destructive" });
+        toast({ title: "Validation Error", description: "Number of shares/units and sell price must be provided.", variant: "destructive" });
         return;
     }
 
-
     if (values.numberOfSharesToSell > maxSharesToSell) {
-      form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} shares.` });
+      form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} shares/units.` });
       return;
     }
 
     try {
       await recordSellStockTransaction(
-        stockId,
-        stockBeingSold.symbol,
+        securityId, // Pass securityId
+        securityBeingSold.symbol,
         values.numberOfSharesToSell,
         values.sellPricePerShare,
         values.sellDate,
-        values.fees === undefined ? 0 : values.fees // Ensure fees is a number
+        values.fees === undefined ? 0 : values.fees
       );
       toast({
         title: "Sale Recorded",
-        description: `Successfully recorded sale of ${values.numberOfSharesToSell} shares of ${stockBeingSold.name}.`,
+        description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityBeingSold.securityType === 'Fund' ? 'units' : 'shares'} of ${securityBeingSold.name}.`,
       });
-      router.push("/investments/stocks");
+      router.push("/investments/stocks"); // Or to a more general "My Securities" page if that exists later
     } catch (error: any) {
       console.error("Error recording sale:", error);
       toast({
@@ -142,7 +138,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
     }
   }
   
-  if (isLoading || isLoadingListedStocks || isLoadingInvestmentsContext) {
+  if (isLoading || isLoadingListedSecurities || isLoadingInvestmentsContext) {
     return (
       <div className="flex items-center justify-center py-10">
         <Loader2 className="mr-2 h-6 w-6 animate-spin" />
@@ -151,12 +147,12 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
     );
   }
 
-  if (!stockBeingSold) {
+  if (!securityBeingSold) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Could not load stock details to sell. Please go back and try again.</AlertDescription>
+        <AlertDescription>Could not load security details to sell. Please go back and try again.</AlertDescription>
       </Alert>
     );
   }
@@ -165,20 +161,21 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
      return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>No Shares to Sell</AlertTitle>
-        <AlertDescription>You do not currently own any shares of {stockBeingSold.name} ({stockBeingSold.symbol}) to sell.</AlertDescription>
+        <AlertTitle>No Holdings to Sell</AlertTitle>
+        <AlertDescription>You do not currently own any holdings of {securityBeingSold.name} ({securityBeingSold.symbol}) to sell.</AlertDescription>
       </Alert>
     );
   }
 
+  const securityLabel = securityBeingSold.securityType === 'Fund' ? 'units' : 'securities';
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="p-4 border rounded-md bg-muted/50">
-            <h3 className="text-lg font-medium">Selling: {stockBeingSold.name} ({stockBeingSold.symbol})</h3>
-            <p className="text-sm text-muted-foreground">You currently own: {maxSharesToSell.toLocaleString()} shares.</p>
-            <p className="text-sm text-muted-foreground">Current Market Price: {stockBeingSold.price.toLocaleString(undefined, { style: 'currency', currency: stockBeingSold.currency })}</p>
+            <h3 className="text-lg font-medium">Selling: {securityBeingSold.name} ({securityBeingSold.symbol})</h3>
+            <p className="text-sm text-muted-foreground">You currently own: {maxSharesToSell.toLocaleString()} {securityLabel}.</p>
+            <p className="text-sm text-muted-foreground">Current Market Price: {securityBeingSold.price.toLocaleString(undefined, { style: 'currency', currency: securityBeingSold.currency })}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -187,7 +184,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
             name="numberOfSharesToSell"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of Securities to Sell</FormLabel>
+                <FormLabel>Number of {securityLabel} to Sell</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -208,7 +205,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
             name="sellPricePerShare"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sell Price (per security)</FormLabel>
+                <FormLabel>Sell Price (per {securityLabel.slice(0,-1)})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -230,7 +227,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
               <FormItem>
                 <FormLabel>Sell Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input type="date" {...field} value={field.value || getCurrentDate()} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
