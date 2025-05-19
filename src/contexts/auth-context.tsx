@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("AuthContext: Setting up onAuthStateChanged listener.");
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      console.log("AuthContext: onAuthStateChanged triggered. Firebase user:", firebaseUser);
       if (firebaseUser) {
         setUser({
           uid: firebaseUser.uid,
@@ -50,43 +52,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       }
       setIsLoading(false); // Initial auth state determined
+      console.log("AuthContext: isLoading set to false.");
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log("AuthContext: Cleaning up onAuthStateChanged listener.");
+      unsubscribe();
+    };
   }, []);
 
   const login = useCallback(async () => {
+    console.log("AuthContext: login function called.");
     setIsProcessingLogin(true);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle setting the user.
-      // Redirection will be handled by useEffects in LoginPage or AppLayout.
+      console.log("AuthContext: Attempting signInWithPopup...");
+      const result = await signInWithPopup(auth, provider);
+      console.log("AuthContext: signInWithPopup successful. Result:", result);
+      // onAuthStateChanged will handle setting the user and further state updates.
     } catch (error: any) {
+      console.error("AuthContext: signInWithPopup error:", error);
       if (error.code === 'auth/popup-closed-by-user') {
-        console.log("Google sign-in popup closed by user.");
+        console.log("AuthContext: Google sign-in popup closed by user.");
       } else if (error.code === 'auth/cancelled-popup-request') {
-        console.log("Google sign-in popup request cancelled (e.g., another popup was opened).");
+        console.log("AuthContext: Google sign-in popup request cancelled.");
       } else if (error.code === 'auth/popup-blocked') {
-        console.warn("Google sign-in popup blocked by the browser. Please enable popups for this site.");
-      }
-      else {
-        console.error("An unexpected error occurred during Google sign-in:", error);
+        console.warn("AuthContext: Google sign-in popup blocked by the browser.");
+      } else {
+        console.error("AuthContext: An unexpected error occurred during Google sign-in:", error);
       }
     } finally {
       setIsProcessingLogin(false);
+      console.log("AuthContext: isProcessingLogin set to false.");
     }
   }, []);
 
   const logout = useCallback(async () => {
-    // For simplicity, not adding a separate isProcessingLogout state here.
-    // If logout took significant time or involved multiple steps, it might be useful.
+    console.log("AuthContext: logout function called.");
     try {
       await firebaseSignOut(auth);
-      setUser(null); // Explicitly set user to null, onAuthStateChanged will also update
+      // setUser(null) will be handled by onAuthStateChanged
       router.push('/'); // Navigate to login page after logout
+      console.log("AuthContext: Logout successful, navigated to /");
     } catch (error) {
-      console.error("Error during sign-out:", error);
+      console.error("AuthContext: Error during sign-out:", error);
     }
   }, [router]);
 

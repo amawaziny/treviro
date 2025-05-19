@@ -1,3 +1,4 @@
+
 "use client";
 
 import { AuthForm } from '@/components/auth/auth-form';
@@ -12,13 +13,16 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log(`LoginPage Effect: isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`);
     if (!isLoading && isAuthenticated) {
+      console.log("LoginPage: Redirecting to /dashboard");
       router.replace('/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading || (!isLoading && isAuthenticated)) {
     // Show a loading skeleton or spinner while checking auth or redirecting
+    // console.log(`LoginPage Render: Showing Skeleton. isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`);
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-4">
@@ -30,5 +34,6 @@ export default function LoginPage() {
     );
   }
   
+  // console.log(`LoginPage Render: Showing AuthForm. isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`);
   return <AuthForm />;
 }
