@@ -3,7 +3,7 @@ export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instrumen
 
 export interface BaseInvestment {
   id: string;
-  name: string;
+  name: string; // User-defined label for the investment lot
   type: InvestmentType;
   amountInvested: number;
   purchaseDate: string; // ISO string
@@ -13,10 +13,11 @@ export interface BaseInvestment {
 
 export interface StockInvestment extends BaseInvestment {
   type: 'Stocks';
-  tickerSymbol?: string;
-  numberOfShares?: number;
-  purchasePricePerShare?: number;
-  stockLogoUrl?: string;
+  actualStockName?: string; // Official name of the stock, e.g., "Apple Inc."
+  tickerSymbol?: string; // e.g., AAPL - This will be derived from selected stock
+  numberOfShares?: number; // User input, label: "Number of Securities"
+  purchasePricePerShare?: number; // User input, label: "Purchase Price"
+  stockLogoUrl?: string; // This will be derived from selected stock
   isFund?: boolean;
 }
 

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,13 +25,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AddInvestmentSchema, type AddInvestmentFormValues, investmentTypes } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
-import { v4 as uuidv4 } from "uuid"; // Needs: npm install uuid && npm install --save-dev @types/uuid
+import { v4 as uuidv4 } from "uuid";
 import { currencyFluctuationAnalysis } from "@/ai/flows/currency-fluctuation-analysis";
 import type { CurrencyFluctuationAnalysisInput, CurrencyFluctuationAnalysisOutput } from "@/ai/flows/currency-fluctuation-analysis";
 import React, { useState } from "react";
 import { CurrencyAnalysisDisplay } from "./currency-analysis-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useListedStocks } from "@/hooks/use-listed-stocks";
+import type { StockInvestment } from "@/lib/types";
 
 
 // Helper function to get current date in YYYY-MM-DD format
@@ -48,6 +51,7 @@ export function AddInvestmentForm() {
   const { toast } = useToast();
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
+  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError } = useListedStocks();
 
   const form = useForm<AddInvestmentFormValues>({
     resolver: zodResolver(AddInvestmentSchema),
@@ -57,10 +61,9 @@ export function AddInvestmentForm() {
       purchaseDate: getCurrentDate(),
       type: undefined, // User must select
       // Stock
-      tickerSymbol: "",
+      selectedStockId: undefined,
       numberOfShares: undefined,
       purchasePricePerShare: undefined,
-      stockLogoUrl: "",
       isStockFund: false,
       // Gold
       quantityInGrams: undefined,
@@ -86,9 +89,9 @@ export function AddInvestmentForm() {
     setAiAnalysisResult(null);
 
     const investmentId = uuidv4();
-    let newInvestment: any = { // Use 'any' for flexibility before casting to specific type
+    let newInvestment: any = { 
       id: investmentId,
-      name: values.name,
+      name: values.name, // User's custom label for the investment
       type: values.type,
       amountInvested: values.amountInvested,
       purchaseDate: values.purchaseDate,
@@ -97,14 +100,24 @@ export function AddInvestmentForm() {
     let analysisResult: CurrencyFluctuationAnalysisOutput | undefined = undefined;
 
     if (values.type === "Stocks") {
+      const selectedStock = listedStocks.find(stock => stock.id === values.selectedStockId);
+      if (!selectedStock) {
+        toast({
+          title: "Error",
+          description: "Selected stock not found. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
       newInvestment = {
         ...newInvestment,
-        tickerSymbol: values.tickerSymbol,
+        actualStockName: selectedStock.name, // Official stock name
+        tickerSymbol: selectedStock.symbol,
+        stockLogoUrl: selectedStock.logoUrl,
         numberOfShares: values.numberOfShares,
         purchasePricePerShare: values.purchasePricePerShare,
-        stockLogoUrl: values.stockLogoUrl,
         isFund: values.isStockFund,
-      };
+      } as StockInvestment;
     } else if (values.type === "Gold") {
       newInvestment = {
         ...newInvestment,
@@ -116,10 +129,9 @@ export function AddInvestmentForm() {
         ...newInvestment,
         currencyCode: values.currencyCode,
         baseCurrency: values.baseCurrency,
-        currentExchangeRate: values.currentExchangeRate, // Storing this for record keeping
+        currentExchangeRate: values.currentExchangeRate, 
       };
       
-      // Call GenAI flow for currency analysis
       if (values.currencyCode && values.baseCurrency && values.currentExchangeRate && values.amountInvested) {
         setIsLoadingAi(true);
         try {
@@ -164,9 +176,8 @@ export function AddInvestmentForm() {
       description: `${values.name} (${values.type}) has been successfully added.`,
     });
     form.reset();
-    // Keep AI analysis result displayed if it was generated
     if (!analysisResult) {
-       setAiAnalysisResult(null); // Clear if no new analysis was made (e.g. not currency type)
+       setAiAnalysisResult(null); 
     }
   }
 
@@ -184,10 +195,11 @@ export function AddInvestmentForm() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Investment Name</FormLabel>
+                    <FormLabel>Investment Label</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Tech Startup XYZ Shares" {...field} />
+                      <Input placeholder="e.g., My Tech Stocks Q1" {...field} />
                     </FormControl>
+                    <FormDescription>A custom name for this specific investment lot.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -223,10 +235,11 @@ export function AddInvestmentForm() {
                 name="amountInvested"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Amount Invested</FormLabel>
+                    <FormLabel>Total Amount Invested</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 10000" {...field} />
                     </FormControl>
+                    <FormDescription>Total cost including any fees.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -252,17 +265,43 @@ export function AddInvestmentForm() {
               <div className="space-y-6 mt-6 p-6 border rounded-md">
                 <h3 className="text-lg font-medium text-primary">Stock Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField control={form.control} name="tickerSymbol" render={({ field }) => (
-                      <FormItem><FormLabel>Ticker Symbol</FormLabel><FormControl><Input placeholder="e.g., AAPL" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                  <FormField control={form.control} name="stockLogoUrl" render={({ field }) => (
-                      <FormItem><FormLabel>Stock Logo URL (Optional)</FormLabel><FormControl><Input placeholder="e.g., https://example.com/logo.png" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
+                  <FormField
+                    control={form.control}
+                    name="selectedStockId"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Select Stock</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingListedStocks || !!listedStocksError || listedStocks.length === 0}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={
+                                isLoadingListedStocks ? "Loading stocks..." : 
+                                listedStocksError ? "Error loading stocks" :
+                                listedStocks.length === 0 ? "No stocks available" :
+                                "Select a stock from the list"
+                              } />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {isLoadingListedStocks && <SelectItem value="loading" disabled>Loading...</SelectItem>}
+                            {listedStocksError && <SelectItem value="error" disabled>Could not load stocks.</SelectItem>}
+                            {!isLoadingListedStocks && !listedStocksError && listedStocks.length === 0 && <SelectItem value="no-stocks" disabled>No stocks found. Add them via admin.</SelectItem>}
+                            {listedStocks.map((stock) => (
+                              <SelectItem key={stock.id} value={stock.id}>
+                                {stock.name} ({stock.symbol}) - {stock.market}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField control={form.control} name="numberOfShares" render={({ field }) => (
-                      <FormItem><FormLabel>Number of Shares</FormLabel><FormControl><Input type="number" placeholder="e.g., 100" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Number of Securities</FormLabel><FormControl><Input type="number" placeholder="e.g., 100" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="purchasePricePerShare" render={({ field }) => (
-                      <FormItem><FormLabel>Purchase Price Per Share</FormLabel><FormControl><Input type="number" placeholder="e.g., 150.50" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Purchase Price (per security)</FormLabel><FormControl><Input type="number" placeholder="e.g., 150.50" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="isStockFund" render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this a stock fund/ETF?</FormLabel></div></FormItem>
@@ -344,7 +383,7 @@ export function AddInvestmentForm() {
               <CurrencyAnalysisDisplay result={aiAnalysisResult} />
             )}
 
-            <Button type="submit" className="w-full md:w-auto" disabled={isLoadingAi}>
+            <Button type="submit" className="w-full md:w-auto" disabled={isLoadingAi || (selectedType === "Stocks" && (isLoadingListedStocks || !!listedStocksError))}>
               {isLoadingAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Add Investment
             </Button>
@@ -354,3 +393,4 @@ export function AddInvestmentForm() {
     </Card>
   );
 }
+

@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const investmentTypes = ['Real Estate', 'Gold', 'Stocks', 'Debt Instruments', 'Currencies'] as const;
@@ -9,10 +10,9 @@ export const AddInvestmentSchema = z.object({
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
   
   // Stock specific
-  tickerSymbol: z.string().optional(),
-  numberOfShares: z.coerce.number().optional(),
-  purchasePricePerShare: z.coerce.number().optional(),
-  stockLogoUrl: z.string().url({ message: "Please enter a valid URL for the stock logo." }).optional().or(z.literal('')),
+  selectedStockId: z.string().optional(), // ID of the stock selected from dropdown
+  numberOfShares: z.coerce.number().optional(), // Label: "Number of Securities"
+  purchasePricePerShare: z.coerce.number().optional(), // Label: "Purchase Price"
   isStockFund: z.boolean().optional().default(false),
 
   // Gold specific
@@ -35,14 +35,14 @@ export const AddInvestmentSchema = z.object({
 
 }).superRefine((data, ctx) => {
   if (data.type === 'Stocks') {
-    if (!data.tickerSymbol) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Ticker symbol is required for stocks.", path: ["tickerSymbol"] });
+    if (!data.selectedStockId) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please select a stock.", path: ["selectedStockId"] });
     }
     if (data.numberOfShares === undefined || data.numberOfShares <= 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of shares must be positive.", path: ["numberOfShares"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of securities must be positive.", path: ["numberOfShares"] });
     }
     if (data.purchasePricePerShare === undefined || data.purchasePricePerShare <= 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price per share must be positive.", path: ["purchasePricePerShare"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price must be positive.", path: ["purchasePricePerShare"] });
     }
   }
   if (data.type === 'Gold') {
