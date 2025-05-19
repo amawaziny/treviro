@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react'; // Import React
 import {
   Card,
   CardContent,
@@ -30,7 +31,8 @@ const investmentTypeIcons = {
   'Currencies': CircleDollarSign,
 };
 
-function InvestmentRow({ investment }: { investment: Investment }) {
+// Memoize InvestmentRow
+const InvestmentRow = React.memo(function InvestmentRow({ investment }: { investment: Investment }) {
   const Icon = investmentTypeIcons[investment.type] || CircleDollarSign;
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(investment.amountInvested); // Assuming USD for display
 
@@ -49,7 +51,8 @@ function InvestmentRow({ investment }: { investment: Investment }) {
       <TableCell>{new Date(investment.purchaseDate).toLocaleDateString()}</TableCell>
     </TableRow>
   );
-}
+});
+InvestmentRow.displayName = 'InvestmentRow'; // Optional: for better debugging
 
 export function RecentInvestmentsList() {
   const { investments, isLoading } = useInvestments();

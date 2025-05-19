@@ -5,12 +5,14 @@ import type { ListedStock } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import React from 'react'; // Import React
 
 interface StockListItemProps {
   stock: ListedStock;
 }
 
-export function StockListItem({ stock }: StockListItemProps) {
+// Memoize StockListItem
+export const StockListItem = React.memo(function StockListItem({ stock }: StockListItemProps) {
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'decimal',
     minimumFractionDigits: 2,
@@ -53,4 +55,5 @@ export function StockListItem({ stock }: StockListItemProps) {
       </div>
     </Card>
   );
-}
+});
+StockListItem.displayName = 'StockListItem'; // Optional: for better debugging
