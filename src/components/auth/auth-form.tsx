@@ -4,10 +4,13 @@
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn } from 'lucide-react'; 
+import { LogIn, Loader2 } from 'lucide-react'; 
 
 export function AuthForm() {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isProcessingLogin } = useAuth();
+
+  // The button should be disabled if initial auth check is happening OR a login is processing.
+  const showSpinner = isLoading || isProcessingLogin;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -17,9 +20,13 @@ export function AuthForm() {
           <CardDescription>Securely manage your investments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={login} className="w-full" size="lg" disabled={isLoading}>
-            <LogIn className="mr-2 h-5 w-5" />
-            {isLoading ? "Logging in..." : "Login with Google"}
+          <Button onClick={login} className="w-full" size="lg" disabled={showSpinner}>
+            {showSpinner ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <LogIn className="mr-2 h-5 w-5" />
+            )}
+            {showSpinner ? "Processing..." : "Login with Google"}
           </Button>
         </CardContent>
       </Card>
