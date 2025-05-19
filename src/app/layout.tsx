@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -6,6 +7,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from '@/components/ui/toaster';
 import { InvestmentProvider } from '@/contexts/investment-context';
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { FirebaseIntegrations } from '@/components/layout/firebase-integrations';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,7 +41,9 @@ export default function RootLayout({
           <AuthProvider>
             <InvestmentProvider>
               <SidebarProvider defaultOpen={true}>
-                {children}
+                <FirebaseIntegrations>
+                  {children}
+                </FirebaseIntegrations>
               </SidebarProvider>
               <Toaster />
             </InvestmentProvider>
