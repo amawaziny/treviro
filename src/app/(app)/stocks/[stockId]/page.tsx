@@ -4,12 +4,12 @@
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useListedSecurities } from '@/hooks/use-listed-securities'; 
-import type { ListedSecurity, StockInvestment } from '@/lib/types'; 
+import type { ListedSecurity, StockInvestment, Transaction } from '@/lib/types'; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3 } from 'lucide-react';
+import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3, Trash2 } from 'lucide-react';
 import { StockDetailChart } from '@/components/stocks/stock-detail-chart'; 
 import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
@@ -17,17 +17,32 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
 
 
 export default function SecurityDetailPage() { 
   const params = useParams();
   const router = useRouter();
   const securityId = params.stockId as string; 
+  const { toast } = useToast();
 
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); 
-  const { investments, isLoading: isLoadingInvestments, transactions } = useInvestments();
+  const { investments, isLoading: isLoadingInvestments, transactions, deleteSellTransaction } = useInvestments();
   
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(null); 
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   useEffect(() => {
     if (securityId) {
@@ -62,32 +77,51 @@ export default function SecurityDetailPage() {
     const buyTransactions = investments
       .filter(inv => inv.type === 'Stocks' && inv.tickerSymbol === security.symbol)
       .map(inv => ({
-        id: inv.id, // This is the StockInvestment ID, crucial for editing
+        id: inv.id, 
         date: inv.purchaseDate,
         type: 'Buy' as 'Buy' | 'Sell', 
         shares: (inv as StockInvestment).numberOfShares || 0,
         price: (inv as StockInvestment).purchasePricePerShare || 0,
         fees: (inv as StockInvestment).purchaseFees || 0,
         total: inv.amountInvested,
-        isInvestmentRecord: true, // Flag to identify this as an editable purchase lot
+        isInvestmentRecord: true, 
+        tickerSymbol: security.symbol, // Add tickerSymbol for consistency
       }));
 
     const sellTransactions = transactions
       .filter(tx => tx.tickerSymbol === security.symbol && tx.type === 'sell')
       .map(tx => ({
-        id: tx.id, // This is the Transaction ID
-        date: tx.date,
-        type: 'Sell' as 'Buy' | 'Sell', 
-        shares: tx.numberOfShares,
-        price: tx.pricePerShare,
-        fees: tx.fees,
-        total: tx.totalAmount,
-        profitOrLoss: tx.profitOrLoss,
-        isInvestmentRecord: false, // Flag to identify this as a sell transaction (not editable for now)
+        ...tx, // Spread the original transaction
+        isInvestmentRecord: false, 
       }));
 
     return [...buyTransactions, ...sellTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [investments, transactions, security]);
+
+  const handleDeleteConfirmation = (tx: Transaction) => {
+    setTransactionToDelete(tx);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteSellTransaction = async () => {
+    if (!transactionToDelete) return;
+    try {
+      await deleteSellTransaction(transactionToDelete);
+      toast({
+        title: "Transaction Deleted",
+        description: `Sell transaction from ${new Date(transactionToDelete.date + "T00:00:00").toLocaleDateString()} has been deleted.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error Deleting Transaction",
+        description: error.message || "Could not delete the transaction.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteAlertOpen(false);
+      setTransactionToDelete(null);
+    }
+  };
 
 
   if (isLoadingListedSecurities || isLoadingInvestments || security === undefined) {
@@ -271,6 +305,14 @@ export default function SecurityDetailPage() {
                               </Link>
                             </Button>
                           )}
+                          {!tx.isInvestmentRecord && tx.type === 'sell' && (
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete Sell Transaction</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -283,9 +325,32 @@ export default function SecurityDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the record of selling {transactionToDelete?.shares.toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? new Date(transactionToDelete.date + "T00:00:00").toLocaleDateString() : ''}.
+              This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSellTransaction}
+              className={buttonVariants({ variant: "destructive" })}
+            >
+              Delete Transaction
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
+
+    
 
     

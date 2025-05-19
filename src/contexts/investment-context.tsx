@@ -26,6 +26,7 @@ interface InvestmentContextType {
   transactions: Transaction[];
   removeStockInvestmentsBySymbol: (tickerSymbol: string) => Promise<void>;
   updateStockInvestment: (investmentId: string, dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>, oldAmountInvested: number) => Promise<void>;
+  deleteSellTransaction: (transaction: Transaction) => Promise<void>;
   dashboardSummary: DashboardSummary | null;
 }
 
@@ -134,7 +135,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           purchaseDate: data.purchaseDate,
           createdAt: data.createdAt && data.createdAt instanceof Timestamp
             ? data.createdAt.toDate().toISOString()
-            : data.createdAt,
+            : data.createdAt, // Keep as string if already string
         } as Investment;
         fetchedInvestments.push(investment);
       });
@@ -154,7 +155,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
                 date: data.date, 
                 createdAt: data.createdAt && data.createdAt instanceof Timestamp
                     ? data.createdAt.toDate().toISOString()
-                    : data.createdAt,
+                    : data.createdAt, // Keep as string if already string
             } as Transaction);
         });
         setTransactions(fetchedTransactions);
@@ -174,14 +175,20 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching currency analyses:", error);
     });
 
-    Promise.all([
-        getDocs(qInvestments).catch(() => null),
-        getDocs(qTransactions).catch(() => null),
-        getDocs(qAnalyses).catch(() => null),
-        summaryDocRef ? getDoc(summaryDocRef).catch(() => null) : Promise.resolve(null)
-    ]).then(() => {
+    // Combined loading state update
+    const dataFetchPromises = [
+      getDocs(qInvestments).catch(() => null),
+      getDocs(qTransactions).catch(() => null),
+      getDocs(qAnalyses).catch(() => null)
+    ];
+    if (summaryDocRef) {
+        dataFetchPromises.push(getDoc(summaryDocRef).catch(() => null));
+    }
+
+    Promise.all(dataFetchPromises).then(() => {
         setIsLoading(false);
     }).catch(() => {
+        // Even if some fetches fail, we should stop loading
         setIsLoading(false);
     });
 
@@ -358,6 +365,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
+  // Corrected updateStockInvestment to take oldAmountInvested
   const correctedUpdateStockInvestment = useCallback(async (
     investmentId: string,
     dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>,
@@ -392,6 +400,35 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
+  const deleteSellTransaction = useCallback(async (transactionToDelete: Transaction) => {
+    if (!isAuthenticated || !userId) {
+      throw new Error("User not authenticated.");
+    }
+    if (transactionToDelete.type !== 'sell') {
+      throw new Error("Can only delete 'sell' transactions with this function.");
+    }
+
+    const transactionDocRef = doc(db, `users/${userId}/transactions`, transactionToDelete.id);
+
+    try {
+      await deleteDoc(transactionDocRef);
+
+      // Reverse P/L impact on dashboard summary
+      if (transactionToDelete.profitOrLoss !== undefined) {
+        await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
+      }
+
+      // Note: Share re-addition to StockInvestment lots is NOT handled here.
+      // The user needs to manually adjust holdings or re-enter purchases if necessary.
+      console.log(`Successfully deleted sell transaction ${transactionToDelete.id}.`);
+
+    } catch (error) {
+      console.error(`Error deleting sell transaction ${transactionToDelete.id}:`, error);
+      throw error;
+    }
+
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+
 
   return (
     <InvestmentContext.Provider value={{
@@ -404,10 +441,13 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         transactions,
         removeStockInvestmentsBySymbol,
         updateStockInvestment: correctedUpdateStockInvestment,
+        deleteSellTransaction,
         dashboardSummary
     }}>
       {children}
     </InvestmentContext.Provider>
   );
 };
+    
+
     
