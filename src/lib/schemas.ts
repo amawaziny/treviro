@@ -6,24 +6,26 @@ export const investmentTypes = ['Real Estate', 'Gold', 'Stocks', 'Debt Instrumen
 export const AddInvestmentSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   type: z.enum(investmentTypes, { errorMap: () => ({ message: "Please select a valid investment type."}) }),
-  amountInvested: z.coerce.number().positive({ message: "Amount must be positive." }),
+  amountInvested: z.coerce.number().positive({ message: "Amount must be positive." }), // This will be calculated for stocks
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
-  
-  selectedStockId: z.string().optional(), 
-  numberOfShares: z.coerce.number().optional(), 
-  purchasePricePerShare: z.coerce.number().optional(), 
+
+  selectedStockId: z.string().optional(),
+  numberOfShares: z.coerce.number().optional(),
+  purchasePricePerShare: z.coerce.number().optional(),
   isStockFund: z.boolean().optional().default(false),
+  purchaseFees: z.coerce.number().min(0, {message: "Fees cannot be negative."}).optional().default(0),
+
 
   quantityInGrams: z.coerce.number().optional(),
   isPhysicalGold: z.boolean().optional().default(true),
 
-  currencyCode: z.string().optional(), 
-  baseCurrency: z.string().optional(), 
-  currentExchangeRate: z.coerce.number().optional(), 
+  currencyCode: z.string().optional(),
+  baseCurrency: z.string().optional(),
+  currentExchangeRate: z.coerce.number().optional(),
 
   propertyAddress: z.string().optional(),
   propertyType: z.enum(['Residential', 'Commercial', 'Land']).optional(),
-  
+
   issuer: z.string().optional(),
   interestRate: z.coerce.number().optional(),
   maturityDate: z.string().optional().refine((date) => date && date.length > 0 ? !isNaN(Date.parse(date)) : true, { message: "Invalid maturity date format."}),
@@ -39,6 +41,7 @@ export const AddInvestmentSchema = z.object({
     if (data.purchasePricePerShare === undefined || data.purchasePricePerShare <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price must be positive.", path: ["purchasePricePerShare"] });
     }
+    // purchaseFees is optional with a default, so direct validation here isn't strictly needed unless it has specific conditions when present
   }
   if (data.type === 'Gold') {
     if (data.quantityInGrams === undefined || data.quantityInGrams <= 0) {
@@ -81,3 +84,4 @@ export const SellStockSchema = z.object({
 });
 
 export type SellStockFormValues = z.infer<typeof SellStockSchema>;
+

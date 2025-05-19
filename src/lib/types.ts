@@ -19,6 +19,7 @@ export interface StockInvestment extends BaseInvestment {
   purchasePricePerShare?: number; // User input, label: "Purchase Price"
   stockLogoUrl?: string; // This will be derived from selected stock
   isFund?: boolean;
+  purchaseFees?: number; // Fees for purchasing this stock lot
 }
 
 export interface GoldInvestment extends BaseInvestment {
@@ -60,14 +61,14 @@ export interface ListedStock {
   name: string;
   symbol: string;
   logoUrl: string;
-  price: number; 
+  price: number;
   currency: string;
   changePercent: number;
-  market: string; 
+  market: string;
 }
 
 export interface StockChartDataPoint {
-  date: string; 
+  date: string;
   price: number;
 }
 
@@ -89,3 +90,4 @@ export interface Transaction {
   profitOrLoss?: number; // For 'sell' transactions
   createdAt: string; // Server-generated timestamp, ISO string
 }
+
