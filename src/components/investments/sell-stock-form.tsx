@@ -173,7 +173,14 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
               <FormItem>
                 <FormLabel>Number of Securities to Sell</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" placeholder="e.g., 50" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                  <Input 
+                    type="number" 
+                    step="any" 
+                    placeholder="e.g., 50" 
+                    {...field} 
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(parseFloat(e.target.value))} 
+                  />
                 </FormControl>
                 <FormDescription>Max: {maxSharesToSell}</FormDescription>
                 <FormMessage />
@@ -187,7 +194,14 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
               <FormItem>
                 <FormLabel>Sell Price (per security)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" placeholder="e.g., 160.25" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                  <Input 
+                    type="number" 
+                    step="any" 
+                    placeholder="e.g., 160.25" 
+                    {...field} 
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(parseFloat(e.target.value))} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -213,7 +227,14 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
               <FormItem>
                 <FormLabel>Fees (if any)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" placeholder="e.g., 5.00" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
+                  <Input 
+                    type="number" 
+                    step="any" 
+                    placeholder="e.g., 5.00" 
+                    {...field} 
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(parseFloat(e.target.value))} 
+                  />
                 </FormControl>
                 <FormDescription>Total fees for this transaction.</FormDescription>
                 <FormMessage />
@@ -229,3 +250,4 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
     </Form>
   );
 }
+
