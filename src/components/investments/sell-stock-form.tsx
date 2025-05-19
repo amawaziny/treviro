@@ -53,7 +53,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
       numberOfSharesToSell: undefined,
       sellPricePerShare: undefined,
       sellDate: getCurrentDate(),
-      fees: 0,
+      fees: 0, // Default fees to 0
     },
   });
 
@@ -86,17 +86,33 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
   
   // Update default sell price if stock data available
   useEffect(() => {
-    if (stockBeingSold && stockBeingSold.price) {
+    if (stockBeingSold && stockBeingSold.price && form.getValues("sellPricePerShare") === undefined) {
         form.setValue("sellPricePerShare", stockBeingSold.price);
     }
   }, [stockBeingSold, form]);
 
+  const handleNumericInputChange = (field: any, value: string) => {
+    if (value === '') {
+      field.onChange(undefined); 
+    } else {
+      const parsedValue = parseFloat(value);
+      field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
+    }
+  };
 
   async function onSubmit(values: SellStockFormValues) {
     if (!stockBeingSold) {
       toast({ title: "Error", description: "Stock details not found.", variant: "destructive" });
       return;
     }
+    // Ensure numberOfSharesToSell and sellPricePerShare are defined and positive, schema should handle this
+    // but an extra client-side check before calling recordSellStockTransaction can be good
+    if (values.numberOfSharesToSell === undefined || values.sellPricePerShare === undefined) {
+        toast({ title: "Validation Error", description: "Number of shares and sell price must be provided.", variant: "destructive" });
+        return;
+    }
+
+
     if (values.numberOfSharesToSell > maxSharesToSell) {
       form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} shares.` });
       return;
@@ -109,7 +125,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
         values.numberOfSharesToSell,
         values.sellPricePerShare,
         values.sellDate,
-        values.fees
+        values.fees === undefined ? 0 : values.fees // Ensure fees is a number
       );
       toast({
         title: "Sale Recorded",
@@ -179,7 +195,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
                     placeholder="e.g., 50" 
                     {...field} 
                     value={field.value ?? ''}
-                    onChange={e => field.onChange(parseFloat(e.target.value))} 
+                    onChange={e => handleNumericInputChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormDescription>Max: {maxSharesToSell}</FormDescription>
@@ -200,7 +216,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
                     placeholder="e.g., 160.25" 
                     {...field} 
                     value={field.value ?? ''}
-                    onChange={e => field.onChange(parseFloat(e.target.value))} 
+                    onChange={e => handleNumericInputChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -233,7 +249,7 @@ export function SellStockForm({ stockId }: SellStockFormProps) {
                     placeholder="e.g., 5.00" 
                     {...field} 
                     value={field.value ?? ''}
-                    onChange={e => field.onChange(parseFloat(e.target.value))} 
+                    onChange={e => handleNumericInputChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormDescription>Total fees for this transaction.</FormDescription>
