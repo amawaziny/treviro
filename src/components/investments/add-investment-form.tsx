@@ -33,7 +33,7 @@ import { CurrencyAnalysisDisplay } from "./currency-analysis-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useListedStocks } from "@/hooks/use-listed-stocks";
-import type { StockInvestment } from "@/lib/types";
+import type { ListedStock, StockInvestment } from "@/lib/types";
 import { useSearchParams, useRouter } from "next/navigation";
 
 // Helper function to get current date in YYYY-MM-DD format
@@ -46,15 +46,15 @@ const getCurrentDate = () => {
 };
 
 const initialFormValues: AddInvestmentFormValues = {
-  name: "",
-  amountInvested: 0, // Will be overridden for stocks
+  name: "", // Will be auto-generated
+  amountInvested: 0,
   purchaseDate: getCurrentDate(),
   type: undefined,
   selectedStockId: undefined,
   numberOfShares: '',
   purchasePricePerShare: '',
   isStockFund: false,
-  purchaseFees: 0, // New field for stock purchase fees
+  purchaseFees: 0,
   quantityInGrams: '',
   isPhysicalGold: true,
   currencyCode: "",
@@ -77,7 +77,9 @@ export function AddInvestmentForm() {
 
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
-  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError } = useListedStocks();
+  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError, getListedStockById } = useListedStocks();
+  const [preSelectedStockDetails, setPreSelectedStockDetails] = useState<ListedStock | null>(null);
+
 
   const form = useForm<AddInvestmentFormValues>({
     resolver: zodResolver(AddInvestmentSchema),
@@ -91,13 +93,16 @@ export function AddInvestmentForm() {
   const selectedType = form.watch("type");
 
   useEffect(() => {
-    if (preSelectedStockId && selectedType === "Stocks" && listedStocks.length > 0) {
+    if (preSelectedStockId && listedStocks.length > 0) {
       const stock = listedStocks.find(s => s.id === preSelectedStockId);
-      if (stock && !form.getValues("name")) {
-        form.setValue("name", `${stock.name} Purchase`);
+      if (stock) {
+        setPreSelectedStockDetails(stock);
+        form.setValue("name", `${stock.name} Purchase`); // Auto-set name for pre-selected stock
+        form.setValue("type", "Stocks");
+        form.setValue("selectedStockId", preSelectedStockId);
       }
     }
-  }, [preSelectedStockId, selectedType, listedStocks, form]);
+  }, [preSelectedStockId, listedStocks, form]);
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
@@ -105,18 +110,20 @@ export function AddInvestmentForm() {
     setAiAnalysisResult(null);
 
     const investmentId = uuidv4();
-    let newInvestment: any = { // Base structure, will be typed more strictly for specific types
+    let investmentName = values.name; // Use existing name if set (e.g., by pre-selection effect)
+
+    let newInvestment: any = {
       id: investmentId,
-      name: values.name,
       type: values.type,
       purchaseDate: values.purchaseDate,
-      // amountInvested will be set below
     };
 
     let analysisResult: CurrencyFluctuationAnalysisOutput | undefined = undefined;
 
     if (values.type === "Stocks") {
-      const selectedStock = listedStocks.find(stock => stock.id === values.selectedStockId);
+      const stockToProcessId = values.selectedStockId || preSelectedStockId;
+      const selectedStock = listedStocks.find(stock => stock.id === stockToProcessId);
+
       if (!selectedStock) {
         toast({
           title: "Error",
@@ -130,11 +137,15 @@ export function AddInvestmentForm() {
       const pricePerShare = typeof values.purchasePricePerShare === 'number' ? values.purchasePricePerShare : parseFloat(values.purchasePricePerShare || '0');
       const fees = typeof values.purchaseFees === 'number' ? values.purchaseFees : parseFloat(String(values.purchaseFees || '0'));
 
-
       const calculatedAmountInvested = (numShares * pricePerShare) + fees;
+      
+      if (!investmentName) { // Auto-generate name if not already set
+        investmentName = `${selectedStock.name} Purchase`;
+      }
 
       newInvestment = {
         ...newInvestment,
+        name: investmentName,
         amountInvested: calculatedAmountInvested,
         actualStockName: selectedStock.name,
         tickerSymbol: selectedStock.symbol,
@@ -148,6 +159,11 @@ export function AddInvestmentForm() {
       // For non-stock types, amountInvested comes directly from the form or default
       newInvestment.amountInvested = typeof values.amountInvested === 'number' ? values.amountInvested : parseFloat(String(values.amountInvested || '0'));
       
+      if (!investmentName) { // Auto-generate name for other types
+         investmentName = `${values.type} Investment on ${values.purchaseDate}`;
+      }
+      newInvestment.name = investmentName;
+
       if (values.type === "Gold") {
         newInvestment = {
           ...newInvestment,
@@ -200,18 +216,22 @@ export function AddInvestmentForm() {
         }
       }
     }
+    
+    newInvestment.name = investmentName; // Ensure name is part of the object being passed
 
     addInvestment(newInvestment, analysisResult);
     toast({
       title: "Investment Added",
-      description: `${values.name} (${values.type}) has been successfully added.`,
+      description: `${newInvestment.name} (${values.type}) has been successfully added.`,
     });
     form.reset({
       ...initialFormValues,
       type: undefined,
       selectedStockId: undefined,
+      name: "", // Reset name
     });
-    router.replace('/investments/add');
+    setPreSelectedStockDetails(null); // Clear pre-selected stock details
+    router.replace('/investments/add'); // Clear query params
     if (!analysisResult) {
        setAiAnalysisResult(null);
     }
@@ -219,7 +239,7 @@ export function AddInvestmentForm() {
 
   const handleNumericInputChange = (field: any, value: string) => {
     if (value === '') {
-      field.onChange(undefined); // Use undefined for react-hook-form's validation if field is optional
+      field.onChange(undefined);
     } else {
       const parsedValue = parseFloat(value);
       field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
@@ -228,83 +248,65 @@ export function AddInvestmentForm() {
   
   const handleFeesInputChange = (field: any, value: string) => {
     if (value === '') {
-      field.onChange(0); // Default to 0 if empty, as fees are optional and default to 0
+      field.onChange(0); 
     } else {
       const parsedValue = parseFloat(value);
       field.onChange(isNaN(parsedValue) ? 0 : parsedValue);
     }
   };
 
+  const pageTitle = preSelectedStockId && preSelectedStockDetails 
+    ? `Buy: ${preSelectedStockDetails.name}` 
+    : "Add New Investment";
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Add New Investment</CardTitle>
+        <CardTitle>{pageTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Investment Label</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., My Tech Stocks Q1" {...field} />
-                    </FormControl>
-                    <FormDescription>A custom name for this specific investment lot.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Investment Label field is removed from UI */}
 
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Investment Type</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        if (value !== "Stocks") {
-                            form.setValue("selectedStockId", undefined);
-                            if(form.getValues("name").includes("Purchase") && preSelectedStockId) {
-                                form.setValue("name", "");
-                            }
-                        } else if (preSelectedStockId) {
-                            form.setValue("selectedStockId", preSelectedStockId);
-                            const stock = listedStocks.find(s => s.id === preSelectedStockId);
-                            if (stock && !form.getValues("name")) {
-                                form.setValue("name", `${stock.name} Purchase`);
-                            }
-                        }
-                      }}
-                      value={field.value || ""}
-                      disabled={!!preSelectedStockId}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an investment type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {investmentTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {!!preSelectedStockId && <FormDescription>Investment type locked to Stocks due to pre-selection.</FormDescription>}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!preSelectedStockId && (
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Investment Type</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value !== "Stocks") {
+                              form.setValue("selectedStockId", undefined);
+                          }
+                          form.setValue("name", ""); // Clear name when type changes, it will be auto-generated
+                        }}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an investment type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {investmentTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-              {selectedType !== "Stocks" && (
+              {(selectedType !== "Stocks" && !preSelectedStockId) && (
                  <FormField
                     control={form.control}
                     name="amountInvested"
@@ -313,7 +315,7 @@ export function AddInvestmentForm() {
                         <FormLabel>Total Amount Invested</FormLabel>
                         <FormControl>
                         <Input type="number" step="any" placeholder="e.g., 10000" {...field}
-                            value={field.value ?? ''} // Ensure it's controlled, handle 0 if needed
+                            value={field.value ?? ''} 
                             onChange={e => handleNumericInputChange(field, e.target.value)} />
                         </FormControl>
                         <FormDescription>Total cost including any fees.</FormDescription>
@@ -343,43 +345,58 @@ export function AddInvestmentForm() {
               <div className="space-y-6 mt-6 p-6 border rounded-md">
                 <h3 className="text-lg font-medium text-primary">Stock Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="selectedStockId"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Select Stock</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || ""}
-                          disabled={isLoadingListedStocks || !!listedStocksError || listedStocks.length === 0 || !!preSelectedStockId}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={
-                                isLoadingListedStocks ? "Loading stocks..." :
-                                listedStocksError ? "Error loading stocks" :
-                                listedStocks.length === 0 ? "No stocks available" :
-                                "Select a stock from the list"
-                              } />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {isLoadingListedStocks && <SelectItem value="loading" disabled>Loading...</SelectItem>}
-                            {listedStocksError && <SelectItem value="error" disabled>Could not load stocks.</SelectItem>}
-                            {!isLoadingListedStocks && !listedStocksError && listedStocks.length === 0 && <SelectItem value="no-stocks" disabled>No stocks found. Add them via admin.</SelectItem>}
-                            {listedStocks.map((stock) => (
-                              <SelectItem key={stock.id} value={stock.id}>
-                                {stock.name} ({stock.symbol}) - {stock.market}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                         {!!preSelectedStockId && <FormDescription>Stock pre-selected. Change stock by going back to Browse Stocks.</FormDescription>}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {!preSelectedStockId && (
+                    <FormField
+                      control={form.control}
+                      name="selectedStockId"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel>Select Stock</FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                                field.onChange(value);
+                                const stock = listedStocks.find(s => s.id === value);
+                                if (stock) {
+                                    form.setValue("name", `${stock.name} Purchase`);
+                                } else {
+                                    form.setValue("name", "");
+                                }
+                            }}
+                            value={field.value || ""}
+                            disabled={isLoadingListedStocks || !!listedStocksError || listedStocks.length === 0}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={
+                                  isLoadingListedStocks ? "Loading stocks..." :
+                                  listedStocksError ? "Error loading stocks" :
+                                  listedStocks.length === 0 ? "No stocks available" :
+                                  "Select a stock from the list"
+                                } />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {isLoadingListedStocks && <SelectItem value="loading" disabled>Loading...</SelectItem>}
+                              {listedStocksError && <SelectItem value="error" disabled>Could not load stocks.</SelectItem>}
+                              {!isLoadingListedStocks && !listedStocksError && listedStocks.length === 0 && <SelectItem value="no-stocks" disabled>No stocks found. Add them via admin.</SelectItem>}
+                              {listedStocks.map((stock) => (
+                                <SelectItem key={stock.id} value={stock.id}>
+                                  {stock.name} ({stock.symbol}) - {stock.market}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                   {preSelectedStockId && preSelectedStockDetails && (
+                     <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
+                        <p className="text-sm font-medium">Selected Stock: {preSelectedStockDetails.name} ({preSelectedStockDetails.symbol})</p>
+                        <p className="text-xs text-muted-foreground">Market Price: {preSelectedStockDetails.price.toLocaleString(undefined, {style: 'currency', currency: preSelectedStockDetails.currency})}</p>
+                     </div>
+                   )}
                   <FormField control={form.control} name="numberOfShares" render={({ field }) => (
                       <FormItem><FormLabel>Number of Securities</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 100" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -407,7 +424,7 @@ export function AddInvestmentForm() {
               </div>
             )}
 
-            {selectedType === "Gold" && (
+            {selectedType === "Gold" && !preSelectedStockId && (
                <div className="space-y-6 mt-6 p-6 border rounded-md">
                 <h3 className="text-lg font-medium text-primary">Gold Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -421,7 +438,7 @@ export function AddInvestmentForm() {
               </div>
             )}
 
-            {selectedType === "Currencies" && (
+            {selectedType === "Currencies" && !preSelectedStockId && (
               <div className="space-y-6 mt-6 p-6 border rounded-md">
                 <h3 className="text-lg font-medium text-primary">Currency Details</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -438,7 +455,7 @@ export function AddInvestmentForm() {
               </div>
             )}
 
-            {selectedType === "Real Estate" && (
+            {selectedType === "Real Estate" && !preSelectedStockId && (
               <div className="space-y-6 mt-6 p-6 border rounded-md">
                 <h3 className="text-lg font-medium text-primary">Real Estate Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -452,7 +469,7 @@ export function AddInvestmentForm() {
               </div>
             )}
 
-            {selectedType === "Debt Instruments" && (
+            {selectedType === "Debt Instruments" && !preSelectedStockId && (
               <div className="space-y-6 mt-6 p-6 border rounded-md">
                 <h3 className="text-lg font-medium text-primary">Debt Instrument Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -482,7 +499,7 @@ export function AddInvestmentForm() {
 
             <Button type="submit" className="w-full md:w-auto" disabled={isLoadingAi || (selectedType === "Stocks" && (isLoadingListedStocks || !!listedStocksError))}>
               {form.formState.isSubmitting || isLoadingAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Add Investment
+              {preSelectedStockId ? "Buy Stock" : "Add Investment"}
             </Button>
           </form>
         </Form>
