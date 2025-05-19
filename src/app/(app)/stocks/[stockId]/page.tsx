@@ -62,28 +62,28 @@ export default function SecurityDetailPage() {
     const buyTransactions = investments
       .filter(inv => inv.type === 'Stocks' && inv.tickerSymbol === security.symbol)
       .map(inv => ({
-        id: inv.id,
+        id: inv.id, // This is the StockInvestment ID, crucial for editing
         date: inv.purchaseDate,
-        type: 'Buy' as 'Buy' | 'Sell', // Type assertion
+        type: 'Buy' as 'Buy' | 'Sell', 
         shares: (inv as StockInvestment).numberOfShares || 0,
         price: (inv as StockInvestment).purchasePricePerShare || 0,
         fees: (inv as StockInvestment).purchaseFees || 0,
         total: inv.amountInvested,
-        isInvestmentRecord: true, 
+        isInvestmentRecord: true, // Flag to identify this as an editable purchase lot
       }));
 
     const sellTransactions = transactions
       .filter(tx => tx.tickerSymbol === security.symbol && tx.type === 'sell')
       .map(tx => ({
-        id: tx.id,
+        id: tx.id, // This is the Transaction ID
         date: tx.date,
-        type: 'Sell' as 'Buy' | 'Sell', // Type assertion
+        type: 'Sell' as 'Buy' | 'Sell', 
         shares: tx.numberOfShares,
         price: tx.pricePerShare,
         fees: tx.fees,
         total: tx.totalAmount,
         profitOrLoss: tx.profitOrLoss,
-        isInvestmentRecord: false,
+        isInvestmentRecord: false, // Flag to identify this as a sell transaction (not editable for now)
       }));
 
     return [...buyTransactions, ...sellTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -241,7 +241,7 @@ export default function SecurityDetailPage() {
                       <TableHead className="text-right">Fees</TableHead>
                       <TableHead className="text-right">Total Amount</TableHead>
                       {securityTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
-                      {/* <TableHead className="text-right">Actions</TableHead> Removed Actions column */}
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -262,7 +262,6 @@ export default function SecurityDetailPage() {
                             {tx.profitOrLoss !== undefined ? tx.profitOrLoss.toLocaleString(undefined, { style: 'currency', currency: security.currency, signDisplay: 'always' }) : 'N/A'}
                             </TableCell>
                         )}
-                        {/* Cell for edit button removed
                         <TableCell className="text-right">
                           {tx.isInvestmentRecord && (
                             <Button variant="ghost" size="icon" asChild>
@@ -273,7 +272,6 @@ export default function SecurityDetailPage() {
                             </Button>
                           )}
                         </TableCell>
-                        */}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -289,3 +287,5 @@ export default function SecurityDetailPage() {
   );
 }
 
+
+    
