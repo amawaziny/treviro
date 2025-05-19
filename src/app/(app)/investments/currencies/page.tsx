@@ -1,11 +1,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Construction } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Construction, Plus } from "lucide-react";
+import Link from "next/link";
 
 export default function MyCurrenciesPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">My Currencies</h1>
         <p className="text-muted-foreground">View your currency holdings.</p>
@@ -25,6 +27,16 @@ export default function MyCurrenciesPage() {
           </p>
         </CardContent>
       </Card>
+      <Link href="/investments/add" passHref>
+        <Button
+          variant="default"
+          size="icon"
+          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
+          aria-label="Add new currency investment"
+        >
+          <Plus className="h-7 w-7" />
+        </Button>
+      </Link>
     </div>
   );
 }

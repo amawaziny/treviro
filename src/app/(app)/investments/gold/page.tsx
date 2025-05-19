@@ -10,7 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Gem, Building, Coins } from 'lucide-react'; // Coins for funds
+import { Gem, Coins, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function MyGoldPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
@@ -30,7 +32,7 @@ export default function MyGoldPage() {
       if (security && security.securityType === 'Fund' && isGoldRelatedFund(security.fundType)) {
         return {
           ...stockInv,
-          fundDetails: security, // Attach full fund details
+          fundDetails: security, 
         };
       }
       return null;
@@ -69,7 +71,7 @@ export default function MyGoldPage() {
 
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">My Gold Holdings</h1>
         <p className="text-muted-foreground">Track your direct gold and gold-related fund investments.</p>
@@ -115,7 +117,7 @@ export default function MyGoldPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Coins className="mr-2 h-6 w-6 text-primary" /> {/* Changed Icon */}
+            <Coins className="mr-2 h-6 w-6 text-primary" />
             Gold-Related Fund Investments
           </CardTitle>
           <CardDescription>ETFs and other funds primarily investing in gold.</CardDescription>
@@ -156,6 +158,16 @@ export default function MyGoldPage() {
           )}
         </CardContent>
       </Card>
+      <Link href="/investments/add" passHref>
+        <Button
+          variant="default"
+          size="icon"
+          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
+          aria-label="Add new gold investment"
+        >
+          <Plus className="h-7 w-7" />
+        </Button>
+      </Link>
     </div>
   );
 }

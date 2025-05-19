@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, PlusCircle, List, Briefcase, Home, Gem, ScrollText, DollarSign, Building } from 'lucide-react'; // Added Building for Funds
+import { LayoutDashboard, List, Briefcase, Home, Gem, ScrollText, DollarSign } from 'lucide-react'; // Removed PlusCircle
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -28,14 +28,14 @@ const navItems: NavItem[] = [
     href: '/dashboard',
     icon: LayoutDashboard,
   },
+  // { // "Add Investment" removed from here
+  //   title: 'Add Investment',
+  //   href: '/investments/add',
+  //   icon: PlusCircle,
+  // },
   {
-    title: 'Add Investment',
-    href: '/investments/add',
-    icon: PlusCircle,
-  },
-  {
-    title: 'Browse Securities', // Renamed
-    href: '/stocks', // Kept href for now, page at /stocks will be updated
+    title: 'Browse Securities', 
+    href: '/stocks', 
     icon: List, 
   },
   {
@@ -43,11 +43,6 @@ const navItems: NavItem[] = [
     href: '/investments/stocks',
     icon: Briefcase,
   },
-  // { // Placeholder for "My Funds" - can be added in a subsequent step
-  //   title: 'My Funds',
-  //   href: '/investments/funds', // This route would need to be created
-  //   icon: Building,
-  // },
   {
     title: 'My Real Estate',
     href: '/investments/real-estate',
@@ -91,17 +86,17 @@ export function SidebarNav() {
             isActive = false;
           }
         }
-         // For "Browse Securities" (href: /stocks), keep it active if viewing a detail page /stocks/[id]
          if (item.href === '/stocks' && pathname.startsWith('/stocks/')) {
            isActive = true;
          }
           if (item.href === '/investments/stocks' && pathname.startsWith('/investments/stocks')) {
              isActive = true;
          }
-         // Example for My Funds if added:
-         // if (item.href === '/investments/funds' && pathname.startsWith('/investments/funds')) {
-         //   isActive = true;
-         // }
+         if (item.href === '/investments/add' && pathname.startsWith('/investments/add')) {
+             // This condition will likely not be hit if Add Investment is not in navItems
+             // but useful if it were to be re-added contextually
+             isActive = true;
+         }
 
 
         return (
@@ -123,4 +118,3 @@ export function SidebarNav() {
     </SidebarMenu>
   );
 }
-
