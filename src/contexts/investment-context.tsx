@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction } from '@/lib/types';
 import { db } from '@/lib/firebase'; 
-import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,6 +24,7 @@ interface InvestmentContextType {
     fees: number
   ) => Promise<void>;
   transactions: Transaction[];
+  removeStockInvestmentsBySymbol: (tickerSymbol: string) => Promise<void>;
 }
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
@@ -72,7 +73,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         fetchedInvestments.push(investment);
       });
       setInvestments(fetchedInvestments);
-      if (!unsubTransactions) setIsLoading(false); // Only set loading false if both listeners are set up or this is the last one
+      // Ensure loading state is managed considering both listeners
+      // This simple check assumes transactions listener is also active or will be soon
     }, (error) => {
       console.error("Error fetching investments:", error);
       setIsLoading(false);
@@ -93,10 +95,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             } as Transaction);
         });
         setTransactions(fetchedTransactions);
-        if(!unsubscribeInvestments) setIsLoading(false); // Only set loading false if both listeners are set up
     }, (error) => {
         console.error("Error fetching transactions:", error);
-        setIsLoading(false); // Set loading false even on transaction fetch error
     });
 
 
@@ -111,15 +111,14 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching currency analyses:", error);
     });
     
-    // Set loading to false once initial listeners are established
-    // This assumes onSnapshot calls back relatively quickly for empty or existing data
     Promise.all([
-        getDocs(qInvestments), // Check if initial data for investments is processed
-        getDocs(qTransactions)  // Check if initial data for transactions is processed
+        getDocs(qInvestments).catch(() => null), 
+        getDocs(qTransactions).catch(() => null),
+        getDocs(qAnalyses).catch(() => null)
     ]).then(() => {
         setIsLoading(false);
     }).catch(() => {
-        setIsLoading(false); // Also set loading to false on error during initial fetch
+        setIsLoading(false); 
     });
 
 
@@ -184,7 +183,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         (inv) => inv.type === "Stocks" && inv.tickerSymbol === tickerSymbol
       ) as StockInvestment[];
 
-      userStockInvestments.sort((a, b) => new Date(a.purchaseDate).getTime() - new Date(b.purchaseDate).getTime()); // Sort by purchase date (FIFO for share reduction)
+      userStockInvestments.sort((a, b) => new Date(a.purchaseDate).getTime() - new Date(b.purchaseDate).getTime()); 
 
       let totalOwnedShares = userStockInvestments.reduce((sum, inv) => sum + (inv.numberOfShares || 0), 0);
       if (numberOfSharesToSell > totalOwnedShares) {
@@ -231,18 +230,14 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         const sharesInThisLot = investment.numberOfShares || 0;
 
         if (sharesInThisLot >= sharesToDeduct) {
-          // This lot has enough shares
           const newShareCount = sharesInThisLot - sharesToDeduct;
           if (newShareCount === 0) {
-            batch.delete(investmentDocRef); // Delete if all shares from this lot are sold
+            batch.delete(investmentDocRef); 
           } else {
             batch.update(investmentDocRef, { numberOfShares: newShareCount });
-            // Note: We are NOT adjusting amountInvested here to simplify.
-            // True P/L tracking would require this.
           }
           sharesToDeduct = 0;
         } else {
-          // Sell all shares from this lot and continue to the next
           batch.delete(investmentDocRef);
           sharesToDeduct -= sharesInThisLot;
         }
@@ -251,6 +246,37 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     },
     [userId, isAuthenticated, investments]
   );
+
+  const removeStockInvestmentsBySymbol = useCallback(async (tickerSymbol: string) => {
+    if (!isAuthenticated || !userId) {
+      console.error("User not authenticated, cannot remove investments.");
+      return;
+    }
+    const investmentsCollectionPath = `users/${userId}/investments`;
+    const q = query(
+      collection(db, investmentsCollectionPath),
+      where("type", "==", "Stocks"),
+      where("tickerSymbol", "==", tickerSymbol)
+    );
+
+    try {
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        console.log(`No stock investments found for symbol ${tickerSymbol} to remove.`);
+        return;
+      }
+      const batch = writeBatch(db);
+      querySnapshot.forEach((docSnapshot) => {
+        batch.delete(docSnapshot.ref);
+      });
+      await batch.commit();
+      console.log(`Successfully removed stock investments for symbol ${tickerSymbol}.`);
+      // Optionally, you could also remove related transactions here if needed.
+    } catch (error) {
+      console.error(`Error removing stock investments for symbol ${tickerSymbol}:`, error);
+      throw error; // Re-throw to be caught by caller for UI feedback
+    }
+  }, [userId, isAuthenticated]);
 
 
   return (
@@ -261,7 +287,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         isLoading, 
         currencyAnalyses,
         recordSellStockTransaction,
-        transactions 
+        transactions,
+        removeStockInvestmentsBySymbol
     }}>
       {children}
     </InvestmentContext.Provider>
