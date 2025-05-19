@@ -45,6 +45,27 @@ const getCurrentDate = () => {
   return `${year}-${month}-${day}`;
 };
 
+const initialFormValues: AddInvestmentFormValues = {
+  name: "",
+  amountInvested: 0,
+  purchaseDate: getCurrentDate(),
+  type: undefined, 
+  selectedStockId: undefined,
+  numberOfShares: '', // Changed from undefined
+  purchasePricePerShare: '', // Changed from undefined
+  isStockFund: false,
+  quantityInGrams: '', // Changed from undefined
+  isPhysicalGold: true,
+  currencyCode: "",
+  baseCurrency: "",
+  currentExchangeRate: '', // Changed from undefined
+  propertyAddress: "",
+  propertyType: undefined,
+  issuer: "",
+  interestRate: '', // Changed from undefined
+  maturityDate: '', // Changed from undefined
+};
+
 
 export function AddInvestmentForm() {
   const { addInvestment } = useInvestments();
@@ -55,29 +76,14 @@ export function AddInvestmentForm() {
 
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
-  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError, getListedStockById } = useListedStocks();
+  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError } = useListedStocks();
 
   const form = useForm<AddInvestmentFormValues>({
     resolver: zodResolver(AddInvestmentSchema),
     defaultValues: {
-      name: "",
-      amountInvested: 0,
-      purchaseDate: getCurrentDate(),
+      ...initialFormValues,
       type: preSelectedStockId ? "Stocks" : undefined,
       selectedStockId: preSelectedStockId || undefined,
-      numberOfShares: undefined,
-      purchasePricePerShare: undefined,
-      isStockFund: false,
-      quantityInGrams: undefined,
-      isPhysicalGold: true,
-      currencyCode: "",
-      baseCurrency: "",
-      currentExchangeRate: undefined,
-      propertyAddress: "",
-      propertyType: undefined,
-      issuer: "",
-      interestRate: undefined,
-      maturityDate: undefined,
     },
   });
 
@@ -87,8 +93,8 @@ export function AddInvestmentForm() {
   useEffect(() => {
     if (preSelectedStockId && selectedType === "Stocks" && listedStocks.length > 0) {
       const stock = listedStocks.find(s => s.id === preSelectedStockId);
-      if (stock && !form.getValues("name")) { // Only set if name is not already filled
-        form.setValue("name", `${stock.name} Purchase`); // Suggest a default name
+      if (stock && !form.getValues("name")) { 
+        form.setValue("name", `${stock.name} Purchase`); 
       }
     }
   }, [preSelectedStockId, selectedType, listedStocks, form]);
@@ -150,7 +156,7 @@ export function AddInvestmentForm() {
             transactionAmount: values.amountInvested,
             transactionDate: values.purchaseDate,
             baseCurrency: values.baseCurrency,
-            currentExchangeRate: values.currentExchangeRate,
+            currentExchangeRate: Number(values.currentExchangeRate), // Ensure it's a number for AI
           };
           analysisResult = await currencyFluctuationAnalysis(aiInput);
           setAiAnalysisResult(analysisResult);
@@ -185,19 +191,25 @@ export function AddInvestmentForm() {
       title: "Investment Added",
       description: `${values.name} (${values.type}) has been successfully added.`,
     });
-    form.reset({ // Reset with initial values for new form, clearing preselection
-        name: "", amountInvested: 0, purchaseDate: getCurrentDate(), type: undefined,
-        selectedStockId: undefined, numberOfShares: undefined, purchasePricePerShare: undefined,
-        isStockFund: false, quantityInGrams: undefined, isPhysicalGold: true,
-        currencyCode: "", baseCurrency: "", currentExchangeRate: undefined,
-        propertyAddress: "", propertyType: undefined, issuer: "", interestRate: undefined,
-        maturityDate: undefined,
+    form.reset({
+      ...initialFormValues, // Use the defined initial values for reset
+      type: undefined, // Explicitly reset type for a fresh form
+      selectedStockId: undefined, // Explicitly reset stock selection
     });
-    router.replace('/investments/add'); // Clear query params
+    router.replace('/investments/add'); 
     if (!analysisResult) {
        setAiAnalysisResult(null); 
     }
   }
+  
+  const handleNumericInputChange = (field: any, value: string) => {
+    if (value === '') {
+      field.onChange(undefined);
+    } else {
+      const parsedValue = parseFloat(value);
+      field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
+    }
+  };
 
   return (
     <Card>
@@ -232,16 +244,22 @@ export function AddInvestmentForm() {
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
-                        // If type changes away from Stocks, clear stock-specific fields that might have been pre-filled
                         if (value !== "Stocks") {
                             form.setValue("selectedStockId", undefined);
-                            if(form.getValues("name").includes("Purchase") && preSelectedStockId) { // Clear suggested name if type changes
+                            if(form.getValues("name").includes("Purchase") && preSelectedStockId) { 
                                 form.setValue("name", "");
+                            }
+                        } else if (preSelectedStockId) {
+                            // If type becomes Stocks AND preSelectedStockId exists, ensure it's set
+                            form.setValue("selectedStockId", preSelectedStockId);
+                            const stock = listedStocks.find(s => s.id === preSelectedStockId);
+                            if (stock && !form.getValues("name")) {
+                                form.setValue("name", `${stock.name} Purchase`);
                             }
                         }
                       }} 
-                      defaultValue={field.value}
-                      disabled={!!preSelectedStockId} // Disable type if stockId is in URL
+                      value={field.value || ""} // Use value || "" for Select
+                      disabled={!!preSelectedStockId} 
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -269,6 +287,7 @@ export function AddInvestmentForm() {
                   <FormItem>
                     <FormLabel>Total Amount Invested</FormLabel>
                     <FormControl>
+                      {/* For amountInvested, it defaults to 0, which is a defined value. Standard onChange is fine. */}
                       <Input type="number" step="any" placeholder="e.g., 10000" {...field} 
                         onChange={e => field.onChange(parseFloat(e.target.value))} />
                     </FormControl>
@@ -305,7 +324,7 @@ export function AddInvestmentForm() {
                         <FormLabel>Select Stock</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
-                          value={field.value} // Controlled component
+                          value={field.value || ""} // Use value || "" for Select
                           disabled={isLoadingListedStocks || !!listedStocksError || listedStocks.length === 0 || !!preSelectedStockId}
                         >
                           <FormControl>
@@ -335,10 +354,10 @@ export function AddInvestmentForm() {
                     )}
                   />
                   <FormField control={form.control} name="numberOfShares" render={({ field }) => (
-                      <FormItem><FormLabel>Number of Securities</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 100" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Number of Securities</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 100" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="purchasePricePerShare" render={({ field }) => (
-                      <FormItem><FormLabel>Purchase Price (per security)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 150.50" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Purchase Price (per security)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 150.50" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="isStockFund" render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this a stock fund/ETF?</FormLabel></div></FormItem>
@@ -352,7 +371,7 @@ export function AddInvestmentForm() {
                 <h3 className="text-lg font-medium text-primary">Gold Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="quantityInGrams" render={({ field }) => (
-                      <FormItem><FormLabel>Quantity (grams)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 50" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Quantity (grams)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 50" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="isPhysicalGold" render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this physical gold?</FormLabel><FormDescription>Uncheck for Gold ETFs, Digital Gold etc.</FormDescription></div></FormItem>
@@ -372,7 +391,7 @@ export function AddInvestmentForm() {
                       <FormItem><FormLabel>Base Currency Code (for comparison)</FormLabel><FormControl><Input placeholder="e.g., EUR" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                    <FormField control={form.control} name="currentExchangeRate" render={({ field }) => (
-                      <FormItem><FormLabel>Current Exchange Rate (to Base)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 0.92" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormDescription>Needed for AI fluctuation analysis.</FormDescription><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Current Exchange Rate (to Base)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 0.92" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormDescription>Needed for AI fluctuation analysis.</FormDescription><FormMessage /></FormItem>
                     )} />
                 </div>
               </div>
@@ -386,7 +405,7 @@ export function AddInvestmentForm() {
                     <FormItem><FormLabel>Property Address</FormLabel><FormControl><Input placeholder="e.g., 123 Main St, Anytown" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="propertyType" render={({ field }) => (
-                    <FormItem><FormLabel>Property Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select property type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Residential">Residential</SelectItem><SelectItem value="Commercial">Commercial</SelectItem><SelectItem value="Land">Land</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Property Type</FormLabel><Select onValueChange={field.onChange} value={field.value || ""}><FormControl><SelectTrigger><SelectValue placeholder="Select property type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Residential">Residential</SelectItem><SelectItem value="Commercial">Commercial</SelectItem><SelectItem value="Land">Land</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
                 </div>
               </div>
@@ -400,7 +419,7 @@ export function AddInvestmentForm() {
                     <FormItem><FormLabel>Issuer</FormLabel><FormControl><Input placeholder="e.g., Government Bonds" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="interestRate" render={({ field }) => (
-                    <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 5.5" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 5.5" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="maturityDate" render={({ field }) => (
                     <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
