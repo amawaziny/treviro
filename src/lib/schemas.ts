@@ -12,7 +12,6 @@ export const AddInvestmentSchema = z.object({
   selectedStockId: z.string().optional(),
   numberOfShares: z.coerce.number().optional(),
   purchasePricePerShare: z.coerce.number().optional(),
-  isStockFund: z.boolean().optional().default(false),
   purchaseFees: z.coerce.number().min(0, {message: "Fees cannot be negative."}).optional().default(0),
 
 
@@ -41,7 +40,6 @@ export const AddInvestmentSchema = z.object({
     if (data.purchasePricePerShare === undefined || data.purchasePricePerShare <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price must be positive.", path: ["purchasePricePerShare"] });
     }
-    // purchaseFees is optional with a default, so direct validation here isn't strictly needed unless it has specific conditions when present
   }
   if (data.type === 'Gold') {
     if (data.quantityInGrams === undefined || data.quantityInGrams <= 0) {

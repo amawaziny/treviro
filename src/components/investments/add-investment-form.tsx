@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { AddInvestmentSchema, type AddInvestmentFormValues, investmentTypes } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
@@ -53,7 +52,6 @@ const initialFormValues: AddInvestmentFormValues = {
   selectedStockId: undefined,
   numberOfShares: '',
   purchasePricePerShare: '',
-  isStockFund: false,
   purchaseFees: 0,
   quantityInGrams: '',
   isPhysicalGold: true,
@@ -77,7 +75,7 @@ export function AddInvestmentForm() {
 
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
-  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError, getListedStockById } = useListedStocks();
+  const { listedStocks, isLoading: isLoadingListedStocks, error: listedStocksError } = useListedStocks();
   const [preSelectedStockDetails, setPreSelectedStockDetails] = useState<ListedStock | null>(null);
 
 
@@ -97,9 +95,9 @@ export function AddInvestmentForm() {
       const stock = listedStocks.find(s => s.id === preSelectedStockId);
       if (stock) {
         setPreSelectedStockDetails(stock);
-        form.setValue("name", `${stock.name} Purchase`); // Auto-set name for pre-selected stock
         form.setValue("type", "Stocks");
         form.setValue("selectedStockId", preSelectedStockId);
+        // Name is now auto-generated in onSubmit
       }
     }
   }, [preSelectedStockId, listedStocks, form]);
@@ -110,7 +108,7 @@ export function AddInvestmentForm() {
     setAiAnalysisResult(null);
 
     const investmentId = uuidv4();
-    let investmentName = values.name; // Use existing name if set (e.g., by pre-selection effect)
+    let investmentName = ""; 
 
     let newInvestment: any = {
       id: investmentId,
@@ -132,16 +130,13 @@ export function AddInvestmentForm() {
         });
         return;
       }
-      // Ensure numberOfShares and purchasePricePerShare are numbers for calculation
       const numShares = typeof values.numberOfShares === 'number' ? values.numberOfShares : parseFloat(values.numberOfShares || '0');
       const pricePerShare = typeof values.purchasePricePerShare === 'number' ? values.purchasePricePerShare : parseFloat(values.purchasePricePerShare || '0');
       const fees = typeof values.purchaseFees === 'number' ? values.purchaseFees : parseFloat(String(values.purchaseFees || '0'));
 
       const calculatedAmountInvested = (numShares * pricePerShare) + fees;
       
-      if (!investmentName) { // Auto-generate name if not already set
-        investmentName = `${selectedStock.name} Purchase`;
-      }
+      investmentName = `${selectedStock.name} Purchase`;
 
       newInvestment = {
         ...newInvestment,
@@ -152,16 +147,11 @@ export function AddInvestmentForm() {
         stockLogoUrl: selectedStock.logoUrl,
         numberOfShares: numShares,
         purchasePricePerShare: pricePerShare,
-        isFund: values.isStockFund,
         purchaseFees: fees,
       } as StockInvestment;
     } else {
-      // For non-stock types, amountInvested comes directly from the form or default
       newInvestment.amountInvested = typeof values.amountInvested === 'number' ? values.amountInvested : parseFloat(String(values.amountInvested || '0'));
-      
-      if (!investmentName) { // Auto-generate name for other types
-         investmentName = `${values.type} Investment on ${values.purchaseDate}`;
-      }
+      investmentName = `${values.type} Investment on ${values.purchaseDate}`;
       newInvestment.name = investmentName;
 
       if (values.type === "Gold") {
@@ -217,8 +207,6 @@ export function AddInvestmentForm() {
       }
     }
     
-    newInvestment.name = investmentName; // Ensure name is part of the object being passed
-
     addInvestment(newInvestment, analysisResult);
     toast({
       title: "Investment Added",
@@ -228,10 +216,10 @@ export function AddInvestmentForm() {
       ...initialFormValues,
       type: undefined,
       selectedStockId: undefined,
-      name: "", // Reset name
+      name: "", 
     });
-    setPreSelectedStockDetails(null); // Clear pre-selected stock details
-    router.replace('/investments/add'); // Clear query params
+    setPreSelectedStockDetails(null); 
+    router.replace('/investments/add'); 
     if (!analysisResult) {
        setAiAnalysisResult(null);
     }
@@ -268,7 +256,6 @@ export function AddInvestmentForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Investment Label field is removed from UI */}
 
               {!preSelectedStockId && (
                 <FormField
@@ -283,7 +270,7 @@ export function AddInvestmentForm() {
                           if (value !== "Stocks") {
                               form.setValue("selectedStockId", undefined);
                           }
-                          form.setValue("name", ""); // Clear name when type changes, it will be auto-generated
+                          // Name is auto-generated
                         }}
                         value={field.value || ""}
                       >
@@ -306,7 +293,7 @@ export function AddInvestmentForm() {
                 />
               )}
 
-              {(selectedType !== "Stocks" && !preSelectedStockId) && (
+              {selectedType !== "Stocks" && ( // Show for non-stocks or if no stock is pre-selected
                  <FormField
                     control={form.control}
                     name="amountInvested"
@@ -325,20 +312,21 @@ export function AddInvestmentForm() {
                 />
               )}
 
-
-              <FormField
-                control={form.control}
-                name="purchaseDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Purchase Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {selectedType !== "Stocks" && (
+                <FormField
+                  control={form.control}
+                  name="purchaseDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Purchase Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             {selectedType === "Stocks" && (
@@ -355,12 +343,7 @@ export function AddInvestmentForm() {
                           <Select
                             onValueChange={(value) => {
                                 field.onChange(value);
-                                const stock = listedStocks.find(s => s.id === value);
-                                if (stock) {
-                                    form.setValue("name", `${stock.name} Purchase`);
-                                } else {
-                                    form.setValue("name", "");
-                                }
+                                // Name is auto-generated
                             }}
                             value={field.value || ""}
                             disabled={isLoadingListedStocks || !!listedStocksError || listedStocks.length === 0}
@@ -417,9 +400,19 @@ export function AddInvestmentForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField control={form.control} name="isStockFund" render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this a stock fund/ETF?</FormLabel></div></FormItem>
-                    )} />
+                  <FormField
+                    control={form.control}
+                    name="purchaseDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Purchase Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} value={field.value || ''}/>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             )}
@@ -432,7 +425,7 @@ export function AddInvestmentForm() {
                       <FormItem><FormLabel>Quantity (grams)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 50" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="isPhysicalGold" render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this physical gold?</FormLabel><FormDescription>Uncheck for Gold ETFs, Digital Gold etc.</FormDescription></div></FormItem>
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Input type="checkbox" checked={field.value} onChange={e => field.onChange(e.target.checked)} className="h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" /></FormControl><div className="space-y-1 leading-none"><FormLabel>Is this physical gold?</FormLabel><FormDescription>Uncheck for Gold ETFs, Digital Gold etc.</FormDescription></div></FormItem>
                     )} />
                 </div>
               </div>
@@ -443,10 +436,10 @@ export function AddInvestmentForm() {
                 <h3 className="text-lg font-medium text-primary">Currency Details</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <FormField control={form.control} name="currencyCode" render={({ field }) => (
-                      <FormItem><FormLabel>Transaction Currency Code</FormLabel><FormControl><Input placeholder="e.g., USD" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Transaction Currency Code</FormLabel><FormControl><Input placeholder="e.g., USD" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                   <FormField control={form.control} name="baseCurrency" render={({ field }) => (
-                      <FormItem><FormLabel>Base Currency Code (for comparison)</FormLabel><FormControl><Input placeholder="e.g., EUR" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Base Currency Code (for comparison)</FormLabel><FormControl><Input placeholder="e.g., EUR" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                    <FormField control={form.control} name="currentExchangeRate" render={({ field }) => (
                       <FormItem><FormLabel>Current Exchange Rate (to Base)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 0.92" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormDescription>Needed for AI fluctuation analysis.</FormDescription><FormMessage /></FormItem>
@@ -460,7 +453,7 @@ export function AddInvestmentForm() {
                 <h3 className="text-lg font-medium text-primary">Real Estate Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="propertyAddress" render={({ field }) => (
-                    <FormItem><FormLabel>Property Address</FormLabel><FormControl><Input placeholder="e.g., 123 Main St, Anytown" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Property Address</FormLabel><FormControl><Input placeholder="e.g., 123 Main St, Anytown" {...field} value={field.value || ''}/></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="propertyType" render={({ field }) => (
                     <FormItem><FormLabel>Property Type</FormLabel><Select onValueChange={field.onChange} value={field.value || ""}><FormControl><SelectTrigger><SelectValue placeholder="Select property type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Residential">Residential</SelectItem><SelectItem value="Commercial">Commercial</SelectItem><SelectItem value="Land">Land</SelectItem></SelectContent></Select><FormMessage /></FormItem>
@@ -474,13 +467,13 @@ export function AddInvestmentForm() {
                 <h3 className="text-lg font-medium text-primary">Debt Instrument Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <FormField control={form.control} name="issuer" render={({ field }) => (
-                    <FormItem><FormLabel>Issuer</FormLabel><FormControl><Input placeholder="e.g., Government Bonds" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Issuer</FormLabel><FormControl><Input placeholder="e.g., Government Bonds" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="interestRate" render={({ field }) => (
                     <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl><Input type="number" step="any" placeholder="e.g., 5.5" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="maturityDate" render={({ field }) => (
-                    <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
               </div>

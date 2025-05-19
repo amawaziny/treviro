@@ -18,7 +18,6 @@ export interface StockInvestment extends BaseInvestment {
   numberOfShares?: number; // User input, label: "Number of Securities"
   purchasePricePerShare?: number; // User input, label: "Purchase Price"
   stockLogoUrl?: string; // This will be derived from selected stock
-  isFund?: boolean;
   purchaseFees?: number; // Fees for purchasing this stock lot
 }
 
