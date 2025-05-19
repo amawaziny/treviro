@@ -6,14 +6,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Button } from '@/components/ui/button';
 import type { StockChartDataPoint, StockChartTimeRange } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import { subDays, format } from 'date-fns';
+import { collection, query, orderBy, limit, getDocs, QueryDocumentSnapshot, DocumentData, documentId } from 'firebase/firestore';
+import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 
 interface StockDetailChartProps {
-  securityId: string; // Changed from stockSymbol to securityId
+  securityId: string;
 }
 
 const timeRanges: StockChartTimeRange[] = ['1D', '1W', '1M', '6M', '1Y', '5Y'];
@@ -55,7 +55,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
         
         // To get the last N points, we query by date string in descending order.
         // The document IDs are 'YYYY-MM-DD'.
-        const q = query(priceHistoryRef, orderBy(document.id, "desc"), limit(numPoints));
+        const q = query(priceHistoryRef, orderBy(documentId(), "desc"), limit(numPoints));
         
         const querySnapshot = await getDocs(q);
         const data: StockChartDataPoint[] = [];
@@ -176,8 +176,8 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             labelStyle={{ color: 'hsl(var(--foreground))' }}
             itemStyle={{ color: 'hsl(var(--primary))' }}
             formatter={(value: number, name: string, props: any) => {
-                const securityName = props?.payload?.name || "Price"; // Get security name if available
-                return [`$${value.toFixed(2)}`, securityName];
+                // const securityName = props?.payload?.name || "Price"; // Get security name if available, currently name is not passed to data
+                return [`$${value.toFixed(2)}`, "Price"];
             }}
             labelFormatter={(label: string) => format(new Date(label + "T00:00:00"), 'MMM d, yyyy')}
           />
