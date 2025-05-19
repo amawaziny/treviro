@@ -92,3 +92,8 @@ export interface Transaction {
   createdAt: string; 
 }
 
+export interface DashboardSummary {
+  totalInvestedAcrossAllAssets: number;
+  totalRealizedPnL: number;
+  // Potentially add totalCurrentPortfolioValue and totalUnrealizedPnL in the future
+}
