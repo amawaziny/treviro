@@ -3,27 +3,29 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import { useListedSecurities } from '@/hooks/use-listed-securities'; // Updated hook
-import type { ListedSecurity, StockInvestment } from '@/lib/types'; // ListedStock -> ListedSecurity
+import { useListedSecurities } from '@/hooks/use-listed-securities'; 
+import type { ListedSecurity, StockInvestment } from '@/lib/types'; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase } from 'lucide-react';
-import { StockDetailChart } from '@/components/stocks/stock-detail-chart'; // This can be reused
+import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3 } from 'lucide-react';
+import { StockDetailChart } from '@/components/stocks/stock-detail-chart'; 
 import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge'; // Added Badge import
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export default function SecurityDetailPage() { // Renamed for clarity, though file path is still /stocks/[stockId]
+
+export default function SecurityDetailPage() { 
   const params = useParams();
   const router = useRouter();
-  const securityId = params.stockId as string; // stockId from URL is now securityId
+  const securityId = params.stockId as string; 
 
-  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); // Updated hook
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); 
+  const { investments, isLoading: isLoadingInvestments, transactions } = useInvestments();
   
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(null); 
 
@@ -35,8 +37,7 @@ export default function SecurityDetailPage() { // Renamed for clarity, though fi
     }
   }, [securityId, getListedSecurityById]);
 
-  // "My Position" logic: assumes investments in funds are also stored as type 'Stocks'
-  // with tickerSymbol matching the fund's symbol.
+  
   const userOwnedSecurities = React.useMemo(() => 
     investments.filter(inv => inv.type === 'Stocks' && inv.tickerSymbol === security?.symbol) as StockInvestment[],
     [investments, security]
@@ -54,6 +55,40 @@ export default function SecurityDetailPage() { // Renamed for clarity, though fi
   }, [userOwnedSecurities, totalSharesOwned]);
 
   const hasPosition = totalSharesOwned > 0;
+
+  const securityTransactions = React.useMemo(() => {
+    if (!security) return [];
+    
+    const buyTransactions = investments
+      .filter(inv => inv.type === 'Stocks' && inv.tickerSymbol === security.symbol)
+      .map(inv => ({
+        id: inv.id,
+        date: inv.purchaseDate,
+        type: 'Buy' as 'Buy' | 'Sell', // Type assertion
+        shares: (inv as StockInvestment).numberOfShares || 0,
+        price: (inv as StockInvestment).purchasePricePerShare || 0,
+        fees: (inv as StockInvestment).purchaseFees || 0,
+        total: inv.amountInvested,
+        isInvestmentRecord: true, 
+      }));
+
+    const sellTransactions = transactions
+      .filter(tx => tx.tickerSymbol === security.symbol && tx.type === 'sell')
+      .map(tx => ({
+        id: tx.id,
+        date: tx.date,
+        type: 'Sell' as 'Buy' | 'Sell', // Type assertion
+        shares: tx.numberOfShares,
+        price: tx.pricePerShare,
+        fees: tx.fees,
+        total: tx.totalAmount,
+        profitOrLoss: tx.profitOrLoss,
+        isInvestmentRecord: false,
+      }));
+
+    return [...buyTransactions, ...sellTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [investments, transactions, security]);
+
 
   if (isLoadingListedSecurities || isLoadingInvestments || security === undefined) {
     return (
@@ -113,13 +148,13 @@ export default function SecurityDetailPage() { // Renamed for clarity, though fi
           </div>
         </CardHeader>
         <CardContent className="flex justify-end space-x-2 pb-4">
-           <Link href={`/investments/add?stockId=${security.id}`} passHref> {/* stockId query param is used by add-investment-form */}
+           <Link href={`/investments/add?stockId=${security.id}`} passHref> 
              <Button variant="default">
                <ShoppingCart className="mr-2 h-4 w-4" /> Buy
              </Button>
            </Link>
           {hasPosition && (
-            <Link href={`/investments/sell-stock/${security.id}`} passHref> {/* sell-stock route still used */}
+            <Link href={`/investments/sell-stock/${security.id}`} passHref> 
               <Button variant="outline"> 
                 <DollarSign className="mr-2 h-4 w-4" /> Sell
               </Button>
@@ -129,22 +164,25 @@ export default function SecurityDetailPage() { // Renamed for clarity, though fi
       </Card>
 
       <Tabs defaultValue="performance" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 md:w-[500px]">
           <TabsTrigger value="performance">
             <LineChart className="mr-2 h-4 w-4" /> Performance
           </TabsTrigger>
           <TabsTrigger value="position" disabled={!hasPosition}>
             <Briefcase className="mr-2 h-4 w-4" /> My Position
           </TabsTrigger>
+          <TabsTrigger value="transactions">
+            <Briefcase className="mr-2 h-4 w-4" /> Transactions
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="performance">
           <Card>
             <CardHeader>
               <CardTitle>Price History</CardTitle>
-              <CardDescription>Mock data. Shows security price over various time ranges.</CardDescription>
+              <CardDescription>Daily closing prices from admin-entered data.</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <StockDetailChart stockSymbol={security.symbol} />
+              <StockDetailChart securityId={security.id} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -158,7 +196,7 @@ export default function SecurityDetailPage() { // Renamed for clarity, though fi
               {hasPosition ? (
                 <>
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><span className="font-medium text-muted-foreground">Total Shares/Units:</span> {totalSharesOwned.toLocaleString()}</div>
+                    <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
                     <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {averagePurchasePrice.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
                     <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {totalCostBasis.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
                     <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {currentMarketPrice.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</div>
@@ -185,8 +223,66 @@ export default function SecurityDetailPage() { // Renamed for clarity, though fi
             </CardContent>
           </Card>
         </TabsContent>
+         <TabsContent value="transactions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Transaction History for {security.name}</CardTitle>
+              <CardDescription>All buy and sell records for this security.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {securityTransactions.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-right">Shares/Units</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Fees</TableHead>
+                      <TableHead className="text-right">Total Amount</TableHead>
+                      {securityTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {securityTransactions.map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
+                            {tx.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">{tx.shares.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{tx.price.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</TableCell>
+                        <TableCell className="text-right">{tx.fees.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</TableCell>
+                        <TableCell className="text-right">{tx.total.toLocaleString(undefined, { style: 'currency', currency: security.currency })}</TableCell>
+                        {securityTransactions.some(t => t.profitOrLoss !== undefined) && (
+                            <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
+                            {tx.profitOrLoss !== undefined ? tx.profitOrLoss.toLocaleString(undefined, { style: 'currency', currency: security.currency, signDisplay: 'always' }) : 'N/A'}
+                            </TableCell>
+                        )}
+                        <TableCell className="text-right">
+                          {tx.isInvestmentRecord && (
+                            <Button variant="ghost" size="icon" asChild>
+                              <Link href={`/investments/edit/${tx.id}`}>
+                                <Edit3 className="h-4 w-4" />
+                                <span className="sr-only">Edit Purchase</span>
+                              </Link>
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-muted-foreground">No transactions recorded for this security yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-
