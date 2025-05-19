@@ -9,29 +9,24 @@ export const AddInvestmentSchema = z.object({
   amountInvested: z.coerce.number().positive({ message: "Amount must be positive." }),
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
   
-  // Stock specific
-  selectedStockId: z.string().optional(), // ID of the stock selected from dropdown
-  numberOfShares: z.coerce.number().optional(), // Label: "Number of Securities"
-  purchasePricePerShare: z.coerce.number().optional(), // Label: "Purchase Price"
+  selectedStockId: z.string().optional(), 
+  numberOfShares: z.coerce.number().optional(), 
+  purchasePricePerShare: z.coerce.number().optional(), 
   isStockFund: z.boolean().optional().default(false),
 
-  // Gold specific
   quantityInGrams: z.coerce.number().optional(),
   isPhysicalGold: z.boolean().optional().default(true),
 
-  // Currency specific
-  currencyCode: z.string().optional(), // e.g. USD
-  baseCurrency: z.string().optional(), // e.g. EUR
-  currentExchangeRate: z.coerce.number().optional(), // For AI analysis input
+  currencyCode: z.string().optional(), 
+  baseCurrency: z.string().optional(), 
+  currentExchangeRate: z.coerce.number().optional(), 
 
-  // Real Estate specific
   propertyAddress: z.string().optional(),
   propertyType: z.enum(['Residential', 'Commercial', 'Land']).optional(),
   
-  // Debt Instruments specific
   issuer: z.string().optional(),
   interestRate: z.coerce.number().optional(),
-  maturityDate: z.string().optional().refine((date) => date ? !isNaN(Date.parse(date)) : true, { message: "Invalid maturity date format."}),
+  maturityDate: z.string().optional().refine((date) => date && date.length > 0 ? !isNaN(Date.parse(date)) : true, { message: "Invalid maturity date format."}),
 
 }).superRefine((data, ctx) => {
   if (data.type === 'Stocks') {
@@ -61,6 +56,28 @@ export const AddInvestmentSchema = z.object({
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Current exchange rate must be positive.", path: ["currentExchangeRate"] });
     }
   }
+  if (data.type === 'Debt Instruments') {
+    if (!data.issuer) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Issuer is required.", path: ["issuer"]});
+    }
+    if (data.interestRate === undefined || data.interestRate <= 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Interest rate must be positive.", path: ["interestRate"]});
+    }
+    if (!data.maturityDate) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Maturity date is required.", path: ["maturityDate"]});
+    }
+  }
 });
 
 export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
+
+
+export const SellStockSchema = z.object({
+  stockId: z.string(), // Hidden field or passed programmatically
+  numberOfSharesToSell: z.coerce.number().positive({ message: "Number of securities to sell must be positive." }),
+  sellPricePerShare: z.coerce.number().positive({ message: "Sell price must be positive." }),
+  sellDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
+  fees: z.coerce.number().min(0, {message: "Fees cannot be negative."}).optional().default(0),
+});
+
+export type SellStockFormValues = z.infer<typeof SellStockSchema>;

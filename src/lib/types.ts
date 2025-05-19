@@ -19,7 +19,6 @@ export interface StockInvestment extends BaseInvestment {
   purchasePricePerShare?: number; // User input, label: "Purchase Price"
   stockLogoUrl?: string; // This will be derived from selected stock
   isFund?: boolean;
-  // currentMarketPrice?: number; // Market price at the time of viewing, might be redundant if ListedStock.price is used
 }
 
 export interface GoldInvestment extends BaseInvestment {
@@ -56,22 +55,37 @@ export interface CurrencyFluctuationAnalysisResult {
   analysisSummary: string;
 }
 
-// New type for displaying stocks in a list
 export interface ListedStock {
   id: string;
   name: string;
   symbol: string;
   logoUrl: string;
-  price: number; // This acts as current market price
+  price: number; 
   currency: string;
   changePercent: number;
-  market: string; // e.g., "SAR", "EGX"
+  market: string; 
 }
 
 export interface StockChartDataPoint {
-  date: string; // e.g., "2023-01-01"
+  date: string; 
   price: number;
 }
 
 export type StockChartTimeRange = '1D' | '1W' | '1M' | '6M' | '1Y' | '5Y';
 
+export type TransactionType = 'buy' | 'sell';
+
+export interface Transaction {
+  id: string;
+  investmentId?: string; // ID of the specific investment lot if applicable
+  stockId?: string; // ID of the listed stock
+  tickerSymbol: string;
+  type: TransactionType;
+  date: string; // ISO string
+  numberOfShares: number;
+  pricePerShare: number;
+  fees: number;
+  totalAmount: number; // Total cost for 'buy', total proceeds for 'sell'
+  profitOrLoss?: number; // For 'sell' transactions
+  createdAt: string; // Server-generated timestamp, ISO string
+}

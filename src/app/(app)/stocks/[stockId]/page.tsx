@@ -25,7 +25,7 @@ export default function StockDetailPage() {
   const { getListedStockById, isLoading: isLoadingListedStocks } = useListedStocks();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   
-  const [stock, setStock] = useState<ListedStock | null | undefined>(null); // undefined for not yet fetched, null for not found
+  const [stock, setStock] = useState<ListedStock | null | undefined>(null); 
 
   useEffect(() => {
     if (stockId) {
@@ -114,9 +114,11 @@ export default function StockDetailPage() {
              </Button>
            </Link>
           {hasPosition && (
-            <Button variant="outline"> {/* Selling functionality coming soon */}
-              <DollarSign className="mr-2 h-4 w-4" /> Sell
-            </Button>
+            <Link href={`/investments/sell-stock/${stock.id}`} passHref>
+              <Button variant="outline"> 
+                <DollarSign className="mr-2 h-4 w-4" /> Sell
+              </Button>
+            </Link>
           )}
         </CardContent>
       </Card>
