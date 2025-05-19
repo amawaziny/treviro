@@ -15,7 +15,7 @@ import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge'; // Added Badge import
+import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 
@@ -155,7 +155,7 @@ export default function SecurityDetailPage() {
            </Link>
           {hasPosition && (
             <Link href={`/investments/sell-stock/${security.id}`} passHref> 
-              <Button variant="outline"> 
+              <Button variant="outline" > 
                 <DollarSign className="mr-2 h-4 w-4" /> Sell
               </Button>
             </Link>
@@ -241,7 +241,7 @@ export default function SecurityDetailPage() {
                       <TableHead className="text-right">Fees</TableHead>
                       <TableHead className="text-right">Total Amount</TableHead>
                       {securityTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
-                      <TableHead className="text-right">Actions</TableHead>
+                      {/* <TableHead className="text-right">Actions</TableHead> Removed Actions column */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -262,6 +262,7 @@ export default function SecurityDetailPage() {
                             {tx.profitOrLoss !== undefined ? tx.profitOrLoss.toLocaleString(undefined, { style: 'currency', currency: security.currency, signDisplay: 'always' }) : 'N/A'}
                             </TableCell>
                         )}
+                        {/* Cell for edit button removed
                         <TableCell className="text-right">
                           {tx.isInvestmentRecord && (
                             <Button variant="ghost" size="icon" asChild>
@@ -272,6 +273,7 @@ export default function SecurityDetailPage() {
                             </Button>
                           )}
                         </TableCell>
+                        */}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -286,3 +288,4 @@ export default function SecurityDetailPage() {
     </div>
   );
 }
+
