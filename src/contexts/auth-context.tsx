@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     console.log("AuthContext: Setting up onAuthStateChanged listener.");
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
-      console.log("AuthContext: onAuthStateChanged triggered. Firebase user:", firebaseUser);
+      console.log("AuthContext: onAuthStateChanged triggered. Firebase user present:", !!firebaseUser);
       if (firebaseUser) {
         setUser({
           uid: firebaseUser.uid,
@@ -68,16 +68,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log("AuthContext: Attempting signInWithPopup...");
       const result = await signInWithPopup(auth, provider);
-      console.log("AuthContext: signInWithPopup successful. Result:", result);
+      console.log("AuthContext: signInWithPopup successful. User UID:", result.user?.uid);
       // onAuthStateChanged will handle setting the user and further state updates.
     } catch (error: any) {
-      console.error("AuthContext: signInWithPopup error:", error);
+      console.error("AuthContext: signInWithPopup error. Code:", error.code, "Message:", error.message);
       if (error.code === 'auth/popup-closed-by-user') {
-        console.log("AuthContext: Google sign-in popup closed by user.");
+        console.warn("AuthContext: Google sign-in popup was closed by user or due to an interruption.");
       } else if (error.code === 'auth/cancelled-popup-request') {
-        console.log("AuthContext: Google sign-in popup request cancelled.");
+        console.warn("AuthContext: Google sign-in popup request cancelled (e.g., multiple popups).");
       } else if (error.code === 'auth/popup-blocked') {
         console.warn("AuthContext: Google sign-in popup blocked by the browser.");
+        // Consider showing a message to the user to check their popup blocker.
       } else {
         console.error("AuthContext: An unexpected error occurred during Google sign-in:", error);
       }
