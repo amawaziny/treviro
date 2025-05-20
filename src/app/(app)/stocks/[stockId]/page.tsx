@@ -85,14 +85,14 @@ export default function SecurityDetailPage() {
         fees: (inv as StockInvestment).purchaseFees || 0,
         total: inv.amountInvested,
         isInvestmentRecord: true, 
-        tickerSymbol: security.symbol, // Add tickerSymbol for consistency
-        profitOrLoss: undefined, // Explicitly undefined for buy transactions
+        tickerSymbol: security.symbol, 
+        profitOrLoss: undefined, 
       }));
 
     const sellTransactionsFromContext = transactions
       .filter(tx => tx.tickerSymbol === security.symbol && tx.type === 'sell')
       .map(tx => ({
-        ...tx, // Spread the original transaction
+        ...tx, 
         isInvestmentRecord: false, 
       }));
 
@@ -100,7 +100,6 @@ export default function SecurityDetailPage() {
   }, [investments, transactions, security]);
 
   const handleDeleteConfirmation = (tx: Transaction) => {
-    // Ensure we only try to delete actual sell transactions from the 'transactions' collection
     const sellTx = transactions.find(t => t.id === tx.id && t.type === 'sell');
     if (sellTx) {
       setTransactionToDelete(sellTx);
@@ -170,176 +169,176 @@ export default function SecurityDetailPage() {
   const displayCurrency = security.currency || 'USD';
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <Button variant="outline" size="sm" onClick={() => router.back()} className="mb-4">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Securities
-      </Button>
+    <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+      <div className="container mx-auto py-8 space-y-6">
+        <Button variant="outline" size="sm" onClick={() => router.back()} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Securities
+        </Button>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
-              <AvatarFallback>{security.symbol.substring(0, 2)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-2xl font-bold">{pageTitle}</CardTitle>
-              <CardDescription>{security.market} - {displayCurrency}</CardDescription>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
+                <AvatarFallback>{security.symbol.substring(0, 2)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl font-bold">{pageTitle}</CardTitle>
+                <CardDescription>{security.market} - {displayCurrency}</CardDescription>
+              </div>
             </div>
-          </div>
-          <div className="text-right">
-             <p className="text-2xl font-bold">{currentMarketPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-             <p className={cn("text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
-                {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
-             </p>
-          </div>
-        </CardHeader>
-        <CardContent className="flex justify-end space-x-2 pb-4">
-           <Link href={`/investments/add?stockId=${security.id}`} passHref> 
-             <Button variant="default">
-               <ShoppingCart className="mr-2 h-4 w-4" /> Buy
-             </Button>
-           </Link>
-          {hasPosition && (
-            <Link href={`/investments/sell-stock/${security.id}`} passHref> 
-              <Button variant="outline" > 
-                <DollarSign className="mr-2 h-4 w-4" /> Sell
+            <div className="text-right">
+              <p className="text-2xl font-bold">{currentMarketPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className={cn("text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
+                  {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="flex justify-end space-x-2 pb-4">
+            <Link href={`/investments/add?stockId=${security.id}`} passHref> 
+              <Button variant="default">
+                <ShoppingCart className="mr-2 h-4 w-4" /> Buy
               </Button>
             </Link>
-          )}
-        </CardContent>
-      </Card>
+            {hasPosition && (
+              <Link href={`/investments/sell-stock/${security.id}`} passHref> 
+                <Button variant="outline" > 
+                  <DollarSign className="mr-2 h-4 w-4" /> Sell
+                </Button>
+              </Link>
+            )}
+          </CardContent>
+        </Card>
 
-      <Tabs defaultValue="performance" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 md:w-[500px]">
-          <TabsTrigger value="performance">
-            <LineChart className="mr-2 h-4 w-4" /> Performance
-          </TabsTrigger>
-          <TabsTrigger value="position" disabled={!hasPosition}>
-            <Briefcase className="mr-2 h-4 w-4" /> My Position
-          </TabsTrigger>
-          <TabsTrigger value="transactions">
-            <Briefcase className="mr-2 h-4 w-4" /> Transactions
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="performance">
-          <Card>
-            <CardHeader>
-              <CardTitle>Price History</CardTitle>
-              <CardDescription>Daily closing prices from admin-entered data.</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px]">
-              <StockDetailChart securityId={security.id} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="position">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Position in {security.name}</CardTitle>
-              <CardDescription>Overview of your investment in this security.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {hasPosition ? (
-                <>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
-                    <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {averagePurchasePrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                    <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {totalCostBasis.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                    <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {currentMarketPrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                    <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {totalInvestmentValue.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between pt-2">
-                    <p className="text-lg font-semibold">Profit / Loss:</p>
-                    <div className="text-right">
-                        <p className={cn("text-2xl font-bold", isProfitable ? "text-accent" : "text-destructive")}>
-                            {PnL.toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' })}
-                        </p>
-                        <Badge variant={isProfitable ? 'default' : 'destructive'} 
-                               className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
-                            {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
-                            {PnLPercentage.toFixed(2)}%
-                        </Badge>
+        <Tabs defaultValue="performance" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 md:w-[500px]">
+            <TabsTrigger value="performance">
+              <LineChart className="mr-2 h-4 w-4" /> Performance
+            </TabsTrigger>
+            <TabsTrigger value="position" disabled={!hasPosition}>
+              <Briefcase className="mr-2 h-4 w-4" /> My Position
+            </TabsTrigger>
+            <TabsTrigger value="transactions">
+              <Briefcase className="mr-2 h-4 w-4" /> Transactions
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="performance">
+            <Card>
+              <CardHeader>
+                <CardTitle>Price History</CardTitle>
+                <CardDescription>Daily closing prices from admin-entered data.</CardDescription>
+              </CardHeader>
+              <CardContent className="h-[400px]">
+                <StockDetailChart securityId={security.id} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="position">
+            <Card>
+              <CardHeader>
+                <CardTitle>My Position in {security.name}</CardTitle>
+                <CardDescription>Overview of your investment in this security.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {hasPosition ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
+                      <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {averagePurchasePrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                      <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {totalCostBasis.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                      <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {currentMarketPrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                      <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {totalInvestmentValue.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <p className="text-muted-foreground">You do not have a position in this security.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-         <TabsContent value="transactions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction History for {security.name}</CardTitle>
-              <CardDescription>All buy and sell records for this security.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {securityTransactions.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead className="text-right">Shares/Units</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Fees</TableHead>
-                      <TableHead className="text-right">Total Amount</TableHead>
-                      {securityTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {securityTransactions.map((tx) => (
-                      <TableRow key={tx.id}>
-                        <TableCell>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
-                            {tx.type}
+                    <Separator />
+                    <div className="flex items-center justify-between pt-2">
+                      <p className="text-lg font-semibold">Profit / Loss:</p>
+                      <div className="text-right">
+                          <p className={cn("text-2xl font-bold", isProfitable ? "text-accent" : "text-destructive")}>
+                              {PnL.toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' })}
+                          </p>
+                          <Badge variant={isProfitable ? 'default' : 'destructive'} 
+                                className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
+                              {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
+                              {PnLPercentage.toFixed(2)}%
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
-                        <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                        <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                        <TableCell className="text-right">{(tx.total ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                        {securityTransactions.some(t => t.profitOrLoss !== undefined) && (
-                            <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                            {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
-                            </TableCell>
-                        )}
-                        <TableCell className="text-right">
-                          {tx.isInvestmentRecord && (
-                            <Button variant="ghost" size="icon" asChild>
-                              <Link href={`/investments/edit/${tx.id}`}>
-                                <Edit3 className="h-4 w-4" />
-                                <span className="sr-only">Edit Purchase</span>
-                              </Link>
-                            </Button>
-                          )}
-                          {!tx.isInvestmentRecord && tx.type === 'sell' && (
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Delete Sell Transaction</span>
-                              </Button>
-                            </AlertDialogTrigger>
-                          )}
-                        </TableCell>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">You do not have a position in this security.</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="transactions">
+            <Card>
+              <CardHeader>
+                <CardTitle>Transaction History for {security.name}</CardTitle>
+                <CardDescription>All buy and sell records for this security.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {securityTransactions.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Shares/Units</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                        <TableHead className="text-right">Fees</TableHead>
+                        <TableHead className="text-right">Total Amount</TableHead>
+                        {securityTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-muted-foreground">No transactions recorded for this security yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                    </TableHeader>
+                    <TableBody>
+                      {securityTransactions.map((tx) => (
+                        <TableRow key={tx.id}>
+                          <TableCell>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
+                              {tx.type}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
+                          <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                          <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                          <TableCell className="text-right">{(tx.total ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                          {securityTransactions.some(t => t.profitOrLoss !== undefined) && (
+                              <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
+                              {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
+                              </TableCell>
+                          )}
+                          <TableCell className="text-right">
+                            {tx.isInvestmentRecord && (
+                              <Button variant="ghost" size="icon" asChild>
+                                <Link href={`/investments/edit/${tx.id}`}>
+                                  <Edit3 className="h-4 w-4" />
+                                  <span className="sr-only">Edit Purchase</span>
+                                </Link>
+                              </Button>
+                            )}
+                            {!tx.isInvestmentRecord && tx.type === 'sell' && (
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Delete Sell Transaction</span>
+                                </Button>
+                              </AlertDialogTrigger>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-muted-foreground">No transactions recorded for this security yet.</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
@@ -358,7 +357,8 @@ export default function SecurityDetailPage() {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
-    </div>
+      </div>
+    </AlertDialog>
   );
 }
+
