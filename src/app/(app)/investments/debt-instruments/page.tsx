@@ -4,7 +4,7 @@
 import React from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
-import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity } from '@/lib/types';
+import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, InvestmentType } from '@/lib/types';
 import { isDebtRelatedFund } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -90,7 +90,9 @@ export default function MyDebtInstrumentsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Issuer/Name</TableHead>
+                  <TableHead>Name/Description</TableHead>
+                  <TableHead>Sub-Type</TableHead>
+                  <TableHead>Issuer</TableHead>
                   <TableHead>Amount Invested</TableHead>
                   <TableHead>Interest Rate (%)</TableHead>
                   <TableHead>Maturity Date</TableHead>
@@ -100,7 +102,9 @@ export default function MyDebtInstrumentsPage() {
               <TableBody>
                 {directDebtHoldings.map(debt => (
                   <TableRow key={debt.id}>
-                    <TableCell>{debt.issuer || debt.name}</TableCell>
+                    <TableCell>{debt.name}</TableCell>
+                    <TableCell>{debt.debtSubType || 'N/A'}</TableCell>
+                    <TableCell>{debt.issuer || 'N/A'}</TableCell>
                     <TableCell>${debt.amountInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell>{debt.interestRate?.toLocaleString() || 'N/A'}%</TableCell>
                     <TableCell>{debt.maturityDate ? new Date(debt.maturityDate  + "T00:00:00").toLocaleDateString() : 'N/A'}</TableCell>
@@ -159,7 +163,7 @@ export default function MyDebtInstrumentsPage() {
           )}
         </CardContent>
       </Card>
-       <Link href="/investments/add" passHref>
+       <Link href="/investments/add?type=Debt Instruments" passHref>
         <Button
           variant="default"
           size="icon"
@@ -172,3 +176,4 @@ export default function MyDebtInstrumentsPage() {
     </div>
   );
 }
+
