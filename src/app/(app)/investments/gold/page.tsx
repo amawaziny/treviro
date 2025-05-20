@@ -103,7 +103,7 @@ export default function MyGoldPage() {
                     <TableCell>{gold.name}</TableCell>
                     <TableCell>{gold.quantityInGrams?.toLocaleString() || 'N/A'}</TableCell>
                     <TableCell>${gold.amountInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell>{new Date(gold.purchaseDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(gold.purchaseDate + "T00:00:00").toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -158,7 +158,7 @@ export default function MyGoldPage() {
           )}
         </CardContent>
       </Card>
-      <Link href="/investments/add" passHref>
+      <Link href="/investments/add?type=Gold" passHref>
         <Button
           variant="default"
           size="icon"
