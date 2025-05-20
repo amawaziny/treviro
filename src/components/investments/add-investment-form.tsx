@@ -32,7 +32,7 @@ import { CurrencyAnalysisDisplay } from "./currency-analysis-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
-import type { ListedSecurity, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, DebtInstrumentInvestment, Investment, InvestmentType } from "@/lib/types";
+import type { ListedSecurity, Investment, InvestmentType, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, DebtInstrumentInvestment } from "@/lib/types";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const getCurrentDate = () => {
@@ -45,8 +45,7 @@ const getCurrentDate = () => {
 
 const initialFormValues: AddInvestmentFormValues = {
   type: undefined,
-  name: "",
-  amountInvested: '', // Initialize as empty string
+  amountInvested: '', 
   purchaseDate: getCurrentDate(),
   
   selectedStockId: undefined,
@@ -68,6 +67,7 @@ const initialFormValues: AddInvestmentFormValues = {
   issuer: "",
   interestRate: '', 
   maturityDate: '', 
+  name: "", // Added for general name/description
 };
 
 
@@ -85,27 +85,30 @@ export function AddInvestmentForm() {
   const [preSelectedSecurityDetails, setPreSelectedSecurityDetails] = useState<ListedSecurity | null>(null);
 
   const isDedicatedDebtMode = preSelectedInvestmentTypeQueryParam === "Debt Instruments";
-  const isPreSelectedStockMode = !!preSelectedSecurityId;
-
+  const isPreSelectedStockMode = !!preSelectedSecurityId && !isDedicatedDebtMode;
 
   const form = useForm<AddInvestmentFormValues>({
     resolver: zodResolver(AddInvestmentSchema),
     defaultValues: { 
       ...initialFormValues,
-      // Type will be set in useEffect based on query params
     },
   });
-
-  const selectedType = form.watch("type");
   
+  const selectedTypeFromForm = form.watch("type");
+  const effectiveSelectedType = isDedicatedDebtMode ? "Debt Instruments" : (isPreSelectedStockMode ? "Stocks" : selectedTypeFromForm);
+
+
   if (Object.keys(form.formState.errors).length > 0) {
     console.log("AddInvestmentForm validation errors:", form.formState.errors);
   }
 
   useEffect(() => {
     let isMounted = true;
-    if (preSelectedSecurityId) {
-      // Pre-selected Stock mode
+    if (isDedicatedDebtMode) {
+      form.setValue("type", "Debt Instruments", { shouldValidate: true });
+      form.setValue("selectedStockId", undefined); // Ensure no stock details are shown or carried over
+      setPreSelectedSecurityDetails(null);
+    } else if (isPreSelectedStockMode) {
       form.setValue("type", "Stocks", { shouldValidate: true });
       form.setValue("selectedStockId", preSelectedSecurityId, { shouldValidate: true });
       getListedSecurityById(preSelectedSecurityId).then(security => {
@@ -121,25 +124,21 @@ export function AddInvestmentForm() {
         }
       });
     } else if (preSelectedInvestmentTypeQueryParam) {
-      // Pre-selected Type mode (e.g., Debt Instruments)
       form.setValue("type", preSelectedInvestmentTypeQueryParam, { shouldValidate: true });
       if (preSelectedInvestmentTypeQueryParam !== "Stocks") {
-        form.setValue("selectedStockId", undefined); // Clear stock ID if another type is pre-selected
+        form.setValue("selectedStockId", undefined);
       }
-      setPreSelectedSecurityDetails(null); // Ensure no stock details are shown
+      setPreSelectedSecurityDetails(null);
     } else {
       // General Add mode (no pre-selection)
       setPreSelectedSecurityDetails(null);
+      // Clear stockId if type is changed away from Stocks
       if (form.getValues("type") !== "Stocks" && form.getValues("selectedStockId")) {
          form.setValue("selectedStockId", undefined);
       }
-      // Reset type if navigating away from a pre-selected context
-      if (form.getValues("type") && !preSelectedInvestmentTypeQueryParam && !preSelectedSecurityId) {
-        // form.setValue("type", undefined); // Or set to a default general type if desired
-      }
     }
     return () => { isMounted = false; };
-  }, [preSelectedSecurityId, preSelectedInvestmentTypeQueryParam, getListedSecurityById, form, toast, router]);
+  }, [isDedicatedDebtMode, preSelectedSecurityId, preSelectedInvestmentTypeQueryParam, getListedSecurityById, form, toast, router]);
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
@@ -169,10 +168,11 @@ export function AddInvestmentForm() {
 
     if (finalInvestmentType === "Stocks") {
       const securityToProcessId = values.selectedStockId || preSelectedSecurityId;
-      const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId);
+      const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
 
       if (!selectedSecurity) {
         toast({ title: "Error", description: "Selected security details not found.", variant: "destructive" });
+        console.error("Selected security not found. securityToProcessId:", securityToProcessId, "listedSecurities:", listedSecurities.map(s => ({id: s.id, name: s.name})), "preSelectedSecurityDetails:", preSelectedSecurityDetails);
         return;
       }
       
@@ -181,7 +181,7 @@ export function AddInvestmentForm() {
       const fees = parseFloat(String(values.purchaseFees) || '0');
       const calculatedAmountInvested = (numShares * pricePerShare) + fees;
 
-      investmentName = `${selectedSecurity.name} Purchase`; // Auto-generated name
+      investmentName = `${selectedSecurity.name} Purchase`;
 
       newInvestment = {
         ...newInvestment,
@@ -197,7 +197,7 @@ export function AddInvestmentForm() {
       } as Omit<StockInvestment, 'createdAt'>;
 
     } else if (finalInvestmentType === "Debt Instruments") {
-        investmentName = `${values.debtSubType} from ${values.issuer}`; // Auto-generated name for debt
+        investmentName = `${values.debtSubType} from ${values.issuer}`; 
         newInvestment = {
           ...newInvestment,
           name: investmentName,
@@ -209,20 +209,25 @@ export function AddInvestmentForm() {
           type: 'Debt Instruments',
         } as Omit<DebtInstrumentInvestment, 'createdAt'>;
     } else {
-      // For other types like Gold, Currencies, Real Estate
-      newInvestment.amountInvested = parseFloat(String(values.amountInvested || '0'));
+      // General investments like Gold, Currencies, Real Estate
+      const generalAmountInvested = parseFloat(String(values.amountInvested || '0'));
+      if (isNaN(generalAmountInvested) || generalAmountInvested <= 0) {
+         toast({ title: "Error", description: "Amount invested must be a positive number for this investment type.", variant: "destructive" });
+         return;
+      }
+      newInvestment.amountInvested = generalAmountInvested;
       
       if (finalInvestmentType === "Gold") {
-        investmentName = values.name || "Gold Investment";
+        investmentName = values.name || `Gold Investment on ${values.purchaseDate}`;
         newInvestment = {
           ...newInvestment,
           name: investmentName,
           quantityInGrams: parseFloat(String(values.quantityInGrams) || '0'),
-          isPhysical: values.isPhysicalGold,
+          isPhysicalGold: values.isPhysicalGold,
           type: 'Gold',
         } as Omit<GoldInvestment, 'createdAt'>;
       } else if (finalInvestmentType === "Currencies") {
-        investmentName = values.name || `Currency Investment (${values.currencyCode})`;
+        investmentName = values.name || `Currency (${values.currencyCode}) on ${values.purchaseDate}`;
         newInvestment = {
           ...newInvestment,
           name: investmentName,
@@ -252,7 +257,7 @@ export function AddInvestmentForm() {
           }
         }
       } else if (finalInvestmentType === "Real Estate") {
-        investmentName = values.name || `Real Estate (${values.propertyAddress || 'N/A'})`;
+        investmentName = values.name || `Real Estate (${values.propertyAddress || 'N/A'}) on ${values.purchaseDate}`;
         newInvestment = {
           ...newInvestment,
           name: investmentName,
@@ -261,7 +266,7 @@ export function AddInvestmentForm() {
           type: 'Real Estate',
         } as Omit<RealEstateInvestment, 'createdAt'>;
       } else {
-         // Fallback for any other type, though unlikely with current setup
+         // Fallback for any other type (should not happen if type enum is strict)
          investmentName = values.name || `${finalInvestmentType} Investment on ${values.purchaseDate}`;
          newInvestment.name = investmentName;
       }
@@ -269,35 +274,54 @@ export function AddInvestmentForm() {
     
     newInvestment.name = investmentName; 
 
-    console.log("Attempting to add investment:", newInvestment);
-    await addInvestment(newInvestment, analysisResult);
+    console.log("Attempting to add investment:", JSON.stringify(newInvestment, null, 2));
+    await addInvestment(newInvestment, analysisResult); // analysisResult can be undefined
     toast({
       title: "Investment Added",
       description: `${newInvestment.name} (${finalInvestmentType}) has been successfully added.`,
     });
 
-    const resetValues = { ...initialFormValues };
-    if (isDedicatedDebtMode) {
-        resetValues.type = "Debt Instruments";
-    } else if (isPreSelectedStockMode) {
-        resetValues.type = "Stocks";
-        resetValues.selectedStockId = preSelectedSecurityId || undefined;
-    } else if (preSelectedInvestmentTypeQueryParam) { // For other pre-selected types (Gold, RE, Currency) if linked directly
-       resetValues.type = preSelectedInvestmentTypeQueryParam;
-    }
-    // If no pre-selection at all, resetValues.type remains undefined, which is fine for initialFormValues.
+    const resetValues: AddInvestmentFormValues = { 
+        ...initialFormValues,
+        type: undefined, // Reset type unless it's a dedicated mode
+        selectedStockId: undefined,
+        // Ensure all specific fields are reset to their initial string/boolean/undefined states
+        name: "",
+        amountInvested: '',
+        purchaseDate: getCurrentDate(),
+        numberOfShares: '',
+        purchasePricePerShare: '',
+        purchaseFees: 0,
+        quantityInGrams: '',
+        isPhysicalGold: true,
+        currencyCode: "",
+        baseCurrency: "",
+        currentExchangeRate: '',
+        propertyAddress: "",
+        propertyType: undefined,
+        debtSubType: undefined,
+        issuer: "",
+        interestRate: '',
+        maturityDate: '',
+    };
 
+    if (isDedicatedDebtMode) {
+        resetValues.type = "Debt Instruments"; // Keep type for dedicated debt mode
+    } else if (isPreSelectedStockMode) {
+        resetValues.type = "Stocks"; // Keep type for dedicated stock mode
+        resetValues.selectedStockId = preSelectedSecurityId || undefined;
+    } else if (preSelectedInvestmentTypeQueryParam) {
+       resetValues.type = preSelectedInvestmentTypeQueryParam; // Keep type if passed by query param for general types
+    }
+    
     form.reset(resetValues);
     
-    // Navigate back or to a different page if needed
-    // For dedicated debt mode, maybe go back to debt list or stay for another entry?
-    // For pre-selected stock, maybe go to that stock's detail page?
-    // For now, it stays on the add page with form reset.
-    if (!preSelectedSecurityId && !isDedicatedDebtMode && !preSelectedInvestmentTypeQueryParam) {
+    // Only redirect if not in a dedicated mode (to allow multiple additions)
+    if (!isDedicatedDebtMode && !isPreSelectedStockMode && !preSelectedInvestmentTypeQueryParam) {
         router.replace('/investments/add'); 
     }
     
-    if (!analysisResult) {
+    if (!analysisResult) { // If AI analysis wasn't run or wasn't for this submission, clear old results
        setAiAnalysisResult(null);
     }
   }
@@ -311,18 +335,16 @@ export function AddInvestmentForm() {
     }
   };
   
-  const effectiveSelectedType = isDedicatedDebtMode ? "Debt Instruments" : (isPreSelectedStockMode ? "Stocks" : selectedType);
-
   let pageTitle = "Add New Investment";
   let submitButtonText = `Add ${effectiveSelectedType || 'Investment'}`;
 
   if (isDedicatedDebtMode) {
-    pageTitle = "Buy Debt Instrument";
+    pageTitle = "Buy Debt Instrument"; 
     submitButtonText = "Buy Debt Instrument";
   } else if (isPreSelectedStockMode && preSelectedSecurityDetails) {
     pageTitle = `Buy: ${preSelectedSecurityDetails.name}`;
     submitButtonText = `Buy ${preSelectedSecurityDetails.securityType === 'Fund' ? 'Fund' : 'Stock'}`;
-  } else if (preSelectedInvestmentTypeQueryParam) { // For other specific types linked from FABs
+  } else if (preSelectedInvestmentTypeQueryParam && preSelectedInvestmentTypeQueryParam !== "Debt Instruments") {
     pageTitle = `Add New ${preSelectedInvestmentTypeQueryParam}`;
     submitButtonText = `Add ${preSelectedInvestmentTypeQueryParam}`;
   }
@@ -403,7 +425,7 @@ export function AddInvestmentForm() {
         {preSelectedSecurityDetails?.securityType === 'Fund' ? 'Fund Purchase Details' : 'Stock Purchase Details'}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {!preSelectedSecurityId && ( // Only show selector if not pre-selected
+        {!preSelectedSecurityId && !isDedicatedDebtMode && ( // Ensure this dropdown doesn't show in dedicated debt mode
           <FormField
             control={form.control}
             name="selectedStockId"
@@ -490,8 +512,7 @@ export function AddInvestmentForm() {
 
   const RenderGeneralFields = () => (
     <>
-      {/* Investment Type Selector - only in general mode */}
-      {!isPreSelectedStockMode && !isDedicatedDebtMode && ( // Ensure it's not pre-selected stock or dedicated debt
+      {(!isDedicatedDebtMode && !isPreSelectedStockMode) && (
           <FormField
             control={form.control}
             name="type"
@@ -527,7 +548,6 @@ export function AddInvestmentForm() {
           />
         )}
 
-      {/* General fields for non-Stock, non-Debt types */}
       {effectiveSelectedType && !["Stocks", "Debt Instruments"].includes(effectiveSelectedType) && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -580,7 +600,7 @@ export function AddInvestmentForm() {
       {effectiveSelectedType === "Gold" && <RenderGoldFields />}
       {effectiveSelectedType === "Currencies" && <RenderCurrencyFields />}
       {effectiveSelectedType === "Real Estate" && <RenderRealEstateFields />}
-      {effectiveSelectedType === "Stocks" && !isPreSelectedStockMode && <RenderStockFields /> /* For selecting stock generally */}
+      {effectiveSelectedType === "Stocks" && !isPreSelectedStockMode && !isDedicatedDebtMode && <RenderStockFields />}
     </>
   );
 
@@ -684,5 +704,3 @@ export function AddInvestmentForm() {
     
 
     
-
-
