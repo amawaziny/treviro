@@ -20,3 +20,19 @@ export function isRealEstateRelatedFund(fundType?: string): boolean {
   const realEstateKeywords = ["reit", "real estate", "property fund", "mortgage"]; // Add more keywords if needed
   return realEstateKeywords.some(keyword => lowerFundType.includes(keyword));
 }
+
+// Helper function to identify debt-related funds
+export function isDebtRelatedFund(fundType?: string): boolean {
+  if (!fundType) return false;
+  const lowerFundType = fundType.toLowerCase();
+  const debtKeywords = [
+    "debt", 
+    "bond", 
+    "fixed income", 
+    "money market", 
+    "cash management", 
+    "treasury",
+    "certificate" // For funds that might invest in CDs
+  ];
+  return debtKeywords.some(keyword => lowerFundType.includes(keyword));
+}
