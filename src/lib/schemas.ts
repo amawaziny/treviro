@@ -4,9 +4,9 @@ import { z } from 'zod';
 export const investmentTypes = ['Real Estate', 'Gold', 'Stocks', 'Debt Instruments', 'Currencies'] as const;
 
 export const AddInvestmentSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  name: z.string().optional(), // Made optional, will be programmatically set
   type: z.enum(investmentTypes, { errorMap: () => ({ message: "Please select a valid investment type."}) }),
-  amountInvested: z.coerce.number().positive({ message: "Amount must be positive." }), // This will be calculated for stocks
+  amountInvested: z.coerce.number().optional(), // Made optional, validated conditionally in superRefine
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
 
   selectedStockId: z.string().optional(),
@@ -16,7 +16,7 @@ export const AddInvestmentSchema = z.object({
 
 
   quantityInGrams: z.coerce.number().optional(),
-  isPhysicalGold: z.boolean().optional().default(true),
+  isPhysicalGold: z.boolean().optional().default(true), // isPhysical was isPhysicalGold
 
   currencyCode: z.string().optional(),
   baseCurrency: z.string().optional(),
@@ -32,7 +32,7 @@ export const AddInvestmentSchema = z.object({
 }).superRefine((data, ctx) => {
   if (data.type === 'Stocks') {
     if (!data.selectedStockId) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please select a stock.", path: ["selectedStockId"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please select a security.", path: ["selectedStockId"] });
     }
     if (data.numberOfShares === undefined || data.numberOfShares <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of securities must be positive.", path: ["numberOfShares"] });
@@ -40,7 +40,12 @@ export const AddInvestmentSchema = z.object({
     if (data.purchasePricePerShare === undefined || data.purchasePricePerShare <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price must be positive.", path: ["purchasePricePerShare"] });
     }
+  } else { // For types other than Stocks
+    if (data.amountInvested === undefined || data.amountInvested <= 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Amount invested must be positive.", path: ["amountInvested"] });
+    }
   }
+
   if (data.type === 'Gold') {
     if (data.quantityInGrams === undefined || data.quantityInGrams <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Quantity in grams must be positive for gold.", path: ["quantityInGrams"] });
@@ -83,3 +88,10 @@ export const SellStockSchema = z.object({
 
 export type SellStockFormValues = z.infer<typeof SellStockSchema>;
 
+export const EditStockInvestmentSchema = z.object({
+  purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format." }),
+  numberOfShares: z.coerce.number().positive({ message: "Number of securities must be positive." }),
+  purchasePricePerShare: z.coerce.number().positive({ message: "Purchase price must be positive." }),
+  purchaseFees: z.coerce.number().min(0, { message: "Fees cannot be negative." }).optional().default(0),
+});
+export type EditStockInvestmentFormValues = z.infer<typeof EditStockInvestmentSchema>;
