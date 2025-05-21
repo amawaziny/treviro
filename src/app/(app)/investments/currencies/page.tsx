@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 interface AggregatedCurrencyHolding {
   currencyCode: string;
   totalForeignAmount: number;
-  totalCostInEGP: number;
+  totalCostInEGP: number; // This is derived from all 'amountInvested' which are in EGP
   averagePurchaseRateToEGP: number;
   currentMarketRateToEGP?: number;
   currentValueInEGP?: number;
@@ -36,16 +36,14 @@ export default function MyCurrenciesPage() {
     const holdings: { [key: string]: { totalForeign: number; totalCostEGP: number; count: number } } = {};
 
     currencyInvestments.forEach(inv => {
-      // We ensure that the P/L is calculated only for investments recorded against EGP.
-      if (inv.baseCurrencyAtPurchase?.toUpperCase() === 'EGP') {
-        if (!holdings[inv.currencyCode]) {
-          holdings[inv.currencyCode] = { totalForeign: 0, totalCostEGP: 0, count: 0 };
-        }
-        holdings[inv.currencyCode].totalForeign += inv.foreignCurrencyAmount;
-        // inv.amountInvested is already the cost in EGP
-        holdings[inv.currencyCode].totalCostEGP += inv.amountInvested;
-        holdings[inv.currencyCode].count++;
+      // We assume inv.amountInvested is the cost in EGP because baseCurrencyAtPurchase was removed.
+      if (!holdings[inv.currencyCode]) {
+        holdings[inv.currencyCode] = { totalForeign: 0, totalCostEGP: 0, count: 0 };
       }
+      holdings[inv.currencyCode].totalForeign += inv.foreignCurrencyAmount;
+      // inv.amountInvested is already the cost in EGP
+      holdings[inv.currencyCode].totalCostEGP += inv.amountInvested;
+      holdings[inv.currencyCode].count++;
     });
 
     return Object.entries(holdings).map(([code, data]) => {
@@ -189,7 +187,7 @@ export default function MyCurrenciesPage() {
             </Table>
           ) : (
             <p className="text-muted-foreground py-4 text-center">
-              No currency investments found that were purchased against EGP, or current exchange rates are unavailable.
+              No currency investments found, or current exchange rates are unavailable.
             </p>
           )}
         </CardContent>

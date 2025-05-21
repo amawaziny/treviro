@@ -46,28 +46,28 @@ const getCurrentDate = () => {
 
 const initialFormValues: AddInvestmentFormValues = {
   type: undefined,
-  amountInvested: undefined,
+  amountInvested: '', // Init as empty string for controlled input
   purchaseDate: getCurrentDate(),
 
   selectedStockId: undefined,
-  numberOfShares: undefined,
-  purchasePricePerShare: undefined,
-  purchaseFees: "0", // Default as string for Zod coercion
+  numberOfShares: '', // Init as empty string
+  purchasePricePerShare: '', // Init as empty string
+  purchaseFees: "0",
 
   goldType: undefined,
-  quantityInGrams: undefined,
+  quantityInGrams: '', // Init as empty string
 
   currencyCode: "",
-  foreignCurrencyAmount: undefined,
-  exchangeRateAtPurchase: undefined,
-  baseCurrencyAtPurchase: "EGP",
+  foreignCurrencyAmount: '', // Init as empty string
+  exchangeRateAtPurchase: '', // Init as empty string
+  // baseCurrencyAtPurchase removed
 
   propertyAddress: "",
   propertyType: undefined,
 
   debtSubType: undefined,
   issuer: "",
-  interestRate: undefined,
+  interestRate: '', // Init as empty string
   maturityDate: '',
   name: "",
 };
@@ -143,7 +143,7 @@ const MemoizedRenderGoldFieldsSection = React.memo(function RenderGoldFieldsSect
                   inputMode="decimal"
                   placeholder="e.g., 50 or 2.5"
                   {...field}
-                  value={String(field.value ?? '')}
+                  value={field.value ?? ''}
                   onChange={e => handleNumericInputChange(field, e.target.value)}
                 />
               </FormControl>
@@ -164,7 +164,7 @@ const MemoizedRenderGoldFieldsSection = React.memo(function RenderGoldFieldsSect
                   inputMode="decimal"
                   placeholder="e.g., 10000.50"
                   {...field}
-                  value={String(field.value ?? '')}
+                  value={field.value ?? ''}
                   onChange={e => handleNumericInputChange(field, e.target.value)}
                 />
               </FormControl>
@@ -217,36 +217,50 @@ export function AddInvestmentForm() {
     defaultValues: initialFormValues,
   });
 
+  // For console logging
+  // useEffect(() => {
+  //   console.log("AddInvestmentForm validation errors:", form.formState.errors);
+  // }, [form.formState.errors]);
+
   const selectedTypeFromForm = form.watch("type");
   const effectiveSelectedType = isDedicatedGoldMode ? "Gold" :
                                 isDedicatedDebtMode ? "Debt Instruments" :
                                 isDedicatedCurrencyMode ? "Currencies" :
                                 isPreSelectedStockMode ? "Stocks" :
                                 selectedTypeFromForm;
-  
-  // console.log("AddInvestmentForm - Current effectiveSelectedType:", effectiveSelectedType);
-  // console.log("AddInvestmentForm - form.formState.errors:", form.formState.errors);
 
 
   useEffect(() => {
     let isMounted = true;
+    console.log("AddInvestmentForm: Reading URL Params");
+    console.log("AddInvestmentForm - preSelectedSecurityId from URL:", preSelectedSecurityId);
+    console.log("AddInvestmentForm - preSelectedInvestmentTypeQueryParam from URL:", preSelectedInvestmentTypeQueryParam);
     
     const baseResetValues: AddInvestmentFormValues = {
-        ...initialFormValues, // Spread initial defaults first
-        purchaseDate: form.getValues("purchaseDate") || getCurrentDate(), // Preserve current date if set
-        baseCurrencyAtPurchase: "EGP", // Always default this for new forms
+        ...initialFormValues, 
+        purchaseDate: form.getValues("purchaseDate") || getCurrentDate(),
     };
+     console.log("AddInvestmentForm - Calculated Modes:");
+     console.log("AddInvestmentForm - isDedicatedDebtMode:", isDedicatedDebtMode);
+     console.log("AddInvestmentForm - isDedicatedGoldMode:", isDedicatedGoldMode);
+     console.log("AddInvestmentForm - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
+     console.log("AddInvestmentForm - isPreSelectedStockMode:", isPreSelectedStockMode);
+
 
     if (isDedicatedGoldMode) {
+      console.log("AddInvestmentForm - useEffect - Applying Dedicated Gold Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Gold" });
       setPreSelectedSecurityDetails(null);
     } else if (isDedicatedDebtMode) {
+      console.log("AddInvestmentForm - useEffect - Applying Dedicated Debt Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Debt Instruments" });
       setPreSelectedSecurityDetails(null);
     } else if (isDedicatedCurrencyMode) {
+      console.log("AddInvestmentForm - useEffect - Applying Dedicated Currency Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Currencies" });
       setPreSelectedSecurityDetails(null);
     } else if (isPreSelectedStockMode && preSelectedSecurityId) {
+      console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Stocks", selectedStockId: preSelectedSecurityId });
       getListedSecurityById(preSelectedSecurityId).then(security => {
         if (isMounted && security) {
@@ -258,6 +272,7 @@ export function AddInvestmentForm() {
         }
       });
     } else if (preSelectedInvestmentTypeQueryParam) {
+      console.log("AddInvestmentForm - useEffect - Applying general pre-selected type from URL param.");
       form.reset({ ...baseResetValues, type: preSelectedInvestmentTypeQueryParam});
       setPreSelectedSecurityDetails(null);
     }
@@ -266,7 +281,7 @@ export function AddInvestmentForm() {
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
-    // console.log("AddInvestmentForm - onSubmit - Zod parsed values:", JSON.stringify(values, null, 2));
+    // console.log("AddInvestmentForm - onSubmit - Raw Zod parsed values:", JSON.stringify(values, null, 2));
 
     if (Object.keys(form.formState.errors).length > 0) {
         // console.error("Validation errors present, cannot submit:", form.formState.errors)
@@ -300,19 +315,23 @@ export function AddInvestmentForm() {
 
     if (finalInvestmentType === "Stocks") {
       const securityToProcessId = values.selectedStockId || preSelectedSecurityId;
+      // console.log("AddInvestmentForm onSubmit - Stocks - securityToProcessId:", securityToProcessId);
+      // console.log("AddInvestmentForm onSubmit - Stocks - listedSecurities (name/id):", listedSecurities.map(ls => ({name: ls.name, id: ls.id })));
+
       const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
+      // console.log("AddInvestmentForm onSubmit - Stocks - selectedSecurity found:", selectedSecurity);
 
       if (!selectedSecurity) {
         toast({ title: "Error", description: "Selected security details not found.", variant: "destructive" });
         return;
       }
       
-      const numShares = values.numberOfShares!;
-      const pricePerShare = values.purchasePricePerShare!;
-      const fees = values.purchaseFees!;
+      const numShares = parseFloat(String(values.numberOfShares!));
+      const pricePerShare = parseFloat(String(values.purchasePricePerShare!));
+      const fees = parseFloat(String(values.purchaseFees!));
       const calculatedAmountInvested = (numShares * pricePerShare) + fees;
 
-      investmentName = values.name || `${selectedSecurity.name} Purchase`;
+      investmentName = `${selectedSecurity.name} Purchase`;
 
       newInvestment = {
         ...newInvestmentBase,
@@ -328,13 +347,13 @@ export function AddInvestmentForm() {
       };
 
     } else if (finalInvestmentType === "Debt Instruments") {
-        investmentName = values.name || `${values.debtSubType || 'Debt'} from ${values.issuer || 'N/A'}`;
+        investmentName = `${values.debtSubType || 'Debt'} from ${values.issuer || 'N/A'}`;
         newInvestment = {
           ...newInvestmentBase,
           name: investmentName,
-          amountInvested: values.amountInvested!,
+          amountInvested: parseFloat(String(values.amountInvested!)),
           issuer: values.issuer!,
-          interestRate: values.interestRate!,
+          interestRate: parseFloat(String(values.interestRate!)),
           maturityDate: values.maturityDate!,
           debtSubType: values.debtSubType!,
           type: 'Debt Instruments',
@@ -344,15 +363,15 @@ export function AddInvestmentForm() {
         newInvestment = {
           ...newInvestmentBase,
           name: investmentName,
-          amountInvested: values.amountInvested!,
+          amountInvested: parseFloat(String(values.amountInvested!)),
           goldType: values.goldType!,
-          quantityInGrams: values.quantityInGrams!,
+          quantityInGrams: parseFloat(String(values.quantityInGrams!)),
           type: 'Gold',
         };
     } else if (finalInvestmentType === "Currencies") {
         investmentName = values.name || `Currency (${values.currencyCode || 'N/A'}) on ${values.purchaseDate}`;
-        const foreignAmount = values.foreignCurrencyAmount!;
-        const rateAtPurchase = values.exchangeRateAtPurchase!;
+        const foreignAmount = parseFloat(String(values.foreignCurrencyAmount!));
+        const rateAtPurchase = parseFloat(String(values.exchangeRateAtPurchase!));
         const calculatedCost = foreignAmount * rateAtPurchase;
 
         newInvestment = {
@@ -362,18 +381,17 @@ export function AddInvestmentForm() {
           currencyCode: values.currencyCode!,
           foreignCurrencyAmount: foreignAmount,
           exchangeRateAtPurchase: rateAtPurchase,
-          baseCurrencyAtPurchase: values.baseCurrencyAtPurchase!,
           type: 'Currencies',
         };
 
-        if (values.currencyCode && values.baseCurrencyAtPurchase && values.exchangeRateAtPurchase && foreignAmount) {
+        if (values.currencyCode && values.exchangeRateAtPurchase && foreignAmount) {
           setIsLoadingAi(true);
           try {
             const aiInput: CurrencyFluctuationAnalysisInput = {
                 transactionCurrency: values.currencyCode!,
                 transactionAmount: foreignAmount,
                 transactionDate: values.purchaseDate,
-                baseCurrency: values.baseCurrencyAtPurchase!,
+                baseCurrency: "EGP", // Hardcoded as per user request
                 currentExchangeRate: rateAtPurchase,
             };
             analysisResultFromAi = await currencyFluctuationAnalysis(aiInput);
@@ -389,17 +407,18 @@ export function AddInvestmentForm() {
         newInvestment = {
           ...newInvestmentBase,
           name: investmentName,
-          amountInvested: values.amountInvested!,
+          amountInvested: parseFloat(String(values.amountInvested!)),
           propertyAddress: values.propertyAddress,
           propertyType: values.propertyType,
           type: 'Real Estate',
         };
     } else {
          investmentName = values.name || `${finalInvestmentType} Investment on ${values.purchaseDate}`;
-         newInvestment = { ...newInvestmentBase, name: investmentName, amountInvested: values.amountInvested!, type: finalInvestmentType as any };
+         newInvestment = { ...newInvestmentBase, name: investmentName, amountInvested: parseFloat(String(values.amountInvested!)), type: finalInvestmentType as any };
     }
     
     newInvestment.name = investmentName; 
+    // console.log("AddInvestmentForm onSubmit - newInvestment object being passed to addInvestment:", JSON.stringify(newInvestment, null, 2));
 
     await addInvestment(newInvestment, analysisResultFromAi);
     toast({
@@ -407,18 +426,22 @@ export function AddInvestmentForm() {
       description: `${newInvestment.name} (${finalInvestmentType}) has been successfully added.`,
     });
 
+    const resetTargetType = isDedicatedDebtMode ? "Debt Instruments" :
+                            isDedicatedGoldMode ? "Gold" :
+                            isDedicatedCurrencyMode ? "Currencies" :
+                            isPreSelectedStockMode ? "Stocks" :
+                            undefined;
+
     const resetValues: AddInvestmentFormValues = {
         ...initialFormValues,
-        type: (isDedicatedDebtMode || isDedicatedGoldMode || isDedicatedCurrencyMode) ? finalInvestmentType : (isPreSelectedStockMode ? "Stocks" : undefined),
+        type: resetTargetType,
         selectedStockId: isPreSelectedStockMode && preSelectedSecurityId ? preSelectedSecurityId : undefined,
-        name: "", 
         purchaseDate: getCurrentDate(),
-        baseCurrencyAtPurchase: "EGP",
     };
     
     form.reset(resetValues);
     
-    if (!isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode && !preSelectedInvestmentTypeQueryParam) {
+    if (!resetTargetType && !preSelectedInvestmentTypeQueryParam) { // Only redirect if it was a general add, not a dedicated one
         router.replace('/investments/add'); 
     }
     
@@ -428,13 +451,9 @@ export function AddInvestmentForm() {
   }
 
   const handleNumericInputChangeCallback = useCallback((field: any, rawStringValue: string) => {
-    if (rawStringValue === '') {
-      field.onChange(''); // Pass empty string to allow Zod to coerce or use default
-      return;
-    }
     const decimalRegex = /^\d*\.?\d*$/;
-    if (decimalRegex.test(rawStringValue)) {
-      field.onChange(rawStringValue);
+    if (rawStringValue === '' || decimalRegex.test(rawStringValue)) {
+      field.onChange(rawStringValue); // Pass string directly
     }
   }, []);
   
@@ -460,6 +479,10 @@ export function AddInvestmentForm() {
      submitButtonText = `Add ${effectiveSelectedType}`;
   }
 
+  // console.log("AddInvestmentForm - Form State and Watched Values:");
+  // console.log("AddInvestmentForm - form.watch('type'):", form.watch("type"));
+  // console.log("AddInvestmentForm - effectiveSelectedType for UI logic:", effectiveSelectedType);
+
   const RenderDebtFields = () => (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">Debt Instrument Details</h3>
@@ -471,13 +494,13 @@ export function AddInvestmentForm() {
           <FormItem><FormLabel>Issuer / Institution</FormLabel><FormControl><Input placeholder="e.g., US Treasury, XYZ Corp" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="interestRate" render={({ field }) => (
-          <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 5.5" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 5.5" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="maturityDate" render={({ field }) => (
           <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="amountInvested" render={({ field }) => (
-          <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 10000.75" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
+          <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 10000.75" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
           )}
         />
         <FormField control={form.control} name="purchaseDate" render={({ field }) => (
@@ -493,9 +516,6 @@ export function AddInvestmentForm() {
       <h3 className="text-lg font-medium text-primary">
         {preSelectedSecurityDetails?.securityType === 'Fund' ? 'Fund Purchase Details' : 'Stock Purchase Details'}
       </h3>
-       {!isPreSelectedStockMode && <FormField control={form.control} name="name" render={({ field }) => (
-            <FormItem className="md:col-span-2 mt-4"><FormLabel>Name / Description (Optional)</FormLabel><FormControl><Input placeholder="e.g., My Apple Shares" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
-        )} /> }
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {!preSelectedSecurityId && (
           <FormField control={form.control} name="selectedStockId" render={({ field }) => (
@@ -511,13 +531,13 @@ export function AddInvestmentForm() {
           </div>
         )}
         <FormField control={form.control} name="numberOfShares" render={({ field }) => (
-            <FormItem><FormLabel>Number of Securities</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 100.5" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Number of Securities</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 100.5" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
           )} />
         <FormField control={form.control} name="purchasePricePerShare" render={({ field }) => (
-            <FormItem><FormLabel>Purchase Price (per security)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 150.50" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Purchase Price (per security)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 150.50" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
           )} />
         <FormField control={form.control} name="purchaseFees" render={({ field }) => (
-            <FormItem><FormLabel>Purchase Fees (optional)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 5.00" {...field} value={String(field.value ?? '0')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Brokerage or transaction fees for this purchase.</FormDescription><FormMessage /></FormItem>
+            <FormItem><FormLabel>Purchase Fees (optional)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 5.00" {...field} value={field.value ?? '0'} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Brokerage or transaction fees for this purchase.</FormDescription><FormMessage /></FormItem>
           )}
         />
         <FormField control={form.control} name="purchaseDate" render={({ field }) => (
@@ -542,13 +562,10 @@ export function AddInvestmentForm() {
             <FormItem><FormLabel>Transaction Currency Code</FormLabel><FormControl><Input placeholder="e.g., USD, EUR" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
           )} />
         <FormField control={form.control} name="foreignCurrencyAmount" render={({ field }) => (
-            <FormItem><FormLabel>Foreign Currency Amount</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 1000" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Amount of the foreign currency you bought.</FormDescription><FormMessage /></FormItem>
+            <FormItem><FormLabel>Foreign Currency Amount</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 1000" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Amount of the foreign currency you bought.</FormDescription><FormMessage /></FormItem>
           )} />
         <FormField control={form.control} name="exchangeRateAtPurchase" render={({ field }) => (
-            <FormItem><FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 30.85 (for USD to EGP)" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
-          )} />
-        <FormField control={form.control} name="baseCurrencyAtPurchase" render={({ field }) => (
-            <FormItem><FormLabel>Base Currency at Purchase</FormLabel><FormControl><Input placeholder="e.g., EGP" {...field} value={field.value || 'EGP'} /></FormControl><FormDescription>The currency used for the transaction cost. Default EGP.</FormDescription><FormMessage /></FormItem>
+            <FormItem><FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 30.85 (for USD to EGP)" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
           )} />
          <FormField control={form.control} name="purchaseDate" render={({ field }) => (
             <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
@@ -571,7 +588,7 @@ export function AddInvestmentForm() {
           <FormItem><FormLabel>Property Type</FormLabel><Select onValueChange={field.onChange} value={field.value || ""}><FormControl><SelectTrigger><SelectValue placeholder="Select property type" /></SelectTrigger></FormControl><SelectContent>{propertyTypes.map(pType => (<SelectItem key={pType} value={pType}>{pType}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="amountInvested" render={({ field }) => (
-          <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 1000000.00" {...field} value={String(field.value ?? '')} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
+          <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 1000000.00" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
           )}
         />
         <FormField control={form.control} name="purchaseDate" render={({ field }) => (
@@ -581,7 +598,39 @@ export function AddInvestmentForm() {
       </div>
     </div>
   );
+
+  const RenderGeneralTypeSelector = () => (
+    <FormField control={form.control} name="type" render={({ field }) => (
+      <FormItem>
+        <FormLabel>Investment Type</FormLabel>
+        <Select onValueChange={(value) => { 
+          field.onChange(value); 
+          const currentValues = form.getValues();
+          form.reset({ 
+            ...initialFormValues, 
+            type: value as InvestmentType, 
+            purchaseDate: currentValues.purchaseDate || getCurrentDate(),
+          }); 
+          setPreSelectedSecurityDetails(null); 
+        }} 
+        value={field.value || ""}
+        >
+          <FormControl><SelectTrigger><SelectValue placeholder="Select an investment type" /></SelectTrigger></FormControl>
+          <SelectContent>{investmentTypes.map((type) => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent>
+        </Select>
+        <FormMessage />
+      </FormItem>
+    )} />
+  );
   
+  // console.log("AddInvestmentForm: Determining render path in JSX...");
+  // console.log("  JSX - isDedicatedDebtMode:", isDedicatedDebtMode);
+  // console.log("  JSX - isDedicatedGoldMode:", isDedicatedGoldMode);
+  // console.log("  JSX - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
+  // console.log("  JSX - isPreSelectedStockMode:", isPreSelectedStockMode);
+  // console.log("  JSX - effectiveSelectedType:", effectiveSelectedType);
+
+
   return (
     <Card>
       <CardHeader>
@@ -600,10 +649,7 @@ export function AddInvestmentForm() {
              isPreSelectedStockMode ? <RenderStockFields /> :
              ( // General Mode
                 <>
-                  <FormField control={form.control} name="type" render={({ field }) => (
-                      <FormItem><FormLabel>Investment Type</FormLabel><Select onValueChange={(value) => { field.onChange(value); const currentValues = form.getValues(); form.reset({ ...initialFormValues, type: value as InvestmentType, purchaseDate: currentValues.purchaseDate || getCurrentDate(), baseCurrencyAtPurchase: "EGP" }); setPreSelectedSecurityDetails(null); }} value={field.value || ""}><FormControl><SelectTrigger><SelectValue placeholder="Select an investment type" /></SelectTrigger></FormControl><SelectContent>{investmentTypes.map((type) => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
-                    )}
-                  />
+                  <RenderGeneralTypeSelector />
                   {effectiveSelectedType === "Stocks" && <RenderStockFields />}
                   {effectiveSelectedType === "Gold" && <MemoizedRenderGoldFieldsSection control={form.control} handleNumericInputChange={handleNumericInputChangeCallback} getCurrentDateForForm={getCurrentDate} />}
                   {effectiveSelectedType === "Currencies" && <RenderCurrencyFields />}

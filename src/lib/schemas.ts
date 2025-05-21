@@ -26,7 +26,7 @@ export const AddInvestmentSchema = z.object({
   currencyCode: z.string().optional(), // e.g. USD
   foreignCurrencyAmount: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)),
   exchangeRateAtPurchase: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)), // e.g. USD to EGP rate
-  baseCurrencyAtPurchase: z.string().optional(), // e.g. EGP
+  // baseCurrencyAtPurchase removed
 
   // Real Estate
   propertyAddress: z.string().optional(),
@@ -68,7 +68,7 @@ export const AddInvestmentSchema = z.object({
     }
   }
   if (effectiveType === 'Currencies') {
-    if (!data.currencyCode) {
+    if (!data.currencyCode || data.currencyCode.trim() === "") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Transaction currency code is required.", path: ["currencyCode"] });
     }
     if (data.foreignCurrencyAmount === undefined || data.foreignCurrencyAmount <= 0) {
@@ -77,21 +77,18 @@ export const AddInvestmentSchema = z.object({
     if (data.exchangeRateAtPurchase === undefined || data.exchangeRateAtPurchase <= 0) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Exchange rate at purchase must be positive.", path: ["exchangeRateAtPurchase"] });
     }
-    if (!data.baseCurrencyAtPurchase) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Base currency at purchase is required.", path: ["baseCurrencyAtPurchase"] });
-    }
   }
   if (effectiveType === 'Debt Instruments') {
     if (!data.debtSubType) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Specific debt type is required.", path: ["debtSubType"]});
     }
-    if (!data.issuer) {
+    if (!data.issuer || data.issuer.trim() === "") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Issuer is required.", path: ["issuer"]});
     }
     if (data.interestRate === undefined || data.interestRate <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Interest rate must be positive.", path: ["interestRate"]});
     }
-    if (!data.maturityDate) {
+    if (!data.maturityDate || data.maturityDate.trim() === "") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Maturity date is required.", path: ["maturityDate"]});
     }
   }

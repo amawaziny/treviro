@@ -33,7 +33,7 @@ export interface CurrencyInvestment extends BaseInvestment {
   currencyCode: string; // e.g., USD, EUR
   foreignCurrencyAmount: number; // Amount of the foreign currency bought/held
   exchangeRateAtPurchase: number; // Exchange rate of foreign currency TO baseCurrencyAtPurchase at time of purchase
-  baseCurrencyAtPurchase: string; // The currency used for the purchase cost (amountInvested), e.g., EGP
+  // baseCurrencyAtPurchase removed
 }
 
 export interface RealEstateInvestment extends BaseInvestment {
@@ -83,8 +83,8 @@ export type TransactionType = 'buy' | 'sell';
 
 export interface Transaction {
   id: string;
-  investmentId?: string;
-  stockId?: string;
+  investmentId?: string; // For 'buy' transactions that are actual investment records
+  stockId?: string; // ID of the ListedSecurity
   tickerSymbol: string;
   type: TransactionType;
   date: string; // ISO string
@@ -114,3 +114,4 @@ export interface ExchangeRates {
   [key: string]: number; // e.g., USD_EGP: 30.85, SAR_EGP: 8.22
   // lastUpdated?: any; // Firestore Timestamp or Date - good to have
 }
+
