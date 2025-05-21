@@ -16,11 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas"; // Schema remains SellStockSchema
 import { useInvestments } from "@/hooks/use-investments";
-import { useListedSecurities } from "@/hooks/use-listed-securities"; 
+import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import type { ListedSecurity, StockInvestment } from "@/lib/types"; 
+import type { ListedSecurity, StockInvestment } from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -32,28 +32,28 @@ const getCurrentDate = () => {
   return `${year}-${month}-${day}`;
 };
 
-interface SellSecurityFormProps { 
-  stockId: string; 
+interface SellSecurityFormProps {
+  stockId: string;
 }
 
-export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
+export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
   const { recordSellStockTransaction, investments, isLoading: isLoadingInvestmentsContext } = useInvestments();
-  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); 
+  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { toast } = useToast();
   const router = useRouter();
 
   const [securityBeingSold, setSecurityBeingSold] = useState<ListedSecurity | null>(null);
   const [maxSharesToSell, setMaxSharesToSell] = useState(0);
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<SellStockFormValues>({
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
-      stockId: securityId, 
-      numberOfSharesToSell: '', // Initialize as empty string
-      sellPricePerShare: '',    // Initialize as empty string
+      stockId: securityId,
+      numberOfSharesToSell: '',
+      sellPricePerShare: '',
       sellDate: getCurrentDate(),
-      fees: '',                 // Initialize as empty string, schema defaults to 0
+      fees: '',
     },
   });
 
@@ -73,27 +73,28 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
           0
         );
         setMaxSharesToSell(totalOwned);
-        // Pre-fill sellPricePerShare if it's not already set (e.g. by user interaction)
-        // and securityBeingSold.price is available
         if (listedSecurityData.price && form.getValues("sellPricePerShare") === '') {
             form.setValue("sellPricePerShare", String(listedSecurityData.price));
         }
       }
       setIsLoading(false);
     }
-    if (securityId && !isLoadingInvestmentsContext) { 
+    if (securityId && !isLoadingInvestmentsContext) {
         fetchData();
     } else if (!isLoadingInvestmentsContext) {
-        setIsLoading(false); 
+        setIsLoading(false);
     }
 
   }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext, form]);
   
-  const handleNumericInputChange = useCallback((field: any, rawStringValue: string) => {
+  const handleDecimalInputChange = useCallback((field: any, rawStringValue: string) => {
     if (rawStringValue === '') {
-      field.onChange(undefined); 
-    } else {
-      field.onChange(rawStringValue); // Pass the raw string to RHF, Zod will coerce
+      field.onChange(undefined);
+      return;
+    }
+    const decimalRegex = /^\d*\.?\d*$/;
+    if (decimalRegex.test(rawStringValue)) {
+      field.onChange(rawStringValue);
     }
   }, []);
 
@@ -103,7 +104,6 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       toast({ title: "Error", description: "Security details not found.", variant: "destructive" });
       return;
     }
-    // Zod coercion handles string to number, validation handles positive.
     const numberOfSharesToSellNum = parseFloat(String(values.numberOfSharesToSell));
 
     if (numberOfSharesToSellNum > maxSharesToSell) {
@@ -113,18 +113,18 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
 
     try {
       await recordSellStockTransaction(
-        securityId, 
+        securityId,
         securityBeingSold.symbol,
-        parseFloat(String(values.numberOfSharesToSell)), // Ensure number is passed
-        parseFloat(String(values.sellPricePerShare)),   // Ensure number is passed
+        parseFloat(String(values.numberOfSharesToSell)),
+        parseFloat(String(values.sellPricePerShare)),
         values.sellDate,
-        values.fees === '' || values.fees === undefined ? 0 : parseFloat(String(values.fees)) // Ensure number is passed
+        values.fees === '' || values.fees === undefined ? 0 : parseFloat(String(values.fees))
       );
       toast({
         title: "Sale Recorded",
         description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityBeingSold.securityType === 'Fund' ? 'units' : 'shares'} of ${securityBeingSold.name}.`,
       });
-      router.push(`/stocks/${securityId}`); 
+      router.push(`/stocks/${securityId}`);
     } catch (error: any) {
       console.error("Error recording sale:", error);
       toast({
@@ -183,13 +183,13 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
               <FormItem>
                 <FormLabel>Number of {securityLabel} to Sell</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="text" 
-                    inputMode="decimal" 
-                    placeholder="e.g., 50 or 10.5" 
-                    {...field} 
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g., 50 or 10.5"
+                    {...field}
                     value={field.value ?? ''}
-                    onChange={e => handleNumericInputChange(field, e.target.value)}
+                    onChange={e => handleDecimalInputChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormDescription>Max: {maxSharesToSell}</FormDescription>
@@ -204,13 +204,13 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
               <FormItem>
                 <FormLabel>Sell Price (per {securityLabel.slice(0,-1)})</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="text" 
-                    inputMode="decimal" 
-                    placeholder="e.g., 160.25" 
-                    {...field} 
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g., 160.25"
+                    {...field}
                     value={field.value ?? ''}
-                    onChange={e => handleNumericInputChange(field, e.target.value)}
+                    onChange={e => handleDecimalInputChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -237,13 +237,13 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
               <FormItem>
                 <FormLabel>Fees (if any)</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="text" 
-                    inputMode="decimal" 
-                    placeholder="e.g., 5.00" 
-                    {...field} 
-                    value={field.value ?? ''} 
-                    onChange={e => handleNumericInputChange(field, e.target.value)}
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g., 5.00"
+                    {...field}
+                    value={field.value ?? ''}
+                    onChange={e => handleDecimalInputChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormDescription>Total fees for this transaction.</FormDescription>
