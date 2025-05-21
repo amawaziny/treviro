@@ -1,8 +1,10 @@
+
 import Link from 'next/link';
 import { Coins } from 'lucide-react'; // Using Coins as a generic logo
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { UserNav } from '@/components/auth/user-nav';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { LanguageToggle } from './language-toggle'; // Added import
 
 export function Header() {
   return (
@@ -18,6 +20,7 @@ export function Header() {
         
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-1">
+            <LanguageToggle /> {/* Added LanguageToggle component */}
             <ThemeToggle />
             <UserNav />
           </nav>

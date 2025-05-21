@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { InvestmentProvider } from '@/contexts/investment-context';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { FirebaseIntegrations } from '@/components/layout/firebase-integrations';
+import { LanguageProvider } from '@/contexts/language-context'; // Added import
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,11 +41,13 @@ export default function RootLayout({
         >
           <AuthProvider>
             <InvestmentProvider>
-              <SidebarProvider defaultOpen={true}>
-                <FirebaseIntegrations>
-                  {children}
-                </FirebaseIntegrations>
-              </SidebarProvider>
+              <LanguageProvider> {/* Added LanguageProvider */}
+                <SidebarProvider defaultOpen={true}>
+                  <FirebaseIntegrations>
+                    {children}
+                  </FirebaseIntegrations>
+                </SidebarProvider>
+              </LanguageProvider> {/* Added LanguageProvider */}
               <Toaster />
             </InvestmentProvider>
           </AuthProvider>
