@@ -1,6 +1,16 @@
-import { AddInvestmentForm } from '@/components/investments/add-investment-form';
+
 import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
+
+// Dynamically import AddInvestmentForm with ssr: false
+const AddInvestmentForm = dynamic(() => 
+  import('@/components/investments/add-investment-form').then(mod => mod.AddInvestmentForm),
+  { 
+    suspense: true, // This will use the <Suspense> boundary below
+    ssr: false      // Ensure this component is only rendered on the client
+  }
+);
 
 function AddInvestmentLoadingFallback() {
   return (
