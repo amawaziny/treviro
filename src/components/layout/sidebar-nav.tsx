@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, List, Briefcase, Home, Gem, ScrollText, DollarSign } from 'lucide-react'; // Removed PlusCircle
+import { LayoutDashboard, List, Briefcase, Home, Gem, ScrollText, DollarSign, Search } from 'lucide-react'; // Changed List to Search for "Explore"
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -28,15 +28,10 @@ const navItems: NavItem[] = [
     href: '/dashboard',
     icon: LayoutDashboard,
   },
-  // { // "Add Investment" removed from here
-  //   title: 'Add Investment',
-  //   href: '/investments/add',
-  //   icon: PlusCircle,
-  // },
   {
-    title: 'Browse Securities', 
+    title: 'Explore', 
     href: '/stocks', 
-    icon: List, 
+    icon: Search, // Using Search icon for "Explore"
   },
   {
     title: 'My Stocks',
@@ -118,3 +113,4 @@ export function SidebarNav() {
     </SidebarMenu>
   );
 }
+
