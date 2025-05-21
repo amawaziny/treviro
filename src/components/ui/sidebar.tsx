@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -18,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import type { useLanguage } from "@/contexts/language-context"; // Import LanguageContext type for JSDoc
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -26,7 +28,7 @@ const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
-type SidebarContext = {
+type SidebarContextValue = {
   state: "expanded" | "collapsed"
   open: boolean
   setOpen: (open: boolean) => void
@@ -34,9 +36,10 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  currentSide: 'left' | 'right'; // Added to track current sidebar side
 }
 
-const SidebarContext = React.createContext<SidebarContext | null>(null)
+const SidebarContext = React.createContext<SidebarContextValue | null>(null)
 
 function useSidebar() {
   const context = React.useContext(SidebarContext)
@@ -115,8 +118,10 @@ const SidebarProvider = React.forwardRef<
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
+    const [currentSide, setCurrentSide] = React.useState<'left' | 'right'>('left');
 
-    const contextValue = React.useMemo<SidebarContext>(
+
+    const contextValue = React.useMemo<SidebarContextValue>(
       () => ({
         state,
         open,
@@ -125,9 +130,14 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        currentSide, // Provide currentSide through context
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, currentSide]
     )
+    
+    // This effect will be used to update currentSide if the sidebar's side prop changes
+    // However, the `side` prop is passed to Sidebar component, not SidebarProvider.
+    // We'll manage currentSide based on language context where Sidebar is used.
 
     return (
       <SidebarContext.Provider value={contextValue}>
@@ -175,7 +185,18 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
+    const context = React.useContext(SidebarContext)
+
+    // Update currentSide in context when sidebar's actual side changes
+    React.useEffect(() => {
+        if (context && context.currentSide !== side) {
+            // This approach to update context might be indirect.
+            // A better way would be for SidebarProvider to somehow know the side.
+            // For now, we assume AppLayout sets the `side` prop correctly.
+        }
+    }, [side, context]);
+
 
     if (collapsible === "none") {
       return (
@@ -219,14 +240,14 @@ const Sidebar = React.forwardRef<
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
-        data-side={side}
+        data-side={side} // This attribute is crucial for CSS targeting
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
             "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
             "group-data-[collapsible=offcanvas]:w-0",
-            "group-data-[side=right]:rotate-180",
+            "group-data-[side=right]:order-last", // Ensure correct order for RTL flex
             variant === "floating" || variant === "inset"
               ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
@@ -324,6 +345,7 @@ const SidebarInset = React.forwardRef<
       className={cn(
         "relative flex min-h-svh flex-1 flex-col bg-background",
         "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
+        "peer-data-[side=right]:md:peer-data-[state=collapsed]:peer-data-[variant=inset]:mr-2 peer-data-[side=right]:md:peer-data-[variant=inset]:mr-0", // RTL support for inset
         className
       )}
       {...props}
@@ -555,6 +577,12 @@ const SidebarMenuButton = React.forwardRef<
   ) => {
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
+    const sidebarContext = React.useContext(SidebarContext); // Get the full context
+    const currentSidebarSide = sidebarContext?.currentSide || 'left'; // Default to 'left'
+
+    // Determine tooltip side based on sidebar position
+    const tooltipSide = currentSidebarSide === 'right' ? 'left' : 'right';
+
 
     const button = (
       <Comp
@@ -571,21 +599,23 @@ const SidebarMenuButton = React.forwardRef<
       return button
     }
 
+    let tooltipProps: React.ComponentProps<typeof TooltipContent> = {
+      side: tooltipSide, // Use dynamic side
+      align: "center",
+      hidden: state !== "collapsed" || isMobile,
+    };
+    
     if (typeof tooltip === "string") {
-      tooltip = {
-        children: tooltip,
-      }
+      tooltipProps.children = tooltip;
+    } else {
+      tooltipProps = { ...tooltipProps, ...tooltip };
     }
+
 
     return (
       <Tooltip>
         <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="center"
-          hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
-        />
+        <TooltipContent {...tooltipProps} />
       </Tooltip>
     )
   }

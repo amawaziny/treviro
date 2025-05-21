@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Header } from '@/components/layout/header';
@@ -16,10 +17,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Coins } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/language-context'; // Added import
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const { language } = useLanguage(); // Added to get current language
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -40,7 +43,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <> {/* Sidebar (nav) and SidebarInset (main content) are now siblings */}
-      <Sidebar variant="sidebar" collapsible="icon" side="left">
+      <Sidebar variant="sidebar" collapsible="icon" side={language === 'ar' ? 'right' : 'left'}>
         <SidebarRail />
         <SidebarHeader className="p-4 justify-center items-center group-data-[collapsible=icon]:justify-start">
           <Link href="/dashboard" className="flex items-center gap-2">
