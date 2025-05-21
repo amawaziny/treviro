@@ -14,7 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas"; // Schema remains SellStockSchema
+import { NumericInput } from "@/components/ui/numeric-input"; // Added import
+import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas"; 
 import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
@@ -53,7 +54,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       numberOfSharesToSell: '',
       sellPricePerShare: '',
       sellDate: getCurrentDate(),
-      fees: '',
+      fees: '', // Initialize as empty string for NumericInput
     },
   });
 
@@ -87,24 +88,14 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
 
   }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext, form]);
   
-  const handleDecimalInputChange = useCallback((field: any, rawStringValue: string) => {
-    if (rawStringValue === '') {
-      field.onChange(undefined);
-      return;
-    }
-    const decimalRegex = /^\d*\.?\d*$/;
-    if (decimalRegex.test(rawStringValue)) {
-      field.onChange(rawStringValue);
-    }
-  }, []);
-
 
   async function onSubmit(values: SellStockFormValues) {
     if (!securityBeingSold) {
       toast({ title: "Error", description: "Security details not found.", variant: "destructive" });
       return;
     }
-    const numberOfSharesToSellNum = parseFloat(String(values.numberOfSharesToSell));
+    // Values from Zod schema are already numbers due to transform
+    const numberOfSharesToSellNum = values.numberOfSharesToSell; 
 
     if (numberOfSharesToSellNum > maxSharesToSell) {
       form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} shares/units.` });
@@ -115,10 +106,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       await recordSellStockTransaction(
         securityId,
         securityBeingSold.symbol,
-        parseFloat(String(values.numberOfSharesToSell)),
-        parseFloat(String(values.sellPricePerShare)),
+        numberOfSharesToSellNum,
+        values.sellPricePerShare, // Already a number from Zod
         values.sellDate,
-        values.fees === '' || values.fees === undefined ? 0 : parseFloat(String(values.fees))
+        values.fees // Already a number from Zod (or 0 if undefined)
       );
       toast({
         title: "Sale Recorded",
@@ -183,13 +174,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
               <FormItem>
                 <FormLabel>Number of {securityLabel} to Sell</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
+                  <NumericInput
                     placeholder="e.g., 50 or 10.5"
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={e => handleDecimalInputChange(field, e.target.value)}
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormDescription>Max: {maxSharesToSell}</FormDescription>
@@ -204,13 +192,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
               <FormItem>
                 <FormLabel>Sell Price (per {securityLabel.slice(0,-1)})</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
+                  <NumericInput
                     placeholder="e.g., 160.25"
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={e => handleDecimalInputChange(field, e.target.value)}
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />
@@ -237,13 +222,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
               <FormItem>
                 <FormLabel>Fees (if any)</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
+                  <NumericInput
                     placeholder="e.g., 5.00"
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={e => handleDecimalInputChange(field, e.target.value)}
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormDescription>Total fees for this transaction.</FormDescription>

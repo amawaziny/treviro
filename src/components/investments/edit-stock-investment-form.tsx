@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/numeric-input"; // Added import
 import { EditStockInvestmentSchema, type EditStockInvestmentFormValues } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
@@ -39,7 +40,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
   
   const form = useForm<EditStockInvestmentFormValues>({
     resolver: zodResolver(EditStockInvestmentSchema),
-    defaultValues: {
+    defaultValues: { // RHF expects strings for controlled text inputs
       purchaseDate: "",
       numberOfShares: '',
       purchasePricePerShare: '',
@@ -53,11 +54,11 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     if (foundInvestment) {
       setInvestmentToEdit(foundInvestment);
       setOldAmountInvested(foundInvestment.amountInvested);
-      form.reset({
+      form.reset({ // Reset with string values for the form
         purchaseDate: foundInvestment.purchaseDate.split('T')[0],
-        numberOfShares: String(foundInvestment.numberOfShares),
-        purchasePricePerShare: String(foundInvestment.purchasePricePerShare),
-        purchaseFees: String(foundInvestment.purchaseFees || 0),
+        numberOfShares: String(foundInvestment.numberOfShares ?? ''),
+        purchasePricePerShare: String(foundInvestment.purchasePricePerShare ?? ''),
+        purchaseFees: String(foundInvestment.purchaseFees ?? '0'), // Default to '0' if undefined
       });
     } else if (!isLoadingContext) {
       toast({
@@ -70,18 +71,6 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     setIsLoadingData(false);
   }, [investmentId, investments, form, toast, router, isLoadingContext]);
 
-
-  const handleDecimalInputChange = useCallback((field: any, rawStringValue: string) => {
-    if (rawStringValue === '') {
-      field.onChange(undefined);
-      return;
-    }
-    const decimalRegex = /^\d*\.?\d*$/;
-    if (decimalRegex.test(rawStringValue)) {
-      field.onChange(rawStringValue);
-    }
-  },[]);
-
   async function onSubmit(values: EditStockInvestmentFormValues) {
     if (!investmentToEdit || oldAmountInvested === null) {
       toast({ title: "Error", description: "Cannot save, investment data missing or original amount not loaded.", variant: "destructive" });
@@ -89,11 +78,12 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     }
 
     try {
+      // Zod schema transforms string values to numbers
       const dataToUpdate = {
         purchaseDate: values.purchaseDate,
-        numberOfShares: parseFloat(String(values.numberOfShares)),
-        purchasePricePerShare: parseFloat(String(values.purchasePricePerShare)),
-        purchaseFees: values.purchaseFees === '' || values.purchaseFees === undefined ? 0 : parseFloat(String(values.purchaseFees)),
+        numberOfShares: values.numberOfShares, // Already number from Zod
+        purchasePricePerShare: values.purchasePricePerShare, // Already number from Zod
+        purchaseFees: values.purchaseFees, // Already number from Zod (or 0 if undefined)
       };
 
       await updateStockInvestment(investmentId, dataToUpdate, oldAmountInvested);
@@ -165,13 +155,10 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                   <FormItem>
                     <FormLabel>Number of Securities</FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
+                      <NumericInput
                         placeholder="e.g., 100.5"
-                        {...field}
-                        value={field.value ?? ''}
-                        onChange={e => handleDecimalInputChange(field, e.target.value)}
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -185,13 +172,10 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                   <FormItem>
                     <FormLabel>Purchase Price (per security)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
+                      <NumericInput
                         placeholder="e.g., 150.50"
-                        {...field}
-                        value={field.value ?? ''}
-                        onChange={e => handleDecimalInputChange(field, e.target.value)}
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -205,13 +189,10 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                   <FormItem>
                     <FormLabel>Purchase Fees (optional)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
+                      <NumericInput
                         placeholder="e.g., 5.00"
-                        {...field}
-                        value={field.value ?? ''}
-                        onChange={e => handleDecimalInputChange(field, e.target.value)}
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
