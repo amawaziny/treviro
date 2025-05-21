@@ -46,64 +46,49 @@ const getCurrentDate = () => {
 
 const initialFormValues: AddInvestmentFormValues = {
   type: undefined,
-  amountInvested: '', // Init as empty string for controlled input
+  amountInvested: '',
   purchaseDate: getCurrentDate(),
 
   selectedStockId: undefined,
-  numberOfShares: '', // Init as empty string
-  purchasePricePerShare: '', // Init as empty string
+  numberOfShares: '',
+  purchasePricePerShare: '',
   purchaseFees: "0",
 
   goldType: undefined,
-  quantityInGrams: '', // Init as empty string
+  quantityInGrams: '',
 
   currencyCode: "",
-  foreignCurrencyAmount: '', // Init as empty string
-  exchangeRateAtPurchase: '', // Init as empty string
-  // baseCurrencyAtPurchase removed
+  foreignCurrencyAmount: '',
+  exchangeRateAtPurchase: '',
 
   propertyAddress: "",
   propertyType: undefined,
 
   debtSubType: undefined,
   issuer: "",
-  interestRate: '', // Init as empty string
+  interestRate: '',
   maturityDate: '',
   name: "",
 };
 
-
-// Memoized component for Gold Fields
-const MemoizedRenderGoldFieldsSection = React.memo(function RenderGoldFieldsSection({
-  control,
-  handleNumericInputChange,
-  getCurrentDateForForm,
-  isDedicatedGoldMode,
-}: {
+type RenderGoldFieldsSectionProps = {
   control: any;
   handleNumericInputChange: (field: any, value: string) => void;
   getCurrentDateForForm: () => string;
   isDedicatedGoldMode?: boolean;
-}) {
+};
+
+const RenderGoldFieldsSection: React.FC<RenderGoldFieldsSectionProps> = ({
+  control,
+  handleNumericInputChange,
+  getCurrentDateForForm,
+  isDedicatedGoldMode,
+}) => {
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">Gold Investment Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {!isDedicatedGoldMode && (
-           <FormField
-            control={control}
-            name="name"
-            render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                    <FormLabel>Name / Description (Optional)</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., My Gold Bar or Wedding Gold" {...field} value={field.value || ''} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}
-          />
-         )}
+        {/* Name/Description field is intentionally removed from here for dedicated gold mode, handled by form's main structure */}
         <FormField
           control={control}
           name="goldType"
@@ -189,8 +174,50 @@ const MemoizedRenderGoldFieldsSection = React.memo(function RenderGoldFieldsSect
       </div>
     </div>
   );
-});
+};
+const MemoizedRenderGoldFieldsSection = React.memo(RenderGoldFieldsSection);
 MemoizedRenderGoldFieldsSection.displayName = 'MemoizedRenderGoldFieldsSection';
+
+
+type RenderCurrencyFieldsProps = {
+  control: any;
+  handleNumericInputChange: (field: any, value: string) => void;
+  getCurrentDateForForm: () => string;
+  isDedicatedCurrencyMode?: boolean;
+};
+const RenderCurrencyFields: React.FC<RenderCurrencyFieldsProps> = ({
+  control,
+  handleNumericInputChange,
+  getCurrentDateForForm,
+  isDedicatedCurrencyMode,
+}) => {
+  return (
+    <div className="space-y-6 mt-6 p-6 border rounded-md">
+      <h3 className="text-lg font-medium text-primary">Currency Holding Details</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!isDedicatedCurrencyMode && (
+            <FormField control={control} name="name" render={({ field }) => (
+                <FormItem className="md:col-span-2"><FormLabel>Name / Description (Optional)</FormLabel><FormControl><Input placeholder="e.g., USD Savings or Trip to Europe Fund" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
+            )} />
+          )}
+        <FormField control={control} name="currencyCode" render={({ field }) => (
+            <FormItem><FormLabel>Transaction Currency Code</FormLabel><FormControl><Input placeholder="e.g., USD, EUR" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
+          )} />
+        <FormField control={control} name="foreignCurrencyAmount" render={({ field }) => (
+            <FormItem><FormLabel>Foreign Currency Amount</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 1000.50" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormDescription>Amount of the foreign currency you bought.</FormDescription><FormMessage /></FormItem>
+          )} />
+        <FormField control={control} name="exchangeRateAtPurchase" render={({ field }) => (
+            <FormItem><FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 30.85 (for USD to EGP)" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChange(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
+          )} />
+         <FormField control={control} name="purchaseDate" render={({ field }) => (
+            <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDateForForm()} /></FormControl><FormMessage /></FormItem>
+          )} />
+      </div>
+    </div>
+  );
+};
+const MemoizedRenderCurrencyFields = React.memo(RenderCurrencyFields);
+MemoizedRenderCurrencyFields.displayName = 'MemoizedRenderCurrencyFields';
 
 
 export function AddInvestmentForm() {
@@ -201,12 +228,7 @@ export function AddInvestmentForm() {
 
   const preSelectedSecurityId = searchParams.get('stockId');
   const preSelectedInvestmentTypeQueryParam = searchParams.get('type') as InvestmentType | null;
-
-  const isDedicatedDebtMode = preSelectedInvestmentTypeQueryParam === "Debt Instruments";
-  const isDedicatedGoldMode = preSelectedInvestmentTypeQueryParam === "Gold";
-  const isDedicatedCurrencyMode = preSelectedInvestmentTypeQueryParam === "Currencies";
-  const isPreSelectedStockMode = !!preSelectedSecurityId && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode;
-
+  
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
   const { listedSecurities, isLoading: isLoadingListedSecurities, error: listedSecuritiesError, getListedSecurityById } = useListedSecurities();
@@ -217,50 +239,52 @@ export function AddInvestmentForm() {
     defaultValues: initialFormValues,
   });
 
-  // For console logging
-  // useEffect(() => {
-  //   console.log("AddInvestmentForm validation errors:", form.formState.errors);
-  // }, [form.formState.errors]);
-
   const selectedTypeFromForm = form.watch("type");
+
+  const isDedicatedDebtMode = preSelectedInvestmentTypeQueryParam === "Debt Instruments";
+  const isDedicatedGoldMode = preSelectedInvestmentTypeQueryParam === "Gold";
+  const isDedicatedCurrencyMode = preSelectedInvestmentTypeQueryParam === "Currencies";
+  // Ensure isPreSelectedStockMode is only true if no other dedicated mode is active
+  const isPreSelectedStockMode = !!preSelectedSecurityId && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode;
+
+
   const effectiveSelectedType = isDedicatedGoldMode ? "Gold" :
                                 isDedicatedDebtMode ? "Debt Instruments" :
                                 isDedicatedCurrencyMode ? "Currencies" :
                                 isPreSelectedStockMode ? "Stocks" :
                                 selectedTypeFromForm;
 
-
   useEffect(() => {
     let isMounted = true;
-    console.log("AddInvestmentForm: Reading URL Params");
-    console.log("AddInvestmentForm - preSelectedSecurityId from URL:", preSelectedSecurityId);
-    console.log("AddInvestmentForm - preSelectedInvestmentTypeQueryParam from URL:", preSelectedInvestmentTypeQueryParam);
+    // console.log("AddInvestmentForm: Reading URL Params");
+    // console.log("AddInvestmentForm - preSelectedSecurityId from URL:", preSelectedSecurityId);
+    // console.log("AddInvestmentForm - preSelectedInvestmentTypeQueryParam from URL:", preSelectedInvestmentTypeQueryParam);
     
     const baseResetValues: AddInvestmentFormValues = {
         ...initialFormValues, 
         purchaseDate: form.getValues("purchaseDate") || getCurrentDate(),
     };
-     console.log("AddInvestmentForm - Calculated Modes:");
-     console.log("AddInvestmentForm - isDedicatedDebtMode:", isDedicatedDebtMode);
-     console.log("AddInvestmentForm - isDedicatedGoldMode:", isDedicatedGoldMode);
-     console.log("AddInvestmentForm - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
-     console.log("AddInvestmentForm - isPreSelectedStockMode:", isPreSelectedStockMode);
+    // console.log("AddInvestmentForm - Calculated Modes:");
+    // console.log("AddInvestmentForm - isDedicatedDebtMode:", isDedicatedDebtMode);
+    // console.log("AddInvestmentForm - isDedicatedGoldMode:", isDedicatedGoldMode);
+    // console.log("AddInvestmentForm - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
+    // console.log("AddInvestmentForm - isPreSelectedStockMode:", isPreSelectedStockMode);
 
 
     if (isDedicatedGoldMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Gold Mode settings to form.");
+      // console.log("AddInvestmentForm - useEffect - Applying Dedicated Gold Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Gold" });
       setPreSelectedSecurityDetails(null);
     } else if (isDedicatedDebtMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Debt Mode settings to form.");
+      // console.log("AddInvestmentForm - useEffect - Applying Dedicated Debt Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Debt Instruments" });
       setPreSelectedSecurityDetails(null);
     } else if (isDedicatedCurrencyMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Currency Mode settings to form.");
+      // console.log("AddInvestmentForm - useEffect - Applying Dedicated Currency Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Currencies" });
       setPreSelectedSecurityDetails(null);
     } else if (isPreSelectedStockMode && preSelectedSecurityId) {
-      console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode settings to form.");
+      // console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode settings to form.");
       form.reset({ ...baseResetValues, type: "Stocks", selectedStockId: preSelectedSecurityId });
       getListedSecurityById(preSelectedSecurityId).then(security => {
         if (isMounted && security) {
@@ -271,20 +295,25 @@ export function AddInvestmentForm() {
           router.replace('/investments/add');
         }
       });
-    } else if (preSelectedInvestmentTypeQueryParam) {
-      console.log("AddInvestmentForm - useEffect - Applying general pre-selected type from URL param.");
+    } else if (preSelectedInvestmentTypeQueryParam && !isDedicatedGoldMode && !isDedicatedDebtMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode) {
+      // console.log("AddInvestmentForm - useEffect - Applying general pre-selected type from URL param (not dedicated).");
       form.reset({ ...baseResetValues, type: preSelectedInvestmentTypeQueryParam});
       setPreSelectedSecurityDetails(null);
+    } else if (!preSelectedInvestmentTypeQueryParam && !preSelectedSecurityId) {
+        // General case, no pre-selection, reset to ensure type is clear or based on previous form state if any.
+        // console.log("AddInvestmentForm - useEffect - No specific pre-selection, general mode.");
+        form.reset({ ...baseResetValues, type: selectedTypeFromForm || undefined }); // Keep existing type if user was interacting
+        setPreSelectedSecurityDetails(null);
     }
     return () => { isMounted = false; };
-  }, [isDedicatedDebtMode, isDedicatedGoldMode, isDedicatedCurrencyMode, isPreSelectedStockMode, preSelectedSecurityId, preSelectedInvestmentTypeQueryParam, getListedSecurityById, form, toast, router]);
+  }, [isDedicatedDebtMode, isDedicatedGoldMode, isDedicatedCurrencyMode, isPreSelectedStockMode, preSelectedSecurityId, preSelectedInvestmentTypeQueryParam, getListedSecurityById, form, toast, router, selectedTypeFromForm]);
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
     // console.log("AddInvestmentForm - onSubmit - Raw Zod parsed values:", JSON.stringify(values, null, 2));
 
     if (Object.keys(form.formState.errors).length > 0) {
-        // console.error("Validation errors present, cannot submit:", form.formState.errors)
+        console.error("Validation errors present, cannot submit:", form.formState.errors);
         toast({ title: "Validation Error", description: "Please check the form for errors.", variant: "destructive" });
         return;
     }
@@ -293,7 +322,7 @@ export function AddInvestmentForm() {
     setAiAnalysisResult(null);
 
     const investmentId = uuidv4();
-    let investmentName = values.name || ""; 
+    let investmentName = ""; 
 
     const finalInvestmentType = effectiveSelectedType;
 
@@ -315,11 +344,7 @@ export function AddInvestmentForm() {
 
     if (finalInvestmentType === "Stocks") {
       const securityToProcessId = values.selectedStockId || preSelectedSecurityId;
-      // console.log("AddInvestmentForm onSubmit - Stocks - securityToProcessId:", securityToProcessId);
-      // console.log("AddInvestmentForm onSubmit - Stocks - listedSecurities (name/id):", listedSecurities.map(ls => ({name: ls.name, id: ls.id })));
-
       const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
-      // console.log("AddInvestmentForm onSubmit - Stocks - selectedSecurity found:", selectedSecurity);
 
       if (!selectedSecurity) {
         toast({ title: "Error", description: "Selected security details not found.", variant: "destructive" });
@@ -347,7 +372,7 @@ export function AddInvestmentForm() {
       };
 
     } else if (finalInvestmentType === "Debt Instruments") {
-        investmentName = `${values.debtSubType || 'Debt'} from ${values.issuer || 'N/A'}`;
+        investmentName = values.name || `${values.debtSubType || 'Debt'} from ${values.issuer || 'N/A'}`;
         newInvestment = {
           ...newInvestmentBase,
           name: investmentName,
@@ -391,8 +416,8 @@ export function AddInvestmentForm() {
                 transactionCurrency: values.currencyCode!,
                 transactionAmount: foreignAmount,
                 transactionDate: values.purchaseDate,
-                baseCurrency: "EGP", // Hardcoded as per user request
-                currentExchangeRate: rateAtPurchase,
+                baseCurrency: "EGP", 
+                currentExchangeRate: rateAtPurchase, 
             };
             analysisResultFromAi = await currencyFluctuationAnalysis(aiInput);
             setAiAnalysisResult(analysisResultFromAi);
@@ -412,7 +437,7 @@ export function AddInvestmentForm() {
           propertyType: values.propertyType,
           type: 'Real Estate',
         };
-    } else {
+    } else { // Should not happen if type is always selected
          investmentName = values.name || `${finalInvestmentType} Investment on ${values.purchaseDate}`;
          newInvestment = { ...newInvestmentBase, name: investmentName, amountInvested: parseFloat(String(values.amountInvested!)), type: finalInvestmentType as any };
     }
@@ -441,8 +466,14 @@ export function AddInvestmentForm() {
     
     form.reset(resetValues);
     
-    if (!resetTargetType && !preSelectedInvestmentTypeQueryParam) { // Only redirect if it was a general add, not a dedicated one
-        router.replace('/investments/add'); 
+    if (!resetTargetType && !isPreSelectedStockMode && !preSelectedInvestmentTypeQueryParam) { 
+        // console.log("AddInvestmentForm: onSubmit - Resetting and redirecting to general add page if not dedicated or pre-selected.");
+        // Only redirect to /add if it was truly a general mode entry, not from a specific type FAB
+        if (!preSelectedInvestmentTypeQueryParam && !isPreSelectedStockMode) {
+             router.replace('/investments/add'); 
+        }
+    } else {
+        // console.log(`AddInvestmentForm: onSubmit - Resetting for dedicated/pre-selected mode: ${resetTargetType || 'Stock'}`);
     }
     
     if (!analysisResultFromAi) { 
@@ -452,8 +483,10 @@ export function AddInvestmentForm() {
 
   const handleNumericInputChangeCallback = useCallback((field: any, rawStringValue: string) => {
     const decimalRegex = /^\d*\.?\d*$/;
-    if (rawStringValue === '' || decimalRegex.test(rawStringValue)) {
-      field.onChange(rawStringValue); // Pass string directly
+    if (rawStringValue === '') {
+      field.onChange(undefined);
+    } else if (decimalRegex.test(rawStringValue)) {
+      field.onChange(rawStringValue);
     }
   }, []);
   
@@ -470,18 +503,24 @@ export function AddInvestmentForm() {
     pageTitle = "Add Currency Holding";
     submitButtonText = "Add Currency";
   } else if (isPreSelectedStockMode && preSelectedSecurityDetails) {
-    pageTitle = `Buy: ${preSelectedSecurityDetails.name}`;
+    pageTitle = `Buy: ${preSelectedSecurityDetails.name} (${preSelectedSecurityDetails.securityType === 'Fund' ? preSelectedSecurityDetails.fundType || 'Fund' : preSelectedSecurityDetails.symbol})`;
     submitButtonText = `Buy ${preSelectedSecurityDetails.securityType === 'Fund' ? 'Fund' : 'Stock'}`;
-  } else if (preSelectedInvestmentTypeQueryParam) {
-    pageTitle = `Add New ${preSelectedInvestmentTypeQueryParam}`;
+  } else if (preSelectedInvestmentTypeQueryParam && !isDedicatedGoldMode && !isDedicatedDebtMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode) {
+    pageTitle = `Add New ${preSelectedInvestmentTypeQueryParam}`; // General case for other ?type=...
     submitButtonText = `Add ${preSelectedInvestmentTypeQueryParam}`;
-  } else if (effectiveSelectedType) {
+  } else if (effectiveSelectedType && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode) { // General mode, type selected in form
      submitButtonText = `Add ${effectiveSelectedType}`;
   }
 
-  // console.log("AddInvestmentForm - Form State and Watched Values:");
-  // console.log("AddInvestmentForm - form.watch('type'):", form.watch("type"));
-  // console.log("AddInvestmentForm - effectiveSelectedType for UI logic:", effectiveSelectedType);
+
+  // console.log("AddInvestmentForm - Form State and Watched Values for Rendering:");
+  // console.log("  form.watch('type'):", form.watch("type"));
+  // console.log("  effectiveSelectedType:", effectiveSelectedType);
+  // console.log("  isDedicatedDebtMode:", isDedicatedDebtMode);
+  // console.log("  isDedicatedGoldMode:", isDedicatedGoldMode);
+  // console.log("  isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
+  // console.log("  isPreSelectedStockMode:", isPreSelectedStockMode);
+
 
   const RenderDebtFields = () => (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
@@ -548,31 +587,6 @@ export function AddInvestmentForm() {
     </div>
   );
 
-
-  const RenderCurrencyFields = () => (
-    <div className="space-y-6 mt-6 p-6 border rounded-md">
-      <h3 className="text-lg font-medium text-primary">Currency Holding Details</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {!isDedicatedCurrencyMode && (
-            <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem className="md:col-span-2"><FormLabel>Name / Description (Optional)</FormLabel><FormControl><Input placeholder="e.g., USD Savings or Trip to Europe Fund" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
-            )} />
-          )}
-        <FormField control={form.control} name="currencyCode" render={({ field }) => (
-            <FormItem><FormLabel>Transaction Currency Code</FormLabel><FormControl><Input placeholder="e.g., USD, EUR" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
-          )} />
-        <FormField control={form.control} name="foreignCurrencyAmount" render={({ field }) => (
-            <FormItem><FormLabel>Foreign Currency Amount</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 1000" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormDescription>Amount of the foreign currency you bought.</FormDescription><FormMessage /></FormItem>
-          )} />
-        <FormField control={form.control} name="exchangeRateAtPurchase" render={({ field }) => (
-            <FormItem><FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="e.g., 30.85 (for USD to EGP)" {...field} value={field.value ?? ''} onChange={e => handleNumericInputChangeCallback(field, e.target.value)} /></FormControl><FormMessage /></FormItem>
-          )} />
-         <FormField control={form.control} name="purchaseDate" render={({ field }) => (
-            <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
-          )} />
-      </div>
-    </div>
-  );
 
   const RenderRealEstateFields = () => (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
@@ -644,17 +658,24 @@ export function AddInvestmentForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             
             {isDedicatedDebtMode ? <RenderDebtFields /> :
-             isDedicatedGoldMode ? <MemoizedRenderGoldFieldsSection control={form.control} handleNumericInputChange={handleNumericInputChangeCallback} getCurrentDateForForm={getCurrentDate} isDedicatedGoldMode={true} /> :
-             isDedicatedCurrencyMode ? <RenderCurrencyFields /> :
+             isDedicatedGoldMode ? <MemoizedRenderGoldFieldsSection control={form.control} handleNumericInputChange={handleNumericInputChangeCallback} getCurrentDateForForm={getCurrentDate} isDedicatedGoldMode={true}/> :
+             isDedicatedCurrencyMode ? <MemoizedRenderCurrencyFields control={form.control} handleNumericInputChange={handleNumericInputChangeCallback} getCurrentDateForForm={getCurrentDate} isDedicatedCurrencyMode={true} /> :
              isPreSelectedStockMode ? <RenderStockFields /> :
              ( // General Mode
                 <>
                   <RenderGeneralTypeSelector />
+                  {/* Conditionally render Name/Description for non-dedicated, non-stock types */}
+                  {effectiveSelectedType && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode && effectiveSelectedType !== "Stocks" && (
+                     <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormItem className="mt-6"><FormLabel>Name / Description (Optional)</FormLabel><FormControl><Input placeholder={`e.g., My ${effectiveSelectedType} Investment`} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                  )}
+
                   {effectiveSelectedType === "Stocks" && <RenderStockFields />}
                   {effectiveSelectedType === "Gold" && <MemoizedRenderGoldFieldsSection control={form.control} handleNumericInputChange={handleNumericInputChangeCallback} getCurrentDateForForm={getCurrentDate} />}
-                  {effectiveSelectedType === "Currencies" && <RenderCurrencyFields />}
+                  {effectiveSelectedType === "Currencies" && <MemoizedRenderCurrencyFields control={form.control} handleNumericInputChange={handleNumericInputChangeCallback} getCurrentDateForForm={getCurrentDate} />}
                   {effectiveSelectedType === "Real Estate" && <RenderRealEstateFields />}
-                  {effectiveSelectedType === "Debt Instruments" && <RenderDebtFields />}
+                  {effectiveSelectedType === "Debt Instruments" && <RenderDebtFields />} {/* Should not be hit if dedicated mode works */}
                 </>
              )
             }
@@ -676,7 +697,9 @@ export function AddInvestmentForm() {
               disabled={
                 form.formState.isSubmitting ||
                 isLoadingAi ||
+                // Disable if in general stock mode (not pre-selected) and security details are still loading/error/not selected
                 (effectiveSelectedType === "Stocks" && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode && (isLoadingListedSecurities || !!listedSecuritiesError || !form.getValues("selectedStockId"))) ||
+                // Disable if in pre-selected stock mode and details are still loading
                 (isPreSelectedStockMode && (!preSelectedSecurityDetails || isLoadingListedSecurities))
               }
             >
@@ -689,3 +712,6 @@ export function AddInvestmentForm() {
     </Card>
   );
 }
+
+    
+
