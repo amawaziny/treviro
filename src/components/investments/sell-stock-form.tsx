@@ -50,10 +50,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
       stockId: securityId, 
-      numberOfSharesToSell: undefined, // Will be '' in input
-      sellPricePerShare: undefined,    // Will be '' in input
+      numberOfSharesToSell: '', // Initialize as empty string
+      sellPricePerShare: '',    // Initialize as empty string
       sellDate: getCurrentDate(),
-      fees: undefined,                 // Will be '' in input, schema defaults to 0
+      fees: '',                 // Initialize as empty string, schema defaults to 0
     },
   });
 
@@ -73,6 +73,11 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
           0
         );
         setMaxSharesToSell(totalOwned);
+        // Pre-fill sellPricePerShare if it's not already set (e.g. by user interaction)
+        // and securityBeingSold.price is available
+        if (listedSecurityData.price && form.getValues("sellPricePerShare") === '') {
+            form.setValue("sellPricePerShare", String(listedSecurityData.price));
+        }
       }
       setIsLoading(false);
     }
@@ -82,20 +87,13 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
         setIsLoading(false); 
     }
 
-  }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext]);
+  }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext, form]);
   
-  useEffect(() => {
-    if (securityBeingSold && securityBeingSold.price && form.getValues("sellPricePerShare") === undefined) {
-        form.setValue("sellPricePerShare", securityBeingSold.price);
-    }
-  }, [securityBeingSold, form]);
-
-  const handleNumericInputChange = useCallback((field: any, value: string) => {
-    if (value === '') {
+  const handleNumericInputChange = useCallback((field: any, rawStringValue: string) => {
+    if (rawStringValue === '') {
       field.onChange(undefined); 
     } else {
-      const parsedValue = parseFloat(value);
-      field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
+      field.onChange(rawStringValue); // Pass the raw string to RHF, Zod will coerce
     }
   }, []);
 
@@ -105,12 +103,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       toast({ title: "Error", description: "Security details not found.", variant: "destructive" });
       return;
     }
-    if (values.numberOfSharesToSell === undefined || values.sellPricePerShare === undefined) {
-        toast({ title: "Validation Error", description: "Number of shares/units and sell price must be provided.", variant: "destructive" });
-        return;
-    }
+    // Zod coercion handles string to number, validation handles positive.
+    const numberOfSharesToSellNum = parseFloat(String(values.numberOfSharesToSell));
 
-    if (values.numberOfSharesToSell > maxSharesToSell) {
+    if (numberOfSharesToSellNum > maxSharesToSell) {
       form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} shares/units.` });
       return;
     }
@@ -119,16 +115,16 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       await recordSellStockTransaction(
         securityId, 
         securityBeingSold.symbol,
-        values.numberOfSharesToSell,
-        values.sellPricePerShare,
+        parseFloat(String(values.numberOfSharesToSell)), // Ensure number is passed
+        parseFloat(String(values.sellPricePerShare)),   // Ensure number is passed
         values.sellDate,
-        values.fees === undefined ? 0 : values.fees
+        values.fees === '' || values.fees === undefined ? 0 : parseFloat(String(values.fees)) // Ensure number is passed
       );
       toast({
         title: "Sale Recorded",
         description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityBeingSold.securityType === 'Fund' ? 'units' : 'shares'} of ${securityBeingSold.name}.`,
       });
-      router.push("/investments/stocks"); 
+      router.push(`/stocks/${securityId}`); 
     } catch (error: any) {
       console.error("Error recording sale:", error);
       toast({
@@ -246,7 +242,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
                     inputMode="decimal" 
                     placeholder="e.g., 5.00" 
                     {...field} 
-                    value={field.value ?? ''} // Use ?? '' to ensure value is always a string
+                    value={field.value ?? ''} 
                     onChange={e => handleNumericInputChange(field, e.target.value)}
                   />
                 </FormControl>

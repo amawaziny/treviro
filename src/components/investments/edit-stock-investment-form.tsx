@@ -41,9 +41,9 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     resolver: zodResolver(EditStockInvestmentSchema),
     defaultValues: {
       purchaseDate: "",
-      numberOfShares: undefined, // Will be '' in input
-      purchasePricePerShare: undefined, // Will be '' in input
-      purchaseFees: undefined, // Will be '' in input, schema defaults to 0
+      numberOfShares: '', // Initialize as empty string
+      purchasePricePerShare: '', // Initialize as empty string
+      purchaseFees: '', // Initialize as empty string, schema defaults to 0
     },
   });
 
@@ -55,9 +55,9 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
       setOldAmountInvested(foundInvestment.amountInvested);
       form.reset({
         purchaseDate: foundInvestment.purchaseDate.split('T')[0], 
-        numberOfShares: foundInvestment.numberOfShares,
-        purchasePricePerShare: foundInvestment.purchasePricePerShare,
-        purchaseFees: foundInvestment.purchaseFees || 0,
+        numberOfShares: String(foundInvestment.numberOfShares), // Convert to string for input
+        purchasePricePerShare: String(foundInvestment.purchasePricePerShare), // Convert to string
+        purchaseFees: String(foundInvestment.purchaseFees || 0), // Convert to string
       });
     } else if (!isLoadingContext) {
       toast({
@@ -71,12 +71,11 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
   }, [investmentId, investments, form, toast, router, isLoadingContext]);
 
 
-  const handleNumericInputChange = useCallback((field: any, value: string) => {
-    if (value === '') {
+  const handleNumericInputChange = useCallback((field: any, rawStringValue: string) => {
+    if (rawStringValue === '') {
       field.onChange(undefined); 
     } else {
-      const parsedValue = parseFloat(value);
-      field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
+      field.onChange(rawStringValue); // Pass the raw string to RHF, Zod will coerce
     }
   },[]);
 
@@ -87,12 +86,15 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     }
 
     try {
-      await updateStockInvestment(investmentId, {
+      // Ensure values passed to context are numbers after Zod coercion
+      const dataToUpdate = {
         purchaseDate: values.purchaseDate,
-        numberOfShares: values.numberOfShares,
-        purchasePricePerShare: values.purchasePricePerShare,
-        purchaseFees: values.purchaseFees,
-      }, oldAmountInvested);
+        numberOfShares: parseFloat(String(values.numberOfShares)),
+        purchasePricePerShare: parseFloat(String(values.purchasePricePerShare)),
+        purchaseFees: values.purchaseFees === '' || values.purchaseFees === undefined ? 0 : parseFloat(String(values.purchaseFees)),
+      };
+
+      await updateStockInvestment(investmentId, dataToUpdate, oldAmountInvested);
 
       toast({
         title: "Investment Updated",
