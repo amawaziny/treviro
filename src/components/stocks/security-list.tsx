@@ -3,7 +3,7 @@
 
 import { SecurityListItem } from './security-list-item'; // Updated import
 import { Input } from '@/components/ui/input';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { useListedSecurities } from '@/hooks/use-listed-securities'; // Updated hook import
 import type { ListedSecurity } from '@/lib/types';
@@ -18,6 +18,12 @@ interface SecurityListProps {
 export function SecurityList({ filterType, title }: SecurityListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { listedSecurities, isLoading, error } = useListedSecurities(); 
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log(`SecurityList: document.documentElement.dir = ${document.documentElement.dir}`);
+    }
+  }, []); // Log on mount, and whenever it re-renders if dir changes (though dir on html is less likely to trigger re-render here directly)
 
   const filteredAndTypedSecurities = useMemo(() => {
     let securitiesToFilter = listedSecurities;

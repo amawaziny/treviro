@@ -1,9 +1,18 @@
 
+"use client"; // Added "use client" as useEffect is used
+
 import { SecurityList } from "@/components/stocks/security-list"; // Updated import
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect } from 'react'; // Added useEffect import
 
 export default function SecuritiesPage() {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log(`SecuritiesPage (Tabs): document.documentElement.dir = ${document.documentElement.dir}`);
+    }
+  }, []); // Log on mount
+
   return (
     <div className="space-y-8">
       <div>
