@@ -5,8 +5,11 @@ import { SecurityList } from "@/components/stocks/security-list"; // Updated imp
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect } from 'react'; // Added useEffect import
+import { useLanguage } from "@/contexts/language-context"; // Added import
 
 export default function SecuritiesPage() {
+  const { language } = useLanguage(); // Get current language
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log(`SecuritiesPage (Tabs): document.documentElement.dir = ${document.documentElement.dir}`);
@@ -20,7 +23,7 @@ export default function SecuritiesPage() {
         <p className="text-muted-foreground">Discover stocks and funds from different markets.</p>
       </div>
       <Separator />
-      <Tabs defaultValue="stocks" className="w-full">
+      <Tabs defaultValue="stocks" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
           <TabsTrigger value="stocks">Stocks</TabsTrigger>
           <TabsTrigger value="funds">Funds</TabsTrigger>
