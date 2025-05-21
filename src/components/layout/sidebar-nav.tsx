@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, List, Briefcase, Home, Gem, ScrollText, DollarSign, Search } from 'lucide-react'; // Changed List to Search for "Explore"
+import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search } from 'lucide-react'; // Changed List to Search for "Explore"
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -31,30 +31,30 @@ const navItems: NavItem[] = [
   {
     title: 'Explore', 
     href: '/stocks', 
-    icon: Search, // Using Search icon for "Explore"
+    icon: Search, 
   },
   {
-    title: 'My Stocks',
+    title: 'Stocks',
     href: '/investments/stocks',
     icon: Briefcase,
   },
   {
-    title: 'My Real Estate',
+    title: 'Real Estate',
     href: '/investments/real-estate',
     icon: Home,
   },
   {
-    title: 'My Gold',
+    title: 'Gold',
     href: '/investments/gold',
     icon: Gem,
   },
   {
-    title: 'My Debt', 
+    title: 'Debt Instruments', 
     href: '/investments/debt-instruments',
     icon: ScrollText,
   },
   {
-    title: 'My Currencies',
+    title: 'Currencies',
     href: '/investments/currencies',
     icon: DollarSign,
   },
@@ -77,19 +77,21 @@ export function SidebarNav() {
           isActive = pathname === item.href;
         } else {
           isActive = pathname.startsWith(item.href);
+          // Special handling for dashboard to not stay active for child routes
           if (item.href === '/dashboard' && pathname !== '/dashboard') {
             isActive = false;
           }
+          // Ensure /stocks (explore) isn't active for /investments/stocks
+          if (item.href === '/stocks' && pathname.startsWith('/investments/stocks')) {
+            isActive = false;
+          }
         }
+         // Specific active state for /stocks to cover its child /stocks/[stockId]
          if (item.href === '/stocks' && pathname.startsWith('/stocks/')) {
            isActive = true;
          }
-          if (item.href === '/investments/stocks' && pathname.startsWith('/investments/stocks')) {
-             isActive = true;
-         }
-         if (item.href === '/investments/add' && pathname.startsWith('/investments/add')) {
-             // This condition will likely not be hit if Add Investment is not in navItems
-             // but useful if it were to be re-added contextually
+         // Specific active state for /investments/stocks to cover its child /investments/stocks
+         if (item.href === '/investments/stocks' && pathname.startsWith('/investments/stocks')) {
              isActive = true;
          }
 
