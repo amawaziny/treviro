@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,10 +18,10 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter }
 from 'next/navigation';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import type { StockInvestment } from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
@@ -36,14 +35,15 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
   const router = useRouter();
   const [investmentToEdit, setInvestmentToEdit] = useState<StockInvestment | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [oldAmountInvested, setOldAmountInvested] = useState<number | null>(null);
   
   const form = useForm<EditStockInvestmentFormValues>({
     resolver: zodResolver(EditStockInvestmentSchema),
     defaultValues: {
       purchaseDate: "",
-      numberOfShares: undefined,
-      purchasePricePerShare: undefined,
-      purchaseFees: 0,
+      numberOfShares: undefined, // Will be '' in input
+      purchasePricePerShare: undefined, // Will be '' in input
+      purchaseFees: undefined, // Will be '' in input, schema defaults to 0
     },
   });
 
@@ -52,8 +52,9 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     const foundInvestment = investments.find(inv => inv.id === investmentId && inv.type === 'Stocks') as StockInvestment | undefined;
     if (foundInvestment) {
       setInvestmentToEdit(foundInvestment);
+      setOldAmountInvested(foundInvestment.amountInvested);
       form.reset({
-        purchaseDate: foundInvestment.purchaseDate.split('T')[0], // Ensure YYYY-MM-DD format for date input
+        purchaseDate: foundInvestment.purchaseDate.split('T')[0], 
         numberOfShares: foundInvestment.numberOfShares,
         purchasePricePerShare: foundInvestment.purchasePricePerShare,
         purchaseFees: foundInvestment.purchaseFees || 0,
@@ -64,28 +65,26 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
         description: "Investment not found or not editable.",
         variant: "destructive",
       });
-      router.back(); // Go back if investment not found
+      router.back(); 
     }
     setIsLoadingData(false);
   }, [investmentId, investments, form, toast, router, isLoadingContext]);
 
 
-  const handleNumericInputChange = (field: any, value: string) => {
+  const handleNumericInputChange = useCallback((field: any, value: string) => {
     if (value === '') {
       field.onChange(undefined); 
     } else {
       const parsedValue = parseFloat(value);
       field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
     }
-  };
+  },[]);
 
   async function onSubmit(values: EditStockInvestmentFormValues) {
-    if (!investmentToEdit) {
-      toast({ title: "Error", description: "Cannot save, investment data missing.", variant: "destructive" });
+    if (!investmentToEdit || oldAmountInvested === null) {
+      toast({ title: "Error", description: "Cannot save, investment data missing or original amount not loaded.", variant: "destructive" });
       return;
     }
-
-    const oldAmountInvested = investmentToEdit.amountInvested;
 
     try {
       await updateStockInvestment(investmentId, {
@@ -99,7 +98,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
         title: "Investment Updated",
         description: `${investmentToEdit.actualStockName || investmentToEdit.name} purchase details updated.`,
       });
-      router.push(`/stocks/${investmentToEdit.tickerSymbol}`); // Navigate back to stock detail page
+      router.push(`/stocks/${investmentToEdit.tickerSymbol}`); 
     } catch (error: any) {
       console.error("Error updating investment:", error);
       toast({
@@ -163,9 +162,9 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormLabel>Number of Securities</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="any" 
-                        placeholder="e.g., 100" 
+                        type="text" 
+                        inputMode="decimal"
+                        placeholder="e.g., 100.5" 
                         {...field} 
                         value={field.value ?? ''}
                         onChange={e => handleNumericInputChange(field, e.target.value)}
@@ -183,8 +182,8 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormLabel>Purchase Price (per security)</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="any" 
+                        type="text" 
+                        inputMode="decimal" 
                         placeholder="e.g., 150.50" 
                         {...field} 
                         value={field.value ?? ''}
@@ -203,8 +202,8 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormLabel>Purchase Fees (optional)</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="any" 
+                        type="text" 
+                        inputMode="decimal" 
                         placeholder="e.g., 5.00" 
                         {...field} 
                         value={field.value ?? ''}

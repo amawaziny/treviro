@@ -16,11 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas"; // Schema remains SellStockSchema
 import { useInvestments } from "@/hooks/use-investments";
-import { useListedSecurities } from "@/hooks/use-listed-securities"; // Updated hook
+import { useListedSecurities } from "@/hooks/use-listed-securities"; 
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import type { ListedSecurity, StockInvestment } from "@/lib/types"; // ListedStock -> ListedSecurity
+import React, { useEffect, useState, useCallback } from "react";
+import type { ListedSecurity, StockInvestment } from "@/lib/types"; 
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -32,13 +32,13 @@ const getCurrentDate = () => {
   return `${year}-${month}-${day}`;
 };
 
-interface SellSecurityFormProps { // Renamed interface for clarity
-  stockId: string; // This is now securityId
+interface SellSecurityFormProps { 
+  stockId: string; 
 }
 
-export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { // Renamed prop for clarity
+export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
   const { recordSellStockTransaction, investments, isLoading: isLoadingInvestmentsContext } = useInvestments();
-  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); // Updated hook
+  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); 
   const { toast } = useToast();
   const router = useRouter();
 
@@ -49,11 +49,11 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
   const form = useForm<SellStockFormValues>({
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
-      stockId: securityId, // Schema expects stockId, maps to securityId here
-      numberOfSharesToSell: undefined,
-      sellPricePerShare: undefined,
+      stockId: securityId, 
+      numberOfSharesToSell: undefined, // Will be '' in input
+      sellPricePerShare: undefined,    // Will be '' in input
       sellDate: getCurrentDate(),
-      fees: 0,
+      fees: undefined,                 // Will be '' in input, schema defaults to 0
     },
   });
 
@@ -90,14 +90,15 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
     }
   }, [securityBeingSold, form]);
 
-  const handleNumericInputChange = (field: any, value: string) => {
+  const handleNumericInputChange = useCallback((field: any, value: string) => {
     if (value === '') {
       field.onChange(undefined); 
     } else {
       const parsedValue = parseFloat(value);
       field.onChange(isNaN(parsedValue) ? undefined : parsedValue);
     }
-  };
+  }, []);
+
 
   async function onSubmit(values: SellStockFormValues) {
     if (!securityBeingSold) {
@@ -116,7 +117,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
 
     try {
       await recordSellStockTransaction(
-        securityId, // Pass securityId
+        securityId, 
         securityBeingSold.symbol,
         values.numberOfSharesToSell,
         values.sellPricePerShare,
@@ -127,7 +128,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
         title: "Sale Recorded",
         description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityBeingSold.securityType === 'Fund' ? 'units' : 'shares'} of ${securityBeingSold.name}.`,
       });
-      router.push("/investments/stocks"); // Or to a more general "My Securities" page if that exists later
+      router.push("/investments/stocks"); 
     } catch (error: any) {
       console.error("Error recording sale:", error);
       toast({
@@ -167,7 +168,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
     );
   }
 
-  const securityLabel = securityBeingSold.securityType === 'Fund' ? 'units' : 'securities';
+  const securityLabel = securityBeingSold.securityType === 'Fund' ? 'units' : 'shares';
 
   return (
     <Form {...form}>
@@ -187,9 +188,9 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
                 <FormLabel>Number of {securityLabel} to Sell</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
-                    step="any" 
-                    placeholder="e.g., 50" 
+                    type="text" 
+                    inputMode="decimal" 
+                    placeholder="e.g., 50 or 10.5" 
                     {...field} 
                     value={field.value ?? ''}
                     onChange={e => handleNumericInputChange(field, e.target.value)}
@@ -208,8 +209,8 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
                 <FormLabel>Sell Price (per {securityLabel.slice(0,-1)})</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
-                    step="any" 
+                    type="text" 
+                    inputMode="decimal" 
                     placeholder="e.g., 160.25" 
                     {...field} 
                     value={field.value ?? ''}
@@ -241,11 +242,11 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
                 <FormLabel>Fees (if any)</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
-                    step="any" 
+                    type="text" 
+                    inputMode="decimal" 
                     placeholder="e.g., 5.00" 
                     {...field} 
-                    value={field.value ?? ''}
+                    value={field.value ?? ''} // Use ?? '' to ensure value is always a string
                     onChange={e => handleNumericInputChange(field, e.target.value)}
                   />
                 </FormControl>
@@ -263,4 +264,3 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) { 
     </Form>
   );
 }
-
