@@ -8,7 +8,6 @@ import { logEvent } from 'firebase/analytics';
 
 export function FirebaseIntegrations({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Crashlytics is initialized in firebase.ts if supported.
   // Automatic crash collection should start once firebase.ts initializes it.
@@ -16,8 +15,7 @@ export function FirebaseIntegrations({ children }: { children: React.ReactNode }
   useEffect(() => {
     // This effect runs when `analytics` instance becomes available or pathname/searchParams change.
     if (analytics) { 
-      const searchParamsString = searchParams.toString();
-      const url = pathname + (searchParamsString ? `?${searchParamsString}` : '');
+      const url = pathname ;
       
       logEvent(analytics, 'page_view', {
         page_path: url,
@@ -25,7 +23,7 @@ export function FirebaseIntegrations({ children }: { children: React.ReactNode }
       });
       // console.log(`Logged page_view: ${url}`);
     }
-  }, [pathname, searchParams, analytics]); // Ensure effect re-runs if analytics instance becomes available later
+  }, [pathname, analytics]); // Ensure effect re-runs if analytics instance becomes available later
 
   return <>{children}</>;
 }
