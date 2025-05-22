@@ -1,16 +1,18 @@
 
-"use client";
+"use client"; // This page needs to be a client component to use next/dynamic with ssr:false
 
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
 
 // Dynamically import AddInvestmentForm with ssr: false
+// The component itself (AddInvestmentForm) must also be marked with "use client";
 const AddInvestmentForm = dynamic(() => 
   import('@/components/investments/add-investment-form').then(mod => mod.AddInvestmentForm),
   { 
-    suspense: true, // This will use the <Suspense> boundary below
-    ssr: false      // Ensure this component is only rendered on the client
+    ssr: false,      // Ensure this component is only rendered on the client
+    suspense: true,  // This will use the <Suspense> boundary below
+    // loading: () => <AddInvestmentLoadingFallback /> // Alternative if suspense:true is not used directly
   }
 );
 

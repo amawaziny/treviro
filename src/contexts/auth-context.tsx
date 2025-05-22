@@ -80,16 +80,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await signInWithPopup(firebaseAuthService, provider);
       // User object is set by onAuthStateChanged
       console.log("AuthContext: signInWithPopup successful. User UID:", result.user?.uid);
+      // Removed router.push('/dashboard'); to let useEffect in LoginPage handle it
     } catch (error: any) {
-      console.error("AuthContext: signInWithPopup error. Code:", error.code, "Message:", error.message);
       if (error.code === 'auth/popup-closed-by-user') {
         console.warn("AuthContext: Google sign-in popup was closed by user or due to an interruption.");
       } else if (error.code === 'auth/cancelled-popup-request') {
         console.warn("AuthContext: Google sign-in popup request cancelled (e.g., multiple popups).");
       } else if (error.code === 'auth/popup-blocked') {
-        console.warn("AuthContext: Google sign-in popup blocked by the browser.");
+        console.warn("AuthContext: Google sign-in popup blocked by the browser. Consider notifying the user to enable popups.");
+        // You might want to show a toast or message to the user here.
       } else {
-        console.error("AuthContext: An unexpected error occurred during Google sign-in:", error);
+        console.error("AuthContext: An unexpected error occurred during Google sign-in. Code:", error.code, "Message:", error.message);
       }
     } finally {
       setIsProcessingLogin(false);

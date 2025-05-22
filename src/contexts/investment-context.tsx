@@ -53,7 +53,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   }, [userId]);
 
   const updateDashboardSummaryDoc = useCallback(async (updates: Partial<DashboardSummary>) => {
-    if (!userId || !firestoreInstance) return;
+    if (!userId || !firestoreInstance) {
+        console.warn("UpdateDashboardSummaryDoc: User ID or Firestore instance missing.");
+        return;
+    }
     const summaryDocRef = getDashboardSummaryDocRef();
     if (!summaryDocRef) return;
 
@@ -67,14 +70,18 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         for (const key in updates) {
             const typedKey = key as keyof DashboardSummary;
             const updateValue = updates[typedKey];
+            // Ensure both current value and update value are numbers before adding
             if (typeof updateValue === 'number' && typeof newData[typedKey] === 'number') {
                 (newData[typedKey] as number) += updateValue;
+            } else if (typeof updateValue === 'number' && newData[typedKey] === undefined) {
+                // If current value is undefined (e.g., new field), initialize it
+                (newData[typedKey] as number) = updateValue;
             }
         }
         transaction.set(summaryDocRef, newData);
       });
     } catch (e) {
-      console.error("Transaction failed: ", e);
+      console.error("Dashboard summary transaction failed: ", e);
     }
   }, [userId, getDashboardSummaryDocRef]);
 
@@ -82,7 +89,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (authIsLoading) {
       setIsLoading(true);
-      return () => {}; // Return an empty cleanup function
+      return () => {}; 
     }
 
     if (!isAuthenticated || !userId || !firestoreInstance) {
@@ -92,7 +99,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setDashboardSummary(defaultDashboardSummary);
       setIsLoading(false);
       console.warn("InvestmentContext: User not authenticated, userId missing, or Firestore not available. Skipping data fetching.");
-      return () => {}; // Return an empty cleanup function
+      return () => {};
     }
 
     setIsLoading(true);
@@ -110,12 +117,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             } else {
                 setDashboardSummary(defaultDashboardSummary);
                 const defaultData: DashboardSummary = { ...defaultDashboardSummary };
+                // Attempt to create the default summary doc if it doesn't exist
                 setDoc(summaryDocRef, defaultData).catch(err => console.error("Failed to create default summary doc:", err));
             }
             }, (error) => {
             console.error("Error fetching dashboard summary:", error);
-            setDashboardSummary(defaultDashboardSummary);
+            setDashboardSummary(defaultDashboardSummary); // Fallback to default on error
             });
+    } else {
+        setDashboardSummary(defaultDashboardSummary); // If no ref, use default
     }
 
 
@@ -137,6 +147,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setInvestments(fetchedInvestments);
     }, (error) => {
       console.error("Error fetching investments:", error);
+      setInvestments([]); // Clear on error
     });
 
     const qTransactions = query(collection(firestoreInstance, transactionsCollectionPath), orderBy("date", "desc"));
@@ -156,6 +167,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         setTransactions(fetchedTransactions);
     }, (error) => {
         console.error("Error fetching transactions:", error);
+        setTransactions([]); // Clear on error
     });
 
 
@@ -168,10 +180,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setCurrencyAnalyses(fetchedAnalyses);
     }, (error) => {
       console.error("Error fetching currency analyses:", error);
+      setCurrencyAnalyses({}); // Clear on error
     });
 
+    // Consolidate loading state updates
     const dataFetchPromises = [
-      getDocs(qInvestments).catch(() => null),
+      getDocs(qInvestments).catch(() => null), // Allow promises to resolve even if one fails
       getDocs(qTransactions).catch(() => null),
       getDocs(qAnalyses).catch(() => null)
     ];
@@ -182,7 +196,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     Promise.all(dataFetchPromises).then(() => {
         setIsLoading(false);
     }).catch(() => {
-        setIsLoading(false);
+        // This catch might be redundant if individual fetches handle their errors
+        setIsLoading(false); 
     });
 
 
@@ -192,11 +207,11 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       unsubTransactions();
       unsubSummary();
     };
-  }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]);
+  }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]); // Added getDashboardSummaryDocRef
 
   const addInvestment = useCallback(async (investmentData: Omit<Investment, 'createdAt' | 'id'>, analysis?: CurrencyFluctuationAnalysisResult) => {
     if (!isAuthenticated || !userId || !firestoreInstance) {
-      console.error("User not authenticated or Firestore not available, cannot add investment.");
+      console.error("AddInvestment: User not authenticated, userId missing, or Firestore not available.");
       return;
     }
 
@@ -228,6 +243,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("Error adding investment to Firestore:", error);
+      throw error; // Re-throw to be caught by form if needed
     }
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
@@ -245,6 +261,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       fees: number
     ) => {
       if (!isAuthenticated || !userId || !firestoreInstance) {
+        console.error("RecordSellStockTransaction: User not authenticated, userId missing, or Firestore not available.");
         throw new Error("User not authenticated or Firestore not available.");
       }
 
@@ -293,7 +310,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
       
       let sharesToDeduct = numberOfSharesToSell;
-      let costBasisReduction = 0;
+      let costBasisReduction = 0; // Track how much totalInvested is reduced by this sale
 
       for (const investment of userStockInvestments) {
         if (sharesToDeduct <= 0) break;
@@ -305,34 +322,35 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
         if (sharesInThisLot >= sharesToDeduct) {
           const newShareCount = sharesInThisLot - sharesToDeduct;
-          const proportionSold = sharesToDeduct / sharesInThisLot;
-          const costBasisOfSoldPortion = costOfThisLot * proportionSold;
-          costBasisReduction += costBasisOfSoldPortion;
+          // Calculate the proportion of cost attributed to the sold shares from this lot
+          const proportionSoldFromLot = sharesToDeduct / sharesInThisLot;
+          const costBasisOfSoldPortionFromLot = costOfThisLot * proportionSoldFromLot;
+          costBasisReduction += costBasisOfSoldPortionFromLot;
 
 
           if (newShareCount === 0) {
             batch.delete(investmentDocRef);
           } else {
-            const newAmountInvested = costOfThisLot - costBasisOfSoldPortion;
+            // The remaining amountInvested for this lot is its original cost minus the cost of shares sold from it
+            const newAmountInvestedForLot = costOfThisLot - costBasisOfSoldPortionFromLot;
             batch.update(investmentDocRef, { 
                 numberOfShares: newShareCount,
-                amountInvested: newAmountInvested 
+                amountInvested: newAmountInvestedForLot 
             });
           }
           sharesToDeduct = 0;
-        } else {
-          costBasisReduction += costOfThisLot;
+        } else { // Selling more shares than available in this lot
+          costBasisReduction += costOfThisLot; // Entire cost of this lot is being "realized"
           batch.delete(investmentDocRef);
           sharesToDeduct -= sharesInThisLot;
         }
       }
       await batch.commit();
 
-      // Update dashboard summary after batch commit
       if (typeof profitOrLoss === 'number') {
         await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
       }
-       if (costBasisReduction !== 0) {
+      if (costBasisReduction !== 0) {
         await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReduction });
       }
 
@@ -342,7 +360,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const removeStockInvestmentsBySymbol = useCallback(async (tickerSymbol: string) => {
     if (!isAuthenticated || !userId || !firestoreInstance) {
-      console.error("User not authenticated or Firestore not available, cannot remove investments.");
+      console.error("RemoveStockInvestmentsBySymbol: User not authenticated, userId missing, or Firestore not available.");
       return;
     }
     const investmentsCollectionPath = `users/${userId}/investments`;
@@ -384,6 +402,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     oldAmountInvested: number
   ) => {
     if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("UpdateStockInvestment: User not authenticated, userId missing, or Firestore not available.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
@@ -414,6 +433,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteSellTransaction = useCallback(async (transactionToDelete: Transaction) => {
     if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("DeleteSellTransaction: User not authenticated, userId missing, or Firestore not available.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     if (transactionToDelete.type !== 'sell') {
@@ -429,16 +449,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
       }
       
-      // Add back the cost basis of the sold shares to totalInvestedAcrossAllAssets
-      // This assumes we can recalculate or estimate the cost basis of the sold shares.
-      // For simplicity, we'll use transactionToDelete.totalAmount - transactionToDelete.profitOrLoss
-      // This is an approximation if fees were involved or average cost changed.
-      // A more precise way would be to store costBasisOfSoldShares in the transaction.
       const costBasisOfSoldShares = transactionToDelete.totalAmount - (transactionToDelete.profitOrLoss || 0);
-      if (costBasisOfSoldShares > 0) { // Only add back if it was a cost
-          // This is tricky: deleting a sale should *increase* your cost basis of held assets.
-          // Let's assume the original recordSellStockTransaction *decreased* totalInvestedAmount by costBasisOfSoldShares.
-          // So deleting should *increase* it back.
+      if (costBasisOfSoldShares > 0) { 
+          // When a sale is deleted, the cost basis that was previously "realized" (removed from totalInvested)
+          // should be added back to totalInvestedAcrossAllAssets.
           await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: costBasisOfSoldShares });
       }
 
