@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary } from '@/lib/types';
-import { db } from '@/lib/firebase';
+import { db as firestoreInstance } from '@/lib/firebase'; // Renamed import
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, increment, runTransaction, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,37 +48,30 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const userId = user?.uid;
 
   const getDashboardSummaryDocRef = useCallback(() => {
-    if (!userId) return null;
-    return doc(db, `users/${userId}/dashboard_aggregates/summary`);
+    if (!userId || !firestoreInstance) return null;
+    return doc(firestoreInstance, `users/${userId}/dashboard_aggregates/summary`);
   }, [userId]);
 
   const updateDashboardSummaryDoc = useCallback(async (updates: Partial<DashboardSummary>) => {
-    if (!userId) return;
+    if (!userId || !firestoreInstance) return;
     const summaryDocRef = getDashboardSummaryDocRef();
     if (!summaryDocRef) return;
 
     try {
-      await runTransaction(db, async (transaction) => {
+      await runTransaction(firestoreInstance, async (transaction) => {
         const summaryDoc = await transaction.get(summaryDocRef);
-        if (!summaryDoc.exists()) {
-          const initialData: DashboardSummary = { ...defaultDashboardSummary };
-          for (const key in updates) {
+        const currentData = summaryDoc.exists() ? summaryDoc.data() as DashboardSummary : { ...defaultDashboardSummary };
+        
+        const newData: DashboardSummary = { ...currentData };
+
+        for (const key in updates) {
             const typedKey = key as keyof DashboardSummary;
-            if (typeof updates[typedKey] === 'number') {
-              (initialData[typedKey] as number) = (updates[typedKey] as number);
+            const updateValue = updates[typedKey];
+            if (typeof updateValue === 'number' && typeof newData[typedKey] === 'number') {
+                (newData[typedKey] as number) += updateValue;
             }
-          }
-          transaction.set(summaryDocRef, initialData);
-        } else {
-          const updateData: { [key: string]: any } = {};
-          for (const key in updates) {
-            const typedKey = key as keyof DashboardSummary;
-             if (typeof updates[typedKey] === 'number') {
-                updateData[typedKey] = increment(updates[typedKey] as number);
-            }
-          }
-          transaction.update(summaryDocRef, updateData);
         }
+        transaction.set(summaryDocRef, newData);
       });
     } catch (e) {
       console.error("Transaction failed: ", e);
@@ -89,16 +82,17 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (authIsLoading) {
       setIsLoading(true);
-      return;
+      return () => {}; // Return an empty cleanup function
     }
 
-    if (!isAuthenticated || !userId) {
+    if (!isAuthenticated || !userId || !firestoreInstance) {
       setInvestments([]);
       setTransactions([]);
       setCurrencyAnalyses({});
       setDashboardSummary(defaultDashboardSummary);
       setIsLoading(false);
-      return;
+      console.warn("InvestmentContext: User not authenticated, userId missing, or Firestore not available. Skipping data fetching.");
+      return () => {}; // Return an empty cleanup function
     }
 
     setIsLoading(true);
@@ -108,23 +102,24 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
     const summaryDocRef = getDashboardSummaryDocRef();
 
-    const unsubSummary = summaryDocRef 
-      ? onSnapshot(summaryDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setDashboardSummary(docSnap.data() as DashboardSummary);
-          } else {
+    let unsubSummary = () => {};
+    if (summaryDocRef) {
+        unsubSummary = onSnapshot(summaryDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setDashboardSummary(docSnap.data() as DashboardSummary);
+            } else {
+                setDashboardSummary(defaultDashboardSummary);
+                const defaultData: DashboardSummary = { ...defaultDashboardSummary };
+                setDoc(summaryDocRef, defaultData).catch(err => console.error("Failed to create default summary doc:", err));
+            }
+            }, (error) => {
+            console.error("Error fetching dashboard summary:", error);
             setDashboardSummary(defaultDashboardSummary);
-            const defaultData: DashboardSummary = { ...defaultDashboardSummary };
-            setDoc(summaryDocRef, defaultData).catch(err => console.error("Failed to create default summary doc:", err));
-          }
-        }, (error) => {
-          console.error("Error fetching dashboard summary:", error);
-          setDashboardSummary(defaultDashboardSummary);
-        })
-      : () => {};
+            });
+    }
 
 
-    const qInvestments = query(collection(db, investmentsCollectionPath), orderBy("purchaseDate", "asc"));
+    const qInvestments = query(collection(firestoreInstance, investmentsCollectionPath), orderBy("purchaseDate", "asc"));
     const unsubscribeInvestments = onSnapshot(qInvestments, (querySnapshot) => {
       const fetchedInvestments: Investment[] = [];
       querySnapshot.forEach((documentSnapshot) => {
@@ -135,7 +130,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           purchaseDate: data.purchaseDate,
           createdAt: data.createdAt && data.createdAt instanceof Timestamp
             ? data.createdAt.toDate().toISOString()
-            : data.createdAt, // Keep as string if already string
+            : data.createdAt,
         } as Investment;
         fetchedInvestments.push(investment);
       });
@@ -144,7 +139,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching investments:", error);
     });
 
-    const qTransactions = query(collection(db, transactionsCollectionPath), orderBy("date", "desc"));
+    const qTransactions = query(collection(firestoreInstance, transactionsCollectionPath), orderBy("date", "desc"));
     const unsubTransactions = onSnapshot(qTransactions, (querySnapshot) => {
         const fetchedTransactions: Transaction[] = [];
         querySnapshot.forEach((docSnap) => {
@@ -155,7 +150,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
                 date: data.date, 
                 createdAt: data.createdAt && data.createdAt instanceof Timestamp
                     ? data.createdAt.toDate().toISOString()
-                    : data.createdAt, // Keep as string if already string
+                    : data.createdAt,
             } as Transaction);
         });
         setTransactions(fetchedTransactions);
@@ -164,7 +159,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     });
 
 
-    const qAnalyses = query(collection(db, analysesCollectionPath));
+    const qAnalyses = query(collection(firestoreInstance, analysesCollectionPath));
     const unsubscribeAnalyses = onSnapshot(qAnalyses, (querySnapshot) => {
       const fetchedAnalyses: Record<string, CurrencyFluctuationAnalysisResult> = {};
       querySnapshot.forEach((doc) => {
@@ -175,7 +170,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching currency analyses:", error);
     });
 
-    // Combined loading state update
     const dataFetchPromises = [
       getDocs(qInvestments).catch(() => null),
       getDocs(qTransactions).catch(() => null),
@@ -188,7 +182,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     Promise.all(dataFetchPromises).then(() => {
         setIsLoading(false);
     }).catch(() => {
-        // Even if some fetches fail, we should stop loading
         setIsLoading(false);
     });
 
@@ -202,8 +195,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]);
 
   const addInvestment = useCallback(async (investmentData: Omit<Investment, 'createdAt' | 'id'>, analysis?: CurrencyFluctuationAnalysisResult) => {
-    if (!isAuthenticated || !userId) {
-      console.error("User not authenticated, cannot add investment.");
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("User not authenticated or Firestore not available, cannot add investment.");
       return;
     }
 
@@ -222,7 +215,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     };
 
     try {
-      const investmentDocRef = doc(db, investmentsCollectionPath, investmentId);
+      const investmentDocRef = doc(firestoreInstance, investmentsCollectionPath, investmentId);
       await setDoc(investmentDocRef, investmentWithTimestamp);
 
       if (investmentData.amountInvested && typeof investmentData.amountInvested === 'number') {
@@ -230,7 +223,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (analysis && investmentData.type === 'Currencies') {
-        const analysisDocRef = doc(db, analysesCollectionPath, investmentId);
+        const analysisDocRef = doc(firestoreInstance, analysesCollectionPath, investmentId);
         await setDoc(analysisDocRef, analysis);
       }
     } catch (error) {
@@ -251,8 +244,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       sellDate: string,
       fees: number
     ) => {
-      if (!isAuthenticated || !userId) {
-        throw new Error("User not authenticated.");
+      if (!isAuthenticated || !userId || !firestoreInstance) {
+        throw new Error("User not authenticated or Firestore not available.");
       }
 
       const userStockInvestments = investments.filter(
@@ -294,47 +287,67 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           createdAt: serverTimestamp(),
       };
 
-      const batch = writeBatch(db);
-      const transactionDocRef = doc(db, `users/${userId}/transactions`, transactionId);
+      const batch = writeBatch(firestoreInstance);
+      const transactionDocRef = doc(firestoreInstance, `users/${userId}/transactions`, transactionId);
       batch.set(transactionDocRef, transactionWithTimestamp);
 
-      if (typeof profitOrLoss === 'number') {
-        await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
-      }
-
+      
       let sharesToDeduct = numberOfSharesToSell;
+      let costBasisReduction = 0;
+
       for (const investment of userStockInvestments) {
         if (sharesToDeduct <= 0) break;
 
-        const investmentDocRef = doc(db, `users/${userId}/investments`, investment.id);
+        const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investment.id);
         const sharesInThisLot = investment.numberOfShares || 0;
+        const costOfThisLot = investment.amountInvested;
+
 
         if (sharesInThisLot >= sharesToDeduct) {
           const newShareCount = sharesInThisLot - sharesToDeduct;
+          const proportionSold = sharesToDeduct / sharesInThisLot;
+          const costBasisOfSoldPortion = costOfThisLot * proportionSold;
+          costBasisReduction += costBasisOfSoldPortion;
+
+
           if (newShareCount === 0) {
             batch.delete(investmentDocRef);
           } else {
-            batch.update(investmentDocRef, { numberOfShares: newShareCount });
+            const newAmountInvested = costOfThisLot - costBasisOfSoldPortion;
+            batch.update(investmentDocRef, { 
+                numberOfShares: newShareCount,
+                amountInvested: newAmountInvested 
+            });
           }
           sharesToDeduct = 0;
         } else {
+          costBasisReduction += costOfThisLot;
           batch.delete(investmentDocRef);
           sharesToDeduct -= sharesInThisLot;
         }
       }
       await batch.commit();
+
+      // Update dashboard summary after batch commit
+      if (typeof profitOrLoss === 'number') {
+        await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
+      }
+       if (costBasisReduction !== 0) {
+        await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReduction });
+      }
+
     },
     [userId, isAuthenticated, investments, updateDashboardSummaryDoc]
   );
 
   const removeStockInvestmentsBySymbol = useCallback(async (tickerSymbol: string) => {
-    if (!isAuthenticated || !userId) {
-      console.error("User not authenticated, cannot remove investments.");
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("User not authenticated or Firestore not available, cannot remove investments.");
       return;
     }
     const investmentsCollectionPath = `users/${userId}/investments`;
     const q = query(
-      collection(db, investmentsCollectionPath),
+      collection(firestoreInstance, investmentsCollectionPath),
       where("type", "==", "Stocks"),
       where("tickerSymbol", "==", tickerSymbol)
     );
@@ -347,7 +360,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
 
       let totalAmountInvestedRemoved = 0;
-      const batch = writeBatch(db);
+      const batch = writeBatch(firestoreInstance);
       querySnapshot.forEach((docSnapshot) => {
         const investmentData = docSnapshot.data() as StockInvestment;
         totalAmountInvestedRemoved += investmentData.amountInvested || 0;
@@ -365,16 +378,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
-  // Corrected updateStockInvestment to take oldAmountInvested
   const correctedUpdateStockInvestment = useCallback(async (
     investmentId: string,
     dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>,
     oldAmountInvested: number
   ) => {
-    if (!isAuthenticated || !userId) {
-      throw new Error("User not authenticated.");
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      throw new Error("User not authenticated or Firestore not available.");
     }
-    const investmentDocRef = doc(db, `users/${userId}/investments`, investmentId);
+    const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
 
     const newNumberOfShares = dataToUpdate.numberOfShares ?? 0;
     const newPurchasePricePerShare = dataToUpdate.purchasePricePerShare ?? 0;
@@ -382,13 +394,13 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
     const newCalculatedAmountInvested = (newNumberOfShares * newPurchasePricePerShare) + newPurchaseFees;
 
-    const updatedData = {
+    const updatedInvestmentData = {
       ...dataToUpdate,
       amountInvested: newCalculatedAmountInvested,
     };
 
     try {
-      await setDoc(investmentDocRef, updatedData, { merge: true });
+      await setDoc(investmentDocRef, updatedInvestmentData, { merge: true });
 
       const amountInvestedDelta = newCalculatedAmountInvested - oldAmountInvested;
       if (amountInvestedDelta !== 0) {
@@ -401,26 +413,37 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
   const deleteSellTransaction = useCallback(async (transactionToDelete: Transaction) => {
-    if (!isAuthenticated || !userId) {
-      throw new Error("User not authenticated.");
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      throw new Error("User not authenticated or Firestore not available.");
     }
     if (transactionToDelete.type !== 'sell') {
       throw new Error("Can only delete 'sell' transactions with this function.");
     }
 
-    const transactionDocRef = doc(db, `users/${userId}/transactions`, transactionToDelete.id);
+    const transactionDocRef = doc(firestoreInstance, `users/${userId}/transactions`, transactionToDelete.id);
 
     try {
       await deleteDoc(transactionDocRef);
 
-      // Reverse P/L impact on dashboard summary
       if (transactionToDelete.profitOrLoss !== undefined) {
         await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
       }
+      
+      // Add back the cost basis of the sold shares to totalInvestedAcrossAllAssets
+      // This assumes we can recalculate or estimate the cost basis of the sold shares.
+      // For simplicity, we'll use transactionToDelete.totalAmount - transactionToDelete.profitOrLoss
+      // This is an approximation if fees were involved or average cost changed.
+      // A more precise way would be to store costBasisOfSoldShares in the transaction.
+      const costBasisOfSoldShares = transactionToDelete.totalAmount - (transactionToDelete.profitOrLoss || 0);
+      if (costBasisOfSoldShares > 0) { // Only add back if it was a cost
+          // This is tricky: deleting a sale should *increase* your cost basis of held assets.
+          // Let's assume the original recordSellStockTransaction *decreased* totalInvestedAmount by costBasisOfSoldShares.
+          // So deleting should *increase* it back.
+          await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: costBasisOfSoldShares });
+      }
 
-      // Note: Share re-addition to StockInvestment lots is NOT handled here.
-      // The user needs to manually adjust holdings or re-enter purchases if necessary.
-      console.log(`Successfully deleted sell transaction ${transactionToDelete.id}.`);
+
+      console.log(`Successfully deleted sell transaction ${transactionToDelete.id}. Shares are NOT automatically re-added to holdings.`);
 
     } catch (error) {
       console.error(`Error deleting sell transaction ${transactionToDelete.id}:`, error);
@@ -448,6 +471,3 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     </InvestmentContext.Provider>
   );
 };
-    
-
-    

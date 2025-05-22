@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
+import { auth as firebaseAuthService } from '@/lib/firebase'; // Renamed import
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -25,21 +25,26 @@ interface AuthContextType {
   user: AppUser | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-  isLoading: boolean; // Represents if initial auth check is complete
-  isProcessingLogin: boolean; // Represents if login popup action is in progress
+  isLoading: boolean;
+  isProcessingLogin: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // True until initial auth state is known
+  const [isLoading, setIsLoading] = useState(true);
   const [isProcessingLogin, setIsProcessingLogin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    if (!firebaseAuthService) {
+      console.warn("AuthContext: Firebase Auth service not available. Skipping onAuthStateChanged listener.");
+      setIsLoading(false);
+      return;
+    }
     console.log("AuthContext: Setting up onAuthStateChanged listener.");
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+    const unsubscribe = onAuthStateChanged(firebaseAuthService, (firebaseUser: FirebaseUser | null) => {
       console.log("AuthContext: onAuthStateChanged triggered. Firebase user present:", !!firebaseUser);
       if (firebaseUser) {
         setUser({
@@ -51,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
       }
-      setIsLoading(false); // Initial auth state determined
+      setIsLoading(false);
       console.log("AuthContext: isLoading set to false.");
     });
 
@@ -62,14 +67,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = useCallback(async () => {
+    if (!firebaseAuthService) {
+      console.error("AuthContext: Firebase Auth service not available for login.");
+      setIsProcessingLogin(false);
+      return;
+    }
     console.log("AuthContext: login function called.");
     setIsProcessingLogin(true);
     const provider = new GoogleAuthProvider();
     try {
       console.log("AuthContext: Attempting signInWithPopup...");
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(firebaseAuthService, provider);
+      // User object is set by onAuthStateChanged
       console.log("AuthContext: signInWithPopup successful. User UID:", result.user?.uid);
-      // onAuthStateChanged will handle setting the user and further state updates.
     } catch (error: any) {
       console.error("AuthContext: signInWithPopup error. Code:", error.code, "Message:", error.message);
       if (error.code === 'auth/popup-closed-by-user') {
@@ -78,7 +88,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.warn("AuthContext: Google sign-in popup request cancelled (e.g., multiple popups).");
       } else if (error.code === 'auth/popup-blocked') {
         console.warn("AuthContext: Google sign-in popup blocked by the browser.");
-        // Consider showing a message to the user to check their popup blocker.
       } else {
         console.error("AuthContext: An unexpected error occurred during Google sign-in:", error);
       }
@@ -86,14 +95,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsProcessingLogin(false);
       console.log("AuthContext: isProcessingLogin set to false.");
     }
-  }, []);
+  }, [router]); // Added router to dependency array as it's used in logout
 
   const logout = useCallback(async () => {
+    if (!firebaseAuthService) {
+      console.error("AuthContext: Firebase Auth service not available for logout.");
+      return;
+    }
     console.log("AuthContext: logout function called.");
     try {
-      await firebaseSignOut(auth);
+      await firebaseSignOut(firebaseAuthService);
       // setUser(null) will be handled by onAuthStateChanged
-      router.push('/'); // Navigate to login page after logout
+      router.push('/'); 
       console.log("AuthContext: Logout successful, navigated to /");
     } catch (error) {
       console.error("AuthContext: Error during sign-out:", error);
