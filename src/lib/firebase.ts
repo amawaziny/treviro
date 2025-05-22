@@ -19,37 +19,50 @@ let db: Firestore | null = null;
 let auth: Auth | null = null;
 let analytics: Analytics | null = null;
 
-// Only initialize Firebase if the API key is present.
-// This is crucial for build processes where env vars might not be immediately available.
-if (firebaseConfig.apiKey) {
+// Only initialize Firebase if the API key is present and a non-empty string.
+if (firebaseConfig.apiKey && typeof firebaseConfig.apiKey === 'string' && firebaseConfig.apiKey.trim() !== '') {
   if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
+    try {
+      app = initializeApp(firebaseConfig);
+    } catch (e) {
+      console.error("Firebase initialization error:", e);
+      // app will remain null
+    }
   } else {
     app = getApp();
   }
 
   if (app) {
-    db = getFirestore(app);
-    auth = getAuth(app);
+    try {
+      db = getFirestore(app);
+      auth = getAuth(app);
 
-    if (typeof window !== 'undefined') {
-      isAnalyticsSupported().then((supported) => {
-        if (supported && app) {
-          analytics = getAnalytics(app);
-          // console.log("Firebase Analytics initialized.");
-        } else {
-          // console.log("Firebase Analytics is not supported in this environment or app not initialized.");
-        }
-      }).catch(error => {
-        console.error("Error checking Firebase Analytics support:", error);
-      });
+      if (typeof window !== 'undefined') {
+        isAnalyticsSupported().then((supported) => {
+          if (supported && app) { // ensure app is still valid
+            try {
+              analytics = getAnalytics(app);
+              // console.log("Firebase Analytics initialized.");
+            } catch (e) {
+              console.error("Firebase Analytics initialization error:", e);
+              // analytics will remain null
+            }
+          } else {
+            // console.log("Firebase Analytics is not supported in this environment or app not initialized.");
+          }
+        }).catch(error => {
+          console.error("Error checking Firebase Analytics support:", error);
+        });
+      }
+    } catch (e) {
+      console.error("Error initializing Firestore/Auth:", e);
+      // db and auth might remain null or partially initialized
     }
   }
 } else {
-  // This warning will appear during the Vercel build if the API key is missing.
   console.warn(
-    'Firebase API key is missing. Firebase services will not be initialized. ' +
-    'Ensure NEXT_PUBLIC_FIREBASE_API_KEY (and other Firebase env vars) are correctly set in your Vercel project settings.'
+    'Firebase API key is missing or invalid. Firebase services will not be initialized. ' +
+    'Ensure NEXT_PUBLIC_FIREBASE_API_KEY (and other Firebase env vars) are correctly set.'
   );
 }
 
