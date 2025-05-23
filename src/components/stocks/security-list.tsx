@@ -19,12 +19,6 @@ export function SecurityList({ filterType, title }: SecurityListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { listedSecurities, isLoading, error } = useListedSecurities(); 
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log(`SecurityList: document.documentElement.dir = ${document.documentElement.dir}`);
-    }
-  }, []); // Log on mount, and whenever it re-renders if dir changes (though dir on html is less likely to trigger re-render here directly)
-
   const filteredAndTypedSecurities = useMemo(() => {
     let securitiesToFilter = listedSecurities;
 

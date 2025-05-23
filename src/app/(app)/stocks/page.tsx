@@ -1,20 +1,13 @@
 
-"use client"; // Added "use client" as useEffect is used
+"use client"; 
 
-import { SecurityList } from "@/components/stocks/security-list"; // Updated import
+import { SecurityList } from "@/components/stocks/security-list"; 
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffect } from 'react'; // Added useEffect import
-import { useLanguage } from "@/contexts/language-context"; // Added import
+import { useLanguage } from "@/contexts/language-context"; 
 
 export default function SecuritiesPage() {
-  const { language } = useLanguage(); // Get current language
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log(`SecuritiesPage (Tabs): document.documentElement.dir = ${document.documentElement.dir}`);
-    }
-  }, []); // Log on mount
+  const { language } = useLanguage(); 
 
   return (
     <div className="space-y-8">

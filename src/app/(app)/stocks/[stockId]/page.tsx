@@ -90,7 +90,7 @@ export default function SecurityDetailPage() {
         shares: (inv as StockInvestment).numberOfShares || 0,
         price: (inv as StockInvestment).purchasePricePerShare || 0,
         fees: (inv as StockInvestment).purchaseFees || 0,
-        totalAmount: inv.amountInvested, // Corrected: use totalAmount for consistency
+        totalAmount: inv.amountInvested,
         isInvestmentRecord: true, 
         tickerSymbol: security.symbol, 
         profitOrLoss: undefined, 
@@ -304,27 +304,27 @@ export default function SecurityDetailPage() {
                 <CardTitle>Transaction History for {security.name}</CardTitle>
                 <CardDescription>All buy and sell records for this security.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto">
                 {securityTransactions.length > 0 ? (
                   <>
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Type</TableHead>
+                          <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Date</TableHead>
+                          <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Type</TableHead>
                           <TableHead className="text-right">Shares/Units</TableHead>
                           <TableHead className="text-right">Price</TableHead>
                           <TableHead className="text-right">Fees</TableHead>
                           <TableHead className="text-right">Total Amount</TableHead>
                           {currentTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
-                          <TableHead className="text-right">Actions</TableHead>
+                          <TableHead className={cn(language === 'ar' ? 'text-left' : 'text-right')}>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {currentTransactions.map((tx) => (
                           <TableRow key={tx.id}>
-                            <TableCell>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
-                            <TableCell>
+                            <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
+                            <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
                               <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
                                 {tx.type}
                               </Badge>
@@ -338,7 +338,7 @@ export default function SecurityDetailPage() {
                                 {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
                                 </TableCell>
                             )}
-                            <TableCell className="text-right">
+                            <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>
                               {tx.isInvestmentRecord && (
                                 <Button variant="ghost" size="icon" asChild>
                                   <Link href={`/investments/edit/${tx.id}`}>
@@ -407,7 +407,7 @@ export default function SecurityDetailPage() {
                     )}
                   </>
                 ) : (
-                  <p className="text-muted-foreground">No transactions recorded for this security yet.</p>
+                  <p className="text-muted-foreground py-4 text-center">No transactions recorded for this security yet.</p>
                 )}
               </CardContent>
             </Card>
