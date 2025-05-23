@@ -315,7 +315,7 @@ export default function SecurityDetailPage() {
                           <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
                           <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
                           <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                          <TableCell className="text-right">{(tx.total ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                          <TableCell className="text-right">{(tx.totalAmount ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
                           {securityTransactions.some(t => t.profitOrLoss !== undefined) && (
                               <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
                               {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
@@ -373,3 +373,4 @@ export default function SecurityDetailPage() {
     </AlertDialog>
   );
 }
+
