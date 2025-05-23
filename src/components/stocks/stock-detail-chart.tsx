@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
-import { useLanguage } from '@/contexts/language-context'; // Added
+import { useLanguage } from '@/contexts/language-context';
 
 interface StockDetailChartProps {
   securityId: string;
@@ -21,24 +21,24 @@ const timeRanges: StockChartTimeRange[] = ['1W', '1M', '6M', '1Y', '5Y'];
 
 const getNumPointsForRange = (range: StockChartTimeRange): number => {
   switch (range) {
-    // '1D' case removed
     case '1W': return 7;
     case '1M': return 30;
-    case '6M': return 180; 
+    case '6M': return 180;
     case '1Y': return 365;
     case '5Y': return 365 * 5;
-    default: return 30; // Default to 30 points if range is somehow undefined
+    default: return 30; // Default to 30 points
   }
 };
 
 export function StockDetailChart({ securityId }: StockDetailChartProps) {
-  const { language } = useLanguage(); // Added
-  const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>('1W'); // Default to '1W'
+  const { language } = useLanguage();
+  const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>('1W');
   const [chartData, setChartData] = useState<StockChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log(`StockDetailChart: useEffect triggered. Range: ${selectedRange}, Security ID: ${securityId}`);
     if (!securityId) {
       setIsLoading(false);
       setError("No security ID provided to fetch chart data.");
@@ -52,16 +52,16 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
       return;
     }
 
-
     const fetchPriceHistory = async () => {
       setIsLoading(true);
       setError(null);
-      setChartData([]);
+      setChartData([]); // Clear previous data
 
       try {
         const numPoints = getNumPointsForRange(selectedRange);
+        console.log(`StockDetailChart: Fetching for range ${selectedRange}, numPoints: ${numPoints}`);
+
         const priceHistoryRef = collection(db, `listedStocks/${securityId}/priceHistory`);
-        
         const q = query(priceHistoryRef, orderBy(documentId(), "desc"), limit(numPoints));
         
         const querySnapshot = await getDocs(q);
@@ -75,8 +75,10 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             });
           }
         });
-
-        setChartData(data.reverse());
+        
+        console.log(`StockDetailChart: Fetched ${data.length} data points for range ${selectedRange}. Sample:`, JSON.stringify(data.slice(0,3)));
+        setChartData(data.reverse()); // Reverse to have dates in ascending order for the chart
+        console.log(`StockDetailChart: chartData state updated with ${data.length} points.`);
 
       } catch (err: any) {
         console.error("Error fetching price history:", err);
@@ -97,9 +99,21 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
   if (isLoading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <Skeleton className="h-10 w-3/4 mb-4" /> 
+        <div className="flex justify-center space-x-1 mb-4">
+            {timeRanges.map(range => (
+            <Button
+                key={range}
+                variant={selectedRange === range ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedRange(range)}
+                disabled // Disable buttons while loading initial data for a range
+            >
+                {range}
+            </Button>
+            ))}
+        </div>
         <Skeleton className="h-[calc(100%-3.5rem)] w-full" /> 
-        <p className="text-muted-foreground mt-2">Loading chart data...</p>
+        <p className="text-muted-foreground mt-2">Loading chart data for {selectedRange}...</p>
       </div>
     );
   }
@@ -130,12 +144,11 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             ))}
         </div>
         <div className="flex-grow flex items-center justify-center">
-             <p className="text-muted-foreground">No price history data available for this security or selected range.</p>
+             <p className="text-muted-foreground">No price history data available for this security or selected range ({selectedRange}).</p>
         </div>
       </div>
     );
   }
-
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -154,31 +167,30 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={chartData}
-          margin={{ top: 5, right: 20, left: language === 'ar' ? 5 : -20, bottom: 5 }} // Adjusted left margin for Y-axis
+          margin={{ top: 5, right: 20, left: language === 'ar' ? 5 : -20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis 
             dataKey="date" 
             tickFormatter={(tick) => {
                 const dateObj = new Date(tick + "T00:00:00"); 
-                if (selectedRange === '1D' || selectedRange === '1W') return format(dateObj, 'MMM d');
-                if (selectedRange === '1M' || selectedRange === '6M') return format(dateObj, 'MMM d');
-                if (selectedRange === '1Y') return format(dateObj, 'MMM yy');
+                if (selectedRange === '1W' || selectedRange === '1M') return format(dateObj, 'MMM d');
+                if (selectedRange === '6M' || selectedRange === '1Y') return format(dateObj, 'MMM yy');
                 return format(dateObj, 'yyyy');
             }}
             stroke="hsl(var(--muted-foreground))"
             fontSize={12}
             interval="preserveStartEnd"
             minTickGap={50}
-            reversed={language === 'ar'} // Set XAxis to reversed for RTL
+            reversed={language === 'ar'}
           />
           <YAxis 
             stroke="hsl(var(--muted-foreground))"
             fontSize={12}
             tickFormatter={(value) => `$${value.toFixed(0)}`}
             domain={['auto', 'auto']}
-            orientation={language === 'ar' ? 'right' : 'left'} // Set YAxis orientation for RTL
-            yAxisId="priceAxis" // Added yAxisId for clarity
+            orientation={language === 'ar' ? 'right' : 'left'}
+            yAxisId="priceAxis"
           />
           <Tooltip
             contentStyle={{ 
@@ -195,7 +207,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
           />
           <Legend wrapperStyle={{ fontSize: '12px' }}/>
           <Line 
-            yAxisId="priceAxis" // Refer to the yAxisId
+            yAxisId="priceAxis"
             type="monotone" 
             dataKey="price" 
             stroke="hsl(var(--primary))" 
