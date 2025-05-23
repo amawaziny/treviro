@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, ArrowRight, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { StockDetailChart } from '@/components/stocks/stock-detail-chart'; 
 import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
@@ -45,6 +45,11 @@ export default function SecurityDetailPage() {
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(null); 
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+
+  // Pagination state for transactions
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
 
   useEffect(() => {
     if (securityId) {
@@ -85,11 +90,11 @@ export default function SecurityDetailPage() {
         shares: (inv as StockInvestment).numberOfShares || 0,
         price: (inv as StockInvestment).purchasePricePerShare || 0,
         fees: (inv as StockInvestment).purchaseFees || 0,
-        total: inv.amountInvested,
+        totalAmount: inv.amountInvested, // Corrected: use totalAmount for consistency
         isInvestmentRecord: true, 
         tickerSymbol: security.symbol, 
         profitOrLoss: undefined, 
-        createdAt: inv.createdAt || new Date().toISOString(), // Ensure createdAt is present
+        createdAt: inv.createdAt || new Date().toISOString(),
       }));
 
     const sellTransactionsFromContext = transactions
@@ -99,14 +104,25 @@ export default function SecurityDetailPage() {
         isInvestmentRecord: false, 
       }));
     
-    // Ensure all transaction objects have a createdAt for robust sorting
     const allTransactions = [...buyTransactions, ...sellTransactionsFromContext].map(tx => ({
         ...tx,
-        createdAt: tx.createdAt || new Date(0).toISOString() // Fallback for very old data if createdAt is missing
+        createdAt: tx.createdAt || new Date(0).toISOString() 
     }));
 
     return allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [investments, transactions, security]);
+
+  // Pagination logic for transactions
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTransactions = securityTransactions.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(securityTransactions.length / itemsPerPage);
+
+  useEffect(() => {
+    // Reset to page 1 if the security changes or transactions data reloads to a different length
+    setCurrentPage(1);
+  }, [securityId, securityTransactions.length]);
+
 
   const handleDeleteConfirmation = (tx: Transaction) => {
     const sellTx = transactions.find(t => t.id === tx.id && t.type === 'sell');
@@ -290,59 +306,106 @@ export default function SecurityDetailPage() {
               </CardHeader>
               <CardContent>
                 {securityTransactions.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead className="text-right">Shares/Units</TableHead>
-                        <TableHead className="text-right">Price</TableHead>
-                        <TableHead className="text-right">Fees</TableHead>
-                        <TableHead className="text-right">Total Amount</TableHead>
-                        {securityTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {securityTransactions.map((tx) => (
-                        <TableRow key={tx.id}>
-                          <TableCell>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
-                              {tx.type}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
-                          <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                          <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                          <TableCell className="text-right">{(tx.totalAmount ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                          {securityTransactions.some(t => t.profitOrLoss !== undefined) && (
-                              <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                              {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
-                              </TableCell>
-                          )}
-                          <TableCell className="text-right">
-                            {tx.isInvestmentRecord && (
-                              <Button variant="ghost" size="icon" asChild>
-                                <Link href={`/investments/edit/${tx.id}`}>
-                                  <Edit3 className="h-4 w-4" />
-                                  <span className="sr-only">Edit Purchase</span>
-                                </Link>
-                              </Button>
-                            )}
-                            {!tx.isInvestmentRecord && tx.type === 'sell' && (
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
-                                  <Trash2 className="h-4 w-4" />
-                                  <span className="sr-only">Delete Sell Transaction</span>
-                                </Button>
-                              </AlertDialogTrigger>
-                            )}
-                          </TableCell>
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead className="text-right">Shares/Units</TableHead>
+                          <TableHead className="text-right">Price</TableHead>
+                          <TableHead className="text-right">Fees</TableHead>
+                          <TableHead className="text-right">Total Amount</TableHead>
+                          {currentTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {currentTransactions.map((tx) => (
+                          <TableRow key={tx.id}>
+                            <TableCell>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
+                                {tx.type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
+                            <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                            <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                            <TableCell className="text-right">{(tx.totalAmount ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                            {currentTransactions.some(t => t.profitOrLoss !== undefined) && (
+                                <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
+                                {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
+                                </TableCell>
+                            )}
+                            <TableCell className="text-right">
+                              {tx.isInvestmentRecord && (
+                                <Button variant="ghost" size="icon" asChild>
+                                  <Link href={`/investments/edit/${tx.id}`}>
+                                    <Edit3 className="h-4 w-4" />
+                                    <span className="sr-only">Edit Purchase</span>
+                                  </Link>
+                                </Button>
+                              )}
+                              {!tx.isInvestmentRecord && tx.type === 'sell' && (
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Delete Sell Transaction</span>
+                                  </Button>
+                                </AlertDialogTrigger>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between mt-4 py-2 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className="flex items-center gap-1"
+                        >
+                          {language === 'ar' ? (
+                            <>
+                              <span>السابق</span> 
+                              <ChevronRight className="h-4 w-4" />
+                            </>
+                          ) : (
+                            <>
+                              <ChevronLeft className="h-4 w-4" />
+                              <span>Previous</span>
+                            </>
+                          )}
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                          className="flex items-center gap-1"
+                        >
+                          {language === 'ar' ? (
+                            <>
+                              <ChevronLeft className="h-4 w-4" />
+                              <span>التالي</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Next</span>
+                              <ChevronRight className="h-4 w-4" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <p className="text-muted-foreground">No transactions recorded for this security yet.</p>
                 )}
@@ -373,4 +436,3 @@ export default function SecurityDetailPage() {
     </AlertDialog>
   );
 }
-
