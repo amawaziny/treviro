@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation'; // Added useSearchParams
 import React, { useEffect, useState } from 'react';
 import { useListedSecurities } from '@/hooks/use-listed-securities'; 
 import type { ListedSecurity, StockInvestment, Transaction } from '@/lib/types'; 
@@ -35,6 +35,7 @@ import { useLanguage } from '@/contexts/language-context';
 export default function SecurityDetailPage() { 
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams(); // For reading query params
   const securityId = params.stockId as string; 
   const { toast } = useToast();
   const { language } = useLanguage();
@@ -46,9 +47,11 @@ export default function SecurityDetailPage() {
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
-  // Pagination state for transactions
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const previousTab = searchParams.get('previousTab');
+  const backLinkHref = previousTab ? `/stocks?tab=${previousTab}` : '/stocks';
 
 
   useEffect(() => {
@@ -112,14 +115,12 @@ export default function SecurityDetailPage() {
     return allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [investments, transactions, security]);
 
-  // Pagination logic for transactions
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTransactions = securityTransactions.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(securityTransactions.length / itemsPerPage);
 
   useEffect(() => {
-    // Reset to page 1 if the security changes or transactions data reloads to a different length
     setCurrentPage(1);
   }, [securityId, securityTransactions.length]);
 
@@ -173,7 +174,7 @@ export default function SecurityDetailPage() {
       <div className="container mx-auto py-8 text-center">
         <h1 className="text-2xl font-bold text-destructive mb-4">Security Not Found</h1>
         <p className="text-muted-foreground mb-6">The security you are looking for could not be found.</p>
-        <Button onClick={() => router.back()}>
+        <Button onClick={() => router.push(backLinkHref)}> {/* Use dynamic back link */}
           {language === 'ar' ? <ArrowRight className="ml-2 h-4 w-4" /> : <ArrowLeft className="mr-2 h-4 w-4" />}
            Go Back
         </Button>
@@ -199,8 +200,10 @@ export default function SecurityDetailPage() {
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
       <div className="container mx-auto py-8 space-y-6">
-        <Button variant="outline" size="sm" onClick={() => router.back()} className="mb-4">
-          <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} /> Back to Securities
+        <Button variant="outline" size="sm" asChild className="mb-4">
+           <Link href={backLinkHref}> {/* Use dynamic back link */}
+             <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} /> Back to Explore
+           </Link>
         </Button>
 
         <Card>

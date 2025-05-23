@@ -1,21 +1,22 @@
 
 "use client";
 
-import { SecurityListItem } from './security-list-item'; // Updated import
+import { SecurityListItem } from './security-list-item'; 
 import { Input } from '@/components/ui/input';
 import { useState, useMemo, useEffect } from 'react';
 import { Search, Loader2 } from 'lucide-react';
-import { useListedSecurities } from '@/hooks/use-listed-securities'; // Updated hook import
+import { useListedSecurities } from '@/hooks/use-listed-securities'; 
 import type { ListedSecurity } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 
 interface SecurityListProps {
   filterType?: 'Stock' | 'Fund';
-  title?: string; // Optional title for the list section
+  title?: string; 
+  currentTab: 'stocks' | 'funds'; // Added prop
 }
 
-export function SecurityList({ filterType, title }: SecurityListProps) {
+export function SecurityList({ filterType, title, currentTab }: SecurityListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { listedSecurities, isLoading, error } = useListedSecurities(); 
 
@@ -98,7 +99,7 @@ export function SecurityList({ filterType, title }: SecurityListProps) {
       {filteredAndTypedSecurities.length > 0 ? (
         <div className="space-y-3">
           {filteredAndTypedSecurities.map(security => (
-            <SecurityListItem key={security.id} security={security} />
+            <SecurityListItem key={security.id} security={security} currentTab={currentTab} />
           ))}
         </div>
       ) : (

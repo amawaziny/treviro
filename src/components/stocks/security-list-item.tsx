@@ -11,9 +11,10 @@ import Link from 'next/link';
 
 interface SecurityListItemProps {
   security: ListedSecurity;
+  currentTab: 'stocks' | 'funds'; // Added prop
 }
 
-export const SecurityListItem = React.memo(function SecurityListItem({ security }: SecurityListItemProps) {
+export const SecurityListItem = React.memo(function SecurityListItem({ security, currentTab }: SecurityListItemProps) {
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'decimal',
     minimumFractionDigits: 2,
@@ -22,8 +23,10 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security 
 
   const isPositiveChange = security.changePercent >= 0;
 
+  const detailPageLink = `/stocks/${security.id}?previousTab=${currentTab}`;
+
   return (
-    <Link href={`/stocks/${security.id}`} passHref>
+    <Link href={detailPageLink} passHref>
       <Card className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm">
         {/* Left Side: Logo and Name/Symbol */}
         <div className="flex items-center gap-3 flex-grow min-w-0">
@@ -56,7 +59,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security 
             variant={isPositiveChange ? 'default' : 'destructive'}
             className={cn(
               isPositiveChange ? 'bg-accent text-accent-foreground' : 'bg-destructive text-destructive-foreground',
-              "mt-1 text-xs" // Added mt-1 for a little space
+              "mt-1 text-xs" 
             )}
           >
             {isPositiveChange ? '+' : ''}
