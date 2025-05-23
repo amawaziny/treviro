@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3, Trash2 } from 'lucide-react';
 import { StockDetailChart } from '@/components/stocks/stock-detail-chart'; 
 import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
@@ -29,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/language-context';
 
 
 export default function SecurityDetailPage() { 
@@ -36,6 +37,7 @@ export default function SecurityDetailPage() {
   const router = useRouter();
   const securityId = params.stockId as string; 
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); 
   const { investments, isLoading: isLoadingInvestments, transactions, deleteSellTransaction } = useInvestments();
@@ -87,6 +89,7 @@ export default function SecurityDetailPage() {
         isInvestmentRecord: true, 
         tickerSymbol: security.symbol, 
         profitOrLoss: undefined, 
+        createdAt: inv.createdAt || new Date().toISOString(), // Ensure createdAt is present
       }));
 
     const sellTransactionsFromContext = transactions
@@ -95,8 +98,14 @@ export default function SecurityDetailPage() {
         ...tx, 
         isInvestmentRecord: false, 
       }));
+    
+    // Ensure all transaction objects have a createdAt for robust sorting
+    const allTransactions = [...buyTransactions, ...sellTransactionsFromContext].map(tx => ({
+        ...tx,
+        createdAt: tx.createdAt || new Date(0).toISOString() // Fallback for very old data if createdAt is missing
+    }));
 
-    return [...buyTransactions, ...sellTransactionsFromContext].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [investments, transactions, security]);
 
   const handleDeleteConfirmation = (tx: Transaction) => {
@@ -149,7 +158,8 @@ export default function SecurityDetailPage() {
         <h1 className="text-2xl font-bold text-destructive mb-4">Security Not Found</h1>
         <p className="text-muted-foreground mb-6">The security you are looking for could not be found.</p>
         <Button onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+          {language === 'ar' ? <ArrowRight className="ml-2 h-4 w-4" /> : <ArrowLeft className="mr-2 h-4 w-4" />}
+           Go Back
         </Button>
       </div>
     );
@@ -167,12 +177,14 @@ export default function SecurityDetailPage() {
     : `${security.name} (${security.symbol})`;
   
   const displayCurrency = security.currency || 'USD';
+  const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
+
 
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
       <div className="container mx-auto py-8 space-y-6">
         <Button variant="outline" size="sm" onClick={() => router.back()} className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Securities
+          <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} /> Back to Securities
         </Button>
 
         <Card>
@@ -210,7 +222,7 @@ export default function SecurityDetailPage() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="performance" className="w-full">
+        <Tabs defaultValue="performance" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 md:w-[500px]">
             <TabsTrigger value="performance">
               <LineChart className="mr-2 h-4 w-4" /> Performance
@@ -361,4 +373,3 @@ export default function SecurityDetailPage() {
     </AlertDialog>
   );
 }
-
