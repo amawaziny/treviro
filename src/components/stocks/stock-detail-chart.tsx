@@ -6,7 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Button } from '@/components/ui/button';
 import type { StockChartDataPoint, StockChartTimeRange } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, QueryDocumentSnapshot, DocumentData, documentId } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, QueryDocumentSnapshot, DocumentData, documentId, where } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,13 +20,12 @@ interface StockDetailChartProps {
 const timeRanges: StockChartTimeRange[] = ['1W', '1M', '6M', '1Y', '5Y'];
 
 const getNumPointsForRange = (range: StockChartTimeRange): number => {
+  // This is now only used for 6M, 1Y, 5Y ranges
   switch (range) {
-    case '1W': return 7;
-    case '1M': return 30;
     case '6M': return 180;
     case '1Y': return 365;
     case '5Y': return 365 * 5;
-    default: return 30; // Default to 30 points
+    default: return 30; // Default for any other case, though not expected for these ranges
   }
 };
 
@@ -58,13 +57,36 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
       setChartData([]); // Clear previous data
 
       try {
-        const numPoints = getNumPointsForRange(selectedRange);
-        console.log(`StockDetailChart: Fetching for range ${selectedRange}, numPoints: ${numPoints}`);
-
+        let firestoreQuery;
         const priceHistoryRef = collection(db, `listedStocks/${securityId}/priceHistory`);
-        const q = query(priceHistoryRef, orderBy(documentId(), "desc"), limit(numPoints));
+
+        if (selectedRange === '1W' || selectedRange === '1M') {
+          const today = new Date();
+          const daysToSubtract = selectedRange === '1W' ? 7 : 30;
+          const startDate = new Date(today);
+          startDate.setDate(today.getDate() - daysToSubtract);
+          
+          const startDateString = format(startDate, 'yyyy-MM-dd');
+          
+          console.log(`StockDetailChart: Range ${selectedRange}. Fetching from date >= ${startDateString}`);
+
+          firestoreQuery = query(
+            priceHistoryRef,
+            where(documentId(), '>=', startDateString),
+            orderBy(documentId(), 'asc') 
+          );
+        } else {
+          // For 6M, 1Y, 5Y, use the limit N points logic
+          const numPoints = getNumPointsForRange(selectedRange);
+          console.log(`StockDetailChart: Range ${selectedRange}. Fetching last ${numPoints} points (desc order).`);
+          firestoreQuery = query(
+            priceHistoryRef,
+            orderBy(documentId(), 'desc'),
+            limit(numPoints)
+          );
+        }
         
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(firestoreQuery);
         const data: StockChartDataPoint[] = [];
         querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
           const docData = doc.data();
@@ -76,9 +98,13 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
           }
         });
         
-        console.log(`StockDetailChart: Fetched ${data.length} data points for range ${selectedRange}. Sample:`, JSON.stringify(data.slice(0,3)));
-        setChartData(data.reverse()); // Reverse to have dates in ascending order for the chart
-        console.log(`StockDetailChart: chartData state updated with ${data.length} points.`);
+        console.log(`StockDetailChart: Fetched ${data.length} data points for range ${selectedRange}. Sample (raw):`, JSON.stringify(data.slice(0,3)));
+        
+        // If we fetched with limit (desc order for 6M+), we need to reverse.
+        // If we fetched with date range (asc order for 1W, 1M), it's already correct.
+        const finalData = (selectedRange !== '1W' && selectedRange !== '1M') ? data.reverse() : data;
+        setChartData(finalData);
+        console.log(`StockDetailChart: chartData state updated with ${finalData.length} points. Full chartData sample:`, JSON.stringify(finalData.slice(0,Math.min(3, finalData.length))));
 
       } catch (err: any) {
         console.error("Error fetching price history:", err);
@@ -173,7 +199,8 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
           <XAxis 
             dataKey="date" 
             tickFormatter={(tick) => {
-                const dateObj = new Date(tick + "T00:00:00"); 
+                const dateObj = new Date(tick + "T00:00:00"); // Assume UTC if no timezone in string
+                if (chartData.length <= 15 && (selectedRange === '1W' || selectedRange === '1M')) return format(dateObj, 'MMM d'); // Show more ticks for sparse short ranges
                 if (selectedRange === '1W' || selectedRange === '1M') return format(dateObj, 'MMM d');
                 if (selectedRange === '6M' || selectedRange === '1Y') return format(dateObj, 'MMM yy');
                 return format(dateObj, 'yyyy');
@@ -181,7 +208,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             stroke="hsl(var(--muted-foreground))"
             fontSize={12}
             interval="preserveStartEnd"
-            minTickGap={50}
+            minTickGap={selectedRange === '1W' || selectedRange === '1M' ? 20 : 50}
             reversed={language === 'ar'}
           />
           <YAxis 
@@ -212,7 +239,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             dataKey="price" 
             stroke="hsl(var(--primary))" 
             strokeWidth={2} 
-            dot={false} 
+            dot={chartData.length < 30} // Show dots if few data points
             name="Price" 
           />
         </LineChart>
