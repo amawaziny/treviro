@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 interface CustomInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 interface NumericInputProps extends Omit<CustomInputProps, 'value' | 'onChange' | 'type'> {
-  value: string | undefined;
-  onChange: (value: string | undefined) => void;
-  allowDecimal?: boolean; // New prop
+  value: string | undefined; // react-hook-form field.value will be string | undefined
+  onChange: (value: string) => void; // react-hook-form field.onChange, expects a string
+  allowDecimal?: boolean;
 }
 
 const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
@@ -22,7 +22,7 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
       const regexToUse = allowDecimal ? decimalRegex : integerRegex;
 
       if (rawStringValue === '') {
-        onChange(undefined);
+        onChange(''); // Pass empty string to react-hook-form
       } else if (regexToUse.test(rawStringValue)) {
         onChange(rawStringValue);
       }
@@ -34,7 +34,7 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
         ref={ref}
         type="text"
         inputMode={allowDecimal ? "decimal" : "numeric"}
-        value={value ?? ''}
+        value={value ?? ''} // Display empty string if RHF value is undefined (e.g. initial)
         onChange={handleChange}
         className={cn(className)}
         {...props}
