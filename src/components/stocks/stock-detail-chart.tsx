@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-context'; // Added
 
 interface StockDetailChartProps {
   securityId: string;
@@ -20,10 +21,10 @@ const timeRanges: StockChartTimeRange[] = ['1D', '1W', '1M', '6M', '1Y', '5Y'];
 
 const getNumPointsForRange = (range: StockChartTimeRange): number => {
   switch (range) {
-    case '1D': return 7; // Show last 7 daily points for "1D" as we only have daily data
+    case '1D': return 7; 
     case '1W': return 7;
     case '1M': return 30;
-    case '6M': return 180; // Approx 6 months of daily data
+    case '6M': return 180; 
     case '1Y': return 365;
     case '5Y': return 365 * 5;
     default: return 30;
@@ -31,6 +32,7 @@ const getNumPointsForRange = (range: StockChartTimeRange): number => {
 };
 
 export function StockDetailChart({ securityId }: StockDetailChartProps) {
+  const { language } = useLanguage(); // Added
   const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>('1M');
   const [chartData, setChartData] = useState<StockChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +45,13 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
       setChartData([]);
       return;
     }
+    if (!db) {
+      setIsLoading(false);
+      setError("Firestore is not available. Cannot fetch chart data.");
+      setChartData([]);
+      return;
+    }
+
 
     const fetchPriceHistory = async () => {
       setIsLoading(true);
@@ -53,28 +62,29 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
         const numPoints = getNumPointsForRange(selectedRange);
         const priceHistoryRef = collection(db, `listedStocks/${securityId}/priceHistory`);
         
-        // To get the last N points, we query by date string in descending order.
-        // The document IDs are 'YYYY-MM-DD'.
         const q = query(priceHistoryRef, orderBy(documentId(), "desc"), limit(numPoints));
         
         const querySnapshot = await getDocs(q);
         const data: StockChartDataPoint[] = [];
         querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
           const docData = doc.data();
-          if (docData.price !== undefined) { // Ensure price field exists
+          if (docData.price !== undefined) { 
             data.push({
-              date: doc.id, // doc.id is 'YYYY-MM-DD'
+              date: doc.id, 
               price: parseFloat(docData.price),
             });
           }
         });
 
-        // Data is fetched in descending order of date, reverse to make it ascending for the chart
         setChartData(data.reverse());
 
       } catch (err: any) {
         console.error("Error fetching price history:", err);
-        setError(err.message || "Failed to load chart data.");
+        if (err.code === 'failed-precondition' && err.message.includes('index')) {
+          setError(`Firestore index missing for price history. Please create it in Firebase console. Details: ${err.message}`);
+        } else {
+          setError(err.message || "Failed to load chart data.");
+        }
         setChartData([]);
       } finally {
         setIsLoading(false);
@@ -87,8 +97,8 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
   if (isLoading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <Skeleton className="h-10 w-3/4 mb-4" /> {/* Skeleton for buttons */}
-        <Skeleton className="h-[calc(100%-3.5rem)] w-full" /> {/* Skeleton for chart area */}
+        <Skeleton className="h-10 w-3/4 mb-4" /> 
+        <Skeleton className="h-[calc(100%-3.5rem)] w-full" /> 
         <p className="text-muted-foreground mt-2">Loading chart data...</p>
       </div>
     );
@@ -144,13 +154,13 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={chartData}
-          margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
+          margin={{ top: 5, right: 20, left: language === 'ar' ? 5 : -20, bottom: 5 }} // Adjusted left margin for Y-axis
         >
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis 
             dataKey="date" 
             tickFormatter={(tick) => {
-                const dateObj = new Date(tick + "T00:00:00"); // Ensure parsing as local date
+                const dateObj = new Date(tick + "T00:00:00"); 
                 if (selectedRange === '1D' || selectedRange === '1W') return format(dateObj, 'MMM d');
                 if (selectedRange === '1M' || selectedRange === '6M') return format(dateObj, 'MMM d');
                 if (selectedRange === '1Y') return format(dateObj, 'MMM yy');
@@ -160,12 +170,15 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             fontSize={12}
             interval="preserveStartEnd"
             minTickGap={50}
+            reversed={language === 'ar'} // Set XAxis to reversed for RTL
           />
           <YAxis 
             stroke="hsl(var(--muted-foreground))"
             fontSize={12}
             tickFormatter={(value) => `$${value.toFixed(0)}`}
             domain={['auto', 'auto']}
+            orientation={language === 'ar' ? 'right' : 'left'} // Set YAxis orientation for RTL
+            yAxisId="priceAxis" // Added yAxisId for clarity
           />
           <Tooltip
             contentStyle={{ 
@@ -176,13 +189,20 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             labelStyle={{ color: 'hsl(var(--foreground))' }}
             itemStyle={{ color: 'hsl(var(--primary))' }}
             formatter={(value: number, name: string, props: any) => {
-                // const securityName = props?.payload?.name || "Price"; // Get security name if available, currently name is not passed to data
                 return [`$${value.toFixed(2)}`, "Price"];
             }}
             labelFormatter={(label: string) => format(new Date(label + "T00:00:00"), 'MMM d, yyyy')}
           />
           <Legend wrapperStyle={{ fontSize: '12px' }}/>
-          <Line type="monotone" dataKey="price" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Price" />
+          <Line 
+            yAxisId="priceAxis" // Refer to the yAxisId
+            type="monotone" 
+            dataKey="price" 
+            stroke="hsl(var(--primary))" 
+            strokeWidth={2} 
+            dot={false} 
+            name="Price" 
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
