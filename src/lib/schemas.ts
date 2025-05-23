@@ -7,26 +7,25 @@ export const debtSubTypes = ['Certificate', 'Treasury Bill', 'Bond', 'Other'] as
 export const propertyTypes = ['Residential', 'Commercial', 'Land'] as const;
 
 export const AddInvestmentSchema = z.object({
-  name: z.string().optional(), // Optional as it can be auto-generated
+  name: z.string().optional(),
   type: z.enum(investmentTypes, { errorMap: () => ({ message: "Please select a valid investment type."}) }).optional(),
-  amountInvested: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)), // Cost of investment, will be calculated for Stocks and Currencies
+  amountInvested: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
 
   // Stocks
   selectedStockId: z.string().optional(),
-  numberOfShares: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)),
-  purchasePricePerShare: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)),
-  purchaseFees: z.coerce.string().optional().transform(val => val === undefined || val === "" ? 0 : parseFloat(val)).default("0"),
+  numberOfShares: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
+  purchasePricePerShare: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
+  purchaseFees: z.coerce.string().transform(val => val === "" || val === undefined ? 0 : parseFloat(val)).default("0"),
 
   // Gold
   goldType: z.enum(goldTypes).optional(),
-  quantityInGrams: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)), // Label is "Quantity / Units"
+  quantityInGrams: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
 
   // Currencies
-  currencyCode: z.string().optional(), // e.g. USD
-  foreignCurrencyAmount: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)),
-  exchangeRateAtPurchase: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)), // e.g. USD to EGP rate
-  // baseCurrencyAtPurchase removed
+  currencyCode: z.string().optional(),
+  foreignCurrencyAmount: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
+  exchangeRateAtPurchase: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
 
   // Real Estate
   propertyAddress: z.string().optional(),
@@ -35,7 +34,7 @@ export const AddInvestmentSchema = z.object({
   // Debt Instruments
   debtSubType: z.enum(debtSubTypes).optional(),
   issuer: z.string().optional(),
-  interestRate: z.coerce.string().optional().transform(val => val === undefined || val === "" ? undefined : parseFloat(val)),
+  interestRate: z.coerce.string().transform(val => val === "" || val === undefined ? undefined : parseFloat(val)).optional(),
   maturityDate: z.string().optional().refine((date) => date === undefined || date === "" || !isNaN(Date.parse(date)), { message: "Invalid maturity date format."}),
 
 }).superRefine((data, ctx) => {
@@ -45,19 +44,22 @@ export const AddInvestmentSchema = z.object({
     if (!data.selectedStockId) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please select a security.", path: ["selectedStockId"] });
     }
-    if (data.numberOfShares === undefined || data.numberOfShares <= 0) {
+    if (data.numberOfShares === undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of securities is required.", path: ["numberOfShares"] });
+    } else if (data.numberOfShares <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of securities must be positive.", path: ["numberOfShares"] });
+    } else if (!Number.isInteger(data.numberOfShares)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of securities must be an integer.", path: ["numberOfShares"] });
     }
+
     if (data.purchasePricePerShare === undefined || data.purchasePricePerShare <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price must be positive.", path: ["purchasePricePerShare"] });
     }
   } else if (effectiveType === 'Real Estate' || effectiveType === 'Gold' || effectiveType === 'Debt Instruments') {
-    // Direct amount invested for these types
     if (data.amountInvested === undefined || data.amountInvested <= 0) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Amount invested must be positive.", path: ["amountInvested"] });
     }
   }
-
 
   if (effectiveType === 'Gold') {
     if (!data.goldType) {
@@ -99,18 +101,29 @@ export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
 
 export const SellStockSchema = z.object({
   stockId: z.string(),
-  numberOfSharesToSell: z.coerce.string().transform(val => parseFloat(val)).pipe(z.number().positive({ message: "Number of securities to sell must be positive." })),
-  sellPricePerShare: z.coerce.string().transform(val => parseFloat(val)).pipe(z.number().positive({ message: "Sell price must be positive." })),
+  numberOfSharesToSell: z.coerce.string().transform(val => parseFloat(val))
+    .pipe(z.number()
+      .int({ message: "Number of securities to sell must be an integer." })
+      .positive({ message: "Number of securities to sell must be positive." })),
+  sellPricePerShare: z.coerce.string().transform(val => parseFloat(val))
+    .pipe(z.number().positive({ message: "Sell price must be positive." })),
   sellDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
-  fees: z.coerce.string().transform(val => val === "" ? 0 : parseFloat(val)).pipe(z.number().min(0, {message: "Fees cannot be negative."})).optional().default("0"),
+  fees: z.coerce.string().transform(val => val === "" ? 0 : parseFloat(val))
+    .pipe(z.number().min(0, {message: "Fees cannot be negative."})).optional().default("0"),
 });
 
 export type SellStockFormValues = z.infer<typeof SellStockSchema>;
 
 export const EditStockInvestmentSchema = z.object({
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format." }),
-  numberOfShares: z.coerce.string().transform(val => parseFloat(val)).pipe(z.number().positive({ message: "Number of securities must be positive." })),
-  purchasePricePerShare: z.coerce.string().transform(val => parseFloat(val)).pipe(z.number().positive({ message: "Purchase price must be positive." })),
-  purchaseFees: z.coerce.string().transform(val => val === "" ? 0 : parseFloat(val)).pipe(z.number().min(0, { message: "Fees cannot be negative." })).optional().default("0"),
+  numberOfShares: z.coerce.string().transform(val => parseFloat(val))
+    .pipe(z.number()
+      .int({ message: "Number of securities must be an integer." })
+      .positive({ message: "Number of securities must be positive." })),
+  purchasePricePerShare: z.coerce.string().transform(val => parseFloat(val))
+    .pipe(z.number().positive({ message: "Purchase price must be positive." })),
+  purchaseFees: z.coerce.string().transform(val => val === "" ? 0 : parseFloat(val))
+    .pipe(z.number().min(0, { message: "Fees cannot be negative." })).optional().default("0"),
 });
 export type EditStockInvestmentFormValues = z.infer<typeof EditStockInvestmentSchema>;
+

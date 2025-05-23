@@ -14,8 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { NumericInput } from "@/components/ui/numeric-input"; // Added import
-import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas"; 
+import { NumericInput } from "@/components/ui/numeric-input";
+import { SellStockSchema, type SellStockFormValues } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
@@ -51,10 +51,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
       stockId: securityId,
-      numberOfSharesToSell: '',
-      sellPricePerShare: '',
+      numberOfSharesToSell: '', // Keep as string
+      sellPricePerShare: '', // Keep as string
       sellDate: getCurrentDate(),
-      fees: '', // Initialize as empty string for NumericInput
+      fees: '', // Keep as string
     },
   });
 
@@ -68,7 +68,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
         const userOwnedForThisSymbol = investments.filter(
           (inv) => inv.type === 'Stocks' && inv.tickerSymbol === listedSecurityData.symbol
         ) as StockInvestment[];
-        
+
         const totalOwned = userOwnedForThisSymbol.reduce(
           (sum, inv) => sum + (inv.numberOfShares || 0),
           0
@@ -87,18 +87,18 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
     }
 
   }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext, form]);
-  
+
 
   async function onSubmit(values: SellStockFormValues) {
     if (!securityBeingSold) {
       toast({ title: "Error", description: "Security details not found.", variant: "destructive" });
       return;
     }
-    // Values from Zod schema are already numbers due to transform
-    const numberOfSharesToSellNum = values.numberOfSharesToSell; 
+
+    const numberOfSharesToSellNum = values.numberOfSharesToSell;
 
     if (numberOfSharesToSellNum > maxSharesToSell) {
-      form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} shares/units.` });
+      form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} ${securityLabel}.` });
       return;
     }
 
@@ -107,13 +107,13 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
         securityId,
         securityBeingSold.symbol,
         numberOfSharesToSellNum,
-        values.sellPricePerShare, // Already a number from Zod
+        values.sellPricePerShare,
         values.sellDate,
-        values.fees // Already a number from Zod (or 0 if undefined)
+        values.fees ?? 0 // Zod default ensures this is 0 if undefined
       );
       toast({
         title: "Sale Recorded",
-        description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityBeingSold.securityType === 'Fund' ? 'units' : 'shares'} of ${securityBeingSold.name}.`,
+        description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityLabel} of ${securityBeingSold.name}.`,
       });
       router.push(`/stocks/${securityId}`);
     } catch (error: any) {
@@ -125,7 +125,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       });
     }
   }
-  
+
   if (isLoading || isLoadingListedSecurities || isLoadingInvestmentsContext) {
     return (
       <div className="flex items-center justify-center py-10">
@@ -144,7 +144,9 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
       </Alert>
     );
   }
-  
+
+  const securityLabel = securityBeingSold.securityType === 'Fund' ? 'units' : 'shares';
+
   if (maxSharesToSell === 0 && !isLoading) {
      return (
       <Alert>
@@ -155,7 +157,6 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
     );
   }
 
-  const securityLabel = securityBeingSold.securityType === 'Fund' ? 'units' : 'shares';
 
   return (
     <Form {...form}>
@@ -175,9 +176,10 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
                 <FormLabel>Number of {securityLabel} to Sell</FormLabel>
                 <FormControl>
                   <NumericInput
-                    placeholder="e.g., 50 or 10.5"
+                    placeholder={`e.g., 50 or 10`}
                     value={field.value}
                     onChange={field.onChange}
+                    allowDecimal={false}
                   />
                 </FormControl>
                 <FormDescription>Max: {maxSharesToSell}</FormDescription>

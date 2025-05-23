@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { NumericInput } from "@/components/ui/numeric-input"; // Added import
+import { NumericInput } from "@/components/ui/numeric-input";
 import { EditStockInvestmentSchema, type EditStockInvestmentFormValues } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
@@ -37,14 +37,14 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
   const [investmentToEdit, setInvestmentToEdit] = useState<StockInvestment | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [oldAmountInvested, setOldAmountInvested] = useState<number | null>(null);
-  
+
   const form = useForm<EditStockInvestmentFormValues>({
     resolver: zodResolver(EditStockInvestmentSchema),
-    defaultValues: { // RHF expects strings for controlled text inputs
+    defaultValues: {
       purchaseDate: "",
-      numberOfShares: '',
-      purchasePricePerShare: '',
-      purchaseFees: '',
+      numberOfShares: '', // Keep as string
+      purchasePricePerShare: '', // Keep as string
+      purchaseFees: '', // Keep as string
     },
   });
 
@@ -54,11 +54,11 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     if (foundInvestment) {
       setInvestmentToEdit(foundInvestment);
       setOldAmountInvested(foundInvestment.amountInvested);
-      form.reset({ // Reset with string values for the form
+      form.reset({
         purchaseDate: foundInvestment.purchaseDate.split('T')[0],
         numberOfShares: String(foundInvestment.numberOfShares ?? ''),
         purchasePricePerShare: String(foundInvestment.purchasePricePerShare ?? ''),
-        purchaseFees: String(foundInvestment.purchaseFees ?? '0'), // Default to '0' if undefined
+        purchaseFees: String(foundInvestment.purchaseFees ?? '0'),
       });
     } else if (!isLoadingContext) {
       toast({
@@ -78,12 +78,11 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     }
 
     try {
-      // Zod schema transforms string values to numbers
       const dataToUpdate = {
         purchaseDate: values.purchaseDate,
-        numberOfShares: values.numberOfShares, // Already number from Zod
-        purchasePricePerShare: values.purchasePricePerShare, // Already number from Zod
-        purchaseFees: values.purchaseFees, // Already number from Zod (or 0 if undefined)
+        numberOfShares: values.numberOfShares,
+        purchasePricePerShare: values.purchasePricePerShare,
+        purchaseFees: values.purchaseFees ?? 0, // Zod default ensures this is 0
       };
 
       await updateStockInvestment(investmentId, dataToUpdate, oldAmountInvested);
@@ -121,7 +120,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
       </Alert>
     );
   }
-  
+
   const pageTitle = `Edit Purchase: ${investmentToEdit?.actualStockName || investmentToEdit?.name || 'Stock'}`;
 
 
@@ -156,9 +155,10 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormLabel>Number of Securities</FormLabel>
                     <FormControl>
                       <NumericInput
-                        placeholder="e.g., 100.5"
+                        placeholder="e.g., 100"
                         value={field.value}
                         onChange={field.onChange}
+                        allowDecimal={false}
                       />
                     </FormControl>
                     <FormMessage />
