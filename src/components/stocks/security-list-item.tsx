@@ -33,7 +33,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security 
             width={40}
             height={40}
             className="rounded-full object-cover"
-            data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}
+            data-ai-hint={security.securityType === 'Fund' ? "fund logo" : "company logo"}
           />
           <div className="truncate">
             <p className="font-semibold text-sm text-foreground truncate">{security.name}</p>
