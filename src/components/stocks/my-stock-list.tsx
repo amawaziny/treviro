@@ -17,7 +17,7 @@ export function MyStockList() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
 
   const stockInvestments = React.useMemo(() => {
-    return investments.filter(inv => inv.type === 'Stocks') as StockInvestment[];
+    return investments.filter(inv => inv.securityType === 'Stock' || (inv.securityType === 'Fund' && inv.fundType !== 'Gold')) as StockInvestment[];
   }, [investments]);
 
   if (isLoadingInvestments) {

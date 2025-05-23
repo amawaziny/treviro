@@ -2,9 +2,11 @@
 "use client"; // This page needs to be a client component to use next/dynamic with ssr:false
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 // Dynamically import AddInvestmentForm with ssr: false
 // The component itself (AddInvestmentForm) must also be marked with "use client";
 const AddInvestmentForm = dynamic(() => 
@@ -28,6 +30,11 @@ function AddInvestmentLoadingFallback() {
 export default function AddInvestmentPage() {
   return (
     <div className="container mx-auto py-8">
+      <div className="mb-6">
+        <Link href="/stocks/placeholder" passHref>
+          <Button variant="outline">Back to Security</Button>
+        </Link>
+      </div>
       <Suspense fallback={<AddInvestmentLoadingFallback />}>
         <AddInvestmentForm />
       </Suspense>

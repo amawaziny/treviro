@@ -63,9 +63,21 @@ export function MyStockListItem({
     isProfitable = profitLoss >= 0;
   }
 
-  const formattedAvgPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(averagePurchasePrice);
-  const formattedMarketPrice = currentMarketPrice ? new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(currentMarketPrice) : 'N/A';
-  const formattedProfitLoss = new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, signDisplay: 'always' }).format(profitLoss);
+  const formattedAvgPrice = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  }).format(averagePurchasePrice);
+  const formattedMarketPrice = currentMarketPrice ? new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  }).format(currentMarketPrice) : 'N/A';
+  const formattedProfitLoss = new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: currency, signDisplay: 'always', minimumFractionDigits: 3, maximumFractionDigits: 3,
+  }).format(profitLoss);
   
   const sharesLabel = isFund ? 'Units' : 'Shares';
 
