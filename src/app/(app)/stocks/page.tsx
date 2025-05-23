@@ -17,23 +17,17 @@ export default function SecuritiesPage() {
   const [activeTab, setActiveTab] = useState(urlTab || 'stocks');
 
   // Effect to update activeTab if URL changes (e.g., browser back/forward)
-  // or if the initial urlTab was different from the default 'stocks'.
   useEffect(() => {
     const newUrlTab = searchParams.get('tab');
-    if (newUrlTab && newUrlTab !== activeTab) {
-      setActiveTab(newUrlTab);
-    } else if (!newUrlTab && activeTab !== 'stocks') {
-      // If URL has no tab param (e.g. direct navigation to /stocks) and current tab is not default, reset to default
-      // This case might be less common if initial state is set correctly
-      // setActiveTab('stocks'); // Potentially remove if initial state handles it well
+    const targetTab = newUrlTab || 'stocks'; // Default to 'stocks' if no tab in URL
+    if (targetTab !== activeTab) { // Only update if there's an actual change needed from URL
+      setActiveTab(targetTab);
     }
-  }, [searchParams, activeTab]); // Rerun if searchParams or activeTab changes
+  }, [searchParams]); // Only run when searchParams change (e.g. browser back/forward)
 
   // Handler to update state when user clicks a tab
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
-    // Optionally, update URL here if you want tab clicks to change the URL
-    // window.history.pushState(null, '', `/stocks?tab=${newTab}`);
   };
 
   return (
