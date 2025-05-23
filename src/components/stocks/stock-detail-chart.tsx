@@ -17,23 +17,23 @@ interface StockDetailChartProps {
   securityId: string;
 }
 
-const timeRanges: StockChartTimeRange[] = ['1D', '1W', '1M', '6M', '1Y', '5Y'];
+const timeRanges: StockChartTimeRange[] = ['1W', '1M', '6M', '1Y', '5Y'];
 
 const getNumPointsForRange = (range: StockChartTimeRange): number => {
   switch (range) {
-    case '1D': return 7; 
+    // '1D' case removed
     case '1W': return 7;
     case '1M': return 30;
     case '6M': return 180; 
     case '1Y': return 365;
     case '5Y': return 365 * 5;
-    default: return 30;
+    default: return 30; // Default to 30 points if range is somehow undefined
   }
 };
 
 export function StockDetailChart({ securityId }: StockDetailChartProps) {
   const { language } = useLanguage(); // Added
-  const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>('1M');
+  const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>('1W'); // Default to '1W'
   const [chartData, setChartData] = useState<StockChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
