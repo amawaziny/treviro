@@ -140,3 +140,29 @@ export interface AggregatedCurrencyHolding {
   profitOrLossInEGP?: number;
   profitOrLossPercentage?: number;
 }
+
+export interface AggregatedDebtHolding {
+  id: string; // Firestore ID for direct debt, or fund ID for funds
+  itemType: 'direct' | 'fund';
+  displayName: string; 
+  
+  // Direct Debt Specific
+  debtSubType?: DebtSubType;
+  issuer?: string;
+  interestRate?: number;
+  maturityDate?: string;
+  amountInvested?: number; // Cost for direct debt
+  purchaseDate?: string;
+
+  // Fund Specific
+  fundDetails?: ListedSecurity; 
+  totalUnits?: number;
+  averagePurchasePrice?: number;
+  totalCost?: number; // Cost for fund investment
+  currentMarketPrice?: number;
+  currentValue?: number;
+  profitLoss?: number;
+  profitLossPercent?: number;
+  currency?: string; 
+  logoUrl?: string;
+}

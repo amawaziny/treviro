@@ -3,9 +3,9 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType } from '@/lib/types';
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment } from '@/lib/types';
 import { db as firestoreInstance } from '@/lib/firebase';
-import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -28,6 +28,7 @@ interface InvestmentContextType {
   updateStockInvestment: (investmentId: string, dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>, oldAmountInvested: number) => Promise<void>;
   deleteSellTransaction: (transaction: Transaction) => Promise<void>;
   removeGoldInvestments: (identifier: string, itemType: 'physical' | 'fund') => Promise<void>;
+  removeDirectDebtInvestment: (investmentId: string) => Promise<void>;
   dashboardSummary: DashboardSummary | null;
 }
 
@@ -64,22 +65,44 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     try {
       await runTransaction(firestoreInstance, async (transaction) => {
         const summaryDoc = await transaction.get(summaryDocRef);
-        const currentData = summaryDoc.exists() ? summaryDoc.data() as DashboardSummary : { ...defaultDashboardSummary };
         
-        const newData: DashboardSummary = { ...currentData };
+        let currentData: DashboardSummary;
+        if (summaryDoc.exists()) {
+            currentData = summaryDoc.data() as DashboardSummary;
+        } else {
+            // If doc doesn't exist, initialize with defaults before applying updates
+            currentData = { ...defaultDashboardSummary };
+            // Note: transaction.set for initialization must happen before updates
+            // We'll handle this by ensuring the document is created if it doesn't exist
+            // or by ensuring initial values if fields are missing.
+        }
+        
+        const newData: Partial<DashboardSummary> = {};
+        let docNeedsCreation = !summaryDoc.exists();
 
         for (const key in updates) {
             const typedKey = key as keyof DashboardSummary;
             const updateValue = updates[typedKey];
-            if (typeof updateValue === 'number' && typeof newData[typedKey] === 'number') {
-                (newData[typedKey] as number) += updateValue;
-            } else if (typeof updateValue === 'number' && newData[typedKey] === undefined) {
-                (newData[typedKey] as number) = updateValue;
-            }  else if (typeof updateValue === 'number') { // If currentData[typedKey] isn't a number but update is
-                 (newData[typedKey] as number) = updateValue;
+
+            if (typeof updateValue === 'number') {
+                // Use Firestore increment for atomic updates if the document exists
+                // Otherwise, prepare the value for a set operation.
+                if (summaryDoc.exists()) {
+                    newData[typedKey] = increment(updateValue) as any; // `increment` is the correct way
+                } else {
+                    // If doc doesn't exist, just set the initial incremented value
+                     const currentFieldValue = (currentData[typedKey] as number | undefined) || 0;
+                    (newData[typedKey] as number) = currentFieldValue + updateValue;
+                }
             }
         }
-        transaction.set(summaryDocRef, newData, { merge: true });
+        if (docNeedsCreation) {
+            // If the doc doesn't exist, create it with the initial summed values
+            transaction.set(summaryDocRef, newData); // newData contains the initial computed values
+        } else {
+            // If doc exists, update with increments (or new values if fields were previously undefined)
+            transaction.update(summaryDocRef, newData);
+        }
       });
     } catch (e) {
       console.error("Dashboard summary transaction failed: ", e);
@@ -117,8 +140,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
                 setDashboardSummary(docSnap.data() as DashboardSummary);
             } else {
                 setDashboardSummary(defaultDashboardSummary);
-                const defaultData: DashboardSummary = { ...defaultDashboardSummary };
-                setDoc(summaryDocRef, defaultData).catch(err => console.error("Failed to create default summary doc:", err));
+                // Attempt to create the summary document with defaults if it doesn't exist
+                const defaultDataForCreation: DashboardSummary = { ...defaultDashboardSummary };
+                setDoc(summaryDocRef, defaultDataForCreation, { merge: true })
+                  .catch(err => console.error("Failed to create default summary doc:", err));
             }
             }, (error) => {
             console.error("Error fetching dashboard summary:", error);
@@ -183,10 +208,11 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setCurrencyAnalyses({});
     });
 
-    const dataFetchPromises = [
-      getDocs(qInvestments).catch(() => null),
-      getDocs(qTransactions).catch(() => null),
-      getDocs(qAnalyses).catch(() => null)
+    // Combine promises to set loading to false once initial data (or attempt) is done
+    const dataFetchPromises: Promise<any>[] = [
+        getDocs(qInvestments).catch(() => null), // Don't let one error stop others
+        getDocs(qTransactions).catch(() => null),
+        getDocs(qAnalyses).catch(() => null)
     ];
     if (summaryDocRef) {
         dataFetchPromises.push(getDoc(summaryDocRef).catch(() => null));
@@ -195,6 +221,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     Promise.all(dataFetchPromises).then(() => {
         setIsLoading(false);
     }).catch(() => {
+        // Errors are handled by individual listeners, this just manages global loading
         setIsLoading(false); 
     });
 
@@ -274,16 +301,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Not enough shares to sell.");
       }
 
-      let totalCostOfOwnedShares = userStockInvestments.reduce(
-        (sum, inv) => sum + (inv.amountInvested || 0), // Use amountInvested (cost of each lot)
+      const totalCostOfAllLots = userStockInvestments.reduce(
+        (sum, inv) => sum + (inv.amountInvested || 0),
         0
       );
-      // Average purchase price is total cost of all lots / total shares of all lots
-      const averagePurchasePrice = totalOwnedShares > 0 ? totalCostOfOwnedShares / totalOwnedShares : 0;
+      const averagePurchasePriceAllLots = totalOwnedShares > 0 ? totalCostOfAllLots / totalOwnedShares : 0;
 
 
       const totalProceeds = numberOfSharesToSell * sellPricePerShare - fees;
-      const costOfSharesSold = averagePurchasePrice * numberOfSharesToSell;
+      const costOfSharesSold = averagePurchasePriceAllLots * numberOfSharesToSell;
       const profitOrLoss = totalProceeds - costOfSharesSold;
 
       const transactionId = uuidv4();
@@ -310,7 +336,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
       
       let sharesToDeduct = numberOfSharesToSell;
-      let costBasisReduction = 0;
+      let costBasisReductionFromPortfolio = 0;
 
       for (const investment of userStockInvestments) {
         if (sharesToDeduct <= 0) break;
@@ -324,7 +350,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           const newShareCount = sharesInThisLot - sharesToDeduct;
           const proportionSoldFromLot = sharesToDeduct / sharesInThisLot;
           const costBasisOfSoldPortionFromLot = costOfThisLot * proportionSoldFromLot;
-          costBasisReduction += costBasisOfSoldPortionFromLot;
+          costBasisReductionFromPortfolio += costBasisOfSoldPortionFromLot;
 
 
           if (newShareCount === 0) {
@@ -338,7 +364,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           }
           sharesToDeduct = 0;
         } else { 
-          costBasisReduction += costOfThisLot;
+          costBasisReductionFromPortfolio += costOfThisLot;
           batch.delete(investmentDocRef);
           sharesToDeduct -= sharesInThisLot;
         }
@@ -348,9 +374,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       if (typeof profitOrLoss === 'number') {
         await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
       }
-      if (costBasisReduction !== 0) {
-        // totalInvestedAcrossAllAssets should decrease by the cost basis of the shares sold
-        await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReduction });
+      if (costBasisReductionFromPortfolio !== 0) {
+        await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReductionFromPortfolio });
       }
 
     },
@@ -395,7 +420,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
-  const correctedUpdateStockInvestment = useCallback(async (
+  const updateStockInvestment = useCallback(async (
     investmentId: string,
     dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>,
     oldAmountInvested: number
@@ -448,10 +473,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
       }
       
-      // Cost basis of shares sold was total amount - P/L.
-      // When deleting a sale, this cost basis needs to be added back to totalInvested.
       const costBasisOfSoldShares = transactionToDelete.totalAmount - (transactionToDelete.profitOrLoss || 0);
-      if (costBasisOfSoldShares > 0) { 
+      if (costBasisOfSoldShares !== 0) { 
           await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: costBasisOfSoldShares });
       }
 
@@ -487,40 +510,49 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         totalAmountInvestedRemoved += investmentData.amountInvested || 0;
         batch.delete(docSnapshot.ref);
       });
+      await batch.commit(); // Commit for physical gold deletions
+      if (totalAmountInvestedRemoved !== 0) {
+          await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
+      }
     } else if (itemType === 'fund') {
-      // Re-use existing logic by calling removeStockInvestmentsBySymbol internally
-      // Note: removeStockInvestmentsBySymbol already handles dashboard summary updates for amountInvested.
-      // To avoid double-counting, we won't directly call updateDashboardSummaryDoc here for funds.
-      // This is a bit of a workaround; ideally, removal logic would be more centralized.
-      // For now, we fetch the sum of amounts to be removed, let removeStockInvestmentsBySymbol do its job,
-      // and if it doesn't update the summary itself, we would do it. But it does.
-      // So for funds, the dashboard update happens within removeStockInvestmentsBySymbol.
       const tickerSymbol = identifier;
-      const q = query(
-        collection(firestoreInstance, investmentsCollectionPath),
-        where("type", "==", "Stocks"),
-        where("tickerSymbol", "==", tickerSymbol)
-      );
-      const querySnapshot = await getDocs(q);
-      let fundAmountInvestedRemoved = 0;
-       querySnapshot.forEach((docSnapshot) => {
-        const investmentData = docSnapshot.data() as StockInvestment;
-        fundAmountInvestedRemoved += investmentData.amountInvested || 0;
-        // Actual deletion is handled by removeStockInvestmentsBySymbol
-      });
-      await removeStockInvestmentsBySymbol(tickerSymbol); // This will handle its own dashboard summary update.
-      // totalAmountInvestedRemoved is not modified here for funds, as removeStockInvestmentsBySymbol handles it.
+      // For funds, we rely on removeStockInvestmentsBySymbol which already handles its own batch and summary update.
+      await removeStockInvestmentsBySymbol(tickerSymbol);
+      // No separate commit or summary update here as it's handled by the called function.
     }
-
-    if (itemType === 'physical') { // Only commit and update summary if it was physical (funds handled by sub-call)
-        await batch.commit();
-        if (totalAmountInvestedRemoved !== 0) {
-            await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
-        }
-    }
-
     console.log(`Successfully removed gold investments for identifier: ${identifier} (type: ${itemType}).`);
   }, [userId, isAuthenticated, updateDashboardSummaryDoc, removeStockInvestmentsBySymbol]);
+
+  const removeDirectDebtInvestment = useCallback(async (investmentId: string) => {
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("RemoveDirectDebtInvestment: User not authenticated, userId missing, or Firestore not available.");
+      throw new Error("User not authenticated or Firestore not available.");
+    }
+    const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
+    
+    try {
+      const docSnap = await getDoc(investmentDocRef);
+      if (!docSnap.exists()) {
+        console.warn(`Direct debt investment ${investmentId} not found for removal.`);
+        return;
+      }
+      const investmentData = docSnap.data() as DebtInstrumentInvestment;
+      if (investmentData.type !== 'Debt Instruments') {
+         console.warn(`Investment ${investmentId} is not a direct debt instrument.`);
+         return;
+      }
+
+      await deleteDoc(investmentDocRef);
+
+      if (investmentData.amountInvested && typeof investmentData.amountInvested === 'number') {
+        await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -investmentData.amountInvested });
+      }
+      console.log(`Successfully removed direct debt investment ${investmentId}.`);
+    } catch (error) {
+      console.error(`Error removing direct debt investment ${investmentId}:`, error);
+      throw error;
+    }
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
 
   return (
@@ -533,9 +565,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         recordSellStockTransaction,
         transactions,
         removeStockInvestmentsBySymbol,
-        updateStockInvestment: correctedUpdateStockInvestment,
+        updateStockInvestment,
         deleteSellTransaction,
         removeGoldInvestments,
+        removeDirectDebtInvestment,
         dashboardSummary
     }}>
       {children}

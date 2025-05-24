@@ -4,39 +4,104 @@
 import React from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
-import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, InvestmentType } from '@/lib/types';
+import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, AggregatedDebtHolding } from '@/lib/types';
 import { isDebtRelatedFund } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollText, Database, Plus } from 'lucide-react';
+import { ScrollText, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { MyDebtListItem } from '@/components/investments/my-debt-list-item'; 
+
 
 export default function MyDebtInstrumentsPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
 
-  const directDebtHoldings = React.useMemo(() => {
-    return investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
-  }, [investments]);
-
-  const debtFundHoldings = React.useMemo(() => {
+  const aggregatedDebtHoldings = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
+    const holdings: AggregatedDebtHolding[] = [];
+
+    // Process Direct Debt Instruments
+    const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
+    directDebtInvestments.forEach(debt => {
+      holdings.push({
+        id: debt.id,
+        itemType: 'direct',
+        displayName: debt.name || `${debt.debtSubType} - ${debt.issuer || 'N/A'}`,
+        debtSubType: debt.debtSubType,
+        issuer: debt.issuer,
+        interestRate: debt.interestRate,
+        maturityDate: debt.maturityDate,
+        amountInvested: debt.amountInvested,
+        purchaseDate: debt.purchaseDate,
+      });
+    });
+
+    // Process Debt-Related Funds
     const stockInvestments = investments.filter(inv => inv.type === 'Stocks') as StockInvestment[];
-    
-    return stockInvestments.map(stockInv => {
+    const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
+
+    stockInvestments.forEach(stockInv => {
       const security = listedSecurities.find(ls => ls.symbol === stockInv.tickerSymbol);
       if (security && security.securityType === 'Fund' && isDebtRelatedFund(security.fundType)) {
-        return {
-          ...stockInv,
-          fundDetails: security,
-        };
+        const symbol = security.symbol;
+        if (debtFundAggregationMap.has(symbol)) {
+          const existing = debtFundAggregationMap.get(symbol)!;
+          existing.totalUnits = (existing.totalUnits || 0) + (stockInv.numberOfShares || 0);
+          existing.totalCost = (existing.totalCost || 0) + (stockInv.amountInvested || 0);
+          if (existing.totalUnits && existing.totalUnits > 0 && existing.totalCost) {
+            existing.averagePurchasePrice = existing.totalCost / existing.totalUnits;
+          }
+          // Recalculate P/L for aggregated fund
+          if (existing.currentMarketPrice && existing.totalUnits && existing.totalCost) {
+            existing.currentValue = existing.currentMarketPrice * existing.totalUnits;
+            existing.profitLoss = existing.currentValue - existing.totalCost;
+            existing.profitLossPercent = existing.totalCost > 0 ? (existing.profitLoss / existing.totalCost) * 100 : (existing.currentValue > 0 ? Infinity : 0);
+          }
+
+        } else {
+          const totalCostVal = stockInv.amountInvested || 0;
+          const totalUnitsVal = stockInv.numberOfShares || 0;
+          const avgPrice = totalUnitsVal > 0 ? totalCostVal / totalUnitsVal : 0;
+          let currentValueVal, profitLossVal, profitLossPercentVal;
+
+          if(security.price && totalUnitsVal > 0){
+            currentValueVal = security.price * totalUnitsVal;
+            profitLossVal = currentValueVal - totalCostVal;
+            profitLossPercentVal = totalCostVal > 0 ? (profitLossVal/totalCostVal) * 100 : (currentValueVal > 0 ? Infinity : 0);
+          }
+
+          debtFundAggregationMap.set(symbol, {
+            id: security.id, 
+            itemType: 'fund',
+            displayName: security.name,
+            fundDetails: security,
+            totalUnits: totalUnitsVal,
+            averagePurchasePrice: avgPrice,
+            totalCost: totalCostVal,
+            currentMarketPrice: security.price,
+            currency: security.currency,
+            logoUrl: security.logoUrl,
+            currentValue: currentValueVal,
+            profitLoss: profitLossVal,
+            profitLossPercent: profitLossPercentVal
+          });
+        }
       }
-      return null;
-    }).filter(Boolean) as (StockInvestment & { fundDetails: ListedSecurity })[];
+    });
+    
+    holdings.push(...Array.from(debtFundAggregationMap.values()));
+    
+    return holdings.sort((a,b) => {
+        // Sort by item type (direct first, then funds), then by display name
+        if (a.itemType === 'direct' && b.itemType === 'fund') return -1;
+        if (a.itemType === 'fund' && b.itemType === 'direct') return 1;
+        return a.displayName.localeCompare(b.displayName);
+    });
+
   }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
@@ -49,22 +114,12 @@ export default function MyDebtInstrumentsPage() {
           <Skeleton className="h-4 w-64" />
         </div>
         <Separator />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
+        {[...Array(2)].map((_, i) => (
+           <Card key={i} className="mt-6">
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
@@ -72,98 +127,34 @@ export default function MyDebtInstrumentsPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Debt Instruments</h1>
-        <p className="text-muted-foreground">Track your direct debt holdings and debt-related fund investments.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Debt Holdings</h1>
+        <p className="text-muted-foreground">Track your direct debt instruments and debt-related fund investments.</p>
       </div>
       <Separator />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <ScrollText className="mr-2 h-6 w-6 text-primary" />
-            Direct Debt Holdings
-          </CardTitle>
-          <CardDescription>Certificates, Treasury Bills, Bonds, etc.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {directDebtHoldings.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name/Description</TableHead>
-                  <TableHead>Sub-Type</TableHead>
-                  <TableHead>Issuer</TableHead>
-                  <TableHead>Amount Invested</TableHead>
-                  <TableHead>Interest Rate (%)</TableHead>
-                  <TableHead>Maturity Date</TableHead>
-                  <TableHead>Purchase Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {directDebtHoldings.map(debt => (
-                  <TableRow key={debt.id}>
-                    <TableCell>{debt.name}</TableCell>
-                    <TableCell>{debt.debtSubType || 'N/A'}</TableCell>
-                    <TableCell>{debt.issuer || 'N/A'}</TableCell>
-                    <TableCell>${debt.amountInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell>{debt.interestRate?.toLocaleString() || 'N/A'}%</TableCell>
-                    <TableCell>{debt.maturityDate ? new Date(debt.maturityDate  + "T00:00:00").toLocaleDateString() : 'N/A'}</TableCell>
-                    <TableCell>{new Date(debt.purchaseDate + "T00:00:00").toLocaleDateString()}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground">No direct debt investments recorded.</p>
-          )}
-        </CardContent>
-      </Card>
+      {aggregatedDebtHoldings.length > 0 ? (
+        <div className="space-y-4 mt-6">
+          {aggregatedDebtHoldings.map(holding => (
+            <MyDebtListItem key={holding.id} holding={holding} />
+          ))}
+        </div>
+      ) : (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <ScrollText className="mr-2 h-6 w-6 text-primary" />
+              No Debt Holdings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground py-4 text-center">
+              You haven't added any debt investments or related funds yet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Database className="mr-2 h-6 w-6 text-primary" /> {/* Using Database icon for funds */}
-            Debt-Related Fund Investments
-          </CardTitle>
-          <CardDescription>Cash management funds, fixed income funds, bond ETFs, etc.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {debtFundHoldings.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fund Name (Symbol)</TableHead>
-                  <TableHead>Units Held</TableHead>
-                  <TableHead>Avg. Purchase Price</TableHead>
-                  <TableHead>Total Invested</TableHead>
-                  <TableHead>Current Market Price</TableHead>
-                  <TableHead>Current Value</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {debtFundHoldings.map(fundInv => {
-                  const totalCost = (fundInv.numberOfShares || 0) * (fundInv.purchasePricePerShare || 0);
-                  const avgPurchasePrice = (fundInv.numberOfShares && fundInv.numberOfShares > 0) ? totalCost / fundInv.numberOfShares : 0;
-                  const currentValue = (fundInv.numberOfShares || 0) * (fundInv.fundDetails.price || 0);
-                  return (
-                    <TableRow key={fundInv.id}>
-                      <TableCell>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
-                      <TableCell>{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
-                      <TableCell>${avgPurchasePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${fundInv.fundDetails.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground">No debt-related fund investments found.</p>
-          )}
-        </CardContent>
-      </Card>
-       <Link href="/investments/add?type=Debt Instruments" passHref>
+      <Link href="/investments/add?type=Debt Instruments" passHref>
         <Button
           variant="default"
           size="icon"
@@ -176,4 +167,3 @@ export default function MyDebtInstrumentsPage() {
     </div>
   );
 }
-
