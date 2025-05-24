@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollText, Plus, Building, Trash2, Landmark } from 'lucide-react';
+import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown } from 'lucide-react'; // Added ArrowUpDown
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MyDebtListItem } from '@/components/investments/my-debt-list-item';
@@ -51,7 +51,6 @@ export default function MyDebtInstrumentsPage() {
     const directHoldings: AggregatedDebtHolding[] = [];
     const fundHoldings: AggregatedDebtHolding[] = [];
 
-    // Process Direct Debt Instruments
     const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
       let maturityDay: string | undefined;
@@ -60,7 +59,7 @@ export default function MyDebtInstrumentsPage() {
 
       if (debt.maturityDate) {
         try {
-          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00"); // Ensure it's parsed as local
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00"); 
           if (isValid(parsedMaturityDate)) {
             maturityDay = format(parsedMaturityDate, 'dd');
             maturityMonth = format(parsedMaturityDate, 'MM');
@@ -80,14 +79,13 @@ export default function MyDebtInstrumentsPage() {
         interestRate: debt.interestRate,
         maturityDate: debt.maturityDate,
         amountInvested: debt.amountInvested,
-        purchaseDate: debt.purchaseDate,
+        purchaseDate: debt.debtSubType === 'Certificate' ? undefined : debt.purchaseDate,
         maturityDay,
         maturityMonth,
         maturityYear,
       });
     });
 
-    // Process Debt-Related Funds
     const stockInvestments = investments.filter(inv => inv.type === 'Stocks') as StockInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
@@ -172,15 +170,15 @@ export default function MyDebtInstrumentsPage() {
   };
 
   const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return ''; // Return empty string for blank cell
+    if (!dateString) return '';
     try {
-        const parsedDate = parseISO(dateString + "T00:00:00"); // Ensure local interpretation
+        const parsedDate = parseISO(dateString + "T00:00:00");
         if (isValid(parsedDate)) {
             return format(parsedDate, 'dd-MM-yyyy');
         }
         return '';
     } catch (e) {
-        return ''; // Return empty if date is invalid
+        return '';
     }
   };
 
@@ -226,16 +224,16 @@ export default function MyDebtInstrumentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name/Description</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Issuer</TableHead>
-                      <TableHead className="text-right">Interest Rate</TableHead>
-                      <TableHead className="text-right">M. Day</TableHead>
-                      <TableHead className="text-right">M. Month</TableHead>
-                      <TableHead className="text-right">M. Year</TableHead>
-                      <TableHead className="text-right">Maturity Date</TableHead>
-                      <TableHead className="text-right">Amount Invested</TableHead>
-                      <TableHead>Purchase Date</TableHead>
+                      <TableHead className="flex items-center">Name/Description <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="flex items-center">Type <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="flex items-center">Issuer <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="text-right flex items-center justify-end">Interest Rate <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="text-right flex items-center justify-end">M. Day <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="text-right flex items-center justify-end">M. Month <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="text-right flex items-center justify-end">M. Year <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="text-right flex items-center justify-end">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="text-right flex items-center justify-end">Amount Invested <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
+                      <TableHead className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -337,7 +335,6 @@ export default function MyDebtInstrumentsPage() {
                   if (itemToDelete.itemType === 'direct') {
                     handleRemoveDirectDebt(itemToDelete.id, itemToDelete.displayName);
                   }
-                  // Note: MyDebtListItem handles its own fund removal, so we don't call that here.
                 }}
                 className={cn(buttonVariants({ variant: "destructive" }))}
               >
@@ -350,3 +347,4 @@ export default function MyDebtInstrumentsPage() {
     </AlertDialog>
   );
 }
+
