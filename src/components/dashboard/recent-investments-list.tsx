@@ -36,7 +36,8 @@ const investmentTypeIcons = {
 // Memoize InvestmentRow
 const InvestmentRow = React.memo(function InvestmentRow({ investment }: { investment: Investment }) {
   const Icon = investmentTypeIcons[investment.type] || CircleDollarSign;
-  const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(investment.amountInvested); // Assuming USD for display
+  // Assume amountInvested is in EGP for general display here. Stock details will use their specific currency.
+  const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(investment.amountInvested);
   const formattedDate = investment.purchaseDate ? format(new Date(investment.purchaseDate), 'dd-MM-yyyy') : 'N/A';
 
   return (

@@ -26,8 +26,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog"; // Corrected import
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/language-context';
 import { format } from 'date-fns';
@@ -36,7 +36,7 @@ import { format } from 'date-fns';
 export default function SecurityDetailPage() { 
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams(); // For reading query params
+  const searchParams = useSearchParams(); 
   const securityId = params.stockId as string; 
   const { toast } = useToast();
   const { language } = useLanguage();
@@ -146,7 +146,7 @@ export default function SecurityDetailPage() {
       await deleteSellTransaction(transactionToDelete);
       toast({
         title: "Transaction Deleted",
-        description: `Sell transaction from ${transactionToDelete.date ? format(new Date(transactionToDelete.date + "T00:00:00"), 'dd-MM-yyyy') : ''} has been deleted.`,
+        description: `Sell transaction from ${transactionToDelete.date ? format(new Date(transactionToDelete.date + "T00:00:00Z"), 'dd-MM-yyyy') : ''} has been deleted.`,
       });
     } catch (error: any) {
       toast({
@@ -194,21 +194,22 @@ export default function SecurityDetailPage() {
     ? `${security.name} (${security.symbol}) - ${security.fundType || 'Fund'}`
     : `${security.name} (${security.symbol})`;
   
-  const displayCurrency = security.currency || 'USD';
+  const displayCurrency = security.currency || 'EGP'; // Default to EGP if currency not specified
   const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
 
-  const formatCurrency = (value: number, currencyCode: string = displayCurrency, minFractionDigits = 3, maxFractionDigits = 3) => {
+  const formatCurrency = (value: number, currencyCode: string = displayCurrency) => {
+    const digits = currencyCode === 'EGP' ? 3 : 2;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currencyCode,
-      minimumFractionDigits: minFractionDigits,
-      maximumFractionDigits: maxFractionDigits,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
     }).format(value);
   };
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return format(new Date(dateString + "T00:00:00"), 'dd-MM-yyyy');
+    return format(new Date(dateString + "T00:00:00Z"), 'dd-MM-yyyy'); // Ensure UTC interpretation
   };
 
 
@@ -234,7 +235,7 @@ export default function SecurityDetailPage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">{currentMarketPrice.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</p>
+              <p className="text-2xl font-bold">{formatCurrency(currentMarketPrice)}</p>
               <p className={cn("text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
                   {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
               </p>
@@ -275,7 +276,7 @@ export default function SecurityDetailPage() {
                 <CardDescription>Daily closing prices from admin-entered data.</CardDescription>
               </CardHeader>
               <CardContent className="h-[400px]">
-                <StockDetailChart securityId={security.id} />
+                <StockDetailChart securityId={security.id} currency={displayCurrency} />
               </CardContent>
             </Card>
           </TabsContent>

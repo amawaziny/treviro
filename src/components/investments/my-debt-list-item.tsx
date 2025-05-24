@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { AggregatedDebtHolding } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building, TrendingUp, TrendingDown, Trash2 } from 'lucide-react'; // Removed ScrollText, CalendarDays, Percent, Banknote
+import { Building, TrendingUp, TrendingDown, Trash2 } from 'lucide-react'; 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import React from 'react';
 
 
 interface MyDebtListItemProps {
-  holding: AggregatedDebtHolding; // This component now only expects fund-type holdings
+  holding: AggregatedDebtHolding; 
 }
 
 const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
@@ -37,14 +37,14 @@ const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "out
 };
 
 export function MyDebtListItem({ holding }: MyDebtListItemProps) {
-  const { removeStockInvestmentsBySymbol } = useInvestments(); // Only need this for funds
+  const { removeStockInvestmentsBySymbol } = useInvestments(); 
   const { toast } = useToast();
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
   const {
     id,
     displayName,
-    fundDetails, // Expect fundDetails to be present
+    fundDetails, 
     totalUnits,
     averagePurchasePrice,
     currentMarketPrice,
@@ -55,17 +55,16 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
   } = holding;
 
   if (holding.itemType !== 'fund' || !fundDetails) {
-    // This component is now only for funds, render nothing or an error if misused
     console.warn("MyDebtListItem received non-fund data:", holding);
     return null;
   }
 
   const isProfitable = profitLoss !== undefined && profitLoss >= 0;
 
-  const formatDisplayCurrency = (value: number | undefined, curr = "USD", digits = 2) => {
+  const formatDisplayCurrency = (value: number | undefined, curr = "USD") => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
-    const effectiveDigits = curr === "EGP" ? 2 : digits;
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: effectiveDigits, maximumFractionDigits: effectiveDigits }).format(value);
+    const digits = curr === 'EGP' ? 3 : 2;
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
   const handleRemoveFund = async () => {
@@ -80,7 +79,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     setIsAlertDialogOpen(false);
   };
   
-  const detailPageLink = `/stocks/${fundDetails.id}?previousTab=funds`; // Link to standard security detail page
+  const detailPageLink = `/stocks/${fundDetails.id}?previousTab=funds`; 
 
 
   return (
@@ -115,7 +114,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             {currentMarketPrice !== undefined && profitLoss !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
-                  {formatDisplayCurrency(profitLoss, currency, fundDetails?.currency === 'EGP' ? 2 : 3)}
+                  {formatDisplayCurrency(profitLoss, currency)}
                 </p>
                 <Badge variant={isProfitable ? 'default' : 'destructive'}
                        className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
@@ -152,8 +151,8 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
         </div>
 
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
-          <p>Avg. Cost: {formatDisplayCurrency(averagePurchasePrice, currency, fundDetails?.currency === 'EGP' ? 2 : 3)}</p>
-          <p>Market Price: {formatDisplayCurrency(currentMarketPrice, currency, fundDetails?.currency === 'EGP' ? 2 : 3)}</p>
+          <p>Avg. Cost: {formatDisplayCurrency(averagePurchasePrice, currency)}</p>
+          <p>Market Price: {formatDisplayCurrency(currentMarketPrice, currency)}</p>
         </div>
       </CardContent>
     </Card>

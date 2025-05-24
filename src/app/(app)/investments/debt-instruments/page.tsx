@@ -70,7 +70,7 @@ export default function MyDebtInstrumentsPage() {
 
       if (debt.maturityDate) {
         try {
-          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00"); 
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z"); // Assume UTC
           if (isValid(parsedMaturityDate)) {
             maturityDay = format(parsedMaturityDate, 'dd');
             maturityMonth = format(parsedMaturityDate, 'MM');
@@ -187,16 +187,16 @@ export default function MyDebtInstrumentsPage() {
     setIsAlertDialogOpen(true);
   };
   
-  const formatDisplayCurrency = (value: number | undefined, curr = "EGP", digits = 2) => {
+  const formatDisplayCurrency = (value: number | undefined, curr = "EGP") => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
-    const effectiveDigits = curr === "EGP" ? 2 : digits;
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: effectiveDigits, maximumFractionDigits: effectiveDigits }).format(value);
+    const digits = curr === "EGP" ? 2 : 2; // Standardizing to 2 for direct debt EGP amounts
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return '';
     try {
-        const parsedDate = parseISO(dateString + "T00:00:00");
+        const parsedDate = parseISO(dateString + "T00:00:00Z"); // Assume UTC
         if (isValid(parsedDate)) {
             return format(parsedDate, 'dd-MM-yyyy');
         }

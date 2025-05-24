@@ -42,6 +42,16 @@ export default function MyRealEstatePage() {
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
+  const formatAmountEGP = (value: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  };
+
+  const formatSecurityCurrency = (value: number, currencyCode: string) => {
+    const digits = currencyCode === 'EGP' ? 3 : 2;
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  };
+
+
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -102,7 +112,7 @@ export default function MyRealEstatePage() {
                   <TableRow key={prop.id}>
                     <TableCell>{prop.propertyAddress || prop.name}</TableCell>
                     <TableCell>{prop.propertyType || 'N/A'}</TableCell>
-                    <TableCell>${prop.amountInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell>{formatAmountEGP(prop.amountInvested)}</TableCell>
                     <TableCell>{prop.purchaseDate ? format(new Date(prop.purchaseDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
@@ -137,17 +147,18 @@ export default function MyRealEstatePage() {
               </TableHeader>
               <TableBody>
                 {realEstateFundHoldings.map(fundInv => {
+                  const displayCurrency = fundInv.fundDetails.currency || 'EGP';
                   const totalCost = (fundInv.numberOfShares || 0) * (fundInv.purchasePricePerShare || 0);
                   const avgPurchasePrice = (fundInv.numberOfShares && fundInv.numberOfShares > 0) ? totalCost / fundInv.numberOfShares : 0;
-                   const currentValue = (fundInv.numberOfShares || 0) * (fundInv.fundDetails.price || 0);
+                  const currentValue = (fundInv.numberOfShares || 0) * (fundInv.fundDetails.price || 0);
                   return (
                     <TableRow key={fundInv.id}>
                       <TableCell>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
                       <TableCell>{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
-                      <TableCell>${avgPurchasePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${(fundInv.fundDetails.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                      <TableCell>{formatSecurityCurrency(avgPurchasePrice, displayCurrency)}</TableCell>
+                      <TableCell>{formatSecurityCurrency(totalCost, displayCurrency)}</TableCell>
+                      <TableCell>{formatSecurityCurrency((fundInv.fundDetails.price || 0), displayCurrency)}</TableCell>
+                      <TableCell>{formatSecurityCurrency(currentValue, displayCurrency)}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -158,7 +169,7 @@ export default function MyRealEstatePage() {
           )}
         </CardContent>
       </Card>
-       <Link href="/investments/add" passHref>
+       <Link href="/investments/add?type=Real Estate" passHref>
         <Button
           variant="default"
           size="icon"

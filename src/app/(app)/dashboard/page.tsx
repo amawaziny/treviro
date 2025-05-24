@@ -15,9 +15,9 @@ export default function DashboardPage() {
   const totalInvested = dashboardSummary?.totalInvestedAcrossAllAssets ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
 
-  // Format currency function
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+  // Format currency function for EGP with 2 decimal places
+  const formatCurrencyEGP = (value: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   };
 
 
@@ -40,7 +40,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p className="text-3xl font-bold">{formatCurrency(totalInvested)}</p>
+              <p className="text-3xl font-bold">{formatCurrencyEGP(totalInvested)}</p>
             )}
             <p className="text-xs text-muted-foreground">Sum of all purchase costs.</p>
           </CardContent>
@@ -56,7 +56,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p className={`text-3xl font-bold ${totalRealizedPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>
-                {formatCurrency(totalRealizedPnL)}
+                {formatCurrencyEGP(totalRealizedPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">Profit/Loss from all completed sales.</p>
