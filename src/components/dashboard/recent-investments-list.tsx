@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react'; // Import React
+import React from 'react'; 
 import {
   Card,
   CardContent,
@@ -24,6 +24,8 @@ import { Landmark, Coins, LineChart, FileText, CircleDollarSign } from 'lucide-r
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/language-context';
+import { cn } from '@/lib/utils';
 
 const investmentTypeIcons = {
   'Real Estate': Landmark,
@@ -33,35 +35,45 @@ const investmentTypeIcons = {
   'Currencies': CircleDollarSign,
 };
 
-// Memoize InvestmentRow
-const InvestmentRow = React.memo(function InvestmentRow({ investment }: { investment: Investment }) {
+
+const InvestmentRow = React.memo(function InvestmentRow({ investment, language }: { investment: Investment, language: 'en' | 'ar' }) {
   const Icon = investmentTypeIcons[investment.type] || CircleDollarSign;
-  // Assume amountInvested is in EGP for general display here. Stock details will use their specific currency.
-  const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(investment.amountInvested);
-  const formattedDate = investment.purchaseDate ? format(new Date(investment.purchaseDate), 'dd-MM-yyyy') : 'N/A';
+  const formattedAmount = new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(investment.amountInvested);
+  
+  let formattedDate = 'N/A';
+  if (investment.purchaseDate) {
+    try {
+      const date = new Date(investment.purchaseDate);
+      if (!isNaN(date.getTime())) {
+        formattedDate = format(date, 'dd-MM-yyyy');
+      }
+    } catch (e) {
+      // Keep 'N/A' if date parsing fails
+    }
+  }
 
   return (
     <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-2">
+      <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
+        <div className={cn("flex items-center gap-2", language === 'ar' ? 'flex-row-reverse' : '')}>
           <Icon className="h-5 w-5 text-muted-foreground" />
           <span className="font-medium">{investment.name}</span>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
         <Badge variant="secondary">{investment.type}</Badge>
       </TableCell>
       <TableCell className="text-right">{formattedAmount}</TableCell>
-      <TableCell>{formattedDate}</TableCell>
+      <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formattedDate}</TableCell>
     </TableRow>
   );
 });
-InvestmentRow.displayName = 'InvestmentRow'; // Optional: for better debugging
+InvestmentRow.displayName = 'InvestmentRow'; 
 
 export function RecentInvestmentsList() {
   const { investments, isLoading } = useInvestments();
+  const { language } = useLanguage();
 
-  // Show last 5 investments or fewer if not enough
   const recentInvestments = investments.slice(-5).reverse();
 
   if (isLoading) {
@@ -105,15 +117,15 @@ export function RecentInvestmentsList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Name</TableHead>
+              <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Type</TableHead>
               <TableHead className="text-right">Amount Invested</TableHead>
-              <TableHead>Purchase Date</TableHead>
+              <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Purchase Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {recentInvestments.map((investment) => (
-              <InvestmentRow key={investment.id} investment={investment} />
+              <InvestmentRow key={investment.id} investment={investment} language={language} />
             ))}
           </TableBody>
         </Table>

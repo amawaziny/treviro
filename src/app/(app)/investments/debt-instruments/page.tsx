@@ -28,7 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
-import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
+import { useLanguage } from '@/contexts/language-context';
 
 const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
   if (variant === "destructive") {
@@ -42,7 +42,7 @@ export default function MyDebtInstrumentsPage() {
   const { investments, isLoading: isLoadingInvestments, removeDirectDebtInvestment } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { toast } = useToast();
-  const { language } = useLanguage(); // Get current language
+  const { language } = useLanguage(); 
 
   const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
@@ -72,7 +72,7 @@ export default function MyDebtInstrumentsPage() {
 
       if (debt.maturityDate) {
         try {
-          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z"); // Assume UTC
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z"); 
           if (isValid(parsedMaturityDate)) {
             maturityDay = format(parsedMaturityDate, 'dd');
             maturityMonth = format(parsedMaturityDate, 'MM');
@@ -191,14 +191,14 @@ export default function MyDebtInstrumentsPage() {
   
   const formatDisplayCurrency = (value: number | undefined, curr = "EGP") => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
-    const digits = curr === "EGP" ? 2 : 2; // Standardizing to 2 for direct debt EGP amounts
+    const digits = curr === "EGP" ? 2 : 2; 
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return '';
     try {
-        const parsedDate = parseISO(dateString + "T00:00:00Z"); // Assume UTC
+        const parsedDate = parseISO(dateString + "T00:00:00Z"); 
         if (isValid(parsedDate)) {
             return format(parsedDate, 'dd-MM-yyyy');
         }
@@ -250,16 +250,16 @@ export default function MyDebtInstrumentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Name/Description <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Type <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Issuer <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Name/Description <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Type <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Issuer <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Interest Rate <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Day <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Month <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Year <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Amount Invested <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Monthly Interest <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Annual Interest <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
@@ -268,16 +268,16 @@ export default function MyDebtInstrumentsPage() {
                   <TableBody>
                     {directDebtHoldings.map(debt => (
                       <TableRow key={debt.id}>
-                        <TableCell><span className="flex items-center">{debt.displayName}</span></TableCell>
-                        <TableCell><span className="flex items-center">{debt.debtSubType || 'N/A'}</span></TableCell>
-                        <TableCell><span className="flex items-center">{debt.issuer || 'N/A'}</span></TableCell>
+                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{debt.displayName}</span></TableCell>
+                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{debt.debtSubType || 'N/A'}</span></TableCell>
+                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{debt.issuer || 'N/A'}</span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityDay || 'N/A'}</span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityMonth || 'N/A'}</span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityYear || 'N/A'}</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{formatDateDisplay(debt.maturityDate)}</span></TableCell>
+                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{formatDateDisplay(debt.maturityDate)}</span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</span></TableCell>
-                        <TableCell><span className="flex items-center">
+                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">
                           {debt.debtSubType === 'Certificate' || !debt.purchaseDate ? '' : formatDateDisplay(debt.purchaseDate)}
                         </span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{debt.projectedMonthlyInterest && debt.projectedMonthlyInterest > 0 ? formatDisplayCurrency(debt.projectedMonthlyInterest, 'EGP') : 'N/A'}</span></TableCell>
@@ -296,7 +296,7 @@ export default function MyDebtInstrumentsPage() {
                   {(totalProjectedMonthlyInterest > 0 || totalProjectedAnnualInterest > 0) && (
                     <TableFooter>
                       <TableRow>
-                        <TableCell colSpan={10} className="font-semibold text-right">Total Projected Interest:</TableCell>
+                        <TableCell colSpan={10} className={cn("font-semibold", language === 'ar' ? 'text-left' : 'text-right')}>Total Projected Interest:</TableCell>
                         <TableCell className="text-right font-semibold">{formatDisplayCurrency(totalProjectedMonthlyInterest, 'EGP')}</TableCell>
                         <TableCell className="text-right font-semibold">{formatDisplayCurrency(totalProjectedAnnualInterest, 'EGP')}</TableCell>
                         <TableCell /> 

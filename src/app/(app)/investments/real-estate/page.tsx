@@ -14,12 +14,13 @@ import { Home, Building, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
+import { useLanguage } from '@/contexts/language-context';
+import { cn } from '@/lib/utils';
 
 export default function MyRealEstatePage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
-  const { language } = useLanguage(); // Get current language
+  const { language } = useLanguage(); 
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(inv => inv.type === 'Real Estate') as RealEstateInvestment[];
@@ -49,8 +50,19 @@ export default function MyRealEstatePage() {
   };
 
   const formatSecurityCurrency = (value: number, currencyCode: string) => {
-    const digits = currencyCode === 'EGP' ? 2 : 2; // Adjusted for consistency EGP to 2
+    const digits = currencyCode === 'EGP' ? 2 : 2; 
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  };
+
+  const formatDateDisplay = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A'; // Invalid date
+      return format(date, 'dd-MM-yyyy');
+    } catch (e) {
+      return 'N/A';
+    }
   };
 
 
@@ -103,19 +115,19 @@ export default function MyRealEstatePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Address/Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount Invested</TableHead>
-                  <TableHead>Purchase Date</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Address/Name</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Type</TableHead>
+                  <TableHead className="text-right">Amount Invested</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Purchase Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {directRealEstateHoldings.map(prop => (
                   <TableRow key={prop.id}>
-                    <TableCell>{prop.propertyAddress || prop.name}</TableCell>
-                    <TableCell>{prop.propertyType || 'N/A'}</TableCell>
-                    <TableCell>{formatAmountEGP(prop.amountInvested)}</TableCell>
-                    <TableCell>{prop.purchaseDate ? format(new Date(prop.purchaseDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{prop.propertyAddress || prop.name}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{prop.propertyType || 'N/A'}</TableCell>
+                    <TableCell className="text-right">{formatAmountEGP(prop.amountInvested)}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(prop.purchaseDate)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -139,12 +151,12 @@ export default function MyRealEstatePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fund Name (Symbol)</TableHead>
-                  <TableHead>Units Held</TableHead>
-                  <TableHead>Avg. Purchase Price</TableHead>
-                  <TableHead>Total Invested</TableHead>
-                  <TableHead>Current Market Price</TableHead>
-                  <TableHead>Current Value</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Fund Name (Symbol)</TableHead>
+                  <TableHead className="text-right">Units Held</TableHead>
+                  <TableHead className="text-right">Avg. Purchase Price</TableHead>
+                  <TableHead className="text-right">Total Invested</TableHead>
+                  <TableHead className="text-right">Current Market Price</TableHead>
+                  <TableHead className="text-right">Current Value</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,12 +167,12 @@ export default function MyRealEstatePage() {
                   const currentValue = (fundInv.numberOfShares || 0) * (fundInv.fundDetails.price || 0);
                   return (
                     <TableRow key={fundInv.id}>
-                      <TableCell>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
-                      <TableCell>{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
-                      <TableCell>{formatSecurityCurrency(avgPurchasePrice, displayCurrency)}</TableCell>
-                      <TableCell>{formatSecurityCurrency(totalCost, displayCurrency)}</TableCell>
-                      <TableCell>{formatSecurityCurrency((fundInv.fundDetails.price || 0), displayCurrency)}</TableCell>
-                      <TableCell>{formatSecurityCurrency(currentValue, displayCurrency)}</TableCell>
+                      <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
+                      <TableCell className="text-right">{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
+                      <TableCell className="text-right">{formatSecurityCurrency(avgPurchasePrice, displayCurrency)}</TableCell>
+                      <TableCell className="text-right">{formatSecurityCurrency(totalCost, displayCurrency)}</TableCell>
+                      <TableCell className="text-right">{formatSecurityCurrency((fundInv.fundDetails.price || 0), displayCurrency)}</TableCell>
+                      <TableCell className="text-right">{formatSecurityCurrency(currentValue, displayCurrency)}</TableCell>
                     </TableRow>
                   );
                 })}
