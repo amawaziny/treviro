@@ -6,28 +6,54 @@ import { useInvestments } from '@/hooks/use-investments';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
 import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, AggregatedDebtHolding } from '@/lib/types';
 import { isDebtRelatedFund } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollText, Plus } from 'lucide-react';
+import { ScrollText, Plus, Building, Trash2, Landmark } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { MyDebtListItem } from '@/components/investments/my-debt-list-item'; 
+import { MyDebtListItem } from '@/components/investments/my-debt-list-item';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
+const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
+  if (variant === "destructive") {
+    return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
+  }
+  return "";
+};
 
 
 export default function MyDebtInstrumentsPage() {
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  const { investments, isLoading: isLoadingInvestments, removeDirectDebtInvestment } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
+  const { toast } = useToast();
 
-  const aggregatedDebtHoldings = React.useMemo(() => {
-    if (isLoadingInvestments || isLoadingListedSecurities) return [];
+  const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
-    const holdings: AggregatedDebtHolding[] = [];
+  const { directDebtHoldings, debtFundHoldings } = React.useMemo(() => {
+    if (isLoadingInvestments || isLoadingListedSecurities) return { directDebtHoldings: [], debtFundHoldings: [] };
+
+    const directHoldings: AggregatedDebtHolding[] = [];
+    const fundHoldings: AggregatedDebtHolding[] = [];
 
     // Process Direct Debt Instruments
     const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
-      holdings.push({
+      directHoldings.push({
         id: debt.id,
         itemType: 'direct',
         displayName: debt.name || `${debt.debtSubType} - ${debt.issuer || 'N/A'}`,
@@ -55,27 +81,25 @@ export default function MyDebtInstrumentsPage() {
           if (existing.totalUnits && existing.totalUnits > 0 && existing.totalCost) {
             existing.averagePurchasePrice = existing.totalCost / existing.totalUnits;
           }
-          // Recalculate P/L for aggregated fund
           if (existing.currentMarketPrice && existing.totalUnits && existing.totalCost) {
             existing.currentValue = existing.currentMarketPrice * existing.totalUnits;
             existing.profitLoss = existing.currentValue - existing.totalCost;
             existing.profitLossPercent = existing.totalCost > 0 ? (existing.profitLoss / existing.totalCost) * 100 : (existing.currentValue > 0 ? Infinity : 0);
           }
-
         } else {
           const totalCostVal = stockInv.amountInvested || 0;
           const totalUnitsVal = stockInv.numberOfShares || 0;
           const avgPrice = totalUnitsVal > 0 ? totalCostVal / totalUnitsVal : 0;
           let currentValueVal, profitLossVal, profitLossPercentVal;
 
-          if(security.price && totalUnitsVal > 0){
+          if (security.price && totalUnitsVal > 0) {
             currentValueVal = security.price * totalUnitsVal;
             profitLossVal = currentValueVal - totalCostVal;
-            profitLossPercentVal = totalCostVal > 0 ? (profitLossVal/totalCostVal) * 100 : (currentValueVal > 0 ? Infinity : 0);
+            profitLossPercentVal = totalCostVal > 0 ? (profitLossVal / totalCostVal) * 100 : (currentValueVal > 0 ? Infinity : 0);
           }
 
           debtFundAggregationMap.set(symbol, {
-            id: security.id, 
+            id: security.id,
             itemType: 'fund',
             displayName: security.name,
             fundDetails: security,
@@ -92,19 +116,46 @@ export default function MyDebtInstrumentsPage() {
         }
       }
     });
-    
-    holdings.push(...Array.from(debtFundAggregationMap.values()));
-    
-    return holdings.sort((a,b) => {
-        // Sort by item type (direct first, then funds), then by display name
-        if (a.itemType === 'direct' && b.itemType === 'fund') return -1;
-        if (a.itemType === 'fund' && b.itemType === 'direct') return 1;
-        return a.displayName.localeCompare(b.displayName);
-    });
+
+    fundHoldings.push(...Array.from(debtFundAggregationMap.values()));
+
+    return {
+      directDebtHoldings: directHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
+      debtFundHoldings: fundHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''))
+    };
 
   }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
+
+  const handleRemoveDirectDebt = async (holdingId: string, holdingName: string) => {
+    try {
+      await removeDirectDebtInvestment(holdingId);
+      toast({ title: "Debt Instrument Removed", description: `${holdingName} has been removed.` });
+    } catch (error: any) {
+      toast({ title: "Error Removing Item", description: error.message || `Could not remove ${holdingName}.`, variant: "destructive" });
+    }
+    setIsAlertDialogOpen(false);
+    setItemToDelete(null);
+  };
+
+  const confirmRemoveItem = (item: AggregatedDebtHolding) => {
+    setItemToDelete(item);
+    setIsAlertDialogOpen(true);
+  };
+  
+  const formatDisplayCurrency = (value: number | undefined, curr = "USD", digits = 2) => {
+    if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
+    const effectiveDigits = curr === "EGP" ? 2 : digits;
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: effectiveDigits, maximumFractionDigits: effectiveDigits }).format(value);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    // Assuming dateString is YYYY-MM-DD, append time to avoid timezone issues if interpreted as UTC midnight
+    return new Date(dateString + "T00:00:00").toLocaleDateString();
+  };
+
 
   if (isLoading) {
     return (
@@ -115,7 +166,7 @@ export default function MyDebtInstrumentsPage() {
         </div>
         <Separator />
         {[...Array(2)].map((_, i) => (
-           <Card key={i} className="mt-6">
+          <Card key={i} className="mt-6">
             <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
             <CardContent><Skeleton className="h-24 w-full" /></CardContent>
           </Card>
@@ -125,45 +176,141 @@ export default function MyDebtInstrumentsPage() {
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Debt Holdings</h1>
-        <p className="text-muted-foreground">Track your direct debt instruments and debt-related fund investments.</p>
-      </div>
-      <Separator />
-
-      {aggregatedDebtHoldings.length > 0 ? (
-        <div className="space-y-4 mt-6">
-          {aggregatedDebtHoldings.map(holding => (
-            <MyDebtListItem key={holding.id} holding={holding} />
-          ))}
+    <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+      <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">My Debt Holdings</h1>
+          <p className="text-muted-foreground">Track your direct debt instruments and debt-related fund investments.</p>
         </div>
-      ) : (
-        <Card className="mt-6">
+        <Separator />
+
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <ScrollText className="mr-2 h-6 w-6 text-primary" />
-              No Debt Holdings
+              <Landmark className="mr-2 h-6 w-6 text-primary" />
+              Direct Debt Instruments
             </CardTitle>
+            <CardDescription>Bonds, Certificates, Treasury Bills you own directly.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground py-4 text-center">
-              You haven't added any debt investments or related funds yet.
-            </p>
+            {directDebtHoldings.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name/Description</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Issuer</TableHead>
+                      <TableHead className="text-right">Interest Rate</TableHead>
+                      <TableHead className="text-right">Maturity Date</TableHead>
+                      <TableHead className="text-right">Amount Invested</TableHead>
+                      <TableHead>Purchase Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {directDebtHoldings.map(debt => (
+                      <TableRow key={debt.id}>
+                        <TableCell>{debt.displayName}</TableCell>
+                        <TableCell>{debt.debtSubType || 'N/A'}</TableCell>
+                        <TableCell>{debt.issuer || 'N/A'}</TableCell>
+                        <TableCell className="text-right">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</TableCell>
+                        <TableCell className="text-right">{formatDate(debt.maturityDate)}</TableCell>
+                        <TableCell className="text-right">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</TableCell>
+                        <TableCell>{formatDate(debt.purchaseDate)}</TableCell>
+                        <TableCell className="text-right">
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => confirmRemoveItem(debt)}>
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Remove {debt.displayName}</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-muted-foreground py-4 text-center">
+                You haven't added any direct debt investments yet.
+              </p>
+            )}
           </CardContent>
         </Card>
-      )}
 
-      <Link href="/investments/add?type=Debt Instruments" passHref>
-        <Button
-          variant="default"
-          size="icon"
-          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
-          aria-label="Add new debt investment"
-        >
-          <Plus className="h-7 w-7" />
-        </Button>
-      </Link>
-    </div>
+
+        {debtFundHoldings.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Building className="mr-2 h-6 w-6 text-primary" />
+                Debt-Related Fund Investments
+              </CardTitle>
+              <CardDescription>Funds primarily investing in debt instruments.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {debtFundHoldings.map(holding => (
+                <MyDebtListItem key={holding.id} holding={holding} />
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {(directDebtHoldings.length === 0 && debtFundHoldings.length === 0) && !isLoading && (
+            <Card className="mt-6">
+             <CardHeader>
+                <CardTitle className="flex items-center">
+                <ScrollText className="mr-2 h-6 w-6 text-primary" />
+                No Debt Holdings
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground py-4 text-center">
+                You haven't added any debt investments or related funds yet.
+                </p>
+            </CardContent>
+            </Card>
+        )}
+
+
+        <Link href="/investments/add?type=Debt Instruments" passHref>
+          <Button
+            variant="default"
+            size="icon"
+            className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
+            aria-label="Add new debt investment"
+          >
+            <Plus className="h-7 w-7" />
+          </Button>
+        </Link>
+
+        {itemToDelete && (
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will permanently remove your investment record for {itemToDelete.displayName}.
+                This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (itemToDelete.itemType === 'direct') {
+                    handleRemoveDirectDebt(itemToDelete.id, itemToDelete.displayName);
+                  }
+                  // Note: MyDebtListItem handles its own fund removal, so we don't call that here.
+                }}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        )}
+      </div>
+    </AlertDialog>
   );
 }
