@@ -1,11 +1,16 @@
 
+"use client"; // Added "use client"
+
 import { MyStockList } from "@/components/stocks/my-stock-list";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
 
 export default function MyStocksPage() {
+  const { language } = useLanguage(); // Get current language
+
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]"> {/* Ensure relative positioning and min height */}
       <div>
@@ -19,8 +24,10 @@ export default function MyStocksPage() {
         <Button
           variant="default"
           size="icon"
-          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
-          aria-label="Add new stock investment"
+          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
+            language === 'ar' ? 'left-8' : 'right-8'
+          }`}
+          aria-label="Browse securities" // Updated aria-label
         >
           <Plus className="h-7 w-7" />
         </Button>

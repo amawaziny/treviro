@@ -14,10 +14,12 @@ import { Home, Building, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
 
 export default function MyRealEstatePage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
+  const { language } = useLanguage(); // Get current language
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(inv => inv.type === 'Real Estate') as RealEstateInvestment[];
@@ -43,11 +45,11 @@ export default function MyRealEstatePage() {
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   const formatAmountEGP = (value: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   };
 
   const formatSecurityCurrency = (value: number, currencyCode: string) => {
-    const digits = currencyCode === 'EGP' ? 3 : 2;
+    const digits = currencyCode === 'EGP' ? 2 : 2; // Adjusted for consistency EGP to 2
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
@@ -173,7 +175,9 @@ export default function MyRealEstatePage() {
         <Button
           variant="default"
           size="icon"
-          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
+          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
+            language === 'ar' ? 'left-8' : 'right-8'
+          }`}
           aria-label="Add new real estate investment"
         >
           <Plus className="h-7 w-7" />

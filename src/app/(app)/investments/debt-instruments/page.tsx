@@ -28,6 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
+import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
 
 const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
   if (variant === "destructive") {
@@ -41,6 +42,7 @@ export default function MyDebtInstrumentsPage() {
   const { investments, isLoading: isLoadingInvestments, removeDirectDebtInvestment } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { toast } = useToast();
+  const { language } = useLanguage(); // Get current language
 
   const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
@@ -190,7 +192,7 @@ export default function MyDebtInstrumentsPage() {
   const formatDisplayCurrency = (value: number | undefined, curr = "EGP") => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
     const digits = curr === "EGP" ? 2 : 2; // Standardizing to 2 for direct debt EGP amounts
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+    return new Intl.NumberFormat('en-EG', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
   const formatDateDisplay = (dateString?: string) => {
@@ -229,7 +231,7 @@ export default function MyDebtInstrumentsPage() {
     <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
       <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">My Debt Holdings</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Debt Instruments</h1>
           <p className="text-muted-foreground">Track your direct debt instruments and debt-related fund investments.</p>
         </div>
         <Separator />
@@ -350,8 +352,10 @@ export default function MyDebtInstrumentsPage() {
           <Button
             variant="default"
             size="icon"
-            className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
-            aria-label="Add new debt investment"
+            className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
+              language === 'ar' ? 'left-8' : 'right-8'
+            }`}
+            aria-label="Add new debt instrument"
           >
             <Plus className="h-7 w-7" />
           </Button>

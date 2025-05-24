@@ -12,11 +12,13 @@ import { DollarSign, AlertCircle, Plus, Coins } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { MyCurrencyListItem } from '@/components/investments/my-currency-list-item'; // New import
+import { MyCurrencyListItem } from '@/components/investments/my-currency-list-item';
+import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
 
 export default function MyCurrenciesPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { exchangeRates, isLoading: isLoadingRates, error: ratesError } = useExchangeRates();
+  const { language } = useLanguage(); // Get current language
 
   const aggregatedCurrencyHoldings = React.useMemo(() => {
     if (isLoadingInvestments || !investments.length) return [];
@@ -81,7 +83,7 @@ export default function MyCurrenciesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Currencies</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Currencies</h1>
         <p className="text-muted-foreground">View your currency holdings and their performance against EGP.</p>
       </div>
       <Separator />
@@ -123,7 +125,9 @@ export default function MyCurrenciesPage() {
         <Button
           variant="default"
           size="icon"
-          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
+          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
+            language === 'ar' ? 'left-8' : 'right-8'
+          }`}
           aria-label="Add new currency investment"
         >
           <Plus className="h-7 w-7" />

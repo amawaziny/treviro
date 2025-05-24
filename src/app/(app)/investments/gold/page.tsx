@@ -15,11 +15,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MyGoldListItem } from '@/components/investments/my-gold-list-item';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
 
 export default function MyGoldPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { goldMarketPrices, isLoading: isLoadingGoldPrices, error: goldPricesError } = useGoldMarketPrices();
+  const { language } = useLanguage(); // Get current language
 
   const aggregatedGoldHoldings = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
@@ -152,7 +154,7 @@ export default function MyGoldPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Gold</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Gold</h1>
         <p className="text-muted-foreground">Overview of your direct gold and gold fund investments.</p>
       </div>
       <Separator />
@@ -194,7 +196,9 @@ export default function MyGoldPage() {
         <Button
           variant="default"
           size="icon"
-          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg z-50"
+          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
+            language === 'ar' ? 'left-8' : 'right-8'
+          }`}
           aria-label="Add new gold investment"
         >
           <Plus className="h-7 w-7" />
