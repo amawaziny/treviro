@@ -17,8 +17,8 @@ interface SecurityListItemProps {
 export const SecurityListItem = React.memo(function SecurityListItem({ security, currentTab }: SecurityListItemProps) {
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'decimal',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 3, // Changed to 3
+    maximumFractionDigits: 3, // Changed to 3
   }).format(security.price);
 
   const isPositiveChange = security.changePercent >= 0;

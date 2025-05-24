@@ -174,7 +174,7 @@ export default function SecurityDetailPage() {
       <div className="container mx-auto py-8 text-center">
         <h1 className="text-2xl font-bold text-destructive mb-4">Security Not Found</h1>
         <p className="text-muted-foreground mb-6">The security you are looking for could not be found.</p>
-        <Button onClick={() => router.push(backLinkHref)}> {/* Use dynamic back link */}
+        <Button onClick={() => router.push(backLinkHref)}> 
           {language === 'ar' ? <ArrowRight className="ml-2 h-4 w-4" /> : <ArrowLeft className="mr-2 h-4 w-4" />}
            Go Back
         </Button>
@@ -186,7 +186,7 @@ export default function SecurityDetailPage() {
   const totalInvestmentValue = totalSharesOwned * currentMarketPrice;
   const totalCostBasis = totalSharesOwned * averagePurchasePrice;
   const PnL = totalInvestmentValue - totalCostBasis;
-  const PnLPercentage = totalCostBasis > 0 ? (PnL / totalCostBasis) * 100 : 0;
+  const PnLPercentage = totalCostBasis > 0 ? (PnL / totalCostBasis) * 100 : (totalInvestmentValue > 0 ? Infinity : 0);
   const isProfitable = PnL >= 0;
 
   const pageTitle = security.securityType === 'Fund' 
@@ -196,12 +196,21 @@ export default function SecurityDetailPage() {
   const displayCurrency = security.currency || 'USD';
   const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
 
+  const formatCurrency = (value: number, currencyCode: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    }).format(value);
+  };
+
 
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
       <div className="container mx-auto py-8 space-y-6">
         <Button variant="outline" size="sm" asChild className="mb-4">
-           <Link href={backLinkHref}> {/* Use dynamic back link */}
+           <Link href={backLinkHref}> 
              <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} /> Back to Explore
            </Link>
         </Button>
@@ -219,7 +228,7 @@ export default function SecurityDetailPage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">{currentMarketPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-2xl font-bold">{currentMarketPrice.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</p>
               <p className={cn("text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
                   {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
               </p>
@@ -275,22 +284,22 @@ export default function SecurityDetailPage() {
                   <>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
-                      <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {averagePurchasePrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                      <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {totalCostBasis.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                      <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {currentMarketPrice.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
-                      <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {totalInvestmentValue.toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</div>
+                      <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {formatCurrency(averagePurchasePrice, displayCurrency)}</div>
+                      <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {formatCurrency(totalCostBasis, displayCurrency)}</div>
+                      <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {formatCurrency(currentMarketPrice, displayCurrency)}</div>
+                      <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {formatCurrency(totalInvestmentValue, displayCurrency)}</div>
                     </div>
                     <Separator />
                     <div className="flex items-center justify-between pt-2">
                       <p className="text-lg font-semibold">Profit / Loss:</p>
                       <div className="text-right">
                           <p className={cn("text-2xl font-bold", isProfitable ? "text-accent" : "text-destructive")}>
-                              {PnL.toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' })}
+                              {formatCurrency(PnL, displayCurrency)}
                           </p>
                           <Badge variant={isProfitable ? 'default' : 'destructive'} 
                                 className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
                               {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
-                              {PnLPercentage.toFixed(2)}%
+                              {PnLPercentage === Infinity ? '∞%' : PnLPercentage.toFixed(2) + '%'}
                           </Badge>
                       </div>
                     </div>
@@ -333,12 +342,12 @@ export default function SecurityDetailPage() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
-                            <TableCell className="text-right">{(tx.price ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                            <TableCell className="text-right">{(tx.fees ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
-                            <TableCell className="text-right">{(tx.totalAmount ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency })}</TableCell>
+                            <TableCell className="text-right">{formatCurrency((tx.price ?? 0), displayCurrency)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency((tx.fees ?? 0), displayCurrency)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency((tx.totalAmount ?? 0), displayCurrency)}</TableCell>
                             {currentTransactions.some(t => t.profitOrLoss !== undefined) && (
                                 <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                                {tx.profitOrLoss !== undefined ? (tx.profitOrLoss ?? 0).toLocaleString(undefined, { style: 'currency', currency: displayCurrency, signDisplay: 'always' }) : 'N/A'}
+                                {tx.profitOrLoss !== undefined ? formatCurrency((tx.profitOrLoss ?? 0), displayCurrency) : 'N/A'}
                                 </TableCell>
                             )}
                             <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>

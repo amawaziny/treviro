@@ -59,25 +59,22 @@ export function MyStockListItem({
     const totalCurrentValue = currentMarketPrice * totalShares;
     const totalCost = averagePurchasePrice * totalShares;
     profitLoss = totalCurrentValue - totalCost;
-    profitLossPercent = (profitLoss / totalCost) * 100;
+    profitLossPercent = (totalCost > 0) ? (profitLoss / totalCost) * 100 : (totalCurrentValue > 0 ? Infinity : 0);
     isProfitable = profitLoss >= 0;
   }
 
-  const formattedAvgPrice = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3,
-  }).format(averagePurchasePrice);
-  const formattedMarketPrice = currentMarketPrice ? new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3,
-  }).format(currentMarketPrice) : 'N/A';
-  const formattedProfitLoss = new Intl.NumberFormat('en-US', {
-    style: 'currency', currency: currency, signDisplay: 'always', minimumFractionDigits: 3, maximumFractionDigits: 3,
-  }).format(profitLoss);
+  const formatCurrencyWithThreeDecimals = (value: number, currencyCode: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    }).format(value);
+  };
+  
+  const formattedAvgPrice = formatCurrencyWithThreeDecimals(averagePurchasePrice, currency);
+  const formattedMarketPrice = currentMarketPrice ? formatCurrencyWithThreeDecimals(currentMarketPrice, currency) : 'N/A';
+  const formattedProfitLoss = formatCurrencyWithThreeDecimals(profitLoss, currency);
   
   const sharesLabel = isFund ? 'Units' : 'Shares';
 
@@ -147,7 +144,7 @@ export function MyStockListItem({
               <Badge variant={isProfitable ? 'default' : 'destructive'} 
                      className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
                 {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
-                {profitLossPercent.toFixed(2)}%
+                {profitLossPercent === Infinity ? '∞%' : profitLossPercent.toFixed(2) + '%'}
               </Badge>
             </>
           ) : (
