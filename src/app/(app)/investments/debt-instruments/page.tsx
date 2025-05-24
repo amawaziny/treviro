@@ -7,7 +7,7 @@ import { useListedSecurities } from '@/hooks/use-listed-securities';
 import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, AggregatedDebtHolding } from '@/lib/types';
 import { isDebtRelatedFund } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown } from 'lucide-react';
@@ -45,8 +45,14 @@ export default function MyDebtInstrumentsPage() {
   const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
-  const { directDebtHoldings, debtFundHoldings } = React.useMemo(() => {
-    if (isLoadingInvestments || isLoadingListedSecurities) return { directDebtHoldings: [], debtFundHoldings: [] };
+  const { directDebtHoldings, debtFundHoldings, certificateProjections } = React.useMemo(() => {
+    if (isLoadingInvestments || isLoadingListedSecurities) {
+      return { 
+        directDebtHoldings: [], 
+        debtFundHoldings: [],
+        certificateProjections: { hasCertificates: false, totalMonthlyInterest: 0, totalAnnualInterest: 0 }
+      };
+    }
 
     const directHoldings: AggregatedDebtHolding[] = [];
     const fundHoldings: AggregatedDebtHolding[] = [];
@@ -138,9 +144,35 @@ export default function MyDebtInstrumentsPage() {
 
     fundHoldings.push(...Array.from(debtFundAggregationMap.values()));
 
+    // Calculate certificate projections
+    let totalMonthlyInterestForCertificates = 0;
+    let totalAnnualInterestForCertificates = 0;
+    let hasCertificates = false;
+
+    const certificateDebts = directHoldings.filter(
+      (debt) => debt.itemType === 'direct' && debt.debtSubType === 'Certificate'
+    );
+
+    if (certificateDebts.length > 0) {
+      hasCertificates = true;
+      certificateDebts.forEach(cert => {
+        if (typeof cert.amountInvested === 'number' && typeof cert.interestRate === 'number') {
+          const principal = cert.amountInvested;
+          const annualRateDecimal = cert.interestRate / 100;
+          totalMonthlyInterestForCertificates += (principal * annualRateDecimal) / 12;
+          totalAnnualInterestForCertificates += principal * annualRateDecimal;
+        }
+      });
+    }
+
     return {
       directDebtHoldings: directHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
-      debtFundHoldings: fundHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''))
+      debtFundHoldings: fundHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
+      certificateProjections: {
+        hasCertificates,
+        totalMonthlyInterest: totalMonthlyInterestForCertificates,
+        totalAnnualInterest: totalAnnualInterestForCertificates
+      }
     };
 
   }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
@@ -240,18 +272,18 @@ export default function MyDebtInstrumentsPage() {
                   <TableBody>
                     {directDebtHoldings.map(debt => (
                       <TableRow key={debt.id}>
-                        <TableCell>{debt.displayName}</TableCell>
-                        <TableCell>{debt.debtSubType || 'N/A'}</TableCell>
-                        <TableCell>{debt.issuer || 'N/A'}</TableCell>
-                        <TableCell className="text-right">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</TableCell>
-                        <TableCell className="text-right">{debt.maturityDay || 'N/A'}</TableCell>
-                        <TableCell className="text-right">{debt.maturityMonth || 'N/A'}</TableCell>
-                        <TableCell className="text-right">{debt.maturityYear || 'N/A'}</TableCell>
-                        <TableCell className="text-right">{formatDateDisplay(debt.maturityDate)}</TableCell>
-                        <TableCell className="text-right">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</TableCell>
-                        <TableCell>
+                        <TableCell><span className="flex items-center">{debt.displayName}</span></TableCell>
+                        <TableCell><span className="flex items-center">{debt.debtSubType || 'N/A'}</span></TableCell>
+                        <TableCell><span className="flex items-center">{debt.issuer || 'N/A'}</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityDay || 'N/A'}</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityMonth || 'N/A'}</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityYear || 'N/A'}</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{formatDateDisplay(debt.maturityDate)}</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</span></TableCell>
+                        <TableCell><span className="flex items-center">
                           {debt.debtSubType === 'Certificate' ? '' : formatDateDisplay(debt.purchaseDate)}
-                        </TableCell>
+                        </span></TableCell>
                         <TableCell className="text-right">
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => confirmRemoveItem(debt)}>
@@ -263,6 +295,20 @@ export default function MyDebtInstrumentsPage() {
                       </TableRow>
                     ))}
                   </TableBody>
+                  {certificateProjections.hasCertificates && (
+                    <TableFooter>
+                      <TableRow>
+                        <TableCell colSpan={8} className="font-semibold text-right">Total Projected Monthly Interest (Certificates):</TableCell>
+                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(certificateProjections.totalMonthlyInterest, 'EGP')}</TableCell>
+                        <TableCell colSpan={2}></TableCell> 
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={8} className="font-semibold text-right">Total Projected Annual Interest (Certificates):</TableCell>
+                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(certificateProjections.totalAnnualInterest, 'EGP')}</TableCell>
+                        <TableCell colSpan={2}></TableCell>
+                      </TableRow>
+                    </TableFooter>
+                  )}
                 </Table>
               </div>
             ) : (
