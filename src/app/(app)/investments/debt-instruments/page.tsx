@@ -45,23 +45,28 @@ export default function MyDebtInstrumentsPage() {
   const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
-  const { directDebtHoldings, debtFundHoldings, certificateProjections } = React.useMemo(() => {
+  const { directDebtHoldings, debtFundHoldings, totalProjectedMonthlyInterest, totalProjectedAnnualInterest } = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) {
       return { 
         directDebtHoldings: [], 
         debtFundHoldings: [],
-        certificateProjections: { hasCertificates: false, totalMonthlyInterest: 0, totalAnnualInterest: 0 }
+        totalProjectedMonthlyInterest: 0,
+        totalProjectedAnnualInterest: 0,
       };
     }
 
     const directHoldings: AggregatedDebtHolding[] = [];
     const fundHoldings: AggregatedDebtHolding[] = [];
+    let monthlyInterestSum = 0;
+    let annualInterestSum = 0;
 
     const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
       let maturityDay: string | undefined;
       let maturityMonth: string | undefined;
       let maturityYear: string | undefined;
+      let projectedMonthly = 0;
+      let projectedAnnual = 0;
 
       if (debt.maturityDate) {
         try {
@@ -74,6 +79,15 @@ export default function MyDebtInstrumentsPage() {
         } catch (e) {
           console.error("Error parsing maturity date for debt holding:", debt.id, e);
         }
+      }
+
+      if (typeof debt.amountInvested === 'number' && typeof debt.interestRate === 'number' && debt.interestRate > 0) {
+        const principal = debt.amountInvested;
+        const annualRateDecimal = debt.interestRate / 100;
+        projectedMonthly = (principal * annualRateDecimal) / 12;
+        projectedAnnual = principal * annualRateDecimal;
+        monthlyInterestSum += projectedMonthly;
+        annualInterestSum += projectedAnnual;
       }
 
       directHoldings.push({
@@ -89,6 +103,8 @@ export default function MyDebtInstrumentsPage() {
         maturityDay,
         maturityMonth,
         maturityYear,
+        projectedMonthlyInterest: projectedMonthly,
+        projectedAnnualInterest: projectedAnnual,
       });
     });
 
@@ -144,35 +160,11 @@ export default function MyDebtInstrumentsPage() {
 
     fundHoldings.push(...Array.from(debtFundAggregationMap.values()));
 
-    // Calculate certificate projections
-    let totalMonthlyInterestForCertificates = 0;
-    let totalAnnualInterestForCertificates = 0;
-    let hasCertificates = false;
-
-    const certificateDebts = directHoldings.filter(
-      (debt) => debt.itemType === 'direct' && debt.debtSubType === 'Certificate'
-    );
-
-    if (certificateDebts.length > 0) {
-      hasCertificates = true;
-      certificateDebts.forEach(cert => {
-        if (typeof cert.amountInvested === 'number' && typeof cert.interestRate === 'number') {
-          const principal = cert.amountInvested;
-          const annualRateDecimal = cert.interestRate / 100;
-          totalMonthlyInterestForCertificates += (principal * annualRateDecimal) / 12;
-          totalAnnualInterestForCertificates += principal * annualRateDecimal;
-        }
-      });
-    }
-
     return {
       directDebtHoldings: directHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
       debtFundHoldings: fundHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
-      certificateProjections: {
-        hasCertificates,
-        totalMonthlyInterest: totalMonthlyInterestForCertificates,
-        totalAnnualInterest: totalAnnualInterestForCertificates
-      }
+      totalProjectedMonthlyInterest: monthlyInterestSum,
+      totalProjectedAnnualInterest: annualInterestSum,
     };
 
   }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
@@ -195,7 +187,7 @@ export default function MyDebtInstrumentsPage() {
     setIsAlertDialogOpen(true);
   };
   
-  const formatDisplayCurrency = (value: number | undefined, curr = "USD", digits = 2) => {
+  const formatDisplayCurrency = (value: number | undefined, curr = "EGP", digits = 2) => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
     const effectiveDigits = curr === "EGP" ? 2 : digits;
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: effectiveDigits, maximumFractionDigits: effectiveDigits }).format(value);
@@ -266,6 +258,8 @@ export default function MyDebtInstrumentsPage() {
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Amount Invested <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="whitespace-nowrap"><span className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Monthly Interest <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Annual Interest <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
                       <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -282,8 +276,10 @@ export default function MyDebtInstrumentsPage() {
                         <TableCell className="text-right"><span className="flex items-center justify-end">{formatDateDisplay(debt.maturityDate)}</span></TableCell>
                         <TableCell className="text-right"><span className="flex items-center justify-end">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</span></TableCell>
                         <TableCell><span className="flex items-center">
-                          {debt.debtSubType === 'Certificate' ? '' : formatDateDisplay(debt.purchaseDate)}
+                          {debt.debtSubType === 'Certificate' || !debt.purchaseDate ? '' : formatDateDisplay(debt.purchaseDate)}
                         </span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.projectedMonthlyInterest && debt.projectedMonthlyInterest > 0 ? formatDisplayCurrency(debt.projectedMonthlyInterest, 'EGP') : 'N/A'}</span></TableCell>
+                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.projectedAnnualInterest && debt.projectedAnnualInterest > 0 ? formatDisplayCurrency(debt.projectedAnnualInterest, 'EGP') : 'N/A'}</span></TableCell>
                         <TableCell className="text-right">
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => confirmRemoveItem(debt)}>
@@ -295,17 +291,13 @@ export default function MyDebtInstrumentsPage() {
                       </TableRow>
                     ))}
                   </TableBody>
-                  {certificateProjections.hasCertificates && (
+                  {(totalProjectedMonthlyInterest > 0 || totalProjectedAnnualInterest > 0) && (
                     <TableFooter>
                       <TableRow>
-                        <TableCell colSpan={8} className="font-semibold text-right">Total Projected Monthly Interest (Certificates):</TableCell>
-                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(certificateProjections.totalMonthlyInterest, 'EGP')}</TableCell>
-                        <TableCell colSpan={2}></TableCell> 
-                      </TableRow>
-                      <TableRow>
-                        <TableCell colSpan={8} className="font-semibold text-right">Total Projected Annual Interest (Certificates):</TableCell>
-                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(certificateProjections.totalAnnualInterest, 'EGP')}</TableCell>
-                        <TableCell colSpan={2}></TableCell>
+                        <TableCell colSpan={10} className="font-semibold text-right">Total Projected Interest:</TableCell>
+                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(totalProjectedMonthlyInterest, 'EGP')}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(totalProjectedAnnualInterest, 'EGP')}</TableCell>
+                        <TableCell /> 
                       </TableRow>
                     </TableFooter>
                   )}
@@ -393,4 +385,3 @@ export default function MyDebtInstrumentsPage() {
     </AlertDialog>
   );
 }
-

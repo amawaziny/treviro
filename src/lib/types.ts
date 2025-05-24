@@ -156,6 +156,8 @@ export interface AggregatedDebtHolding {
   maturityDay?: string;
   maturityMonth?: string;
   maturityYear?: string;
+  projectedMonthlyInterest?: number;
+  projectedAnnualInterest?: number;
 
   // Fund Specific
   fundDetails?: ListedSecurity; 
