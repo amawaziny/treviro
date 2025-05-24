@@ -36,7 +36,6 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type { ListedSecurity, InvestmentType, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, DebtInstrumentInvestment } from "@/lib/types";
 import { useSearchParams, useRouter } from "next/navigation";
 
-
 const getCurrentDate = () => {
   const date = new Date();
   const year = date.getFullYear();
@@ -47,37 +46,36 @@ const getCurrentDate = () => {
 
 const initialFormValues: AddInvestmentFormValues = {
   type: undefined,
-  amountInvested: '', // Keep as string for controlled input
+  amountInvested: '',
   purchaseDate: getCurrentDate(),
   name: "",
 
   selectedStockId: undefined,
-  numberOfShares: '', // Keep as string for controlled input
-  purchasePricePerShare: '', // Keep as string for controlled input
-  purchaseFees: "0", // Default to string "0"
+  numberOfShares: '',
+  purchasePricePerShare: '',
+  purchaseFees: "0",
 
   goldType: undefined,
-  quantityInGrams: '', // Keep as string for controlled input
+  quantityInGrams: '',
 
   currencyCode: "",
-  foreignCurrencyAmount: '', // Keep as string for controlled input
-  exchangeRateAtPurchase: '', // Keep as string for controlled input
+  foreignCurrencyAmount: '',
+  exchangeRateAtPurchase: '',
 
   propertyAddress: "",
   propertyType: undefined,
 
   debtSubType: undefined,
   issuer: "",
-  interestRate: '', // Keep as string for controlled input
+  interestRate: '',
   maturityDate: '',
 };
-
 
 interface RenderGoldFieldsSectionProps {
   control: any;
   isDedicatedGoldMode?: boolean;
 }
-const RenderGoldFieldsSection: React.FC<RenderGoldFieldsSectionProps> = ({
+const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsSectionProps> = ({
     control,
     isDedicatedGoldMode,
   }) => {
@@ -85,6 +83,11 @@ const RenderGoldFieldsSection: React.FC<RenderGoldFieldsSectionProps> = ({
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">Gold Investment Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {!isDedicatedGoldMode && (
+            <FormField control={control} name="name" render={({ field }) => (
+                <FormItem className="md:col-span-2"><FormLabel>Name / Description (Optional)</FormLabel><FormControl><Input placeholder="e.g., My Gold Bar or Gold Coins" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
+            )} />
+        )}
         <FormField
           control={control}
           name="goldType"
@@ -121,7 +124,7 @@ const RenderGoldFieldsSection: React.FC<RenderGoldFieldsSectionProps> = ({
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 50 or 2"
-                  value={field.value}
+                  value={field.value ?? ''}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -139,7 +142,7 @@ const RenderGoldFieldsSection: React.FC<RenderGoldFieldsSectionProps> = ({
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 10000.50"
-                  value={field.value}
+                  value={field.value ?? ''}
                   onChange={field.onChange}
                 />
               </FormControl>
@@ -165,14 +168,14 @@ const RenderGoldFieldsSection: React.FC<RenderGoldFieldsSectionProps> = ({
     </div>
   );
 };
-const MemoizedRenderGoldFieldsSection = React.memo(RenderGoldFieldsSection);
+const MemoizedRenderGoldFieldsSection = React.memo(RenderGoldFieldsComponent);
 
 
 interface RenderCurrencyFieldsProps {
   control: any;
   isDedicatedCurrencyMode?: boolean;
 }
-const RenderCurrencyFields: React.FC<RenderCurrencyFieldsProps> = ({
+const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
     control,
     isDedicatedCurrencyMode,
   }) => {
@@ -192,7 +195,7 @@ const RenderCurrencyFields: React.FC<RenderCurrencyFieldsProps> = ({
             <FormItem><FormLabel>Foreign Currency Amount</FormLabel><FormControl>
               <NumericInput
                 placeholder="e.g., 1000.50"
-                value={field.value}
+                value={field.value ?? ''}
                 onChange={field.onChange}
               />
               </FormControl><FormDescription>Amount of the foreign currency you bought.</FormDescription><FormMessage /></FormItem>
@@ -201,7 +204,7 @@ const RenderCurrencyFields: React.FC<RenderCurrencyFieldsProps> = ({
             <FormItem><FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel><FormControl>
               <NumericInput
                 placeholder="e.g., 30.85 (for USD to EGP)"
-                value={field.value}
+                value={field.value ?? ''}
                 onChange={field.onChange}
               />
               </FormControl><FormMessage /></FormItem>
@@ -213,7 +216,149 @@ const RenderCurrencyFields: React.FC<RenderCurrencyFieldsProps> = ({
     </div>
   );
 };
-const MemoizedRenderCurrencyFields = React.memo(RenderCurrencyFields);
+const MemoizedRenderCurrencyFields = React.memo(RenderCurrencyFieldsComponent);
+
+interface RenderStockFieldsProps {
+  control: any;
+  preSelectedSecurityId?: string | null;
+  preSelectedSecurityDetails: ListedSecurity | null;
+  listedSecurities: ListedSecurity[];
+  isLoadingListedSecurities: boolean;
+  listedSecuritiesError: Error | null;
+  onSecuritySelect: (value: string) => void;
+  isPreSelectedStockMode: boolean;
+}
+
+const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
+  control,
+  preSelectedSecurityId,
+  preSelectedSecurityDetails,
+  listedSecurities,
+  isLoadingListedSecurities,
+  listedSecuritiesError,
+  onSecuritySelect,
+  isPreSelectedStockMode
+}) => {
+  return (
+    <div className="space-y-6 mt-6 p-6 border rounded-md">
+      <h3 className="text-lg font-medium text-primary">
+        {preSelectedSecurityDetails?.securityType === 'Fund' ? 'Fund Purchase Details' : 'Stock Purchase Details'}
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        {!isPreSelectedStockMode && (
+          <FormField
+            control={control}
+            name="selectedStockId"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Select Security (Stock or Fund)</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    onSecuritySelect(value);
+                  }}
+                  value={field.value || ""}
+                  disabled={isLoadingListedSecurities || !!listedSecuritiesError || listedSecurities.length === 0}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        isLoadingListedSecurities ? "Loading securities..." :
+                        listedSecuritiesError ? "Error loading securities" :
+                        listedSecurities.length === 0 ? "No securities available" :
+                        "Select a security from the list"
+                      } />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {listedSecurities.map((security) => (
+                      <SelectItem key={security.id} value={security.id}>
+                        {security.name} ({security.symbol}) - {security.securityType === 'Fund' ? security.fundType : security.market}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {preSelectedSecurityDetails && (
+          <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
+            <p className="text-sm font-medium">Selected Security: {preSelectedSecurityDetails.name} ({preSelectedSecurityDetails.symbol})</p>
+            <p className="text-xs text-muted-foreground">Current Market Price: {preSelectedSecurityDetails.price.toLocaleString(undefined, { style: 'currency', currency: preSelectedSecurityDetails.currency || 'USD' })}</p>
+            {preSelectedSecurityDetails.securityType === 'Fund' && preSelectedSecurityDetails.fundType && <p className="text-xs text-muted-foreground">Type: {preSelectedSecurityDetails.fundType}</p>}
+          </div>
+        )}
+        <FormField
+          control={control}
+          name="numberOfShares"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Securities</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 100"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  allowDecimal={false}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="purchasePricePerShare"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Purchase Price (per security)</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 150.50"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="purchaseFees"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Purchase Fees (optional)</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 5.00"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormDescription>Brokerage or transaction fees for this purchase.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="purchaseDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Purchase Date</FormLabel>
+              <FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+};
+const MemoizedRenderStockFields = React.memo(RenderStockFieldsComponent);
 
 
 export function AddInvestmentForm() {
@@ -229,7 +374,6 @@ export function AddInvestmentForm() {
   // console.log("AddInvestmentForm - preSelectedSecurityId from URL:", preSelectedSecurityId);
   // console.log("AddInvestmentForm - preSelectedInvestmentTypeQueryParam from URL:", preSelectedInvestmentTypeQueryParam);
 
-
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
   const { listedSecurities, isLoading: isLoadingListedSecurities, error: listedSecuritiesError, getListedSecurityById } = useListedSecurities();
@@ -242,18 +386,16 @@ export function AddInvestmentForm() {
 
   const selectedTypeFromFormWatch = form.watch("type");
 
-
   const isDedicatedGoldMode = preSelectedInvestmentTypeQueryParam === "Gold" && !preSelectedSecurityId;
   const isDedicatedDebtMode = preSelectedInvestmentTypeQueryParam === "Debt Instruments" && !preSelectedSecurityId;
   const isDedicatedCurrencyMode = preSelectedInvestmentTypeQueryParam === "Currencies" && !preSelectedSecurityId;
-  const isPreSelectedStockMode = !!preSelectedSecurityId; // This is true if stockId is in URL
+  const isPreSelectedStockMode = !!preSelectedSecurityId;
 
   // console.log("AddInvestmentForm - Calculated Modes:");
   // console.log("AddInvestmentForm - isDedicatedGoldMode:", isDedicatedGoldMode);
   // console.log("AddInvestmentForm - isDedicatedDebtMode:", isDedicatedDebtMode);
   // console.log("AddInvestmentForm - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
   // console.log("AddInvestmentForm - isPreSelectedStockMode:", isPreSelectedStockMode);
-
 
   const effectiveSelectedType = isDedicatedGoldMode ? "Gold" :
                                 isDedicatedDebtMode ? "Debt Instruments" :
@@ -265,13 +407,18 @@ export function AddInvestmentForm() {
   // console.log("AddInvestmentForm - form.watch('type'):", selectedTypeFromFormWatch);
   // console.log("AddInvestmentForm - effectiveSelectedType for UI logic:", effectiveSelectedType);
 
-
   useEffect(() => {
+    // console.log("AddInvestmentForm: useEffect for form reset triggered.");
+    // console.log("  Current preSelectedSecurityId:", preSelectedSecurityId);
+    // console.log("  Current preSelectedInvestmentTypeQueryParam:", preSelectedInvestmentTypeQueryParam);
+    // console.log("  Current isDedicatedDebtMode:", isDedicatedDebtMode);
+    // console.log("  Current isPreSelectedStockMode:", isPreSelectedStockMode);
+
     let isMounted = true;
     const baseResetValues: AddInvestmentFormValues = {
         ...initialFormValues,
         purchaseDate: form.getValues("purchaseDate") || getCurrentDate(),
-        name: "",
+        name: "", // Name is auto-generated for dedicated flows or optional
     };
 
     if (isDedicatedGoldMode) {
@@ -288,33 +435,31 @@ export function AddInvestmentForm() {
       setPreSelectedSecurityDetails(null);
     } else if (isPreSelectedStockMode && preSelectedSecurityId) {
       // console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode.");
-      form.reset({ ...baseResetValues, type: "Stocks", selectedStockId: preSelectedSecurityId, name: "" });
+      form.reset({ ...baseResetValues, type: "Stocks", selectedStockId: preSelectedSecurityId });
       getListedSecurityById(preSelectedSecurityId).then(security => {
         if (isMounted && security) {
           setPreSelectedSecurityDetails(security);
-          form.setValue("purchasePricePerShare", String(security.price)); // Set as string
+          form.setValue("purchasePricePerShare", String(security.price));
         } else if (isMounted) {
           toast({ title: "Error", description: "Pre-selected security not found.", variant: "destructive" });
           router.replace('/investments/add');
         }
       });
     } else if (preSelectedInvestmentTypeQueryParam && !isPreSelectedStockMode && !isDedicatedGoldMode && !isDedicatedDebtMode && !isDedicatedCurrencyMode) {
-        // General type pre-selection (e.g., for Real Estate if we add a FAB)
         // console.log("AddInvestmentForm - useEffect - Applying general pre-selected type from URL:", preSelectedInvestmentTypeQueryParam);
         form.reset({ ...baseResetValues, type: preSelectedInvestmentTypeQueryParam as InvestmentType });
         setPreSelectedSecurityDetails(null);
     } else if (!preSelectedInvestmentTypeQueryParam && !preSelectedSecurityId) {
-        // General mode, reset with current type or undefined.
         // console.log("AddInvestmentForm - useEffect - General mode, reset with current form type or undefined.");
         form.reset({ ...baseResetValues, type: selectedTypeFromFormWatch || undefined, name: form.getValues("name") || "" });
         setPreSelectedSecurityDetails(null);
     }
     return () => { isMounted = false; };
-  }, [isDedicatedDebtMode, isDedicatedGoldMode, isDedicatedCurrencyMode, isPreSelectedStockMode, preSelectedSecurityId, preSelectedInvestmentTypeQueryParam, form, getListedSecurityById, toast, router, selectedTypeFromFormWatch]);
+  }, [isDedicatedDebtMode, isDedicatedGoldMode, isDedicatedCurrencyMode, isPreSelectedStockMode, preSelectedSecurityId, preSelectedInvestmentTypeQueryParam, form, getListedSecurityById, toast, router]);
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
-    // console.log("AddInvestmentForm onSubmit - Raw Zod parsed values:", JSON.stringify(values, null, 2));
+    // console.log("AddInvestmentForm onSubmit - Zod parsed values:", JSON.stringify(values, null, 2));
 
     if (Object.keys(form.formState.errors).length > 0) {
         // console.error("AddInvestmentForm onSubmit - Validation errors present, cannot submit:", form.formState.errors);
@@ -339,15 +484,13 @@ export function AddInvestmentForm() {
       id: investmentId,
       type: finalInvestmentType,
       purchaseDate: values.purchaseDate,
-      amountInvested: 0,
-      name: "",
+      amountInvested: 0, // Will be overridden
+      name: "", // Will be overridden
     };
 
     let newInvestment: Omit<StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment, 'createdAt'>;
     let analysisResultFromAi: CurrencyFluctuationAnalysisOutput | undefined = undefined;
 
-    // Zod schema ensures these are numbers or undefined if optional and not provided.
-    // If required, Zod would have already errored.
     const parsedAmountInvested = values.amountInvested ?? 0;
     const parsedNumberOfShares = values.numberOfShares ?? 0;
     const parsedPricePerShare = values.purchasePricePerShare ?? 0;
@@ -357,9 +500,12 @@ export function AddInvestmentForm() {
     const parsedExchangeRateAtPurchase = values.exchangeRateAtPurchase ?? 0;
     const parsedInterestRate = values.interestRate ?? 0;
 
-
     if (finalInvestmentType === "Stocks") {
       const securityToProcessId = values.selectedStockId || preSelectedSecurityId;
+      // console.log("AddInvestmentForm onSubmit - Stocks: Trying to find security with ID:", securityToProcessId);
+      // console.log("AddInvestmentForm onSubmit - Stocks: preSelectedSecurityDetails:", preSelectedSecurityDetails);
+      // console.log("AddInvestmentForm onSubmit - Stocks: listedSecurities (sample):", listedSecurities.slice(0,2).map(s => ({id: s.id, name: s.name})));
+
       const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
 
       if (!selectedSecurity) {
@@ -384,9 +530,8 @@ export function AddInvestmentForm() {
         purchaseFees: parsedPurchaseFees,
         type: 'Stocks',
       };
-
     } else if (finalInvestmentType === "Debt Instruments") {
-        investmentName = isDedicatedDebtMode ? `${values.debtSubType || 'Debt'} (${values.issuer || 'N/A'})` : (values.name || `${values.debtSubType || 'Debt'} (${values.issuer || 'N/A'})`);
+        investmentName = `${values.debtSubType || 'Debt'} (${values.issuer || 'N/A'})`;
         newInvestment = {
           ...newInvestmentBase,
           name: investmentName,
@@ -428,8 +573,8 @@ export function AddInvestmentForm() {
                 transactionCurrency: values.currencyCode!,
                 transactionAmount: parsedForeignCurrencyAmount,
                 transactionDate: values.purchaseDate,
-                baseCurrency: "EGP",
-                currentExchangeRate: parsedExchangeRateAtPurchase,
+                baseCurrency: "EGP", // Hardcoded as per requirement
+                currentExchangeRate: parsedExchangeRateAtPurchase, // Note: Using purchase rate as current for AI
             };
             analysisResultFromAi = await currencyFluctuationAnalysis(aiInput);
             setAiAnalysisResult(analysisResultFromAi);
@@ -449,7 +594,7 @@ export function AddInvestmentForm() {
           propertyType: values.propertyType,
           type: 'Real Estate',
         };
-    } else {
+    } else { // Should not happen if type is validated
          investmentName = values.name || `${finalInvestmentType} Investment`;
          newInvestment = { ...newInvestmentBase, name: investmentName, amountInvested: parsedAmountInvested, type: finalInvestmentType as any };
     }
@@ -470,25 +615,28 @@ export function AddInvestmentForm() {
 
     const resetValues: AddInvestmentFormValues = {
         ...initialFormValues,
-        type: resetTargetType,
+        type: resetTargetType, // Reset to the dedicated type if applicable
         selectedStockId: isPreSelectedStockMode && preSelectedSecurityId ? preSelectedSecurityId : undefined,
         purchaseDate: getCurrentDate(),
-        name: "",
+        name: "", // Always reset name as it's auto-generated or optionally user-input for non-dedicated flows
     };
 
     form.reset(resetValues);
 
+    // If it was a pre-selected stock, re-populate the purchase price field with current market price
     if (isPreSelectedStockMode && preSelectedSecurityDetails && preSelectedSecurityId) {
         form.setValue("purchasePricePerShare", String(preSelectedSecurityDetails.price));
     } else if (!resetTargetType && !preSelectedInvestmentTypeQueryParam) {
+        // If it was a general form submission without pre-selection, redirect to avoid resubmission on refresh
+        // and to clear any URL params that aren't sticky (like a general `?type=...`)
         router.replace('/investments/add');
     }
 
-    if (!analysisResultFromAi) {
+
+    if (!analysisResultFromAi) { // Clear AI result if no new analysis was run
        setAiAnalysisResult(null);
     }
   }
-
 
   let pageTitle = "Add New Investment";
   let submitButtonText = `Add Investment`;
@@ -512,6 +660,11 @@ export function AddInvestmentForm() {
      submitButtonText = `Add ${effectiveSelectedType}`;
   }
 
+  // console.log("AddInvestmentForm: Rendering. Page Title:", pageTitle, "Submit Text:", submitButtonText);
+  // console.log("  Current preSelectedSecurityId:", preSelectedSecurityId);
+  // console.log("  Current preSelectedInvestmentTypeQueryParam:", preSelectedInvestmentTypeQueryParam);
+  // console.log("  Current isDedicatedDebtMode:", isDedicatedDebtMode);
+  // console.log("  Current isPreSelectedStockMode:", isPreSelectedStockMode);
 
   const RenderDebtFields = () => (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
@@ -527,7 +680,7 @@ export function AddInvestmentForm() {
           <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl>
             <NumericInput
               placeholder="e.g., 5.5"
-              value={field.value}
+              value={field.value ?? ''}
               onChange={field.onChange}
             />
             </FormControl><FormMessage /></FormItem>
@@ -539,7 +692,7 @@ export function AddInvestmentForm() {
           <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
             <NumericInput
               placeholder="e.g., 10000.75"
-              value={field.value}
+              value={field.value ?? ''}
               onChange={field.onChange}
             />
             </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
@@ -553,61 +706,14 @@ export function AddInvestmentForm() {
     </div>
   );
 
-  const RenderStockFields = () => (
-    <div className="space-y-6 mt-6 p-6 border rounded-md">
-      <h3 className="text-lg font-medium text-primary">
-        {preSelectedSecurityDetails?.securityType === 'Fund' ? 'Fund Purchase Details' : 'Stock Purchase Details'}
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        {!preSelectedSecurityId && (
-          <FormField control={form.control} name="selectedStockId" render={({ field }) => (
-              <FormItem className="md:col-span-2"><FormLabel>Select Security (Stock or Fund)</FormLabel><Select onValueChange={(value) => { field.onChange(value); const security = listedSecurities.find(s => s.id === value); setPreSelectedSecurityDetails(security || null); if(security) {form.setValue("purchasePricePerShare", String(security.price));}}} value={field.value || ""} disabled={isLoadingListedSecurities || !!listedSecuritiesError || listedSecurities.length === 0}><FormControl><SelectTrigger><SelectValue placeholder={isLoadingListedSecurities ? "Loading securities..." : listedSecuritiesError ? "Error loading securities" : listedSecurities.length === 0 ? "No securities available" : "Select a security from the list"} /></SelectTrigger></FormControl><SelectContent>{listedSecurities.map((security) => (<SelectItem key={security.id} value={security.id}>{security.name} ({security.symbol}) - {security.securityType === 'Fund' ? security.fundType : security.market}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
-            )}
-          />
-        )}
-        {preSelectedSecurityDetails && (
-          <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
-              <p className="text-sm font-medium">Selected Security: {preSelectedSecurityDetails.name} ({preSelectedSecurityDetails.symbol})</p>
-              <p className="text-xs text-muted-foreground">Current Market Price: {preSelectedSecurityDetails.price.toLocaleString(undefined, {style: 'currency', currency: preSelectedSecurityDetails.currency})}</p>
-              {preSelectedSecurityDetails.securityType === 'Fund' && preSelectedSecurityDetails.fundType && <p className="text-xs text-muted-foreground">Type: {preSelectedSecurityDetails.fundType}</p>}
-          </div>
-        )}
-        <FormField control={form.control} name="numberOfShares" render={({ field }) => (
-            <FormItem><FormLabel>Number of Securities</FormLabel><FormControl>
-              <NumericInput
-                placeholder="e.g., 100"
-                value={field.value}
-                onChange={field.onChange}
-                allowDecimal={false}
-              />
-              </FormControl><FormMessage /></FormItem>
-          )} />
-        <FormField control={form.control} name="purchasePricePerShare" render={({ field }) => (
-            <FormItem><FormLabel>Purchase Price (per security)</FormLabel><FormControl>
-              <NumericInput
-                placeholder="e.g., 150.50"
-                value={field.value}
-                onChange={field.onChange}
-              />
-              </FormControl><FormMessage /></FormItem>
-          )} />
-        <FormField control={form.control} name="purchaseFees" render={({ field }) => (
-            <FormItem><FormLabel>Purchase Fees (optional)</FormLabel><FormControl>
-              <NumericInput
-                placeholder="e.g., 5.00"
-                value={field.value}
-                onChange={field.onChange}
-              />
-              </FormControl><FormDescription>Brokerage or transaction fees for this purchase.</FormDescription><FormMessage /></FormItem>
-          )}
-        />
-        <FormField control={form.control} name="purchaseDate" render={({ field }) => (
-            <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()}/></FormControl><FormMessage /></FormItem>
-          )}
-        />
-      </div>
-    </div>
-  );
+
+  const handleSecuritySelect = useCallback((selectedValue: string) => {
+    const security = listedSecurities.find(s => s.id === selectedValue);
+    setPreSelectedSecurityDetails(security || null);
+    if (security) {
+        form.setValue("purchasePricePerShare", String(security.price));
+    }
+  }, [listedSecurities, form, setPreSelectedSecurityDetails]);
 
 
   const RenderRealEstateFields = () => (
@@ -627,7 +733,7 @@ export function AddInvestmentForm() {
           <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
             <NumericInput
               placeholder="e.g., 1000000.00"
-              value={field.value}
+              value={field.value ?? ''}
               onChange={field.onChange}
             />
             </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
@@ -653,12 +759,12 @@ export function AddInvestmentForm() {
                     field.onChange(value);
                     const currentValues = form.getValues();
                     form.reset({
-                    ...initialFormValues,
-                    type: value as InvestmentType,
-                    purchaseDate: currentValues.purchaseDate || getCurrentDate(),
-                    name: "",
+                      ...initialFormValues,
+                      type: value as InvestmentType,
+                      purchaseDate: currentValues.purchaseDate || getCurrentDate(),
+                      // name will be reset to "" by initialFormValues
                     });
-                    setPreSelectedSecurityDetails(null);
+                    setPreSelectedSecurityDetails(null); // Clear any pre-selected stock if type changes
                 }}
                 value={field.value || ""}
                 >
@@ -682,10 +788,21 @@ export function AddInvestmentForm() {
   );
 
   const RenderGeneralFields = ({ currentType }: { currentType: InvestmentType | undefined }) => {
-    // Only render these if NOT in a dedicated mode and a non-specific type is chosen
-    const showGeneralName = currentType && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode && (currentType === "Real Estate");
-    const showGeneralAmountAndDate = currentType && !isDedicatedDebtMode && !isDedicatedGoldMode && !isDedicatedCurrencyMode && !isPreSelectedStockMode && (currentType === "Real Estate");
+    // Only render general Name/Amount/Date if not in a dedicated mode or stock mode,
+    // and for types that don't have their own complete section (like Real Estate)
+    const showGeneralName = currentType &&
+                           !isDedicatedDebtMode &&
+                           !isDedicatedGoldMode &&
+                           !isDedicatedCurrencyMode &&
+                           !isPreSelectedStockMode &&
+                           (currentType === "Real Estate"); // Only Real Estate uses general name for now
 
+    const showGeneralAmountAndDate = currentType &&
+                                  !isDedicatedDebtMode &&
+                                  !isDedicatedGoldMode &&
+                                  !isDedicatedCurrencyMode &&
+                                  !isPreSelectedStockMode &&
+                                  (currentType === "Real Estate"); // Only Real Estate for now
 
     return (
     <>
@@ -706,7 +823,7 @@ export function AddInvestmentForm() {
                     <FormControl>
                         <NumericInput
                         placeholder="e.g., 1000.00"
-                        value={field.value}
+                        value={field.value ?? ''}
                         onChange={field.onChange}
                         />
                     </FormControl>
@@ -737,8 +854,10 @@ export function AddInvestmentForm() {
   // console.log("AddInvestmentForm: Rendering - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
   // console.log("AddInvestmentForm: Rendering - isPreSelectedStockMode:", isPreSelectedStockMode);
   // console.log("AddInvestmentForm: Rendering - effectiveSelectedType:", effectiveSelectedType);
-  // console.log("AddInvestmentForm: Rendering - form.formState.errors:", form.formState.errors);
+  // console.log("AddInvestmentForm: Rendering - form.formState.errors:", JSON.stringify(form.formState.errors));
 
+  // console.log("AddInvestmentForm: Rendering - pageTitle:", pageTitle);
+  // console.log("AddInvestmentForm: Rendering - preSelectedSecurityDetails:", preSelectedSecurityDetails);
 
   return (
     <Card>
@@ -751,23 +870,50 @@ export function AddInvestmentForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* console.log("AddInvestmentForm: Determining render path in JSX..."); */}
+            {/* console.log("  JSX - isDedicatedDebtMode:", isDedicatedDebtMode); */}
+            {/* console.log("  JSX - isDedicatedGoldMode:", isDedicatedGoldMode); */}
+            {/* console.log("  JSX - isDedicatedCurrencyMode:", isDedicatedCurrencyMode); */}
+            {/* console.log("  JSX - isPreSelectedStockMode:", isPreSelectedStockMode); */}
+            {/* console.log("  JSX - effectiveSelectedType:", effectiveSelectedType); */}
 
             {isDedicatedDebtMode ? <RenderDebtFields /> :
              isDedicatedGoldMode ? <MemoizedRenderGoldFieldsSection control={form.control} isDedicatedGoldMode={true}/> :
              isDedicatedCurrencyMode ? <MemoizedRenderCurrencyFields control={form.control} isDedicatedCurrencyMode={true} /> :
-             isPreSelectedStockMode ? <RenderStockFields /> :
+             isPreSelectedStockMode ? (
+                <MemoizedRenderStockFields
+                  control={form.control}
+                  preSelectedSecurityId={preSelectedSecurityId}
+                  preSelectedSecurityDetails={preSelectedSecurityDetails}
+                  listedSecurities={listedSecurities}
+                  isLoadingListedSecurities={isLoadingListedSecurities}
+                  listedSecuritiesError={listedSecuritiesError}
+                  onSecuritySelect={handleSecuritySelect}
+                  isPreSelectedStockMode={true} // Explicitly pass true
+                />
+             ) :
              ( // General Mode
                 <>
                   <RenderGeneralTypeSelector />
-                  {/* Render sections based on the type selected in the general selector */}
-                  {effectiveSelectedType === "Stocks" && <RenderStockFields />}
+                  {effectiveSelectedType === "Stocks" && (
+                    <MemoizedRenderStockFields
+                      control={form.control}
+                      preSelectedSecurityId={preSelectedSecurityId} // Will be null/undefined here
+                      preSelectedSecurityDetails={preSelectedSecurityDetails} // Will be null initially
+                      listedSecurities={listedSecurities}
+                      isLoadingListedSecurities={isLoadingListedSecurities}
+                      listedSecuritiesError={listedSecuritiesError}
+                      onSecuritySelect={handleSecuritySelect}
+                      isPreSelectedStockMode={false} // Explicitly pass false
+                    />
+                  )}
                   {effectiveSelectedType === "Gold" && <MemoizedRenderGoldFieldsSection control={form.control} />}
                   {effectiveSelectedType === "Currencies" && <MemoizedRenderCurrencyFields control={form.control} />}
                   {effectiveSelectedType === "Real Estate" && <RenderRealEstateFields />}
                   {effectiveSelectedType === "Debt Instruments" && <RenderDebtFields />}
 
-                  {/* RenderGeneralFields is for types that don't have a dedicated section like Real Estate */}
-                  <RenderGeneralFields currentType={effectiveSelectedType} />
+                  {/* RenderGeneralFields is for types that don't have a dedicated section (like Real Estate was before its own section) */}
+                  {/* <RenderGeneralFields currentType={effectiveSelectedType} /> */}
                 </>
              )
             }
