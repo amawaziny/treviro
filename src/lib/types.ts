@@ -49,7 +49,7 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   debtSubType: DebtSubType;
   issuer: string;
   interestRate: number;
-  maturityDate: string;
+  maturityDate: string; // YYYY-MM-DD
 }
 
 export type Investment = StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment;
@@ -150,9 +150,12 @@ export interface AggregatedDebtHolding {
   debtSubType?: DebtSubType;
   issuer?: string;
   interestRate?: number;
-  maturityDate?: string;
+  maturityDate?: string; // YYYY-MM-DD
   amountInvested?: number; // Cost for direct debt
-  purchaseDate?: string;
+  purchaseDate?: string; // YYYY-MM-DD , optional as per previous changes
+  maturityDay?: string;
+  maturityMonth?: string;
+  maturityYear?: string;
 
   // Fund Specific
   fundDetails?: ListedSecurity; 

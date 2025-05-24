@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 
 const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
   if (variant === "destructive") {
@@ -54,6 +54,23 @@ export default function MyDebtInstrumentsPage() {
     // Process Direct Debt Instruments
     const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
+      let maturityDay: string | undefined;
+      let maturityMonth: string | undefined;
+      let maturityYear: string | undefined;
+
+      if (debt.maturityDate) {
+        try {
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00"); // Ensure it's parsed as local
+          if (isValid(parsedMaturityDate)) {
+            maturityDay = format(parsedMaturityDate, 'dd');
+            maturityMonth = format(parsedMaturityDate, 'MM');
+            maturityYear = format(parsedMaturityDate, 'yyyy');
+          }
+        } catch (e) {
+          console.error("Error parsing maturity date for debt holding:", debt.id, e);
+        }
+      }
+
       directHoldings.push({
         id: debt.id,
         itemType: 'direct',
@@ -63,7 +80,10 @@ export default function MyDebtInstrumentsPage() {
         interestRate: debt.interestRate,
         maturityDate: debt.maturityDate,
         amountInvested: debt.amountInvested,
-        purchaseDate: debt.purchaseDate, // Keep purchaseDate here for data model
+        purchaseDate: debt.purchaseDate,
+        maturityDay,
+        maturityMonth,
+        maturityYear,
       });
     });
 
@@ -153,9 +173,12 @@ export default function MyDebtInstrumentsPage() {
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return ''; // Return empty string for blank cell
-    // Assuming dateString is YYYY-MM-DD, append time to avoid timezone issues if interpreted as UTC midnight
     try {
-        return format(new Date(dateString + "T00:00:00"), 'dd-MM-yyyy');
+        const parsedDate = parseISO(dateString + "T00:00:00"); // Ensure local interpretation
+        if (isValid(parsedDate)) {
+            return format(parsedDate, 'dd-MM-yyyy');
+        }
+        return '';
     } catch (e) {
         return ''; // Return empty if date is invalid
     }
@@ -207,6 +230,9 @@ export default function MyDebtInstrumentsPage() {
                       <TableHead>Type</TableHead>
                       <TableHead>Issuer</TableHead>
                       <TableHead className="text-right">Interest Rate</TableHead>
+                      <TableHead className="text-right">M. Day</TableHead>
+                      <TableHead className="text-right">M. Month</TableHead>
+                      <TableHead className="text-right">M. Year</TableHead>
                       <TableHead className="text-right">Maturity Date</TableHead>
                       <TableHead className="text-right">Amount Invested</TableHead>
                       <TableHead>Purchase Date</TableHead>
@@ -220,6 +246,9 @@ export default function MyDebtInstrumentsPage() {
                         <TableCell>{debt.debtSubType || 'N/A'}</TableCell>
                         <TableCell>{debt.issuer || 'N/A'}</TableCell>
                         <TableCell className="text-right">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</TableCell>
+                        <TableCell className="text-right">{debt.maturityDay || 'N/A'}</TableCell>
+                        <TableCell className="text-right">{debt.maturityMonth || 'N/A'}</TableCell>
+                        <TableCell className="text-right">{debt.maturityYear || 'N/A'}</TableCell>
                         <TableCell className="text-right">{formatDateDisplay(debt.maturityDate)}</TableCell>
                         <TableCell className="text-right">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</TableCell>
                         <TableCell>
