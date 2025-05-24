@@ -63,7 +63,7 @@ export default function MyDebtInstrumentsPage() {
         interestRate: debt.interestRate,
         maturityDate: debt.maturityDate,
         amountInvested: debt.amountInvested,
-        purchaseDate: debt.purchaseDate,
+        purchaseDate: debt.purchaseDate, // Keep purchaseDate here for data model
       });
     });
 
@@ -152,9 +152,13 @@ export default function MyDebtInstrumentsPage() {
   };
 
   const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return ''; // Return empty string for blank cell
     // Assuming dateString is YYYY-MM-DD, append time to avoid timezone issues if interpreted as UTC midnight
-    return format(new Date(dateString + "T00:00:00"), 'dd-MM-yyyy');
+    try {
+        return format(new Date(dateString + "T00:00:00"), 'dd-MM-yyyy');
+    } catch (e) {
+        return ''; // Return empty if date is invalid
+    }
   };
 
 
@@ -219,7 +223,7 @@ export default function MyDebtInstrumentsPage() {
                         <TableCell className="text-right">{formatDateDisplay(debt.maturityDate)}</TableCell>
                         <TableCell className="text-right">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</TableCell>
                         <TableCell>
-                          {debt.debtSubType === 'Certificate' ? 'N/A' : formatDateDisplay(debt.purchaseDate)}
+                          {debt.debtSubType === 'Certificate' ? '' : formatDateDisplay(debt.purchaseDate)}
                         </TableCell>
                         <TableCell className="text-right">
                           <AlertDialogTrigger asChild>
@@ -317,4 +321,3 @@ export default function MyDebtInstrumentsPage() {
     </AlertDialog>
   );
 }
-

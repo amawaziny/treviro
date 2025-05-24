@@ -6,7 +6,7 @@ export interface BaseInvestment {
   name: string; // User-defined or auto-generated label for the investment lot
   type: InvestmentType;
   amountInvested: number; // This is the COST of the investment
-  purchaseDate: string; // ISO string
+  purchaseDate?: string; // ISO string - Made optional
   currentValue?: number;
   createdAt?: string; // Server-generated timestamp, stored as ISO string
 }
