@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown } from 'lucide-react'; // Added ArrowUpDown
+import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MyDebtListItem } from '@/components/investments/my-debt-list-item';
@@ -224,17 +224,17 @@ export default function MyDebtInstrumentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="flex items-center">Name/Description <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="flex items-center">Type <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="flex items-center">Issuer <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right flex items-center justify-end">Interest Rate <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right flex items-center justify-end">M. Day <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right flex items-center justify-end">M. Month <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right flex items-center justify-end">M. Year <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right flex items-center justify-end">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right flex items-center justify-end">Amount Invested <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Name/Description <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Type <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Issuer <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Interest Rate <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Day <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Month <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Year <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Amount Invested <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="whitespace-nowrap"><span className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
+                      <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
