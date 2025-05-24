@@ -4,42 +4,132 @@
 import React from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
-import type { GoldInvestment, StockInvestment, ListedSecurity } from '@/lib/types';
+import { useGoldMarketPrices } from '@/hooks/use-gold-market-prices';
+import type { Investment, GoldInvestment, StockInvestment, ListedSecurity, GoldType, AggregatedGoldHolding } from '@/lib/types';
 import { isGoldRelatedFund } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Gem, Coins, Plus } from 'lucide-react';
+import { Gem, Coins, Plus, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { MyGoldListItem } from '@/components/investments/my-gold-list-item';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 export default function MyGoldPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
+  const { goldMarketPrices, isLoading: isLoadingGoldPrices, error: goldPricesError } = useGoldMarketPrices();
 
-  const directGoldHoldings = React.useMemo(() => {
-    return investments.filter(inv => inv.type === 'Gold') as GoldInvestment[];
-  }, [investments]);
-
-  const goldFundHoldings = React.useMemo(() => {
+  const aggregatedGoldHoldings = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
+    const holdings: AggregatedGoldHolding[] = [];
+
+    // Aggregate Physical Gold
+    const physicalGoldInvestments = investments.filter(inv => inv.type === 'Gold') as GoldInvestment[];
+    const physicalAggregated: { [key in GoldType]?: { totalQuantity: number; totalCost: number; count: number; name: string; investments: GoldInvestment[] } } = {};
+
+    physicalGoldInvestments.forEach(inv => {
+      if (!physicalAggregated[inv.goldType]) {
+        physicalAggregated[inv.goldType] = { totalQuantity: 0, totalCost: 0, count: 0, name: inv.name, investments: [] };
+      }
+      physicalAggregated[inv.goldType]!.totalQuantity += inv.quantityInGrams; // quantityInGrams is used for both grams and units
+      physicalAggregated[inv.goldType]!.totalCost += inv.amountInvested;
+      physicalAggregated[inv.goldType]!.count++;
+      physicalAggregated[inv.goldType]!.investments.push(inv);
+    });
+
+    (Object.keys(physicalAggregated) as GoldType[]).forEach(goldType => {
+      const data = physicalAggregated[goldType]!;
+      const avgPrice = data.totalQuantity > 0 ? data.totalCost / data.totalQuantity : 0;
+      let currentMarketPrice: number | undefined;
+      if (goldMarketPrices) {
+        if (goldType === 'K24') currentMarketPrice = goldMarketPrices.pricePerGramK24;
+        else if (goldType === 'K21') currentMarketPrice = goldMarketPrices.pricePerGramK21;
+        else if (goldType === 'Pound') currentMarketPrice = goldMarketPrices.pricePerGoldPound;
+        else if (goldType === 'Ounce') currentMarketPrice = goldMarketPrices.pricePerOunce;
+      }
+
+      holdings.push({
+        id: `physical_${goldType}`,
+        displayName: `Physical Gold - ${goldType === 'K24' ? '24 Karat' : goldType === 'K21' ? '21 Karat' : goldType}`,
+        itemType: 'physical',
+        totalQuantity: data.totalQuantity,
+        averagePurchasePrice: avgPrice,
+        totalCost: data.totalCost,
+        currentMarketPrice: currentMarketPrice,
+        currency: 'EGP', // Assuming physical gold costs are in EGP for P/L display
+        physicalGoldType: goldType,
+      });
+    });
+
+    // Aggregate Gold Funds
     const stockInvestments = investments.filter(inv => inv.type === 'Stocks') as StockInvestment[];
-    
-    return stockInvestments.map(stockInv => {
+    stockInvestments.forEach(stockInv => {
       const security = listedSecurities.find(ls => ls.symbol === stockInv.tickerSymbol);
       if (security && security.securityType === 'Fund' && isGoldRelatedFund(security.fundType)) {
-        return {
-          ...stockInv,
-          fundDetails: security, 
-        };
+        // Check if a fund with this symbol already exists in holdings (could happen if multiple purchase lots)
+        const existingFundHolding = holdings.find(h => h.itemType === 'fund' && h.fundDetails?.symbol === security.symbol);
+        if (existingFundHolding) {
+          existingFundHolding.totalQuantity += stockInv.numberOfShares || 0;
+          existingFundHolding.totalCost += stockInv.amountInvested || 0;
+          if (existingFundHolding.totalQuantity > 0) {
+            existingFundHolding.averagePurchasePrice = existingFundHolding.totalCost / existingFundHolding.totalQuantity;
+          }
+        } else {
+          holdings.push({
+            id: `fund_${security.id}`,
+            displayName: security.name,
+            itemType: 'fund',
+            logoUrl: security.logoUrl,
+            totalQuantity: stockInv.numberOfShares || 0,
+            averagePurchasePrice: stockInv.purchasePricePerShare || 0, // This is per-lot, needs aggregation if multiple lots
+            totalCost: stockInv.amountInvested || 0, // This is per-lot, needs aggregation
+            currentMarketPrice: security.price,
+            currency: security.currency,
+            fundDetails: security,
+          });
+        }
       }
-      return null;
-    }).filter(Boolean) as (StockInvestment & { fundDetails: ListedSecurity })[];
-  }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
+    });
+    
+    // Post-aggregation for funds (if multiple lots were added)
+    const finalFundHoldings: AggregatedGoldHolding[] = [];
+    const fundAggregationMap = new Map<string, AggregatedGoldHolding>();
 
-  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
+    holdings.filter(h => h.itemType === 'fund').forEach(fundHolding => {
+        const symbol = fundHolding.fundDetails!.symbol;
+        if (fundAggregationMap.has(symbol)) {
+            const existing = fundAggregationMap.get(symbol)!;
+            existing.totalQuantity += fundHolding.totalQuantity;
+            existing.totalCost += fundHolding.totalCost;
+            if(existing.totalQuantity > 0) {
+                 existing.averagePurchasePrice = existing.totalCost / existing.totalQuantity;
+            }
+        } else {
+            // For the first lot of a fund, the averagePurchasePrice is simply its purchasePricePerShare
+            // and totalCost is its amountInvested. If more lots are merged, these are recalculated.
+             const initialFundInvestment = stockInvestments.find(si => si.tickerSymbol === symbol && si.id === investments.find(i => i.type === 'Stocks' && (i as StockInvestment).tickerSymbol === symbol)?.id);
+             if(initialFundInvestment){
+                fundHolding.averagePurchasePrice = initialFundInvestment.purchasePricePerShare || 0;
+                fundHolding.totalCost = initialFundInvestment.amountInvested || 0;
+             }
+            fundAggregationMap.set(symbol, { ...fundHolding });
+        }
+    });
+    
+    finalFundHoldings.push(...Array.from(fundAggregationMap.values()));
+    
+    // Combine physical gold (already aggregated) with aggregated funds
+    return [
+        ...holdings.filter(h => h.itemType === 'physical'),
+        ...finalFundHoldings
+    ].sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+  }, [investments, listedSecurities, goldMarketPrices, isLoadingInvestments, isLoadingListedSecurities]);
+
+  const isLoading = isLoadingInvestments || isLoadingListedSecurities || isLoadingGoldPrices;
 
   if (isLoading) {
     return (
@@ -49,115 +139,57 @@ export default function MyGoldPage() {
           <Skeleton className="h-4 w-64" />
         </div>
         <Separator />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
+        {[...Array(2)].map((_, i) => (
+           <Card key={i} className="mt-6">
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-20 w-full" /></CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
 
-
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Gold Holdings</h1>
-        <p className="text-muted-foreground">Track your direct gold and gold-related fund investments.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Gold</h1>
+        <p className="text-muted-foreground">Overview of your direct gold and gold fund investments.</p>
       </div>
       <Separator />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Gem className="mr-2 h-6 w-6 text-primary" />
-            Direct Gold Investments
-          </CardTitle>
-          <CardDescription>Physical gold or other direct gold holdings.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {directGoldHoldings.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name/Description</TableHead>
-                  <TableHead>Quantity (grams)</TableHead>
-                  <TableHead>Amount Invested</TableHead>
-                  <TableHead>Purchase Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {directGoldHoldings.map(gold => (
-                  <TableRow key={gold.id}>
-                    <TableCell>{gold.name}</TableCell>
-                    <TableCell>{gold.quantityInGrams?.toLocaleString() || 'N/A'}</TableCell>
-                    <TableCell>${gold.amountInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell>{new Date(gold.purchaseDate + "T00:00:00").toLocaleDateString()}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground">No direct gold investments recorded.</p>
-          )}
-        </CardContent>
-      </Card>
+      {goldPricesError && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Gold Market Prices</AlertTitle>
+          <AlertDescription>
+            Could not load current market prices for physical gold. P/L calculations for physical gold may be unavailable or inaccurate.
+            Please ensure the 'goldMarketPrices/current' document is correctly set up in Firestore.
+          </AlertDescription>
+        </Alert>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Coins className="mr-2 h-6 w-6 text-primary" />
-            Gold-Related Fund Investments
-          </CardTitle>
-          <CardDescription>ETFs and other funds primarily investing in gold.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {goldFundHoldings.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fund Name (Symbol)</TableHead>
-                  <TableHead>Units Held</TableHead>
-                  <TableHead>Avg. Purchase Price</TableHead>
-                  <TableHead>Total Invested</TableHead>
-                  <TableHead>Current Market Price</TableHead>
-                  <TableHead>Current Value</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {goldFundHoldings.map(fundInv => {
-                  const totalCost = (fundInv.numberOfShares || 0) * (fundInv.purchasePricePerShare || 0);
-                  const avgPurchasePrice = (fundInv.numberOfShares && fundInv.numberOfShares > 0) ? totalCost / fundInv.numberOfShares : 0;
-                  const currentValue = (fundInv.numberOfShares || 0) * (fundInv.fundDetails.price || 0);
-                  return (
-                    <TableRow key={fundInv.id}>
-                      <TableCell>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
-                      <TableCell>{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
-                      <TableCell>${avgPurchasePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${fundInv.fundDetails.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                       <TableCell>${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground">No gold-related fund investments found.</p>
-          )}
-        </CardContent>
-      </Card>
+      {aggregatedGoldHoldings.length > 0 ? (
+        <div className="space-y-4 mt-6">
+          {aggregatedGoldHoldings.map(holding => (
+            <MyGoldListItem key={holding.id} holding={holding} />
+          ))}
+        </div>
+      ) : (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Gem className="mr-2 h-6 w-6 text-primary" />
+              No Gold Holdings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground py-4 text-center">
+              You haven't added any gold investments yet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Link href="/investments/add?type=Gold" passHref>
         <Button
           variant="default"

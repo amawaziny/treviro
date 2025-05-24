@@ -1,47 +1,207 @@
+
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { formatCurrency } from '@/lib/utils'; // Assuming formatCurrency is in utils
+import Image from 'next/image';
+import type { AggregatedGoldHolding } from '@/lib/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Gem, Coins, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import type { GoldInvestment } from '@/lib/types'; // Assuming a GoldInvestment type exists
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useInvestments } from '@/hooks/use-investments';
+import { useToast } from '@/hooks/use-toast';
+import React from 'react';
 
 interface MyGoldListItemProps {
-  holding: GoldInvestment; // Use the specific type for gold
+  holding: AggregatedGoldHolding;
 }
+
+// Helper for buttonVariants in AlertDialogAction
+const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
+  if (variant === "destructive") {
+    return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
+  }
+  return ""; // Default or other variants can be handled by AlertDialog's default styling
+};
+
 
 export function MyGoldListItem({ holding }: MyGoldListItemProps) {
-  // This component will display summary information about a gold holding.
-  // It will also be a link to the detail page.
+  const { removeGoldInvestments } = useInvestments();
+  const { toast } = useToast();
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
-  // Determine the display name and details based on whether it's direct gold or a gold fund
-  const name = holding.securityType === 'Fund' ? holding.actualStockName || holding.symbol : 'Physical Gold';
-  const details = holding.securityType === 'Fund' ? `Shares: ${holding.numberOfShares || 0}` : `Weight: ${holding.weight} ${holding.weightUnit}`; // Assuming weight and weightUnit exist for physical gold
+  const {
+    id,
+    displayName,
+    itemType,
+    logoUrl,
+    totalQuantity,
+    averagePurchasePrice,
+    totalCost,
+    currentMarketPrice,
+    currency,
+    fundDetails, // present if itemType is 'fund'
+    physicalGoldType // present if itemType is 'physical'
+  } = holding;
 
-  // TODO: Calculate current value and profit/loss if market data is available
-  const currentValue = 'N/A'; // Placeholder
-  const profitLoss = 'N/A'; // Placeholder
-  const profitLossColor = 'text-muted-foreground'; // Placeholder for color based on profit/loss
+  let profitLoss = 0;
+  let profitLossPercent = 0;
+  let isProfitable = false;
+  let totalCurrentValue = 0;
+
+  if (currentMarketPrice && totalQuantity > 0) {
+    totalCurrentValue = currentMarketPrice * totalQuantity;
+    profitLoss = totalCurrentValue - totalCost;
+    if (totalCost > 0) {
+      profitLossPercent = (profitLoss / totalCost) * 100;
+    } else if (totalCurrentValue > 0) {
+      profitLossPercent = Infinity; // All profit if cost was 0
+    }
+    isProfitable = profitLoss >= 0;
+  }
+
+  const formattedAvgPrice = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(averagePurchasePrice);
+
+  const formattedMarketPrice = currentMarketPrice
+    ? new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(currentMarketPrice)
+    : 'N/A';
+
+  const formattedProfitLoss = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    signDisplay: 'always',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(profitLoss);
+  
+  const quantityLabel = itemType === 'fund' ? 'Units' : 
+                        (physicalGoldType === 'Pound' || physicalGoldType === 'Ounce' ? 'Units' : 'Grams');
+
+
+  const handleRemove = async () => {
+    try {
+      if (itemType === 'physical' && physicalGoldType) {
+        await removeGoldInvestments(physicalGoldType, 'physical');
+      } else if (itemType === 'fund' && fundDetails?.symbol) {
+        await removeGoldInvestments(fundDetails.symbol, 'fund');
+      }
+      toast({
+        title: "Gold Holding Removed",
+        description: `All investments in ${displayName} have been removed.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error Removing Gold Holding",
+        description: error.message || `Could not remove ${displayName}.`,
+        variant: "destructive",
+      });
+      console.error("Error removing gold holding:", error);
+    }
+    setIsAlertDialogOpen(false);
+  };
+
+  const detailPageLink = `/investments/gold/${id}`; // This page needs to be created
+
+  const cardContent = (
+    <CardContent className="pt-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-grow min-w-0">
+          <Link href={detailPageLink} passHref className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2">
+            {itemType === 'fund' && logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={`${displayName} logo`}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+                data-ai-hint="fund logo"
+              />
+            ) : (
+              <Gem className="h-10 w-10 text-amber-400" /> // Generic icon for physical gold
+            )}
+            <div className="truncate">
+              <p className="text-lg font-semibold truncate">{displayName}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {itemType === 'fund' && fundDetails?.symbol ? `${fundDetails.symbol} - ` : ''}
+                {quantityLabel}: {totalQuantity.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits: 2})}
+              </p>
+            </div>
+          </Link>
+        </div>
+        
+        <div className="text-right pl-2">
+          {currentMarketPrice !== undefined ? (
+            <>
+              <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
+                {formattedProfitLoss}
+              </p>
+              <Badge variant={isProfitable ? 'default' : 'destructive'} 
+                     className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
+                {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
+                {totalCost > 0 ? profitLossPercent.toFixed(2) + '%' : (totalCurrentValue > 0 ? '∞%' : '0.00%')}
+              </Badge>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Market N/A</p>
+          )}
+        </div>
+        <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="ml-2 text-muted-foreground hover:text-destructive">
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Remove {displayName}</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will permanently remove all your investment records for {displayName}. This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRemove} className={buttonVariants({variant: "destructive"})}>
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+      <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
+        <p>Avg. Cost: {formattedAvgPrice}</p>
+        <p>Market Price: {formattedMarketPrice}</p>
+      </div>
+    </CardContent>
+  );
 
   return (
-    <Link href={`/investments/gold/${holding.id}`} passHref>
-      <Card className="cursor-pointer hover:bg-accent/50">
-        <CardHeader>
-          <CardTitle>{name}</CardTitle>
-          <CardDescription>{details}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Current Value:</span>
-            <span>{currentValue}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Profit/Loss:</span>
-            <span className={profitLossColor}>{profitLoss}</span>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+    <Card className="hover:shadow-md transition-shadow">
+      {cardContent}
+    </Card>
   );
 }
+
+MyGoldListItem.displayName = 'MyGoldListItem';
