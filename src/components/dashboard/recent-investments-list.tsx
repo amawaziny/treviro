@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react'; // Import React
@@ -22,6 +23,7 @@ import type { Investment } from "@/lib/types";
 import { Landmark, Coins, LineChart, FileText, CircleDollarSign } from 'lucide-react';
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { format } from 'date-fns';
 
 const investmentTypeIcons = {
   'Real Estate': Landmark,
@@ -35,6 +37,7 @@ const investmentTypeIcons = {
 const InvestmentRow = React.memo(function InvestmentRow({ investment }: { investment: Investment }) {
   const Icon = investmentTypeIcons[investment.type] || CircleDollarSign;
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(investment.amountInvested); // Assuming USD for display
+  const formattedDate = investment.purchaseDate ? format(new Date(investment.purchaseDate), 'dd-MM-yyyy') : 'N/A';
 
   return (
     <TableRow>
@@ -48,7 +51,7 @@ const InvestmentRow = React.memo(function InvestmentRow({ investment }: { invest
         <Badge variant="secondary">{investment.type}</Badge>
       </TableCell>
       <TableCell className="text-right">{formattedAmount}</TableCell>
-      <TableCell>{new Date(investment.purchaseDate).toLocaleDateString()}</TableCell>
+      <TableCell>{formattedDate}</TableCell>
     </TableRow>
   );
 });

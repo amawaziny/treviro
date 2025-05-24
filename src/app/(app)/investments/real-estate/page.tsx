@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Home, Building, Plus } from 'lucide-react'; 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
 
 export default function MyRealEstatePage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
@@ -102,7 +103,7 @@ export default function MyRealEstatePage() {
                     <TableCell>{prop.propertyAddress || prop.name}</TableCell>
                     <TableCell>{prop.propertyType || 'N/A'}</TableCell>
                     <TableCell>${prop.amountInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell>{new Date(prop.purchaseDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{prop.purchaseDate ? format(new Date(prop.purchaseDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -145,7 +146,7 @@ export default function MyRealEstatePage() {
                       <TableCell>{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
                       <TableCell>${avgPurchasePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                       <TableCell>${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                      <TableCell>${fundInv.fundDetails.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                      <TableCell>${(fundInv.fundDetails.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                       <TableCell>${currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     </TableRow>
                   );

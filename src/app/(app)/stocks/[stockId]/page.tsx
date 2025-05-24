@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/language-context';
+import { format } from 'date-fns';
 
 
 export default function SecurityDetailPage() { 
@@ -145,7 +146,7 @@ export default function SecurityDetailPage() {
       await deleteSellTransaction(transactionToDelete);
       toast({
         title: "Transaction Deleted",
-        description: `Sell transaction from ${new Date(transactionToDelete.date + "T00:00:00").toLocaleDateString()} has been deleted.`,
+        description: `Sell transaction from ${transactionToDelete.date ? format(new Date(transactionToDelete.date + "T00:00:00"), 'dd-MM-yyyy') : ''} has been deleted.`,
       });
     } catch (error: any) {
       toast({
@@ -196,13 +197,18 @@ export default function SecurityDetailPage() {
   const displayCurrency = security.currency || 'USD';
   const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
 
-  const formatCurrency = (value: number, currencyCode: string) => {
+  const formatCurrency = (value: number, currencyCode: string = displayCurrency, minFractionDigits = 3, maxFractionDigits = 3) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currencyCode,
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3,
+      minimumFractionDigits: minFractionDigits,
+      maximumFractionDigits: maxFractionDigits,
     }).format(value);
+  };
+
+  const formatDateDisplay = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return format(new Date(dateString + "T00:00:00"), 'dd-MM-yyyy');
   };
 
 
@@ -284,17 +290,17 @@ export default function SecurityDetailPage() {
                   <>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
-                      <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {formatCurrency(averagePurchasePrice, displayCurrency)}</div>
-                      <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {formatCurrency(totalCostBasis, displayCurrency)}</div>
-                      <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {formatCurrency(currentMarketPrice, displayCurrency)}</div>
-                      <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {formatCurrency(totalInvestmentValue, displayCurrency)}</div>
+                      <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {formatCurrency(averagePurchasePrice)}</div>
+                      <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {formatCurrency(totalCostBasis)}</div>
+                      <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {formatCurrency(currentMarketPrice)}</div>
+                      <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {formatCurrency(totalInvestmentValue)}</div>
                     </div>
                     <Separator />
                     <div className="flex items-center justify-between pt-2">
                       <p className="text-lg font-semibold">Profit / Loss:</p>
                       <div className="text-right">
                           <p className={cn("text-2xl font-bold", isProfitable ? "text-accent" : "text-destructive")}>
-                              {formatCurrency(PnL, displayCurrency)}
+                              {formatCurrency(PnL)}
                           </p>
                           <Badge variant={isProfitable ? 'default' : 'destructive'} 
                                 className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
@@ -335,19 +341,19 @@ export default function SecurityDetailPage() {
                       <TableBody>
                         {currentTransactions.map((tx) => (
                           <TableRow key={tx.id}>
-                            <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{new Date(tx.date + "T00:00:00").toLocaleDateString()}</TableCell>
+                            <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(tx.date)}</TableCell>
                             <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
                               <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
                                 {tx.type}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
-                            <TableCell className="text-right">{formatCurrency((tx.price ?? 0), displayCurrency)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency((tx.fees ?? 0), displayCurrency)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency((tx.totalAmount ?? 0), displayCurrency)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency((tx.price ?? 0))}</TableCell>
+                            <TableCell className="text-right">{formatCurrency((tx.fees ?? 0))}</TableCell>
+                            <TableCell className="text-right">{formatCurrency((tx.totalAmount ?? 0))}</TableCell>
                             {currentTransactions.some(t => t.profitOrLoss !== undefined) && (
                                 <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                                {tx.profitOrLoss !== undefined ? formatCurrency((tx.profitOrLoss ?? 0), displayCurrency) : 'N/A'}
+                                {tx.profitOrLoss !== undefined ? formatCurrency((tx.profitOrLoss ?? 0)) : 'N/A'}
                                 </TableCell>
                             )}
                             <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>
@@ -430,7 +436,7 @@ export default function SecurityDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the record of selling {(transactionToDelete?.shares ?? 0).toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? new Date(transactionToDelete.date + "T00:00:00").toLocaleDateString() : ''}.
+              This will remove the record of selling {(transactionToDelete?.shares ?? 0).toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ''}.
               This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

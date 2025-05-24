@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
   if (variant === "destructive") {
@@ -150,10 +151,10 @@ export default function MyDebtInstrumentsPage() {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: effectiveDigits, maximumFractionDigits: effectiveDigits }).format(value);
   };
 
-  const formatDate = (dateString?: string) => {
+  const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return 'N/A';
     // Assuming dateString is YYYY-MM-DD, append time to avoid timezone issues if interpreted as UTC midnight
-    return new Date(dateString + "T00:00:00").toLocaleDateString();
+    return format(new Date(dateString + "T00:00:00"), 'dd-MM-yyyy');
   };
 
 
@@ -215,9 +216,9 @@ export default function MyDebtInstrumentsPage() {
                         <TableCell>{debt.debtSubType || 'N/A'}</TableCell>
                         <TableCell>{debt.issuer || 'N/A'}</TableCell>
                         <TableCell className="text-right">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</TableCell>
-                        <TableCell className="text-right">{formatDate(debt.maturityDate)}</TableCell>
+                        <TableCell className="text-right">{formatDateDisplay(debt.maturityDate)}</TableCell>
                         <TableCell className="text-right">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</TableCell>
-                        <TableCell>{formatDate(debt.purchaseDate)}</TableCell>
+                        <TableCell>{formatDateDisplay(debt.purchaseDate)}</TableCell>
                         <TableCell className="text-right">
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => confirmRemoveItem(debt)}>

@@ -37,7 +37,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log(`StockDetailChart: useEffect triggered. Range: ${selectedRange}, Security ID: ${securityId}`);
+    // console.log(`StockDetailChart: useEffect triggered. Range: ${selectedRange}, Security ID: ${securityId}`);
     if (!securityId) {
       setIsLoading(false);
       setError("No security ID provided to fetch chart data.");
@@ -68,7 +68,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
           
           const startDateString = format(startDate, 'yyyy-MM-dd');
           
-          console.log(`StockDetailChart: Range ${selectedRange}. Fetching from date >= ${startDateString}`);
+          // console.log(`StockDetailChart: Range ${selectedRange}. Fetching from date >= ${startDateString}`);
 
           firestoreQuery = query(
             priceHistoryRef,
@@ -78,7 +78,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
         } else {
           // For 6M, 1Y, 5Y, use the limit N points logic
           const numPoints = getNumPointsForRange(selectedRange);
-          console.log(`StockDetailChart: Range ${selectedRange}. Fetching last ${numPoints} points (desc order).`);
+          // console.log(`StockDetailChart: Range ${selectedRange}. Fetching last ${numPoints} points (desc order).`);
           firestoreQuery = query(
             priceHistoryRef,
             orderBy(documentId(), 'desc'),
@@ -98,13 +98,13 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
           }
         });
         
-        console.log(`StockDetailChart: Fetched ${data.length} data points for range ${selectedRange}. Sample (raw):`, JSON.stringify(data.slice(0,3)));
+        // console.log(`StockDetailChart: Fetched ${data.length} data points for range ${selectedRange}. Sample (raw):`, JSON.stringify(data.slice(0,3)));
         
         // If we fetched with limit (desc order for 6M+), we need to reverse.
         // If we fetched with date range (asc order for 1W, 1M), it's already correct.
         const finalData = (selectedRange !== '1W' && selectedRange !== '1M') ? data.reverse() : data;
         setChartData(finalData);
-        console.log(`StockDetailChart: chartData state updated with ${finalData.length} points. Full chartData sample:`, JSON.stringify(finalData.slice(0,Math.min(3, finalData.length))));
+        // console.log(`StockDetailChart: chartData state updated with ${finalData.length} points. Full chartData sample:`, JSON.stringify(finalData.slice(0,Math.min(3, finalData.length))));
 
       } catch (err: any) {
         console.error("Error fetching price history:", err);
@@ -200,10 +200,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             dataKey="date" 
             tickFormatter={(tick) => {
                 const dateObj = new Date(tick + "T00:00:00"); // Assume UTC if no timezone in string
-                if (chartData.length <= 15 && (selectedRange === '1W' || selectedRange === '1M')) return format(dateObj, 'MMM d'); // Show more ticks for sparse short ranges
-                if (selectedRange === '1W' || selectedRange === '1M') return format(dateObj, 'MMM d');
-                if (selectedRange === '6M' || selectedRange === '1Y') return format(dateObj, 'MMM yy');
-                return format(dateObj, 'yyyy');
+                return format(dateObj, 'dd-MM-yyyy');
             }}
             stroke="hsl(var(--muted-foreground))"
             fontSize={12}
@@ -230,7 +227,7 @@ export function StockDetailChart({ securityId }: StockDetailChartProps) {
             formatter={(value: number, name: string, props: any) => {
                 return [`$${value.toFixed(2)}`, "Price"];
             }}
-            labelFormatter={(label: string) => format(new Date(label + "T00:00:00"), 'MMM d, yyyy')}
+            labelFormatter={(label: string) => format(new Date(label + "T00:00:00"), 'dd-MM-yyyy')}
           />
           <Legend wrapperStyle={{ fontSize: '12px' }}/>
           <Line 
