@@ -36,3 +36,11 @@ export function isDebtRelatedFund(fundType?: string): boolean {
   ];
   return debtKeywords.some(keyword => lowerFundType.includes(keyword));
 }
+
+// Helper function to identify stock-related funds
+export function isStockRelatedFund(fundType?: string): boolean {
+  if (!fundType) return false;
+  const lowerFundType = fundType.toLowerCase();
+  const stockKeywords = ["stock", "equity", "index", "growth", "value", "dividend"]; // Add more keywords as needed
+  return stockKeywords.some(keyword => lowerFundType.includes(keyword));
+}

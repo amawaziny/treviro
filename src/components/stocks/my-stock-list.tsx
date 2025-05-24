@@ -1,9 +1,9 @@
-
 "use client";
 
 import React from 'react';
 import { useInvestments } from '@/hooks/use-investments';
-import type { StockInvestment } from '@/lib/types';
+import { useListedSecurities } from '@/hooks/use-listed-securities'; // Import the hook
+import type { Investment, StockInvestment } from '@/lib/types'; // Import Investment type
 import { MyStockListItem } from './my-stock-list-item';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,16 +11,36 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LineChart, Info } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
+import { isStockRelatedFund } from '@/lib/utils'; // Import the utility function
 
 export function MyStockList() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities(); // Fetch listed securities
 
   const stockInvestments = React.useMemo(() => {
-    return investments.filter(inv => inv.securityType === 'Stock' || (inv.securityType === 'Fund' && inv.fundType !== 'Gold')) as StockInvestment[];
-  }, [investments]);
+    if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
-  if (isLoadingInvestments) {
+    return investments.filter(inv => {
+      // Find the corresponding listed security for the investment
+      const listedSecurity = listedSecurities.find(ls => ls.symbol === inv.tickerSymbol);
+
+      if (!listedSecurity) {
+        // If no listed security is found, exclude the investment
+        return false;
+      }
+
+      // Apply the filter condition based on the listed security's type and fundType
+      const isStock = listedSecurity.securityType === 'Stock';
+      const isStockFund = listedSecurity.securityType === 'Fund' && isStockRelatedFund(listedSecurity.fundType);
+
+      return isStock || isStockFund;
+    }) as StockInvestment[]; // Cast to StockInvestment array
+  }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]); // Add dependencies
+
+  // Update loading state to consider both hooks
+  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
+
+  if (isLoading) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
