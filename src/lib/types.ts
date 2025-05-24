@@ -47,7 +47,7 @@ export type DebtSubType = 'Certificate' | 'Treasury Bill' | 'Bond' | 'Other';
 export interface DebtInstrumentInvestment extends BaseInvestment {
   type: 'Debt Instruments';
   debtSubType: DebtSubType;
-  issuer: string; // Kept as required for direct debt
+  issuer: string;
   interestRate: number;
   maturityDate: string;
 }
@@ -129,3 +129,14 @@ export type AggregatedGoldHolding = {
   fundDetails?: ListedSecurity; // Only for funds
   physicalGoldType?: GoldType; // Only for physical gold
 };
+
+export interface AggregatedCurrencyHolding {
+  currencyCode: string;
+  totalForeignAmount: number;
+  totalCostInEGP: number;
+  averagePurchaseRateToEGP: number;
+  currentMarketRateToEGP?: number;
+  currentValueInEGP?: number;
+  profitOrLossInEGP?: number;
+  profitOrLossPercentage?: number;
+}
