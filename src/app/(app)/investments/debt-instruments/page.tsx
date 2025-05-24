@@ -218,7 +218,9 @@ export default function MyDebtInstrumentsPage() {
                         <TableCell className="text-right">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</TableCell>
                         <TableCell className="text-right">{formatDateDisplay(debt.maturityDate)}</TableCell>
                         <TableCell className="text-right">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</TableCell>
-                        <TableCell>{formatDateDisplay(debt.purchaseDate)}</TableCell>
+                        <TableCell>
+                          {debt.debtSubType === 'Certificate' ? 'N/A' : formatDateDisplay(debt.purchaseDate)}
+                        </TableCell>
                         <TableCell className="text-right">
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => confirmRemoveItem(debt)}>
@@ -315,3 +317,4 @@ export default function MyDebtInstrumentsPage() {
     </AlertDialog>
   );
 }
+
