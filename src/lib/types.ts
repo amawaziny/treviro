@@ -1,5 +1,6 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
+export type IncomeType = 'Salary' | 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
 
 export interface BaseInvestment {
   id: string;
@@ -54,6 +55,18 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
 
 export type Investment = StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment;
 
+export interface IncomeRecord {
+  id: string;
+  type: IncomeType;
+  source?: string;
+  amount: number;
+  date: string; // ISO string date YYYY-MM-DD
+  description?: string;
+  createdAt: string; // ISO string from server timestamp
+  userId: string; // To associate with the user
+}
+
+
 export interface CurrencyFluctuationAnalysisResult {
   significantDeviation: boolean;
   deviationPercentage: number;
@@ -92,7 +105,7 @@ export interface Transaction {
   numberOfShares: number;
   pricePerShare: number;
   fees: number;
-  totalAmount: number;
+  totalAmount: number; // For buys, this is cost. For sells, this is proceeds.
   profitOrLoss?: number;
   createdAt: string;
   isInvestmentRecord?: boolean;
@@ -144,8 +157,8 @@ export interface AggregatedCurrencyHolding {
 export interface AggregatedDebtHolding {
   id: string; // Firestore ID for direct debt, or fund ID for funds
   itemType: 'direct' | 'fund';
-  displayName: string; 
-  
+  displayName: string;
+
   // Direct Debt Specific
   debtSubType?: DebtSubType;
   issuer?: string;
@@ -160,7 +173,7 @@ export interface AggregatedDebtHolding {
   projectedAnnualInterest?: number;
 
   // Fund Specific
-  fundDetails?: ListedSecurity; 
+  fundDetails?: ListedSecurity;
   totalUnits?: number;
   averagePurchasePrice?: number;
   totalCost?: number; // Cost for fund investment
@@ -168,6 +181,6 @@ export interface AggregatedDebtHolding {
   currentValue?: number;
   profitLoss?: number;
   profitLossPercent?: number;
-  currency?: string; 
+  currency?: string;
   logoUrl?: string;
 }

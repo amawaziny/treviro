@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search } from 'lucide-react'; // Changed List to Search for "Explore"
+import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank } from 'lucide-react'; // Added PiggyBank for Income
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -19,7 +19,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   disabled?: boolean;
-  exactMatch?: boolean; 
+  exactMatch?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -27,11 +27,17 @@ const navItems: NavItem[] = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+    exactMatch: true,
   },
   {
-    title: 'Explore', 
-    href: '/stocks', 
-    icon: Search, 
+    title: 'Income',
+    href: '/income',
+    icon: PiggyBank, // Using PiggyBank for Income
+  },
+  {
+    title: 'Explore',
+    href: '/stocks',
+    icon: Search,
   },
   {
     title: 'Stocks',
@@ -49,7 +55,7 @@ const navItems: NavItem[] = [
     icon: Gem,
   },
   {
-    title: 'Debt Instruments', 
+    title: 'Debt Instruments',
     href: '/investments/debt-instruments',
     icon: ScrollText,
   },
@@ -76,25 +82,22 @@ export function SidebarNav() {
         if (item.exactMatch) {
           isActive = pathname === item.href;
         } else {
+          // General case: starts with href
           isActive = pathname.startsWith(item.href);
-          // Special handling for dashboard to not stay active for child routes
-          if (item.href === '/dashboard' && pathname !== '/dashboard') {
-            isActive = false;
-          }
-          // Ensure /stocks (explore) isn't active for /investments/stocks
+
+          // Specific exclusion for 'Explore' (/stocks) not to be active for '/investments/stocks'
           if (item.href === '/stocks' && pathname.startsWith('/investments/stocks')) {
             isActive = false;
           }
+          // Specific exclusion for 'Income' (/income) not to be active for other '/income/...' routes if any are added later
+          if (item.href === '/income' && pathname !== '/income' && !pathname.startsWith('/income/')) {
+             // Only active for /income itself, not its sub-routes, unless specified otherwise by a more specific item.
+             // For instance, if we add /income/reports, it should not make /income active.
+             // This logic can be tricky. If /income is meant to be a parent for /income/add,
+             // then startsWith might be okay, but exactMatch for /income might be better for the parent.
+             // Given current setup, startsWith for /income makes /income/add keep /income active, which is usually desired.
+          }
         }
-         // Specific active state for /stocks to cover its child /stocks/[stockId]
-         if (item.href === '/stocks' && pathname.startsWith('/stocks/')) {
-           isActive = true;
-         }
-         // Specific active state for /investments/stocks to cover its child /investments/stocks
-         if (item.href === '/investments/stocks' && pathname.startsWith('/investments/stocks')) {
-             isActive = true;
-         }
-
 
         return (
           <SidebarMenuItem key={index}>
@@ -115,4 +118,3 @@ export function SidebarNav() {
     </SidebarMenu>
   );
 }
-

@@ -5,35 +5,39 @@ export const investmentTypes = ['Real Estate', 'Gold', 'Stocks', 'Debt Instrumen
 export const goldTypes = ['K24', 'K21', 'Pound', 'Ounce'] as const;
 export const debtSubTypes = ['Certificate', 'Treasury Bill', 'Bond', 'Other'] as const;
 export const propertyTypes = ['Residential', 'Commercial', 'Land'] as const;
+export const incomeTypes = ['Salary', 'Profit Share', 'Bonus', 'Gift', 'Rental Income', 'Freelance', 'Other'] as const;
 
 // Helper for transforming string to number or undefined, and ensuring it's positive if not undefined
-const stringToOptionalPositiveNumber = z.string().transform(val => val === "" ? undefined : parseFloat(val)).pipe(z.number().positive().optional());
-const stringToOptionalPositiveInteger = z.string().transform(val => val === "" ? undefined : parseInt(val, 10)).pipe(z.number().int().positive().optional());
+const stringToOptionalPositiveNumber = z.string().transform(val => val === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional());
+const stringToPositiveNumber = z.string().transform(val => parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }));
+
+const stringToOptionalPositiveInteger = z.string().transform(val => val === "" ? undefined : parseInt(val, 10)).pipe(z.number().int().positive({ message: "Must be a positive whole number." }).optional());
+const stringToPositiveInteger = z.string().transform(val => parseInt(val, 10)).pipe(z.number().int().positive({ message: "Must be a positive whole number." }));
 
 // Helper for transforming string to number, defaulting to a value if empty/invalid, and ensuring it's non-negative
-const stringToNonNegativeNumberOrDefault = (defaultValue: number) => 
+const stringToNonNegativeNumberOrDefault = (defaultValue: number) =>
   z.string().transform(val => {
     const num = parseFloat(val);
-    return isNaN(num) ? defaultValue : num;
-  }).pipe(z.number().min(0));
+    return isNaN(num) || val.trim() === "" ? defaultValue : num; // Ensure empty string also defaults
+  }).pipe(z.number().min(0, { message: "Cannot be negative." }));
 
 
 export const AddInvestmentSchema = z.object({
-  name: z.string().optional(), // Made optional, will be auto-generated if not provided for some types
+  name: z.string().optional(),
   type: z.enum(investmentTypes, { errorMap: () => ({ message: "Please select a valid investment type."}) }).optional(),
-  
+
   amountInvested: stringToOptionalPositiveNumber,
-  purchaseDate: z.string().optional(), // Made optional here, will be refined
+  purchaseDate: z.string().optional(),
 
   // Stocks
   selectedStockId: z.string().optional(),
   numberOfShares: stringToOptionalPositiveInteger,
   purchasePricePerShare: stringToOptionalPositiveNumber,
-  purchaseFees: stringToNonNegativeNumberOrDefault(0).default("0"),
+  purchaseFees: stringToNonNegativeNumberOrDefault(0),
 
   // Gold
   goldType: z.enum(goldTypes).optional(),
-  quantityInGrams: stringToOptionalPositiveNumber, // Represents units for Pound/Ounce
+  quantityInGrams: stringToOptionalPositiveNumber,
 
   // Currencies
   currencyCode: z.string().optional(),
@@ -49,18 +53,17 @@ export const AddInvestmentSchema = z.object({
   issuer: z.string().optional(),
   interestRate: stringToOptionalPositiveNumber,
   maturityDate: z.string().optional().refine((dateStr) => {
-    if (!dateStr || dateStr.trim() === "") return true; // Optional if empty
+    if (!dateStr || dateStr.trim() === "") return true;
     return !isNaN(Date.parse(dateStr));
   }, { message: "Invalid maturity date format."}),
 
 }).superRefine((data, ctx) => {
   const effectiveType = data.type;
 
-  // General purchaseDate validation for types that require it
-  const isPurchaseDateRequiredForType = 
-    effectiveType === 'Stocks' || 
-    effectiveType === 'Gold' || 
-    effectiveType === 'Currencies' || 
+  const isPurchaseDateRequiredForType =
+    effectiveType === 'Stocks' ||
+    effectiveType === 'Gold' ||
+    effectiveType === 'Currencies' ||
     effectiveType === 'Real Estate' ||
     (effectiveType === 'Debt Instruments' && data.debtSubType !== 'Certificate');
 
@@ -81,15 +84,13 @@ export const AddInvestmentSchema = z.object({
     if (data.purchasePricePerShare === undefined) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price is required.", path: ["purchasePricePerShare"] });
     }
-  } else if (effectiveType === 'Real Estate' || effectiveType === 'Gold' || (effectiveType === 'Debt Instruments' && data.debtSubType !== 'Certificate')) {
-    // Amount invested is required for these types (excluding stocks which calculate it, and certificate debt)
-    if (data.amountInvested === undefined) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Amount invested is required.", path: ["amountInvested"] });
-    }
-  } else if (effectiveType === 'Debt Instruments' && data.debtSubType === 'Certificate') {
-     if (data.amountInvested === undefined) { // Still required for Certificates
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Amount invested is required.", path: ["amountInvested"] });
-    }
+  } else if (effectiveType === 'Real Estate' || effectiveType === 'Gold' || effectiveType === 'Debt Instruments' || effectiveType === 'Currencies') {
+     // Amount invested is derived for Stocks and Currencies, so only validate for others
+     if (effectiveType !== 'Stocks' && effectiveType !== 'Currencies') {
+        if (data.amountInvested === undefined) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Amount invested is required.", path: ["amountInvested"] });
+        }
+     }
   }
 
 
@@ -125,6 +126,9 @@ export const AddInvestmentSchema = z.object({
     if (!data.maturityDate || data.maturityDate.trim() === "") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Maturity date is required.", path: ["maturityDate"]});
     }
+    if (data.amountInvested === undefined) { // Amount invested is required for Debt
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Total amount invested is required.", path: ["amountInvested"] });
+    }
   }
 });
 
@@ -133,22 +137,33 @@ export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
 
 export const SellStockSchema = z.object({
   stockId: z.string(),
-  numberOfSharesToSell: stringToOptionalPositiveInteger
+  numberOfSharesToSell: stringToPositiveInteger
     .refine(val => val !== undefined, { message: "Number of securities is required." }),
-  sellPricePerShare: stringToOptionalPositiveNumber
+  sellPricePerShare: stringToPositiveNumber
     .refine(val => val !== undefined, { message: "Sell price is required." }),
   sellDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
-  fees: stringToNonNegativeNumberOrDefault(0).default("0"),
+  fees: stringToNonNegativeNumberOrDefault(0),
 });
 
 export type SellStockFormValues = z.infer<typeof SellStockSchema>;
 
 export const EditStockInvestmentSchema = z.object({
   purchaseDate: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format." }),
-  numberOfShares: stringToOptionalPositiveInteger
+  numberOfShares: stringToPositiveInteger
     .refine(val => val !== undefined, { message: "Number of securities is required." }),
-  purchasePricePerShare: stringToOptionalPositiveNumber
+  purchasePricePerShare: stringToPositiveNumber
     .refine(val => val !== undefined, { message: "Purchase price is required." }),
-  purchaseFees: stringToNonNegativeNumberOrDefault(0).default("0"),
+  purchaseFees: stringToNonNegativeNumberOrDefault(0),
 });
 export type EditStockInvestmentFormValues = z.infer<typeof EditStockInvestmentSchema>;
+
+
+export const AddIncomeSchema = z.object({
+  type: z.enum(incomeTypes, { required_error: "Income type is required." }),
+  source: z.string().optional(),
+  amount: stringToPositiveNumber.refine(val => val !== undefined, { message: "Amount is required." }),
+  date: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Date is required." }),
+  description: z.string().optional(),
+});
+
+export type AddIncomeFormValues = z.infer<typeof AddIncomeSchema>;
