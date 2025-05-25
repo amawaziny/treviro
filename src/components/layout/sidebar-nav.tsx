@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank } from 'lucide-react'; // Added PiggyBank for Income
+import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, Settings, TrendingDown, LineChart as CashFlowIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -32,7 +32,17 @@ const navItems: NavItem[] = [
   {
     title: 'Income',
     href: '/income',
-    icon: PiggyBank, // Using PiggyBank for Income
+    icon: PiggyBank,
+  },
+  {
+    title: 'Expenses', // Added Expenses
+    href: '/expenses',
+    icon: TrendingDown,
+  },
+  {
+    title: 'Cash Flow',
+    href: '/cash-flow',
+    icon: CashFlowIcon,
   },
   {
     title: 'Explore',
@@ -64,6 +74,11 @@ const navItems: NavItem[] = [
     href: '/investments/currencies',
     icon: DollarSign,
   },
+  {
+    title: 'Settings',
+    href: '/settings/financial',
+    icon: Settings,
+  },
 ];
 
 export function SidebarNav() {
@@ -82,20 +97,15 @@ export function SidebarNav() {
         if (item.exactMatch) {
           isActive = pathname === item.href;
         } else {
-          // General case: starts with href
           isActive = pathname.startsWith(item.href);
-
-          // Specific exclusion for 'Explore' (/stocks) not to be active for '/investments/stocks'
           if (item.href === '/stocks' && pathname.startsWith('/investments/stocks')) {
             isActive = false;
           }
-          // Specific exclusion for 'Income' (/income) not to be active for other '/income/...' routes if any are added later
           if (item.href === '/income' && pathname !== '/income' && !pathname.startsWith('/income/')) {
-             // Only active for /income itself, not its sub-routes, unless specified otherwise by a more specific item.
-             // For instance, if we add /income/reports, it should not make /income active.
-             // This logic can be tricky. If /income is meant to be a parent for /income/add,
-             // then startsWith might be okay, but exactMatch for /income might be better for the parent.
-             // Given current setup, startsWith for /income makes /income/add keep /income active, which is usually desired.
+            isActive = false;
+          }
+          if (item.href === '/expenses' && pathname !== '/expenses' && !pathname.startsWith('/expenses/')) {
+            isActive = false;
           }
         }
 
