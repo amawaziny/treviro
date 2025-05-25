@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { MonthlySettingsSchema, type MonthlySettingsFormValues } from "@/lib/schemas";
-import { useInvestments } from "@/hooks/use-investments"; // For monthlySettings and updateMonthlySettings
+import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -27,7 +27,9 @@ export function FinancialSettingsForm() {
   const form = useForm<MonthlySettingsFormValues>({
     resolver: zodResolver(MonthlySettingsSchema),
     defaultValues: {
-      estimatedLivingExpenses: "", // Initialize as string for NumericInput
+      estimatedLivingExpenses: "",
+      estimatedZakat: "",
+      estimatedCharity: "",
     },
   });
 
@@ -35,6 +37,8 @@ export function FinancialSettingsForm() {
     if (monthlySettings && !isLoadingContext) {
       form.reset({
         estimatedLivingExpenses: String(monthlySettings.estimatedLivingExpenses ?? ""),
+        estimatedZakat: String(monthlySettings.estimatedZakat ?? ""),
+        estimatedCharity: String(monthlySettings.estimatedCharity ?? ""),
       });
     }
   }, [monthlySettings, isLoadingContext, form]);
@@ -42,7 +46,9 @@ export function FinancialSettingsForm() {
   async function onSubmit(values: MonthlySettingsFormValues) {
     try {
       const newSettings = {
-        estimatedLivingExpenses: parseFloat(values.estimatedLivingExpenses), // Schema ensures this is a valid number string
+        estimatedLivingExpenses: parseFloat(values.estimatedLivingExpenses),
+        estimatedZakat: values.estimatedZakat ? parseFloat(values.estimatedZakat) : undefined,
+        estimatedCharity: values.estimatedCharity ? parseFloat(values.estimatedCharity) : undefined,
       };
       await updateMonthlySettings(newSettings);
       toast({
@@ -80,13 +86,55 @@ export function FinancialSettingsForm() {
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 15000.00"
-                  value={field.value} // NumericInput expects string
-                  onChange={field.onChange} // field.onChange provides string
+                  value={field.value}
+                  onChange={field.onChange}
                   allowDecimal={true}
                 />
               </FormControl>
               <FormDescription>
-                Estimate your typical monthly spending on essentials like rent, utilities, groceries, transport, etc. (excluding specific loan payments or credit card bills logged elsewhere).
+                Estimate your typical monthly spending on essentials like rent, utilities, groceries, transport, etc.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="estimatedZakat"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estimated Monthly Zakat (EGP - Optional)</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 200.00"
+                  value={field.value}
+                  onChange={field.onChange}
+                  allowDecimal={true}
+                />
+              </FormControl>
+              <FormDescription>
+                If you set aside a monthly amount for Zakat.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="estimatedCharity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estimated Monthly Charity (EGP - Optional)</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 100.00"
+                  value={field.value}
+                  onChange={field.onChange}
+                  allowDecimal={true}
+                />
+              </FormControl>
+              <FormDescription>
+                Any regular monthly charitable contributions.
               </FormDescription>
               <FormMessage />
             </FormItem>

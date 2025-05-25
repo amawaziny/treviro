@@ -1,21 +1,22 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
 export type IncomeType = 'Salary' | 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
+export type ExpenseCategory = 'Living Expenses' | 'Credit Card Payment' | 'Loan/Installment' | 'Subscriptions' | 'Discretionary' | 'Other';
 
 export interface BaseInvestment {
   id: string;
-  name: string; // User-defined or auto-generated label for the investment lot
+  name: string;
   type: InvestmentType;
-  amountInvested: number; // This is the COST of the investment
-  purchaseDate?: string; // ISO string - Made optional
+  amountInvested: number;
+  purchaseDate?: string;
   currentValue?: number;
-  createdAt?: string; // Server-generated timestamp, stored as ISO string
+  createdAt?: string;
 }
 
 export interface StockInvestment extends BaseInvestment {
   type: 'Stocks';
-  actualStockName?: string; // Official name of the stock/fund
-  tickerSymbol?: string; // Symbol of the stock/fund
+  actualStockName?: string;
+  tickerSymbol?: string;
   numberOfShares?: number;
   purchasePricePerShare?: number;
   stockLogoUrl?: string;
@@ -25,15 +26,15 @@ export interface StockInvestment extends BaseInvestment {
 export type GoldType = 'K24' | 'K21' | 'Pound' | 'Ounce';
 export interface GoldInvestment extends BaseInvestment {
   type: 'Gold';
-  quantityInGrams: number; // For K24/K21 this is grams, for Pound/Ounce this is number of units
+  quantityInGrams: number;
   goldType: GoldType;
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
   type: 'Currencies';
-  currencyCode: string; // e.g., USD, EUR
-  foreignCurrencyAmount: number; // Amount of the foreign currency bought/held
-  exchangeRateAtPurchase: number; // Exchange rate of foreign currency TO EGP at time of purchase
+  currencyCode: string;
+  foreignCurrencyAmount: number;
+  exchangeRateAtPurchase: number;
   // amountInvested will be the cost in EGP
 }
 
@@ -60,10 +61,26 @@ export interface IncomeRecord {
   type: IncomeType;
   source?: string;
   amount: number;
-  date: string; // ISO string date YYYY-MM-DD
+  date: string;
   description?: string;
-  createdAt: string; // ISO string from server timestamp
-  userId: string; // To associate with the user
+  createdAt: string;
+  userId: string;
+}
+
+export interface ExpenseRecord {
+  id: string;
+  userId: string;
+  description?: string;
+  amount: number;
+  date: string;
+  category: ExpenseCategory;
+  createdAt?: string;
+}
+
+export interface MonthlySettings {
+  estimatedLivingExpenses: number;
+  estimatedZakat?: number;
+  estimatedCharity?: number;
 }
 
 
@@ -82,8 +99,8 @@ export interface ListedSecurity {
   currency: string;
   changePercent: number;
   market: string;
-  securityType?: 'Stock' | 'Fund'; // 'Stock' is default if undefined
-  fundType?: string; // e.g., 'Equity ETF', 'Bond Mutual Fund', 'Gold ETF' - relevant if securityType is 'Fund'
+  securityType?: 'Stock' | 'Fund';
+  fundType?: string;
 }
 
 export interface StockChartDataPoint {
@@ -97,15 +114,15 @@ export type TransactionType = 'buy' | 'sell';
 
 export interface Transaction {
   id: string;
-  investmentId?: string; // For 'buy' transactions that are actual investment records
-  stockId?: string; // ID of the ListedSecurity
+  investmentId?: string;
+  stockId?: string;
   tickerSymbol: string;
   type: TransactionType;
-  date: string; // ISO string
+  date: string;
   numberOfShares: number;
   pricePerShare: number;
   fees: number;
-  totalAmount: number; // For buys, this is cost. For sells, this is proceeds.
+  totalAmount: number;
   profitOrLoss?: number;
   createdAt: string;
   isInvestmentRecord?: boolean;
@@ -121,26 +138,25 @@ export interface GoldMarketPrices {
   pricePerGramK21?: number;
   pricePerGoldPound?: number;
   pricePerOunce?: number;
-  lastUpdated?: any; // Firestore Timestamp or Date
+  lastUpdated?: any;
 }
 
 export interface ExchangeRates {
   [key: string]: number;
 }
 
-// For MyGoldPage unified list
 export type AggregatedGoldHolding = {
-  id: string; // e.g., "physical_K24" or fund's securityId
+  id: string;
   displayName: string;
   itemType: 'physical' | 'fund';
-  logoUrl?: string; // For funds, or a generic for physical
+  logoUrl?: string;
   totalQuantity: number;
   averagePurchasePrice: number;
   totalCost: number;
   currentMarketPrice?: number;
-  currency: string; // Currency of the prices/costs
-  fundDetails?: ListedSecurity; // Only for funds
-  physicalGoldType?: GoldType; // Only for physical gold
+  currency: string;
+  fundDetails?: ListedSecurity;
+  physicalGoldType?: GoldType;
 };
 
 export interface AggregatedCurrencyHolding {
@@ -155,28 +171,24 @@ export interface AggregatedCurrencyHolding {
 }
 
 export interface AggregatedDebtHolding {
-  id: string; // Firestore ID for direct debt, or fund ID for funds
+  id: string;
   itemType: 'direct' | 'fund';
   displayName: string;
-
-  // Direct Debt Specific
   debtSubType?: DebtSubType;
   issuer?: string;
   interestRate?: number;
-  maturityDate?: string; // YYYY-MM-DD
-  amountInvested?: number; // Cost for direct debt
-  purchaseDate?: string; // YYYY-MM-DD , optional as per previous changes
+  maturityDate?: string;
+  amountInvested?: number;
+  purchaseDate?: string;
   maturityDay?: string;
   maturityMonth?: string;
   maturityYear?: string;
   projectedMonthlyInterest?: number;
   projectedAnnualInterest?: number;
-
-  // Fund Specific
   fundDetails?: ListedSecurity;
   totalUnits?: number;
   averagePurchasePrice?: number;
-  totalCost?: number; // Cost for fund investment
+  totalCost?: number;
   currentMarketPrice?: number;
   currentValue?: number;
   profitLoss?: number;
