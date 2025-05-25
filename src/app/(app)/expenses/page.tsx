@@ -24,8 +24,10 @@ export default function ExpensesPage() {
   const currentMonthEnd = endOfMonth(new Date());
 
   const expensesThisMonth = React.useMemo(() => {
-    return expenseRecords
-      .filter(record => isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd }))
+    // Ensure expenseRecords is an array before filtering
+    const recordsToFilter = expenseRecords || [];
+    return recordsToFilter
+      .filter(record => record.date && isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenseRecords, currentMonthStart, currentMonthEnd]);
 
@@ -129,3 +131,4 @@ export default function ExpensesPage() {
     </div>
   );
 }
+
