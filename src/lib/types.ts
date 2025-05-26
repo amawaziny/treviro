@@ -1,7 +1,7 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
 export type IncomeType = 'Salary' | 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
-export type ExpenseCategory = 'Living Expenses' | 'Credit Card Payment' | 'Loan/Installment' | 'Subscriptions' | 'Discretionary' | 'Other';
+export type ExpenseCategory = 'Credit Card' | 'Other'; // Simplified categories
 
 export interface BaseInvestment {
   id: string;
@@ -35,7 +35,6 @@ export interface CurrencyInvestment extends BaseInvestment {
   currencyCode: string;
   foreignCurrencyAmount: number;
   exchangeRateAtPurchase: number;
-  // amountInvested will be the cost in EGP
 }
 
 export type PropertyType = 'Residential' | 'Commercial' | 'Land';
@@ -71,18 +70,15 @@ export interface ExpenseRecord {
   id: string;
   userId: string;
   description?: string;
-  amount: number;
+  amount: number; // Total amount of the expense
   date: string;
   category: ExpenseCategory;
+  isInstallment?: boolean; // True if this is an installment plan
+  numberOfInstallments?: number; // e.g., 3, 6, 12 months
   createdAt?: string;
 }
 
-export interface MonthlySettings {
-  estimatedLivingExpenses: number;
-  estimatedZakat?: number;
-  estimatedCharity?: number;
-}
-
+// MonthlySettings interface is removed
 
 export interface CurrencyFluctuationAnalysisResult {
   significantDeviation: boolean;

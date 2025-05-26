@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, Settings, TrendingDown, LineChart as CashFlowIcon } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, TrendingDown, LineChart as CashFlowIcon } from 'lucide-react'; // Removed Settings icon
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -35,7 +35,7 @@ const navItems: NavItem[] = [
     icon: PiggyBank,
   },
   {
-    title: 'Expenses', // Added Expenses
+    title: 'Expenses',
     href: '/expenses',
     icon: TrendingDown,
   },
@@ -74,11 +74,7 @@ const navItems: NavItem[] = [
     href: '/investments/currencies',
     icon: DollarSign,
   },
-  {
-    title: 'Settings',
-    href: '/settings/financial',
-    icon: Settings,
-  },
+  // Settings link removed
 ];
 
 export function SidebarNav() {
@@ -98,6 +94,7 @@ export function SidebarNav() {
           isActive = pathname === item.href;
         } else {
           isActive = pathname.startsWith(item.href);
+          // Prevent "Explore" from being active when on "/investments/stocks"
           if (item.href === '/stocks' && pathname.startsWith('/investments/stocks')) {
             isActive = false;
           }

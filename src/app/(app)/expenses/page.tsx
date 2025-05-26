@@ -12,7 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, TrendingDown, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import type { ExpenseRecord } from '@/lib/types';
 
@@ -24,7 +23,6 @@ export default function ExpensesPage() {
   const currentMonthEnd = endOfMonth(new Date());
 
   const expensesThisMonth = React.useMemo(() => {
-    // Ensure expenseRecords is an array before filtering
     const recordsToFilter = expenseRecords || [];
     return recordsToFilter
       .filter(record => record.date && isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd }))
@@ -84,7 +82,7 @@ export default function ExpensesPage() {
                   <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Category</TableHead>
                   <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Description</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  {/* Add Actions column later if needed for edit/delete */}
+                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Installment Info</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -92,8 +90,13 @@ export default function ExpensesPage() {
                   <TableRow key={record.id}>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(record.date)}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.category}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.description}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.description || 'N/A'}</TableCell>
                     <TableCell className="text-right">{formatCurrencyEGP(record.amount)}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
+                      {record.isInstallment && record.numberOfInstallments 
+                        ? `${(record.amount / record.numberOfInstallments).toFixed(2)} EGP x ${record.numberOfInstallments} months`
+                        : 'N/A'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -131,4 +134,3 @@ export default function ExpensesPage() {
     </div>
   );
 }
-

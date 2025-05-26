@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord } from '@/lib/types';
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord } from '@/lib/types'; // Removed MonthlySettings
 import { db as firestoreInstance } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
@@ -32,6 +32,9 @@ interface InvestmentContextType {
   dashboardSummary: DashboardSummary | null;
   incomeRecords: IncomeRecord[];
   addIncomeRecord: (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  expenseRecords: ExpenseRecord[];
+  addExpenseRecord: (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  // monthlySettings and updateMonthlySettings removed
 }
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
@@ -45,6 +48,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
+  const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]); // New state for expenses
   const [currencyAnalyses, setCurrencyAnalyses] = useState<Record<string, CurrencyFluctuationAnalysisResult>>({});
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(defaultDashboardSummary);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,8 +80,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             currentData = { ...defaultDashboardSummary };
         }
         
-        const newDataForUpdate: Partial<DashboardSummary> = {}; // For updates on existing doc
-        const newDataForCreation: DashboardSummary = { ...currentData }; // For creating a new doc
+        const newDataForUpdate: Partial<DashboardSummary> = {}; 
+        const newDataForCreation: DashboardSummary = { ...currentData }; 
 
         let docNeedsCreation = !summaryDoc.exists();
 
@@ -116,6 +120,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setInvestments([]);
       setTransactions([]);
       setIncomeRecords([]);
+      setExpenseRecords([]); // Clear expenses
       setCurrencyAnalyses({});
       setDashboardSummary(defaultDashboardSummary);
       setIsLoading(false);
@@ -128,6 +133,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const analysesCollectionPath = `users/${userId}/currencyAnalyses`;
     const transactionsCollectionPath = `users/${userId}/transactions`;
     const incomeCollectionPath = `users/${userId}/incomeRecords`;
+    const expensesCollectionPath = `users/${userId}/expenseRecords`; // New path for expenses
+    // const monthlySettingsDocPath = `users/${userId}/settings/monthly`; // Path for removed settings
 
     const summaryDocRef = getDashboardSummaryDocRef();
 
@@ -149,7 +156,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     } else {
         setDashboardSummary(defaultDashboardSummary);
     }
-
 
     const qInvestments = query(collection(firestoreInstance, investmentsCollectionPath), orderBy("purchaseDate", "asc"));
     const unsubscribeInvestments = onSnapshot(qInvestments, (querySnapshot) => {
@@ -212,6 +218,27 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         setIncomeRecords([]);
     });
 
+    // New listener for expenses
+    const qExpenseRecords = query(collection(firestoreInstance, expensesCollectionPath), orderBy("date", "desc"));
+    const unsubExpenseRecords = onSnapshot(qExpenseRecords, (querySnapshot) => {
+        const fetchedExpenseRecords: ExpenseRecord[] = [];
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            fetchedExpenseRecords.push({
+                id: docSnap.id,
+                ...data,
+                date: data.date,
+                createdAt: data.createdAt && data.createdAt instanceof Timestamp
+                    ? data.createdAt.toDate().toISOString()
+                    : data.createdAt,
+            } as ExpenseRecord);
+        });
+        setExpenseRecords(fetchedExpenseRecords);
+    }, (error) => {
+        console.error("Error fetching expense records:", error);
+        setExpenseRecords([]);
+    });
+
 
     const qAnalyses = query(collection(firestoreInstance, analysesCollectionPath));
     const unsubscribeAnalyses = onSnapshot(qAnalyses, (querySnapshot) => {
@@ -229,6 +256,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         getDocs(qInvestments).catch(() => null),
         getDocs(qTransactions).catch(() => null),
         getDocs(qIncomeRecords).catch(() => null),
+        getDocs(qExpenseRecords).catch(() => null), // Added expenses fetch
         getDocs(qAnalyses).catch(() => null)
     ];
     if (summaryDocRef) {
@@ -247,6 +275,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       unsubscribeAnalyses();
       unsubTransactions();
       unsubIncomeRecords();
+      unsubExpenseRecords(); // Unsubscribe expenses
       unsubSummary();
     };
   }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]);
@@ -295,27 +324,42 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       throw new Error("User not authenticated or Firestore not available.");
     }
     const incomeId = uuidv4();
-    const incomeWithMetadata: IncomeRecord = {
+    const incomeWithMetadata: Omit<IncomeRecord, 'createdAt'> & { createdAt: any } = { // Temporary type for serverTimestamp
       ...incomeData,
       id: incomeId,
       userId: userId,
-      createdAt: new Date().toISOString(), // Will be replaced by serverTimestamp
-    };
-    const incomeForFirestore = {
-        ...incomeWithMetadata,
-        createdAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
     };
 
     try {
       const incomeDocRef = doc(firestoreInstance, `users/${userId}/incomeRecords`, incomeId);
-      await setDoc(incomeDocRef, incomeForFirestore);
-      // Optionally, update dashboard summary if income affects it (e.g., total income)
-      // await updateDashboardSummaryDoc({ totalIncome: incomeData.amount });
+      await setDoc(incomeDocRef, incomeWithMetadata);
     } catch (error) {
       console.error("Error adding income record to Firestore:", error);
       throw error;
     }
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+  }, [userId, isAuthenticated]);
+
+  const addExpenseRecord = useCallback(async (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => {
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("AddExpenseRecord: User not authenticated, userId missing, or Firestore not available.");
+      throw new Error("User not authenticated or Firestore not available.");
+    }
+    const expenseId = uuidv4();
+    const expenseWithMetadata: Omit<ExpenseRecord, 'createdAt'> & { createdAt: any } = { // Temporary type for serverTimestamp
+      ...expenseData,
+      id: expenseId,
+      userId: userId,
+      createdAt: serverTimestamp(),
+    };
+    try {
+      const expenseDocRef = doc(firestoreInstance, `users/${userId}/expenseRecords`, expenseId);
+      await setDoc(expenseDocRef, expenseWithMetadata);
+    } catch (error) {
+      console.error("Error adding expense record to Firestore:", error);
+      throw error;
+    }
+  }, [userId, isAuthenticated]);
 
 
   const getInvestmentsByType = useCallback((type: string) => {
@@ -471,7 +515,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
-  const updateStockInvestment = useCallback(async (
+  const correctedUpdateStockInvestment = useCallback(async (
     investmentId: string,
     dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>,
     oldAmountInvested: number
@@ -524,8 +568,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
       }
 
+      // Estimate the cost basis that was implicitly removed from portfolio value when P/L was calculated
       const costBasisOfSoldShares = transactionToDelete.totalAmount - (transactionToDelete.profitOrLoss || 0);
       if (costBasisOfSoldShares !== 0) {
+          // Add this cost basis back to the total invested amount
           await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: costBasisOfSoldShares });
       }
 
@@ -567,6 +613,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
     } else if (itemType === 'fund') {
       const tickerSymbol = identifier;
+      // removeStockInvestmentsBySymbol already handles dashboard summary update
       await removeStockInvestmentsBySymbol(tickerSymbol);
     }
     console.log(`Successfully removed gold investments for identifier: ${identifier} (type: ${itemType}).`);
@@ -614,13 +661,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         recordSellStockTransaction,
         transactions,
         removeStockInvestmentsBySymbol,
-        updateStockInvestment,
+        updateStockInvestment: correctedUpdateStockInvestment, // Use the corrected one
         deleteSellTransaction,
         removeGoldInvestments,
         removeDirectDebtInvestment,
         dashboardSummary,
         incomeRecords,
-        addIncomeRecord
+        addIncomeRecord,
+        expenseRecords,
+        addExpenseRecord,
     }}>
       {children}
     </InvestmentContext.Provider>

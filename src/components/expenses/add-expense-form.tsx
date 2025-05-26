@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox"; // Added Checkbox
 import { AddExpenseSchema, type AddExpenseFormValues, expenseCategories } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +39,8 @@ const initialFormValues: AddExpenseFormValues = {
   description: "",
   amount: "",
   date: getCurrentDate(),
+  isInstallment: false,
+  numberOfInstallments: "",
 };
 
 export function AddExpenseForm() {
@@ -50,12 +53,25 @@ export function AddExpenseForm() {
     defaultValues: initialFormValues,
   });
 
+  const watchedCategory = form.watch("category");
+  const watchedIsInstallment = form.watch("isInstallment");
+
   async function onSubmit(values: AddExpenseFormValues) {
     try {
       const expenseDataToSave = {
-        ...values,
-        amount: parseFloat(values.amount), // Schema coerces string to number
+        category: values.category!,
+        description: values.description || undefined,
+        amount: parseFloat(values.amount),
+        date: values.date,
+        isInstallment: values.category === 'Credit Card' ? values.isInstallment : undefined,
+        numberOfInstallments: values.category === 'Credit Card' && values.isInstallment ? parseInt(values.numberOfInstallments || "0", 10) : undefined,
       };
+
+      // Ensure numberOfInstallments is only passed if isInstallment is true
+      if (!expenseDataToSave.isInstallment) {
+        delete expenseDataToSave.numberOfInstallments;
+      }
+
 
       await addExpenseRecord(expenseDataToSave);
       toast({
@@ -85,7 +101,13 @@ export function AddExpenseForm() {
               <FormItem>
                 <FormLabel>Expense Category</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    if (value !== 'Credit Card') {
+                      form.setValue('isInstallment', false);
+                      form.setValue('numberOfInstallments', '');
+                    }
+                  }}
                   value={field.value || ""}
                   required
                 >
@@ -114,9 +136,9 @@ export function AddExpenseForm() {
                 <FormLabel>Amount (EGP)</FormLabel>
                 <FormControl>
                   <NumericInput
-                    placeholder="e.g., 500.00"
-                    value={field.value} // field.value is string from react-hook-form
-                    onChange={field.onChange} // field.onChange expects string
+                    placeholder="e.g., 500.00 or 3000.00 for total installment"
+                    value={field.value}
+                    onChange={(value) => field.onChange(value ?? "")}
                     allowDecimal={true}
                   />
                 </FormControl>
@@ -137,19 +159,68 @@ export function AddExpenseForm() {
               </FormItem>
             )}
           />
-          <FormField
+           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Description (Optional)</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="e.g., Monthly electricity bill, Netflix subscription" {...field} />
+                  <Textarea placeholder="e.g., Monthly electricity bill, New TV (installment)" {...field} value={field.value ?? ''}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {watchedCategory === 'Credit Card' && (
+            <>
+              <FormField
+                control={form.control}
+                name="isInstallment"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                           field.onChange(checked);
+                           if (!checked) {
+                               form.setValue('numberOfInstallments', '');
+                           }
+                        }}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Is this an installment plan?
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              {watchedIsInstallment && (
+                <FormField
+                  control={form.control}
+                  name="numberOfInstallments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Months</FormLabel>
+                      <FormControl>
+                        <NumericInput
+                          placeholder="e.g., 3, 6, 12"
+                          value={field.value}
+                          onChange={(value) => field.onChange(value ?? "")}
+                          allowDecimal={false}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </>
+          )}
         </div>
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
