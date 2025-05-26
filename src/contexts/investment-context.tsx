@@ -45,7 +45,9 @@ const defaultDashboardSummary: DashboardSummary = {
   totalRealizedPnL: 0,
 };
 
+// Added monthlySalary to defaultMonthlySettings
 const defaultMonthlySettings: MonthlySettings = {
+  monthlySalary: undefined,
   estimatedLivingExpenses: undefined,
   estimatedZakat: undefined,
   estimatedCharity: undefined,
@@ -194,7 +196,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         } as Investment);
       });
       setInvestments(fetchedInvestments);
-    }, (error) => console.error("Error fetching investments:", error)));
+    }, (error) => {
+      console.error("Error fetching investments:", error);
+      setInvestments([]);
+    }));
 
     const qTransactions = query(collection(firestoreInstance, collectionsPaths.transactions), orderBy("date", "desc"));
     unsubscribers.push(onSnapshot(qTransactions, (querySnapshot) => {
@@ -208,7 +213,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         } as Transaction);
       });
       setTransactions(fetchedTransactions);
-    }, (error) => console.error("Error fetching transactions:", error)));
+    }, (error) => {
+      console.error("Error fetching transactions:", error);
+      setTransactions([]);
+    }));
 
     const qIncomeRecords = query(collection(firestoreInstance, collectionsPaths.incomeRecords), orderBy("date", "desc"));
     unsubscribers.push(onSnapshot(qIncomeRecords, (querySnapshot) => {
@@ -221,7 +229,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             } as IncomeRecord);
         });
         setIncomeRecords(fetchedIncomeRecords);
-    }, (error) => console.error("Error fetching income records:", error)));
+    }, (error) => {
+      console.error("Error fetching income records:", error);
+      setIncomeRecords([]);
+    }));
 
     const qExpenseRecords = query(collection(firestoreInstance, collectionsPaths.expenseRecords), orderBy("date", "desc"));
     unsubscribers.push(onSnapshot(qExpenseRecords, (querySnapshot) => {
@@ -234,14 +245,20 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             } as ExpenseRecord);
         });
         setExpenseRecords(fetchedExpenseRecords);
-    }, (error) => console.error("Error fetching expense records:", error)));
+    }, (error) => {
+      console.error("Error fetching expense records:", error);
+      setExpenseRecords([]);
+    }));
 
     const qAnalyses = query(collection(firestoreInstance, collectionsPaths.currencyAnalyses));
     unsubscribers.push(onSnapshot(qAnalyses, (querySnapshot) => {
       const fetchedAnalyses: Record<string, CurrencyFluctuationAnalysisResult> = {};
       querySnapshot.forEach((doc) => { fetchedAnalyses[doc.id] = doc.data() as CurrencyFluctuationAnalysisResult; });
       setCurrencyAnalyses(fetchedAnalyses);
-    }, (error) => console.error("Error fetching currency analyses:", error)));
+    }, (error) => {
+      console.error("Error fetching currency analyses:", error);
+      setCurrencyAnalyses({});
+    }));
 
     const dataFetchPromises: Promise<any>[] = [
       getDocs(qInvestments).catch(() => null),
@@ -261,7 +278,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const addInvestment = useCallback(async (investmentData: Omit<Investment, 'createdAt' | 'id'>, analysis?: CurrencyFluctuationAnalysisResult) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const investmentId = uuidv4();
-    const investmentWithTimestamp = { ...investmentData, id: investmentId, createdAt: serverTimestamp() };
+    const investmentWithTimestamp = { ...investmentData, id: investmentId, userId, createdAt: serverTimestamp() };
     await setDoc(doc(firestoreInstance, `users/${userId}/investments`, investmentId), investmentWithTimestamp);
     if (investmentData.amountInvested) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: investmentData.amountInvested });
     if (analysis && investmentData.type === 'Currencies') await setDoc(doc(firestoreInstance, `users/${userId}/currencyAnalyses`, investmentId), analysis);
@@ -283,11 +300,33 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const settingsDocRef = getMonthlySettingsDocRef();
     if (!settingsDocRef) return;
-    const dataToSave = {
-      estimatedLivingExpenses: settings.estimatedLivingExpenses === undefined ? null : settings.estimatedLivingExpenses,
-      estimatedZakat: settings.estimatedZakat === undefined ? null : settings.estimatedZakat,
-      estimatedCharity: settings.estimatedCharity === undefined ? null : settings.estimatedCharity,
-    };
+    
+    // Explicitly handle conversion of undefined to null for each field
+    const dataToSave: MonthlySettings = {};
+    if (settings.monthlySalary !== undefined) {
+        dataToSave.monthlySalary = settings.monthlySalary;
+    } else if (settings.hasOwnProperty('monthlySalary')) { // Check if the key exists, meaning it was intentionally cleared
+        dataToSave.monthlySalary = null as any; // Use null if cleared
+    }
+
+    if (settings.estimatedLivingExpenses !== undefined) {
+        dataToSave.estimatedLivingExpenses = settings.estimatedLivingExpenses;
+    } else if (settings.hasOwnProperty('estimatedLivingExpenses')) {
+        dataToSave.estimatedLivingExpenses = null as any;
+    }
+
+    if (settings.estimatedZakat !== undefined) {
+        dataToSave.estimatedZakat = settings.estimatedZakat;
+    } else if (settings.hasOwnProperty('estimatedZakat')) {
+        dataToSave.estimatedZakat = null as any;
+    }
+    
+    if (settings.estimatedCharity !== undefined) {
+        dataToSave.estimatedCharity = settings.estimatedCharity;
+    } else if (settings.hasOwnProperty('estimatedCharity')) {
+        dataToSave.estimatedCharity = null as any;
+    }
+
     await setDoc(settingsDocRef, dataToSave, { merge: true });
   }, [userId, isAuthenticated, getMonthlySettingsDocRef]);
 
@@ -386,10 +425,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       });
       await batch.commit();
     } else if (itemType === 'fund') {
-      // For gold funds, 'identifier' is the tickerSymbol. Re-use removeStockInvestmentsBySymbol.
-      // This will correctly sum the amountInvested of the funds being removed.
       await removeStockInvestmentsBySymbol(identifier);
-      return; // updateDashboardSummaryDoc is handled by removeStockInvestmentsBySymbol
+      return; 
     }
     if (totalAmountInvestedRemoved) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
   }, [userId, isAuthenticated, updateDashboardSummaryDoc, removeStockInvestmentsBySymbol]);
@@ -418,5 +455,3 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     </InvestmentContext.Provider>
   );
 };
-    
-    

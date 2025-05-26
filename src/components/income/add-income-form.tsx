@@ -55,12 +55,10 @@ export function AddIncomeForm() {
 
   async function onSubmit(values: AddIncomeFormValues) {
     try {
-      // Zod schema coerces amount to number and handles optional fields.
-      // We construct the object to save carefully.
-      const incomeDataToSave: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'> & { amount: number } = {
-        type: values.type!,
+      const incomeDataToSave: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'> = {
+        type: values.type!, // Zod ensures type is valid and present
         amount: values.amount, // Zod has coerced this to number
-        date: values.date,
+        date: values.date, // Zod ensures date is valid
       };
 
       if (values.source && values.source.trim() !== "") {
@@ -75,8 +73,8 @@ export function AddIncomeForm() {
         title: "Income Record Added",
         description: `${values.type} of ${values.amount} EGP recorded successfully.`,
       });
-      form.reset(initialFormValues); // Reset form to initial values
-      router.push("/income"); // Navigate back to income list
+      form.reset(initialFormValues); 
+      router.push("/income"); 
     } catch (error: any) {
       console.error("Error adding income record:", error);
       toast({
@@ -100,7 +98,6 @@ export function AddIncomeForm() {
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || ""}
-                  // required // Zod schema handles this
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -108,7 +105,7 @@ export function AddIncomeForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {incomeTypes.map(type => (
+                    {incomeTypes.map(type => ( // incomeTypes from schema no longer contains 'Salary'
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
@@ -141,8 +138,8 @@ export function AddIncomeForm() {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5000.00"
-                    value={field.value ?? ""} // Pass empty string if undefined
-                    onChange={(value) => field.onChange(value ?? "")} // RHF expects string or undefined
+                    value={field.value} 
+                    onChange={field.onChange} 
                     allowDecimal={true}
                   />
                 </FormControl>
@@ -170,7 +167,7 @@ export function AddIncomeForm() {
               <FormItem className="md:col-span-2">
                 <FormLabel>Description (Optional)</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="e.g., Monthly salary, Q3 Profit Share" {...field} value={field.value ?? ''} />
+                  <Textarea placeholder="e.g., Q3 Profit Share, Freelance Project X" {...field} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

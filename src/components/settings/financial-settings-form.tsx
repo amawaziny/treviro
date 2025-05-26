@@ -33,6 +33,7 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
   const form = useForm<MonthlySettingsFormValues>({
     resolver: zodResolver(MonthlySettingsSchema),
     defaultValues: {
+      monthlySalary: currentSettings?.monthlySalary?.toString() ?? "",
       estimatedLivingExpenses: currentSettings?.estimatedLivingExpenses?.toString() ?? "",
       estimatedZakat: currentSettings?.estimatedZakat?.toString() ?? "",
       estimatedCharity: currentSettings?.estimatedCharity?.toString() ?? "",
@@ -41,6 +42,7 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
 
   useEffect(() => {
     form.reset({
+      monthlySalary: currentSettings?.monthlySalary?.toString() ?? "",
       estimatedLivingExpenses: currentSettings?.estimatedLivingExpenses?.toString() ?? "",
       estimatedZakat: currentSettings?.estimatedZakat?.toString() ?? "",
       estimatedCharity: currentSettings?.estimatedCharity?.toString() ?? "",
@@ -49,10 +51,7 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
 
   async function onSubmit(values: MonthlySettingsFormValues) {
     try {
-      // The 'values' object from react-hook-form (processed by Zod)
-      // already has the correct shape { estimatedLivingExpenses?: number, ... }
-      // The updateMonthlySettings function in the context is responsible for
-      // converting undefined to null for Firestore.
+      // Values from react-hook-form (processed by Zod) will have numbers or undefined
       await updateMonthlySettings(values);
       toast({
         title: "Settings Updated",
@@ -73,6 +72,25 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
+          name="monthlySalary"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Monthly Salary (EGP)</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 15000"
+                  value={field.value} // field.value is string or undefined
+                  onChange={field.onChange} // RHF onChange expects string or undefined
+                  allowDecimal={true}
+                />
+              </FormControl>
+              <FormDescription>Your net monthly salary after taxes.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="estimatedLivingExpenses"
           render={({ field }) => (
             <FormItem>
@@ -80,8 +98,8 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 10000"
-                  value={field.value ?? ""}
-                  onChange={(value) => field.onChange(value ?? "")}
+                  value={field.value}
+                  onChange={field.onChange}
                   allowDecimal={true}
                 />
               </FormControl>
@@ -99,8 +117,8 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 200"
-                  value={field.value ?? ""}
-                  onChange={(value) => field.onChange(value ?? "")}
+                  value={field.value}
+                  onChange={field.onChange}
                   allowDecimal={true}
                 />
               </FormControl>
@@ -118,8 +136,8 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 100"
-                  value={field.value ?? ""}
-                  onChange={(value) => field.onChange(value ?? "")}
+                  value={field.value}
+                  onChange={field.onChange}
                   allowDecimal={true}
                 />
               </FormControl>

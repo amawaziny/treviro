@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, TrendingUp, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, MonthlySettings } from '@/lib/types';
 
@@ -13,13 +13,13 @@ export default function CashFlowPage() {
   const {
     incomeRecords,
     expenseRecords,
-    monthlySettings, // Fetch monthlySettings
+    monthlySettings,
     investments,
     transactions,
     isLoading: isLoadingContext,
   } = useInvestments();
 
-  const isLoading = isLoadingContext; // Consider isLoading from monthlySettings if it were separate
+  const isLoading = isLoadingContext;
 
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -30,6 +30,7 @@ export default function CashFlowPage() {
   };
 
   const {
+    monthlySalary, // Added
     totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
     totalProfitFromSalesThisMonth,
@@ -43,6 +44,9 @@ export default function CashFlowPage() {
     let salesProfit = 0;
     let itemizedExpensesSum = 0;
 
+    const currentSalary = monthlySettings?.monthlySalary ?? 0;
+
+    // Filter income records for the current month (excluding Salary, which is now in monthlySettings)
     (incomeRecords || []).forEach(record => {
       if (isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd })) {
         manualIncome += record.amount;
@@ -51,7 +55,6 @@ export default function CashFlowPage() {
 
     const directDebtInvestments = (investments || []).filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
-      // Only include interest from certificates for now, as per previous logic
       if (debt.debtSubType === 'Certificate' && debt.interestRate && debt.amountInvested) {
         const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
         certificateInterest += annualInterest / 12;
@@ -74,6 +77,7 @@ export default function CashFlowPage() {
     });
 
     return {
+      monthlySalary: currentSalary,
       totalManualIncomeThisMonth: manualIncome,
       totalProjectedCertificateInterestThisMonth: certificateInterest,
       totalProfitFromSalesThisMonth: salesProfit,
@@ -84,7 +88,7 @@ export default function CashFlowPage() {
     };
   }, [incomeRecords, expenseRecords, monthlySettings, investments, transactions, currentMonthStart, currentMonthEnd]);
 
-  const totalIncome = totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth + totalProfitFromSalesThisMonth;
+  const totalIncome = monthlySalary + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth + totalProfitFromSalesThisMonth;
   const totalFixedEstimates = estimatedLiving + estimatedZakatContribution + estimatedCharityContribution;
   const totalExpenses = totalItemizedExpensesThisMonth + totalFixedEstimates;
   const remainingAmount = totalIncome - totalExpenses;
@@ -126,12 +130,13 @@ export default function CashFlowPage() {
         <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Total Income This Month</CardTitle>
-            <PiggyBank className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-700 dark:text-green-300">{formatCurrencyEGP(totalIncome)}</p>
             <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
-              <p>Manual Income: {formatCurrencyEGP(totalManualIncomeThisMonth)}</p>
+              <p>Monthly Salary: {formatCurrencyEGP(monthlySalary)}</p>
+              <p>Other Logged Income: {formatCurrencyEGP(totalManualIncomeThisMonth)}</p>
               <p>Projected Certificate Interest: {formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</p>
               <p>Profit from Sales: {formatCurrencyEGP(totalProfitFromSalesThisMonth)}</p>
             </div>
@@ -179,7 +184,8 @@ export default function CashFlowPage() {
                 <CardDescription>Breakdown of income sources for {format(new Date(), 'MMMM yyyy')}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Manually Logged Income:</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>
+                <div className="flex justify-between"><span><DollarSign className="inline mr-2 h-4 w-4 text-green-600" />Monthly Salary:</span> <span>{formatCurrencyEGP(monthlySalary)}</span></div>
+                <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Other Logged Income:</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>
                 <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Certificate Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>
                 <div className="flex justify-between"><span><TrendingUp className="inline mr-2 h-4 w-4 text-green-600" />Profit from Security Sales:</span> <span>{formatCurrencyEGP(totalProfitFromSalesThisMonth)}</span></div>
                 <hr className="my-2"/>
