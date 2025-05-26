@@ -49,12 +49,11 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
 
   async function onSubmit(values: MonthlySettingsFormValues) {
     try {
-      const settingsToSave: MonthlySettings = {
-        estimatedLivingExpenses: values.estimatedLivingExpenses ? parseFloat(values.estimatedLivingExpenses) : undefined,
-        estimatedZakat: values.estimatedZakat ? parseFloat(values.estimatedZakat) : undefined,
-        estimatedCharity: values.estimatedCharity ? parseFloat(values.estimatedCharity) : undefined,
-      };
-      await updateMonthlySettings(settingsToSave);
+      // The 'values' object from react-hook-form (processed by Zod)
+      // already has the correct shape { estimatedLivingExpenses?: number, ... }
+      // The updateMonthlySettings function in the context is responsible for
+      // converting undefined to null for Firestore.
+      await updateMonthlySettings(values);
       toast({
         title: "Settings Updated",
         description: "Your monthly estimates have been saved.",
@@ -81,7 +80,7 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 10000"
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChange={(value) => field.onChange(value ?? "")}
                   allowDecimal={true}
                 />
@@ -100,7 +99,7 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 200"
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChange={(value) => field.onChange(value ?? "")}
                   allowDecimal={true}
                 />
@@ -119,7 +118,7 @@ export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSett
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 100"
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChange={(value) => field.onChange(value ?? "")}
                   allowDecimal={true}
                 />
