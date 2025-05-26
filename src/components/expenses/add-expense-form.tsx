@@ -22,13 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox"; // Added Checkbox
+import { Checkbox } from "@/components/ui/checkbox";
 import { AddExpenseSchema, type AddExpenseFormValues, expenseCategories } from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import type { ExpenseRecord } from "@/lib/types";
 
 const getCurrentDate = () => {
   return format(new Date(), "yyyy-MM-dd");
@@ -58,20 +59,25 @@ export function AddExpenseForm() {
 
   async function onSubmit(values: AddExpenseFormValues) {
     try {
-      const expenseDataToSave = {
+      // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
+      // It also ensures numberOfInstallments is a positive int if isInstallment is true.
+      const expenseDataToSave: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'> = {
         category: values.category!,
-        description: values.description || undefined,
-        amount: parseFloat(values.amount),
+        amount: values.amount, // Zod has coerced this to number
         date: values.date,
-        isInstallment: values.category === 'Credit Card' ? values.isInstallment : undefined,
-        numberOfInstallments: values.category === 'Credit Card' && values.isInstallment ? parseInt(values.numberOfInstallments || "0", 10) : undefined,
       };
 
-      // Ensure numberOfInstallments is only passed if isInstallment is true
-      if (!expenseDataToSave.isInstallment) {
-        delete expenseDataToSave.numberOfInstallments;
+      if (values.description && values.description.trim() !== "") {
+        expenseDataToSave.description = values.description;
       }
 
+      if (values.category === 'Credit Card') {
+        expenseDataToSave.isInstallment = values.isInstallment;
+        if (values.isInstallment && values.numberOfInstallments) {
+          // Zod ensures values.numberOfInstallments is a number here if isInstallment is true
+          expenseDataToSave.numberOfInstallments = values.numberOfInstallments;
+        }
+      }
 
       await addExpenseRecord(expenseDataToSave);
       toast({
@@ -109,7 +115,7 @@ export function AddExpenseForm() {
                     }
                   }}
                   value={field.value || ""}
-                  required
+                  // required // Zod schema handles required
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -137,8 +143,8 @@ export function AddExpenseForm() {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 500.00 or 3000.00 for total installment"
-                    value={field.value}
-                    onChange={(value) => field.onChange(value ?? "")}
+                    value={field.value} // field.value is string from RHF
+                    onChange={field.onChange} // RHF onChange expects string or number
                     allowDecimal={true}
                   />
                 </FormControl>
@@ -209,8 +215,8 @@ export function AddExpenseForm() {
                       <FormControl>
                         <NumericInput
                           placeholder="e.g., 3, 6, 12"
-                          value={field.value}
-                          onChange={(value) => field.onChange(value ?? "")}
+                          value={field.value} // field.value is string from RHF
+                          onChange={field.onChange} // RHF onChange expects string or number
                           allowDecimal={false}
                         />
                       </FormControl>
