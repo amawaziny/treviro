@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, TrendingDown, LineChart as CashFlowIcon } from 'lucide-react'; // Removed Settings icon
+import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, TrendingDown, LineChart as CashFlowIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -45,36 +45,36 @@ const navItems: NavItem[] = [
     icon: CashFlowIcon,
   },
   {
-    title: 'Explore',
+    title: 'Explore', // Was "Browse Securities"
     href: '/stocks',
     icon: Search,
   },
   {
-    title: 'Stocks',
+    title: 'Stocks', // Was "My Stocks"
     href: '/investments/stocks',
     icon: Briefcase,
   },
   {
-    title: 'Real Estate',
+    title: 'Real Estate', // Was "My Real Estate"
     href: '/investments/real-estate',
     icon: Home,
   },
   {
-    title: 'Gold',
+    title: 'Gold', // Was "My Gold"
     href: '/investments/gold',
     icon: Gem,
   },
   {
-    title: 'Debt Instruments',
+    title: 'Debt Instruments', // Was "My Debt"
     href: '/investments/debt-instruments',
     icon: ScrollText,
   },
   {
-    title: 'Currencies',
+    title: 'Currencies', // Was "My Currencies"
     href: '/investments/currencies',
     icon: DollarSign,
   },
-  // Settings link removed
+  // "Add Investment" and "Settings" links were removed previously
 ];
 
 export function SidebarNav() {
@@ -98,10 +98,11 @@ export function SidebarNav() {
           if (item.href === '/stocks' && pathname.startsWith('/investments/stocks')) {
             isActive = false;
           }
+          // Ensure exact match for income and expenses unless on sub-pages like /income/add
           if (item.href === '/income' && pathname !== '/income' && !pathname.startsWith('/income/')) {
             isActive = false;
           }
-          if (item.href === '/expenses' && pathname !== '/expenses' && !pathname.startsWith('/expenses/')) {
+           if (item.href === '/expenses' && pathname !== '/expenses' && !pathname.startsWith('/expenses/')) {
             isActive = false;
           }
         }

@@ -7,18 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, TrendingUp, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord } from '@/lib/types';
+import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, MonthlySettings } from '@/lib/types';
 
 export default function CashFlowPage() {
   const {
     incomeRecords,
-    expenseRecords, // Now used for all expenses
+    expenseRecords,
+    monthlySettings, // Fetch monthlySettings
     investments,
     transactions,
     isLoading: isLoadingContext,
   } = useInvestments();
 
-  const isLoading = isLoadingContext;
+  const isLoading = isLoadingContext; // Consider isLoading from monthlySettings if it were separate
 
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -32,7 +33,10 @@ export default function CashFlowPage() {
     totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
     totalProfitFromSalesThisMonth,
-    totalItemizedExpensesThisMonth, // Sum of all ExpenseRecord items for the month
+    totalItemizedExpensesThisMonth,
+    estimatedLiving,
+    estimatedZakatContribution,
+    estimatedCharityContribution
   } = useMemo(() => {
     let manualIncome = 0;
     let certificateInterest = 0;
@@ -47,7 +51,8 @@ export default function CashFlowPage() {
 
     const directDebtInvestments = (investments || []).filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
-      if (debt.interestRate && debt.amountInvested) {
+      // Only include interest from certificates for now, as per previous logic
+      if (debt.debtSubType === 'Certificate' && debt.interestRate && debt.amountInvested) {
         const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
         certificateInterest += annualInterest / 12;
       }
@@ -73,15 +78,15 @@ export default function CashFlowPage() {
       totalProjectedCertificateInterestThisMonth: certificateInterest,
       totalProfitFromSalesThisMonth: salesProfit,
       totalItemizedExpensesThisMonth: itemizedExpensesSum,
+      estimatedLiving: monthlySettings?.estimatedLivingExpenses ?? 0,
+      estimatedZakatContribution: monthlySettings?.estimatedZakat ?? 0,
+      estimatedCharityContribution: monthlySettings?.estimatedCharity ?? 0,
     };
-  }, [incomeRecords, expenseRecords, investments, transactions, currentMonthStart, currentMonthEnd]);
-
-  // Remove estimated Zakat and Charity from monthlySettings, as these would now be logged as expenses
-  // const estimatedLivingExpenses = monthlySettings?.estimatedLivingExpenses ?? 0; // This is also removed
+  }, [incomeRecords, expenseRecords, monthlySettings, investments, transactions, currentMonthStart, currentMonthEnd]);
 
   const totalIncome = totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth + totalProfitFromSalesThisMonth;
-  // Total expenses are now just the sum of itemized logged expenses
-  const totalExpenses = totalItemizedExpensesThisMonth; 
+  const totalFixedEstimates = estimatedLiving + estimatedZakatContribution + estimatedCharityContribution;
+  const totalExpenses = totalItemizedExpensesThisMonth + totalFixedEstimates;
   const remainingAmount = totalIncome - totalExpenses;
 
   if (isLoading) {
@@ -140,9 +145,11 @@ export default function CashFlowPage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-red-700 dark:text-red-300">{formatCurrencyEGP(totalExpenses)}</p>
-            <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
-                {/* Removed estimated expenses, now it's just itemized */}
-                <p>Total Itemized Logged Expenses: {formatCurrencyEGP(totalItemizedExpensesThisMonth)}</p>
+             <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
+                <p>Itemized Logged Expenses: {formatCurrencyEGP(totalItemizedExpensesThisMonth)}</p>
+                <p>Est. Living Expenses: {formatCurrencyEGP(estimatedLiving)}</p>
+                <p>Est. Zakat: {formatCurrencyEGP(estimatedZakatContribution)}</p>
+                <p>Est. Charity: {formatCurrencyEGP(estimatedCharityContribution)}</p>
             </div>
           </CardContent>
         </Card>
@@ -172,9 +179,9 @@ export default function CashFlowPage() {
                 <CardDescription>Breakdown of income sources for {format(new Date(), 'MMMM yyyy')}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                <div className="flex justify-between"><span>Manually Logged Income:</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>
-                <div className="flex justify-between"><span>Projected Certificate Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>
-                <div className="flex justify-between"><span>Profit from Security Sales:</span> <span>{formatCurrencyEGP(totalProfitFromSalesThisMonth)}</span></div>
+                <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Manually Logged Income:</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>
+                <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Certificate Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>
+                <div className="flex justify-between"><span><TrendingUp className="inline mr-2 h-4 w-4 text-green-600" />Profit from Security Sales:</span> <span>{formatCurrencyEGP(totalProfitFromSalesThisMonth)}</span></div>
                 <hr className="my-2"/>
                 <div className="flex justify-between font-semibold"><span>Total Projected Income:</span> <span>{formatCurrencyEGP(totalIncome)}</span></div>
             </CardContent>
@@ -185,14 +192,15 @@ export default function CashFlowPage() {
                 <CardDescription>Breakdown of expenses for {format(new Date(), 'MMMM yyyy')}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                {/* Removed estimated expenses, now only shows itemized */}
-                <div className="flex justify-between"><span>Itemized Logged Expenses:</span> <span>{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></div>
+                <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses:</span> <span>{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></div>
+                <div className="flex justify-between"><span><Landmark className="inline mr-2 h-4 w-4 text-red-600" />Est. Living Expenses:</span> <span>{formatCurrencyEGP(estimatedLiving)}</span></div>
+                <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Est. Zakat:</span> <span>{formatCurrencyEGP(estimatedZakatContribution)}</span></div>
+                <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Est. Charity:</span> <span>{formatCurrencyEGP(estimatedCharityContribution)}</span></div>
                 <hr className="my-2"/>
-                <div className="flex justify-between font-semibold"><span>Total Itemized Expenses:</span> <span>{formatCurrencyEGP(totalExpenses)}</span></div>
+                <div className="flex justify-between font-semibold"><span>Total Projected Expenses:</span> <span>{formatCurrencyEGP(totalExpenses)}</span></div>
             </CardContent>
         </Card>
       </div>
-
     </div>
   );
 }

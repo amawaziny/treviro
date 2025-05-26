@@ -1,7 +1,7 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
 export type IncomeType = 'Salary' | 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
-export type ExpenseCategory = 'Credit Card' | 'Other'; // Simplified categories
+export type ExpenseCategory = 'Credit Card' | 'Other';
 
 export interface BaseInvestment {
   id: string;
@@ -35,6 +35,7 @@ export interface CurrencyInvestment extends BaseInvestment {
   currencyCode: string;
   foreignCurrencyAmount: number;
   exchangeRateAtPurchase: number;
+  // baseCurrencyAtPurchase removed
 }
 
 export type PropertyType = 'Residential' | 'Commercial' | 'Land';
@@ -78,7 +79,12 @@ export interface ExpenseRecord {
   createdAt?: string;
 }
 
-// MonthlySettings interface is removed
+export interface MonthlySettings {
+  estimatedLivingExpenses?: number;
+  estimatedZakat?: number;
+  estimatedCharity?: number;
+  // Add other monthly settings here if needed in the future
+}
 
 export interface CurrencyFluctuationAnalysisResult {
   significantDeviation: boolean;
@@ -111,7 +117,7 @@ export type TransactionType = 'buy' | 'sell';
 export interface Transaction {
   id: string;
   investmentId?: string;
-  stockId?: string;
+  stockId?: string; // This can be the ID of the ListedSecurity
   tickerSymbol: string;
   type: TransactionType;
   date: string;
@@ -121,7 +127,7 @@ export interface Transaction {
   totalAmount: number;
   profitOrLoss?: number;
   createdAt: string;
-  isInvestmentRecord?: boolean;
+  isInvestmentRecord?: boolean; // To differentiate buys (from investments) vs. sells (from transactions)
 }
 
 export interface DashboardSummary {
@@ -134,11 +140,11 @@ export interface GoldMarketPrices {
   pricePerGramK21?: number;
   pricePerGoldPound?: number;
   pricePerOunce?: number;
-  lastUpdated?: any;
+  lastUpdated?: any; // Could be Firestore Timestamp or Date string
 }
 
 export interface ExchangeRates {
-  [key: string]: number;
+  [key: string]: number; // e.g., USD_EGP: 30.85
 }
 
 export type AggregatedGoldHolding = {
@@ -146,13 +152,13 @@ export type AggregatedGoldHolding = {
   displayName: string;
   itemType: 'physical' | 'fund';
   logoUrl?: string;
-  totalQuantity: number;
+  totalQuantity: number; // Grams for physical, units for funds
   averagePurchasePrice: number;
   totalCost: number;
   currentMarketPrice?: number;
-  currency: string;
-  fundDetails?: ListedSecurity;
-  physicalGoldType?: GoldType;
+  currency: string; // e.g. EGP for physical, fund's currency for funds
+  fundDetails?: ListedSecurity; // if itemType is 'fund'
+  physicalGoldType?: GoldType; // if itemType is 'physical'
 };
 
 export interface AggregatedCurrencyHolding {
@@ -170,25 +176,27 @@ export interface AggregatedDebtHolding {
   id: string;
   itemType: 'direct' | 'fund';
   displayName: string;
+  // Direct debt fields
   debtSubType?: DebtSubType;
   issuer?: string;
   interestRate?: number;
   maturityDate?: string;
-  amountInvested?: number;
+  amountInvested?: number; // For direct debt, this is the principal
   purchaseDate?: string;
   maturityDay?: string;
   maturityMonth?: string;
   maturityYear?: string;
   projectedMonthlyInterest?: number;
   projectedAnnualInterest?: number;
+  // Fund fields
   fundDetails?: ListedSecurity;
-  totalUnits?: number;
-  averagePurchasePrice?: number;
-  totalCost?: number;
-  currentMarketPrice?: number;
-  currentValue?: number;
-  profitLoss?: number;
-  profitLossPercent?: number;
-  currency?: string;
-  logoUrl?: string;
+  totalUnits?: number; // Shares for funds
+  averagePurchasePrice?: number; // For funds
+  totalCost?: number; // For funds
+  currentMarketPrice?: number; // For funds
+  currentValue?: number; // For funds
+  profitLoss?: number; // For funds
+  profitLossPercent?: number; // For funds
+  currency?: string; // Fund's currency
+  logoUrl?: string; // Fund's logo
 }

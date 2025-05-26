@@ -2,7 +2,7 @@
 "use client";
 
 // This page is no longer used for setting estimated living expenses, Zakat, or Charity.
-// These concepts are now integrated into logging individual expenses.
+// These concepts are now integrated into logging individual expenses and managing fixed estimates on the Expenses page.
 // This page can be repurposed or removed. For now, I'll leave a placeholder.
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,11 +19,10 @@ export default function FinancialSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Settings Overview</CardTitle>
-          <CardDescription>This section can be used for future financial settings if needed. Estimated monthly expenses are now logged directly in the Expenses section.</CardDescription>
+          <CardDescription>Fixed monthly estimates for Living Expenses, Zakat, and Charity are now managed on the "Expenses" page. This page can be used for other application-wide settings in the future.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">No settings available here at the moment.</p>
-          {/* FinancialSettingsForm component is removed as it's no longer needed for its previous purpose */}
         </CardContent>
       </Card>
     </div>

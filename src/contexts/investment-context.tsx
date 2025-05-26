@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord } from '@/lib/types'; // Removed MonthlySettings
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, MonthlySettings } from '@/lib/types';
 import { db as firestoreInstance } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
@@ -34,7 +34,8 @@ interface InvestmentContextType {
   addIncomeRecord: (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   expenseRecords: ExpenseRecord[];
   addExpenseRecord: (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
-  // monthlySettings and updateMonthlySettings removed
+  monthlySettings: MonthlySettings | null;
+  updateMonthlySettings: (settings: MonthlySettings) => Promise<void>;
 }
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
@@ -44,11 +45,18 @@ const defaultDashboardSummary: DashboardSummary = {
   totalRealizedPnL: 0,
 };
 
+const defaultMonthlySettings: MonthlySettings = {
+  estimatedLivingExpenses: undefined,
+  estimatedZakat: undefined,
+  estimatedCharity: undefined,
+};
+
 export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
-  const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]); // New state for expenses
+  const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]);
+  const [monthlySettings, setMonthlySettings] = useState<MonthlySettings | null>(defaultMonthlySettings);
   const [currencyAnalyses, setCurrencyAnalyses] = useState<Record<string, CurrencyFluctuationAnalysisResult>>({});
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(defaultDashboardSummary);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +69,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     return doc(firestoreInstance, `users/${userId}/dashboard_aggregates/summary`);
   }, [userId]);
 
+  const getMonthlySettingsDocRef = useCallback(() => {
+    if (!userId || !firestoreInstance) return null;
+    return doc(firestoreInstance, `users/${userId}/settings/monthly`);
+  }, [userId]);
+
+
   const updateDashboardSummaryDoc = useCallback(async (updates: Partial<DashboardSummary>) => {
     if (!userId || !firestoreInstance) {
         console.warn("UpdateDashboardSummaryDoc: User ID or Firestore instance missing.");
@@ -72,17 +86,9 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     try {
       await runTransaction(firestoreInstance, async (transaction) => {
         const summaryDoc = await transaction.get(summaryDocRef);
-        
-        let currentData: DashboardSummary;
-        if (summaryDoc.exists()) {
-            currentData = summaryDoc.data() as DashboardSummary;
-        } else {
-            currentData = { ...defaultDashboardSummary };
-        }
+        let currentData: DashboardSummary = summaryDoc.exists() ? summaryDoc.data() as DashboardSummary : { ...defaultDashboardSummary };
         
         const newDataForUpdate: Partial<DashboardSummary> = {}; 
-        const newDataForCreation: DashboardSummary = { ...currentData }; 
-
         let docNeedsCreation = !summaryDoc.exists();
 
         for (const key in updates) {
@@ -93,14 +99,14 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
                 if (summaryDoc.exists()) {
                     newDataForUpdate[typedKey] = increment(updateValue) as any;
                 } else {
-                    const currentFieldValue = (newDataForCreation[typedKey] as number | undefined) || 0;
-                    (newDataForCreation[typedKey] as number) = currentFieldValue + updateValue;
+                    const currentFieldValue = (currentData[typedKey] as number | undefined) || 0;
+                    (currentData[typedKey] as number) = currentFieldValue + updateValue;
                 }
             }
         }
         if (docNeedsCreation) {
-            transaction.set(summaryDocRef, newDataForCreation);
-        } else {
+            transaction.set(summaryDocRef, currentData); // Use currentData which has been updated
+        } else if (Object.keys(newDataForUpdate).length > 0) {
             transaction.update(summaryDocRef, newDataForUpdate);
         }
       });
@@ -120,7 +126,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setInvestments([]);
       setTransactions([]);
       setIncomeRecords([]);
-      setExpenseRecords([]); // Clear expenses
+      setExpenseRecords([]);
+      setMonthlySettings(defaultMonthlySettings);
       setCurrencyAnalyses({});
       setDashboardSummary(defaultDashboardSummary);
       setIsLoading(false);
@@ -133,10 +140,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const analysesCollectionPath = `users/${userId}/currencyAnalyses`;
     const transactionsCollectionPath = `users/${userId}/transactions`;
     const incomeCollectionPath = `users/${userId}/incomeRecords`;
-    const expensesCollectionPath = `users/${userId}/expenseRecords`; // New path for expenses
-    // const monthlySettingsDocPath = `users/${userId}/settings/monthly`; // Path for removed settings
-
+    const expensesCollectionPath = `users/${userId}/expenseRecords`;
+    
     const summaryDocRef = getDashboardSummaryDocRef();
+    const monthlySettingsDocRef = getMonthlySettingsDocRef();
 
     let unsubSummary = () => {};
     if (summaryDocRef) {
@@ -145,8 +152,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
                 setDashboardSummary(docSnap.data() as DashboardSummary);
             } else {
                 setDashboardSummary(defaultDashboardSummary);
-                const defaultDataForCreation: DashboardSummary = { ...defaultDashboardSummary };
-                setDoc(summaryDocRef, defaultDataForCreation, { merge: true })
+                setDoc(summaryDocRef, { ...defaultDashboardSummary }, { merge: true })
                   .catch(err => console.error("Failed to create default summary doc:", err));
             }
             }, (error) => {
@@ -156,6 +162,25 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     } else {
         setDashboardSummary(defaultDashboardSummary);
     }
+
+    let unsubMonthlySettings = () => {};
+    if (monthlySettingsDocRef) {
+      unsubMonthlySettings = onSnapshot(monthlySettingsDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setMonthlySettings(docSnap.data() as MonthlySettings);
+        } else {
+          setMonthlySettings(defaultMonthlySettings);
+          setDoc(monthlySettingsDocRef, { ...defaultMonthlySettings }, { merge: true })
+            .catch(err => console.error("Failed to create default monthly settings doc:", err));
+        }
+      }, (error) => {
+        console.error("Error fetching monthly settings:", error);
+        setMonthlySettings(defaultMonthlySettings);
+      });
+    } else {
+        setMonthlySettings(defaultMonthlySettings);
+    }
+
 
     const qInvestments = query(collection(firestoreInstance, investmentsCollectionPath), orderBy("purchaseDate", "asc"));
     const unsubscribeInvestments = onSnapshot(qInvestments, (querySnapshot) => {
@@ -218,7 +243,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         setIncomeRecords([]);
     });
 
-    // New listener for expenses
     const qExpenseRecords = query(collection(firestoreInstance, expensesCollectionPath), orderBy("date", "desc"));
     const unsubExpenseRecords = onSnapshot(qExpenseRecords, (querySnapshot) => {
         const fetchedExpenseRecords: ExpenseRecord[] = [];
@@ -256,12 +280,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         getDocs(qInvestments).catch(() => null),
         getDocs(qTransactions).catch(() => null),
         getDocs(qIncomeRecords).catch(() => null),
-        getDocs(qExpenseRecords).catch(() => null), // Added expenses fetch
+        getDocs(qExpenseRecords).catch(() => null),
         getDocs(qAnalyses).catch(() => null)
     ];
-    if (summaryDocRef) {
-        dataFetchPromises.push(getDoc(summaryDocRef).catch(() => null));
-    }
+    if (summaryDocRef) dataFetchPromises.push(getDoc(summaryDocRef).catch(() => null));
+    if (monthlySettingsDocRef) dataFetchPromises.push(getDoc(monthlySettingsDocRef).catch(() => null));
+
 
     Promise.all(dataFetchPromises).then(() => {
         setIsLoading(false);
@@ -275,10 +299,11 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       unsubscribeAnalyses();
       unsubTransactions();
       unsubIncomeRecords();
-      unsubExpenseRecords(); // Unsubscribe expenses
+      unsubExpenseRecords();
       unsubSummary();
+      unsubMonthlySettings();
     };
-  }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]);
+  }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef, getMonthlySettingsDocRef]);
 
   const addInvestment = useCallback(async (investmentData: Omit<Investment, 'createdAt' | 'id'>, analysis?: CurrencyFluctuationAnalysisResult) => {
     if (!isAuthenticated || !userId || !firestoreInstance) {
@@ -292,7 +317,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
     const newInvestmentWithId = {
         ...investmentData,
-        id: investmentId,
+        id: investmentId, // Ensure the ID is part of the object passed to Firestore
     };
 
     const investmentWithTimestamp = {
@@ -324,7 +349,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       throw new Error("User not authenticated or Firestore not available.");
     }
     const incomeId = uuidv4();
-    const incomeWithMetadata: Omit<IncomeRecord, 'createdAt'> & { createdAt: any } = { // Temporary type for serverTimestamp
+    const incomeWithMetadata = {
       ...incomeData,
       id: incomeId,
       userId: userId,
@@ -346,7 +371,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       throw new Error("User not authenticated or Firestore not available.");
     }
     const expenseId = uuidv4();
-    const expenseWithMetadata: Omit<ExpenseRecord, 'createdAt'> & { createdAt: any } = { // Temporary type for serverTimestamp
+    const expenseWithMetadata = {
       ...expenseData,
       id: expenseId,
       userId: userId,
@@ -360,6 +385,28 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     }
   }, [userId, isAuthenticated]);
+
+  const updateMonthlySettings = useCallback(async (settings: MonthlySettings) => {
+    if (!isAuthenticated || !userId || !firestoreInstance) {
+      console.error("UpdateMonthlySettings: User not authenticated, userId missing, or Firestore not available.");
+      throw new Error("User not authenticated or Firestore not available.");
+    }
+    const settingsDocRef = getMonthlySettingsDocRef();
+    if (!settingsDocRef) return;
+
+    try {
+      // Ensure numeric values or use null for deletion if undefined
+      const dataToSave = {
+        estimatedLivingExpenses: settings.estimatedLivingExpenses ?? null,
+        estimatedZakat: settings.estimatedZakat ?? null,
+        estimatedCharity: settings.estimatedCharity ?? null,
+      };
+      await setDoc(settingsDocRef, dataToSave, { merge: true });
+    } catch (error) {
+      console.error("Error updating monthly settings:", error);
+      throw error;
+    }
+  }, [userId, isAuthenticated, getMonthlySettingsDocRef]);
 
 
   const getInvestmentsByType = useCallback((type: string) => {
@@ -568,10 +615,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
       }
 
-      // Estimate the cost basis that was implicitly removed from portfolio value when P/L was calculated
       const costBasisOfSoldShares = transactionToDelete.totalAmount - (transactionToDelete.profitOrLoss || 0);
       if (costBasisOfSoldShares !== 0) {
-          // Add this cost basis back to the total invested amount
           await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: costBasisOfSoldShares });
       }
 
@@ -613,7 +658,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
     } else if (itemType === 'fund') {
       const tickerSymbol = identifier;
-      // removeStockInvestmentsBySymbol already handles dashboard summary update
       await removeStockInvestmentsBySymbol(tickerSymbol);
     }
     console.log(`Successfully removed gold investments for identifier: ${identifier} (type: ${itemType}).`);
@@ -661,7 +705,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         recordSellStockTransaction,
         transactions,
         removeStockInvestmentsBySymbol,
-        updateStockInvestment: correctedUpdateStockInvestment, // Use the corrected one
+        updateStockInvestment: correctedUpdateStockInvestment,
         deleteSellTransaction,
         removeGoldInvestments,
         removeDirectDebtInvestment,
@@ -670,6 +714,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         addIncomeRecord,
         expenseRecords,
         addExpenseRecord,
+        monthlySettings,
+        updateMonthlySettings,
     }}>
       {children}
     </InvestmentContext.Provider>
