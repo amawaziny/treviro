@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import type { IncomeRecord } from "@/lib/types";
 
 const getCurrentDate = () => {
   return format(new Date(), "yyyy-MM-dd");
@@ -54,15 +55,20 @@ export function AddIncomeForm() {
 
   async function onSubmit(values: AddIncomeFormValues) {
     try {
-      // The schema coerces amount to number.
-      // For source and description, empty strings from form become undefined if schema uses .optional().
-      // If schema expects string, empty string is fine. Our current schema makes them optional.
-      const incomeDataToSave = {
-        ...values,
-        source: values.source || undefined,
-        description: values.description || undefined,
-        amount: parseFloat(values.amount), // Ensure amount is number for context function
+      // Zod schema coerces amount to number and handles optional fields.
+      // We construct the object to save carefully.
+      const incomeDataToSave: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'> & { amount: number } = {
+        type: values.type!,
+        amount: values.amount, // Zod has coerced this to number
+        date: values.date,
       };
+
+      if (values.source && values.source.trim() !== "") {
+        incomeDataToSave.source = values.source;
+      }
+      if (values.description && values.description.trim() !== "") {
+        incomeDataToSave.description = values.description;
+      }
 
       await addIncomeRecord(incomeDataToSave);
       toast({
@@ -94,7 +100,7 @@ export function AddIncomeForm() {
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || ""}
-                  required
+                  // required // Zod schema handles this
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -135,8 +141,8 @@ export function AddIncomeForm() {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5000.00"
-                    value={field.value}
-                    onChange={(value) => field.onChange(value ?? "")}
+                    value={field.value ?? ""} // Pass empty string if undefined
+                    onChange={(value) => field.onChange(value ?? "")} // RHF expects string or undefined
                     allowDecimal={true}
                   />
                 </FormControl>
