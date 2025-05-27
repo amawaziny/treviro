@@ -5,9 +5,19 @@ import React, { useMemo } from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, TrendingUp, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins, Settings2 } from 'lucide-react';
+import { DollarSign, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins, Settings2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
+
+// Helper function to parse YYYY-MM-DD string to a local Date object
+const parseDateString = (dateStr?: string): Date | null => {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null; // Basic validation
+  const [year, month, day] = dateStr.split('-').map(Number);
+  // Ensure year, month, day are valid numbers before creating a date
+  if (isNaN(year) || isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return new Date(year, month - 1, day); // month is 0-indexed for Date constructor
+};
+
 
 export default function CashFlowPage() {
   const {
@@ -15,7 +25,7 @@ export default function CashFlowPage() {
     expenseRecords,
     fixedEstimates,
     investments,
-    transactions, // We no longer need transactions here if profit is logged as income
+    transactions,
     isLoading: isLoadingContext,
   } = useInvestments();
 
@@ -32,9 +42,8 @@ export default function CashFlowPage() {
   const {
     monthlySalary,
     otherFixedIncomeMonthly,
-    totalManualIncomeThisMonth, // This will now include profits from sales via IncomeRecords
+    totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
-    // totalProfitFromSalesThisMonth, // Removed, as profit is now part of totalManualIncomeThisMonth
     zakatFixedMonthly,
     charityFixedMonthly,
     otherFixedExpensesMonthly,
@@ -44,7 +53,6 @@ export default function CashFlowPage() {
     let otherFixedInc = 0;
     let manualIncome = 0;
     let certificateInterest = 0;
-    // let salesProfit = 0; // Removed
 
     let zakat = 0;
     let charity = 0;
@@ -54,9 +62,7 @@ export default function CashFlowPage() {
     const fixedEstimatesList = fixedEstimates || [];
     const incomeRecordsList = incomeRecords || [];
     const investmentsList = investments || [];
-    // const transactionsList = transactions || []; // Removed if not used for direct profit sum
     const expenseRecordsList = expenseRecords || [];
-
 
     // Process Fixed Estimates
     fixedEstimatesList.forEach(fe => {
@@ -85,9 +91,9 @@ export default function CashFlowPage() {
     const hasFixedSalaryEstimate = fixedEstimatesList.some(fe => fe.type === 'Salary' && !fe.isExpense && fe.amount > 0);
 
     // Process IncomeRecords for the current month
-    // This now inherently includes profits from sales if they are logged as IncomeRecords.
     incomeRecordsList.forEach(record => {
-      if (isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd })) {
+      const recordDate = parseDateString(record.date);
+      if (recordDate && isWithinInterval(recordDate, { start: currentMonthStart, end: currentMonthEnd })) {
         const isLikelySalaryRecord = record.type === 'Other' &&
                                     (record.description?.toLowerCase().includes('salary') ||
                                      record.source?.toLowerCase().includes('salary') ||
@@ -111,21 +117,10 @@ export default function CashFlowPage() {
       }
     });
 
-    // Profit from Sales is no longer directly calculated here. It's expected to be part of totalManualIncomeThisMonth.
-    /*
-    const salesThisMonth = transactionsList.filter(tx =>
-      tx.type === 'sell' &&
-      tx.profitOrLoss !== undefined &&
-      isWithinInterval(new Date(tx.date), { start: currentMonthStart, end: currentMonthEnd })
-    );
-    salesThisMonth.forEach(sale => {
-      salesProfit += sale.profitOrLoss || 0;
-    });
-    */
-
     // Process Itemized Expenses
     expenseRecordsList.forEach(expense => {
-      if (isWithinInterval(new Date(expense.date), { start: currentMonthStart, end: currentMonthEnd })) {
+      const expenseDate = parseDateString(expense.date);
+      if (expenseDate && isWithinInterval(expenseDate, { start: currentMonthStart, end: currentMonthEnd })) {
         if (expense.category === 'Credit Card' && expense.isInstallment && expense.numberOfInstallments && expense.numberOfInstallments > 0) {
           itemizedExpensesSum += expense.amount / expense.numberOfInstallments;
         } else {
@@ -139,15 +134,14 @@ export default function CashFlowPage() {
       otherFixedIncomeMonthly: otherFixedInc,
       totalManualIncomeThisMonth: manualIncome,
       totalProjectedCertificateInterestThisMonth: certificateInterest,
-      // totalProfitFromSalesThisMonth: salesProfit, // Removed
       zakatFixedMonthly: zakat,
       charityFixedMonthly: charity,
       otherFixedExpensesMonthly: otherFixedExp,
       totalItemizedExpensesThisMonth: itemizedExpensesSum,
     };
-  }, [fixedEstimates, incomeRecords, investments, /*transactions,*/ expenseRecords, currentMonthStart, currentMonthEnd]);
+  }, [fixedEstimates, incomeRecords, investments, expenseRecords, currentMonthStart, currentMonthEnd]);
 
-  const totalIncome = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth; // Removed totalProfitFromSalesThisMonth
+  const totalIncome = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
   const totalExpenses = zakatFixedMonthly + charityFixedMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth;
   const remainingAmount = totalIncome - totalExpenses;
 
@@ -197,7 +191,6 @@ export default function CashFlowPage() {
               {otherFixedIncomeMonthly > 0 && <p>Other Fixed Income: {formatCurrencyEGP(otherFixedIncomeMonthly)}</p>}
               {totalManualIncomeThisMonth > 0 && <p>Other Logged Income (incl. Sales Profit): {formatCurrencyEGP(totalManualIncomeThisMonth)}</p>}
               {totalProjectedCertificateInterestThisMonth > 0 && <p>Projected Debt Interest: {formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</p>}
-              {/* Removed direct display of totalProfitFromSalesThisMonth */}
             </div>
           </CardContent>
         </Card>
@@ -247,7 +240,6 @@ export default function CashFlowPage() {
                 {otherFixedIncomeMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-green-600" />Other Fixed Income:</span> <span>{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></div>}
                 {totalManualIncomeThisMonth > 0 && <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Other Logged Income (incl. Sales Profit):</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>}
                 {totalProjectedCertificateInterestThisMonth > 0 && <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Debt Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>}
-                {/* Removed direct display of totalProfitFromSalesThisMonth */}
                 <hr className="my-2"/>
                 <div className="flex justify-between font-semibold"><span>Total Projected Income:</span> <span>{formatCurrencyEGP(totalIncome)}</span></div>
             </CardContent>
@@ -270,3 +262,5 @@ export default function CashFlowPage() {
     </div>
   );
 }
+
+    
