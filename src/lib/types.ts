@@ -1,6 +1,6 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
-export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
+export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Stock Dividend' | 'Other';
 export type ExpenseCategory = 'Credit Card' | 'Other';
 
 export interface BaseInvestment {
@@ -35,7 +35,6 @@ export interface CurrencyInvestment extends BaseInvestment {
   currencyCode: string;
   foreignCurrencyAmount: number;
   exchangeRateAtPurchase: number;
-  // baseCurrencyAtPurchase field was removed
 }
 
 export type PropertyType = 'Residential' | 'Commercial' | 'Land';
@@ -79,7 +78,6 @@ export interface ExpenseRecord {
   createdAt?: string;
 }
 
-// New types for Fixed Estimates
 export type FixedEstimateType = 'Salary' | 'Zakat' | 'Charity' | 'Other';
 export type FixedEstimatePeriod = 'Monthly' | 'Quarterly' | 'Yearly';
 
