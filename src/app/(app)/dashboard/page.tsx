@@ -11,7 +11,9 @@ import React, { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import type { DebtInstrumentInvestment, ExpenseRecord, FixedEstimateRecord, IncomeRecord, Transaction } from '@/lib/types';
 import Link from 'next/link';
+import { useMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { formatNumberWithSuffix } from '@/lib/utils';
 
 // Helper function to parse YYYY-MM-DD string to a local Date object
 const parseDateString = (dateStr?: string): Date | null => {
@@ -31,6 +33,7 @@ export default function DashboardPage() {
     investments,
     isLoading: isLoadingContext, // This will be true if any context data is loading
   } = useInvestments();
+  const { isMobile } = useMobile();
 
   const isLoading = isLoadingDashboardSummary || isLoadingContext;
 
@@ -40,6 +43,13 @@ export default function DashboardPage() {
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  };
+
+  const formatCurrencyEGPWithSuffix = (value: number | undefined) => {
+    if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
+    const formattedNumber = formatNumberWithSuffix(value);
+    // Assuming formatNumberWithSuffix doesn't include currency symbol, add EGP prefix
+    return `EGP ${formattedNumber}`;
   };
 
   const currentMonthStart = startOfMonth(new Date());
@@ -159,7 +169,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p className="text-3xl font-bold">{formatCurrencyEGP(totalInvested)}</p>
+              <p className="text-3xl font-bold">{isMobile ? formatCurrencyEGPWithSuffix(totalInvested) : formatCurrencyEGP(totalInvested)}</p>
             )}
             <p className="text-xs text-muted-foreground">Sum of all purchase costs.</p>
           </CardContent>
@@ -175,7 +185,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p className={`text-3xl font-bold ${totalRealizedPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>
-                {formatCurrencyEGP(totalRealizedPnL)}
+ {isMobile ? formatCurrencyEGPWithSuffix(totalRealizedPnL) : formatCurrencyEGP(totalRealizedPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">Profit/Loss from all completed sales.</p>

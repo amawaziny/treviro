@@ -69,6 +69,7 @@ const initialFormValues: AddInvestmentFormValues = {
   issuer: "",
   interestRate: "",
   maturityDate: "",
+ interestFrequency: undefined,
 };
 
 interface RenderGoldFieldsProps {
@@ -404,6 +405,25 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({ control, s
           <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={control} name="amountInvested" render={({ field }) => (
+ <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
+            <NumericInput
+              placeholder="e.g., 10000.75"
+              value={field.value}
+ onChange={field.onChange}
+ allowDecimal={true}
+            />
+            </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
+          )}
+        />
+        {watchedDebtSubType === 'Certificate' && (
+          <FormField control={control} name="interestFrequency" render={({ field }) => (
+            <FormItem><FormLabel>Interest Frequency</FormLabel><Select onValueChange={field.onChange} value={field.value || "Monthly"} required><FormControl><SelectTrigger><SelectValue placeholder="Select frequency" /></SelectTrigger></FormControl><SelectContent>{['Monthly', 'Quarterly', 'Yearly'].map(freq => (<SelectItem key={freq} value={freq}>{freq}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
+          )} />
+        )}
+
+        {watchedDebtSubType !== 'Certificate' && (
+            <FormField control={control} name="purchaseDate" render={({ field }) => (
+
           <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
             <NumericInput
               placeholder="e.g., 10000.75"
@@ -414,11 +434,8 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({ control, s
             </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
           )}
         />
-        {watchedDebtSubType !== 'Certificate' && (
-            <FormField control={control} name="purchaseDate" render={({ field }) => (
                 <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
             )} />
-        )}
       </div>
     </div>
   );
@@ -652,6 +669,7 @@ export function AddInvestmentForm() {
           interestRate: parsedInterestRate,
           maturityDate: values.maturityDate!,
           debtSubType: values.debtSubType!,
+ interestFrequency: values.debtSubType === 'Certificate' ? values.interestFrequency || 'Monthly' : undefined,
           type: 'Debt Instruments',
           purchaseDate: values.debtSubType === 'Certificate' ? undefined : values.purchaseDate, 
         };
