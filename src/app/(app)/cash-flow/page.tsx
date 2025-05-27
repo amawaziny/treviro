@@ -5,15 +5,15 @@ import React, { useMemo } from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, TrendingUp, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins, Settings2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, MonthlySettings } from '@/lib/types';
+import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
 
 export default function CashFlowPage() {
   const {
     incomeRecords,
     expenseRecords,
-    monthlySettings,
+    fixedEstimates, // Added
     investments,
     transactions,
     isLoading: isLoadingContext,
@@ -30,29 +30,59 @@ export default function CashFlowPage() {
   };
 
   const {
-    monthlySalary, // Added
+    monthlySalary,
+    otherFixedIncomeMonthly,
     totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
     totalProfitFromSalesThisMonth,
+    zakatFixedMonthly,
+    charityFixedMonthly,
+    otherFixedExpensesMonthly,
     totalItemizedExpensesThisMonth,
-    estimatedLiving,
-    estimatedZakatContribution,
-    estimatedCharityContribution
   } = useMemo(() => {
+    let salary = 0;
+    let otherFixedInc = 0;
     let manualIncome = 0;
     let certificateInterest = 0;
     let salesProfit = 0;
+
+    let zakat = 0;
+    let charity = 0;
+    let otherFixedExp = 0;
     let itemizedExpensesSum = 0;
 
-    const currentSalary = monthlySettings?.monthlySalary ?? 0;
+    // Process Fixed Estimates
+    (fixedEstimates || []).forEach(fe => {
+      let monthlyAmount = fe.amount;
+      if (fe.period === 'Yearly') {
+        monthlyAmount /= 12;
+      } else if (fe.period === 'Quarterly') {
+        monthlyAmount /= 3;
+      }
 
-    // Filter income records for the current month (excluding Salary, which is now in monthlySettings)
+      if (fe.type === 'Salary' && !fe.isExpense) { // Ensure Salary is treated as income
+        salary += monthlyAmount;
+      } else if (fe.type === 'Zakat' && fe.isExpense) { // Ensure Zakat is an expense
+        zakat += monthlyAmount;
+      } else if (fe.type === 'Charity' && fe.isExpense) { // Ensure Charity is an expense
+        charity += monthlyAmount;
+      } else if (fe.type === 'Other') {
+        if (fe.isExpense) {
+          otherFixedExp += monthlyAmount;
+        } else {
+          otherFixedInc += monthlyAmount;
+        }
+      }
+    });
+
+    // Process IncomeRecords for the current month
     (incomeRecords || []).forEach(record => {
       if (isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd })) {
         manualIncome += record.amount;
       }
     });
 
+    // Process Certificate Interest
     const directDebtInvestments = (investments || []).filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
       if (debt.debtSubType === 'Certificate' && debt.interestRate && debt.amountInvested) {
@@ -61,6 +91,7 @@ export default function CashFlowPage() {
       }
     });
 
+    // Process Profit from Sales
     const salesThisMonth = (transactions || []).filter(tx =>
       tx.type === 'sell' &&
       tx.profitOrLoss !== undefined &&
@@ -70,6 +101,7 @@ export default function CashFlowPage() {
       salesProfit += sale.profitOrLoss || 0;
     });
 
+    // Process Itemized Expenses
     (expenseRecords || []).forEach(expense => {
       if (isWithinInterval(new Date(expense.date), { start: currentMonthStart, end: currentMonthEnd })) {
         itemizedExpensesSum += expense.amount;
@@ -77,20 +109,20 @@ export default function CashFlowPage() {
     });
 
     return {
-      monthlySalary: currentSalary,
+      monthlySalary: salary,
+      otherFixedIncomeMonthly: otherFixedInc,
       totalManualIncomeThisMonth: manualIncome,
       totalProjectedCertificateInterestThisMonth: certificateInterest,
       totalProfitFromSalesThisMonth: salesProfit,
+      zakatFixedMonthly: zakat,
+      charityFixedMonthly: charity,
+      otherFixedExpensesMonthly: otherFixedExp,
       totalItemizedExpensesThisMonth: itemizedExpensesSum,
-      estimatedLiving: monthlySettings?.estimatedLivingExpenses ?? 0,
-      estimatedZakatContribution: monthlySettings?.estimatedZakat ?? 0,
-      estimatedCharityContribution: monthlySettings?.estimatedCharity ?? 0,
     };
-  }, [incomeRecords, expenseRecords, monthlySettings, investments, transactions, currentMonthStart, currentMonthEnd]);
+  }, [fixedEstimates, incomeRecords, investments, transactions, expenseRecords, currentMonthStart, currentMonthEnd]);
 
-  const totalIncome = monthlySalary + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth + totalProfitFromSalesThisMonth;
-  const totalFixedEstimates = estimatedLiving + estimatedZakatContribution + estimatedCharityContribution;
-  const totalExpenses = totalItemizedExpensesThisMonth + totalFixedEstimates;
+  const totalIncome = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth + totalProfitFromSalesThisMonth;
+  const totalExpenses = zakatFixedMonthly + charityFixedMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth;
   const remainingAmount = totalIncome - totalExpenses;
 
   if (isLoading) {
@@ -135,7 +167,8 @@ export default function CashFlowPage() {
           <CardContent>
             <p className="text-2xl font-bold text-green-700 dark:text-green-300">{formatCurrencyEGP(totalIncome)}</p>
             <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
-              <p>Monthly Salary: {formatCurrencyEGP(monthlySalary)}</p>
+              {monthlySalary > 0 && <p>Monthly Salary (Fixed): {formatCurrencyEGP(monthlySalary)}</p>}
+              {otherFixedIncomeMonthly > 0 && <p>Other Fixed Income: {formatCurrencyEGP(otherFixedIncomeMonthly)}</p>}
               <p>Other Logged Income: {formatCurrencyEGP(totalManualIncomeThisMonth)}</p>
               <p>Projected Certificate Interest: {formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</p>
               <p>Profit from Sales: {formatCurrencyEGP(totalProfitFromSalesThisMonth)}</p>
@@ -152,9 +185,9 @@ export default function CashFlowPage() {
             <p className="text-2xl font-bold text-red-700 dark:text-red-300">{formatCurrencyEGP(totalExpenses)}</p>
              <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
                 <p>Itemized Logged Expenses: {formatCurrencyEGP(totalItemizedExpensesThisMonth)}</p>
-                <p>Est. Living Expenses: {formatCurrencyEGP(estimatedLiving)}</p>
-                <p>Est. Zakat: {formatCurrencyEGP(estimatedZakatContribution)}</p>
-                <p>Est. Charity: {formatCurrencyEGP(estimatedCharityContribution)}</p>
+                {zakatFixedMonthly > 0 && <p>Zakat (Fixed): {formatCurrencyEGP(zakatFixedMonthly)}</p>}
+                {charityFixedMonthly > 0 && <p>Charity (Fixed): {formatCurrencyEGP(charityFixedMonthly)}</p>}
+                {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: {formatCurrencyEGP(otherFixedExpensesMonthly)}</p>}
             </div>
           </CardContent>
         </Card>
@@ -184,7 +217,8 @@ export default function CashFlowPage() {
                 <CardDescription>Breakdown of income sources for {format(new Date(), 'MMMM yyyy')}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                <div className="flex justify-between"><span><DollarSign className="inline mr-2 h-4 w-4 text-green-600" />Monthly Salary:</span> <span>{formatCurrencyEGP(monthlySalary)}</span></div>
+                {monthlySalary > 0 && <div className="flex justify-between"><span><DollarSign className="inline mr-2 h-4 w-4 text-green-600" />Monthly Salary (Fixed):</span> <span>{formatCurrencyEGP(monthlySalary)}</span></div>}
+                {otherFixedIncomeMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-green-600" />Other Fixed Income:</span> <span>{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></div>}
                 <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Other Logged Income:</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>
                 <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Certificate Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>
                 <div className="flex justify-between"><span><TrendingUp className="inline mr-2 h-4 w-4 text-green-600" />Profit from Security Sales:</span> <span>{formatCurrencyEGP(totalProfitFromSalesThisMonth)}</span></div>
@@ -199,9 +233,9 @@ export default function CashFlowPage() {
             </CardHeader>
             <CardContent className="space-y-2">
                 <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses:</span> <span>{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></div>
-                <div className="flex justify-between"><span><Landmark className="inline mr-2 h-4 w-4 text-red-600" />Est. Living Expenses:</span> <span>{formatCurrencyEGP(estimatedLiving)}</span></div>
-                <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Est. Zakat:</span> <span>{formatCurrencyEGP(estimatedZakatContribution)}</span></div>
-                <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Est. Charity:</span> <span>{formatCurrencyEGP(estimatedCharityContribution)}</span></div>
+                {zakatFixedMonthly > 0 && <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Zakat (Fixed):</span> <span>{formatCurrencyEGP(zakatFixedMonthly)}</span></div>}
+                {charityFixedMonthly > 0 && <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Charity (Fixed):</span> <span>{formatCurrencyEGP(charityFixedMonthly)}</span></div>}
+                {otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span>{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></div>}
                 <hr className="my-2"/>
                 <div className="flex justify-between font-semibold"><span>Total Projected Expenses:</span> <span>{formatCurrencyEGP(totalExpenses)}</span></div>
             </CardContent>
@@ -210,3 +244,5 @@ export default function CashFlowPage() {
     </div>
   );
 }
+
+    
