@@ -1,156 +1,26 @@
 
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { NumericInput } from "@/components/ui/numeric-input";
-import { MonthlySettingsSchema, type MonthlySettingsFormValues } from "@/lib/schemas";
-import { useInvestments } from "@/hooks/use-investments";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import React, { useEffect } from "react";
-import type { MonthlySettings } from "@/lib/types";
+// This component is no longer used for Salary, Zakat, Charity.
+// This functionality is moved to the new Fixed Estimates feature.
+// This file can be deleted or repurposed for other settings.
 
-interface FinancialSettingsFormProps {
-  currentSettings: MonthlySettings | null;
-  onSave?: () => void; // Optional callback after saving
-}
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export function FinancialSettingsForm({ currentSettings, onSave }: FinancialSettingsFormProps) {
-  const { updateMonthlySettings } = useInvestments();
-  const { toast } = useToast();
-
-  const form = useForm<MonthlySettingsFormValues>({
-    resolver: zodResolver(MonthlySettingsSchema),
-    defaultValues: {
-      monthlySalary: currentSettings?.monthlySalary?.toString() ?? "",
-      estimatedLivingExpenses: currentSettings?.estimatedLivingExpenses?.toString() ?? "",
-      estimatedZakat: currentSettings?.estimatedZakat?.toString() ?? "",
-      estimatedCharity: currentSettings?.estimatedCharity?.toString() ?? "",
-    },
-  });
-
-  useEffect(() => {
-    form.reset({
-      monthlySalary: currentSettings?.monthlySalary?.toString() ?? "",
-      estimatedLivingExpenses: currentSettings?.estimatedLivingExpenses?.toString() ?? "",
-      estimatedZakat: currentSettings?.estimatedZakat?.toString() ?? "",
-      estimatedCharity: currentSettings?.estimatedCharity?.toString() ?? "",
-    });
-  }, [currentSettings, form]);
-
-  async function onSubmit(values: MonthlySettingsFormValues) {
-    try {
-      // Values from react-hook-form (processed by Zod) will have numbers or undefined
-      await updateMonthlySettings(values);
-      toast({
-        title: "Settings Updated",
-        description: "Your monthly estimates have been saved.",
-      });
-      onSave?.();
-    } catch (error: any) {
-      toast({
-        title: "Update Failed",
-        description: error.message || "Could not save settings.",
-        variant: "destructive",
-      });
-    }
-  }
-
+export function FinancialSettingsForm() {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="monthlySalary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Monthly Salary (EGP)</FormLabel>
-              <FormControl>
-                <NumericInput
-                  placeholder="e.g., 15000"
-                  value={field.value} // field.value is string or undefined
-                  onChange={field.onChange} // RHF onChange expects string or undefined
-                  allowDecimal={true}
-                />
-              </FormControl>
-              <FormDescription>Your net monthly salary after taxes.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="estimatedLivingExpenses"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estimated Monthly Living Expenses (EGP)</FormLabel>
-              <FormControl>
-                <NumericInput
-                  placeholder="e.g., 10000"
-                  value={field.value}
-                  onChange={field.onChange}
-                  allowDecimal={true}
-                />
-              </FormControl>
-              <FormDescription>Your general recurring monthly household expenses.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="estimatedZakat"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estimated Monthly Zakat (EGP)</FormLabel>
-              <FormControl>
-                <NumericInput
-                  placeholder="e.g., 200"
-                  value={field.value}
-                  onChange={field.onChange}
-                  allowDecimal={true}
-                />
-              </FormControl>
-              <FormDescription>Your estimated monthly Zakat contribution.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="estimatedCharity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estimated Monthly Charity (EGP)</FormLabel>
-              <FormControl>
-                <NumericInput
-                  placeholder="e.g., 100"
-                  value={field.value}
-                  onChange={field.onChange}
-                  allowDecimal={true}
-                />
-              </FormControl>
-              <FormDescription>Your estimated regular monthly charity contributions.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Estimates
-        </Button>
-      </form>
-    </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Financial Settings Placeholder</CardTitle>
+        <CardDescription>
+          Management of Salary, Zakat, and Charity is now handled on the "Fixed Estimates" page.
+          This component is currently a placeholder.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">No settings here.</p>
+      </CardContent>
+    </Card>
   );
 }
