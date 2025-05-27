@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, TrendingDown, LineChart as CashFlowIcon, Settings } from 'lucide-react'; // Added Settings icon
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -83,7 +84,7 @@ const navItems: NavItem[] = [
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile } = useSidebar(); // useIsMobile is not used here
 
 
   if (!navItems?.length) {

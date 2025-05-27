@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, TrendingDown, Landmark, Edit } from 'lucide-react'; // Removed AlertCircle
+import { Plus, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ExpenseRecord } from '@/lib/types';
 // Removed FinancialSettingsForm import as its functionality is moved
@@ -46,6 +46,15 @@ export default function ExpensesPage() {
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   };
 
+  const formatNumberWithSuffix = (num: number | undefined): string => {
+    if (num === undefined || num === null || isNaN(num)) return '0';
+    if (num === 0) return '0';
+    const absNum = Math.abs(num);
+    if (absNum >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (absNum >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (absNum >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return num.toFixed(2).replace(/\.00$/, ''); // Keep two decimal places for smaller numbers
+  };
 
   if (isLoading) {
     return (
@@ -98,11 +107,19 @@ export default function ExpensesPage() {
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.category}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.description || 'N/A'}</TableCell>
                     <TableCell className="text-right">{formatCurrencyEGP(record.amount)}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
-                      {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card'
-                        ? `${(record.amount / record.numberOfInstallments).toFixed(2)} EGP x ${record.numberOfInstallments} months`
-                        : 'N/A'}
-                    </TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left', 'text-sm')}>
+                      {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' ? (
+                        <span className="flex items-center justify-end md:justify-start">
+                          {window.innerWidth < 768
+                            ? `${formatCurrencyEGP(record.amount / record.numberOfInstallments)} / month`
+                            : `${formatCurrencyEGP(record.amount / record.numberOfInstallments)} x ${record.numberOfInstallments} months`}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                         N/A
+                        </span>
+                      )}
+                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
