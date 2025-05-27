@@ -13,7 +13,7 @@ export default function CashFlowPage() {
   const {
     incomeRecords,
     expenseRecords,
-    fixedEstimates,
+    fixedEstimates, // Changed from monthlySettings
     investments,
     transactions,
     isLoading: isLoadingContext,
@@ -87,7 +87,6 @@ export default function CashFlowPage() {
     // Process IncomeRecords for the current month
     incomeRecordsList.forEach(record => {
       if (isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd })) {
-        // If a fixed salary estimate exists, and this 'Other' income record looks like salary, skip it.
         const isLikelySalaryRecord = record.type === 'Other' &&
                                     (record.description?.toLowerCase().includes('salary') ||
                                      record.source?.toLowerCase().includes('salary') ||
@@ -105,7 +104,7 @@ export default function CashFlowPage() {
     // Process Certificate Interest
     const directDebtInvestments = investmentsList.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
-      if (debt.debtSubType === 'Certificate' && debt.interestRate && debt.amountInvested) {
+      if (debt.interestRate && debt.amountInvested) { // All direct debt types can have interest
         const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
         certificateInterest += annualInterest / 12;
       }
@@ -124,7 +123,11 @@ export default function CashFlowPage() {
     // Process Itemized Expenses
     expenseRecordsList.forEach(expense => {
       if (isWithinInterval(new Date(expense.date), { start: currentMonthStart, end: currentMonthEnd })) {
-        itemizedExpensesSum += expense.amount;
+        if (expense.category === 'Credit Card' && expense.isInstallment && expense.numberOfInstallments && expense.numberOfInstallments > 0) {
+          itemizedExpensesSum += expense.amount / expense.numberOfInstallments;
+        } else {
+          itemizedExpensesSum += expense.amount;
+        }
       }
     });
 
@@ -190,7 +193,7 @@ export default function CashFlowPage() {
               {monthlySalary > 0 && <p>Monthly Salary (Fixed): {formatCurrencyEGP(monthlySalary)}</p>}
               {otherFixedIncomeMonthly > 0 && <p>Other Fixed Income: {formatCurrencyEGP(otherFixedIncomeMonthly)}</p>}
               {totalManualIncomeThisMonth > 0 && <p>Other Logged Income: {formatCurrencyEGP(totalManualIncomeThisMonth)}</p>}
-              {totalProjectedCertificateInterestThisMonth > 0 && <p>Projected Certificate Interest: {formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</p>}
+              {totalProjectedCertificateInterestThisMonth > 0 && <p>Projected Debt Interest: {formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</p>}
               {totalProfitFromSalesThisMonth > 0 && <p>Profit from Sales: {formatCurrencyEGP(totalProfitFromSalesThisMonth)}</p>}
             </div>
           </CardContent>
@@ -240,7 +243,7 @@ export default function CashFlowPage() {
                 {monthlySalary > 0 && <div className="flex justify-between"><span><DollarSign className="inline mr-2 h-4 w-4 text-green-600" />Monthly Salary (Fixed):</span> <span>{formatCurrencyEGP(monthlySalary)}</span></div>}
                 {otherFixedIncomeMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-green-600" />Other Fixed Income:</span> <span>{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></div>}
                 {totalManualIncomeThisMonth > 0 && <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Other Logged Income:</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>}
-                {totalProjectedCertificateInterestThisMonth > 0 && <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Certificate Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>}
+                {totalProjectedCertificateInterestThisMonth > 0 && <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Debt Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>}
                 {totalProfitFromSalesThisMonth > 0 && <div className="flex justify-between"><span><TrendingUp className="inline mr-2 h-4 w-4 text-green-600" />Profit from Security Sales:</span> <span>{formatCurrencyEGP(totalProfitFromSalesThisMonth)}</span></div>}
                 <hr className="my-2"/>
                 <div className="flex justify-between font-semibold"><span>Total Projected Income:</span> <span>{formatCurrencyEGP(totalIncome)}</span></div>
@@ -252,7 +255,7 @@ export default function CashFlowPage() {
                 <CardDescription>Breakdown of expenses for {format(new Date(), 'MMMM yyyy')}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                {totalItemizedExpensesThisMonth > 0 && <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses:</span> <span>{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></div>}
+                {totalItemizedExpensesThisMonth > 0 && <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses (Monthly Impact):</span> <span>{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></div>}
                 {zakatFixedMonthly > 0 && <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Zakat (Fixed):</span> <span>{formatCurrencyEGP(zakatFixedMonthly)}</span></div>}
                 {charityFixedMonthly > 0 && <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Charity (Fixed):</span> <span>{formatCurrencyEGP(charityFixedMonthly)}</span></div>}
                 {otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span>{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></div>}
@@ -264,5 +267,3 @@ export default function CashFlowPage() {
     </div>
   );
 }
-
-    
