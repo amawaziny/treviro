@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types'; // Added FixedEstimateRecord
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
 import { db as firestoreInstance } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment, FieldValue } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
@@ -34,9 +34,8 @@ interface InvestmentContextType {
   addIncomeRecord: (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   expenseRecords: ExpenseRecord[];
   addExpenseRecord: (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
-  fixedEstimates: FixedEstimateRecord[]; // New state for fixed estimates
-  addFixedEstimate: (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => Promise<void>; // New function
-  // updateFixedEstimate and removeFixedEstimate can be added later
+  fixedEstimates: FixedEstimateRecord[];
+  addFixedEstimate: (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => Promise<void>;
 }
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
@@ -51,7 +50,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
   const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]);
-  const [fixedEstimates, setFixedEstimates] = useState<FixedEstimateRecord[]>([]); // New state
+  const [fixedEstimates, setFixedEstimates] = useState<FixedEstimateRecord[]>([]);
   const [currencyAnalyses, setCurrencyAnalyses] = useState<Record<string, CurrencyFluctuationAnalysisResult>>({});
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(defaultDashboardSummary);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,7 +84,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           const updateValue = updates[typedKey];
 
           if (typeof updateValue === 'number') {
-            if (summaryDoc.exists() && updateValue !== 0) { // Only increment if doc exists and value is non-zero
+            if (summaryDoc.exists() && updateValue !== 0) {
               newDataForUpdate[typedKey] = increment(updateValue);
             } else {
               (currentData[typedKey] as number) = ((currentData[typedKey] as number | undefined) || 0) + updateValue;
@@ -107,7 +106,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (authIsLoading || !firestoreInstance) {
       setIsLoading(true);
-      console.warn("InvestmentContext: Auth loading or Firestore not available.");
       return () => {};
     }
 
@@ -116,11 +114,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setTransactions([]);
       setIncomeRecords([]);
       setExpenseRecords([]);
-      setFixedEstimates([]); // Reset new state
+      setFixedEstimates([]);
       setCurrencyAnalyses({});
       setDashboardSummary(defaultDashboardSummary);
       setIsLoading(false);
-      console.warn("InvestmentContext: User not authenticated, userId missing. Skipping data fetching.");
       return () => {};
     }
 
@@ -131,11 +128,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       transactions: `users/${userId}/transactions`,
       incomeRecords: `users/${userId}/incomeRecords`,
       expenseRecords: `users/${userId}/expenseRecords`,
-      fixedEstimates: `users/${userId}/fixedEstimates`, // New collection path
+      fixedEstimates: `users/${userId}/fixedEstimates`,
     };
     
     const summaryDocRef = getDashboardSummaryDocRef();
-
     const unsubscribers: (() => void)[] = [];
 
     if (summaryDocRef) {
@@ -160,7 +156,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const setupListener = <T,>(path: string, setter: React.Dispatch<React.SetStateAction<T[]>>, orderByField = "createdAt", orderDirection: "asc" | "desc" = "desc") => {
       if (!firestoreInstance) return;
       const q = query(collection(firestoreInstance, path), orderBy(orderByField, orderDirection));
-      dataFetchPromises.push(getDocs(q).catch(() => null)); // For initial loading state
+      dataFetchPromises.push(getDocs(q).catch(() => null)); 
       unsubscribers.push(onSnapshot(q, (querySnapshot) => {
         const fetchedItems: T[] = [];
         querySnapshot.forEach((documentSnapshot) => {
@@ -169,8 +165,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             id: documentSnapshot.id,
             ...data,
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
-            updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt, // if applicable
-            date: data.date, // Assuming 'date' is a common field
+            updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt,
+            date: data.date, 
           } as T);
         });
         setter(fetchedItems);
@@ -184,7 +180,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     setupListener<Transaction>(collectionsPaths.transactions, setTransactions, "date");
     setupListener<IncomeRecord>(collectionsPaths.incomeRecords, setIncomeRecords, "date");
     setupListener<ExpenseRecord>(collectionsPaths.expenseRecords, setExpenseRecords, "date");
-    setupListener<FixedEstimateRecord>(collectionsPaths.fixedEstimates, setFixedEstimates, "type"); // Order by type for now
+    setupListener<FixedEstimateRecord>(collectionsPaths.fixedEstimates, setFixedEstimates, "type");
 
 
     const qAnalyses = query(collection(firestoreInstance, collectionsPaths.currencyAnalyses));
@@ -200,7 +196,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
     Promise.all(dataFetchPromises)
       .then(() => setIsLoading(false))
-      .catch(() => setIsLoading(false)); // Also set loading to false on error
+      .catch(() => setIsLoading(false)); 
 
     return () => unsubscribers.forEach(unsub => unsub());
   }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]);
@@ -226,7 +222,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     await setDoc(doc(firestoreInstance, `users/${userId}/expenseRecords`, expenseId), { ...expenseData, id: expenseId, userId, createdAt: serverTimestamp() });
   }, [userId, isAuthenticated]);
 
-  // New function to add a fixed estimate
   const addFixedEstimate = useCallback(async (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const estimateId = uuidv4();
@@ -245,18 +240,25 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const recordSellStockTransaction = useCallback(async (listedStockId: string, tickerSymbol: string, numberOfSharesToSell: number, sellPricePerShare: number, sellDate: string, fees: number) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
-      console.error("recordSellStockTransaction: Firestore not available or user not authenticated.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     const userStockInvestments = investments.filter(inv => inv.type === "Stocks" && inv.tickerSymbol === tickerSymbol) as StockInvestment[];
     userStockInvestments.sort((a, b) => (new Date(a.purchaseDate || 0).getTime()) - (new Date(b.purchaseDate || 0).getTime()));
     const totalOwnedShares = userStockInvestments.reduce((sum, inv) => sum + (inv.numberOfShares || 0), 0);
     if (numberOfSharesToSell > totalOwnedShares) throw new Error("Not enough shares to sell.");
-    const totalCostOfAllLots = userStockInvestments.reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
-    const averagePurchasePriceAllLots = totalOwnedShares > 0 ? totalCostOfAllLots / totalOwnedShares : 0;
+    
+    let costOfSharesBeingSold = 0;
+    let sharesRemainingToAccountFor = numberOfSharesToSell;
+    for (const lot of userStockInvestments) {
+        if (sharesRemainingToAccountFor <= 0) break;
+        const sharesFromThisLot = Math.min(lot.numberOfShares || 0, sharesRemainingToAccountFor);
+        costOfSharesBeingSold += sharesFromThisLot * (lot.purchasePricePerShare || 0);
+        sharesRemainingToAccountFor -= sharesFromThisLot;
+    }
+    
     const totalProceeds = numberOfSharesToSell * sellPricePerShare - fees;
-    const costOfSharesSold = averagePurchasePriceAllLots * numberOfSharesToSell;
-    const profitOrLoss = totalProceeds - costOfSharesSold;
+    const profitOrLoss = totalProceeds - costOfSharesBeingSold;
+
     const transactionId = uuidv4();
     const newTransaction = { 
       id: transactionId,
@@ -270,20 +272,25 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       profitOrLoss, 
       createdAt: serverTimestamp() 
     };
+
     const batch = writeBatch(firestoreInstance);
     batch.set(doc(firestoreInstance, `users/${userId}/transactions`, transactionId), newTransaction);
+    
     let sharesToDeduct = numberOfSharesToSell;
     let costBasisReductionFromPortfolio = 0;
+
     for (const investment of userStockInvestments) {
       if (sharesToDeduct <= 0) break;
       const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investment.id);
       const sharesInThisLot = investment.numberOfShares || 0;
       const costOfThisLot = investment.amountInvested;
+      
       if (sharesInThisLot >= sharesToDeduct) {
         const newShareCount = sharesInThisLot - sharesToDeduct;
-        const proportionSoldFromLot = sharesToDeduct / sharesInThisLot;
+        const proportionSoldFromLot = costOfThisLot > 0 && sharesInThisLot > 0 ? sharesToDeduct / sharesInThisLot : 0;
         const costBasisOfSoldPortionFromLot = costOfThisLot * proportionSoldFromLot;
         costBasisReductionFromPortfolio += costBasisOfSoldPortionFromLot;
+
         if (newShareCount === 0) batch.delete(investmentDocRef);
         else batch.update(investmentDocRef, { numberOfShares: newShareCount, amountInvested: costOfThisLot - costBasisOfSoldPortionFromLot });
         sharesToDeduct = 0;
@@ -293,14 +300,28 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         sharesToDeduct -= sharesInThisLot;
       }
     }
+
     await batch.commit();
+
     if (profitOrLoss) await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
     if (costBasisReductionFromPortfolio) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReductionFromPortfolio });
-  }, [userId, isAuthenticated, investments, updateDashboardSummaryDoc]);
+
+    // Automatically add profit as income
+    if (profitOrLoss > 0) {
+      const incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'> = {
+        type: 'Profit Share', // Or a more specific type like 'Security Sale Profit'
+        source: `Sale of ${tickerSymbol}`,
+        amount: profitOrLoss,
+        date: sellDate,
+        description: `Profit from selling ${numberOfSharesToSell} units of ${tickerSymbol}.`,
+      };
+      await addIncomeRecord(incomeData);
+    }
+
+  }, [userId, isAuthenticated, investments, updateDashboardSummaryDoc, addIncomeRecord]);
 
   const correctedUpdateStockInvestment = useCallback(async (investmentId: string, dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>, oldAmountInvested: number) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
-      console.error("correctedUpdateStockInvestment: Firestore not available or user not authenticated.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
@@ -316,19 +337,19 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteSellTransaction = useCallback(async (transactionToDelete: Transaction) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
-       console.error("deleteSellTransaction: Firestore not available or user not authenticated.");
        throw new Error("User not authenticated or Firestore not available.");
     }
     if (transactionToDelete.type !== 'sell') throw new Error("Can only delete 'sell' transactions.");
     await deleteDoc(doc(firestoreInstance, `users/${userId}/transactions`, transactionToDelete.id));
     if (transactionToDelete.profitOrLoss !== undefined) await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
-    const costBasisOfSoldShares = transactionToDelete.totalAmount - (transactionToDelete.profitOrLoss || 0);
-    if (costBasisOfSoldShares) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: costBasisOfSoldShares });
+    
+    // Note: This does not automatically re-add shares to holdings or reverse income records.
+    // If an income record was created for this sale's profit, it would need to be manually deleted by the user from the income page.
+
   }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
 
   const removeStockInvestmentsBySymbol = useCallback(async (tickerSymbol: string) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
-      console.error("removeStockInvestmentsBySymbol: Firestore not available or user not authenticated.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     const q = query(collection(firestoreInstance, `users/${userId}/investments`), where("type", "==", "Stocks"), where("tickerSymbol", "==", tickerSymbol));
@@ -346,7 +367,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const removeGoldInvestments = useCallback(async (identifier: string, itemType: 'physical' | 'fund') => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
-      console.error("removeGoldInvestments: Firestore not available or user not authenticated.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     let totalAmountInvestedRemoved = 0;
@@ -362,7 +382,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       });
       await batch.commit();
     } else if (itemType === 'fund') {
-      await removeStockInvestmentsBySymbol(identifier); // This already updates summary
+      await removeStockInvestmentsBySymbol(identifier);
       return; 
     }
     if (totalAmountInvestedRemoved && itemType === 'physical') await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
@@ -370,7 +390,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const removeDirectDebtInvestment = useCallback(async (investmentId: string) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
-      console.error("removeDirectDebtInvestment: Firestore not available or user not authenticated.");
       throw new Error("User not authenticated or Firestore not available.");
     }
     const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
@@ -389,7 +408,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       updateStockInvestment: correctedUpdateStockInvestment,
       deleteSellTransaction, removeGoldInvestments, removeDirectDebtInvestment,
       dashboardSummary, incomeRecords, addIncomeRecord, expenseRecords, addExpenseRecord,
-      fixedEstimates, addFixedEstimate, // Expose new state and function
+      fixedEstimates, addFixedEstimate,
     }}>
       {children}
     </InvestmentContext.Provider>
