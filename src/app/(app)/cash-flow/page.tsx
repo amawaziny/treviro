@@ -6,6 +6,7 @@ import { useInvestments } from '@/hooks/use-investments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins, Settings2 } from 'lucide-react';
+import { formatNumberWithSuffix } from '@/lib/utils'; // Import the utility function
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
 
@@ -37,6 +38,12 @@ export default function CashFlowPage() {
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  };
+
+  const formatCurrencyEGPForMobile = (value: number | undefined) => {
+    if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
+    // Apply suffix formatting first, then currency format
+    return formatCurrencyEGP(parseFloat(formatNumberWithSuffix(value)));
   };
 
   const {
@@ -185,12 +192,15 @@ export default function CashFlowPage() {
             <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-700 dark:text-green-300">{formatCurrencyEGP(totalIncome)}</p>
+            <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+              <span className="md:hidden">{formatCurrencyEGPForMobile(totalIncome)}</span>
+              <span className="hidden md:inline">{formatCurrencyEGP(totalIncome)}</span>
+            </p>
             <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
-              {monthlySalary > 0 && <p>Monthly Salary (Fixed): {formatCurrencyEGP(monthlySalary)}</p>}
-              {otherFixedIncomeMonthly > 0 && <p>Other Fixed Income: {formatCurrencyEGP(otherFixedIncomeMonthly)}</p>}
-              {totalManualIncomeThisMonth > 0 && <p>Other Logged Income (incl. Sales Profit): {formatCurrencyEGP(totalManualIncomeThisMonth)}</p>}
-              {totalProjectedCertificateInterestThisMonth > 0 && <p>Projected Debt Interest: {formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</p>}
+              {monthlySalary > 0 && <p>Monthly Salary (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(monthlySalary)}</span><span className="hidden md:inline">{formatCurrencyEGP(monthlySalary)}</span></p>}
+              {otherFixedIncomeMonthly > 0 && <p>Other Fixed Income: <span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedIncomeMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></p>}
+              {totalManualIncomeThisMonth > 0 && <p>Other Logged Income (incl. Sales Profit): <span className="md:hidden">{formatCurrencyEGPForMobile(totalManualIncomeThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></p>}
+              {totalProjectedCertificateInterestThisMonth > 0 && <p>Projected Debt Interest: <span className="md:hidden">{formatCurrencyEGPForMobile(totalProjectedCertificateInterestThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></p>}
             </div>
           </CardContent>
         </Card>
@@ -201,12 +211,15 @@ export default function CashFlowPage() {
             <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-red-700 dark:text-red-300">{formatCurrencyEGP(totalExpenses)}</p>
+            <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+              <span className="md:hidden">{formatCurrencyEGPForMobile(totalExpenses)}</span>
+              <span className="hidden md:inline">{formatCurrencyEGP(totalExpenses)}</span>
+            </p>
              <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
-                {totalItemizedExpensesThisMonth > 0 && <p>Itemized Logged Expenses (Monthly Impact): {formatCurrencyEGP(totalItemizedExpensesThisMonth)}</p>}
-                {zakatFixedMonthly > 0 && <p>Zakat (Fixed): {formatCurrencyEGP(zakatFixedMonthly)}</p>}
-                {charityFixedMonthly > 0 && <p>Charity (Fixed): {formatCurrencyEGP(charityFixedMonthly)}</p>}
-                {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: {formatCurrencyEGP(otherFixedExpensesMonthly)}</p>}
+                {totalItemizedExpensesThisMonth > 0 && <p>Itemized Logged Expenses (Monthly Impact): <span className="md:hidden">{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></p>}
+                {zakatFixedMonthly > 0 && <p>Zakat (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></p>}
+                {charityFixedMonthly > 0 && <p>Charity (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></p>}
+                {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></p>}
             </div>
           </CardContent>
         </Card>
@@ -219,7 +232,10 @@ export default function CashFlowPage() {
             <Wallet className={`h-5 w-5 ${remainingAmount >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`} />
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-bold ${remainingAmount >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>
+            <p className={`text-2xl font-bold ${remainingAmount >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>             
+              <span className="md:hidden">{formatCurrencyEGPForMobile(remainingAmount)}</span>
+              <span className="hidden md:inline">{formatCurrencyEGP(remainingAmount)}</span>
+
                 {formatCurrencyEGP(remainingAmount)}
             </p>
             <p className={`text-xs mt-1 ${remainingAmount >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
@@ -237,11 +253,11 @@ export default function CashFlowPage() {
             </CardHeader>
             <CardContent className="space-y-2">
                 {monthlySalary > 0 && <div className="flex justify-between"><span><DollarSign className="inline mr-2 h-4 w-4 text-green-600" />Monthly Salary (Fixed):</span> <span>{formatCurrencyEGP(monthlySalary)}</span></div>}
-                {otherFixedIncomeMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-green-600" />Other Fixed Income:</span> <span>{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></div>}
-                {totalManualIncomeThisMonth > 0 && <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Other Logged Income (incl. Sales Profit):</span> <span>{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></div>}
-                {totalProjectedCertificateInterestThisMonth > 0 && <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Debt Interest:</span> <span>{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></div>}
+                {otherFixedIncomeMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-green-600" />Other Fixed Income:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedIncomeMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></span></div>}
+                {totalManualIncomeThisMonth > 0 && <div className="flex justify-between"><span><PiggyBank className="inline mr-2 h-4 w-4 text-green-600" />Other Logged Income (incl. Sales Profit):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalManualIncomeThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></span></div>}
+                {totalProjectedCertificateInterestThisMonth > 0 && <div className="flex justify-between"><span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Debt Interest:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalProjectedCertificateInterestThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></span></div>}
                 <hr className="my-2"/>
-                <div className="flex justify-between font-semibold"><span>Total Projected Income:</span> <span>{formatCurrencyEGP(totalIncome)}</span></div>
+                <div className="flex justify-between font-semibold"><span>Total Projected Income:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalIncome)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalIncome)}</span></span></div>
             </CardContent>
         </Card>
         <Card>
@@ -250,12 +266,12 @@ export default function CashFlowPage() {
                 <CardDescription>Breakdown of expenses for {format(new Date(), 'MMMM yyyy')}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-                {totalItemizedExpensesThisMonth > 0 && <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses (Monthly Impact):</span> <span>{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></div>}
-                {zakatFixedMonthly > 0 && <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Zakat (Fixed):</span> <span>{formatCurrencyEGP(zakatFixedMonthly)}</span></div>}
-                {charityFixedMonthly > 0 && <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Charity (Fixed):</span> <span>{formatCurrencyEGP(charityFixedMonthly)}</span></div>}
-                {otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span>{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></div>}
+                {totalItemizedExpensesThisMonth > 0 && <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses (Monthly Impact):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></span></div>}
+                {zakatFixedMonthly > 0 && <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Zakat (Fixed):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></span></div>}
+                {charityFixedMonthly > 0 && <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Charity (Fixed):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></span></div>}
+                {otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></span></div>}
                 <hr className="my-2"/>
-                <div className="flex justify-between font-semibold"><span>Total Projected Expenses:</span> <span>{formatCurrencyEGP(totalExpenses)}</span></div>
+                <div className="flex justify-between font-semibold"><span>Total Projected Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalExpenses)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalExpenses)}</span></span></div>
             </CardContent>
         </Card>
       </div>

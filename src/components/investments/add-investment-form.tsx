@@ -422,20 +422,8 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({ control, s
         )}
 
         {watchedDebtSubType !== 'Certificate' && (
-            <FormField control={control} name="purchaseDate" render={({ field }) => (
-
-          <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
-            <NumericInput
-              placeholder="e.g., 10000.75"
-              value={field.value}
-              onChange={field.onChange}
-              allowDecimal={true}
-            />
-            </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
-          )}
-        />
-                <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
-            )} />
+            <FormField control={control} name="purchaseDate" render={({ field }) => (<FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>)} />
+        )}
       </div>
     </div>
   );
