@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, TrendingUp, TrendingDown, Info } from 'lucide-react'; // Using DollarSign as a generic currency icon
 import { cn } from '@/lib/utils';
-
+import { formatNumberWithSuffix } from '@/lib/utils'; // Import the utility function
 interface MyCurrencyListItemProps {
   holding: AggregatedCurrencyHolding;
 }
@@ -27,6 +27,11 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
   const formatCurrency = (value: number | undefined, currency = "EGP") => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  };
+
+  const formatCurrencyForCurrencyMobile = (value: number | undefined, currency = "EGP") => {
+    if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
+    return `${currency} ${formatNumberWithSuffix(value)}`;
   };
 
   const formatAmount = (value: number | undefined) => {
@@ -52,7 +57,10 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             </div>
             <div className="truncate">
               <p className="text-lg font-semibold truncate">{currencyCode}</p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground truncate md:hidden">
+                Held: {formatNumberWithSuffix(totalForeignAmount || 0)} {currencyCode}
+              </p>
+              <p className="text-xs text-muted-foreground truncate hidden md:block">
                 Held: {formatAmount(totalForeignAmount)} {currencyCode}
               </p>
             </div>
@@ -62,7 +70,10 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             {hasMarketRate && profitOrLossInEGP !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
-                  {formattedProfitLoss}
+ <span className="md:hidden">
+ {formatCurrencyForCurrencyMobile(profitOrLossInEGP)} 
+ </span>
+ <span className="hidden md:inline" data-ai-hint="Display profit/loss for larger screens">{formattedProfitLoss}</span>
                 </p>
                 <Badge variant={isProfitable ? 'default' : 'destructive'} 
                        className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>

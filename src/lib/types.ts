@@ -1,6 +1,6 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
-export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other'; // Removed 'Salary'
+export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Stock Dividend' | 'Other';
 export type ExpenseCategory = 'Credit Card' | 'Other';
 
 export interface BaseInvestment {
@@ -26,8 +26,8 @@ export interface StockInvestment extends BaseInvestment {
 export type GoldType = 'K24' | 'K21' | 'Pound' | 'Ounce';
 export interface GoldInvestment extends BaseInvestment {
   type: 'Gold';
-  quantityInGrams: number;
   goldType: GoldType;
+  quantityInGrams: number; // Represents units for Pound/Ounce
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
@@ -71,20 +71,29 @@ export interface ExpenseRecord {
   id: string;
   userId: string;
   description?: string;
-  amount: number; // Total amount of the expense
+  amount: number;
   date: string;
   category: ExpenseCategory;
-  isInstallment?: boolean; // True if this is an installment plan
-  numberOfInstallments?: number; // e.g., 3, 6, 12 months
+  isInstallment?: boolean;
+  numberOfInstallments?: number;
   createdAt?: string;
 }
 
-export interface MonthlySettings {
-  monthlySalary?: number; // Added
-  estimatedLivingExpenses?: number;
-  estimatedZakat?: number;
-  estimatedCharity?: number;
+export type FixedEstimateType = 'Salary' | 'Zakat' | 'Charity' | 'Other';
+export type FixedEstimatePeriod = 'Monthly' | 'Quarterly' | 'Yearly';
+
+export interface FixedEstimateRecord {
+  id: string;
+  userId: string;
+  type: FixedEstimateType;
+  name?: string; // Used if type is 'Other'
+  amount: number;
+  period: FixedEstimatePeriod;
+  isExpense: boolean; // True for Zakat, Charity, 'Other' expenses; False for Salary, 'Other' income
+  createdAt: string;
+  updatedAt?: string;
 }
+
 
 export interface CurrencyFluctuationAnalysisResult {
   significantDeviation: boolean;
@@ -117,7 +126,7 @@ export type TransactionType = 'buy' | 'sell';
 export interface Transaction {
   id: string;
   investmentId?: string;
-  stockId?: string; // This can be the ID of the ListedSecurity
+  stockId?: string; 
   tickerSymbol: string;
   type: TransactionType;
   date: string;
@@ -127,7 +136,7 @@ export interface Transaction {
   totalAmount: number;
   profitOrLoss?: number;
   createdAt: string;
-  isInvestmentRecord?: boolean; // To differentiate buys (from investments) vs. sells (from transactions)
+  isInvestmentRecord?: boolean; 
 }
 
 export interface DashboardSummary {
@@ -140,11 +149,11 @@ export interface GoldMarketPrices {
   pricePerGramK21?: number;
   pricePerGoldPound?: number;
   pricePerOunce?: number;
-  lastUpdated?: any; // Could be Firestore Timestamp or Date string
+  lastUpdated?: any; 
 }
 
 export interface ExchangeRates {
-  [key: string]: number; // e.g., USD_EGP: 30.85
+  [key: string]: number; 
 }
 
 export type AggregatedGoldHolding = {
@@ -152,13 +161,13 @@ export type AggregatedGoldHolding = {
   displayName: string;
   itemType: 'physical' | 'fund';
   logoUrl?: string;
-  totalQuantity: number; // Grams for physical, units for funds
+  totalQuantity: number; 
   averagePurchasePrice: number;
   totalCost: number;
   currentMarketPrice?: number;
-  currency: string; // e.g. EGP for physical, fund's currency for funds
-  fundDetails?: ListedSecurity; // if itemType is 'fund'
-  physicalGoldType?: GoldType; // if itemType is 'physical'
+  currency: string; 
+  fundDetails?: ListedSecurity; 
+  physicalGoldType?: GoldType; 
 };
 
 export interface AggregatedCurrencyHolding {
@@ -176,27 +185,27 @@ export interface AggregatedDebtHolding {
   id: string;
   itemType: 'direct' | 'fund';
   displayName: string;
-  // Direct debt fields
+  
   debtSubType?: DebtSubType;
   issuer?: string;
   interestRate?: number;
   maturityDate?: string;
-  amountInvested?: number; // For direct debt, this is the principal
+  amountInvested?: number; 
   purchaseDate?: string;
   maturityDay?: string;
   maturityMonth?: string;
   maturityYear?: string;
   projectedMonthlyInterest?: number;
   projectedAnnualInterest?: number;
-  // Fund fields
+  
   fundDetails?: ListedSecurity;
-  totalUnits?: number; // Shares for funds
-  averagePurchasePrice?: number; // For funds
-  totalCost?: number; // For funds
-  currentMarketPrice?: number; // For funds
-  currentValue?: number; // For funds
-  profitLoss?: number; // For funds
-  profitLossPercent?: number; // For funds
-  currency?: string; // Fund's currency
-  logoUrl?: string; // Fund's logo
+  totalUnits?: number; 
+  averagePurchasePrice?: number; 
+  totalCost?: number; 
+  currentMarketPrice?: number; 
+  currentValue?: number; 
+  profitLoss?: number; 
+  profitLossPercent?: number; 
+  currency?: string; 
+  logoUrl?: string; 
 }

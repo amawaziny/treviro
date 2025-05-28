@@ -11,13 +11,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, TrendingDown, AlertCircle, Landmark, Edit } from 'lucide-react';
+import { Plus, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ExpenseRecord } from '@/lib/types';
-import { FinancialSettingsForm } from '@/components/settings/financial-settings-form'; // Import the form
+// Removed FinancialSettingsForm import as its functionality is moved
 
 export default function ExpensesPage() {
-  const { expenseRecords, monthlySettings, isLoading } = useInvestments(); // Get monthlySettings
+  const { expenseRecords, isLoading } = useInvestments(); // Removed monthlySettings
   const { language } = useLanguage();
 
   const currentMonthStart = startOfMonth(new Date());
@@ -34,10 +34,10 @@ export default function ExpensesPage() {
     if (!dateString) return 'N/A';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString; // Return original string if invalid
+      if (isNaN(date.getTime())) return dateString; 
       return format(date, 'dd-MM-yyyy');
     } catch (e) {
-      return dateString; // Return original string on error
+      return dateString; 
     }
   };
 
@@ -46,6 +46,15 @@ export default function ExpensesPage() {
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   };
 
+  const formatNumberWithSuffix = (num: number | undefined): string => {
+    if (num === undefined || num === null || isNaN(num)) return '0';
+    if (num === 0) return '0';
+    const absNum = Math.abs(num);
+    if (absNum >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (absNum >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (absNum >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return num.toFixed(2).replace(/\.00$/, ''); // Keep two decimal places for smaller numbers
+  };
 
   if (isLoading) {
     return (
@@ -55,10 +64,7 @@ export default function ExpensesPage() {
           <Skeleton className="h-4 w-64" />
         </div>
         <Separator />
-        <Card className="mt-6">
-          <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
-          <CardContent><Skeleton className="h-10 w-full mb-4" /></CardContent>
-        </Card>
+        {/* Removed skeleton for Monthly Fixed Estimates card */}
         <Card className="mt-6">
           <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
           <CardContent><Skeleton className="h-24 w-full" /></CardContent>
@@ -71,22 +77,11 @@ export default function ExpensesPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Expenses Management</h1>
-        <p className="text-muted-foreground">Log your itemized expenses and manage monthly estimates.</p>
+        <p className="text-muted-foreground">Log your itemized expenses. Fixed estimates (Salary, Zakat, Charity) are now managed on the "Fixed Estimates" page.</p>
       </div>
       <Separator />
 
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Landmark className="mr-2 h-5 w-5 text-primary" />
-            Monthly Fixed Estimates
-          </CardTitle>
-          <CardDescription>Set your recurring estimated monthly expenses. These apply to your Cash Flow calculations each month.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FinancialSettingsForm currentSettings={monthlySettings} />
-        </CardContent>
-      </Card>
+      {/* Removed the Card for Monthly Fixed Estimates that rendered FinancialSettingsForm */}
 
       {expensesThisMonth.length > 0 ? (
         <Card className="mt-6">
@@ -112,11 +107,19 @@ export default function ExpensesPage() {
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.category}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.description || 'N/A'}</TableCell>
                     <TableCell className="text-right">{formatCurrencyEGP(record.amount)}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
-                      {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card'
-                        ? `${(record.amount / record.numberOfInstallments).toFixed(2)} EGP x ${record.numberOfInstallments} months`
-                        : 'N/A'}
-                    </TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left', 'text-sm')}>
+                      {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' ? (
+                        <span className="flex items-center justify-end md:justify-start">
+                          {window.innerWidth < 768
+                            ? `${formatCurrencyEGP(record.amount / record.numberOfInstallments)} / month`
+                            : `${formatCurrencyEGP(record.amount / record.numberOfInstallments)} x ${record.numberOfInstallments} months`}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                         N/A
+                        </span>
+                      )}
+                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

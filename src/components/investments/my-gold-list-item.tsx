@@ -23,7 +23,7 @@ import {
 import { useInvestments } from '@/hooks/use-investments';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
-
+import { formatNumberWithSuffix } from '@/lib/utils';
 interface MyGoldListItemProps {
   holding: AggregatedGoldHolding;
 }
@@ -78,6 +78,11 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(averagePurchasePrice);
+
+  const formatCurrencyForGoldMobile = (value: number, currencyCode: string) => {
+ return `${currencyCode} ${formatNumberWithSuffix(value)}`;
+  };
+
 
   const formattedMarketPrice = currentMarketPrice
     ? new Intl.NumberFormat('en-US', {
@@ -153,16 +158,19 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
         
         <div className="text-right pl-2">
           {currentMarketPrice !== undefined ? (
-            <>
-              <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
-                {formattedProfitLoss}
+            <div className="flex flex-col items-end">
+              <p className={cn("font-bold", 
+                              isProfitable ? 'text-accent' : 'text-destructive',
+                              "text-lg md:text-xl")}>
+                  <span className="md:hidden">{formatCurrencyForGoldMobile(profitLoss, currency)}</span>
               </p>
+
               <Badge variant={isProfitable ? 'default' : 'destructive'} 
                      className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
                 {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
                 {totalCost > 0 ? profitLossPercent.toFixed(2) + '%' : (totalCurrentValue > 0 ? '∞%' : '0.00%')}
               </Badge>
-            </>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">Market N/A</p>
           )}
@@ -191,8 +199,14 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
         </AlertDialog>
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
-        <p>Avg. Cost: {formattedAvgPrice}</p>
-        <p>Market Price: {formattedMarketPrice}</p>
+        <p>Avg. Cost: 
+          <span className="md:hidden">{formatCurrencyForGoldMobile(averagePurchasePrice, currency)}</span>
+          <span className="hidden md:inline">{formattedAvgPrice}</span>
+        </p>
+        <p>Market Price: 
+          <span className="md:hidden">{formatCurrencyForGoldMobile(currentMarketPrice || 0, currency)}</span>
+          <span className="hidden md:inline">{formattedMarketPrice}</span>
+        </p>
       </div>
     </CardContent>
   );

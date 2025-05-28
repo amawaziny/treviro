@@ -4,7 +4,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, TrendingDown, LineChart as CashFlowIcon } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Home, Gem, ScrollText, DollarSign, Search, PiggyBank, TrendingDown, LineChart as CashFlowIcon, Settings } from 'lucide-react'; // Added Settings icon
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -40,46 +41,50 @@ const navItems: NavItem[] = [
     icon: TrendingDown,
   },
   {
+    title: 'Fixed Estimates', // New menu item
+    href: '/fixed-estimates',
+    icon: Settings, // Using Settings icon, can be changed
+  },
+  {
     title: 'Cash Flow',
     href: '/cash-flow',
     icon: CashFlowIcon,
   },
   {
-    title: 'Explore', // Was "Browse Securities"
+    title: 'Explore',
     href: '/stocks',
     icon: Search,
   },
   {
-    title: 'Stocks', // Was "My Stocks"
+    title: 'Stocks',
     href: '/investments/stocks',
     icon: Briefcase,
   },
   {
-    title: 'Real Estate', // Was "My Real Estate"
+    title: 'Real Estate',
     href: '/investments/real-estate',
     icon: Home,
   },
   {
-    title: 'Gold', // Was "My Gold"
+    title: 'Gold',
     href: '/investments/gold',
     icon: Gem,
   },
   {
-    title: 'Debt Instruments', // Was "My Debt"
+    title: 'Debt Instruments',
     href: '/investments/debt-instruments',
     icon: ScrollText,
   },
   {
-    title: 'Currencies', // Was "My Currencies"
+    title: 'Currencies',
     href: '/investments/currencies',
     icon: DollarSign,
   },
-  // "Add Investment" and "Settings" links were removed previously
 ];
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile } = useSidebar(); // useIsMobile is not used here
 
 
   if (!navItems?.length) {
@@ -103,6 +108,9 @@ export function SidebarNav() {
             isActive = false;
           }
            if (item.href === '/expenses' && pathname !== '/expenses' && !pathname.startsWith('/expenses/')) {
+            isActive = false;
+          }
+           if (item.href === '/fixed-estimates' && pathname !== '/fixed-estimates' && !pathname.startsWith('/fixed-estimates/')) {
             isActive = false;
           }
         }

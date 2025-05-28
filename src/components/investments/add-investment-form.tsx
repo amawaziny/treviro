@@ -408,12 +408,12 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
           <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={control} name="amountInvested" render={({ field }) => (
-          <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
+ <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
             <NumericInput
               placeholder="e.g., 10000.75"
               value={field.value}
-              onChange={field.onChange}
-              allowDecimal={true}
+ onChange={field.onChange}
+ allowDecimal={true}
             />
             </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
           )}
@@ -448,6 +448,10 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             <FormField control={control} name="purchaseDate" render={({ field }) => (
                 <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
             )} />
+        )}
+
+        {watchedDebtSubType !== 'Certificate' && (
+            <FormField control={control} name="purchaseDate" render={({ field }) => (<FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>)} />
         )}
       </div>
     </div>
@@ -684,6 +688,7 @@ export function AddInvestmentForm() {
           interestRate: parsedInterestRate,
           maturityDate: values.maturityDate!,
           debtSubType: values.debtSubType!,
+ interestFrequency: values.debtSubType === 'Certificate' ? values.interestFrequency || 'Monthly' : undefined,
           type: 'Debt Instruments',
           purchaseDate: values.debtSubType === 'Certificate' ? undefined : values.purchaseDate,
           certificateInterestFrequency: values.certificateInterestFrequency || 'Monthly',

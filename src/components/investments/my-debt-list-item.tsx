@@ -6,7 +6,7 @@ import type { AggregatedDebtHolding } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building, TrendingUp, TrendingDown, Trash2 } from 'lucide-react'; 
-import { cn } from '@/lib/utils';
+import { cn, formatNumberWithSuffix } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -67,6 +67,11 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
+  const formatCurrencyForDebtMobile = (value: number | undefined, curr: string) => {
+    if (value === undefined || value === null || Number.isNaN(value)) return 'N/A';
+    return `${curr} ${formatNumberWithSuffix(value)}`;
+  };
+
   const handleRemoveFund = async () => {
     if (fundDetails?.symbol) {
       try {
@@ -114,7 +119,8 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             {currentMarketPrice !== undefined && profitLoss !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
-                  {formatDisplayCurrency(profitLoss, currency)}
+ <span className="md:hidden">{formatCurrencyForDebtMobile(profitLoss, currency)}</span>
+ <span className="hidden md:inline">{formatDisplayCurrency(profitLoss, currency)}</span>
                 </p>
                 <Badge variant={isProfitable ? 'default' : 'destructive'}
                        className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
@@ -151,8 +157,14 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
         </div>
 
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
-          <p>Avg. Cost: {formatDisplayCurrency(averagePurchasePrice, currency)}</p>
-          <p>Market Price: {formatDisplayCurrency(currentMarketPrice, currency)}</p>
+          <p>Avg. Cost: 
+            <span className="md:hidden">{formatCurrencyForDebtMobile(averagePurchasePrice || 0, currency)}</span>
+ <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice || 0, currency)}</span>
+ </p>
+          <p>Market Price: 
+            <span className="md:hidden">{formatCurrencyForDebtMobile(currentMarketPrice, currency)}</span>
+ <span className="hidden md:inline">{formatDisplayCurrency(currentMarketPrice, currency)}</span>
+ </p>
         </div>
       </CardContent>
     </Card>
