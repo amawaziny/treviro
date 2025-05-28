@@ -1,8 +1,7 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import {
@@ -46,29 +45,31 @@ const getCurrentDate = () => {
 
 const initialFormValues: AddInvestmentFormValues = {
   type: undefined,
-  amountInvested: "",
+  amountInvested: undefined,
   purchaseDate: getCurrentDate(),
   name: "",
 
   selectedStockId: undefined,
-  numberOfShares: "",
-  purchasePricePerShare: "",
-  purchaseFees: "0",
+  numberOfShares: undefined,
+  purchasePricePerShare: undefined,
+  purchaseFees: 0,
 
   goldType: undefined,
-  quantityInGrams: "",
+  quantityInGrams: undefined,
 
   currencyCode: "",
-  foreignCurrencyAmount: "",
-  exchangeRateAtPurchase: "",
+  foreignCurrencyAmount: undefined,
+  exchangeRateAtPurchase: undefined,
 
   propertyAddress: "",
   propertyType: undefined,
 
   debtSubType: undefined,
   issuer: "",
-  interestRate: "",
+  interestRate: undefined,
   maturityDate: "",
+
+  certificateInterestFrequency: "Monthly",
 };
 
 interface RenderGoldFieldsProps {
@@ -124,7 +125,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 50 or 2"
-                  value={field.value}
+                  value={field.value !== undefined ? String(field.value) : undefined}
                   onChange={field.onChange}
                   allowDecimal={true}
                 />
@@ -143,7 +144,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 10000.50"
-                  value={field.value}
+                  value={field.value !== undefined ? String(field.value) : undefined}
                   onChange={field.onChange}
                   allowDecimal={true}
                 />
@@ -197,7 +198,7 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             <FormItem><FormLabel>Foreign Currency Amount</FormLabel><FormControl>
               <NumericInput
                 placeholder="e.g., 1000.50"
-                value={field.value}
+                value={field.value !== undefined ? String(field.value) : undefined}
                 onChange={field.onChange}
                 allowDecimal={true}
               />
@@ -207,7 +208,7 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             <FormItem><FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel><FormControl>
               <NumericInput
                 placeholder="e.g., 30.85 (for USD to EGP)"
-                value={field.value}
+                value={field.value !== undefined ? String(field.value) : undefined}
                 onChange={field.onChange}
                 allowDecimal={true}
               />
@@ -301,7 +302,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 100"
-                  value={field.value}
+                  value={field.value !== undefined ? String(field.value) : undefined}
                   onChange={field.onChange}
                   allowDecimal={false}
                 />
@@ -319,7 +320,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 150.50"
-                  value={field.value}
+                  value={field.value !== undefined ? String(field.value) : undefined}
                   onChange={field.onChange}
                   allowDecimal={true}
                 />
@@ -369,10 +370,13 @@ interface RenderDebtFieldsProps {
   setValue: any;
   watch: any;
 }
-const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({ control, setValue, watch }) => {
+const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
+  const { control, setValue, watch } = useFormContext();
   const watchedDebtSubType = watch("debtSubType");
+  console.log("RenderDebtFieldsComponent rendered, watchedDebtSubType:", watchedDebtSubType);
 
   useEffect(() => {
+    console.log("useEffect running, watchedDebtSubType:", watchedDebtSubType);
     if (watchedDebtSubType === 'Certificate') {
       setValue('purchaseDate', ''); 
     } else if (watchedDebtSubType && !watch("purchaseDate")) {
@@ -414,6 +418,32 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({ control, s
             </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage /></FormItem>
           )}
         />
+        {/* Certificate Interest Frequency Dropdown */}
+        {watchedDebtSubType === 'Certificate' && (
+          <FormField
+            control={control}
+            name="certificateInterestFrequency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Certificate Interest Frequency</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || 'Monthly'}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Monthly">Monthly</SelectItem>
+                    <SelectItem value="Quarterly">Quarterly</SelectItem>
+                    <SelectItem value="Yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>How often interest is paid. Default is Monthly.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         {watchedDebtSubType !== 'Certificate' && (
             <FormField control={control} name="purchaseDate" render={({ field }) => (
                 <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
@@ -481,7 +511,10 @@ export function AddInvestmentForm() {
 
   const form = useForm<AddInvestmentFormValues>({
     resolver: zodResolver(AddInvestmentSchema),
-    defaultValues: initialFormValues,
+    defaultValues: {
+      ...initialFormValues,
+      certificateInterestFrequency: "Monthly",
+    },
   });
 
   const selectedTypeFromFormWatch = form.watch("type");
@@ -552,7 +585,7 @@ export function AddInvestmentForm() {
       getListedSecurityById(preSelectedSecurityId).then(security => {
         if (isMounted && security) {
           setPreSelectedSecurityDetails(security);
-          form.setValue("purchasePricePerShare", String(security.price));
+          form.setValue("purchasePricePerShare", security.price);
         } else if (isMounted) {
           toast({ title: "Error", description: "Pre-selected security not found.", variant: "destructive" });
           router.replace('/investments/add');
@@ -603,17 +636,17 @@ export function AddInvestmentForm() {
       name: "", 
     };
 
-    let newInvestment: Omit<StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment, 'createdAt'>;
+    let newInvestment: DebtInstrumentInvestment | StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment;
     let analysisResultFromAi: CurrencyFluctuationAnalysisOutput | undefined = undefined;
 
-    const parsedAmountInvested = parseFloat(values.amountInvested || "0");
-    const parsedNumberOfShares = parseInt(values.numberOfShares || "0", 10);
-    const parsedPricePerShare = parseFloat(values.purchasePricePerShare || "0");
-    const parsedPurchaseFees = parseFloat(values.purchaseFees || "0");
-    const parsedQuantityInGrams = parseFloat(values.quantityInGrams || "0");
-    const parsedForeignCurrencyAmount = parseFloat(values.foreignCurrencyAmount || "0");
-    const parsedExchangeRateAtPurchase = parseFloat(values.exchangeRateAtPurchase || "0");
-    const parsedInterestRate = parseFloat(values.interestRate || "0");
+    const parsedAmountInvested = typeof values.amountInvested === 'number' ? values.amountInvested : 0;
+    const parsedNumberOfShares = typeof values.numberOfShares === 'number' ? values.numberOfShares : 0;
+    const parsedPricePerShare = typeof values.purchasePricePerShare === 'number' ? values.purchasePricePerShare : 0;
+    const parsedPurchaseFees = typeof values.purchaseFees === 'number' ? values.purchaseFees : 0;
+    const parsedQuantityInGrams = typeof values.quantityInGrams === 'number' ? values.quantityInGrams : 0;
+    const parsedForeignCurrencyAmount = typeof values.foreignCurrencyAmount === 'number' ? values.foreignCurrencyAmount : 0;
+    const parsedExchangeRateAtPurchase = typeof values.exchangeRateAtPurchase === 'number' ? values.exchangeRateAtPurchase : 0;
+    const parsedInterestRate = typeof values.interestRate === 'number' ? values.interestRate : 0;
 
 
     if (finalInvestmentType === "Stocks") {
@@ -634,8 +667,7 @@ export function AddInvestmentForm() {
         ...newInvestmentBase,
         name: investmentName,
         amountInvested: calculatedAmountInvested,
-        actualStockName: selectedSecurity.name,
-        tickerSymbol: selectedSecurity.symbol,
+        tickerSymbol: selectedSecurity.symbol as string,
         stockLogoUrl: selectedSecurity.logoUrl,
         numberOfShares: parsedNumberOfShares,
         purchasePricePerShare: parsedPricePerShare,
@@ -648,12 +680,13 @@ export function AddInvestmentForm() {
           ...newInvestmentBase,
           name: investmentName,
           amountInvested: parsedAmountInvested,
-          issuer: values.issuer!,
+          issuer: values.issuer || "",
           interestRate: parsedInterestRate,
           maturityDate: values.maturityDate!,
           debtSubType: values.debtSubType!,
           type: 'Debt Instruments',
-          purchaseDate: values.debtSubType === 'Certificate' ? undefined : values.purchaseDate, 
+          purchaseDate: values.debtSubType === 'Certificate' ? undefined : values.purchaseDate,
+          certificateInterestFrequency: values.certificateInterestFrequency || 'Monthly',
         };
     } else if (finalInvestmentType === "Gold") {
         investmentName = values.name || `Gold (${values.goldType || 'N/A'})`;
@@ -735,7 +768,7 @@ export function AddInvestmentForm() {
     form.reset(resetValues);
 
     if (isPreSelectedStockMode && preSelectedSecurityDetails && preSelectedSecurityId) {
-        form.setValue("purchasePricePerShare", String(preSelectedSecurityDetails.price));
+        form.setValue("purchasePricePerShare", preSelectedSecurityDetails.price);
     } else if (!resetTargetType && !preSelectedInvestmentTypeQueryParam) {
         router.replace('/investments/add');
     }
@@ -774,7 +807,7 @@ export function AddInvestmentForm() {
     const security = listedSecurities.find(s => s.id === selectedValue);
     setPreSelectedSecurityDetails(security || null);
     if (security) {
-        form.setValue("purchasePricePerShare", String(security.price));
+        form.setValue("purchasePricePerShare", security.price);
     }
   }, [listedSecurities, form, setPreSelectedSecurityDetails]);
 
@@ -829,7 +862,7 @@ export function AddInvestmentForm() {
             <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
                 <NumericInput
                     placeholder="e.g., 1000.00"
-                    value={field.value}
+                    value={field.value !== undefined ? String(field.value) : undefined}
                     onChange={field.onChange}
                     allowDecimal={true}
                 />
@@ -891,8 +924,9 @@ export function AddInvestmentForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            { isDedicatedDebtMode ? <MemoizedRenderDebtFields control={form.control} setValue={form.setValue} watch={form.watch} /> :
-              isDedicatedGoldMode ? <MemoizedRenderGoldFieldsSection control={form.control} isDedicatedGoldMode={true}/> :
+            { isDedicatedDebtMode || effectiveSelectedType === "Debt Instruments" ? (
+              <MemoizedRenderDebtFields control={form.control} setValue={form.setValue} watch={form.watch} />
+            ) : isDedicatedGoldMode ? <MemoizedRenderGoldFieldsSection control={form.control} isDedicatedGoldMode={true}/> :
               isDedicatedCurrencyMode ? <MemoizedRenderCurrencyFields control={form.control} isDedicatedCurrencyMode={true} /> :
               isDedicatedRealEstateMode ? <MemoizedRenderRealEstateFields control={form.control} /> :
               isPreSelectedStockMode && preSelectedSecurityDetails ? (

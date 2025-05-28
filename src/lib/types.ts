@@ -51,6 +51,7 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   issuer: string;
   interestRate: number;
   maturityDate: string; // YYYY-MM-DD
+  certificateInterestFrequency: 'Monthly' | 'Quarterly' | 'Yearly';
 }
 
 export type Investment = StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment;

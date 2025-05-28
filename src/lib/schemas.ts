@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const investmentTypes = ['Real Estate', 'Gold', 'Stocks', 'Debt Instruments', 'Currencies'] as const;
@@ -47,6 +46,7 @@ export const AddInvestmentSchema = z.object({
     if (!dateStr || dateStr.trim() === "") return true;
     return !isNaN(Date.parse(dateStr));
   }, { message: "Invalid maturity date format."}),
+  certificateInterestFrequency: z.enum(["Monthly", "Quarterly", "Yearly"]).default("Monthly").optional(),
 
 }).superRefine((data, ctx) => {
   const effectiveType = data.type;
