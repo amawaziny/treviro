@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord, MonthlySettings, FixedEstimateType } from '@/lib/types';
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
 import { db as firestoreInstance } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment, FieldValue } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
@@ -289,14 +289,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const newTransaction: Omit<Transaction, 'createdAt'> & { createdAt: FieldValue } = { 
       id: transactionId,
       stockId: listedStockId, 
-      tickerSymbol, type: 'sell' as 'sell', 
-      date: sellDate, 
-      shares: numberOfSharesToSell, 
-      price: sellPricePerShare, 
-      fees, 
-      totalAmount: totalProceeds, 
-      profitOrLoss, 
-      createdAt: serverTimestamp() 
+      tickerSymbol,
+      type: 'sell',
+      date: sellDate,
+      numberOfShares: numberOfSharesToSell, // changed from 'shares' to 'numberOfShares'
+      pricePerShare: sellPricePerShare, // Added missing property
+      fees,
+      totalAmount: totalProceeds,
+      profitOrLoss,
+      createdAt: serverTimestamp()
     };
 
     const batch = writeBatch(firestoreInstance);

@@ -444,14 +444,11 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             )}
           />
         )}
+        {/* Only show purchase date for non-certificate debt types */}
         {watchedDebtSubType !== 'Certificate' && (
             <FormField control={control} name="purchaseDate" render={({ field }) => (
                 <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>
             )} />
-        )}
-
-        {watchedDebtSubType !== 'Certificate' && (
-            <FormField control={control} name="purchaseDate" render={({ field }) => (<FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()} /></FormControl><FormMessage /></FormItem>)} />
         )}
       </div>
     </div>
@@ -688,7 +685,6 @@ export function AddInvestmentForm() {
           interestRate: parsedInterestRate,
           maturityDate: values.maturityDate!,
           debtSubType: values.debtSubType!,
- interestFrequency: values.debtSubType === 'Certificate' ? values.interestFrequency || 'Monthly' : undefined,
           type: 'Debt Instruments',
           purchaseDate: values.debtSubType === 'Certificate' ? undefined : values.purchaseDate,
           certificateInterestFrequency: values.certificateInterestFrequency || 'Monthly',
