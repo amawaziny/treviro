@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord, MonthlySettings, FixedEstimateType } from '@/lib/types';
 import { db as firestoreInstance } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment, FieldValue } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
@@ -83,10 +83,14 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           const typedKey = key as keyof DashboardSummary;
           const updateValue = updates[typedKey];
 
-          if (typeof updateValue === 'number') {
-            if (summaryDoc.exists() && updateValue !== 0) {
-              newDataForUpdate[typedKey] = increment(updateValue);
+          if (typeof updateValue === 'number') { // Ensure it's a number
+            if (summaryDoc.exists()) {
+              // Only add to newDataForUpdate if it's a non-zero change to avoid empty updates
+              if (updateValue !== 0) {
+                  newDataForUpdate[typedKey] = increment(updateValue);
+              }
             } else {
+              // For new doc, accumulate directly into currentData
               (currentData[typedKey] as number) = ((currentData[typedKey] as number | undefined) || 0) + updateValue;
             }
           }
@@ -101,7 +105,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     } catch (e) {
       console.error("Dashboard summary transaction failed: ", e);
     }
-  }, [userId, getDashboardSummaryDocRef]);
+  }, [userId, getDashboardSummaryDocRef, firestoreInstance]);
+
 
   useEffect(() => {
     if (authIsLoading || !firestoreInstance) {
@@ -131,26 +136,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       fixedEstimates: `users/${userId}/fixedEstimates`,
     };
     
-    const summaryDocRef = getDashboardSummaryDocRef();
     const unsubscribers: (() => void)[] = [];
-
-    if (summaryDocRef) {
-      unsubscribers.push(onSnapshot(summaryDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setDashboardSummary(docSnap.data() as DashboardSummary);
-        } else {
-          setDashboardSummary(defaultDashboardSummary);
-          setDoc(summaryDocRef, { ...defaultDashboardSummary }, { merge: true })
-            .catch(err => console.error("Failed to create default summary doc:", err));
-        }
-      }, (error) => {
-        console.error("Error fetching dashboard summary:", error);
-        setDashboardSummary(defaultDashboardSummary);
-      }));
-    } else {
-      setDashboardSummary(defaultDashboardSummary);
-    }
-    
     const dataFetchPromises: Promise<any>[] = [];
 
     const setupListener = <T,>(path: string, setter: React.Dispatch<React.SetStateAction<T[]>>, orderByField = "createdAt", orderDirection: "asc" | "desc" = "desc") => {
@@ -166,7 +152,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             ...data,
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
             updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt,
-            date: data.date, 
           } as T);
         });
         setter(fetchedItems);
@@ -182,59 +167,100 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     setupListener<ExpenseRecord>(collectionsPaths.expenseRecords, setExpenseRecords, "date");
     setupListener<FixedEstimateRecord>(collectionsPaths.fixedEstimates, setFixedEstimates, "type");
 
-
     const qAnalyses = query(collection(firestoreInstance, collectionsPaths.currencyAnalyses));
-      dataFetchPromises.push(getDocs(qAnalyses).catch(() => null));
-      unsubscribers.push(onSnapshot(qAnalyses, (querySnapshot) => {
-        const fetchedAnalyses: Record<string, CurrencyFluctuationAnalysisResult> = {};
-        querySnapshot.forEach((doc) => { fetchedAnalyses[doc.id] = doc.data() as CurrencyFluctuationAnalysisResult; });
-        setCurrencyAnalyses(fetchedAnalyses);
-      }, (error) => {
-        console.error("Error fetching currency analyses:", error);
-        setCurrencyAnalyses({});
+    dataFetchPromises.push(getDocs(qAnalyses).catch(() => null));
+    unsubscribers.push(onSnapshot(qAnalyses, (querySnapshot) => {
+      const fetchedAnalyses: Record<string, CurrencyFluctuationAnalysisResult> = {};
+      querySnapshot.forEach((doc) => { fetchedAnalyses[doc.id] = doc.data() as CurrencyFluctuationAnalysisResult; });
+      setCurrencyAnalyses(fetchedAnalyses);
+    }, (error) => {
+      console.error("Error fetching currency analyses:", error);
+      setCurrencyAnalyses({});
     }));
 
+    // Add initial fetch for dashboard summary
+    const summaryDocRef = getDashboardSummaryDocRef();
+    if (summaryDocRef) {
+      dataFetchPromises.push(
+        getDoc(summaryDocRef)
+          .then(docSnap => {
+            if (docSnap.exists()) {
+              setDashboardSummary(docSnap.data() as DashboardSummary);
+            } else {
+              setDashboardSummary(defaultDashboardSummary);
+              // Attempt to create the document if it doesn't exist
+              return setDoc(summaryDocRef, { ...defaultDashboardSummary }, { merge: true });
+            }
+          })
+          .catch(error => {
+            console.error("Error initial fetching/creating dashboard summary:", error);
+            setDashboardSummary(defaultDashboardSummary);
+          })
+      );
+      // The onSnapshot listener will then keep it up-to-date
+      unsubscribers.push(onSnapshot(summaryDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setDashboardSummary(docSnap.data() as DashboardSummary);
+        } else {
+          // Document might have been deleted, reset to default and try to recreate
+          setDashboardSummary(defaultDashboardSummary);
+          setDoc(summaryDocRef, { ...defaultDashboardSummary }, { merge: true })
+            .catch(err => console.error("Failed to re-create default summary doc on snapshot non-existence:", err));
+        }
+      }, (error) => {
+        console.error("Error listening to dashboard summary:", error);
+        setDashboardSummary(defaultDashboardSummary);
+      }));
+    } else {
+      setDashboardSummary(defaultDashboardSummary);
+      // If no summaryDocRef (e.g. no userId yet), and no other promises, set loading to false
+      if(dataFetchPromises.length === 0) setIsLoading(false);
+    }
+    
     Promise.all(dataFetchPromises)
       .then(() => setIsLoading(false))
       .catch(() => setIsLoading(false)); 
 
     return () => unsubscribers.forEach(unsub => unsub());
-  }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef]);
+  }, [userId, isAuthenticated, authIsLoading, getDashboardSummaryDocRef, firestoreInstance]);
 
   const addInvestment = useCallback(async (investmentData: Omit<Investment, 'createdAt' | 'id'>, analysis?: CurrencyFluctuationAnalysisResult) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const investmentId = uuidv4();
     const investmentWithTimestamp = { ...investmentData, id: investmentId, userId, createdAt: serverTimestamp() };
     await setDoc(doc(firestoreInstance, `users/${userId}/investments`, investmentId), investmentWithTimestamp);
-    if (investmentData.amountInvested) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: investmentData.amountInvested });
+    
+    const amountInvestedValue = Number(investmentData.amountInvested);
+    if (!isNaN(amountInvestedValue) && amountInvestedValue !== 0) {
+      await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: amountInvestedValue });
+    }
     if (analysis && investmentData.type === 'Currencies') await setDoc(doc(firestoreInstance, `users/${userId}/currencyAnalyses`, investmentId), analysis);
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
   const addIncomeRecord = useCallback(async (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const incomeId = uuidv4();
     await setDoc(doc(firestoreInstance, `users/${userId}/incomeRecords`, incomeId), { ...incomeData, id: incomeId, userId, createdAt: serverTimestamp() });
-  }, [userId, isAuthenticated]);
+  }, [userId, isAuthenticated, firestoreInstance]);
 
   const addExpenseRecord = useCallback(async (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const expenseId = uuidv4();
     await setDoc(doc(firestoreInstance, `users/${userId}/expenseRecords`, expenseId), { ...expenseData, id: expenseId, userId, createdAt: serverTimestamp() });
-  }, [userId, isAuthenticated]);
+  }, [userId, isAuthenticated, firestoreInstance]);
 
   const addFixedEstimate = useCallback(async (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const estimateId = uuidv4();
-    const finalEstimateData = {
+    const finalEstimateData: FixedEstimateRecord = {
       ...estimateData,
       id: estimateId,
       userId,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: serverTimestamp() as unknown as string, // Temp cast for serverTimestamp
+      updatedAt: serverTimestamp() as unknown as string, // Temp cast
     };
     await setDoc(doc(firestoreInstance, `users/${userId}/fixedEstimates`, estimateId), finalEstimateData);
-  }, [userId, isAuthenticated]);
-
+  }, [userId, isAuthenticated, firestoreInstance]);
 
   const getInvestmentsByType = useCallback((type: string) => investments.filter(inv => inv.type === type), [investments]);
 
@@ -260,13 +286,13 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const profitOrLoss = totalProceeds - costOfSharesBeingSold;
 
     const transactionId = uuidv4();
-    const newTransaction = { 
+    const newTransaction: Omit<Transaction, 'createdAt'> & { createdAt: FieldValue } = { 
       id: transactionId,
       stockId: listedStockId, 
       tickerSymbol, type: 'sell' as 'sell', 
       date: sellDate, 
-      numberOfShares: numberOfSharesToSell, 
-      pricePerShare: sellPricePerShare, 
+      shares: numberOfSharesToSell, 
+      price: sellPricePerShare, 
       fees, 
       totalAmount: totalProceeds, 
       profitOrLoss, 
@@ -303,13 +329,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
     await batch.commit();
 
-    if (profitOrLoss) await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
-    if (costBasisReductionFromPortfolio) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReductionFromPortfolio });
+    if (!isNaN(profitOrLoss)) await updateDashboardSummaryDoc({ totalRealizedPnL: profitOrLoss });
+    if (!isNaN(costBasisReductionFromPortfolio) && costBasisReductionFromPortfolio !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -costBasisReductionFromPortfolio });
 
-    // Automatically add profit as income
     if (profitOrLoss > 0) {
       const incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'> = {
-        type: 'Profit Share', // Or a more specific type like 'Security Sale Profit'
+        type: 'Profit Share',
         source: `Sale of ${tickerSymbol}`,
         amount: profitOrLoss,
         date: sellDate,
@@ -318,7 +343,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       await addIncomeRecord(incomeData);
     }
 
-  }, [userId, isAuthenticated, investments, updateDashboardSummaryDoc, addIncomeRecord]);
+  }, [userId, isAuthenticated, investments, updateDashboardSummaryDoc, addIncomeRecord, firestoreInstance]);
 
   const correctedUpdateStockInvestment = useCallback(async (investmentId: string, dataToUpdate: Pick<StockInvestment, 'numberOfShares' | 'purchasePricePerShare' | 'purchaseDate' | 'purchaseFees'>, oldAmountInvested: number) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -331,9 +356,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const newCalculatedAmountInvested = (newNumberOfShares * newPurchasePricePerShare) + newPurchaseFees;
     const updatedInvestmentData = { ...dataToUpdate, amountInvested: newCalculatedAmountInvested, updatedAt: serverTimestamp() };
     await setDoc(investmentDocRef, updatedInvestmentData, { merge: true });
+    
     const amountInvestedDelta = newCalculatedAmountInvested - oldAmountInvested;
-    if (amountInvestedDelta) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: amountInvestedDelta });
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+    if (!isNaN(amountInvestedDelta) && amountInvestedDelta !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: amountInvestedDelta });
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
   const deleteSellTransaction = useCallback(async (transactionToDelete: Transaction) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -341,12 +367,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
     if (transactionToDelete.type !== 'sell') throw new Error("Can only delete 'sell' transactions.");
     await deleteDoc(doc(firestoreInstance, `users/${userId}/transactions`, transactionToDelete.id));
-    if (transactionToDelete.profitOrLoss !== undefined) await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
-    
-    // Note: This does not automatically re-add shares to holdings or reverse income records.
-    // If an income record was created for this sale's profit, it would need to be manually deleted by the user from the income page.
-
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+    if (transactionToDelete.profitOrLoss !== undefined && !isNaN(transactionToDelete.profitOrLoss)) {
+      await updateDashboardSummaryDoc({ totalRealizedPnL: -transactionToDelete.profitOrLoss });
+    }
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
   const removeStockInvestmentsBySymbol = useCallback(async (tickerSymbol: string) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -362,8 +386,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       batch.delete(docSnapshot.ref);
     });
     await batch.commit();
-    if (totalAmountInvestedRemoved) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+    if (!isNaN(totalAmountInvestedRemoved) && totalAmountInvestedRemoved !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
   const removeGoldInvestments = useCallback(async (identifier: string, itemType: 'physical' | 'fund') => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -371,22 +395,29 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
     let totalAmountInvestedRemoved = 0;
     const investmentsCollectionPath = `users/${userId}/investments`;
+    const batch = writeBatch(firestoreInstance);
+
     if (itemType === 'physical') {
       const goldType = identifier as GoldType;
       const q = query(collection(firestoreInstance, investmentsCollectionPath), where("type", "==", "Gold"), where("goldType", "==", goldType));
       const querySnapshot = await getDocs(q);
-      const batch = writeBatch(firestoreInstance);
       querySnapshot.forEach((docSnapshot) => {
         totalAmountInvestedRemoved += (docSnapshot.data() as GoldInvestment).amountInvested || 0;
         batch.delete(docSnapshot.ref);
       });
-      await batch.commit();
     } else if (itemType === 'fund') {
-      await removeStockInvestmentsBySymbol(identifier);
-      return; 
+      // For funds, 'identifier' is the tickerSymbol.
+      // We need to fetch these to sum their amountInvested before deleting.
+      const q = query(collection(firestoreInstance, investmentsCollectionPath), where("type", "==", "Stocks"), where("tickerSymbol", "==", identifier));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((docSnapshot) => {
+        totalAmountInvestedRemoved += (docSnapshot.data() as StockInvestment).amountInvested || 0;
+        batch.delete(docSnapshot.ref);
+      });
     }
-    if (totalAmountInvestedRemoved && itemType === 'physical') await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc, removeStockInvestmentsBySymbol]);
+    await batch.commit();
+    if (!isNaN(totalAmountInvestedRemoved) && totalAmountInvestedRemoved !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -totalAmountInvestedRemoved });
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
   const removeDirectDebtInvestment = useCallback(async (investmentId: string) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -396,10 +427,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const docSnap = await getDoc(investmentDocRef);
     if (!docSnap.exists()) return;
     const investmentData = docSnap.data() as DebtInstrumentInvestment;
-    if (investmentData.type !== 'Debt Instruments') return;
+    if (investmentData.type !== 'Debt Instruments') return; // Should not happen if called correctly
+    
+    const amountInvested = investmentData.amountInvested;
     await deleteDoc(investmentDocRef);
-    if (investmentData.amountInvested) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -investmentData.amountInvested });
-  }, [userId, isAuthenticated, updateDashboardSummaryDoc]);
+    if (!isNaN(amountInvested) && amountInvested !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -amountInvested });
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
   return (
     <InvestmentContext.Provider value={{
@@ -414,3 +447,5 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     </InvestmentContext.Provider>
   );
 };
+
+    

@@ -897,7 +897,7 @@ export function AddInvestmentForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            { isDedicatedDebtMode ? <MemoizedRenderDebtFields control={form.control} setValue={form.setValue} watch={form.watch} /> :
+            { isDedicatedDebtMode ? <MemoizedRenderDebtFields control={form.control} setValue={form.setValue} watch={form.watch} /> : /* This handles the dedicated debt mode */
               isDedicatedGoldMode ? <MemoizedRenderGoldFieldsSection control={form.control} isDedicatedGoldMode={true}/> :
               isDedicatedCurrencyMode ? <MemoizedRenderCurrencyFields control={form.control} isDedicatedCurrencyMode={true} /> :
               isDedicatedRealEstateMode ? <MemoizedRenderRealEstateFields control={form.control} /> :
