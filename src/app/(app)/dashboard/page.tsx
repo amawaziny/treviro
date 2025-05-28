@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import type { DebtInstrumentInvestment, ExpenseRecord, FixedEstimateRecord, IncomeRecord, Transaction } from '@/lib/types';
 import Link from 'next/link';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { formatNumberWithSuffix } from '@/lib/utils';
 
@@ -33,7 +33,7 @@ export default function DashboardPage() {
     investments,
     isLoading: isLoadingContext, // This will be true if any context data is loading
   } = useInvestments();
-  const { isMobile } = useMobile();
+  const isMobile = useIsMobile();
 
   const isLoading = isLoadingDashboardSummary || isLoadingContext;
 

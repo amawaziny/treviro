@@ -42,8 +42,7 @@ export default function CashFlowPage() {
 
   const formatCurrencyEGPForMobile = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
-    // Apply suffix formatting first, then currency format
-    return formatCurrencyEGP(parseFloat(formatNumberWithSuffix(value)));
+    return 'EGP ' + formatNumberWithSuffix(value);
   };
 
   const {

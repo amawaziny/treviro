@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { LineChart, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
-import type { ListedSecurity } from '@/lib/types';
+import type { ListedSecurity, StockInvestment } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { formatNumberWithSuffix } from '@/lib/utils';
 import { useInvestments } from '@/hooks/use-investments';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
@@ -72,6 +73,15 @@ export function MyStockListItem({
     }).format(value);
   };
   
+   const formatCurrencyWithSuffixForMobile = (value: number, currencyCode: string) => {
+    if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0`;
+    const formattedNumber = formatNumberWithSuffix(value);
+    // Prepend currency code and handle potential negative sign from suffix formatting
+    const sign = formattedNumber.startsWith('-') ? '-' : '';
+    const numberPart = sign === '-' ? formattedNumber.substring(1) : formattedNumber;
+    return `${sign}${currencyCode} ${numberPart}`;
+  };
+
   const formattedAvgPrice = formatCurrencyWithThreeDecimals(averagePurchasePrice, currency);
   const formattedMarketPrice = currentMarketPrice ? formatCurrencyWithThreeDecimals(currentMarketPrice, currency) : 'N/A';
   const formattedProfitLoss = formatCurrencyWithThreeDecimals(profitLoss, currency);
@@ -138,7 +148,10 @@ export function MyStockListItem({
             <p className="text-sm text-muted-foreground">Loading...</p>
           ) : currentMarketPrice !== undefined ? (
             <>
-              <p className={`text-lg font-bold ${isProfitable ? 'text-accent' : 'text-destructive'}`}>
+              <p className={`text-lg font-bold ${isProfitable ? 'text-accent' : 'text-destructive'} md:hidden`}>
+                {formatCurrencyWithSuffixForMobile(profitLoss, currency)}
+              </p>
+               <p className={`text-lg font-bold ${isProfitable ? 'text-accent' : 'text-destructive'} hidden md:block`}>
                 {formattedProfitLoss}
               </p>
               <Badge variant={isProfitable ? 'default' : 'destructive'} 
@@ -175,8 +188,18 @@ export function MyStockListItem({
         </AlertDialog>
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
-        <p>Avg. Purchase Price: {formattedAvgPrice}</p>
-        <p>Current Market Price: {formattedMarketPrice}</p>
+        <p>Avg. Purchase Price: 
+            <span className="md:hidden ml-1">{formatCurrencyWithSuffixForMobile(averagePurchasePrice, currency)}</span>
+            <span className="hidden md:inline ml-1">{formattedAvgPrice}</span>
+        </p>
+        <p>Current Market Price: 
+           {currentMarketPrice !== undefined ? (
+             <>
+               <span className="md:hidden ml-1">{formatCurrencyWithSuffixForMobile(currentMarketPrice, currency)}</span>
+               <span className="hidden md:inline ml-1">{formattedMarketPrice}</span>
+             </>
+           ) : <span className="ml-1">N/A</span>}
+        </p>
       </div>
     </CardContent>
   );
