@@ -70,10 +70,10 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             {hasMarketRate && profitOrLossInEGP !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
- <span className=\"md:hidden\">
- {formatCurrencyForCurrencyMobile(profitOrLossInEGP)} {/* Applied formatNumberWithSuffix for mobile profit/loss */}
+ <span className="md:hidden">
+ {formatCurrencyForCurrencyMobile(profitOrLossInEGP)} 
  </span>
- <span className=\"hidden md:inline\" data-ai-hint="Display profit/loss for larger screens">{formattedProfitLoss}</span>
+ <span className="hidden md:inline" data-ai-hint="Display profit/loss for larger screens">{formattedProfitLoss}</span>
                 </p>
                 <Badge variant={isProfitable ? 'default' : 'destructive'} 
                        className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>

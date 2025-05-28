@@ -163,14 +163,14 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
                               isProfitable ? 'text-accent' : 'text-destructive',
                               "text-lg md:text-xl")}>
                   <span className="md:hidden">{formatCurrencyForGoldMobile(profitLoss, currency)}</span>
-
+              </p>
 
               <Badge variant={isProfitable ? 'default' : 'destructive'} 
                      className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
                 {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
                 {totalCost > 0 ? profitLossPercent.toFixed(2) + '%' : (totalCurrentValue > 0 ? '∞%' : '0.00%')}
               </Badge>
-            </>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">Market N/A</p>
           )}
