@@ -31,7 +31,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
 
   const formatCurrencyForCurrencyMobile = (value: number | undefined, currency = "EGP") => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
-    return `${currency} ${formatNumberWithSuffix(value || 0)}`;
+    return `${currency} ${formatNumberWithSuffix(value)}`;
   };
 
   const formatAmount = (value: number | undefined) => {
@@ -71,9 +71,9 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
  <span className=\"md:hidden\">
- {formatCurrencyForCurrencyMobile(profitOrLossInEGP)}
+ {formatCurrencyForCurrencyMobile(profitOrLossInEGP)} {/* Applied formatNumberWithSuffix for mobile profit/loss */}
  </span>
- <span className=\"hidden md:inline\">{formattedProfitLoss}</span>
+ <span className=\"hidden md:inline\" data-ai-hint="Display profit/loss for larger screens">{formattedProfitLoss}</span>
                 </p>
                 <Badge variant={isProfitable ? 'default' : 'destructive'} 
                        className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>

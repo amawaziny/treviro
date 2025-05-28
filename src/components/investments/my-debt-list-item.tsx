@@ -158,8 +158,8 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
 
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
           <p>Avg. Cost: 
-            <span className="md:hidden">{formatCurrencyForDebtMobile(averagePurchasePrice, currency)}</span>
- <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice, currency)}</span>
+            <span className="md:hidden">{formatCurrencyForDebtMobile(averagePurchasePrice || 0, currency)}</span>
+ <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice || 0, currency)}</span>
  </p>
           <p>Market Price: 
             <span className="md:hidden">{formatCurrencyForDebtMobile(currentMarketPrice, currency)}</span>

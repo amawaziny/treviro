@@ -163,9 +163,6 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
                               isProfitable ? 'text-accent' : 'text-destructive',
                               "text-lg md:text-xl")}>
                   <span className="md:hidden">{formatCurrencyForGoldMobile(profitLoss, currency)}</span>
- <span className="hidden md:inline">{formattedProfitLoss}</span>
-              </p>
-             
 
 
               <Badge variant={isProfitable ? 'default' : 'destructive'} 
