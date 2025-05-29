@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -16,11 +15,14 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { formatNumberWithSuffix } from '@/lib/utils';
 
 export default function MyRealEstatePage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { language } = useLanguage(); 
+  const isMobile = useIsMobile();
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(inv => inv.type === 'Real Estate') as RealEstateInvestment[];
@@ -47,6 +49,11 @@ export default function MyRealEstatePage() {
 
   const formatAmountEGP = (value: number) => {
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  };
+
+  const formatAmountEGPWithSuffix = (value: number) => {
+    const formattedNumber = formatNumberWithSuffix(value);
+    return `EGP ${formattedNumber}`;
   };
 
   const formatSecurityCurrency = (value: number, currencyCode: string) => {
@@ -126,7 +133,7 @@ export default function MyRealEstatePage() {
                   <TableRow key={prop.id}>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{prop.propertyAddress || prop.name}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{prop.propertyType || 'N/A'}</TableCell>
-                    <TableCell className="text-right">{formatAmountEGP(prop.amountInvested)}</TableCell>
+                    <TableCell className="text-right">{isMobile ? formatAmountEGPWithSuffix(prop.amountInvested) : formatAmountEGP(prop.amountInvested)}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(prop.purchaseDate)}</TableCell>
                   </TableRow>
                 ))}

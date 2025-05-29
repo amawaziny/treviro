@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -14,10 +13,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, PiggyBank, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { formatNumberWithSuffix } from '@/lib/utils';
 
 export default function IncomePage() {
   const { incomeRecords, isLoading } = useInvestments();
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -38,6 +40,10 @@ export default function IncomePage() {
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   };
 
+  const formatCurrencyEGPWithSuffix = (value: number) => {
+    const formattedNumber = formatNumberWithSuffix(value);
+    return `EGP ${formattedNumber}`;
+  };
 
   if (isLoading) {
     return (
@@ -87,7 +93,7 @@ export default function IncomePage() {
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(record.date)}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.type}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.source || 'N/A'}</TableCell>
-                    <TableCell className="text-right">{formatCurrencyEGP(record.amount)}</TableCell>
+                    <TableCell className="text-right">{isMobile ? formatCurrencyEGPWithSuffix(record.amount) : formatCurrencyEGP(record.amount)}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.description || 'N/A'}</TableCell>
                   </TableRow>
                 ))}

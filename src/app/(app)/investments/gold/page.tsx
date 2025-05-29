@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -16,12 +15,15 @@ import { Button } from '@/components/ui/button';
 import { MyGoldListItem } from '@/components/investments/my-gold-list-item';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
+import { useIsMobile } from '@/hooks/use-mobile';
+import { formatNumberWithSuffix } from '@/lib/utils';
 
 export default function MyGoldPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { goldMarketPrices, isLoading: isLoadingGoldPrices, error: goldPricesError } = useGoldMarketPrices();
   const { language } = useLanguage(); // Get current language
+  const isMobile = useIsMobile();
 
   const aggregatedGoldHoldings = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];

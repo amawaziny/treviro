@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { ReactNode } from 'react';
@@ -36,6 +35,7 @@ interface InvestmentContextType {
   addExpenseRecord: (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   fixedEstimates: FixedEstimateRecord[];
   addFixedEstimate: (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => Promise<void>;
+  recalculateDashboardSummary: () => Promise<void>;
 }
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
@@ -435,6 +435,23 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     if (!isNaN(amountInvested) && amountInvested !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -amountInvested });
   }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
+  // Recalculate dashboard summary from all current investments and transactions
+  const recalculateDashboardSummary = useCallback(async () => {
+    if (!userId || !firestoreInstance) return;
+    // Calculate total invested
+    const totalInvestedAcrossAllAssets = investments.reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
+    // Calculate total realized PnL
+    const totalRealizedPnL = transactions.reduce((sum, txn) => sum + (txn.profitOrLoss || 0), 0);
+    // You can expand this logic as needed
+    const summaryDocRef = getDashboardSummaryDocRef();
+    if (summaryDocRef) {
+      await setDoc(summaryDocRef, {
+        totalInvestedAcrossAllAssets,
+        totalRealizedPnL,
+      }, { merge: true });
+    }
+  }, [userId, firestoreInstance, investments, transactions, getDashboardSummaryDocRef]);
+
   return (
     <InvestmentContext.Provider value={{
       investments, addInvestment, getInvestmentsByType, isLoading, currencyAnalyses,
@@ -442,11 +459,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       updateStockInvestment: correctedUpdateStockInvestment,
       deleteSellTransaction, removeGoldInvestments, removeDirectDebtInvestment,
       dashboardSummary, incomeRecords, addIncomeRecord, expenseRecords, addExpenseRecord,
-      fixedEstimates, addFixedEstimate,
+      fixedEstimates, addFixedEstimate, recalculateDashboardSummary,
     }}>
       {children}
     </InvestmentContext.Provider>
   );
 };
 
-    

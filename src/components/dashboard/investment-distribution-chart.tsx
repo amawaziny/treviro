@@ -1,133 +1,165 @@
-
 "use client"
 
 import * as React from "react"
-import { Pie, PieChart, ResponsiveContainer, Cell, Legend } from "recharts"
+import { ResponsivePie } from '@nivo/pie';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import type { Investment } from "@/lib/types"
 import { useInvestments } from "@/hooks/use-investments"
+import { formatNumberWithSuffix } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
-const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+const INVESTMENT_TYPE_COLORS: Record<string, string> = {
+  'Real Estate': '#b6d037',      // light green
+  'Gold': '#e6b93e',            // gold
+  'Stocks': '#e05a47',          // red
+  'Debt instruments': '#5e9c1c',// dark green
+  'Currencies': '#7bb661',      // green
+};
+
+const INVESTMENT_TYPE_LABELS: Record<string, string> = {
+  'Real Estate': 'Real Estate',
+  'Gold': 'Gold',
+  'Stocks': 'Stocks',
+  'Debt Instruments': 'Debt instruments',
+  'Debt instruments': 'Debt instruments',
+  'Currencies': 'Currencies',
+};
+
+const INVESTMENT_ORDER = [
+  'Real Estate',
+  'Gold',
+  'Stocks',
+  'Debt instruments',
+  'Currencies',
 ];
 
 export function InvestmentDistributionChart() {
   const { investments, isLoading } = useInvestments();
+  const { resolvedTheme } = useTheme();
+
+  // Dynamic color palettes for light/dark mode
+  const LIGHT_COLORS = {
+    'Real Estate': '#b6d037',
+    'Gold': '#e6b93e',
+    'Stocks': '#e05a47',
+    'Debt instruments': '#5e9c1c',
+    'Currencies': '#7bb661',
+  };
+  const DARK_COLORS = {
+    'Real Estate': '#7bb661',
+    'Gold': '#e6b93e',
+    'Stocks': '#ff7b6b',
+    'Debt instruments': '#b6d037',
+    'Currencies': '#45818e',
+  };
+  const COLORS = resolvedTheme === 'dark' ? DARK_COLORS : LIGHT_COLORS;
 
   const chartData = React.useMemo(() => {
     if (isLoading || investments.length === 0) return [];
-    
     const distribution: { [key: string]: number } = {};
     investments.forEach(inv => {
-      distribution[inv.type] = (distribution[inv.type] || 0) + inv.amountInvested;
+      const label = INVESTMENT_TYPE_LABELS[inv.type] || inv.type;
+      distribution[label] = (distribution[label] || 0) + inv.amountInvested;
     });
-
-    return Object.entries(distribution).map(([name, value]) => ({
-      name,
-      value,
-      fill: COLORS[Object.keys(distribution).indexOf(name) % COLORS.length], // Assign color
-    }));
-  }, [investments, isLoading]);
-
-  const chartConfig = React.useMemo(() => {
-    const config: ChartConfig = {};
-    chartData.forEach(item => {
-      config[item.name] = {
-        label: item.name,
-        color: item.fill,
+    return INVESTMENT_ORDER.map(type => {
+      const label = INVESTMENT_TYPE_LABELS[type] || type;
+      return {
+        id: label,
+        label: label,
+        value: distribution[label] || 0,
+        color: COLORS[label as keyof typeof COLORS] || '#8884d8',
       };
-    });
-    return config;
-  }, [chartData]);
+    }).filter(d => d.value > 0);
+  }, [investments, isLoading, COLORS]);
 
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Investment Distribution</CardTitle>
-          <CardDescription>Loading chart data...</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  if (investments.length === 0) {
-     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Investment Distribution</CardTitle>
-          <CardDescription>Asset allocation across types.</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">No investments added yet to display distribution.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
+  const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <Card>
+    <Card className={resolvedTheme === 'dark' ? 'bg-[#181c2a] text-white rounded-2xl shadow-xl' : 'text-[#23255a] rounded-2xl shadow-xl'}>
       <CardHeader>
-        <CardTitle>Investment Distribution</CardTitle>
-        <CardDescription>Asset allocation across different investment types.</CardDescription>
+        <CardTitle className={resolvedTheme === 'dark' ? 'text-white text-lg font-bold' : 'text-[#23255a] text-lg font-bold'}>Investment Distribution</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel nameKey="name" />}
-              />
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                labelLine={false}
-                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-                  const RADIAN = Math.PI / 180;
-                  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                  return (
-                    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="10px">
-                      {`${(percent * 100).toFixed(0)}%`}
+        <div className="relative mx-auto h-[300px]">
+          <ResponsivePie
+            data={chartData}
+            margin={{ top: 20, right: 10, bottom: 10, left: 10 }}
+            innerRadius={0.5}
+            padAngle={4}
+            cornerRadius={8}
+            activeOuterRadiusOffset={5}
+            colors={chartData.map(d => d.color)}
+            borderWidth={4}
+            enableArcLabels={true}
+            enableArcLinkLabels={true}
+            arcLinkLabelsTextColor={d => d.color}
+            arcLinkLabelsSkipAngle={3}
+            arcLinkLabelsDiagonalLength={10}
+            arcLinkLabelsStraightLength={10}
+            arcLinkLabelsThickness={4}
+            arcLinkLabelsColor={{ from: 'color' }}
+            arcLinkLabel={d => `${d.label} ${((d.value/total)*100).toFixed(0)}%`}
+            arcLinkLabelsTextOffset={10}
+            tooltip={({ datum }) => (
+              <div style={{ padding: 10, background: resolvedTheme === 'dark' ? '#181c2a' : '#fff', color: resolvedTheme === 'dark' ? '#fff' : '#23255a', borderRadius: 6, minWidth: 120, fontWeight: 600 }}>
+                <strong>{datum.label}: </strong>
+                {formatNumberWithSuffix(datum.value)}
+              </div>
+            )}
+            theme={{
+              labels: {
+                text: {
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fill: resolvedTheme === 'dark' ? '#fff' : '#23255a',
+                  textShadow: resolvedTheme === 'dark' ? '0 2px 8px #181c2a' : '0 2px 8px #fff',
+                  filter: resolvedTheme === 'dark' ? 'drop-shadow(0 2px 8px #181c2a)' : 'drop-shadow(0 2px 8px #fff)'
+                },
+              },
+            }}
+            animate={true}
+            motionConfig="wobbly"
+            isInteractive={true}
+            layers={['arcs', 'arcLinkLabels', 'legends',
+              // Custom layer for center total
+              (props) => {
+                const { centerX, centerY } = props;
+                return (
+                  <g transform={`translate(${centerX},${centerY})`}>
+                    <text
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      style={{ fontSize: 28, fontWeight: 700, fill: resolvedTheme === 'dark' ? '#fff' : '#23255a' }}
+                    >
+                      {formatNumberWithSuffix(total)}
                     </text>
-                  );
-                }}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-              </Pie>
-              <Legend content={({ payload }) => (
-                <ul className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-4 text-sm">
-                  {payload?.map((entry, index) => (
-                    <li key={`item-${index}`} className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                      {entry.value}
-                    </li>
-                  ))}
-                </ul>
-              )} />
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+                    <text
+                      y={24}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      style={{ fontSize: 14, fill: resolvedTheme === 'dark' ? '#fff' : '#23255a', opacity: 0.7 }}
+                    >
+                      Total
+                    </text>
+                  </g>
+                );
+              }
+            ]}
+          />
+        </div>
+        {/* Custom legend below chart */}
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4">
+          {chartData.map((d, i) => (
+            <div key={d.id} className="flex items-center gap-2 min-w-[110px]">
+              <span className="inline-block w-3 h-3 rounded-full" style={{ background: d.color }} />
+              <span className={resolvedTheme === 'dark' ? 'font-semibold text-white' : 'font-semibold text-[#23255a]'}>{d.label}:</span>
+              <span className={resolvedTheme === 'dark' ? 'font-semibold text-white' : 'font-semibold text-[#23255a]'}>{((d.value/total)*100).toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 

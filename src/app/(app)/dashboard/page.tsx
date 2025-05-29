@@ -1,4 +1,3 @@
-
 "use client"; 
 
 import { InvestmentDistributionChart } from "@/components/dashboard/investment-distribution-chart";
@@ -14,6 +13,8 @@ import Link from 'next/link';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { formatNumberWithSuffix } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { InvestmentBreakdownCards } from '@/components/dashboard/investment-breakdown-cards';
 
 // Helper function to parse YYYY-MM-DD string to a local Date object
 const parseDateString = (dateStr?: string): Date | null => {
@@ -32,7 +33,9 @@ export default function DashboardPage() {
     fixedEstimates,
     investments,
     isLoading: isLoadingContext, // This will be true if any context data is loading
+    recalculateDashboardSummary,
   } = useInvestments();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const isLoading = isLoadingDashboardSummary || isLoadingContext;
@@ -74,6 +77,8 @@ export default function DashboardPage() {
     const incomeRecordsList = incomeRecords || [];
     const investmentsList = investments || [];
     const expenseRecordsList = expenseRecords || [];
+
+    const directDebtInvestments = investmentsList.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
 
     // Process Fixed Estimates
     fixedEstimatesList.forEach(fe => {
@@ -119,9 +124,41 @@ export default function DashboardPage() {
     });
 
     // Process Certificate Interest (Direct Debt Interest)
-    const directDebtInvestments = investmentsList.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-based
+    const currentYear = now.getFullYear();
+    const currentDay = now.getDate();
     directDebtInvestments.forEach(debt => {
-      if (debt.interestRate && debt.amountInvested) {
+      if (debt.interestRate && debt.amountInvested && debt.debtSubType === 'Certificate' && debt.certificateInterestFrequency && debt.maturityDate) {
+        const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
+        const maturity = parseDateString(debt.maturityDate);
+        if (!maturity) return;
+        const payoutDay = maturity.getDate();
+        const payoutMonth = maturity.getMonth(); // 0-based
+        const payoutYear = maturity.getFullYear();
+        let shouldAdd = false;
+        if (debt.certificateInterestFrequency === 'Monthly') {
+          // Always add if today is on/after payout day
+          shouldAdd = currentDay >= payoutDay;
+        } else if (debt.certificateInterestFrequency === 'Quarterly') {
+          // Add only if (currentMonth - payoutMonth) % 3 === 0 and day >= payoutDay
+          const monthsSince = (currentYear - payoutYear) * 12 + (currentMonth - payoutMonth);
+          shouldAdd = monthsSince >= 0 && monthsSince % 3 === 0 && currentDay >= payoutDay;
+        } else if (debt.certificateInterestFrequency === 'Yearly') {
+          // Add only if currentMonth === payoutMonth and day >= payoutDay
+          shouldAdd = (currentMonth === payoutMonth) && (currentDay >= payoutDay);
+        }
+        if (shouldAdd) {
+          if (debt.certificateInterestFrequency === 'Monthly') {
+            certificateInterest += annualInterest / 12;
+          } else if (debt.certificateInterestFrequency === 'Quarterly') {
+            certificateInterest += annualInterest / 4;
+          } else if (debt.certificateInterestFrequency === 'Yearly') {
+            certificateInterest += annualInterest;
+          }
+        }
+      } else if (debt.interestRate && debt.amountInvested) {
+        // Fallback for legacy or non-certificate debt: keep old logic
         const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
         certificateInterest += annualInterest / 12;
       }
@@ -159,6 +196,19 @@ export default function DashboardPage() {
       
       <Separator />
 
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={async () => {
+            await recalculateDashboardSummary();
+            toast({ title: "Summary recalculated!", description: "Dashboard summary values have been updated." });
+          }}
+        >
+          Recalculate Summary
+        </Button>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
          <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -185,7 +235,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p className={`text-3xl font-bold ${totalRealizedPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>
- {isMobile ? formatCurrencyEGPWithSuffix(totalRealizedPnL) : formatCurrencyEGP(totalRealizedPnL)}
+                {isMobile ? formatCurrencyEGPWithSuffix(totalRealizedPnL) : formatCurrencyEGP(totalRealizedPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">Profit/Loss from all completed sales.</p>
@@ -232,21 +282,21 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Income</p>
                   <IncomeIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{formatCurrencyEGP(totalIncomeThisMonth)}</p>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{isMobile ? formatCurrencyEGPWithSuffix(totalIncomeThisMonth) : formatCurrencyEGP(totalIncomeThisMonth)}</p>
               </div>
               <div className="p-4 border rounded-lg bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700">
                 <div className="flex flex-row items-center justify-between space-y-0 pb-1">
                   <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses</p>
                   <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                 </div>
-                <p className="text-2xl font-bold text-red-700 dark:text-red-300">{formatCurrencyEGP(totalExpensesThisMonth)}</p>
+                <p className="text-2xl font-bold text-red-700 dark:text-red-300">{isMobile ? formatCurrencyEGPWithSuffix(totalExpensesThisMonth) : formatCurrencyEGP(totalExpensesThisMonth)}</p>
               </div>
               <div className={`p-4 border rounded-lg ${netCashFlowThisMonth >= 0 ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700" : "bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700"}`}>
                 <div className="flex flex-row items-center justify-between space-y-0 pb-1">
                   <p className={`text-sm font-medium ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>Net Cash Flow</p>
                   <Wallet className={`h-4 w-4 ${netCashFlowThisMonth >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`} />
                 </div>
-                <p className={`text-2xl font-bold ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>{formatCurrencyEGP(netCashFlowThisMonth)}</p>
+                <p className={`text-2xl font-bold ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>{isMobile ? formatCurrencyEGPWithSuffix(netCashFlowThisMonth) : formatCurrencyEGP(netCashFlowThisMonth)}</p>
               </div>
             </div>
           )}
@@ -256,8 +306,11 @@ export default function DashboardPage() {
       <div className="lg:col-span-3">
         <InvestmentDistributionChart />
       </div>
+
+      <div className="lg:col-span-3">
+        <InvestmentBreakdownCards />
+      </div>
     </div>
   );
 }
 
-    

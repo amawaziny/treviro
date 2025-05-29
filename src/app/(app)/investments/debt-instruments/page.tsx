@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -29,6 +28,8 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
 import { useLanguage } from '@/contexts/language-context';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { formatNumberWithSuffix } from '@/lib/utils';
 
 const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
   if (variant === "destructive") {
@@ -43,6 +44,7 @@ export default function MyDebtInstrumentsPage() {
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { toast } = useToast();
   const { language } = useLanguage(); 
+  const isMobile = useIsMobile();
 
   const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -14,11 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { MyCurrencyListItem } from '@/components/investments/my-currency-list-item';
 import { useLanguage } from '@/contexts/language-context'; // Import useLanguage
+import { useIsMobile } from '@/hooks/use-mobile';
+import { formatNumberWithSuffix } from '@/lib/utils';
 
 export default function MyCurrenciesPage() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { exchangeRates, isLoading: isLoadingRates, error: ratesError } = useExchangeRates();
   const { language } = useLanguage(); // Get current language
+  const isMobile = useIsMobile();
 
   const aggregatedCurrencyHoldings = React.useMemo(() => {
     if (isLoadingInvestments || !investments.length) return [];
