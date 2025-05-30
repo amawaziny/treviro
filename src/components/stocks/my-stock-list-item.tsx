@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -73,6 +72,15 @@ export function MyStockListItem({
     }).format(value);
   };
   
+  const formatCurrencyWithSixDecimals = (value: number, currencyCode: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 6,
+      maximumFractionDigits: 6,
+    }).format(value);
+  };
+  
    const formatCurrencyWithSuffixForMobile = (value: number, currencyCode: string) => {
     if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0`;
     const formattedNumber = formatNumberWithSuffix(value);
@@ -82,7 +90,7 @@ export function MyStockListItem({
     return `${sign}${currencyCode} ${numberPart}`;
   };
 
-  const formattedAvgPrice = formatCurrencyWithThreeDecimals(averagePurchasePrice, currency);
+  const formattedAvgPrice = formatCurrencyWithSixDecimals(averagePurchasePrice, currency);
   const formattedMarketPrice = currentMarketPrice ? formatCurrencyWithThreeDecimals(currentMarketPrice, currency) : 'N/A';
   const formattedProfitLoss = formatCurrencyWithThreeDecimals(profitLoss, currency);
   

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Header } from '@/components/layout/header';
@@ -18,11 +17,14 @@ import {
 import { Coins } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/language-context'; // Added import
+import { BottomTabBar } from '@/components/layout/bottom-tab-bar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const { language } = useLanguage(); // Added to get current language
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -42,27 +44,29 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <> {/* Sidebar (nav) and SidebarInset (main content) are now siblings */}
-      <Sidebar variant="sidebar" collapsible="icon" side={language === 'ar' ? 'right' : 'left'}>
-        <SidebarRail />
-        <SidebarHeader className="p-4 justify-center items-center group-data-[collapsible=icon]:justify-start">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Coins className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">Treviro</span>
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarNav />
-        </SidebarContent>
-        {/* You can add sidebar footer items here if needed */}
-      </Sidebar>
-
+    <>
+      {/* Only render Sidebar on desktop/tablet */}
+      {!isMobile && (
+        <Sidebar variant="sidebar" collapsible="icon" side={language === 'ar' ? 'right' : 'left'}>
+          <SidebarRail />
+          <SidebarHeader className="p-4 justify-center items-center group-data-[collapsible=icon]:justify-start">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <Coins className="h-8 w-8 text-primary" />
+              <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">Treviro</span>
+            </Link>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarNav />
+          </SidebarContent>
+        </Sidebar>
+      )}
       <SidebarInset> {/* This component renders a <main> tag that is flex flex-col */}
         <Header /> {/* This is the app's main top bar for the content area */}
         {/* This div will wrap the page content, provide padding, and grow to fill remaining vertical space */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
           {children} {/* This is the page-specific content, e.g., DashboardPage */}
         </div>
+        <BottomTabBar />
       </SidebarInset>
     </>
   );

@@ -6,13 +6,22 @@ import { useListedSecurities } from '@/hooks/use-listed-securities';
 import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, AggregatedDebtHolding } from '@/lib/types';
 import { isDebtRelatedFund } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MyDebtListItem } from '@/components/investments/my-debt-list-item';
+import MyDebtsListView from '@/components/investments/my-debt-list';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableFooter
+} from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -230,164 +239,51 @@ export default function MyDebtInstrumentsPage() {
   }
 
   return (
-    <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
-      <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Debt Instruments</h1>
-          <p className="text-muted-foreground">Track your direct debt instruments and debt-related fund investments.</p>
-        </div>
-        <Separator />
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Landmark className="mr-2 h-6 w-6 text-primary" />
-              Direct Debt Instruments
-            </CardTitle>
-            <CardDescription>Bonds, Certificates, Treasury Bills you own directly.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {directDebtHoldings.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Name/Description <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Type <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Issuer <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Interest Rate <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Day <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Month <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">M. Year <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Maturity Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Amount Invested <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className={cn("whitespace-nowrap", language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">Purchase Date <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Monthly Interest <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap"><span className="flex items-center justify-end">Annual Interest <ArrowUpDown className="ml-2 h-3 w-3" /></span></TableHead>
-                      <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {directDebtHoldings.map(debt => (
-                      <TableRow key={debt.id}>
-                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{debt.displayName}</span></TableCell>
-                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{debt.debtSubType || 'N/A'}</span></TableCell>
-                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{debt.issuer || 'N/A'}</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.interestRate?.toFixed(2) ?? 'N/A'}%</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityDay || 'N/A'}</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityMonth || 'N/A'}</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.maturityYear || 'N/A'}</span></TableCell>
-                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">{formatDateDisplay(debt.maturityDate)}</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{formatDisplayCurrency(debt.amountInvested, 'EGP')}</span></TableCell>
-                        <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}><span className="flex items-center">
-                          {debt.debtSubType === 'Certificate' || !debt.purchaseDate ? '' : formatDateDisplay(debt.purchaseDate)}
-                        </span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.projectedMonthlyInterest && debt.projectedMonthlyInterest > 0 ? formatDisplayCurrency(debt.projectedMonthlyInterest, 'EGP') : 'N/A'}</span></TableCell>
-                        <TableCell className="text-right"><span className="flex items-center justify-end">{debt.projectedAnnualInterest && debt.projectedAnnualInterest > 0 ? formatDisplayCurrency(debt.projectedAnnualInterest, 'EGP') : 'N/A'}</span></TableCell>
-                        <TableCell className="text-right">
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => confirmRemoveItem(debt)}>
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Remove {debt.displayName}</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                  {(totalProjectedMonthlyInterest > 0 || totalProjectedAnnualInterest > 0) && (
-                    <TableFooter>
-                      <TableRow>
-                        <TableCell colSpan={10} className={cn("font-semibold", language === 'ar' ? 'text-left' : 'text-right')}>Total Projected Interest:</TableCell>
-                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(totalProjectedMonthlyInterest, 'EGP')}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatDisplayCurrency(totalProjectedAnnualInterest, 'EGP')}</TableCell>
-                        <TableCell /> 
-                      </TableRow>
-                    </TableFooter>
-                  )}
-                </Table>
-              </div>
-            ) : (
-              <p className="text-muted-foreground py-4 text-center">
-                You haven't added any direct debt investments yet.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-
-        {debtFundHoldings.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Building className="mr-2 h-6 w-6 text-primary" />
-                Debt-Related Fund Investments
-              </CardTitle>
-              <CardDescription>Funds primarily investing in debt instruments.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {debtFundHoldings.map(holding => (
-                <MyDebtListItem key={holding.id} holding={holding} />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {(directDebtHoldings.length === 0 && debtFundHoldings.length === 0) && !isLoading && (
-            <Card className="mt-6">
-             <CardHeader>
-                <CardTitle className="flex items-center">
-                <ScrollText className="mr-2 h-6 w-6 text-primary" />
-                No Debt Holdings
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground py-4 text-center">
-                You haven't added any debt investments or related funds yet.
-                </p>
-            </CardContent>
-            </Card>
-        )}
-
-
-        <Link href="/investments/add?type=Debt Instruments" passHref>
-          <Button
-            variant="default"
-            size="icon"
-            className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
-              language === 'ar' ? 'left-8' : 'right-8'
-            }`}
-            aria-label="Add new debt instrument"
-          >
-            <Plus className="h-7 w-7" />
-          </Button>
-        </Link>
-
-        {itemToDelete && (
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action will permanently remove your investment record for {itemToDelete.displayName}.
-                This cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  if (itemToDelete.itemType === 'direct') {
-                    handleRemoveDirectDebt(itemToDelete.id, itemToDelete.displayName);
-                  }
-                }}
-                className={cn(buttonVariants({ variant: "destructive" }))}
-              >
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        )}
+    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Debt Instruments</h1>
+        <p className="text-muted-foreground">Track your direct debt instruments and debt-related fund investments.</p>
       </div>
-    </AlertDialog>
+      <Separator />
+      {/* Direct Debt Holdings as List Items */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Landmark className="mr-2 h-6 w-6 text-primary" />
+            Direct Debt Instruments
+          </CardTitle>
+          <CardDescription>Bonds, Certificates, Treasury Bills you own directly.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {directDebtHoldings.length > 0 ? (
+            directDebtHoldings.map(debt => (
+              <MyDebtListItem key={debt.id} holding={debt} />
+            ))
+          ) : (
+            <p className="text-muted-foreground py-4 text-center">
+              You haven't added any direct debt investments yet.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+      {/* Debt Fund Holdings as List Items */}
+      {debtFundHoldings.length > 0 && (
+        <div className="space-y-4 mt-6">
+          {debtFundHoldings.map(holding => (
+            <MyDebtListItem key={holding.id} holding={holding} />
+          ))}
+        </div>
+      )}
+      <Link href="/investments/add?type=Debt Instruments" passHref>
+        <Button
+          variant="default"
+          size="icon"
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === 'ar' ? 'left-8' : 'right-8'} bottom-[88px] md:bottom-8`}
+          aria-label="Add new debt instrument"
+        >
+          <Plus className="h-7 w-7" />
+        </Button>
+      </Link>
+    </div>
   );
 }

@@ -154,7 +154,7 @@ export default function MyGoldPage() {
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+    <div className="space-y-8 relative min-h-[calc(100vh-56px)] pb-4">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Gold</h1>
         <p className="text-muted-foreground">Overview of your direct gold and gold fund investments.</p>
@@ -198,9 +198,10 @@ export default function MyGoldPage() {
         <Button
           variant="default"
           size="icon"
-          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
-            language === 'ar' ? 'left-8' : 'right-8'
-          }`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg
+            ${language === 'ar' ? 'left-8' : 'right-8'}
+            bottom-[88px] md:bottom-8
+          `}
           aria-label="Add new gold investment"
         >
           <Plus className="h-7 w-7" />

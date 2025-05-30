@@ -1,4 +1,3 @@
-
 "use client"; 
 
 import { SecurityList } from "@/components/stocks/security-list"; 
@@ -38,14 +37,14 @@ export default function SecuritiesPage() {
       </div>
       <Separator />
       <Tabs 
-        value={activeTab} // Make it a controlled component
-        onValueChange={handleTabChange} // Update state on user interaction
-        className="w-full" 
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="w-full"
         dir={language === 'ar' ? 'rtl' : 'ltr'}
       >
-        <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
-          <TabsTrigger value="stocks">Stocks</TabsTrigger>
-          <TabsTrigger value="funds">Funds</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:w-[300px] max-w-full">
+          <TabsTrigger value="stocks" className="w-full text-xs sm:text-sm">Stocks</TabsTrigger>
+          <TabsTrigger value="funds" className="w-full text-xs sm:text-sm">Funds</TabsTrigger>
         </TabsList>
         <TabsContent value="stocks">
           <SecurityList filterType="Stock" currentTab="stocks" />

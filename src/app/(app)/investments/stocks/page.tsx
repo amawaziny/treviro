@@ -1,4 +1,3 @@
-
 "use client"; // Added "use client"
 
 import { MyStockList } from "@/components/stocks/my-stock-list";
@@ -24,10 +23,11 @@ export default function MyStocksPage() {
         <Button
           variant="default"
           size="icon"
-          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
-            language === 'ar' ? 'left-8' : 'right-8'
-          }`}
-          aria-label="Browse securities" // Updated aria-label
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg
+            ${language === 'ar' ? 'left-8' : 'right-8'}
+            bottom-[88px] md:bottom-8
+          `}
+          aria-label="Browse securities"
         >
           <Plus className="h-7 w-7" />
         </Button>

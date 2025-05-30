@@ -1,4 +1,3 @@
-
 "use client";
 
 import { SecurityListItem } from './security-list-item'; 
@@ -91,7 +90,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
         <Input
           type="text"
           placeholder={`Search ${filterType ? filterType.toLowerCase() : 'securit'}ies by name, symbol, market, or type...`}
-          className="w-full ltr:pl-10 rtl:pr-10"
+          className="w-full ltr:pl-10 rtl:pr-10 text-xs sm:text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

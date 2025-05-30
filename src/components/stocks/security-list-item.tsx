@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -27,9 +26,9 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
 
   return (
     <Link href={detailPageLink} passHref>
-      <Card className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm">
+      <Card className="p-4 flex flex-col sm:flex-row items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm gap-2 sm:gap-0">
         {/* Left Side: Logo and Name/Symbol */}
-        <div className="flex items-center gap-3 flex-grow min-w-0">
+        <div className="flex items-center gap-3 flex-grow min-w-0 w-full sm:w-auto">
           <Image
             src={security.logoUrl || 'https://placehold.co/40x40.png'}
             alt={`${security.name} logo`}
@@ -50,7 +49,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
         </div>
 
         {/* Right Side: Price and Change Percentage */}
-        <div className="flex flex-col items-end text-right pl-2">
+        <div className="flex flex-col items-end text-right pl-2 w-full sm:w-auto">
           <p className="text-lg font-semibold text-foreground">
             {formattedPrice}
             <span className="ml-1 text-xs text-muted-foreground">{security.currency}</span>
@@ -59,10 +58,9 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
             variant={isPositiveChange ? 'default' : 'destructive'}
             className={cn(
               isPositiveChange ? 'bg-accent text-accent-foreground' : 'bg-destructive text-destructive-foreground',
-              "mt-1 text-xs" 
+              'text-xs px-2 py-1 mt-1 sm:mt-0'
             )}
           >
-            {isPositiveChange ? '+' : ''}
             {security.changePercent.toFixed(2)}%
           </Badge>
         </div>

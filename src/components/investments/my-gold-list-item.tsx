@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -34,6 +33,18 @@ const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "out
     return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
   }
   return ""; // Default or other variants can be handled by AlertDialog's default styling
+};
+
+// Helper for mobile: 6 digits for avg cost and market price, but not for invested amount or P/L
+const formatCurrencyForGoldMobile = (value: number, currencyCode: string, digits = 2) => {
+  if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0.00`;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    useGrouping: false,
+  }).format(value);
 };
 
 
@@ -75,13 +86,10 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
   const formattedAvgPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+    useGrouping: false,
   }).format(averagePurchasePrice);
-
-  const formatCurrencyForGoldMobile = (value: number, currencyCode: string) => {
- return `${currencyCode} ${formatNumberWithSuffix(value)}`;
-  };
 
 
   const formattedMarketPrice = currentMarketPrice
@@ -131,8 +139,8 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
 
   const cardContent = (
     <CardContent className="pt-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-grow min-w-0">
+      <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
+        <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
           <Link href={detailPageLink} passHref className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2">
             {itemType === 'fund' && logoUrl ? (
               <Image
@@ -200,11 +208,11 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>Avg. Cost: 
-          <span className="md:hidden">{formatCurrencyForGoldMobile(averagePurchasePrice, currency)}</span>
+          <span className="md:hidden">{formatCurrencyForGoldMobile(averagePurchasePrice, currency, 6)}</span>
           <span className="hidden md:inline">{formattedAvgPrice}</span>
         </p>
         <p>Market Price: 
-          <span className="md:hidden">{formatCurrencyForGoldMobile(currentMarketPrice || 0, currency)}</span>
+          <span className="md:hidden">{formatCurrencyForGoldMobile(currentMarketPrice || 0, currency, 6)}</span>
           <span className="hidden md:inline">{formattedMarketPrice}</span>
         </p>
       </div>
@@ -212,7 +220,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
   );
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
       {cardContent}
     </Card>
   );

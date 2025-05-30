@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -54,16 +53,53 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     logoUrl
   } = holding;
 
-  if (holding.itemType !== 'fund' || !fundDetails) {
-    console.warn("MyDebtListItem received non-fund data:", holding);
-    return null;
+  if (holding.itemType !== 'fund' || !holding.fundDetails) {
+    // Render direct debt instrument (bonds, certificates, etc.)
+    return (
+      <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
+            <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary flex-shrink-0">
+                <Building className="h-6 w-6" />
+              </div>
+              <div className="truncate min-w-0 w-0">
+                <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName}>
+                  {holding.displayName ?
+                    (holding.displayName.length > 16 ? holding.displayName.slice(0, 14) + '…' : holding.displayName)
+                    : (typeof holding.amountInvested === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.amountInvested)}` : 'Debt Item')}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {holding.debtSubType} {holding.issuer ? `- ${holding.issuer}` : ''}
+                </p>
+              </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+              {typeof holding.amountInvested === 'number' ? (
+                <p className="text-lg font-bold">
+                  {(holding.currency || 'EGP')} {formatNumberWithSuffix(holding.amountInvested)}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">N/A</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
+            <p>Interest Rate: <span>{holding.interestRate ? `${holding.interestRate}%` : 'N/A'}</span></p>
+            <p>Maturity: <span>{holding.maturityDate || 'N/A'}</span></p>
+            <p>Monthly Interest: <span>{typeof holding.projectedMonthlyInterest === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.projectedMonthlyInterest)}` : 'N/A'}</span></p>
+            <p>Annual Interest: <span>{typeof holding.projectedAnnualInterest === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.projectedAnnualInterest)}` : 'N/A'}</span></p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   const isProfitable = profitLoss !== undefined && profitLoss >= 0;
 
-  const formatDisplayCurrency = (value: number | undefined, curr = "USD") => {
+  const formatDisplayCurrency = (value: number | undefined, curr = "USD", digitsOverride?: number) => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
-    const digits = curr === 'EGP' ? 3 : 2;
+    const digits = digitsOverride ?? (curr === 'EGP' ? 3 : 2);
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
@@ -84,14 +120,14 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     setIsAlertDialogOpen(false);
   };
   
-  const detailPageLink = `/stocks/${fundDetails.id}?previousTab=funds`; 
+  const detailPageLink = fundDetails ? `/stocks/${fundDetails.id}?previousTab=funds` : undefined; 
 
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
       <CardContent className="pt-6">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3 flex-grow min-w-0">
+        <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
+          <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
             {logoUrl ? (
               <Link href={detailPageLink || "#"} passHref className={detailPageLink ? '' : 'pointer-events-none'}>
                 <Image src={logoUrl} alt={`${displayName} logo`} width={40} height={40} className="rounded-full object-cover cursor-pointer" data-ai-hint="fund logo"/>
@@ -101,16 +137,20 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 <Building className="h-6 w-6" />
               </div>
             )}
-            <div className="truncate">
+            <div className="truncate min-w-0 w-0">
                {detailPageLink ? (
                  <Link href={detailPageLink} passHref>
-                    <p className="text-lg font-semibold truncate hover:underline cursor-pointer">{displayName}</p>
+                    <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={displayName}>
+  {displayName ? (displayName.length > 16 ? displayName.slice(0, 14) + '…' : displayName) : (typeof holding.amountInvested === 'number' ? `${currency || 'EGP'} ${formatNumberWithSuffix(holding.amountInvested)}` : 'Debt Item')}
+</p>
                  </Link>
                ) : (
-                <p className="text-lg font-semibold truncate">{displayName}</p>
+                <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName || ''}>
+                  {typeof holding.amountInvested === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.amountInvested)}` : 'Debt Item'}
+                </p>
                )}
               <p className="text-xs text-muted-foreground truncate">
-                {fundDetails.symbol} - Units: {totalUnits?.toLocaleString() ?? 'N/A'}
+                {fundDetails?.symbol} - Units: {totalUnits?.toLocaleString() ?? 'N/A'}
               </p>
             </div>
           </div>
@@ -119,7 +159,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             {currentMarketPrice !== undefined && profitLoss !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>
- <span className="md:hidden">{formatCurrencyForDebtMobile(profitLoss, currency)}</span>
+ <span className="md:hidden">{formatCurrencyForDebtMobile(profitLoss, currency || "EGP")}</span>
  <span className="hidden md:inline">{formatDisplayCurrency(profitLoss, currency)}</span>
                 </p>
                 <Badge variant={isProfitable ? 'default' : 'destructive'}
@@ -158,11 +198,11 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
 
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
           <p>Avg. Cost: 
-            <span className="md:hidden">{formatCurrencyForDebtMobile(averagePurchasePrice || 0, currency)}</span>
- <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice || 0, currency)}</span>
+            <span className="md:hidden">{formatCurrencyForDebtMobile(averagePurchasePrice || 0, currency || "EGP")}</span>
+ <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice || 0, currency, 6)}</span>
  </p>
           <p>Market Price: 
-            <span className="md:hidden">{formatCurrencyForDebtMobile(currentMarketPrice, currency)}</span>
+            <span className="md:hidden">{formatCurrencyForDebtMobile(currentMarketPrice, currency || "EGP")}</span>
  <span className="hidden md:inline">{formatDisplayCurrency(currentMarketPrice, currency)}</span>
  </p>
         </div>
