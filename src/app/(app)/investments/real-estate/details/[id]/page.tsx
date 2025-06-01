@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { formatNumberWithSuffix } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/installment-table";
+
 import { generateInstallmentSchedule } from "@/lib/installment-utils";
 import type { Installment } from "@/components/investments/installment-table";
 
@@ -28,12 +29,11 @@ export default function RealEstateDetailPage() {
     ) as import('@/lib/types').RealEstateInvestment | undefined;
   }, [params?.id, investments]);
 
-  // Simulated paid installments (replace with real data from backend or context)
-  const paidInstallments: { number: number; chequeNumber?: string }[] = [
-    // Example: { number: 1, chequeNumber: 'CHQ-001' },
-    // Add real paid installments here
-  ];
-  const today = new Date('2025-06-01'); // Use current date
+  const { updateRealEstateInvestment } = useInvestments();
+  const today = new Date(); // Use current date
+
+  // Use the actual paid installments from the investment
+  const paidInstallments = investment?.paidInstallments || [];
   const installments: Installment[] = investment ? generateInstallmentSchedule(investment, paidInstallments, today) : [];
 
   if (isLoading) {
@@ -74,7 +74,7 @@ export default function RealEstateDetailPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="w-full max-w-[calc(100%-16rem)] mx-auto py-8">
       <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Back
       </Button>
@@ -101,7 +101,13 @@ export default function RealEstateDetailPage() {
           {/* Installment Table */}
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-2">Installment Schedule</h3>
-            <InstallmentTable installments={installments} />
+            <InstallmentTable
+              installments={installments}
+              investmentId={params.id as string}
+              investment={investment}
+              updateRealEstateInvestment={updateRealEstateInvestment}
+              paidInstallments={paidInstallments}
+            />
           </div>
           {/* Future: List of installments, paid/unpaid, etc. */}
           <div className="mt-6 flex gap-4">

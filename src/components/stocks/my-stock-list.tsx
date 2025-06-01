@@ -132,11 +132,6 @@ export function MyStockList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end mb-2">
-        <Button asChild variant="default" size="sm">
-          <Link href="/investments/add?type=Real%20Estate">+ Add Real Estate</Link>
-        </Button>
-      </div>
       {Object.entries(aggregatedStocks).map(([tickerSymbol, data]) => {
         const avgPurchasePrice = data.totalShares > 0 ? data.totalCost / data.totalShares : 0;
         // Find a representative stock item for details like logo, name, ID for linking

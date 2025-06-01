@@ -35,7 +35,7 @@ export default function EditRealEstateInvestmentPage() {
 
   if (!investment) {
     return (
-      <Card className="max-w-xl mx-auto mt-10">
+      <Card>
         <CardHeader>
           <CardTitle>Investment Not Found</CardTitle>
         </CardHeader>
@@ -49,7 +49,7 @@ export default function EditRealEstateInvestmentPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-8">
+    <div className="container mx-auto mt-8">
       <AddInvestmentForm mode="edit" initialValues={investment} />
     </div>
   );

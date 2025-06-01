@@ -37,6 +37,8 @@ import type { ListedSecurity, InvestmentType, StockInvestment, GoldInvestment, C
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useLanguage } from '@/contexts/language-context';
+import { RealEstateForm } from './real-estate-form';
+import { Controller } from "react-hook-form";
 
 const getCurrentDate = () => {
   const date = new Date();
@@ -482,152 +484,15 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
 };
 const MemoizedRenderDebtFields = React.memo(RenderDebtFieldsComponent);
 
-
 interface RenderRealEstateFieldsProps {
   control: any;
 }
-const RenderRealEstateFieldsComponent: React.FC<RenderRealEstateFieldsProps> = ({ control }) => (
-  <div className="space-y-6 mt-6 p-6 border rounded-md">
-    <h3 className="text-lg font-medium text-primary">Real Estate Details</h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <FormField control={control} name="name" render={({ field }) => (
-          <FormItem className="md:col-span-2"><FormLabel>Name / Description (Optional)</FormLabel><FormControl><Input placeholder="e.g., Downtown Apartment or Beach House Plot" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
-        )} />
-      <FormField control={control} name="propertyAddress" render={({ field }) => (
-        <FormItem><FormLabel>Property Address</FormLabel><FormControl><Input placeholder="e.g., 123 Main St, Anytown" {...field} value={field.value || ''}/></FormControl><FormMessage /></FormItem>
-      )} />
-      <FormField control={control} name="propertyType" render={({ field }) => (
-        <FormItem><FormLabel>Property Type</FormLabel><Select onValueChange={field.onChange} value={field.value || ""}><FormControl><SelectTrigger><SelectValue placeholder="Select property type" /></SelectTrigger></FormControl><SelectContent>{propertyTypes.map(pType => (<SelectItem key={pType} value={pType}>{pType}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
-      )} />
-      <FormField control={control} name="amountInvested" render={({ field }) => (
-        <FormItem><FormLabel>Total Amount Invested (Cost)</FormLabel><FormControl>
-          <NumericInput
-            placeholder="e.g., 1000000.00"
-            value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-            onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
-            allowDecimal={true}
-          />
-          </FormControl><FormDescription>Total cost including any fees.</FormDescription><FormMessage />
-        </FormItem>
-        )}
-      />
-      {/* Installment Frequency and Amount */}
-      <FormField control={control} name="installmentFrequency" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Installment Frequency</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value || ""}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select frequency" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="Monthly">Monthly</SelectItem>
-              <SelectItem value="Quarterly">Quarterly</SelectItem>
-              <SelectItem value="Yearly">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-          <FormDescription>How often do you pay the installment?</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="installmentAmount" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Installment Amount</FormLabel>
-          <FormControl>
-            <NumericInput
-              placeholder="e.g., 10000.00"
-              value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-              onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
-              allowDecimal={true}
-            />
-          </FormControl>
-          <FormDescription>Amount of each installment payment.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="purchaseDate" render={({ field }) => (
-          <FormItem><FormLabel>Purchase Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || getCurrentDate()}/></FormControl><FormMessage /></FormItem>
-        )}
-      />
-      <FormField control={control} name="totalInstallmentPrice" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Total Price at End of All Installments</FormLabel>
-          <FormControl>
-            <NumericInput
-              placeholder="e.g., 1200000.00"
-              value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-              onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
-              allowDecimal={true}
-            />
-          </FormControl>
-          <FormDescription>Total price you will have paid after all installments are complete.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="installmentEndDate" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Installment End Date</FormLabel>
-          <FormControl>
-            <Input type="date" {...field} value={field.value || ''} />
-          </FormControl>
-          <FormDescription>Date when the last installment is due.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="installmentStartDate" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Installment Start Date</FormLabel>
-          <FormControl>
-            <Input type="date" {...field} value={field.value || ''} />
-          </FormControl>
-          <FormDescription>Date when the first installment is due.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="downPayment" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Down Payment (optional)</FormLabel>
-          <FormControl>
-            <NumericInput
-              placeholder="e.g., 200000.00"
-              value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-              onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
-              allowDecimal={true}
-            />
-          </FormControl>
-          <FormDescription>Initial payment made at the start of the contract.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="maintenanceAmount" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Maintenance Amount (optional)</FormLabel>
-          <FormControl>
-            <NumericInput
-              placeholder="e.g., 15000.00"
-              value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-              onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
-              allowDecimal={true}
-            />
-          </FormControl>
-          <FormDescription>Maintenance payment, if any.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-      <FormField control={control} name="maintenancePaymentDate" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Date of Maintenance Payment (optional)</FormLabel>
-          <FormControl>
-            <Input type="date" {...field} value={field.value || ''} />
-          </FormControl>
-          <FormDescription>Date when the maintenance payment is/was due.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )} />
-    </div>
-  </div>
-);
+
+const RenderRealEstateFieldsComponent: React.FC<RenderRealEstateFieldsProps> = ({ control }) => {
+  return <RealEstateForm control={control} />;
+};
+
+export default RenderRealEstateFieldsComponent;
 const MemoizedRenderRealEstateFields = React.memo(RenderRealEstateFieldsComponent);
 
 

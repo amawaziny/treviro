@@ -20,7 +20,7 @@ export function generateInstallmentSchedule(
       number,
       dueDate: currentDate.toISOString(),
       amount: investment.installmentAmount,
-      status: paid ? "Paid" : isBefore(currentDate, today) || isEqual(currentDate, today) ? "Unpaid" : "Unpaid",
+      status: paid ? "Paid" : "Unpaid",
       chequeNumber: paid?.chequeNumber,
     });
     switch (investment.installmentFrequency) {

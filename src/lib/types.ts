@@ -49,6 +49,7 @@ export interface RealEstateInvestment extends BaseInvestment {
   downPayment?: number; // NEW FIELD
   maintenanceAmount?: number; // NEW FIELD
   maintenancePaymentDate?: string; // NEW FIELD
+  paidInstallments?: { number: number; chequeNumber?: string }[];
 }
 
 export type DebtSubType = 'Certificate' | 'Treasury Bill' | 'Bond' | 'Other';

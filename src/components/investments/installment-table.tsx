@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { format } from "date-fns";
+import { format, isBefore } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { RealEstateInvestment } from "@/lib/types";
 import {
   Sheet,
   SheetContent,
@@ -13,21 +14,27 @@ export interface Installment {
   number: number;
   dueDate: string;
   amount: number;
-  status: "Paid" | "Unpaid";
+  status: 'Paid' | 'Unpaid';
   chequeNumber?: string;
 }
 
 export interface InstallmentTableProps {
   installments: Installment[];
+  investmentId: string;
+  investment: RealEstateInvestment;
+  updateRealEstateInvestment: (investmentId: string, dataToUpdate: Partial<RealEstateInvestment>) => Promise<void>;
+  paidInstallments: { number: number; chequeNumber?: string }[];
 }
 
-export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments }) => {
+export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments, investmentId, investment, updateRealEstateInvestment, paidInstallments }) => {
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [chequeNumber, setChequeNumber] = useState("");
-  const [localInstallments, setLocalInstallments] = useState(installments);
+  const [localInstallments, setLocalInstallments] = useState<Installment[]>(installments || []);
 
-  const unpaidInstallments = localInstallments.filter(i => i.status === "Unpaid");
+  // Use local state for display since it's updated immediately
+  const displayInstallments = localInstallments;
+  const unpaidInstallments = displayInstallments.filter(i => i.status === "Unpaid");
 
   const handleOpenSheet = () => {
     setShowSheet(true);
@@ -35,14 +42,31 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments
     setChequeNumber("");
   };
 
-  const handleMarkPaid = () => {
+  const handleMarkPaid = async () => {
     if (selectedNumber == null) return;
-    setLocalInstallments(prev => prev.map(inst =>
+
+    // Update local state first
+    const updatedInstallments = localInstallments.map(inst =>
       inst.number === selectedNumber
-        ? { ...inst, status: "Paid", chequeNumber: chequeNumber || undefined }
+        ? { ...inst, status: 'Paid' as const, chequeNumber: chequeNumber || undefined }
         : inst
-    ));
-    setShowSheet(false);
+    ) as Installment[];
+    setLocalInstallments(updatedInstallments);
+
+    // Save to Firebase
+    try {
+      const updatedInvestment: Partial<RealEstateInvestment> = {
+        ...investment,
+        paidInstallments: [...paidInstallments, { number: selectedNumber, chequeNumber }]
+      };
+      await updateRealEstateInvestment(investmentId, updatedInvestment);
+      setShowSheet(false);
+    } catch (error) {
+      console.error('Error saving installment payment:', error);
+      // Reset to previous state on error
+      setLocalInstallments(localInstallments);
+      alert('Failed to save installment payment. Please try again.');
+    }
   };
 
   return (
@@ -61,11 +85,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments
           {localInstallments.map((inst) => (
             <tr
               key={inst.number}
-              className={
-                (inst.status === "Paid"
-                  ? "bg-green-50 dark:bg-green-900/30"
-                  : "bg-white dark:bg-[#23255a] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30")
-              }
               onClick={() => {
                 if (inst.status === "Unpaid") {
                   setShowSheet(true);
@@ -73,6 +92,13 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments
                   setChequeNumber(inst.chequeNumber || "");
                 }
               }}
+            className={`
+              ${inst.status === "Paid"
+                ? "bg-green-50 dark:bg-green-900/30"
+                : "bg-white dark:bg-[#23255a] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30"
+              }
+              ${isBefore(new Date(inst.dueDate), new Date()) && inst.status === "Unpaid" ? "bg-red-50 dark:bg-red-900/30" : ""}
+            `}
             >
               <td className="px-3 py-2 border text-center">{inst.number}</td>
               <td className="px-3 py-2 border text-center">{format(new Date(inst.dueDate), "dd-MM-yyyy")}</td>
