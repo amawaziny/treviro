@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
+import type { Investment, CurrencyFluctuationAnalysisResult, StockInvestment, Transaction, DashboardSummary, GoldInvestment, GoldType, DebtInstrumentInvestment, IncomeRecord, ExpenseRecord, FixedEstimateRecord, RealEstateInvestment } from '@/lib/types';
 import { db as firestoreInstance } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, setDoc, serverTimestamp, Timestamp, writeBatch, orderBy, getDocs, deleteDoc, where, runTransaction, getDoc, increment, FieldValue } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
@@ -28,6 +28,7 @@ interface InvestmentContextType {
   deleteSellTransaction: (transaction: Transaction) => Promise<void>;
   removeGoldInvestments: (identifier: string, itemType: 'physical' | 'fund') => Promise<void>;
   removeDirectDebtInvestment: (investmentId: string) => Promise<void>;
+  removeRealEstateInvestment: (investmentId: string) => Promise<void>;
   dashboardSummary: DashboardSummary | null;
   incomeRecords: IncomeRecord[];
   addIncomeRecord: (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
@@ -36,6 +37,7 @@ interface InvestmentContextType {
   fixedEstimates: FixedEstimateRecord[];
   addFixedEstimate: (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => Promise<void>;
   recalculateDashboardSummary: () => Promise<void>;
+  updateRealEstateInvestment: (investmentId: string, dataToUpdate: Partial<RealEstateInvestment>) => Promise<void>;
 }
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
@@ -435,6 +437,20 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     if (!isNaN(amountInvested) && amountInvested !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -amountInvested });
   }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
 
+  const removeRealEstateInvestment = useCallback(async (investmentId: string) => {
+    if (!firestoreInstance || !isAuthenticated || !userId) {
+      throw new Error("User not authenticated or Firestore not available.");
+    }
+    const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
+    const docSnap = await getDoc(investmentDocRef);
+    if (!docSnap.exists()) return;
+    const investmentData = docSnap.data() as Investment;
+    if (investmentData.type !== 'Real Estate') return; // Only allow for real estate
+    const amountInvested = investmentData.amountInvested;
+    await deleteDoc(investmentDocRef);
+    if (!isNaN(amountInvested) && amountInvested !== 0) await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: -amountInvested });
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
+
   // Recalculate dashboard summary from all current investments and transactions
   const recalculateDashboardSummary = useCallback(async () => {
     if (!userId || !firestoreInstance) return;
@@ -452,12 +468,34 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, firestoreInstance, investments, transactions, getDashboardSummaryDocRef]);
 
+  // Add updateRealEstateInvestment implementation
+  const updateRealEstateInvestment = useCallback(async (investmentId: string, dataToUpdate: Partial<RealEstateInvestment>) => {
+    if (!firestoreInstance || !isAuthenticated || !userId) {
+      throw new Error("User not authenticated or Firestore not available.");
+    }
+    const investmentDocRef = doc(firestoreInstance, `users/${userId}/investments`, investmentId);
+    const docSnap = await getDoc(investmentDocRef);
+    if (!docSnap.exists()) throw new Error("Investment not found.");
+    const oldData = docSnap.data() as RealEstateInvestment;
+    if (oldData.type !== 'Real Estate') throw new Error("Not a real estate investment.");
+    const oldAmountInvested = oldData.amountInvested || 0;
+    // Calculate new amountInvested if provided, else keep old
+    const newAmountInvested = typeof dataToUpdate.amountInvested === 'number' ? dataToUpdate.amountInvested : oldAmountInvested;
+    const updatedInvestmentData = { ...dataToUpdate, amountInvested: newAmountInvested, updatedAt: serverTimestamp() };
+    await setDoc(investmentDocRef, updatedInvestmentData, { merge: true });
+    const amountInvestedDelta = newAmountInvested - oldAmountInvested;
+    if (!isNaN(amountInvestedDelta) && amountInvestedDelta !== 0) {
+      await updateDashboardSummaryDoc({ totalInvestedAcrossAllAssets: amountInvestedDelta });
+    }
+  }, [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance]);
+
   return (
     <InvestmentContext.Provider value={{
       investments, addInvestment, getInvestmentsByType, isLoading, currencyAnalyses,
       recordSellStockTransaction, transactions, removeStockInvestmentsBySymbol,
       updateStockInvestment: correctedUpdateStockInvestment,
       deleteSellTransaction, removeGoldInvestments, removeDirectDebtInvestment,
+      removeRealEstateInvestment, updateRealEstateInvestment,
       dashboardSummary, incomeRecords, addIncomeRecord, expenseRecords, addExpenseRecord,
       fixedEstimates, addFixedEstimate, recalculateDashboardSummary,
     }}>

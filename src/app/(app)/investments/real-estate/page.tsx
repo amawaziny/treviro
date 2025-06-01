@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Home, Building, Plus } from 'lucide-react'; 
+import { Home, Building, Plus, Trash2 } from 'lucide-react'; 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -17,12 +17,28 @@ import { useLanguage } from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { formatNumberWithSuffix } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from "next/navigation";
+import { MyRealEstateListItem } from '@/components/investments/my-real-estate-list-item';
 
 export default function MyRealEstatePage() {
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  const { investments, isLoading: isLoadingInvestments, removeRealEstateInvestment } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { language } = useLanguage(); 
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(inv => inv.type === 'Real Estate') as RealEstateInvestment[];
@@ -72,8 +88,9 @@ export default function MyRealEstatePage() {
     }
   };
 
+  const [dialogOpenId, setDialogOpenId] = React.useState<string | null>(null);
 
-  if (isLoading) {
+  if (isLoadingInvestments || isLoadingListedSecurities) {
     return (
       <div className="space-y-8">
         <div>
@@ -81,70 +98,46 @@ export default function MyRealEstatePage() {
           <Skeleton className="h-4 w-64" />
         </div>
         <Separator />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
+        {[...Array(2)].map((_, i) => (
+          <Card key={i} className="mt-6">
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-20 w-full" /></CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+    <div className="space-y-8 relative min-h-[calc(100vh-56px)] pb-4">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">My Real Estate Holdings</h1>
-        <p className="text-muted-foreground">Track your direct real estate and REIT/fund investments.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Real Estate</h1>
+        <p className="text-muted-foreground">Overview of your direct real estate and real estate fund investments.</p>
       </div>
       <Separator />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Home className="mr-2 h-6 w-6 text-primary" />
-            Direct Real Estate Investments
-          </CardTitle>
-          <CardDescription>Properties you own directly.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {directRealEstateHoldings.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Address/Name</TableHead>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Type</TableHead>
-                  <TableHead className="text-right">Amount Invested</TableHead>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Purchase Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {directRealEstateHoldings.map(prop => (
-                  <TableRow key={prop.id}>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{prop.propertyAddress || prop.name}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{prop.propertyType || 'N/A'}</TableCell>
-                    <TableCell className="text-right">{isMobile ? formatAmountEGPWithSuffix(prop.amountInvested) : formatAmountEGP(prop.amountInvested)}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(prop.purchaseDate)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground">No direct real estate investments recorded.</p>
-          )}
-        </CardContent>
-      </Card>
-
+      {/* Direct Real Estate Holdings */}
+      {directRealEstateHoldings.length > 0 ? (
+        <div className="space-y-4 mt-6">
+          {directRealEstateHoldings.map(investment => (
+            <MyRealEstateListItem key={investment.id} investment={investment} />
+          ))}
+        </div>
+      ) : (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Home className="mr-2 h-6 w-6 text-primary" />
+              No Real Estate Holdings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground py-4 text-center">
+              You haven't added any real estate investments yet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      {/* Real Estate Fund Holdings Table (keep as table for now) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -190,13 +183,11 @@ export default function MyRealEstatePage() {
           )}
         </CardContent>
       </Card>
-       <Link href="/investments/add?type=Real Estate" passHref>
+      <Link href="/investments/add?type=Real Estate" passHref>
         <Button
           variant="default"
           size="icon"
-          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
-            language === 'ar' ? 'left-8' : 'right-8'
-          }`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === 'ar' ? 'left-8' : 'right-8'} bottom-[88px] md:bottom-8`}
           aria-label="Add new real estate investment"
         >
           <Plus className="h-7 w-7" />

@@ -11,121 +11,101 @@ export const expenseCategories = ['Credit Card', 'Other'] as const;
 export const fixedEstimateTypes = ['Salary', 'Zakat', 'Charity', 'Other'] as const;
 export const fixedEstimatePeriods = ['Monthly', 'Quarterly', 'Yearly'] as const;
 
-
-const stringToOptionalPositiveNumberOrUndefined = z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional());
+const stringToOptionalPositiveNumberOrUndefined = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null || val === "") return undefined;
+    if (typeof val === "string") {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? undefined : parsed;
+    }
+    return val;
+  },
+  z.number().positive({ message: "Amount must be positive." }).optional()
+);
 const stringToOptionalPositiveIntegerOrUndefined = z.string().transform(val => val.trim() === "" ? undefined : parseInt(val, 10)).pipe(z.number().int().positive({ message: "Must be a positive whole number." }).optional());
-const stringToRequiredPositiveNumber = z.string().min(1, {message: "This field is required."}).transform(val => parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }));
+const stringToRequiredPositiveNumber = z.preprocess(
+  (val) => {
+    if (typeof val === "string") {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? undefined : parsed;
+    }
+    return val;
+  },
+  z.number().positive({ message: "Amount must be positive." })
+);
 const stringToRequiredPositiveInteger = z.string().min(1, {message: "This field is required."}).transform(val => parseInt(val,10)).pipe(z.number().int().positive({ message: "Number must be a positive whole number." }));
 const stringToOptionalNonNegativeNumber = z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().min(0, { message: "Cannot be negative." }).optional());
 
-
-export const AddInvestmentSchema = z.object({
+// Discriminated union for AddInvestmentSchema
+const StockInvestmentSchema = z.object({
+  type: z.literal('Stocks'),
   name: z.string().optional(),
-  type: z.enum(investmentTypes, { errorMap: () => ({ message: "Please select a valid investment type."}) }).optional(),
-  amountInvested: z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional()),
-  purchaseDate: z.string().optional(),
-
-  // Stocks
-  selectedStockId: z.string().optional(),
-  numberOfShares: z.string().transform(val => val.trim() === "" ? undefined : parseInt(val, 10)).pipe(z.number().int({message: "Number of securities must be a whole number."}).positive({ message: "Number of securities must be positive." }).optional()),
-  purchasePricePerShare: z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional()),
-  purchaseFees: z.string().transform(val => parseFloat(val || "0")).pipe(z.number().min(0, { message: "Cannot be negative." })).default("0"),
-
-  // Gold
-  goldType: z.enum(goldTypes).optional(),
-  quantityInGrams: z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional()),
-
-  // Currencies
-  currencyCode: z.string().optional(),
-  foreignCurrencyAmount: z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional()),
-  exchangeRateAtPurchase: z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional()),
-
-  // Real Estate
-  propertyAddress: z.string().optional(),
-  propertyType: z.enum(propertyTypes).optional(),
-
-  // Debt Instruments
-  debtSubType: z.enum(debtSubTypes).optional(),
-  issuer: z.string().optional(),
-  interestRate: z.string().transform(val => val.trim() === "" ? undefined : parseFloat(val)).pipe(z.number().positive({ message: "Amount must be positive." }).optional()),
-  maturityDate: z.string().optional().refine((dateStr) => {
-    if (!dateStr || dateStr.trim() === "") return true; // Optional, so valid if empty
-    return !isNaN(Date.parse(dateStr));
-  }, { message: "Invalid maturity date format."}),
-  certificateInterestFrequency: z.enum(["Monthly", "Quarterly", "Yearly"]).default("Monthly").optional(),
-
-}).superRefine((data, ctx) => {
-  const effectiveType = data.type;
-
-  // Purchase Date validation
-  if (effectiveType && (effectiveType === 'Stocks' || effectiveType === 'Gold' || effectiveType === 'Currencies' || effectiveType === 'Real Estate')) {
-    if (!data.purchaseDate || data.purchaseDate.trim() === "" || isNaN(Date.parse(data.purchaseDate))) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase date is required.", path: ["purchaseDate"] });
-    }
-  } else if (effectiveType === 'Debt Instruments' && data.debtSubType && data.debtSubType !== 'Certificate') {
-    if (!data.purchaseDate || data.purchaseDate.trim() === "" || isNaN(Date.parse(data.purchaseDate))) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase date is required for this debt type.", path: ["purchaseDate"] });
-    }
-  }
-  
-  // Amount Invested validation for non-Stock, non-Currency, non-Debt types
-  if (effectiveType && effectiveType !== 'Stocks' && effectiveType !== 'Currencies' && effectiveType !== 'Debt Instruments' && data.amountInvested === undefined) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Total amount invested is required.", path: ["amountInvested"] });
-  }
-
-  // Type-specific validations
-  if (effectiveType === 'Stocks') {
-    if (!data.selectedStockId) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please select a security.", path: ["selectedStockId"] });
-    }
-    if (data.numberOfShares === undefined) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Number of securities is required.", path: ["numberOfShares"] });
-    }
-    if (data.purchasePricePerShare === undefined) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Purchase price is required.", path: ["purchasePricePerShare"] });
-    }
-  }
-
-  if (effectiveType === 'Gold') {
-    if (!data.goldType) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Gold type is required.", path: ["goldType"] });
-    }
-    if (data.quantityInGrams === undefined) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Quantity / Units is required.", path: ["quantityInGrams"] });
-    }
-     if (data.amountInvested === undefined) { // Amount invested is required for Gold
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Total amount invested is required.", path: ["amountInvested"] });
-    }
-  }
-  if (effectiveType === 'Currencies') {
-    if (!data.currencyCode || data.currencyCode.trim() === "") {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Transaction currency code is required.", path: ["currencyCode"] });
-    }
-    if (data.foreignCurrencyAmount === undefined) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Foreign currency amount is required.", path: ["foreignCurrencyAmount"] });
-    }
-    if (data.exchangeRateAtPurchase === undefined) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Exchange rate at purchase is required.", path: ["exchangeRateAtPurchase"] });
-    }
-  }
-  if (effectiveType === 'Debt Instruments') {
-    if (!data.debtSubType) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Specific debt type is required.", path: ["debtSubType"]});
-    }
-    if (!data.issuer || data.issuer.trim() === "") {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Issuer is required.", path: ["issuer"]});
-    }
-    if (data.interestRate === undefined) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Interest rate is required.", path: ["interestRate"]});
-    }
-    if (!data.maturityDate || data.maturityDate.trim() === "") {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Maturity date is required.", path: ["maturityDate"]});
-    }
-    if (data.amountInvested === undefined) { // Amount invested is required for Debt Instruments
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Total amount invested is required.", path: ["amountInvested"] });
-    }
-  }
+  selectedStockId: z.string({ required_error: 'Please select a security.' }),
+  numberOfShares: stringToRequiredPositiveInteger,
+  purchasePricePerShare: stringToRequiredPositiveNumber,
+  purchaseFees: stringToOptionalNonNegativeNumber.default('0'),
+  purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+  amountInvested: z.any().optional(), // calculated in submit logic, not user input
 });
+
+const GoldInvestmentSchema = z.object({
+  type: z.literal('Gold'),
+  name: z.string().optional(),
+  goldType: z.enum(goldTypes, { required_error: 'Gold type is required.' }),
+  quantityInGrams: stringToRequiredPositiveNumber,
+  amountInvested: stringToRequiredPositiveNumber,
+  purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+});
+
+const CurrencyInvestmentSchema = z.object({
+  type: z.literal('Currencies'),
+  name: z.string().optional(),
+  currencyCode: z.string().min(1, { message: 'Transaction currency code is required.' }),
+  foreignCurrencyAmount: stringToRequiredPositiveNumber,
+  exchangeRateAtPurchase: stringToRequiredPositiveNumber,
+  amountInvested: z.any().optional(), // calculated in submit logic, not user input
+  purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+});
+
+const RealEstateInvestmentSchema = z.object({
+  type: z.literal('Real Estate'),
+  name: z.string().optional(),
+  propertyAddress: z.string().min(1, { message: 'Property address is required.' }),
+  propertyType: z.enum(propertyTypes, { required_error: 'Property type is required.' }),
+  amountInvested: stringToRequiredPositiveNumber,
+  installmentFrequency: z.enum(['Monthly', 'Quarterly', 'Yearly']).optional(),
+  installmentAmount: stringToOptionalPositiveNumberOrUndefined,
+  installmentStartDate: z.string().optional().refine((date) => !date || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }), // NEW FIELD
+  purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+  totalInstallmentPrice: stringToOptionalPositiveNumberOrUndefined, // New field
+  installmentEndDate: z.string().optional().refine((date) => !date || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }), // New field
+  downPayment: stringToOptionalPositiveNumberOrUndefined, // NEW FIELD
+  maintenanceAmount: stringToOptionalPositiveNumberOrUndefined, // NEW FIELD
+  maintenancePaymentDate: z.string().optional().refine((date) => !date || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }), // NEW FIELD
+});
+
+const DebtInstrumentInvestmentSchema = z.object({
+  type: z.literal('Debt Instruments'),
+  name: z.string().optional(),
+  debtSubType: z.enum(debtSubTypes, { required_error: 'Specific debt type is required.' }),
+  issuer: z.string().min(1, { message: 'Issuer is required.' }),
+  interestRate: stringToRequiredPositiveNumber,
+  maturityDate: z.string().min(1, { message: 'Maturity date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid maturity date format.' }),
+  certificateInterestFrequency: z.enum(['Monthly', 'Quarterly', 'Yearly']).default('Monthly').optional(),
+  amountInvested: stringToRequiredPositiveNumber,
+  purchaseDate: z.string().optional().refine((dateStr) => {
+    if (!dateStr || dateStr.trim() === "") return true;
+    return !isNaN(Date.parse(dateStr));
+  }, { message: 'Invalid purchase date format.' }),
+});
+
+export const AddInvestmentSchema = z.discriminatedUnion('type', [
+  StockInvestmentSchema,
+  GoldInvestmentSchema,
+  CurrencyInvestmentSchema,
+  RealEstateInvestmentSchema,
+  DebtInstrumentInvestmentSchema,
+]);
 
 export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
 

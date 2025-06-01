@@ -1,4 +1,3 @@
-
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
 export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Stock Dividend' | 'Other';
 export type ExpenseCategory = 'Credit Card' | 'Other';
@@ -42,6 +41,14 @@ export interface RealEstateInvestment extends BaseInvestment {
   type: 'Real Estate';
   propertyAddress?: string;
   propertyType?: PropertyType;
+  installmentFrequency?: 'Monthly' | 'Quarterly' | 'Yearly';
+  installmentAmount?: number;
+  totalInstallmentPrice?: number; // New: total price at end of all installments
+  installmentStartDate?: string; // NEW FIELD
+  installmentEndDate?: string; // New: end date of all installments
+  downPayment?: number; // NEW FIELD
+  maintenanceAmount?: number; // NEW FIELD
+  maintenancePaymentDate?: string; // NEW FIELD
 }
 
 export type DebtSubType = 'Certificate' | 'Treasury Bill' | 'Bond' | 'Other';

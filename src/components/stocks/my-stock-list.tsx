@@ -12,15 +12,50 @@ import { LineChart, Info } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { isStockRelatedFund } from '@/lib/utils'; // Import the utility function
+import { getAllOfflineInvestments } from '@/lib/offline-investment-storage';
 
 export function MyStockList() {
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities(); // Fetch listed securities
+  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
+  const [offlineInvestments, setOfflineInvestments] = React.useState<StockInvestment[]>([]);
+  const [isOffline, setIsOffline] = React.useState(!navigator.onLine);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (isOffline) {
+      getAllOfflineInvestments().then((pending) => {
+        setOfflineInvestments(
+          pending.filter(inv => inv.type === 'Stocks' && typeof inv.numberOfShares === 'number' && typeof inv.purchaseFees === 'number') as StockInvestment[]
+        );
+      });
+    } else {
+      setOfflineInvestments([]);
+    }
+  }, [isOffline]);
+
+  const allInvestments = React.useMemo(() => {
+    return isOffline ? [...investments, ...offlineInvestments] : investments;
+  }, [investments, offlineInvestments, isOffline]);
 
   const stockInvestments = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
-    return investments.filter(inv => {
+    return allInvestments.filter((inv): inv is StockInvestment => {
+      // Only process investments that have a tickerSymbol (i.e., StockInvestment)
+      if (!('tickerSymbol' in inv) || typeof inv.tickerSymbol !== 'string') {
+        return false;
+      }
+
       // Find the corresponding listed security for the investment
       const listedSecurity = listedSecurities.find(ls => ls.symbol === inv.tickerSymbol);
 
@@ -34,8 +69,8 @@ export function MyStockList() {
       const isStockFund = listedSecurity.securityType === 'Fund' && isStockRelatedFund(listedSecurity.fundType);
 
       return isStock || isStockFund;
-    }) as StockInvestment[]; // Cast to StockInvestment array
-  }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]); // Add dependencies
+    });
+  }, [allInvestments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]); // Add dependencies
 
   // Update loading state to consider both hooks
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
@@ -97,6 +132,11 @@ export function MyStockList() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end mb-2">
+        <Button asChild variant="default" size="sm">
+          <Link href="/investments/add?type=Real%20Estate">+ Add Real Estate</Link>
+        </Button>
+      </div>
       {Object.entries(aggregatedStocks).map(([tickerSymbol, data]) => {
         const avgPurchasePrice = data.totalShares > 0 ? data.totalCost / data.totalShares : 0;
         // Find a representative stock item for details like logo, name, ID for linking

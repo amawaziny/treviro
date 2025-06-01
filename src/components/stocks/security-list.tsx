@@ -8,6 +8,7 @@ import { useListedSecurities } from '@/hooks/use-listed-securities';
 import type { ListedSecurity } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
+import { cacheSecurities, getCachedSecurities } from '@/lib/offline-securities-storage';
 
 interface SecurityListProps {
   filterType?: 'Stock' | 'Fund';
@@ -18,16 +19,79 @@ interface SecurityListProps {
 export function SecurityList({ filterType, title, currentTab }: SecurityListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { listedSecurities, isLoading, error } = useListedSecurities(); 
+  const [offlineMode, setOfflineMode] = useState(!navigator.onLine);
+  const [cachedSecurities, setCachedSecurities] = useState<ListedSecurity[]>([]);
+  const [usingCache, setUsingCache] = useState(false);
+
+  // Listen for online/offline events
+  useEffect(() => {
+    const handleOnline = () => setOfflineMode(false);
+    const handleOffline = () => setOfflineMode(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Cache securities when online and loaded
+  useEffect(() => {
+    if (!offlineMode && listedSecurities.length > 0) {
+      // Map ListedSecurity to OfflineSecurity (type: 'stock' | 'fund')
+      cacheSecurities(listedSecurities.map(sec => ({
+        id: sec.id,
+        name: sec.name,
+        symbol: sec.symbol,
+        type: (sec.securityType === 'Fund' ? 'fund' : 'stock'),
+        logoUrl: sec.logoUrl,
+        price: sec.price,
+        currency: sec.currency,
+        changePercent: sec.changePercent,
+        market: sec.market,
+        securityType: sec.securityType,
+        fundType: sec.fundType,
+      })));
+    }
+  }, [offlineMode, listedSecurities]);
+
+  // Load from cache when offline
+  useEffect(() => {
+    if (offlineMode) {
+      getCachedSecurities(
+        filterType ? (filterType === 'Fund' ? 'fund' : 'stock') : undefined
+      ).then(secs => {
+        // Convert OfflineSecurity[] to ListedSecurity[]
+        setCachedSecurities(secs.map(sec => ({
+          id: sec.id,
+          name: sec.name,
+          symbol: sec.symbol,
+          logoUrl: sec.logoUrl,
+          price: sec.price,
+          currency: sec.currency,
+          changePercent: sec.changePercent,
+          market: sec.market,
+          securityType: sec.securityType,
+          fundType: sec.fundType,
+        })));
+        setUsingCache(true);
+      });
+    } else {
+      setCachedSecurities([]);
+      setUsingCache(false);
+    }
+  }, [offlineMode, filterType]);
+
+  // Use cached or live data
+  const securitiesToShow = offlineMode ? cachedSecurities : listedSecurities;
 
   const filteredAndTypedSecurities = useMemo(() => {
-    let securitiesToFilter = listedSecurities;
-
+    let securitiesToFilter = securitiesToShow;
     if (filterType) {
-      securitiesToFilter = listedSecurities.filter(sec => 
+      securitiesToFilter = securitiesToShow.filter(sec =>
         filterType === 'Stock' ? (sec.securityType === 'Stock' || sec.securityType === undefined) : sec.securityType === filterType
       );
     }
-
     if (!searchTerm) {
       return securitiesToFilter;
     }
@@ -37,9 +101,9 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
       sec.market.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sec.fundType && sec.fundType.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [searchTerm, listedSecurities, filterType]);
+  }, [searchTerm, securitiesToShow, filterType]);
 
-  if (isLoading) {
+  if (isLoading && !offlineMode) {
     return (
       <div className="flex justify-center items-center py-10">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -48,7 +112,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
     );
   }
 
-  if (error) {
+  if (error && !offlineMode) {
     return (
       <Alert variant="destructive" className="mt-4">
         <AlertCircle className="h-4 w-4" />
@@ -60,7 +124,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
     );
   }
   
-  if (!isLoading && listedSecurities.length === 0 && !error) {
+  if (!isLoading && securitiesToShow.length === 0 && !error) {
      return (
       <div className="space-y-6">
          {title && <h2 className="text-xl font-semibold tracking-tight">{title}</h2>}
@@ -72,11 +136,11 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
             className="w-full ltr:pl-10 rtl:pr-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            disabled 
+            disabled={offlineMode && usingCache}
           />
         </div>
         <p className="text-center text-muted-foreground py-10">
-          No securities found. The 'listedStocks' collection in Firestore might be empty or not yet populated.
+          {offlineMode ? 'No cached securities available for offline viewing.' : "No securities found. The 'listedStocks' collection in Firestore might be empty or not yet populated."}
         </p>
       </div>
     );
@@ -85,6 +149,11 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
   return (
     <div className="space-y-6">
       {title && <h2 className="text-xl font-semibold tracking-tight">{title}</h2>}
+      {offlineMode && usingCache && (
+        <div className="text-xs text-yellow-600 bg-yellow-50 border border-yellow-200 rounded px-2 py-1 mb-2">
+          Offline mode: showing last cached securities. Some features may be unavailable.
+        </div>
+      )}
       <div className="relative">
         <Search className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ltr:left-3 rtl:right-3" />
         <Input
@@ -93,6 +162,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
           className="w-full ltr:pl-10 rtl:pr-10 text-xs sm:text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          disabled={offlineMode && usingCache && securitiesToShow.length === 0}
         />
       </div>
       {filteredAndTypedSecurities.length > 0 ? (
