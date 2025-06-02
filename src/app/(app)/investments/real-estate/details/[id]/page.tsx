@@ -8,11 +8,23 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { formatNumberWithSuffix } from "@/lib/utils";
-import { Loader2, ArrowLeft, Plus } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Calendar as CalendarIcon } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/installment-table";
-
 import { generateInstallmentSchedule } from "@/lib/installment-utils";
 import type { Installment } from "@/components/investments/installment-table";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RealEstateDetailPage() {
   const router = useRouter();
@@ -20,7 +32,13 @@ export default function RealEstateDetailPage() {
   const { investments, isLoading } = useInvestments();
   const { language } = useLanguage();
   const [showAddInstallment, setShowAddInstallment] = useState(false);
-  const [showPayInstallment, setShowPayInstallment] = useState(false);
+  const [newInstallment, setNewInstallment] = useState({
+    dueDate: new Date(),
+    amount: 0,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const { toast } = useToast();
 
   const investment = useMemo(() => {
     if (!params?.id) return null;
@@ -114,6 +132,143 @@ export default function RealEstateDetailPage() {
             <Button variant="outline" onClick={() => setShowAddInstallment(true)}>
               <Plus className="mr-2 h-4 w-4" /> Add Future Installment
             </Button>
+
+            <Dialog open={showAddInstallment} onOpenChange={setShowAddInstallment}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add Future Installment</DialogTitle>
+                  <DialogDescription>
+                    Add a new future installment to the payment schedule.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="dueDate" className="text-right">
+                      Due Date
+                    </Label>
+                    <div className="col-span-3">
+                      <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {newInstallment.dueDate ? (
+                              format(newInstallment.dueDate, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={newInstallment.dueDate}
+                            onSelect={(date) => {
+                              if (date) {
+                                setNewInstallment({...newInstallment, dueDate: date});
+                                setDatePickerOpen(false);
+                              }
+                            }}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="amount" className="text-right">
+                      Amount
+                    </Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      className="col-span-3"
+                      value={newInstallment.amount || ''}
+                      onChange={(e) =>
+                        setNewInstallment({
+                          ...newInstallment,
+                          amount: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowAddInstallment(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={isSubmitting || !newInstallment.amount || !newInstallment.dueDate}
+                    onClick={async () => {
+                      if (!investment) return;
+                      
+                      try {
+                        setIsSubmitting(true);
+                        
+                        // Generate the next installment number based on existing installments
+                        const nextNumber = Math.max(0, ...installments.map(i => i.number)) + 1;
+                        
+                        // Create the new installment
+                        const newInstallmentObj: Installment = {
+                          number: nextNumber,
+                          dueDate: format(newInstallment.dueDate, 'yyyy-MM-dd'),
+                          amount: newInstallment.amount,
+                          status: 'Unpaid',
+                        };
+                        
+                        // Update the investment with the new installment
+                        await updateRealEstateInvestment(investment.id, {
+                          paidInstallments: [
+                            ...(investment.paidInstallments || []),
+                            {
+                              number: nextNumber,
+                              chequeNumber: "" // Empty string for manual cheques
+                            }
+                          ]
+                        });
+                        
+                        // Show success toast
+                        toast({
+                          title: "Success",
+                          description: `Installment #${nextNumber} has been added successfully.`,
+                        });
+                        
+                        // Reset form and close dialog
+                        setNewInstallment({ dueDate: new Date(), amount: 0 });
+                        setShowAddInstallment(false);
+                      } catch (error) {
+                        console.error('Error adding installment:', error);
+                        // Show error toast
+                        toast({
+                          title: "Error",
+                          description: "Failed to add installment. Please try again.",
+                          variant: "destructive"
+                        });
+                      } finally {
+                        setIsSubmitting(false);
+                      }
+                    }}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add Installment'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
