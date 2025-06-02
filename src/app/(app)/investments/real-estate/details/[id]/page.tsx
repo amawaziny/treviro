@@ -48,36 +48,73 @@ export default function RealEstateDetailPage() {
   }, [params?.id, investments]);
 
   const { updateRealEstateInvestment } = useInvestments();
-  // Memoize today's date to prevent infinite re-renders
   const today = useMemo(() => new Date(), []);
 
-  // Use the actual paid installments from the investment
   const [paidInstallments, setPaidInstallments] = useState<{number: number; chequeNumber?: string}[]>(investment?.paidInstallments || []);
   const [installments, setInstallments] = useState<Installment[]>([]);
 
-  // Update paidInstallments when investment changes
   useEffect(() => {
     if (investment?.paidInstallments) {
       setPaidInstallments(investment.paidInstallments);
     }
   }, [investment?.paidInstallments]);
 
-  // Update installments when investment changes
   useEffect(() => {
     if (investment) {
-      console.log('Generating installments with:', {
-        investment,
+      const generatedInstallments = generateInstallmentSchedule(
+        { ...investment, paidInstallments },
         paidInstallments,
         today
-      });
-      const generatedInstallments = generateInstallmentSchedule({
-        ...investment,
-        paidInstallments: paidInstallments
-      }, paidInstallments, today);
-      console.log('Generated installments:', generatedInstallments);
+      );
       setInstallments(generatedInstallments);
     }
   }, [investment, paidInstallments, today]);
+
+  const formatDateDisplay = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
+      return format(date, 'dd-MM-yyyy');
+    } catch (e) {
+      return 'N/A';
+    }
+  };
+
+  const handleDeleteInstallment = async (installmentNumber: number) => {
+    try {
+      if (!investment) {
+        toast({
+          title: "Error",
+          description: "Investment not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const updatedPaidInstallments = paidInstallments.filter(
+        (inst) => inst.number !== installmentNumber
+      );
+
+      await updateRealEstateInvestment(investment.id, {
+        paidInstallments: updatedPaidInstallments,
+      });
+
+      setPaidInstallments(updatedPaidInstallments);
+
+      toast({
+        title: "Success",
+        description: "Installment deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting installment:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete installment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -103,18 +140,6 @@ export default function RealEstateDetailPage() {
       </Card>
     );
   }
-
-  // Helper to format date
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'N/A';
-      return format(date, 'dd-MM-yyyy');
-    } catch (e) {
-      return 'N/A';
-    }
-  };
 
   return (
     <div className="w-full max-w-[calc(100%-16rem)] mx-auto py-8">
@@ -143,7 +168,12 @@ export default function RealEstateDetailPage() {
           </div>
           {/* Installment Table */}
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-2">Installment Schedule</h3>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold">Installment Schedule</h3>
+              <Button onClick={() => setShowAddInstallment(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Add Future Installment
+              </Button>
+            </div>
             <div className="mt-4">
               <InstallmentTable
                 installments={installments}
@@ -151,208 +181,148 @@ export default function RealEstateDetailPage() {
                 investment={investment}
                 updateRealEstateInvestment={updateRealEstateInvestment}
                 paidInstallments={paidInstallments}
-                onDeleteInstallment={async (installmentNumber: number) => {
-                  try {
-                    // Filter out the deleted installment
-                    const updatedPaidInstallments = paidInstallments.filter(
-                      (inst) => inst.number !== installmentNumber
-                    );
-
-                    // Update the investment with the filtered installments
-                    await updateRealEstateInvestment(investment.id, {
-                      paidInstallments: updatedPaidInstallments,
-                    });
-
-                    // Update local state
-                    setPaidInstallments(updatedPaidInstallments);
-
-                    // Show success message
-                    toast({
-                      title: "Success",
-                      description: "Installment deleted successfully",
-                    });
-                  } catch (error) {
-                    console.error("Error deleting installment:", error);
-                    toast({
-                      title: "Error",
-                      description: "Failed to delete installment. Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
+                onDeleteInstallment={handleDeleteInstallment}
               />
             </div>
           </div>
-          {/* Future: List of installments, paid/unpaid, etc. */}
-          <div className="mt-6 flex gap-4">
-            <Button variant="outline" onClick={() => setShowAddInstallment(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Future Installment
-            </Button>
-
-            <Dialog open={showAddInstallment} onOpenChange={setShowAddInstallment}>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Add Future Installment</DialogTitle>
-                  <DialogDescription>
-                    Add a new future installment to the payment schedule.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="dueDate" className="text-right">
-                      Due Date
-                    </Label>
-                    <div className="col-span-3">
-                      <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start text-left font-normal"
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {newInstallment.dueDate ? (
-                              format(newInstallment.dueDate, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={newInstallment.dueDate}
-                            onSelect={(date) => {
-                              if (date) {
-                                setNewInstallment({...newInstallment, dueDate: date});
-                                setDatePickerOpen(false);
-                              }
-                            }}
-                            disabled={(date) => date < new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="amount" className="text-right">
-                      Amount
-                    </Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      className="col-span-3"
-                      value={newInstallment.amount || ''}
-                      onChange={(e) =>
-                        setNewInstallment({
-                          ...newInstallment,
-                          amount: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                    />
+          <Dialog open={showAddInstallment} onOpenChange={setShowAddInstallment}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add Future Installment</DialogTitle>
+                <DialogDescription>
+                  Add a new future installment to the payment schedule.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="dueDate" className="text-right">
+                    Due Date
+                  </Label>
+                  <div className="col-span-3">
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {newInstallment.dueDate ? (
+                            format(newInstallment.dueDate, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={newInstallment.dueDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              setNewInstallment({...newInstallment, dueDate: date});
+                              setDatePickerOpen(false);
+                            }
+                          }}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowAddInstallment(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    disabled={isSubmitting || !newInstallment.amount || !newInstallment.dueDate}
-                    onClick={async () => {
-                      if (!investment) return;
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="amount" className="text-right">
+                    Amount
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    className="col-span-3"
+                    value={newInstallment.amount || ''}
+                    onChange={(e) =>
+                      setNewInstallment({
+                        ...newInstallment,
+                        amount: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowAddInstallment(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  disabled={isSubmitting || !newInstallment.amount || !newInstallment.dueDate}
+                  onClick={async () => {
+                    if (!investment) return;
+                    
+                    try {
+                      setIsSubmitting(true);
                       
-                      try {
-                        setIsSubmitting(true);
-                        
-                        // Generate the next installment number based on existing installments
-                        const nextNumber = Math.max(0, ...installments.map(i => i.number)) + 1;
-                        
-                        // Create the new installment with the correct amount and status
-                        const newInstallmentObj: Installment = {
-                          number: nextNumber,
-                          dueDate: newInstallment.dueDate.toISOString(),
-                          amount: Number(newInstallment.amount) || 0, // Ensure it's a number
-                          status: 'Unpaid', // Always set to Unpaid for new installments
-                        };
-                        
-                        // Create the new paid installment entry (will be marked as paid when actually paid)
-                        const newPaidInstallment = {
-                          number: nextNumber,
-                          dueDate: newInstallment.dueDate.toISOString(), // Include the due date
-                          amount: Number(newInstallment.amount) || 0, // Ensure it's a number
-                          chequeNumber: "" // Empty string for manual cheques
-                        };
-                        
-                        console.log('New installment created:', { newInstallmentObj, newPaidInstallment });
-                        
-                        console.log('Adding new installment:', { newInstallmentObj, newPaidInstallment });
+                      const nextNumber = Math.max(0, ...installments.map(i => i.number)) + 1;
+                      
+                      const newInstallmentObj: Installment = {
+                        number: nextNumber,
+                        dueDate: newInstallment.dueDate.toISOString(),
+                        amount: Number(newInstallment.amount) || 0,
+                        status: 'Unpaid',
+                      };
+                      
+                      const newPaidInstallment = {
+                        number: nextNumber,
+                        dueDate: newInstallment.dueDate.toISOString(),
+                        amount: Number(newInstallment.amount) || 0,
+                        chequeNumber: ""
+                      };
 
-                        // Update the investment with the new installment
-                        const updatedInvestment = {
-                          ...investment,
-                          paidInstallments: [
-                            ...(paidInstallments || []),
-                            newPaidInstallment
-                          ]
-                        };
+                      const updatedPaidInstallments = [
+                        ...paidInstallments,
+                        newPaidInstallment
+                      ];
 
-                        // Update the investment in the database
-                        await updateRealEstateInvestment(investment.id, {
-                          paidInstallments: updatedInvestment.paidInstallments
-                        });
+                      await updateRealEstateInvestment(investment.id, {
+                        paidInstallments: updatedPaidInstallments
+                      });
 
-                        // Update paid installments and let the effect handle the rest
-                        const updatedPaidInstallments = [
-                          ...paidInstallments,
-                          newPaidInstallment
-                        ];
-                        setPaidInstallments(updatedPaidInstallments);
-                        
-                        // Also update the investment object to trigger the effect
-                        await updateRealEstateInvestment(investment.id, {
-                          paidInstallments: updatedPaidInstallments
-                        });
-                        
-                        // Show success toast
-                        toast({
-                          title: "Success",
-                          description: `Installment #${nextNumber} has been added successfully.`,
-                        });
-                        
-                        // Reset form and close dialog
-                        setNewInstallment({ dueDate: new Date(), amount: 0 });
-                        setShowAddInstallment(false);
-                      } catch (error) {
-                        console.error('Error adding installment:', error);
-                        // Show error toast
-                        toast({
-                          title: "Error",
-                          description: "Failed to add installment. Please try again.",
-                          variant: "destructive"
-                        });
-                      } finally {
-                        setIsSubmitting(false);
-                      }
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Adding...
-                      </>
-                    ) : (
-                      'Add Installment'
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                      setPaidInstallments(updatedPaidInstallments);
+                      
+                      toast({
+                        title: "Success",
+                        description: `Installment #${nextNumber} has been added successfully.`,
+                      });
+                      
+                      setNewInstallment({ dueDate: new Date(), amount: 0 });
+                      setShowAddInstallment(false);
+                    } catch (error) {
+                      console.error('Error adding installment:', error);
+                      toast({
+                        title: "Error",
+                        description: "Failed to add installment. Please try again.",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    'Add Installment'
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </div>
