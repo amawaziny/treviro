@@ -9,6 +9,17 @@ import {
   SheetTitle,
   SheetFooter
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export interface Installment {
   number: number;
@@ -24,13 +35,27 @@ export interface InstallmentTableProps {
   investment: RealEstateInvestment;
   updateRealEstateInvestment: (investmentId: string, dataToUpdate: Partial<RealEstateInvestment>) => Promise<void>;
   paidInstallments: { number: number; chequeNumber?: string }[];
+  onDeleteInstallment?: (installmentNumber: number) => Promise<void>;
 }
 
-export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments, investmentId, investment, updateRealEstateInvestment, paidInstallments }) => {
+export const InstallmentTable: React.FC<InstallmentTableProps> = ({ 
+  installments, 
+  investmentId, 
+  investment, 
+  updateRealEstateInvestment, 
+  paidInstallments,
+  onDeleteInstallment 
+}) => {
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [chequeNumber, setChequeNumber] = useState("");
   const [localInstallments, setLocalInstallments] = useState<Installment[]>(installments || []);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
+
+  // Sync local installments with parent installments
+  React.useEffect(() => {
+    setLocalInstallments(installments || []);
+  }, [installments]);
 
   // Use local state for display since it's updated immediately
   const displayInstallments = localInstallments;
@@ -79,6 +104,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments
             <th className="px-3 py-2 border">Amount</th>
             <th className="px-3 py-2 border">Status</th>
             <th className="px-3 py-2 border">Cheque Number</th>
+            <th className="px-3 py-2 border">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -105,6 +131,47 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({ installments
               <td className="px-3 py-2 border text-center">EGP {inst.amount.toLocaleString()}</td>
               <td className={`px-3 py-2 border text-center font-semibold ${inst.status === 'Paid' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{inst.status}</td>
               <td className="px-3 py-2 border text-center">{inst.chequeNumber || '-'}</td>
+              <td className="px-3 py-2 border text-center">
+                <AlertDialog open={showDeleteDialog === inst.number} onOpenChange={(open) => setShowDeleteDialog(open ? inst.number : null)}>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDeleteDialog(inst.number);
+                      }}
+                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 px-2 py-1 rounded"
+                      title="Delete Installment"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action will permanently remove installment #{inst.number} from the schedule. This cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (onDeleteInstallment) {
+                            await onDeleteInstallment(inst.number);
+                          }
+                          setShowDeleteDialog(null);
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </td>
             </tr>
           ))}
         </tbody>

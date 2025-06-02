@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -48,11 +48,36 @@ export default function RealEstateDetailPage() {
   }, [params?.id, investments]);
 
   const { updateRealEstateInvestment } = useInvestments();
-  const today = new Date(); // Use current date
+  // Memoize today's date to prevent infinite re-renders
+  const today = useMemo(() => new Date(), []);
 
   // Use the actual paid installments from the investment
-  const paidInstallments = investment?.paidInstallments || [];
-  const installments: Installment[] = investment ? generateInstallmentSchedule(investment, paidInstallments, today) : [];
+  const [paidInstallments, setPaidInstallments] = useState<{number: number; chequeNumber?: string}[]>(investment?.paidInstallments || []);
+  const [installments, setInstallments] = useState<Installment[]>([]);
+
+  // Update paidInstallments when investment changes
+  useEffect(() => {
+    if (investment?.paidInstallments) {
+      setPaidInstallments(investment.paidInstallments);
+    }
+  }, [investment?.paidInstallments]);
+
+  // Update installments when investment changes
+  useEffect(() => {
+    if (investment) {
+      console.log('Generating installments with:', {
+        investment,
+        paidInstallments,
+        today
+      });
+      const generatedInstallments = generateInstallmentSchedule({
+        ...investment,
+        paidInstallments: paidInstallments
+      }, paidInstallments, today);
+      console.log('Generated installments:', generatedInstallments);
+      setInstallments(generatedInstallments);
+    }
+  }, [investment, paidInstallments, today]);
 
   if (isLoading) {
     return (
@@ -119,13 +144,44 @@ export default function RealEstateDetailPage() {
           {/* Installment Table */}
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-2">Installment Schedule</h3>
-            <InstallmentTable
-              installments={installments}
-              investmentId={params.id as string}
-              investment={investment}
-              updateRealEstateInvestment={updateRealEstateInvestment}
-              paidInstallments={paidInstallments}
-            />
+            <div className="mt-4">
+              <InstallmentTable
+                installments={installments}
+                investmentId={params.id as string}
+                investment={investment}
+                updateRealEstateInvestment={updateRealEstateInvestment}
+                paidInstallments={paidInstallments}
+                onDeleteInstallment={async (installmentNumber: number) => {
+                  try {
+                    // Filter out the deleted installment
+                    const updatedPaidInstallments = paidInstallments.filter(
+                      (inst) => inst.number !== installmentNumber
+                    );
+
+                    // Update the investment with the filtered installments
+                    await updateRealEstateInvestment(investment.id, {
+                      paidInstallments: updatedPaidInstallments,
+                    });
+
+                    // Update local state
+                    setPaidInstallments(updatedPaidInstallments);
+
+                    // Show success message
+                    toast({
+                      title: "Success",
+                      description: "Installment deleted successfully",
+                    });
+                  } catch (error) {
+                    console.error("Error deleting installment:", error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to delete installment. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              />
+            </div>
           </div>
           {/* Future: List of installments, paid/unpaid, etc. */}
           <div className="mt-6 flex gap-4">
@@ -216,23 +272,50 @@ export default function RealEstateDetailPage() {
                         // Generate the next installment number based on existing installments
                         const nextNumber = Math.max(0, ...installments.map(i => i.number)) + 1;
                         
-                        // Create the new installment
+                        // Create the new installment with the correct amount and status
                         const newInstallmentObj: Installment = {
                           number: nextNumber,
-                          dueDate: format(newInstallment.dueDate, 'yyyy-MM-dd'),
-                          amount: newInstallment.amount,
-                          status: 'Unpaid',
+                          dueDate: newInstallment.dueDate.toISOString(),
+                          amount: Number(newInstallment.amount) || 0, // Ensure it's a number
+                          status: 'Unpaid', // Always set to Unpaid for new installments
                         };
                         
+                        // Create the new paid installment entry (will be marked as paid when actually paid)
+                        const newPaidInstallment = {
+                          number: nextNumber,
+                          dueDate: newInstallment.dueDate.toISOString(), // Include the due date
+                          amount: Number(newInstallment.amount) || 0, // Ensure it's a number
+                          chequeNumber: "" // Empty string for manual cheques
+                        };
+                        
+                        console.log('New installment created:', { newInstallmentObj, newPaidInstallment });
+                        
+                        console.log('Adding new installment:', { newInstallmentObj, newPaidInstallment });
+
                         // Update the investment with the new installment
-                        await updateRealEstateInvestment(investment.id, {
+                        const updatedInvestment = {
+                          ...investment,
                           paidInstallments: [
-                            ...(investment.paidInstallments || []),
-                            {
-                              number: nextNumber,
-                              chequeNumber: "" // Empty string for manual cheques
-                            }
+                            ...(paidInstallments || []),
+                            newPaidInstallment
                           ]
+                        };
+
+                        // Update the investment in the database
+                        await updateRealEstateInvestment(investment.id, {
+                          paidInstallments: updatedInvestment.paidInstallments
+                        });
+
+                        // Update paid installments and let the effect handle the rest
+                        const updatedPaidInstallments = [
+                          ...paidInstallments,
+                          newPaidInstallment
+                        ];
+                        setPaidInstallments(updatedPaidInstallments);
+                        
+                        // Also update the investment object to trigger the effect
+                        await updateRealEstateInvestment(investment.id, {
+                          paidInstallments: updatedPaidInstallments
                         });
                         
                         // Show success toast
