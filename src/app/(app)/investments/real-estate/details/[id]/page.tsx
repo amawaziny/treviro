@@ -114,11 +114,7 @@ export default function RealEstateDetailPage() {
             <Button variant="outline" onClick={() => setShowAddInstallment(true)}>
               <Plus className="mr-2 h-4 w-4" /> Add Future Installment
             </Button>
-            <Button variant="default" onClick={() => setShowPayInstallment(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Paid Installment
-            </Button>
           </div>
-          {/* TODO: Add dialogs/forms for adding installments */}
         </CardContent>
       </Card>
     </div>
