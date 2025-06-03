@@ -13,49 +13,63 @@ export const fixedEstimateTypes = ['Salary', 'Zakat', 'Charity', 'Other'] as con
 export const fixedEstimatePeriods = ['Monthly', 'Quarterly', 'Yearly'] as const;
 
 // Coercion helpers for numeric string inputs
-const stringToRequiredPositiveNumberCoerced = z.coerce.number({
-    invalid_type_error: "Must be a valid number.",
-    required_error: "This field is required.",
-  }).positive({ message: "Amount must be positive." });
 
+// For required fields that must be positive numbers
+const stringToRequiredPositiveNumberCoerced = z.string()
+  .min(1, "This field is required.") // First, ensure the string is not empty
+  .pipe(z.coerce.number({ invalid_type_error: "Must be a valid number." })) // Then, coerce to number
+  .positive({ message: "Amount must be positive." }); // Finally, check if positive
+
+// For optional fields that must be positive numbers if provided
 const stringToOptionalPositiveNumberCoerced = z.preprocess(
-  (val) => (val === "" || val === null || val === undefined ? undefined : val),
-  z.coerce.number({ invalid_type_error: "Must be a valid number if provided." })
-    .positive({ message: "Amount must be positive if provided." })
+  (val) => (val === "" || val === null || val === undefined ? undefined : String(val)), // Ensure it's a string or undefined
+  z.string()
     .optional()
+    .pipe(
+      z.coerce.number({ invalid_type_error: "Must be a valid number if provided." })
+        .positive({ message: "Amount must be positive if provided." })
+        .optional()
+    )
 );
 
+// For optional fields that must be non-negative numbers if provided
 const stringToOptionalNonNegativeNumberCoerced = z.preprocess(
-  (val) => (val === "" || val === null || val === undefined ? undefined : val),
-  z.coerce.number({ invalid_type_error: "Must be a valid number if provided." })
-    .min(0, { message: "Cannot be negative if provided." })
+  (val) => (val === "" || val === null || val === undefined ? undefined : String(val)), // Ensure it's a string or undefined
+  z.string()
     .optional()
+    .pipe(
+      z.coerce.number({ invalid_type_error: "Must be a valid number if provided." })
+        .min(0, { message: "Cannot be negative if provided." })
+        .optional()
+    )
 );
 
-const stringToRequiredPositiveIntegerCoerced = z.coerce.number({
-    invalid_type_error: "Must be a valid whole number.",
-    required_error: "This field is required.",
-  }).int({ message: "Must be a whole number."}).positive({ message: "Number must be a positive whole number." });
+// For required fields that must be positive integers
+const stringToRequiredPositiveIntegerCoerced = z.string()
+  .min(1, "This field is required.") // First, ensure the string is not empty
+  .pipe(z.coerce.number({ invalid_type_error: "Must be a valid whole number." })) // Then, coerce to number
+  .int({ message: "Must be a whole number."})
+  .positive({ message: "Number must be a positive whole number." });
 
 
 // Discriminated union for AddInvestmentSchema
 const StockInvestmentSchema = z.object({
   type: z.literal('Stocks'),
   name: z.string().optional(),
-  selectedStockId: z.string({ required_error: 'Please select a security.' }),
-  numberOfShares: stringToRequiredPositiveIntegerCoerced, // Use coerced version
-  purchasePricePerShare: stringToRequiredPositiveNumberCoerced, // Use coerced version
-  purchaseFees: stringToOptionalNonNegativeNumberCoerced.default(0), // Use coerced version
+  selectedStockId: z.string({ required_error: 'Please select a security.' }).min(1, 'Please select a security.'),
+  numberOfShares: stringToRequiredPositiveIntegerCoerced,
+  purchasePricePerShare: stringToRequiredPositiveNumberCoerced,
+  purchaseFees: stringToOptionalNonNegativeNumberCoerced.default('0').transform(v => parseFloat(v || '0')),
   purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
-  amountInvested: z.any().optional(), // calculated in submit logic, not user input
+  amountInvested: z.any().optional(),
 });
 
 const GoldInvestmentSchema = z.object({
   type: z.literal('Gold'),
   name: z.string().optional(),
   goldType: z.enum(goldTypes, { required_error: 'Gold type is required.' }),
-  quantityInGrams: stringToRequiredPositiveNumberCoerced, // Use coerced version
-  amountInvested: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  quantityInGrams: stringToRequiredPositiveNumberCoerced,
+  amountInvested: stringToRequiredPositiveNumberCoerced,
   purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
 });
 
@@ -63,9 +77,9 @@ const CurrencyInvestmentSchema = z.object({
   type: z.literal('Currencies'),
   name: z.string().optional(),
   currencyCode: z.string().min(1, { message: 'Transaction currency code is required.' }),
-  foreignCurrencyAmount: stringToRequiredPositiveNumberCoerced, // Use coerced version
-  exchangeRateAtPurchase: stringToRequiredPositiveNumberCoerced, // Use coerced version
-  amountInvested: z.any().optional(), // calculated in submit logic, not user input
+  foreignCurrencyAmount: stringToRequiredPositiveNumberCoerced,
+  exchangeRateAtPurchase: stringToRequiredPositiveNumberCoerced,
+  amountInvested: z.any().optional(),
   purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
 });
 
@@ -74,16 +88,16 @@ const RealEstateInvestmentSchema = z.object({
   name: z.string().optional(),
   propertyAddress: z.string().min(1, { message: 'Property address is required.' }),
   propertyType: z.enum(propertyTypes, { required_error: 'Property type is required.' }),
-  amountInvested: stringToRequiredPositiveNumberCoerced, // Use coerced helper
+  amountInvested: stringToRequiredPositiveNumberCoerced,
   installmentFrequency: z.enum(['Monthly', 'Quarterly', 'Yearly']).optional(),
-  installmentAmount: stringToOptionalPositiveNumberCoerced, // Use coerced helper
-  installmentStartDate: z.string().optional().refine((date) => !date || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+  installmentAmount: stringToOptionalPositiveNumberCoerced,
+  installmentStartDate: z.string().optional().refine((date) => !date || date.trim() === "" || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
   purchaseDate: z.string().min(1, { message: 'Purchase date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
-  totalInstallmentPrice: stringToOptionalPositiveNumberCoerced, // Use coerced helper
-  installmentEndDate: z.string().optional().refine((date) => !date || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
-  downPayment: stringToOptionalPositiveNumberCoerced, // Use coerced helper
-  maintenanceAmount: stringToOptionalNonNegativeNumberCoerced, // Use coerced helper (can be 0)
-  maintenancePaymentDate: z.string().optional().refine((date) => !date || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+  totalInstallmentPrice: stringToOptionalPositiveNumberCoerced,
+  installmentEndDate: z.string().optional().refine((date) => !date || date.trim() === "" || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
+  downPayment: stringToOptionalPositiveNumberCoerced,
+  maintenanceAmount: stringToOptionalNonNegativeNumberCoerced,
+  maintenancePaymentDate: z.string().optional().refine((date) => !date || date.trim() === "" || !isNaN(Date.parse(date)), { message: 'Invalid date format.' }),
 });
 
 const DebtInstrumentInvestmentSchema = z.object({
@@ -91,12 +105,12 @@ const DebtInstrumentInvestmentSchema = z.object({
   name: z.string().optional(),
   debtSubType: z.enum(debtSubTypes, { required_error: 'Specific debt type is required.' }),
   issuer: z.string().min(1, { message: 'Issuer is required.' }),
-  interestRate: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  interestRate: stringToRequiredPositiveNumberCoerced,
   maturityDate: z.string().min(1, { message: 'Maturity date is required.' }).refine((date) => !isNaN(Date.parse(date)), { message: 'Invalid maturity date format.' }),
   certificateInterestFrequency: z.enum(['Monthly', 'Quarterly', 'Yearly']).default('Monthly').optional(),
-  amountInvested: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  amountInvested: stringToRequiredPositiveNumberCoerced,
   purchaseDate: z.string().optional().refine((dateStr) => {
-    if (!dateStr || dateStr.trim() === "") return true;
+    if (!dateStr || dateStr.trim() === "") return true; // Optional, so empty is fine
     return !isNaN(Date.parse(dateStr));
   }, { message: 'Invalid purchase date format.' }),
 });
@@ -114,19 +128,19 @@ export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
 
 export const SellStockSchema = z.object({
   stockId: z.string(),
-  numberOfSharesToSell: stringToRequiredPositiveIntegerCoerced, // Use coerced version
-  sellPricePerShare: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  numberOfSharesToSell: stringToRequiredPositiveIntegerCoerced,
+  sellPricePerShare: stringToRequiredPositiveNumberCoerced,
   sellDate: z.string().min(1, { message: "Date is required." }).refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),
-  fees: stringToOptionalNonNegativeNumberCoerced.default(0), // Use coerced version
+  fees: stringToOptionalNonNegativeNumberCoerced.default('0').transform(v => parseFloat(v || '0')),
 });
 
 export type SellStockFormValues = z.infer<typeof SellStockSchema>;
 
 export const EditStockInvestmentSchema = z.object({
   purchaseDate: z.string().min(1, { message: "Date is required." }).refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format." }),
-  numberOfShares: stringToRequiredPositiveIntegerCoerced, // Use coerced version
-  purchasePricePerShare: stringToRequiredPositiveNumberCoerced, // Use coerced version
-  purchaseFees: stringToOptionalNonNegativeNumberCoerced.default(0), // Use coerced version
+  numberOfShares: stringToRequiredPositiveIntegerCoerced,
+  purchasePricePerShare: stringToRequiredPositiveNumberCoerced,
+  purchaseFees: stringToOptionalNonNegativeNumberCoerced.default('0').transform(v => parseFloat(v || '0')),
 });
 export type EditStockInvestmentFormValues = z.infer<typeof EditStockInvestmentSchema>;
 
@@ -134,7 +148,7 @@ export type EditStockInvestmentFormValues = z.infer<typeof EditStockInvestmentSc
 export const AddIncomeSchema = z.object({
   type: z.enum(incomeTypes, { required_error: "Income type is required." }),
   source: z.string().optional(),
-  amount: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  amount: stringToRequiredPositiveNumberCoerced,
   date: z.string().min(1, { message: "Date is required." }).refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format." }),
   description: z.string().optional(),
 });
@@ -144,15 +158,19 @@ export type AddIncomeFormValues = z.infer<typeof AddIncomeSchema>;
 export const AddExpenseSchema = z.object({
   category: z.enum(expenseCategories, { required_error: "Expense category is required." }),
   description: z.string().optional(),
-  amount: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  amount: stringToRequiredPositiveNumberCoerced,
   date: z.string().min(1, { message: "Date is required." }).refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format." }),
   isInstallment: z.boolean().optional().default(false),
   numberOfInstallments: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined ? undefined : val),
-    z.coerce.number({ invalid_type_error: "Number of months must be a valid whole number." })
-      .int({ message: "Number of months must be a whole number."})
-      .positive({ message: "Number of months must be a positive whole number." })
+    (val) => (val === "" || val === null || val === undefined ? undefined : String(val)),
+    z.string()
       .optional()
+      .pipe(
+        z.coerce.number({ invalid_type_error: "Number of months must be a valid whole number." })
+          .int({ message: "Number of months must be a whole number."})
+          .positive({ message: "Number of months must be a positive whole number." })
+          .optional()
+      )
   ),
 }).superRefine((data, ctx) => {
   if (data.category === 'Credit Card' && data.isInstallment && data.numberOfInstallments === undefined) {
@@ -162,7 +180,7 @@ export const AddExpenseSchema = z.object({
       path: ["numberOfInstallments"],
     });
   }
-  if (data.category === 'Credit Card' && data.isInstallment && (data.numberOfInstallments ?? 0) <= 0) {
+  if (data.category === 'Credit Card' && data.isInstallment && data.numberOfInstallments !== undefined && data.numberOfInstallments <= 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Number of months must be greater than 0.",
@@ -176,9 +194,9 @@ export type AddExpenseFormValues = z.infer<typeof AddExpenseSchema>;
 export const FixedEstimateSchema = z.object({
   type: z.enum(fixedEstimateTypes, { required_error: "Estimate type is required." }),
   name: z.string().optional(),
-  amount: stringToRequiredPositiveNumberCoerced, // Use coerced version
+  amount: stringToRequiredPositiveNumberCoerced,
   period: z.enum(fixedEstimatePeriods, { required_error: "Period is required." }),
-  isExpense: z.boolean().optional(), // Will be set based on type if 'Other' is not chosen
+  isExpense: z.boolean().optional(),
 }).superRefine((data, ctx) => {
   if (data.type === 'Other' && (!data.name || data.name.trim() === "")) {
     ctx.addIssue({
