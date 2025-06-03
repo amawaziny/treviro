@@ -125,9 +125,8 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     try {
       // Create a clean installments array for Firebase
       const cleanInstallments = localInstallments.map(inst => {
-        const isMatchingInstallment = inst.number === selectedNumber && 
-          (!inst.dueDate || !installmentToUpdate.dueDate || 
-           safeDateCompare(inst.dueDate, installmentToUpdate.dueDate));
+        // Match by number only since that's what we use to identify installments
+        const isMatchingInstallment = inst.number === selectedNumber;
         
         if (isMatchingInstallment) {
           const updatedInst = {
@@ -172,9 +171,8 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       
       // Update local state
       const updatedLocalInstallments = localInstallments.map(inst => {
-        const isMatchingInstallment = inst.number === selectedNumber && 
-          (!inst.dueDate || !installmentToUpdate.dueDate || 
-           safeDateCompare(inst.dueDate, installmentToUpdate.dueDate));
+        // Match by number only since that's what we use to identify installments
+        const isMatchingInstallment = inst.number === selectedNumber;
         
         return isMatchingInstallment
           ? { 
@@ -197,10 +195,11 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
 
   const handleRowClick = (installment: Installment) => {
     if (installment.status === 'Unpaid') {
-      setShowSheet(true);
       setSelectedNumber(installment.number);
       setChequeNumber(installment.chequeNumber || '');
+      setShowSheet(true);
     } else if (installment.status === 'Paid') {
+      setSelectedNumber(installment.number);
       setSelectedInstallment(installment);
       setShowUnpaidDialog(installment.number);
     }
@@ -348,9 +347,11 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                         <div className="flex gap-4 mt-4">
                           <Button 
                             variant="outline" 
+                            className="w-full"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowUnpaidDialog(null);
+                              setSelectedNumber(null);
                             }}
                             className="w-full"
                           >
@@ -361,8 +362,12 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                             className="w-full"
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setSelectedNumber(inst.number);
-                              await handleStatusChange(false);
+                              if (selectedNumber !== null) {
+                                await handleStatusChange(false);
+                                setShowUnpaidDialog(null);
+                                setSelectedNumber(null);
+                                setSelectedInstallment(null);
+                              }
                             }}
                           >
                             Mark as Unpaid
