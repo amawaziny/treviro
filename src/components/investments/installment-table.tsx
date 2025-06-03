@@ -75,8 +75,9 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   // Use local state for installments to allow for optimistic updates
   const [localInstallments, setLocalInstallments] = useState<Installment[]>(sortedInstallments);
   const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
-  
-  // Update local installments when the sorted installments change
+  const [showUnpaidDialog, setShowUnpaidDialog] = useState<number | null>(null);
+  const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
+
   useEffect(() => {
     setLocalInstallments(sortedInstallments);
   }, [sortedInstallments]);
@@ -91,8 +92,8 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     setChequeNumber("");
   };
 
-  const handleMarkPaid = async () => {
-    console.log('=== handleMarkPaid ===');
+  const handleStatusChange = async (markAsPaid: boolean) => {
+    console.log(`=== Marking installment as ${markAsPaid ? 'paid' : 'unpaid'} ===`);
     console.log('Selected number:', selectedNumber);
     
     if (selectedNumber == null) {
@@ -100,19 +101,20 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       return;
     }
 
-    // Find the installment being marked as paid
-    const installmentToPay = localInstallments.find(inst => inst.number === selectedNumber);
-    if (!installmentToPay) {
+    // Find the installment being updated
+    const installmentToUpdate = localInstallments.find(inst => inst.number === selectedNumber);
+    if (!installmentToUpdate) {
       console.error('Installment not found in localInstallments:', selectedNumber);
       console.log('Available installments:', localInstallments.map(i => i.number));
       return;
     }
 
-    console.log('Marking installment as paid:', {
-      number: installmentToPay.number,
-      amount: installmentToPay.amount,
-      dueDate: installmentToPay.dueDate,
-      chequeNumber: chequeNumber || '(none)'
+    const newStatus = markAsPaid ? 'Paid' : 'Unpaid';
+    console.log(`Marking installment as ${newStatus}:`, {
+      number: installmentToUpdate.number,
+      amount: installmentToUpdate.amount,
+      dueDate: installmentToUpdate.dueDate,
+      chequeNumber: markAsPaid ? (chequeNumber || '(none)') : 'N/A'
     });
 
     // Save to Firebase first
@@ -121,14 +123,14 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       const cleanInstallments = localInstallments.map(inst => {
         // Check if this is the installment we're updating
         const isMatchingInstallment = inst.number === selectedNumber && 
-          (!inst.dueDate || !installmentToPay.dueDate || 
-           safeDateCompare(inst.dueDate, installmentToPay.dueDate));
+          (!inst.dueDate || !installmentToUpdate.dueDate || 
+           safeDateCompare(inst.dueDate, installmentToUpdate.dueDate));
         
         if (isMatchingInstallment) {
           const updatedInst = {
             ...inst,
-            status: 'Paid' as const,
-            chequeNumber: chequeNumber || inst.chequeNumber
+            status: newStatus as 'Paid' | 'Unpaid',
+            ...(markAsPaid ? { chequeNumber: chequeNumber || inst.chequeNumber } : { chequeNumber: undefined })
           };
           
           const cleanInst: any = {
@@ -175,26 +177,38 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       // Only update local state after successful Firebase update
       const updatedLocalInstallments = localInstallments.map(inst => {
         const isMatchingInstallment = inst.number === selectedNumber && 
-          (!inst.dueDate || !installmentToPay.dueDate || 
-           safeDateCompare(inst.dueDate, installmentToPay.dueDate));
+          (!inst.dueDate || !installmentToUpdate.dueDate || 
+           safeDateCompare(inst.dueDate, installmentToUpdate.dueDate));
         
         return isMatchingInstallment
           ? { 
               ...inst, 
-              status: 'Paid' as const, 
-              chequeNumber: chequeNumber || inst.chequeNumber 
+              status: newStatus as 'Paid' | 'Unpaid',
+              ...(markAsPaid ? { chequeNumber: chequeNumber || inst.chequeNumber } : { chequeNumber: undefined })
             }
           : inst;
       });
       
       setLocalInstallments(updatedLocalInstallments);
-      console.log('Successfully updated investment and local state');
+      console.log(`Successfully marked installment as ${newStatus}`);
       setShowSheet(false);
+      setShowUnpaidDialog(null);
     } catch (error) {
       console.error('Error saving installment payment:', error);
       // Reset to previous state on error
       setLocalInstallments(localInstallments);
       alert('Failed to save installment payment. Please try again.');
+    }
+  };
+
+  const handleRowClick = (installment: Installment) => {
+    if (installment.status === 'Unpaid') {
+      setShowSheet(true);
+      setSelectedNumber(installment.number);
+      setChequeNumber(installment.chequeNumber || '');
+    } else if (installment.status === 'Paid') {
+      setSelectedInstallment(installment);
+      setShowUnpaidDialog(installment.number);
     }
   };
 
@@ -215,20 +229,14 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
           {localInstallments.map((inst) => (
             <tr
               key={`${inst.number}-${inst.dueDate}`}
-              onClick={() => {
-                if (inst.status === "Unpaid") {
-                  setShowSheet(true);
-                  setSelectedNumber(inst.number);
-                  setChequeNumber(inst.chequeNumber || "");
-                }
-              }}
-            className={`
-              ${inst.status === "Paid"
-                ? "bg-green-50 dark:bg-green-900/30"
-                : "bg-white dark:bg-[#23255a] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30"
+              onClick={() => handleRowClick(inst)}
+              className={
+                inst.status === "Paid"
+                  ? "bg-green-50 dark:bg-green-900/30"
+                  : isBefore(new Date(inst.dueDate), new Date()) && inst.status === "Unpaid"
+                  ? "bg-red-50 dark:bg-red-900/30"
+                  : "bg-white dark:bg-[#23255a] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30"
               }
-              ${isBefore(new Date(inst.dueDate), new Date()) && inst.status === "Unpaid" ? "bg-red-50 dark:bg-red-900/30" : ""}
-            `}
             >
               <td className="px-3 py-2 border text-center">{inst.number}</td>
               <td className="px-3 py-2 border text-center">{format(new Date(inst.dueDate), "dd-MM-yyyy")}</td>
@@ -275,6 +283,44 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
+
+                {/* Unpaid Confirmation Bottom Sheet */}
+                <Sheet open={showUnpaidDialog === inst.number} onOpenChange={(open) => setShowUnpaidDialog(open ? inst.number : null)}>
+                  <SheetContent 
+                    side="bottom" 
+                    className="max-w-lg w-full bottom-0 left-0 right-0 fixed rounded-t-lg bg-white dark:bg-[#181c2a] text-[#23255a] dark:text-white"
+                    style={{ top: 'auto' }}
+                  >
+                    <SheetHeader className="text-left">
+                      <SheetTitle className="text-xl font-bold">Mark as Unpaid?</SheetTitle>
+                      <p className="text-muted-foreground">
+                        Are you sure you want to mark installment #{inst.number} as unpaid? This will remove the payment record.
+                      </p>
+                    </SheetHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="flex gap-4 mt-4">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowUnpaidDialog(null)}
+                          className="w-full"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="destructive"
+                          className="w-full"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setSelectedNumber(inst.number);
+                            await handleStatusChange(false);
+                          }}
+                        >
+                          Mark as Unpaid
+                        </Button>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </td>
             </tr>
           ))}
@@ -307,7 +353,13 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
             />
           </div>
           <SheetFooter>
-            <Button onClick={handleMarkPaid} disabled={selectedNumber == null} className="w-full">Mark as Paid</Button>
+            <Button 
+              onClick={() => handleStatusChange(true)} 
+              disabled={selectedNumber == null} 
+              className="w-full"
+            >
+              Mark as Paid
+            </Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
