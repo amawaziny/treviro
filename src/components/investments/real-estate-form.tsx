@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,10 +25,10 @@ import {
 import { propertyTypes } from "@/lib/schemas";
 import { format } from "date-fns";
 import { useLanguage } from '@/contexts/language-context';
-import { Controller } from "react-hook-form";
+// Removed Controller import from react-hook-form as FormField handles it
 
 interface RealEstateFormProps {
-  control: any;
+  control: any; // Control object from react-hook-form
 }
 
 const getCurrentDate = () => {
@@ -42,33 +43,16 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
       <div className="space-y-6 mt-6 p-6 border rounded-md">
         <h3 className="text-lg font-medium text-primary">Unit Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Controller
-            name="name"
+          <FormField
             control={control}
+            name="name"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>Name / Description (Optional)</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="e.g., Downtown Apartment or Beach House Plot" 
-                    {...field} 
-                    value={field.value || ''} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Controller
-            name="propertyAddress"
-            control={control}
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Property Address</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="e.g., 123 Main St, Anytown" 
-                    {...field} 
+                  <Input
+                    placeholder="e.g., Downtown Apartment or Beach House Plot"
+                    {...field}
                     value={field.value || ''}
                   />
                 </FormControl>
@@ -76,17 +60,35 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
-          <Controller
-            name="totalInstallmentPrice"
+          <FormField
             control={control}
+            name="propertyAddress"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Property Address</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., 123 Main St, Anytown"
+                    {...field}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="totalInstallmentPrice"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Total Price at End</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="Enter total price at end"
-                    {...field}
                     value={field.value || ''}
+                    onChange={field.onChange}
+                    allowDecimal={true}
                   />
                 </FormControl>
                 <FormDescription>
@@ -96,14 +98,14 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
-          <Controller
-            name="propertyType"
+          <FormField
             control={control}
+            name="propertyType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Property Type</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
+                <Select
+                  onValueChange={field.onChange}
                   value={field.value || ""}
                 >
                   <FormControl>
@@ -128,16 +130,16 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
       <div className="space-y-6 mt-6 p-6 border rounded-md">
         <h3 className="text-lg font-medium text-primary">Installment Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Controller
-            name="purchaseDate"
+          <FormField
             control={control}
+            name="purchaseDate"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Purchase Date</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="date" 
-                    {...field} 
+                  <Input
+                    type="date"
+                    {...field}
                     value={field.value || getCurrentDate()}
                   />
                 </FormControl>
@@ -145,9 +147,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
-          <Controller
-            name="downPayment"
+          <FormField
             control={control}
+            name="downPayment"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Down Payment (Optional)</FormLabel>
@@ -165,9 +167,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             )}
           />
 
-          <Controller
-            name="installmentAmount"
+          <FormField
             control={control}
+            name="installmentAmount"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Installment Amount</FormLabel>
@@ -184,9 +186,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
-          <Controller
-            name="installmentFrequency"
+          <FormField
             control={control}
+            name="installmentFrequency"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Installment Frequency</FormLabel>
@@ -208,9 +210,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             )}
           />
 
-          <Controller
-            name="installmentStartDate"
+          <FormField
             control={control}
+            name="installmentStartDate"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Installment Start Date</FormLabel>
@@ -222,9 +224,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
-          <Controller
-            name="installmentEndDate"
+          <FormField
             control={control}
+            name="installmentEndDate"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Installment End Date</FormLabel>
@@ -236,12 +238,12 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
-          <Controller
-            name="maintenancePayment"
+          <FormField
             control={control}
+            name="maintenanceAmount" // Name was maintenancePayment, changed to maintenanceAmount
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Maintenance Payment</FormLabel>
+                <FormLabel>Maintenance Payment Amount (Optional)</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 1000.00"
@@ -250,21 +252,21 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                     allowDecimal={true}
                   />
                 </FormControl>
-                <FormDescription>Monthly maintenance fee for the property.</FormDescription>
+                <FormDescription>Maintenance fee for the property, if applicable.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Controller
-            name="maintenancePaymentDate"
+          <FormField
             control={control}
+            name="maintenancePaymentDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Maintenance Payment Date</FormLabel>
+                <FormLabel>Maintenance Payment Date (Optional)</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} value={field.value || ''} />
                 </FormControl>
-                <FormDescription>Date when the maintenance payment is due.</FormDescription>
+                <FormDescription>Date when the maintenance payment is due, if applicable.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
