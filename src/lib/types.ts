@@ -1,3 +1,4 @@
+
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
 export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Stock Dividend' | 'Other';
 export type ExpenseCategory = 'Credit Card' | 'Other';
@@ -55,14 +56,16 @@ export interface RealEstateInvestment extends BaseInvestment {
     amount: number;
     status: 'Paid' | 'Unpaid';
     chequeNumber?: string;
-    description?: string; // Added optional description
+    description?: string;
+    isMaintenance?: boolean; // Added
   }>;
-  paidInstallments?: Array<{
+  paidInstallments?: Array<{ // This is likely legacy, but keep for now if generateInstallmentSchedule uses it
     number: number;
     dueDate?: string;
     amount?: number;
     chequeNumber?: string;
-    description?: string; // Added optional description
+    description?: string;
+    isMaintenance?: boolean; // Added
   }>;
 }
 
@@ -231,3 +234,4 @@ export interface AggregatedDebtHolding {
   currency?: string; 
   logoUrl?: string; 
 }
+

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { format, isBefore, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -27,8 +28,9 @@ export interface Installment {
   amount: number;
   status: 'Paid' | 'Unpaid';
   chequeNumber?: string;
-  description?: string; // Added description field
+  description?: string;
   displayNumber?: number;
+  isMaintenance?: boolean; // Added flag
 }
 
 export interface InstallmentTableProps {
@@ -74,17 +76,24 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
 
   const totalPaidAmount = useMemo(() => {
     return localInstallments
-      .filter(i => i.status === 'Paid')
+      .filter(i => i.status === 'Paid' && !i.isMaintenance) // Exclude maintenance from property paid amount
       .reduce((sum, installment) => sum + (installment.amount || 0), 0);
   }, [localInstallments]);
 
   const remainingAmount = useMemo(() => {
-    return (investment.totalInstallmentPrice || 0) - totalPaidAmount;
-  }, [investment.totalInstallmentPrice, totalPaidAmount]);
+    // Remaining for property purchase, excluding maintenance
+    const totalPurchaseInstallments = localInstallments
+      .filter(i => !i.isMaintenance)
+      .reduce((sum, inst) => sum + (inst.amount || 0), 0);
+    return totalPurchaseInstallments - totalPaidAmount;
+  }, [localInstallments, totalPaidAmount]);
 
   const totalAmount = useMemo(() => {
-    return investment.totalInstallmentPrice || 0;
-  }, [investment.totalInstallmentPrice]);
+    // Total property purchase price, excluding maintenance
+    return localInstallments
+      .filter(i => !i.isMaintenance)
+      .reduce((sum, inst) => sum + (inst.amount || 0), 0);
+  }, [localInstallments]);
 
   const displayInstallments = localInstallments;
   const unpaidInstallments = displayInstallments.filter(i => i.status === "Unpaid");
@@ -106,8 +115,12 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     }
 
     const newStatus = markAsPaid ? 'Paid' : 'Unpaid';
-    const amountChange = markAsPaid ? installmentToUpdate.amount : -installmentToUpdate.amount;
-    const newAmountInvested = (investment.amountInvested || 0) + amountChange;
+    let newAmountInvested = investment.amountInvested || 0;
+
+    if (!installmentToUpdate.isMaintenance) { // Only adjust amountInvested for non-maintenance items
+      const amountChange = markAsPaid ? installmentToUpdate.amount : -installmentToUpdate.amount;
+      newAmountInvested += amountChange;
+    }
 
     try {
       const cleanInstallments = localInstallments.map(inst => {
@@ -118,16 +131,15 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
           dueDate: inst.dueDate,
           amount: inst.amount,
           status: isMatchingInstallment ? newStatus : inst.status,
+          isMaintenance: inst.isMaintenance || false, // Ensure flag is preserved
         };
 
         if (isMatchingInstallment) {
           if (markAsPaid) {
              if (chequeNumber) baseInstClean.chequeNumber = chequeNumber;
-             if (inst.description) baseInstClean.description = inst.description; // Preserve existing description
-          } else {
-            // When marking as unpaid, we might want to clear chequeNumber or keep description
-            if (inst.description) baseInstClean.description = inst.description;
           }
+          // Preserve description regardless
+          if (inst.description) baseInstClean.description = inst.description;
         } else {
           if (inst.chequeNumber) baseInstClean.chequeNumber = inst.chequeNumber;
           if (inst.description) baseInstClean.description = inst.description;
@@ -137,7 +149,9 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       
       await updateRealEstateInvestment(investmentId, {
         installments: cleanInstallments,
-        amountInvested: newAmountInvested
+        // Only update amountInvested if it's not a maintenance item,
+        // otherwise pass the original amountInvested to avoid changing it.
+        amountInvested: installmentToUpdate.isMaintenance ? investment.amountInvested : newAmountInvested
       });
       
       const updatedLocalInstallments = localInstallments.map(inst => {
@@ -155,8 +169,8 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       setShowSheet(false);
       setShowUnpaidDialog(null);
     } catch {
-      setLocalInstallments(localInstallments);
-      setErrorMessage('Failed to save installment payment. Please try again.');
+      setLocalInstallments(localInstallments); // Revert optimistic update
+      setErrorMessage('Failed to save payment. Please try again.');
       setShowErrorDialog(true);
     }
   };
@@ -183,20 +197,20 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   return (
     <div className="mt-8 space-y-4">
       <div className="bg-white dark:bg-[#23255a] p-4 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-2">Payment Summary</h3>
+        <h3 className="text-lg font-semibold mb-2">Payment Summary (Purchase Installments)</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded">
-            <p className="text-sm text-muted-foreground dark:text-green-200">Total Paid</p>
+            <p className="text-sm text-muted-foreground dark:text-green-200">Total Paid (Purchase)</p>
             <p className="text-2xl font-bold text-foreground">EGP {totalPaidAmount.toLocaleString()}</p>
           </div>
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
-            <p className="text-sm text-muted-foreground dark:text-blue-200">Remaining</p>
+            <p className="text-sm text-muted-foreground dark:text-blue-200">Remaining (Purchase)</p>
             <p className="text-2xl font-bold text-foreground">
               EGP {remainingAmount.toLocaleString()}
             </p>
           </div>
           <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded">
-            <p className="text-sm text-muted-foreground dark:text-amber-200">Total Amount</p>
+            <p className="text-sm text-muted-foreground dark:text-amber-200">Total Purchase Price</p>
             <p className="text-2xl font-bold text-foreground">
               EGP {totalAmount.toLocaleString()}
             </p>
@@ -222,13 +236,13 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
               <tr
                 key={`${inst.number}-${inst.dueDate}`}
                 onClick={() => handleRowClick(inst)}
-                className={
-                  inst.status === "Paid"
-                    ? "bg-green-50 dark:bg-green-900/30"
-                    : isBefore(new Date(inst.dueDate), new Date()) && inst.status === "Unpaid"
-                    ? "bg-red-50 dark:bg-red-900/30"
-                    : "bg-white dark:bg-[#23255a] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                }
+                className={`
+                  ${inst.isMaintenance ? 'bg-yellow-50 dark:bg-yellow-900/30' : 
+                    inst.status === "Paid" ? "bg-green-50 dark:bg-green-900/30" : 
+                    isBefore(new Date(inst.dueDate), new Date()) && inst.status === "Unpaid" ? "bg-red-50 dark:bg-red-900/30" : 
+                    "bg-white dark:bg-[#23255a]"}
+                  cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30
+                `}
               >
                 <td className="px-3 py-2 border text-center">{inst.number}</td>
                 <td className="px-3 py-2 border text-center">{format(new Date(inst.dueDate), "dd-MM-yyyy")}</td>
@@ -273,7 +287,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action will permanently remove installment #{inst.number} from the schedule. This cannot be undone.
+                          This action will permanently remove installment #{inst.number} ({inst.description}) from the schedule. This cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -308,7 +322,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                       <SheetHeader className="text-left">
                         <SheetTitle className="text-xl font-bold">Mark as Unpaid?</SheetTitle>
                         <p className="text-muted-foreground">
-                          Are you sure you want to mark installment #{inst.number} as unpaid? This will remove the payment record.
+                          Are you sure you want to mark installment #{inst.number} ({inst.description}) as unpaid? This will remove the payment record.
                         </p>
                       </SheetHeader>
                       <div className="grid gap-4 py-4">
@@ -357,7 +371,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
           style={{ top: 'auto' }}
         >
           <SheetHeader>
-            <SheetTitle>Mark Installment as Paid</SheetTitle>
+            <SheetTitle>Mark Payment as Paid</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
             <label className="block mb-2 font-medium">Installment Number</label>
@@ -404,3 +418,4 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     </div>
 );
 };
+
