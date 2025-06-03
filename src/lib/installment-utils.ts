@@ -25,8 +25,6 @@ export function generateInstallmentSchedule(
   paidInstallments: PaidInstallment[] = [],
   today: Date = new Date()
 ): Installment[] {
-  console.log('=== generateInstallmentSchedule ===');
-  console.log('Paid installments:', paidInstallments);
   if (!investment.installmentAmount || !investment.installmentFrequency || !investment.purchaseDate) {
     return [];
   }
@@ -129,7 +127,6 @@ export function generateInstallmentSchedule(
     inst.displayNumber = index + 1;
   });
 
-  console.log('Generated installments:', result);
   return result;
 }
 

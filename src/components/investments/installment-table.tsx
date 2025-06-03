@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { format, isBefore, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
-
-// Helper function to compare dates safely
-const safeDateCompare = (date1: string | Date, date2: string | Date) => {
-  try {
-    const d1 = typeof date1 === 'string' ? parseISO(date1) : new Date(date1);
-    const d2 = typeof date2 === 'string' ? parseISO(date2) : new Date(date2);
-    return d1.getTime() === d2.getTime();
-  } catch (e) {
-    return false;
-  }
-};
-
 import { RealEstateInvestment } from "@/lib/types";
 import {
   Sheet,
@@ -63,6 +51,8 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   const [localInstallments, setLocalInstallments] = useState<Installment[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
   const [showUnpaidDialog, setShowUnpaidDialog] = useState<number | null>(null);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
 
   const sortedInstallments = useMemo(() => {
@@ -71,8 +61,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
         const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
         const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
         return dateA - dateB;
-      } catch (e) {
-        console.error('Error sorting installments:', e);
+      } catch {
         return 0;
       }
     });
@@ -108,13 +97,11 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
 
   const handleStatusChange = async (markAsPaid: boolean) => {
     if (selectedNumber == null) {
-      console.error('No installment selected');
       return;
     }
 
     const installmentToUpdate = localInstallments.find(inst => inst.number === selectedNumber);
     if (!installmentToUpdate) {
-      console.error('Installment not found in localInstallments:', selectedNumber);
       return;
     }
 
@@ -186,10 +173,10 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       setLocalInstallments(updatedLocalInstallments);
       setShowSheet(false);
       setShowUnpaidDialog(null);
-    } catch (error) {
-      console.error('Error saving installment payment:', error);
+    } catch {
       setLocalInstallments(localInstallments);
-      alert('Failed to save installment payment. Please try again.');
+      setErrorMessage('Failed to save installment payment. Please try again.');
+      setShowErrorDialog(true);
     }
   };
 
@@ -420,6 +407,21 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      {/* Error Alert Dialog */}
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Error</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowErrorDialog(false)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-  );
-};
+);
+}; 

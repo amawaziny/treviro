@@ -59,7 +59,6 @@ export default function RealEstateDetailPage() {
 
     // If we have installments in the investment, use them directly
     if (investment.installments && investment.installments.length > 0) {
-      console.log('Using installments from investment:', investment.installments);
       setInstallments(investment.installments);
       
       // Calculate total paid amount from installments
@@ -68,18 +67,15 @@ export default function RealEstateDetailPage() {
         .reduce((sum, inst) => sum + (inst.amount || 0), 0);
       
       // Update amountInvested to match total paid if different
-      // But only if we have a meaningful difference to prevent infinite loops
       const currentAmount = investment.amountInvested || 0;
-      const hasMeaningfulDifference = Math.abs(totalPaid - currentAmount) > 0.01; // Account for floating point precision
+      const hasMeaningfulDifference = Math.abs(totalPaid - currentAmount) > 0.01;
       
       if (hasMeaningfulDifference) {
-        console.log(`Updating amountInvested from ${currentAmount} to match total paid: ${totalPaid}`);
-        // Use a separate effect to update the investment to avoid dependency issues
         const updateInvestment = async () => {
           try {
             await updateRealEstateInvestment(investment.id, { amountInvested: totalPaid });
-          } catch (error) {
-            console.error('Failed to update investment amount:', error);
+          } catch {
+            // Silently fail, the user can retry if needed
           }
         };
         updateInvestment();
@@ -87,7 +83,6 @@ export default function RealEstateDetailPage() {
     } 
     // Fallback to generating installments if none exist yet (for backward compatibility)
     else if (investment.paidInstallments) {
-      console.log('Generating installments from paidInstallments');
       const generatedInstallments = generateInstallmentSchedule(
         investment,
         investment.paidInstallments,
