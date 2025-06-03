@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -9,14 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Home, Building, Plus, Trash2 } from 'lucide-react'; 
+import { Home, Building, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'; 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/language-context';
-import { cn } from '@/lib/utils';
+import { cn, formatNumberWithSuffix } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { formatNumberWithSuffix } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,45 +52,54 @@ export default function MyRealEstatePage() {
     return stockInvestments.map(stockInv => {
       const security = listedSecurities.find(ls => ls.symbol === stockInv.tickerSymbol);
       if (security && security.securityType === 'Fund' && isRealEstateRelatedFund(security.fundType)) {
+        const totalCost = (stockInv.numberOfShares || 0) * (stockInv.purchasePricePerShare || 0);
+        const currentValue = (stockInv.numberOfShares || 0) * (security.price || 0);
+        const profitLoss = currentValue - totalCost;
+        const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : (currentValue > 0 ? Infinity : 0);
         return {
           ...stockInv,
           fundDetails: security,
+          totalCost,
+          currentValue,
+          profitLoss,
+          profitLossPercent,
         };
       }
       return null;
-    }).filter(Boolean) as (StockInvestment & { fundDetails: ListedSecurity })[];
+    }).filter(Boolean) as (StockInvestment & { fundDetails: ListedSecurity, totalCost: number, currentValue: number, profitLoss: number, profitLossPercent: number })[];
   }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
+
+  const totalFundPnL = React.useMemo(() => {
+    return realEstateFundHoldings.reduce((sum, fund) => sum + (fund.profitLoss || 0), 0);
+  }, [realEstateFundHoldings]);
+
+  const totalFundCost = React.useMemo(() => {
+    return realEstateFundHoldings.reduce((sum, fund) => sum + (fund.totalCost || 0), 0);
+  }, [realEstateFundHoldings]);
+  
+  const totalFundPnLPercent = totalFundCost > 0 ? (totalFundPnL / totalFundCost) * 100 : (totalFundPnL !== 0 ? Infinity : 0);
+  const isTotalFundProfitable = totalFundPnL >= 0;
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
-  const formatAmountEGP = (value: number) => {
+  const formatCurrencyEGP = (value: number | undefined) => {
+    if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
     return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   };
-
-  const formatAmountEGPWithSuffix = (value: number) => {
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `EGP ${formattedNumber}`;
-  };
-
-  const formatSecurityCurrency = (value: number, currencyCode: string) => {
+  
+  const formatSecurityCurrency = (value: number | undefined, currencyCode: string = 'EGP') => {
+    if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0.00`;
     const digits = currencyCode === 'EGP' ? 2 : 2; 
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   };
 
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'N/A'; // Invalid date
-      return format(date, 'dd-MM-yyyy');
-    } catch (e) {
-      return 'N/A';
-    }
+  const formatCurrencyWithSuffix = (value: number | undefined, currencyCode: string = 'EGP') => {
+    if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0`;
+    const formattedNumber = formatNumberWithSuffix(value);
+    return `${currencyCode} ${formattedNumber}`;
   };
 
-  const [dialogOpenId, setDialogOpenId] = React.useState<string | null>(null);
-
-  if (isLoadingInvestments || isLoadingListedSecurities) {
+  if (isLoading) {
     return (
       <div className="space-y-8">
         <div>
@@ -98,8 +107,12 @@ export default function MyRealEstatePage() {
           <Skeleton className="h-4 w-64" />
         </div>
         <Separator />
+        <Card className="mt-6">
+            <CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader>
+            <CardContent><Skeleton className="h-10 w-1/2" /></CardContent>
+        </Card>
         {[...Array(2)].map((_, i) => (
-          <Card key={i} className="mt-6">
+          <Card key={i} className="mt-4">
             <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
             <CardContent><Skeleton className="h-20 w-full" /></CardContent>
           </Card>
@@ -115,7 +128,27 @@ export default function MyRealEstatePage() {
         <p className="text-muted-foreground">Overview of your direct real estate and real estate fund investments.</p>
       </div>
       <Separator />
-      {/* Direct Real Estate Holdings */}
+
+      {realEstateFundHoldings.length > 0 && (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Real Estate Fund P/L</CardTitle>
+                {isTotalFundProfitable ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
+            </CardHeader>
+            <CardContent>
+                <div className={cn("text-2xl font-bold", isTotalFundProfitable ? "text-accent" : "text-destructive")}>
+                    {isMobile ? formatCurrencyWithSuffix(totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP') : formatSecurityCurrency(totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP')}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                    {totalFundPnLPercent === Infinity ? '∞' : totalFundPnLPercent.toFixed(2)}% overall P/L from funds
+                </p>
+                 <p className="text-xs text-muted-foreground mt-1">
+                    Total Invested in Funds: {formatSecurityCurrency(totalFundCost, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP')}
+                </p>
+            </CardContent>
+        </Card>
+      )}
+
       {directRealEstateHoldings.length > 0 ? (
         <div className="space-y-4 mt-6">
           {directRealEstateHoldings.map(investment => (
@@ -127,18 +160,18 @@ export default function MyRealEstatePage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Home className="mr-2 h-6 w-6 text-primary" />
-              No Real Estate Holdings
+              No Direct Real Estate Holdings
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any real estate investments yet.
+              You haven't added any direct real estate investments yet.
             </p>
           </CardContent>
         </Card>
       )}
-      {/* Real Estate Fund Holdings Table (keep as table for now) */}
-      <Card>
+      
+      <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Building className="mr-2 h-6 w-6 text-primary" />
@@ -157,29 +190,32 @@ export default function MyRealEstatePage() {
                   <TableHead className="text-right">Total Invested</TableHead>
                   <TableHead className="text-right">Current Market Price</TableHead>
                   <TableHead className="text-right">Current Value</TableHead>
+                  <TableHead className="text-right">P/L</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {realEstateFundHoldings.map(fundInv => {
                   const displayCurrency = fundInv.fundDetails.currency || 'EGP';
-                  const totalCost = (fundInv.numberOfShares || 0) * (fundInv.purchasePricePerShare || 0);
-                  const avgPurchasePrice = (fundInv.numberOfShares && fundInv.numberOfShares > 0) ? totalCost / fundInv.numberOfShares : 0;
-                  const currentValue = (fundInv.numberOfShares || 0) * (fundInv.fundDetails.price || 0);
+                  const avgPurchasePrice = (fundInv.numberOfShares && fundInv.numberOfShares > 0 && fundInv.totalCost) ? fundInv.totalCost / fundInv.numberOfShares : 0;
+                  
                   return (
                     <TableRow key={fundInv.id}>
                       <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
                       <TableCell className="text-right">{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
                       <TableCell className="text-right">{formatSecurityCurrency(avgPurchasePrice, displayCurrency)}</TableCell>
-                      <TableCell className="text-right">{formatSecurityCurrency(totalCost, displayCurrency)}</TableCell>
+                      <TableCell className="text-right">{formatSecurityCurrency(fundInv.totalCost, displayCurrency)}</TableCell>
                       <TableCell className="text-right">{formatSecurityCurrency((fundInv.fundDetails.price || 0), displayCurrency)}</TableCell>
-                      <TableCell className="text-right">{formatSecurityCurrency(currentValue, displayCurrency)}</TableCell>
+                      <TableCell className="text-right">{formatSecurityCurrency(fundInv.currentValue, displayCurrency)}</TableCell>
+                      <TableCell className={cn("text-right font-semibold", fundInv.profitLoss >= 0 ? "text-accent" : "text-destructive")}>
+                        {formatSecurityCurrency(fundInv.profitLoss, displayCurrency)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground">No real estate-related fund investments found.</p>
+            <p className="text-muted-foreground py-4 text-center">No real estate-related fund investments found.</p>
           )}
         </CardContent>
       </Card>
@@ -196,3 +232,5 @@ export default function MyRealEstatePage() {
     </div>
   );
 }
+
+    
