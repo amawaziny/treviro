@@ -5,19 +5,26 @@ import { useInvestments } from '@/hooks/use-investments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins, Settings2 } from 'lucide-react';
-import { formatNumberWithSuffix } from '@/lib/utils'; // Import the utility function
+import { formatNumberWithSuffix } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import type { DebtInstrumentInvestment, Transaction, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from '@/lib/types';
+import type { 
+  DebtInstrumentInvestment, 
+  Transaction, 
+  IncomeRecord, 
+  ExpenseRecord, 
+  FixedEstimateRecord,
+  RealEstateInvestment,
+  Investment
+} from '@/lib/types';
+import type { Installment } from '@/components/investments/installment-table';
 
 // Helper function to parse YYYY-MM-DD string to a local Date object
 const parseDateString = (dateStr?: string): Date | null => {
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null; // Basic validation
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
   const [year, month, day] = dateStr.split('-').map(Number);
-  // Ensure year, month, day are valid numbers before creating a date
   if (isNaN(year) || isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) return null;
-  return new Date(year, month - 1, day); // month is 0-indexed for Date constructor
+  return new Date(year, month - 1, day);
 };
-
 
 export default function CashFlowPage() {
   const {
@@ -30,19 +37,69 @@ export default function CashFlowPage() {
   } = useInvestments();
 
   const isLoading = isLoadingContext;
-
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
 
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
-    return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat('en-EG', { 
+      style: 'currency', 
+      currency: 'EGP', 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    }).format(value);
   };
 
   const formatCurrencyEGPForMobile = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
     return 'EGP ' + formatNumberWithSuffix(value);
   };
+
+  // Define the type for installments with property info
+  type InstallmentWithProperty = Installment & {
+    propertyName: string;
+    propertyId: string;
+  };
+
+  // Get real estate installments due this month with property info
+  const realEstateInstallments = useMemo<{ total: number; installments: InstallmentWithProperty[] }>(() => {
+    if (!investments) return { total: 0, installments: [] };
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    const installments = investments
+      .filter((inv): inv is RealEstateInvestment => inv.type === 'Real Estate' && inv.installments !== undefined)
+      .flatMap((inv: RealEstateInvestment) => {
+        return (inv.installments || []).map((installment: Installment) => ({
+          ...installment,
+          propertyName: inv.name || inv.propertyAddress || 'Unnamed Property',
+          propertyId: inv.id
+        }));
+      })
+      .filter((installment: InstallmentWithProperty) => {
+        if (installment.status === 'Paid') return false;
+        
+        try {
+          const dueDate = new Date(installment.dueDate);
+          return (
+            dueDate.getMonth() === currentMonth &&
+            dueDate.getFullYear() === currentYear
+          );
+        } catch (e) {
+          return false;
+        }
+      });
+
+    return {
+      total: installments.reduce((sum, inst) => sum + (inst.amount || 0), 0),
+      installments
+    };
+  }, [investments]);
+
+  // Calculate total real estate installments for the current month
+  const realEstateInstallmentsThisMonth = realEstateInstallments.total;
 
   const {
     monthlySalary,
@@ -80,36 +137,24 @@ export default function CashFlowPage() {
 
       if (fe.type === 'Salary' && !fe.isExpense) {
         salary += monthlyAmount;
-      } else if (fe.type === 'Zakat' && fe.isExpense) {
-        zakat += monthlyAmount;
-      } else if (fe.type === 'Charity' && fe.isExpense) {
-        charity += monthlyAmount;
-      } else if (fe.type === 'Other') {
-        if (fe.isExpense) {
-          otherFixedExp += monthlyAmount;
+      } else if (fe.isExpense) {
+        if (fe.type === 'Zakat') {
+          zakat += monthlyAmount;
+        } else if (fe.type === 'Charity') {
+          charity += monthlyAmount;
         } else {
-          otherFixedInc += monthlyAmount;
+          otherFixedExp += monthlyAmount;
         }
+      } else if (!fe.isExpense) {
+        otherFixedInc += monthlyAmount;
       }
     });
 
-    const hasFixedSalaryEstimate = fixedEstimatesList.some(fe => fe.type === 'Salary' && !fe.isExpense && fe.amount > 0);
-
-    // Process IncomeRecords for the current month
-    incomeRecordsList.forEach(record => {
-      const recordDate = parseDateString(record.date);
-      if (recordDate && isWithinInterval(recordDate, { start: currentMonthStart, end: currentMonthEnd })) {
-        const isLikelySalaryRecord = record.type === 'Other' &&
-                                    (record.description?.toLowerCase().includes('salary') ||
-                                     record.source?.toLowerCase().includes('salary') ||
-                                     record.description?.toLowerCase().includes('paycheck') ||
-                                     record.source?.toLowerCase().includes('paycheck'));
-
-        if (hasFixedSalaryEstimate && isLikelySalaryRecord) {
-          // Skip this record as it's likely a duplicate of the fixed salary
-        } else {
-          manualIncome += record.amount;
-        }
+    // Process Manual Income Records
+    incomeRecordsList.forEach(income => {
+      const incomeDate = parseDateString(income.date);
+      if (incomeDate && isWithinInterval(incomeDate, { start: currentMonthStart, end: currentMonthEnd })) {
+        manualIncome += income.amount;
       }
     });
 
@@ -147,7 +192,11 @@ export default function CashFlowPage() {
   }, [fixedEstimates, incomeRecords, investments, expenseRecords, currentMonthStart, currentMonthEnd]);
 
   const totalIncome = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
-  const totalExpenses = zakatFixedMonthly + charityFixedMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth;
+  const totalExpenses = zakatFixedMonthly + 
+    charityFixedMonthly + 
+    otherFixedExpensesMonthly + 
+    totalItemizedExpensesThisMonth + 
+    realEstateInstallmentsThisMonth;
   const remainingAmount = totalIncome - totalExpenses;
 
   if (isLoading) {
@@ -213,11 +262,14 @@ export default function CashFlowPage() {
               <span className="md:hidden">{formatCurrencyEGPForMobile(totalExpenses)}</span>
               <span className="hidden md:inline">{formatCurrencyEGP(totalExpenses)}</span>
             </p>
-             <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
-                {totalItemizedExpensesThisMonth > 0 && <p>Itemized Logged Expenses (Monthly Impact): <span className="md:hidden">{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></p>}
-                {zakatFixedMonthly > 0 && <p>Zakat (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></p>}
-                {charityFixedMonthly > 0 && <p>Charity (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></p>}
-                {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></p>}
+            <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
+              {totalItemizedExpensesThisMonth > 0 && <p>Itemized Logged Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></p>}
+              {zakatFixedMonthly > 0 && <p>Zakat (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></p>}
+              {charityFixedMonthly > 0 && <p>Charity (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></p>}
+              {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></p>}
+              {realEstateInstallments.installments.length > 0 && (
+                <p>Real Estate Installments: <span className="md:hidden">{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span><span className="hidden md:inline">{formatCurrencyEGP(realEstateInstallments.total)}</span></p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -266,6 +318,32 @@ export default function CashFlowPage() {
                 {zakatFixedMonthly > 0 && <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Zakat (Fixed):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></span></div>}
                 {charityFixedMonthly > 0 && <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Charity (Fixed):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></span></div>}
                 {otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></span></div>}
+                {realEstateInstallments.installments.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="font-medium text-sm mt-2 mb-1 text-red-700 dark:text-red-300">Real Estate Installments ({realEstateInstallments.installments.length}):</div>
+                    <div className="space-y-1 pl-4">
+                      {realEstateInstallments.installments.map((installment) => (
+                        <div key={`${installment.propertyId}-${installment.number}`} className="flex justify-between">
+                          <span className="flex items-center">
+                            <Landmark className="inline mr-2 h-3.5 w-3.5 text-red-500" />
+                            {installment.propertyName} (Installment #{installment.number})
+                          </span>
+                          <span className="font-medium">
+                            <span className="md:hidden">{formatCurrencyEGPForMobile(installment.amount || 0)}</span>
+                            <span className="hidden md:inline">{formatCurrencyEGP(installment.amount || 0)}</span>
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between pt-1 border-t border-red-100 dark:border-red-900 mt-2">
+                        <span className="font-medium">Total Real Estate Installments:</span>
+                        <span className="font-semibold">
+                          <span className="md:hidden">{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span>
+                          <span className="hidden md:inline">{formatCurrencyEGP(realEstateInstallments.total)}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <hr className="my-2"/>
                 <div className="flex justify-between font-semibold"><span>Total Projected Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalExpenses)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalExpenses)}</span></span></div>
             </CardContent>
@@ -274,4 +352,3 @@ export default function CashFlowPage() {
     </div>
   );
 }
-
