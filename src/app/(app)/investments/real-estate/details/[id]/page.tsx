@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -184,7 +185,7 @@ export default function RealEstateDetailPage() {
   }
 
   return (
-    <div className="w-full max-w-[calc(100%-16rem)] mx-auto py-8">
+    <div className="w-full">
       <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Back
       </Button>
