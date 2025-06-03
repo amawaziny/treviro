@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { format, isBefore, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 
@@ -59,13 +59,27 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [chequeNumber, setChequeNumber] = useState("");
-  const [localInstallments, setLocalInstallments] = useState<Installment[]>(installments || []);
-  const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
-
-  // Sync local installments with parent installments
-  React.useEffect(() => {
-    setLocalInstallments(installments || []);
+  const sortedInstallments = useMemo(() => {
+    return [...installments].sort((a, b) => {
+      try {
+        const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+        const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+        return dateA - dateB;
+      } catch (e) {
+        console.error('Error sorting installments:', e);
+        return 0;
+      }
+    });
   }, [installments]);
+
+  // Use local state for installments to allow for optimistic updates
+  const [localInstallments, setLocalInstallments] = useState<Installment[]>(sortedInstallments);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
+  
+  // Update local installments when the sorted installments change
+  useEffect(() => {
+    setLocalInstallments(sortedInstallments);
+  }, [sortedInstallments]);
 
   // Use local state for display since it's updated immediately
   const displayInstallments = localInstallments;
