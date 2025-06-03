@@ -58,10 +58,54 @@ export default function DashboardPage() {
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
 
+  // Get real estate installments due this month
+  const realEstateInstallments = useMemo<{ total: number; installments: any[] }>(() => {
+    if (!investments) return { total: 0, installments: [] };
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    const installments = (investments || [])
+      .filter((inv: any) => inv.type === 'Real Estate' && inv.installments !== undefined)
+      .flatMap((inv: any) => {
+        return (inv.installments || []).map((installment: any) => ({
+          ...installment,
+          propertyName: inv.name || inv.propertyAddress || 'Unnamed Property',
+          propertyId: inv.id
+        }));
+      })
+      .filter((installment: any) => {
+        if (installment.status === 'Paid') return false;
+        
+        try {
+          const dueDate = new Date(installment.dueDate);
+          return (
+            dueDate.getMonth() === currentMonth &&
+            dueDate.getFullYear() === currentYear
+          );
+        } catch (e) {
+          return false;
+        }
+      });
+
+    return {
+      total: installments.reduce((sum: number, inst: any) => sum + (inst.amount || 0), 0),
+      installments
+    };
+  }, [investments]);
+
+  const realEstateInstallmentsThisMonth = realEstateInstallments.total;
+
   const {
-    totalIncomeThisMonth,
-    totalExpensesThisMonth,
-    netCashFlowThisMonth,
+    monthlySalary,
+    otherFixedIncomeMonthly,
+    totalManualIncomeThisMonth,
+    totalProjectedCertificateInterestThisMonth,
+    zakatFixedMonthly,
+    charityFixedMonthly,
+    otherFixedExpensesMonthly,
+    totalItemizedExpensesThisMonth,
   } = useMemo(() => {
     let salary = 0;
     let otherFixedInc = 0;
@@ -78,8 +122,6 @@ export default function DashboardPage() {
     const investmentsList = investments || [];
     const expenseRecordsList = expenseRecords || [];
 
-    const directDebtInvestments = investmentsList.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
-
     // Process Fixed Estimates
     fixedEstimatesList.forEach(fe => {
       let monthlyAmount = fe.amount;
@@ -91,79 +133,36 @@ export default function DashboardPage() {
 
       if (fe.type === 'Salary' && !fe.isExpense) {
         salary += monthlyAmount;
-      } else if (fe.type === 'Zakat' && fe.isExpense) {
-        zakat += monthlyAmount;
-      } else if (fe.type === 'Charity' && fe.isExpense) {
-        charity += monthlyAmount;
-      } else if (fe.type === 'Other') {
-        if (fe.isExpense) {
-          otherFixedExp += monthlyAmount;
+      } else if (fe.isExpense) {
+        if (fe.type === 'Zakat') {
+          zakat += monthlyAmount;
+        } else if (fe.type === 'Charity') {
+          charity += monthlyAmount;
         } else {
-          otherFixedInc += monthlyAmount;
+          otherFixedExp += monthlyAmount;
         }
+      } else if (!fe.isExpense) {
+        otherFixedInc += monthlyAmount;
       }
     });
 
-    const hasFixedSalaryEstimate = fixedEstimatesList.some(fe => fe.type === 'Salary' && !fe.isExpense && fe.amount > 0);
-
-    // Process IncomeRecords for the current month (excluding likely salary if fixed salary exists)
-    incomeRecordsList.forEach(record => {
-      const recordDate = parseDateString(record.date);
-      if (recordDate && isWithinInterval(recordDate, { start: currentMonthStart, end: currentMonthEnd })) {
-        const isLikelySalaryRecord = record.type === 'Other' &&
-                                    (record.description?.toLowerCase().includes('salary') ||
-                                     record.source?.toLowerCase().includes('salary') ||
-                                     record.description?.toLowerCase().includes('paycheck') ||
-                                     record.source?.toLowerCase().includes('paycheck'));
-        if (hasFixedSalaryEstimate && isLikelySalaryRecord) {
-          // Skip
-        } else {
-          manualIncome += record.amount; // This includes profits from sales (type 'Profit Share')
-        }
+    // Process Manual Income Records
+    incomeRecordsList.forEach(income => {
+      const incomeDate = parseDateString(income.date);
+      if (incomeDate && isWithinInterval(incomeDate, { start: currentMonthStart, end: currentMonthEnd })) {
+        manualIncome += income.amount;
       }
     });
 
     // Process Certificate Interest (Direct Debt Interest)
-    const now = new Date();
-    const currentMonth = now.getMonth(); // 0-based
-    const currentYear = now.getFullYear();
-    const currentDay = now.getDate();
+    const directDebtInvestments = investmentsList.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {
-      if (debt.interestRate && debt.amountInvested && debt.debtSubType === 'Certificate' && debt.certificateInterestFrequency && debt.maturityDate) {
-        const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
-        const maturity = parseDateString(debt.maturityDate);
-        if (!maturity) return;
-        const payoutDay = maturity.getDate();
-        const payoutMonth = maturity.getMonth(); // 0-based
-        const payoutYear = maturity.getFullYear();
-        let shouldAdd = false;
-        if (debt.certificateInterestFrequency === 'Monthly') {
-          // Always add if today is on/after payout day
-          shouldAdd = currentDay >= payoutDay;
-        } else if (debt.certificateInterestFrequency === 'Quarterly') {
-          // Add only if (currentMonth - payoutMonth) % 3 === 0 and day >= payoutDay
-          const monthsSince = (currentYear - payoutYear) * 12 + (currentMonth - payoutMonth);
-          shouldAdd = monthsSince >= 0 && monthsSince % 3 === 0 && currentDay >= payoutDay;
-        } else if (debt.certificateInterestFrequency === 'Yearly') {
-          // Add only if currentMonth === payoutMonth and day >= payoutDay
-          shouldAdd = (currentMonth === payoutMonth) && (currentDay >= payoutDay);
-        }
-        if (shouldAdd) {
-          if (debt.certificateInterestFrequency === 'Monthly') {
-            certificateInterest += annualInterest / 12;
-          } else if (debt.certificateInterestFrequency === 'Quarterly') {
-            certificateInterest += annualInterest / 4;
-          } else if (debt.certificateInterestFrequency === 'Yearly') {
-            certificateInterest += annualInterest;
-          }
-        }
-      } else if (debt.interestRate && debt.amountInvested) {
-        // Fallback for legacy or non-certificate debt: keep old logic
+      if (debt.interestRate && debt.amountInvested) { 
         const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
         certificateInterest += annualInterest / 12;
       }
     });
-    
+
     // Process Itemized Expenses
     expenseRecordsList.forEach(expense => {
       const expenseDate = parseDateString(expense.date);
@@ -176,15 +175,25 @@ export default function DashboardPage() {
       }
     });
 
-    const incomeSum = salary + otherFixedInc + manualIncome + certificateInterest;
-    const expenseSum = zakat + charity + otherFixedExp + itemizedExpensesSum;
-
     return {
-      totalIncomeThisMonth: incomeSum,
-      totalExpensesThisMonth: expenseSum,
-      netCashFlowThisMonth: incomeSum - expenseSum,
+      monthlySalary: salary,
+      otherFixedIncomeMonthly: otherFixedInc,
+      totalManualIncomeThisMonth: manualIncome,
+      totalProjectedCertificateInterestThisMonth: certificateInterest,
+      zakatFixedMonthly: zakat,
+      charityFixedMonthly: charity,
+      otherFixedExpensesMonthly: otherFixedExp,
+      totalItemizedExpensesThisMonth: itemizedExpensesSum,
     };
   }, [fixedEstimates, incomeRecords, investments, expenseRecords, currentMonthStart, currentMonthEnd]);
+
+  const totalIncomeThisMonth = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
+  const totalExpensesThisMonth = zakatFixedMonthly + 
+    charityFixedMonthly + 
+    otherFixedExpensesMonthly + 
+    totalItemizedExpensesThisMonth + 
+    realEstateInstallmentsThisMonth;
+  const netCashFlowThisMonth = totalIncomeThisMonth - totalExpensesThisMonth;
 
 
   return (
