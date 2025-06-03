@@ -353,7 +353,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                               setShowUnpaidDialog(null);
                               setSelectedNumber(null);
                             }}
-                            className="w-full"
                           >
                             Cancel
                           </Button>
