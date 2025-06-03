@@ -200,7 +200,7 @@ export default function RealEstateDetailPage() {
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-semibold">Installment Schedule</h3>
               <Button onClick={() => setShowAddInstallment(true)}>
-                <Plus className="mr-2 h-4 w-4" /> Add Future Installment
+                <Plus className="mr-2 h-4 w-4" /> Add Payment
               </Button>
             </div>
             <div className="mt-4">
@@ -216,9 +216,9 @@ export default function RealEstateDetailPage() {
           <Dialog open={showAddInstallment} onOpenChange={setShowAddInstallment}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Add Future Installment</DialogTitle>
+                <DialogTitle>Add Payment</DialogTitle>
                 <DialogDescription>
-                  Add a new future installment to the payment schedule.
+                  Add a new future payment to the schedule.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -342,7 +342,7 @@ export default function RealEstateDetailPage() {
                       
                       toast({
                         title: "Success",
-                        description: `Installment #${nextNumber} has been added successfully.`,
+                        description: `Payment #${nextNumber} has been added successfully.`,
                       });
                       
                       setNewInstallment({ dueDate: new Date(), amount: 0, description: "" });
@@ -351,7 +351,7 @@ export default function RealEstateDetailPage() {
                       console.error('Error adding installment:', error);
                       toast({
                         title: "Error",
-                        description: "Failed to add installment. Please try again.",
+                        description: "Failed to add payment. Please try again.",
                         variant: "destructive"
                       });
                     } finally {
@@ -365,7 +365,7 @@ export default function RealEstateDetailPage() {
                       Adding...
                     </>
                   ) : (
-                    'Add Installment'
+                    'Add Payment'
                   )}
                 </Button>
               </DialogFooter>
@@ -376,3 +376,5 @@ export default function RealEstateDetailPage() {
     </div>
   );
 }
+
+    
