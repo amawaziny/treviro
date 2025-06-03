@@ -9,11 +9,10 @@ import { isDebtRelatedFund } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MyDebtListItem } from '@/components/investments/my-debt-list-item';
-// Removed MyDebtsListView import as it's not used anymore, list items are rendered directly.
 import {
   Table,
   TableHeader,
@@ -59,7 +58,7 @@ export default function MyDebtInstrumentsPage() {
   const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
-  const { directDebtHoldings, debtFundHoldings, totalProjectedMonthlyInterest, totalProjectedAnnualInterest, totalDebtFundPnL, totalDebtFundCost } = React.useMemo(() => {
+  const { directDebtHoldings, debtFundHoldings, totalProjectedMonthlyInterest, totalProjectedAnnualInterest, totalDebtFundPnL, totalDebtFundCost, totalDirectDebtInvested } = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) {
       return { 
         directDebtHoldings: [], 
@@ -68,6 +67,7 @@ export default function MyDebtInstrumentsPage() {
         totalProjectedAnnualInterest: 0,
         totalDebtFundPnL: 0,
         totalDebtFundCost: 0,
+        totalDirectDebtInvested: 0,
       };
     }
 
@@ -77,6 +77,7 @@ export default function MyDebtInstrumentsPage() {
     let annualInterestSum = 0;
     let debtFundPnLSum = 0;
     let debtFundCostSum = 0;
+    let directDebtInvestedSum = 0;
 
 
     const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
@@ -108,6 +109,7 @@ export default function MyDebtInstrumentsPage() {
         monthlyInterestSum += projectedMonthly;
         annualInterestSum += projectedAnnual;
       }
+      directDebtInvestedSum += debt.amountInvested || 0;
 
       directHoldings.push({
         id: debt.id,
@@ -124,7 +126,7 @@ export default function MyDebtInstrumentsPage() {
         maturityYear,
         projectedMonthlyInterest: projectedMonthly,
         projectedAnnualInterest: projectedAnnual,
-        currency: 'EGP', // Assuming direct debt in EGP for consistency
+        currency: 'EGP', 
       });
     });
 
@@ -180,12 +182,14 @@ export default function MyDebtInstrumentsPage() {
       totalProjectedAnnualInterest: annualInterestSum,
       totalDebtFundPnL: debtFundPnLSum,
       totalDebtFundCost: debtFundCostSum,
+      totalDirectDebtInvested: directDebtInvestedSum,
     };
 
   }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
   
   const totalDebtFundPnLPercent = totalDebtFundCost > 0 ? (totalDebtFundPnL / totalDebtFundCost) * 100 : (totalDebtFundPnL !== 0 ? Infinity : 0);
   const isTotalFundProfitable = totalDebtFundPnL >= 0;
+  const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
 
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
@@ -238,10 +242,9 @@ export default function MyDebtInstrumentsPage() {
       </div>
       <Separator />
 
-       {debtFundHoldings.length > 0 && (
-        <Card>
+       <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Debt Fund P/L</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Debt Instruments P/L (Funds)</CardTitle>
                 {isTotalFundProfitable ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
             </CardHeader>
             <CardContent>
@@ -251,12 +254,21 @@ export default function MyDebtInstrumentsPage() {
                 <p className="text-xs text-muted-foreground">
                     {totalDebtFundPnLPercent === Infinity ? '∞' : totalDebtFundPnLPercent.toFixed(2)}% overall P/L from funds
                 </p>
-                 <p className="text-xs text-muted-foreground mt-1">
-                    Total Invested in Funds: {formatSecurityCurrency(totalDebtFundCost, debtFundHoldings[0]?.currency || 'EGP')}
-                </p>
+                <div className="mt-2 pt-2 border-t">
+                  <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Total Invested in Debt:</span>
+                      <span className="font-semibold">
+                          {isMobile ? formatCurrencyWithSuffix(totalInvestedInDebt) : formatCurrencyEGP(totalInvestedInDebt)}
+                      </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>(Direct: {formatCurrencyEGP(totalDirectDebtInvested)})</span>
+                      <span>(Funds: {formatSecurityCurrency(totalDebtFundCost, debtFundHoldings[0]?.currency || 'EGP')})</span>
+                  </div>
+                </div>
             </CardContent>
         </Card>
-      )}
+
 
       <Card>
         <CardHeader>
@@ -309,5 +321,4 @@ export default function MyDebtInstrumentsPage() {
     </div>
   );
 }
-
     

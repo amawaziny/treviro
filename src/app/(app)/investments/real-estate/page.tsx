@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Home, Building, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'; 
+import { Home, Building, Plus, Trash2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'; 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -80,6 +80,13 @@ export default function MyRealEstatePage() {
   const totalFundPnLPercent = totalFundCost > 0 ? (totalFundPnL / totalFundCost) * 100 : (totalFundPnL !== 0 ? Infinity : 0);
   const isTotalFundProfitable = totalFundPnL >= 0;
 
+  const totalDirectRealEstateInvested = React.useMemo(() => {
+    return directRealEstateHoldings.reduce((sum, item) => sum + (item.amountInvested || 0), 0);
+  }, [directRealEstateHoldings]);
+
+  const totalInvestedInRealEstate = totalDirectRealEstateInvested + totalFundCost;
+
+
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   const formatCurrencyEGP = (value: number | undefined) => {
@@ -129,25 +136,33 @@ export default function MyRealEstatePage() {
       </div>
       <Separator />
 
-      {realEstateFundHoldings.length > 0 && (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Real Estate Fund P/L</CardTitle>
-                {isTotalFundProfitable ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
-            </CardHeader>
-            <CardContent>
-                <div className={cn("text-2xl font-bold", isTotalFundProfitable ? "text-accent" : "text-destructive")}>
-                    {isMobile ? formatCurrencyWithSuffix(totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP') : formatSecurityCurrency(totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP')}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                    {totalFundPnLPercent === Infinity ? '∞' : totalFundPnLPercent.toFixed(2)}% overall P/L from funds
-                </p>
-                 <p className="text-xs text-muted-foreground mt-1">
-                    Total Invested in Funds: {formatSecurityCurrency(totalFundCost, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP')}
-                </p>
-            </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Real Estate P/L (Funds)</CardTitle>
+            {isTotalFundProfitable ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
+        </CardHeader>
+        <CardContent>
+            <div className={cn("text-2xl font-bold", isTotalFundProfitable ? "text-accent" : "text-destructive")}>
+                {isMobile ? formatCurrencyWithSuffix(totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP') : formatSecurityCurrency(totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP')}
+            </div>
+            <p className="text-xs text-muted-foreground">
+                {totalFundPnLPercent === Infinity ? '∞' : totalFundPnLPercent.toFixed(2)}% overall P/L from funds
+            </p>
+            <div className="mt-2 pt-2 border-t">
+              <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Total Invested in Real Estate:</span>
+                  <span className="font-semibold">
+                      {isMobile ? formatCurrencyWithSuffix(totalInvestedInRealEstate) : formatCurrencyEGP(totalInvestedInRealEstate)}
+                  </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>(Direct: {formatCurrencyEGP(totalDirectRealEstateInvested)})</span>
+                  <span>(Funds: {formatSecurityCurrency(totalFundCost, realEstateFundHoldings[0]?.fundDetails.currency || 'EGP')})</span>
+              </div>
+            </div>
+        </CardContent>
+      </Card>
+
 
       {directRealEstateHoldings.length > 0 ? (
         <div className="space-y-4 mt-6">
@@ -232,5 +247,4 @@ export default function MyRealEstatePage() {
     </div>
   );
 }
-
     
