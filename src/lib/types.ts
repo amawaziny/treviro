@@ -55,12 +55,14 @@ export interface RealEstateInvestment extends BaseInvestment {
     amount: number;
     status: 'Paid' | 'Unpaid';
     chequeNumber?: string;
+    description?: string; // Added optional description
   }>;
   paidInstallments?: Array<{
     number: number;
     dueDate?: string;
     amount?: number;
     chequeNumber?: string;
+    description?: string; // Added optional description
   }>;
 }
 

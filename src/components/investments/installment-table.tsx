@@ -27,6 +27,7 @@ export interface Installment {
   amount: number;
   status: 'Paid' | 'Unpaid';
   chequeNumber?: string;
+  description?: string; // Added description field
   displayNumber?: number;
 }
 
@@ -71,7 +72,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     setLocalInstallments(sortedInstallments);
   }, [sortedInstallments]);
 
-  // Calculate total amount paid from installments
   const totalPaidAmount = useMemo(() => {
     return localInstallments
       .filter(i => i.status === 'Paid')
@@ -110,57 +110,38 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     const newAmountInvested = (investment.amountInvested || 0) + amountChange;
 
     try {
-      // Create a clean installments array for Firebase
       const cleanInstallments = localInstallments.map(inst => {
-        // Match by number only since that's what we use to identify installments
         const isMatchingInstallment = inst.number === selectedNumber;
         
-        if (isMatchingInstallment) {
-          const updatedInst = {
-            ...inst,
-            status: newStatus as 'Paid' | 'Unpaid',
-            ...(markAsPaid ? { chequeNumber: chequeNumber || inst.chequeNumber } : { chequeNumber: undefined })
-          };
-          
-          const cleanInst: any = {
-            number: updatedInst.number,
-            dueDate: updatedInst.dueDate,
-            amount: updatedInst.amount,
-            status: updatedInst.status
-          };
-          
-          if (updatedInst.chequeNumber) {
-            cleanInst.chequeNumber = updatedInst.chequeNumber;
-          }
-          
-          return cleanInst;
-        }
-        
-        const cleanInst: any = {
+        const baseInstClean: any = {
           number: inst.number,
           dueDate: inst.dueDate,
           amount: inst.amount,
-          status: inst.status
+          status: isMatchingInstallment ? newStatus : inst.status,
         };
-        
-        if (inst.chequeNumber) {
-          cleanInst.chequeNumber = inst.chequeNumber;
+
+        if (isMatchingInstallment) {
+          if (markAsPaid) {
+             if (chequeNumber) baseInstClean.chequeNumber = chequeNumber;
+             if (inst.description) baseInstClean.description = inst.description; // Preserve existing description
+          } else {
+            // When marking as unpaid, we might want to clear chequeNumber or keep description
+            if (inst.description) baseInstClean.description = inst.description;
+          }
+        } else {
+          if (inst.chequeNumber) baseInstClean.chequeNumber = inst.chequeNumber;
+          if (inst.description) baseInstClean.description = inst.description;
         }
-        
-        return cleanInst;
+        return baseInstClean;
       });
       
-      // Update the investment with the cleaned installments and new amountInvested
       await updateRealEstateInvestment(investmentId, {
         installments: cleanInstallments,
         amountInvested: newAmountInvested
       });
       
-      // Update local state
       const updatedLocalInstallments = localInstallments.map(inst => {
-        // Match by number only since that's what we use to identify installments
         const isMatchingInstallment = inst.number === selectedNumber;
-        
         return isMatchingInstallment
           ? { 
               ...inst, 
@@ -201,7 +182,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
 
   return (
     <div className="mt-8 space-y-4">
-      {/* Summary Section */}
       <div className="bg-white dark:bg-[#23255a] p-4 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-2">Payment Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -231,6 +211,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
               <th className="px-3 py-2 border">#</th>
               <th className="px-3 py-2 border">Due Date</th>
               <th className="px-3 py-2 border">Amount</th>
+              <th className="px-3 py-2 border">Description</th>
               <th className="px-3 py-2 border">Status</th>
               <th className="px-3 py-2 border">Cheque Number</th>
               <th className="px-3 py-2 border">Actions</th>
@@ -252,6 +233,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                 <td className="px-3 py-2 border text-center">{inst.number}</td>
                 <td className="px-3 py-2 border text-center">{format(new Date(inst.dueDate), "dd-MM-yyyy")}</td>
                 <td className="px-3 py-2 border text-center">EGP {inst.amount.toLocaleString()}</td>
+                <td className="px-3 py-2 border text-center max-w-[200px] truncate" title={inst.description}>{inst.description || '-'}</td>
                 <td className={`px-3 py-2 border text-center font-semibold ${
                   inst.status === 'Paid' 
                     ? 'text-green-600 dark:text-green-400' 
@@ -309,7 +291,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                     </AlertDialogContent>
                   </AlertDialog>
 
-                  {/* Unpaid Confirmation Bottom Sheet */}
                   <Sheet open={showUnpaidDialog === inst.number} onOpenChange={(open) => {
                     if (!open) {
                       setShowUnpaidDialog(null);
@@ -369,7 +350,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
         </table>
       </div>
       
-      {/* Sheet for marking as paid */}
       <Sheet open={showSheet} onOpenChange={setShowSheet}>
         <SheetContent
           side="bottom"
@@ -408,7 +388,6 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
         </SheetContent>
       </Sheet>
 
-      {/* Error Alert Dialog */}
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -424,4 +403,4 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       </AlertDialog>
     </div>
 );
-}; 
+};

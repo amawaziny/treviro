@@ -16,6 +16,7 @@ import type { Installment } from "@/components/investments/installment-table";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea"; // Added Textarea
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ export default function RealEstateDetailPage() {
   const [newInstallment, setNewInstallment] = useState({
     dueDate: new Date(),
     amount: 0,
+    description: "", // Added description to state
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -51,45 +53,38 @@ export default function RealEstateDetailPage() {
   const { updateRealEstateInvestment } = useInvestments();
   const today = useMemo(() => new Date(), []);
 
-  // Initialize installments from investment data
   const [installments, setInstallments] = useState<Installment[]>([]);
 
-  // Update installments when investment data changes
   useEffect(() => {
     if (!investment) return;
-
-    // If we have installments in the investment, use them directly
     if (investment.installments && investment.installments.length > 0) {
-      setInstallments(investment.installments);
-      
-      // Calculate total paid amount from installments
+      setInstallments(investment.installments.map(inst => ({
+        ...inst,
+        description: inst.description || '', // Ensure description is always a string
+      })));
       const totalPaid = investment.installments
         .filter(inst => inst.status === 'Paid')
         .reduce((sum, inst) => sum + (inst.amount || 0), 0);
-      
-      // Update amountInvested to match total paid if different
       const currentAmount = investment.amountInvested || 0;
       const hasMeaningfulDifference = Math.abs(totalPaid - currentAmount) > 0.01;
-      
       if (hasMeaningfulDifference) {
         const updateInvestment = async () => {
           try {
             await updateRealEstateInvestment(investment.id, { amountInvested: totalPaid });
-          } catch {
-            // Silently fail, the user can retry if needed
-          }
+          } catch {}
         };
         updateInvestment();
       }
-    } 
-    // Fallback to generating installments if none exist yet (for backward compatibility)
-    else if (investment.paidInstallments) {
+    } else if (investment.paidInstallments) {
       const generatedInstallments = generateInstallmentSchedule(
         investment,
         investment.paidInstallments,
         today
       );
-      setInstallments(generatedInstallments);
+      setInstallments(generatedInstallments.map(inst => ({
+        ...inst,
+        description: inst.description || '',
+      })));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [investment?.id, JSON.stringify(investment?.installments), investment?.amountInvested, today]);
@@ -116,12 +111,10 @@ export default function RealEstateDetailPage() {
         return;
       }
 
-      // Remove the installment from the installments array
       const updatedInstallments = installments.filter(
         (inst) => inst.number !== installmentNumber
       );
 
-      // Create a clean installments array without undefined values
       const cleanInstallments = updatedInstallments.map(inst => {
         const cleanInst: any = {
           number: inst.number,
@@ -129,12 +122,8 @@ export default function RealEstateDetailPage() {
           amount: inst.amount,
           status: inst.status
         };
-        
-        // Only include chequeNumber if it exists
-        if (inst.chequeNumber) {
-          cleanInst.chequeNumber = inst.chequeNumber;
-        }
-        
+        if (inst.chequeNumber) cleanInst.chequeNumber = inst.chequeNumber;
+        if (inst.description) cleanInst.description = inst.description; // Include description
         return cleanInst;
       });
 
@@ -142,9 +131,7 @@ export default function RealEstateDetailPage() {
         installments: cleanInstallments,
       });
 
-      // Update local state
       setInstallments(updatedInstallments);
-
       toast({
         title: "Success",
         description: "Installment deleted successfully",
@@ -209,7 +196,6 @@ export default function RealEstateDetailPage() {
             <div className="font-medium text-muted-foreground">Installment End Date:</div>
             <div>{formatDateDisplay(investment.installmentEndDate)}</div>
           </div>
-          {/* Installment Table */}
           <div className="mt-8">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-semibold">Installment Schedule</h3>
@@ -289,6 +275,23 @@ export default function RealEstateDetailPage() {
                     }
                   />
                 </div>
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="description" className="text-right pt-2">
+                    Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    className="col-span-3"
+                    placeholder="Optional: e.g., Q4 payment, Final finishing payment"
+                    value={newInstallment.description}
+                    onChange={(e) =>
+                      setNewInstallment({
+                        ...newInstallment,
+                        description: e.target.value,
+                      })
+                    }
+                  />
+                </div>
               </div>
               <DialogFooter>
                 <Button
@@ -309,18 +312,16 @@ export default function RealEstateDetailPage() {
                       
                       const nextNumber = Math.max(0, ...installments.map(i => i.number)) + 1;
                       
-                      // Create the new installment object
                       const newInstallmentObj: Installment = {
                         number: nextNumber,
                         dueDate: newInstallment.dueDate.toISOString(),
                         amount: Number(newInstallment.amount) || 0,
                         status: 'Unpaid',
+                        description: newInstallment.description.trim() || undefined, // Add description
                       };
                       
-                      // Update the installments list to include the new installment
                       const updatedInstallments = [...(investment.installments || []), newInstallmentObj];
                       
-                      // Create a clean installments array without undefined values
                       const cleanInstallments = updatedInstallments.map(inst => {
                         const cleanInst: any = {
                           number: inst.number,
@@ -328,29 +329,23 @@ export default function RealEstateDetailPage() {
                           amount: inst.amount,
                           status: inst.status
                         };
-                        
-                        // Only include chequeNumber if it exists
-                        if (inst.chequeNumber) {
-                          cleanInst.chequeNumber = inst.chequeNumber;
-                        }
-                        
+                        if (inst.chequeNumber) cleanInst.chequeNumber = inst.chequeNumber;
+                        if (inst.description) cleanInst.description = inst.description; // Ensure description is included
                         return cleanInst;
                       });
                       
-                      // Save to the database
                       await updateRealEstateInvestment(investment.id, {
                         installments: cleanInstallments
                       });
                       
-                      // Update local state
-                      setInstallments(updatedInstallments);
+                      setInstallments(updatedInstallments.map(inst => ({ ...inst, description: inst.description || ''})));
                       
                       toast({
                         title: "Success",
                         description: `Installment #${nextNumber} has been added successfully.`,
                       });
                       
-                      setNewInstallment({ dueDate: new Date(), amount: 0 });
+                      setNewInstallment({ dueDate: new Date(), amount: 0, description: "" });
                       setShowAddInstallment(false);
                     } catch (error) {
                       console.error('Error adding installment:', error);
