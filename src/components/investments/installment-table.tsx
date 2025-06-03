@@ -285,11 +285,19 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                 </AlertDialog>
 
                 {/* Unpaid Confirmation Bottom Sheet */}
-                <Sheet open={showUnpaidDialog === inst.number} onOpenChange={(open) => setShowUnpaidDialog(open ? inst.number : null)}>
+                <Sheet open={showUnpaidDialog === inst.number} onOpenChange={(open) => {
+                  if (!open) {
+                    setShowUnpaidDialog(null);
+                  }
+                }}>
                   <SheetContent 
                     side="bottom" 
                     className="max-w-lg w-full bottom-0 left-0 right-0 fixed rounded-t-lg bg-white dark:bg-[#181c2a] text-[#23255a] dark:text-white"
                     style={{ top: 'auto' }}
+                    onInteractOutside={(e) => {
+                      e.preventDefault();
+                      setShowUnpaidDialog(null);
+                    }}
                   >
                     <SheetHeader className="text-left">
                       <SheetTitle className="text-xl font-bold">Mark as Unpaid?</SheetTitle>
@@ -301,7 +309,10 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                       <div className="flex gap-4 mt-4">
                         <Button 
                           variant="outline" 
-                          onClick={() => setShowUnpaidDialog(null)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowUnpaidDialog(null);
+                          }}
                           className="w-full"
                         >
                           Cancel
