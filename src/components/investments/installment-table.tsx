@@ -1,6 +1,17 @@
-import React, { useState } from "react";
-import { format, isBefore } from "date-fns";
+import React, { useState, useEffect } from "react";
+import { format, isBefore, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
+
+// Helper function to compare dates safely
+const safeDateCompare = (date1: string | Date, date2: string | Date) => {
+  try {
+    const d1 = typeof date1 === 'string' ? parseISO(date1) : new Date(date1);
+    const d2 = typeof date2 === 'string' ? parseISO(date2) : new Date(date2);
+    return d1.getTime() === d2.getTime();
+  } catch (e) {
+    return false;
+  }
+};
 import { RealEstateInvestment } from "@/lib/types";
 import {
   Sheet,
@@ -27,6 +38,7 @@ export interface Installment {
   amount: number;
   status: 'Paid' | 'Unpaid';
   chequeNumber?: string;
+  displayNumber?: number;
 }
 
 export interface InstallmentTableProps {
@@ -34,7 +46,6 @@ export interface InstallmentTableProps {
   investmentId: string;
   investment: RealEstateInvestment;
   updateRealEstateInvestment: (investmentId: string, dataToUpdate: Partial<RealEstateInvestment>) => Promise<void>;
-  paidInstallments: { number: number; chequeNumber?: string }[];
   onDeleteInstallment?: (installmentNumber: number) => Promise<void>;
 }
 
@@ -42,8 +53,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   installments, 
   investmentId, 
   investment, 
-  updateRealEstateInvestment, 
-  paidInstallments,
+  updateRealEstateInvestment,
   onDeleteInstallment 
 }) => {
   const [showSheet, setShowSheet] = useState(false);
@@ -68,23 +78,103 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   };
 
   const handleMarkPaid = async () => {
-    if (selectedNumber == null) return;
+    console.log('=== handleMarkPaid ===');
+    console.log('Selected number:', selectedNumber);
+    
+    if (selectedNumber == null) {
+      console.error('No installment selected');
+      return;
+    }
 
-    // Update local state first
-    const updatedInstallments = localInstallments.map(inst =>
-      inst.number === selectedNumber
-        ? { ...inst, status: 'Paid' as const, chequeNumber: chequeNumber || undefined }
-        : inst
-    ) as Installment[];
-    setLocalInstallments(updatedInstallments);
+    // Find the installment being marked as paid
+    const installmentToPay = localInstallments.find(inst => inst.number === selectedNumber);
+    if (!installmentToPay) {
+      console.error('Installment not found in localInstallments:', selectedNumber);
+      console.log('Available installments:', localInstallments.map(i => i.number));
+      return;
+    }
 
-    // Save to Firebase
+    console.log('Marking installment as paid:', {
+      number: installmentToPay.number,
+      amount: installmentToPay.amount,
+      dueDate: installmentToPay.dueDate,
+      chequeNumber: chequeNumber || '(none)'
+    });
+
+    // Save to Firebase first
     try {
+      // Create a clean installments array for Firebase
+      const cleanInstallments = localInstallments.map(inst => {
+        // Check if this is the installment we're updating
+        const isMatchingInstallment = inst.number === selectedNumber && 
+          (!inst.dueDate || !installmentToPay.dueDate || 
+           safeDateCompare(inst.dueDate, installmentToPay.dueDate));
+        
+        if (isMatchingInstallment) {
+          const updatedInst = {
+            ...inst,
+            status: 'Paid' as const,
+            chequeNumber: chequeNumber || inst.chequeNumber
+          };
+          
+          const cleanInst: any = {
+            number: updatedInst.number,
+            dueDate: updatedInst.dueDate,
+            amount: updatedInst.amount,
+            status: updatedInst.status
+          };
+          
+          if (updatedInst.chequeNumber) {
+            cleanInst.chequeNumber = updatedInst.chequeNumber;
+          }
+          
+          return cleanInst;
+        }
+        
+        // For non-matching installments, just clean the data
+        const cleanInst: any = {
+          number: inst.number,
+          dueDate: inst.dueDate,
+          amount: inst.amount,
+          status: inst.status
+        };
+        
+        if (inst.chequeNumber) {
+          cleanInst.chequeNumber = inst.chequeNumber;
+        }
+        
+        return cleanInst;
+      });
+      
+      console.log('Updated installments for Firebase:', cleanInstallments);
+      
+      // Update the investment with the cleaned installments
       const updatedInvestment: Partial<RealEstateInvestment> = {
-        ...investment,
-        paidInstallments: [...paidInstallments, { number: selectedNumber, chequeNumber }]
+        installments: cleanInstallments
       };
+      
+      console.log('Updating investment with:', updatedInvestment);
+      
+      // Update Firebase
       await updateRealEstateInvestment(investmentId, updatedInvestment);
+      
+      // Only update local state after successful Firebase update
+      const updatedLocalInstallments = localInstallments.map(inst => {
+        const isMatchingInstallment = inst.number === selectedNumber && 
+          (!inst.dueDate || !installmentToPay.dueDate || 
+           safeDateCompare(inst.dueDate, installmentToPay.dueDate));
+        
+        return isMatchingInstallment
+          ? { 
+              ...inst, 
+              status: 'Paid' as const, 
+              chequeNumber: chequeNumber || inst.chequeNumber 
+            }
+          : inst;
+      });
+      
+      setLocalInstallments(updatedLocalInstallments);
+      console.log('Successfully updated investment and local state');
       setShowSheet(false);
     } catch (error) {
       console.error('Error saving installment payment:', error);
@@ -110,7 +200,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
         <tbody>
           {localInstallments.map((inst) => (
             <tr
-              key={inst.number}
+              key={`${inst.number}-${inst.dueDate}`}
               onClick={() => {
                 if (inst.status === "Unpaid") {
                   setShowSheet(true);

@@ -50,25 +50,29 @@ export default function RealEstateDetailPage() {
   const { updateRealEstateInvestment } = useInvestments();
   const today = useMemo(() => new Date(), []);
 
-  const [paidInstallments, setPaidInstallments] = useState<{number: number; chequeNumber?: string}[]>(investment?.paidInstallments || []);
+  // Initialize installments from investment data
   const [installments, setInstallments] = useState<Installment[]>([]);
 
-  useEffect(() => {
-    if (investment?.paidInstallments) {
-      setPaidInstallments(investment.paidInstallments);
-    }
-  }, [investment?.paidInstallments]);
-
+  // Update installments when investment data changes
   useEffect(() => {
     if (investment) {
-      const generatedInstallments = generateInstallmentSchedule(
-        { ...investment, paidInstallments },
-        paidInstallments,
-        today
-      );
-      setInstallments(generatedInstallments);
+      // If we have installments in the investment, use them directly
+      if (investment.installments && investment.installments.length > 0) {
+        console.log('Using installments from investment:', investment.installments);
+        setInstallments(investment.installments);
+      } 
+      // Fallback to generating installments if none exist yet (for backward compatibility)
+      else if (investment.paidInstallments) {
+        console.log('Generating installments from paidInstallments');
+        const generatedInstallments = generateInstallmentSchedule(
+          investment,
+          investment.paidInstallments,
+          today
+        );
+        setInstallments(generatedInstallments);
+      }
     }
-  }, [investment, paidInstallments, today]);
+  }, [investment, today]);
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -92,15 +96,34 @@ export default function RealEstateDetailPage() {
         return;
       }
 
-      const updatedPaidInstallments = paidInstallments.filter(
+      // Remove the installment from the installments array
+      const updatedInstallments = installments.filter(
         (inst) => inst.number !== installmentNumber
       );
 
-      await updateRealEstateInvestment(investment.id, {
-        paidInstallments: updatedPaidInstallments,
+      // Create a clean installments array without undefined values
+      const cleanInstallments = updatedInstallments.map(inst => {
+        const cleanInst: any = {
+          number: inst.number,
+          dueDate: inst.dueDate,
+          amount: inst.amount,
+          status: inst.status
+        };
+        
+        // Only include chequeNumber if it exists
+        if (inst.chequeNumber) {
+          cleanInst.chequeNumber = inst.chequeNumber;
+        }
+        
+        return cleanInst;
       });
 
-      setPaidInstallments(updatedPaidInstallments);
+      await updateRealEstateInvestment(investment.id, {
+        installments: cleanInstallments,
+      });
+
+      // Update local state
+      setInstallments(updatedInstallments);
 
       toast({
         title: "Success",
@@ -110,7 +133,7 @@ export default function RealEstateDetailPage() {
       console.error("Error deleting installment:", error);
       toast({
         title: "Error",
-        description: "Failed to delete installment. Please try again.",
+        description: "Failed to delete installment",
         variant: "destructive",
       });
     }
@@ -177,10 +200,9 @@ export default function RealEstateDetailPage() {
             <div className="mt-4">
               <InstallmentTable
                 installments={installments}
-                investmentId={params.id as string}
+                investmentId={investment.id}
                 investment={investment}
                 updateRealEstateInvestment={updateRealEstateInvestment}
-                paidInstallments={paidInstallments}
                 onDeleteInstallment={handleDeleteInstallment}
               />
             </div>
@@ -267,6 +289,7 @@ export default function RealEstateDetailPage() {
                       
                       const nextNumber = Math.max(0, ...installments.map(i => i.number)) + 1;
                       
+                      // Create the new installment object
                       const newInstallmentObj: Installment = {
                         number: nextNumber,
                         dueDate: newInstallment.dueDate.toISOString(),
@@ -274,23 +297,33 @@ export default function RealEstateDetailPage() {
                         status: 'Unpaid',
                       };
                       
-                      const newPaidInstallment = {
-                        number: nextNumber,
-                        dueDate: newInstallment.dueDate.toISOString(),
-                        amount: Number(newInstallment.amount) || 0,
-                        chequeNumber: ""
-                      };
-
-                      const updatedPaidInstallments = [
-                        ...paidInstallments,
-                        newPaidInstallment
-                      ];
-
-                      await updateRealEstateInvestment(investment.id, {
-                        paidInstallments: updatedPaidInstallments
+                      // Update the installments list to include the new installment
+                      const updatedInstallments = [...(investment.installments || []), newInstallmentObj];
+                      
+                      // Create a clean installments array without undefined values
+                      const cleanInstallments = updatedInstallments.map(inst => {
+                        const cleanInst: any = {
+                          number: inst.number,
+                          dueDate: inst.dueDate,
+                          amount: inst.amount,
+                          status: inst.status
+                        };
+                        
+                        // Only include chequeNumber if it exists
+                        if (inst.chequeNumber) {
+                          cleanInst.chequeNumber = inst.chequeNumber;
+                        }
+                        
+                        return cleanInst;
                       });
-
-                      setPaidInstallments(updatedPaidInstallments);
+                      
+                      // Save to the database
+                      await updateRealEstateInvestment(investment.id, {
+                        installments: cleanInstallments
+                      });
+                      
+                      // Update local state
+                      setInstallments(updatedInstallments);
                       
                       toast({
                         title: "Success",
