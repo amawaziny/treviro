@@ -516,6 +516,8 @@ function removeUndefinedFields(obj: any) {
 }
 
 export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add" | "edit"; initialValues?: Partial<AddInvestmentFormValues> }) {
+  // ...existing code
+
   const { addInvestment, investments, updateRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -649,12 +651,16 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
-    console.log("AddInvestmentForm - onSubmit - values:", values);
-    console.log("AddInvestmentForm - onSubmit - form.formState.errors:", form.formState.errors);
-    
-    if (Object.keys(form.formState.errors).length > 0) {
-        toast({ title: "Validation Error", description: "Please check the form for errors.", variant: "destructive" });
-        return;
+    console.log("[DEBUG] onSubmit called");
+    console.log("[DEBUG] Submitted values:", values);
+    console.log("[DEBUG] form.getValues():", form.getValues());
+    console.log("[DEBUG] form.formState.errors:", form.formState.errors);
+    if (form.formState.errors && Object.keys(form.formState.errors).length > 0) {
+      console.log("[DEBUG] Entered error block in onSubmit");
+      // Print detailed errors for debugging
+      console.error('Zod Validation Errors:', JSON.stringify(form.formState.errors, null, 2));
+      toast({ title: "Validation Error", description: "Please check the form for errors.", variant: "destructive" });
+      return;
     }
 
     setIsLoadingAi(false); 
@@ -1061,6 +1067,9 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
             )}
           </form>
         </Form>
+      {/* End of main form rendering */}
+      {/* Debug: show current form values and errors */}
+      {/* Debug output removed for Real Estate edit mode as requested */}
       </CardContent>
     </Card>
   );
