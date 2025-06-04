@@ -34,11 +34,14 @@ interface InvestmentContextType {
   addIncomeRecord: (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   expenseRecords: ExpenseRecord[];
   addExpenseRecord: (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  deleteExpenseRecord: (expenseId: string) => Promise<void>;
+  updateExpenseRecord: (expenseId: string, updatedFields: Partial<ExpenseRecord>) => Promise<void>;
   fixedEstimates: FixedEstimateRecord[];
   addFixedEstimate: (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => Promise<void>;
   recalculateDashboardSummary: () => Promise<void>;
   updateRealEstateInvestment: (investmentId: string, dataToUpdate: Partial<RealEstateInvestment>) => Promise<void>;
 }
+
 
 export const InvestmentContext = createContext<InvestmentContextType | undefined>(undefined);
 
@@ -48,6 +51,7 @@ const defaultDashboardSummary: DashboardSummary = {
 };
 
 export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
+  // ... existing state and hooks
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
@@ -251,7 +255,17 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     await setDoc(doc(firestoreInstance, `users/${userId}/expenseRecords`, expenseId), { ...expenseData, id: expenseId, userId, createdAt: serverTimestamp() });
   }, [userId, isAuthenticated, firestoreInstance]);
 
-  const addFixedEstimate = useCallback(async (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => {
+  const deleteExpenseRecord = useCallback(async (expenseId: string) => {
+    if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
+    await deleteDoc(doc(firestoreInstance, `users/${userId}/expenseRecords`, expenseId));
+  }, [userId, isAuthenticated, firestoreInstance]);
+
+  const updateExpenseRecord = useCallback(async (expenseId: string, updatedFields: Partial<ExpenseRecord>) => {
+    if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
+    await setDoc(doc(firestoreInstance, `users/${userId}/expenseRecords`, expenseId), { ...updatedFields, updatedAt: serverTimestamp() }, { merge: true });
+  }, [userId, isAuthenticated, firestoreInstance]);
+
+const addFixedEstimate = useCallback(async (estimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'userId' | 'updatedAt'>) => {
     if (!firestoreInstance || !isAuthenticated || !userId) throw new Error("User not authenticated or Firestore not available.");
     const estimateId = uuidv4();
     const finalEstimateData: FixedEstimateRecord = {
@@ -497,6 +511,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       deleteSellTransaction, removeGoldInvestments, removeDirectDebtInvestment,
       removeRealEstateInvestment, updateRealEstateInvestment,
       dashboardSummary, incomeRecords, addIncomeRecord, expenseRecords, addExpenseRecord,
+      deleteExpenseRecord, updateExpenseRecord,
       fixedEstimates, addFixedEstimate, recalculateDashboardSummary,
     }}>
       {children}

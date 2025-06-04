@@ -102,9 +102,11 @@ export interface ExpenseRecord {
   isInstallment?: boolean;
   numberOfInstallments?: number;
   createdAt?: string;
+  _originalAmount?: number;
+  _requiredAmount?: number;
 }
 
-export type FixedEstimateType = 'Salary' | 'Zakat' | 'Charity' | 'Other';
+export type FixedEstimateType = 'Salary' | 'Zakat' | 'Charity' | 'Living Expenses' | 'Other';
 export type FixedEstimatePeriod = 'Monthly' | 'Quarterly' | 'Yearly';
 
 export interface FixedEstimateRecord {

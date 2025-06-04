@@ -7,6 +7,18 @@ import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { useInvestments } from '@/hooks/use-investments';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
+import { Pencil, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
@@ -17,7 +29,7 @@ import type { ExpenseRecord } from '@/lib/types';
 // Removed FinancialSettingsForm import as its functionality is moved
 
 export default function ExpensesPage() {
-  const { expenseRecords, isLoading } = useInvestments(); // Removed monthlySettings
+  const { expenseRecords, isLoading, deleteExpenseRecord } = useInvestments(); // Removed monthlySettings
   const { language } = useLanguage();
 
   const currentMonthStart = startOfMonth(new Date());
@@ -25,9 +37,45 @@ export default function ExpensesPage() {
 
   const expensesThisMonth = React.useMemo(() => {
     const recordsToFilter = expenseRecords || [];
-    return recordsToFilter
-      .filter(record => record.date && isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd }))
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const currentMonth = currentMonthStart.getMonth();
+    const currentYear = currentMonthStart.getFullYear();
+    
+    // For each record, determine if it should appear this month
+    return recordsToFilter.flatMap(record => {
+      if (
+        record.category === 'Credit Card' &&
+        record.isInstallment &&
+        record.numberOfInstallments &&
+        record.date
+      ) {
+        // Calculate the months covered by the installment
+        const startDate = new Date(record.date);
+        const startMonth = startDate.getMonth();
+        const startYear = startDate.getFullYear();
+        const installmentMonths = record.numberOfInstallments;
+        // Calculate the month index (0-based) for the current month in the installment plan
+        const monthsSinceStart = (currentYear - startYear) * 12 + (currentMonth - startMonth);
+        if (monthsSinceStart >= 0 && monthsSinceStart < installmentMonths) {
+          // For display, return a row object with both original and required amount
+          return [{
+            ...record,
+            _originalAmount: record.amount,
+            _requiredAmount: record.amount / record.numberOfInstallments,
+            installmentMonthIndex: monthsSinceStart + 1, // for display (1-based)
+            installmentMonthsTotal: installmentMonths,
+            installmentStartDate: startDate,
+          }];
+        } else {
+          return [];
+        }
+      } else if (record.date && isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd })) {
+        // Non-installment or non-credit card expense, use normal logic
+        return [{ ...record, _originalAmount: record.amount, _requiredAmount: record.amount }];
+      } else {
+        return [];
+      }
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenseRecords, currentMonthStart, currentMonthEnd]);
 
   const formatDateDisplay = (dateString?: string) => {
@@ -96,7 +144,8 @@ export default function ExpensesPage() {
                   <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Date</TableHead>
                   <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Category</TableHead>
                   <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Description</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Original Amount</TableHead>
+                  <TableHead className="text-right">Required This Month</TableHead>
                   <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Installment Info</TableHead>
                 </TableRow>
               </TableHeader>
@@ -106,7 +155,8 @@ export default function ExpensesPage() {
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(record.date)}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.category}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.description || 'N/A'}</TableCell>
-                    <TableCell className="text-right">{formatCurrencyEGP(record.amount)}</TableCell>
+                    <TableCell className="text-right">{formatCurrencyEGP(record._originalAmount)}</TableCell>
+                    <TableCell className="text-right">{formatCurrencyEGP(record._requiredAmount)}</TableCell>
                     <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left', 'text-sm')}>
                       {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' ? (
                         <span className="flex items-center justify-end md:justify-start">
@@ -120,6 +170,44 @@ export default function ExpensesPage() {
                         </span>
                       )}
                      </TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/expenses/edit/${record.id}`} passHref legacyBehavior>
+                        <Button variant="ghost" size="icon" className="mr-2" aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove {record.description || record.category}</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action will permanently delete this expense record. This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={async () => {
+                                try {
+                                  await deleteExpenseRecord(record.id);
+                                } catch (e) {
+                                  // Optionally show toast or ignore
+                                }
+                              }}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -44,20 +44,26 @@ const initialFormValues: AddExpenseFormValues = {
   numberOfInstallments: "",
 };
 
-export function AddExpenseForm() {
+export interface AddExpenseFormProps {
+  initialValues?: Partial<AddExpenseFormValues>;
+  onSubmit?: (values: AddExpenseFormValues) => Promise<void>;
+  isEditMode?: boolean;
+}
+
+export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpenseFormProps) {
   const { addExpenseRecord } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<AddExpenseFormValues>({
     resolver: zodResolver(AddExpenseSchema),
-    defaultValues: initialFormValues,
+    defaultValues: initialValues ?? initialFormValues,
   });
 
   const watchedCategory = form.watch("category");
   const watchedIsInstallment = form.watch("isInstallment");
 
-  async function onSubmit(values: AddExpenseFormValues) {
+  async function handleInternalSubmit(values: AddExpenseFormValues) {
     try {
       // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
       // It also ensures numberOfInstallments is a positive int if isInstallment is true.
@@ -98,7 +104,7 @@ export function AddExpenseForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit ? onSubmit : handleInternalSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -231,7 +237,7 @@ export function AddExpenseForm() {
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Add Expense Record
+          {isEditMode ? 'Update Expense Record' : 'Add Expense Record'}
         </Button>
       </form>
     </Form>

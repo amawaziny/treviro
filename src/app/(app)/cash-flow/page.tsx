@@ -108,6 +108,7 @@ export default function CashFlowPage() {
     totalProjectedCertificateInterestThisMonth,
     zakatFixedMonthly,
     charityFixedMonthly,
+    livingExpensesMonthly,
     otherFixedExpensesMonthly,
     totalItemizedExpensesThisMonth,
   } = useMemo(() => {
@@ -118,6 +119,7 @@ export default function CashFlowPage() {
 
     let zakat = 0;
     let charity = 0;
+    let livingExpenses = 0;
     let otherFixedExp = 0;
     let itemizedExpensesSum = 0;
 
@@ -142,7 +144,9 @@ export default function CashFlowPage() {
           zakat += monthlyAmount;
         } else if (fe.type === 'Charity') {
           charity += monthlyAmount;
-        } else {
+        } else if (fe.type === 'Living Expenses') {
+          livingExpenses += monthlyAmount;
+        } else if (fe.type === 'Other') {
           otherFixedExp += monthlyAmount;
         }
       } else if (!fe.isExpense) {
@@ -186,6 +190,7 @@ export default function CashFlowPage() {
       totalProjectedCertificateInterestThisMonth: certificateInterest,
       zakatFixedMonthly: zakat,
       charityFixedMonthly: charity,
+      livingExpensesMonthly: livingExpenses,
       otherFixedExpensesMonthly: otherFixedExp,
       totalItemizedExpensesThisMonth: itemizedExpensesSum,
     };
@@ -194,6 +199,7 @@ export default function CashFlowPage() {
   const totalIncome = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
   const totalExpenses = zakatFixedMonthly + 
     charityFixedMonthly + 
+    livingExpensesMonthly +
     otherFixedExpensesMonthly + 
     totalItemizedExpensesThisMonth + 
     realEstateInstallmentsThisMonth;
@@ -266,7 +272,8 @@ export default function CashFlowPage() {
               {totalItemizedExpensesThisMonth > 0 && <p>Itemized Logged Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></p>}
               {zakatFixedMonthly > 0 && <p>Zakat (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></p>}
               {charityFixedMonthly > 0 && <p>Charity (Fixed): <span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></p>}
-              {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></p>}
+              {livingExpensesMonthly > 0 && <p>Living Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(livingExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(livingExpensesMonthly)}</span></p>}
+{otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: <span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></p>}
               {realEstateInstallments.installments.length > 0 && (
                 <p>Real Estate Installments: <span className="md:hidden">{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span><span className="hidden md:inline">{formatCurrencyEGP(realEstateInstallments.total)}</span></p>
               )}
@@ -317,7 +324,8 @@ export default function CashFlowPage() {
                 {totalItemizedExpensesThisMonth > 0 && <div className="flex justify-between"><span><TrendingDown className="inline mr-2 h-4 w-4 text-red-600" />Itemized Logged Expenses (Monthly Impact):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></span></div>}
                 {zakatFixedMonthly > 0 && <div className="flex justify-between"><span><Gift className="inline mr-2 h-4 w-4 text-red-600" />Zakat (Fixed):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></span></div>}
                 {charityFixedMonthly > 0 && <div className="flex justify-between"><span><HandHeart className="inline mr-2 h-4 w-4 text-red-600" />Charity (Fixed):</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></span></div>}
-                {otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></span></div>}
+                {livingExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Living Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(livingExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(livingExpensesMonthly)}</span></span></div>}
+{otherFixedExpensesMonthly > 0 && <div className="flex justify-between"><span><Settings2 className="inline mr-2 h-4 w-4 text-red-600" />Other Fixed Expenses:</span> <span><span className="md:hidden">{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></span></div>}
                 {realEstateInstallments.installments.length > 0 && (
                   <div className="space-y-2">
                     <div className="font-medium text-sm mt-2 mb-1 text-red-700 dark:text-red-300">Real Estate Installments ({realEstateInstallments.installments.length}):</div>
