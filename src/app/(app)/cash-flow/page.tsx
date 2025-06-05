@@ -8,15 +8,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, TrendingDown, Landmark, PiggyBank, FileText, Wallet, Gift, HandHeart, Coins, Settings2, Briefcase } from 'lucide-react';
 import { formatNumberWithSuffix, formatMonthYear, isInCurrentMonth } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import type { 
-  DebtInstrumentInvestment, 
-  Transaction, 
+import { 
   IncomeRecord, 
-  ExpenseRecord, 
-  FixedEstimateRecord,
-  RealEstateInvestment,
-  Investment,
-  StockInvestment
+  Transaction, 
+  Investment, 
+  RealEstateInvestment, 
+  StockInvestment, 
+  DebtInstrumentInvestment, 
+  GoldInvestment 
 } from '@/lib/types';
 import type { Installment } from '@/components/investments/installment-table';
 
@@ -42,14 +41,27 @@ export default function CashFlowPage() {
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
 
-  // Calculate total stock investment for the current month
-  const totalStockInvestmentThisMonth = (investments || [])
-    .filter(inv => inv.type === 'Stocks' && inv.purchaseDate)
-    .filter(inv => {
-      const parsed = parseDateString(inv.purchaseDate!);
-      return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
-    })
-    .reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
+  // Calculate total investments for the current month by type
+  const totalStockInvestmentThisMonth = (investments || []).filter((investment) => {
+    if (investment.type !== 'Stocks') return false;
+    const stockInv = investment as StockInvestment;
+    const purchaseDate = parseDateString(stockInv.purchaseDate);
+    return purchaseDate && isWithinInterval(purchaseDate, { start: currentMonthStart, end: currentMonthEnd });
+  }).reduce((sum, inv) => sum + (inv as StockInvestment).amountInvested, 0);
+
+  const totalDebtInvestmentThisMonth = (investments || []).filter((investment) => {
+    if (investment.type !== 'Debt Instruments') return false;
+    const debtInv = investment as DebtInstrumentInvestment;
+    const purchaseDate = parseDateString(debtInv.purchaseDate);
+    return purchaseDate && isWithinInterval(purchaseDate, { start: currentMonthStart, end: currentMonthEnd });
+  }).reduce((sum, inv) => sum + (inv as DebtInstrumentInvestment).amountInvested, 0);
+
+  const totalGoldInvestmentThisMonth = (investments || []).filter((investment) => {
+    if (investment.type !== 'Gold') return false;
+    const goldInv = investment as GoldInvestment;
+    const purchaseDate = parseDateString(goldInv.purchaseDate);
+    return purchaseDate && isWithinInterval(purchaseDate, { start: currentMonthStart, end: currentMonthEnd });
+  }).reduce((sum, inv) => sum + (inv as GoldInvestment).amountInvested, 0);
 
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
@@ -321,13 +333,28 @@ export default function CashFlowPage() {
             <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Investments This Month</CardTitle>
             <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-              <span className="md:hidden">{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span>
-              <span className="hidden md:inline">{formatCurrencyEGP(totalInvestmentsOnly)}</span>
-            </p>
-            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              Investments Made: <span className="md:hidden">{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalInvestmentsOnly)}</span>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700 dark:text-blue-300">Stocks:</span>
+              <span className="font-medium">{formatCurrencyEGPForMobile(totalStockInvestmentThisMonth)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700 dark:text-blue-300">Real Estate:</span>
+              <span className="font-medium">{formatCurrencyEGPForMobile(realEstateInstallmentsThisMonth)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700 dark:text-blue-300">Debts:</span>
+              <span className="font-medium">{formatCurrencyEGPForMobile(totalDebtInvestmentThisMonth)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700 dark:text-blue-300">Gold:</span>
+              <span className="font-medium">{formatCurrencyEGPForMobile(totalGoldInvestmentThisMonth)}</span>
+            </div>
+            <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
+              <div className="flex justify-between items-center font-semibold">
+                <span className="text-sm">Total:</span>
+                <span>{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
