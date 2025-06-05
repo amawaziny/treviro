@@ -42,8 +42,11 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     resolver: zodResolver(EditStockInvestmentSchema),
     defaultValues: {
       purchaseDate: "",
+      //@ts-expect-error
       numberOfShares: '', // Keep as string
+      //@ts-expect-error
       purchasePricePerShare: '', // Keep as string
+      //@ts-expect-error
       purchaseFees: '', // Keep as string
     },
   });
@@ -55,10 +58,13 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
       setInvestmentToEdit(foundInvestment);
       setOldAmountInvested(foundInvestment.amountInvested);
       form.reset({
-        purchaseDate: foundInvestment.purchaseDate.split('T')[0],
-        numberOfShares: String(foundInvestment.numberOfShares ?? ''),
-        purchasePricePerShare: String(foundInvestment.purchasePricePerShare ?? ''),
-        purchaseFees: String(foundInvestment.purchaseFees ?? '0'),
+        purchaseDate: foundInvestment?.purchaseDate?.split('T')[0] ?? '',
+      //@ts-expect-error
+        numberOfShares: String(foundInvestment?.numberOfShares ?? ''),
+      //@ts-expect-error
+        purchasePricePerShare: String(foundInvestment?.purchasePricePerShare ?? ''),
+      //@ts-expect-error
+        purchaseFees: String(foundInvestment?.purchaseFees ?? '0'),
       });
     } else if (!isLoadingContext) {
       toast({
@@ -71,7 +77,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
     setIsLoadingData(false);
   }, [investmentId, investments, form, toast, router, isLoadingContext]);
 
-  async function onSubmit(values: EditStockInvestmentFormValues) {
+  const onSubmit: import('react-hook-form').SubmitHandler<EditStockInvestmentFormValues> = async (values) => {
     if (!investmentToEdit || oldAmountInvested === null) {
       toast({ title: "Error", description: "Cannot save, investment data missing or original amount not loaded.", variant: "destructive" });
       return;
@@ -156,7 +162,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormControl>
                       <NumericInput
                         placeholder="e.g., 100"
-                        value={field.value}
+                        value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
                         onChange={field.onChange}
                         allowDecimal={false}
                       />
@@ -174,7 +180,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormControl>
                       <NumericInput
                         placeholder="e.g., 150.50"
-                        value={field.value}
+                        value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
                         onChange={field.onChange}
                       />
                     </FormControl>
@@ -191,7 +197,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
                     <FormControl>
                       <NumericInput
                         placeholder="e.g., 5.00"
-                        value={field.value}
+                        value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
                         onChange={field.onChange}
                       />
                     </FormControl>

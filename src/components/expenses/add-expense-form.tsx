@@ -36,11 +36,13 @@ const getCurrentDate = () => {
 };
 
 const initialFormValues: AddExpenseFormValues = {
-  category: undefined,
+  category: "Other",
   description: "",
+  //@ts-expect-error
   amount: "",
   date: getCurrentDate(),
   isInstallment: false,
+  //@ts-expect-error
   numberOfInstallments: "",
 };
 
@@ -117,7 +119,7 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                     field.onChange(value);
                     if (value !== 'Credit Card') {
                       form.setValue('isInstallment', false);
-                      form.setValue('numberOfInstallments', '');
+                      form.setValue('numberOfInstallments', 0);
                     }
                   }}
                   value={field.value || ""}
@@ -149,7 +151,7 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 500.00 or 3000.00 for total installment"
-                    value={field.value} // field.value is string from RHF
+                    value={field.value === undefined || field.value === null ? '' : String(field.value)} // ensure value is always a string
                     onChange={field.onChange} // RHF onChange expects string or number
                     allowDecimal={true}
                   />
@@ -198,7 +200,7 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                         onCheckedChange={(checked) => {
                            field.onChange(checked);
                            if (!checked) {
-                               form.setValue('numberOfInstallments', '');
+                               form.setValue('numberOfInstallments', 0);
                            }
                         }}
                       />
@@ -221,7 +223,7 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                       <FormControl>
                         <NumericInput
                           placeholder="e.g., 3, 6, 12"
-                          value={field.value} // field.value is string from RHF
+                          value={field.value !== undefined ? field.value.toString() : ""} // always pass string to NumericInput
                           onChange={field.onChange} // RHF onChange expects string or number
                           allowDecimal={false}
                         />

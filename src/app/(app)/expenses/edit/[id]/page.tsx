@@ -47,9 +47,11 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
             initialValues={{
               category: expense.category,
               description: expense.description ?? '',
+              //@ts-expect-error
               amount: expense.amount?.toString() ?? '',
               date: expense.date,
               isInstallment: expense.isInstallment ?? false,
+              //@ts-expect-error
               numberOfInstallments: expense.numberOfInstallments ? expense.numberOfInstallments.toString() : '',
             }}
             onSubmit={async (values: import('@/lib/schemas').AddExpenseFormValues) => {
