@@ -5,7 +5,7 @@ import { InvestmentDistributionChart } from "@/components/dashboard/investment-d
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useInvestments } from '@/hooks/use-investments';
-import { TrendingUp, TrendingDown, DollarSign, Wallet, Coins as IncomeIcon, LineChart as LucideLineChart, ArrowRight, Banknote } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Wallet, Coins, Briefcase, LineChart as LucideLineChart, ArrowRight, Banknote } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { formatNumberWithSuffix, isGoldRelatedFund, isDebtRelatedFund, isRealEstateRelatedFund, isStockRelatedFund } from '@/lib/utils';
+import { calculateMonthlyCashFlowSummary } from '@/lib/financial-utils';
 import { useToast } from '@/hooks/use-toast';
 import { InvestmentBreakdownCards } from '@/components/dashboard/investment-breakdown-cards';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
@@ -63,90 +64,33 @@ export default function DashboardPage() {
     return `EGP ${formattedNumber}`;
   };
 
-  const currentMonthStart = startOfMonth(new Date());
-  const currentMonthEnd = endOfMonth(new Date());
-
-  const realEstateInstallments = useMemo<{ total: number; installments: any[] }>(() => {
-    if (!investments) return { total: 0, installments: [] };
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    const installments = (investments || [])
-      .filter((inv: any): inv is RealEstateInvestment => inv.type === 'Real Estate' && inv.installments !== undefined)
-      .flatMap((inv: RealEstateInvestment) => (inv.installments || []).map((installment: any) => ({ ...installment, propertyName: inv.name || inv.propertyAddress || 'Unnamed Property', propertyId: inv.id })))
-      .filter((installment: any) => {
-        if (installment.status === 'Paid') return false;
-        try {
-          const dueDate = new Date(installment.dueDate);
-          return dueDate.getMonth() === currentMonth && dueDate.getFullYear() === currentYear;
-        } catch (e) { return false; }
-      });
-    return { total: installments.reduce((sum: number, inst: any) => sum + (inst.amount || 0), 0), installments };
-  }, [investments]);
-
-  const realEstateInstallmentsThisMonth = realEstateInstallments.total;
 
   const {
-    monthlySalary, otherFixedIncomeMonthly, totalManualIncomeThisMonth, totalProjectedCertificateInterestThisMonth,
-    zakatFixedMonthly, charityFixedMonthly, otherFixedExpensesMonthly, totalItemizedExpensesThisMonth,
-    investmentsMadeThisMonth,
-  } = useMemo(() => {
-    let salary = 0, otherFixedInc = 0, manualIncome = 0, certificateInterest = 0;
-    let zakat = 0, charity = 0, otherFixedExp = 0, itemizedExpensesSum = 0;
-    let currentMonthInvestments = 0;
+    totalIncome,
+    monthlySalary,
+    otherFixedIncomeMonthly,
+    totalManualIncomeThisMonth,
+    totalProjectedCertificateInterestThisMonth,
+    totalExpensesOnly,
+    livingExpensesMonthly,
+    zakatFixedMonthly,
+    charityFixedMonthly,
+    otherFixedExpensesMonthly,
+    realEstateInstallmentsMonthly,
+    totalItemizedExpensesThisMonth,
+    totalInvestmentsThisMonth,
+    totalStockInvestmentThisMonth,
+    totalDebtInvestmentThisMonth,
+    totalGoldInvestmentThisMonth,
+    totalInvestmentsOnly,
+    netCashFlowThisMonth
+  } = calculateMonthlyCashFlowSummary({
+    incomeRecords,
+    expenseRecords,
+    investments,
+    fixedEstimates
+  });
 
-    (fixedEstimates || []).forEach(fe => {
-      let monthlyAmount = fe.amount;
-      if (fe.period === 'Yearly') monthlyAmount /= 12;
-      else if (fe.period === 'Quarterly') monthlyAmount /= 3;
-      if (fe.type === 'Salary' && !fe.isExpense) salary += monthlyAmount;
-      else if (fe.isExpense) {
-        if (fe.type === 'Zakat') zakat += monthlyAmount;
-        else if (fe.type === 'Charity') charity += monthlyAmount;
-        else otherFixedExp += monthlyAmount;
-      } else if (!fe.isExpense) otherFixedInc += monthlyAmount;
-    });
-    (incomeRecords || []).forEach(income => {
-      const incomeDate = parseDateString(income.date);
-      if (incomeDate && isWithinInterval(incomeDate, { start: currentMonthStart, end: currentMonthEnd })) manualIncome += income.amount;
-    });
-    ((investments || []).filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[]).forEach(debt => {
-      if (debt.interestRate && debt.amountInvested) certificateInterest += (debt.amountInvested * debt.interestRate / 100) / 12;
-    });
-    (expenseRecords || []).forEach(expense => {
-      const expenseDate = parseDateString(expense.date);
-      if (expenseDate && isWithinInterval(expenseDate, { start: currentMonthStart, end: currentMonthEnd })) {
-        if (expense.category === 'Credit Card' && expense.isInstallment && expense.numberOfInstallments && expense.numberOfInstallments > 0) {
-          itemizedExpensesSum += expense.amount / expense.numberOfInstallments;
-        } else itemizedExpensesSum += expense.amount;
-      }
-    });
-    // Calculate investments made this month
-    (investments || []).forEach((inv: InvestmentType) => {
-      if (inv.purchaseDate) {
-        const purchaseDateObj = parseDateString(inv.purchaseDate);
-        if (purchaseDateObj && isWithinInterval(purchaseDateObj, { start: currentMonthStart, end: currentMonthEnd })) {
-          currentMonthInvestments += inv.amountInvested || 0;
-        }
-      }
-    });
-
-    return { 
-      monthlySalary: salary, 
-      otherFixedIncomeMonthly: otherFixedInc, 
-      totalManualIncomeThisMonth: manualIncome, 
-      totalProjectedCertificateInterestThisMonth: certificateInterest, 
-      zakatFixedMonthly: zakat, 
-      charityFixedMonthly: charity, 
-      otherFixedExpensesMonthly: otherFixedExp, 
-      totalItemizedExpensesThisMonth: itemizedExpensesSum,
-      investmentsMadeThisMonth: currentMonthInvestments,
-    };
-  }, [fixedEstimates, incomeRecords, investments, expenseRecords, currentMonthStart, currentMonthEnd]);
-
-  const totalIncomeThisMonth = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
-  const totalExpensesThisMonth = zakatFixedMonthly + charityFixedMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth + realEstateInstallmentsThisMonth + investmentsMadeThisMonth;
-  const netCashFlowThisMonth = totalIncomeThisMonth - totalExpensesThisMonth;
 
   const { totalCurrentPortfolioValue, totalPortfolioCostBasis } = useMemo(() => {
     if (isLoading) return { totalCurrentPortfolioValue: 0, totalPortfolioCostBasis: 0 };
@@ -188,6 +132,7 @@ export default function DashboardPage() {
   
   const totalCurrentPortfolioPnL = totalCurrentPortfolioValue - totalPortfolioCostBasis;
 
+  const totalExpensesThisMonth = totalItemizedExpensesThisMonth + totalInvestmentsThisMonth;
   return (
     <div className="space-y-8">
       <div>
@@ -195,6 +140,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Overview of your investment portfolio and monthly cash flow.</p>
       </div>
       <Separator />
+
       <div className="flex justify-end mb-4">
         <Button variant="secondary" size="sm" onClick={async () => { await recalculateDashboardSummary(); toast({ title: "Summary recalculated!", description: "Dashboard summary values have been updated." }); }}>
           Recalculate Summary
@@ -242,7 +188,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <Card className="lg:col-span-3">
+           {/* Monthly Cash Flow Summary */}
+           <Card className="mb-8">
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -255,35 +202,97 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="grid gap-4 md:grid-cols-3">
-              <Skeleton className="h-20 w-full" /><Skeleton className="h-20 w-full" /><Skeleton className="h-20 w-full" />
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
-                <div className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Income</p>
-                  <IncomeIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <div className="grid gap-4 md:grid-cols-4">
+            {/* Total Income Card */}
+            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Total Income This Month</CardTitle>
+                <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalIncome)}</span>
+                  <span className="hidden md:inline">{formatCurrencyEGP(totalIncome)}</span>
+                </p>
+                <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
+                  {monthlySalary > 0 && <p>Monthly Salary (Fixed): <span className="md:hidden">{formatCurrencyEGPWithSuffix(monthlySalary)}</span><span className="hidden md:inline">{formatCurrencyEGP(monthlySalary)}</span></p>}
+                  {otherFixedIncomeMonthly > 0 && <p>Other Fixed Income: <span className="md:hidden">{formatCurrencyEGPWithSuffix(otherFixedIncomeMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedIncomeMonthly)}</span></p>}
+                  {totalManualIncomeThisMonth > 0 && <p>Other Logged Income (incl. Sales Profit): <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalManualIncomeThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></p>}
+                  {totalProjectedCertificateInterestThisMonth > 0 && <p>Projected Debt Interest: <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalProjectedCertificateInterestThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span></p>}
                 </div>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{isMobile ? formatCurrencyEGPWithSuffix(totalIncomeThisMonth) : formatCurrencyEGP(totalIncomeThisMonth)}</p>
-              </div>
-              <div className="p-4 border rounded-lg bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700">
-                <div className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses & Investments</p>
-                  <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </CardContent>
+            </Card>
+            {/* Total Expenses Card */}
+            <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses This Month</CardTitle>
+                <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                  <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalExpensesOnly)}</span>
+                  <span className="hidden md:inline">{formatCurrencyEGP(totalExpensesOnly)}</span>
+                </p>
+                <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
+                  {totalItemizedExpensesThisMonth > 0 && <p>Itemized Logged Expenses: <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalItemizedExpensesThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalItemizedExpensesThisMonth)}</span></p>}
+                  {zakatFixedMonthly > 0 && <p>Zakat (Fixed): <span className="md:hidden">{formatCurrencyEGPWithSuffix(zakatFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(zakatFixedMonthly)}</span></p>}
+                  {charityFixedMonthly > 0 && <p>Charity (Fixed): <span className="md:hidden">{formatCurrencyEGPWithSuffix(charityFixedMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(charityFixedMonthly)}</span></p>}
+                  {livingExpensesMonthly > 0 && <p>Living Expenses: <span className="md:hidden">{formatCurrencyEGPWithSuffix(livingExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(livingExpensesMonthly)}</span></p>}
+                  {otherFixedExpensesMonthly > 0 && <p>Other Fixed Expenses: <span className="md:hidden">{formatCurrencyEGPWithSuffix(otherFixedExpensesMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(otherFixedExpensesMonthly)}</span></p>}
+                  {realEstateInstallmentsMonthly > 0 && (
+                    <p>Real Estate Installments: <span className="md:hidden">{formatCurrencyEGPWithSuffix(realEstateInstallmentsMonthly)}</span><span className="hidden md:inline">{formatCurrencyEGP(realEstateInstallmentsMonthly)}</span></p>
+                  )}
                 </div>
-                <p className="text-2xl font-bold text-red-700 dark:text-red-300">{isMobile ? formatCurrencyEGPWithSuffix(totalExpensesThisMonth) : formatCurrencyEGP(totalExpensesThisMonth)}</p>
-              </div>
-              <div className={`p-4 border rounded-lg ${netCashFlowThisMonth >= 0 ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700" : "bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700"}`}>
-                <div className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <p className={`text-sm font-medium ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>Monthly Net Cash Flow</p>
-                  <Wallet className={`h-4 w-4 ${netCashFlowThisMonth >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`} />
+              </CardContent>
+            </Card>
+            {/* Total Investments Card */}
+            <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-[220px] flex-1">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Investments This Month</CardTitle>
+                <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Stocks:</span>
+                  <span className="font-medium">{formatCurrencyEGPWithSuffix(totalStockInvestmentThisMonth)}</span>
                 </div>
-                <p className={`text-2xl font-bold ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>{isMobile ? formatCurrencyEGPWithSuffix(netCashFlowThisMonth) : formatCurrencyEGP(netCashFlowThisMonth)}</p>
-              </div>
-            </div>
-          )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Real Estate:</span>
+                  <span className="font-medium">{formatCurrencyEGPWithSuffix(realEstateInstallmentsMonthly)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Debts:</span>
+                  <span className="font-medium">{formatCurrencyEGPWithSuffix(totalDebtInvestmentThisMonth)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Gold:</span>
+                  <span className="font-medium">{formatCurrencyEGPWithSuffix(totalGoldInvestmentThisMonth)}</span>
+                </div>
+                <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
+                  <div className="flex justify-between items-center font-semibold">
+                    <span className="text-sm">Total:</span>
+                    <span>{formatCurrencyEGPWithSuffix(totalInvestmentsThisMonth)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Remaining Cash Card */}
+            <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-[220px] flex-1">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Remaining Cash After Expenses & Investments</CardTitle>
+                <Wallet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                  <span className="md:hidden">{formatCurrencyEGPWithSuffix(netCashFlowThisMonth)}</span>
+                  <span className="hidden md:inline">{formatCurrencyEGP(netCashFlowThisMonth)}</span>
+                </p>
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  Remaining = Total Income - Total Expenses - Total Investments
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </CardContent>
       </Card>
       <div className="lg:col-span-3">

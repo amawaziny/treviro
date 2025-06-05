@@ -1,0 +1,153 @@
+import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import type {
+  IncomeRecord,
+  ExpenseRecord,
+  Investment,
+  FixedEstimateRecord,
+  DebtInstrumentInvestment,
+  StockInvestment,
+  GoldInvestment,
+  RealEstateInvestment
+} from '@/lib/types';
+
+export interface CashFlowSummaryArgs {
+  incomeRecords: IncomeRecord[];
+  expenseRecords: ExpenseRecord[];
+  investments: Investment[];
+  fixedEstimates: FixedEstimateRecord[];
+  month?: Date; // Defaults to current month if not provided
+}
+
+export interface CashFlowSummaryResult {
+  totalIncome: number;
+  monthlySalary: number;
+  otherFixedIncomeMonthly: number;
+  totalManualIncomeThisMonth: number;
+  totalProjectedCertificateInterestThisMonth: number;
+  totalExpensesOnly: number;
+  livingExpensesMonthly: number;
+  zakatFixedMonthly: number;
+  charityFixedMonthly: number;
+  otherFixedExpensesMonthly: number;
+  realEstateInstallmentsMonthly: number;
+  totalItemizedExpensesThisMonth: number;
+  totalInvestmentsThisMonth: number;
+  totalStockInvestmentThisMonth: number;
+  totalDebtInvestmentThisMonth: number;
+  totalGoldInvestmentThisMonth: number;
+  totalInvestmentsOnly: number;
+  netCashFlowThisMonth: number;
+}
+
+export function calculateMonthlyCashFlowSummary({
+  incomeRecords = [],
+  expenseRecords = [],
+  investments = [],
+  fixedEstimates = [],
+  month = new Date(),
+}: CashFlowSummaryArgs): CashFlowSummaryResult {
+  const currentMonthStart = startOfMonth(month);
+  const currentMonthEnd = endOfMonth(month);
+
+  // Helper: parse YYYY-MM-DD to Date
+  const parseDateString = (dateStr?: string): Date | null => {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (isNaN(year) || isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return new Date(year, month - 1, day);
+  };
+
+  // Fixed income breakdown
+  let monthlySalary = 0, otherFixedIncomeMonthly = 0, zakatFixedMonthly = 0, charityFixedMonthly = 0, otherFixedExpensesMonthly = 0, livingExpensesMonthly = 0;
+  (fixedEstimates || []).forEach(fe => {
+    let monthlyAmount = fe.amount;
+    if (fe.period === 'Yearly') monthlyAmount /= 12;
+    if (fe.type === 'Salary') monthlySalary += monthlyAmount;
+    else if (fe.type === 'Other' && fe.isExpense === false) otherFixedIncomeMonthly += monthlyAmount;
+    else if (fe.type === 'Zakat') zakatFixedMonthly += monthlyAmount;
+    else if (fe.type === 'Charity') charityFixedMonthly += monthlyAmount;
+    else if (fe.type === 'Living Expenses') livingExpensesMonthly += monthlyAmount;
+    else if (fe.type === 'Other' && fe.isExpense === true) otherFixedExpensesMonthly += monthlyAmount;
+  });
+
+  // Manual income (income records)
+  let totalManualIncomeThisMonth = 0;
+  (incomeRecords || []).forEach(record => {
+    const date = parseDateString(record.date);
+    if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
+      totalManualIncomeThisMonth += record.amount;
+    }
+  });
+
+  // Projected certificate interest (from investments)
+  let totalProjectedCertificateInterestThisMonth = 0;
+  (investments || []).forEach(inv => {
+    if (inv.type === 'Debt Instruments') {
+      const debtInv = inv as DebtInstrumentInvestment;
+      const date = parseDateString(debtInv.purchaseDate);
+      if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
+        totalProjectedCertificateInterestThisMonth += debtInv.interestAmount || 0;
+      }
+    }
+  });
+
+  // Expenses breakdown
+  let totalItemizedExpensesThisMonth = 0;
+  (expenseRecords || []).forEach(record => {
+    const date = parseDateString(record.date);
+    if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
+      totalItemizedExpensesThisMonth += record.amount;
+    }
+  });
+
+  // Real estate installments (from investments)
+  let realEstateInstallmentsMonthly = 0;
+  (investments || []).forEach(inv => {
+    if (inv.type === 'Real Estate') {
+      const reInv = inv as RealEstateInvestment;
+      const date = parseDateString(reInv.purchaseDate);
+      if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
+        realEstateInstallmentsMonthly += reInv.amountInvested || 0;
+      }
+    }
+  });
+
+  // Investments breakdown
+  let totalStockInvestmentThisMonth = 0, totalDebtInvestmentThisMonth = 0, totalGoldInvestmentThisMonth = 0;
+  (investments || []).forEach(inv => {
+    const date = parseDateString((inv as any).purchaseDate);
+    if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
+      if (inv.type === 'Stocks') totalStockInvestmentThisMonth += (inv as StockInvestment).amountInvested || 0;
+      else if (inv.type === 'Debt Instruments') totalDebtInvestmentThisMonth += (inv as DebtInstrumentInvestment).amountInvested || 0;
+      else if (inv.type === 'Gold') totalGoldInvestmentThisMonth += (inv as GoldInvestment).amountInvested || 0;
+    }
+  });
+
+  // Totals
+  const totalIncome = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
+  const totalExpensesOnly = zakatFixedMonthly + charityFixedMonthly + livingExpensesMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth;
+  const totalInvestmentsOnly = totalStockInvestmentThisMonth + totalDebtInvestmentThisMonth + totalGoldInvestmentThisMonth + realEstateInstallmentsMonthly;
+  const totalInvestmentsThisMonth = totalInvestmentsOnly;
+  const netCashFlowThisMonth = totalIncome - totalExpensesOnly - totalInvestmentsOnly;
+
+  return {
+    totalIncome,
+    monthlySalary,
+    otherFixedIncomeMonthly,
+    totalManualIncomeThisMonth,
+    totalProjectedCertificateInterestThisMonth,
+    totalExpensesOnly,
+    livingExpensesMonthly,
+    zakatFixedMonthly,
+    charityFixedMonthly,
+    otherFixedExpensesMonthly,
+    realEstateInstallmentsMonthly,
+    totalItemizedExpensesThisMonth,
+    totalInvestmentsThisMonth,
+    totalStockInvestmentThisMonth,
+    totalDebtInvestmentThisMonth,
+    totalGoldInvestmentThisMonth,
+    totalInvestmentsOnly,
+    netCashFlowThisMonth
+  };
+}
