@@ -5,11 +5,11 @@ import { InvestmentDistributionChart } from "@/components/dashboard/investment-d
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useInvestments } from '@/hooks/use-investments';
-import { TrendingUp, TrendingDown, DollarSign, Wallet, Coins as IncomeIcon, LineChart as LucideLineChart, ArrowRight } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Wallet, Coins as IncomeIcon, LineChart as LucideLineChart, ArrowRight, Banknote } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import type { DebtInstrumentInvestment, ExpenseRecord, FixedEstimateRecord, IncomeRecord, Transaction, ListedSecurity, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, GoldMarketPrices, ExchangeRates } from '@/lib/types';
+import type { DebtInstrumentInvestment, ExpenseRecord, FixedEstimateRecord, IncomeRecord, Investment as InvestmentType, Transaction, ListedSecurity, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, GoldMarketPrices, ExchangeRates } from '@/lib/types';
 import Link from 'next/link';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,7 @@ export default function DashboardPage() {
 
   const totalInvested = dashboardSummary?.totalInvestedAcrossAllAssets ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
+  const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
 
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
@@ -88,9 +89,12 @@ export default function DashboardPage() {
   const {
     monthlySalary, otherFixedIncomeMonthly, totalManualIncomeThisMonth, totalProjectedCertificateInterestThisMonth,
     zakatFixedMonthly, charityFixedMonthly, otherFixedExpensesMonthly, totalItemizedExpensesThisMonth,
+    investmentsMadeThisMonth,
   } = useMemo(() => {
     let salary = 0, otherFixedInc = 0, manualIncome = 0, certificateInterest = 0;
     let zakat = 0, charity = 0, otherFixedExp = 0, itemizedExpensesSum = 0;
+    let currentMonthInvestments = 0;
+
     (fixedEstimates || []).forEach(fe => {
       let monthlyAmount = fe.amount;
       if (fe.period === 'Yearly') monthlyAmount /= 12;
@@ -117,11 +121,31 @@ export default function DashboardPage() {
         } else itemizedExpensesSum += expense.amount;
       }
     });
-    return { monthlySalary: salary, otherFixedIncomeMonthly: otherFixedInc, totalManualIncomeThisMonth: manualIncome, totalProjectedCertificateInterestThisMonth: certificateInterest, zakatFixedMonthly: zakat, charityFixedMonthly: charity, otherFixedExpensesMonthly: otherFixedExp, totalItemizedExpensesThisMonth: itemizedExpensesSum };
+    // Calculate investments made this month
+    (investments || []).forEach((inv: InvestmentType) => {
+      if (inv.purchaseDate) {
+        const purchaseDateObj = parseDateString(inv.purchaseDate);
+        if (purchaseDateObj && isWithinInterval(purchaseDateObj, { start: currentMonthStart, end: currentMonthEnd })) {
+          currentMonthInvestments += inv.amountInvested || 0;
+        }
+      }
+    });
+
+    return { 
+      monthlySalary: salary, 
+      otherFixedIncomeMonthly: otherFixedInc, 
+      totalManualIncomeThisMonth: manualIncome, 
+      totalProjectedCertificateInterestThisMonth: certificateInterest, 
+      zakatFixedMonthly: zakat, 
+      charityFixedMonthly: charity, 
+      otherFixedExpensesMonthly: otherFixedExp, 
+      totalItemizedExpensesThisMonth: itemizedExpensesSum,
+      investmentsMadeThisMonth: currentMonthInvestments,
+    };
   }, [fixedEstimates, incomeRecords, investments, expenseRecords, currentMonthStart, currentMonthEnd]);
 
   const totalIncomeThisMonth = monthlySalary + otherFixedIncomeMonthly + totalManualIncomeThisMonth + totalProjectedCertificateInterestThisMonth;
-  const totalExpensesThisMonth = zakatFixedMonthly + charityFixedMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth + realEstateInstallmentsThisMonth;
+  const totalExpensesThisMonth = zakatFixedMonthly + charityFixedMonthly + otherFixedExpensesMonthly + totalItemizedExpensesThisMonth + realEstateInstallmentsThisMonth + investmentsMadeThisMonth;
   const netCashFlowThisMonth = totalIncomeThisMonth - totalExpensesThisMonth;
 
   const { totalCurrentPortfolioValue, totalPortfolioCostBasis } = useMemo(() => {
@@ -176,7 +200,7 @@ export default function DashboardPage() {
           Recalculate Summary
         </Button>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Invested Amount</CardTitle>
@@ -207,13 +231,23 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Current market value vs. total cost.</p>
           </CardContent>
         </Card>
+        <Card className="lg:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Cash Balance</CardTitle>
+            <Banknote className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className="text-3xl font-bold">{isMobile ? formatCurrencyEGPWithSuffix(totalCashBalance) : formatCurrencyEGP(totalCashBalance)}</p>}
+            <p className="text-xs text-muted-foreground">Estimated available cash.</p>
+          </CardContent>
+        </Card>
       </div>
       <Card className="lg:col-span-3">
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <CardTitle>Monthly Cash Flow Summary</CardTitle>
-              <CardDescription>For {format(new Date(), 'MMMM yyyy')}.</CardDescription>
+              <CardDescription>For {format(new Date(), 'MMMM yyyy')}. Includes current month's new investments.</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link href="/cash-flow">View Full Details <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -236,14 +270,14 @@ export default function DashboardPage() {
               </div>
               <div className="p-4 border rounded-lg bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700">
                 <div className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses</p>
+                  <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses & Investments</p>
                   <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                 </div>
                 <p className="text-2xl font-bold text-red-700 dark:text-red-300">{isMobile ? formatCurrencyEGPWithSuffix(totalExpensesThisMonth) : formatCurrencyEGP(totalExpensesThisMonth)}</p>
               </div>
               <div className={`p-4 border rounded-lg ${netCashFlowThisMonth >= 0 ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700" : "bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700"}`}>
                 <div className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <p className={`text-sm font-medium ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>Net Cash Flow</p>
+                  <p className={`text-sm font-medium ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>Monthly Net Cash Flow</p>
                   <Wallet className={`h-4 w-4 ${netCashFlowThisMonth >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`} />
                 </div>
                 <p className={`text-2xl font-bold ${netCashFlowThisMonth >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>{isMobile ? formatCurrencyEGPWithSuffix(netCashFlowThisMonth) : formatCurrencyEGP(netCashFlowThisMonth)}</p>
