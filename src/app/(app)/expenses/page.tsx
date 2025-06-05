@@ -171,7 +171,7 @@ export default function ExpensesPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Expenses Management</h1>
-        <p className="text-muted-foreground">Log your itemized expenses. Fixed estimates (Salary, Zakat, Charity) are now managed on the "Fixed Estimates" page.</p>
+        <p className="text-muted-foreground">Log and manage all your itemized expenses, including credit card payments and utility bills.</p>
       </div>
       <Separator />
 
@@ -207,7 +207,9 @@ export default function ExpensesPage() {
                 {showAll ? 'Total Spent (All)' : 'Total Spent This Month'}
               </CardTitle>
               <CardDescription>
-                {showAll ? 'All Expenses' : format(new Date(), 'MMMM yyyy')}
+                {showAll
+                  ? "View and manage all your recorded expenses, including installments and one-time payments."
+                  : `See and manage all expenses required for ${format(new Date(), 'MMMM yyyy')}, including current installments and one-time payments.`}
               </CardDescription>
             </CardHeader>
             <CardContent>

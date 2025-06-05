@@ -229,15 +229,10 @@ export default function CashFlowPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Monthly Cash Flow
-          </h1>
-          <p className="text-muted-foreground">
-            Overview for {format(new Date(), 'MMMM yyyy')}
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Monthly Cash Flow</h1>
+          <p className="text-muted-foreground">Track your income, expenses, and recurring estimates to understand your monthly cash flow and financial health.</p>
         </div>
       </div>
-
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

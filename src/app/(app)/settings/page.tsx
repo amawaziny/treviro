@@ -70,7 +70,7 @@ export default function SettingsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-muted-foreground">Manage your application preferences.</p>
+        <p className="text-muted-foreground">Adjust your financial settings, such as your financial year start month and other preferences.</p>
       </div>
       <Separator />
 

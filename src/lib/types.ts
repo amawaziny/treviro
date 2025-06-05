@@ -184,6 +184,16 @@ export interface ExchangeRates {
   [key: string]: number; 
 }
 
+// Placeholder for AppSettings. Update with real fields as needed.
+export interface AppSettings {
+  // Example fields
+  theme?: string;
+  notificationsEnabled?: boolean;
+  financialYearStartMonth?: number;
+  // Add more fields as needed
+}
+
+
 export type AggregatedGoldHolding = {
   id: string;
   displayName: string;
