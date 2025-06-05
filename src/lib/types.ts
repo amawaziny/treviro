@@ -104,6 +104,7 @@ export interface ExpenseRecord {
   createdAt?: string;
   _originalAmount?: number;
   _requiredAmount?: number;
+  installmentMonthIndex?: number;
 }
 
 export type FixedEstimateType = 'Salary' | 'Zakat' | 'Charity' | 'Living Expenses' | 'Other';
