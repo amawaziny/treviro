@@ -169,6 +169,7 @@ export interface Transaction {
 export interface DashboardSummary {
   totalInvestedAcrossAllAssets: number;
   totalRealizedPnL: number;
+  totalCashBalance: number; // Added this field
 }
 
 export interface GoldMarketPrices {
@@ -237,3 +238,6 @@ export interface AggregatedDebtHolding {
   logoUrl?: string; 
 }
 
+export interface AppSettings {
+  financialYearStartMonth?: number;
+}
