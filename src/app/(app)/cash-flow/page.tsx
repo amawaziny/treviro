@@ -15,7 +15,8 @@ import type {
   ExpenseRecord, 
   FixedEstimateRecord,
   RealEstateInvestment,
-  Investment
+  Investment,
+  StockInvestment
 } from '@/lib/types';
 import type { Installment } from '@/components/investments/installment-table';
 
@@ -40,6 +41,15 @@ export default function CashFlowPage() {
   const isLoading = isLoadingContext;
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
+
+  // Calculate total stock investment for the current month
+  const totalStockInvestmentThisMonth = (investments || [])
+    .filter(inv => inv.type === 'Stocks' && inv.purchaseDate)
+    .filter(inv => {
+      const parsed = parseDateString(inv.purchaseDate!);
+      return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+    })
+    .reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
 
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
@@ -207,6 +217,8 @@ export default function CashFlowPage() {
         }
       }
     });
+    // Add real estate installments as investments
+    currentMonthInvestments += realEstateInstallmentsThisMonth;
 
 
     return {
@@ -228,9 +240,8 @@ export default function CashFlowPage() {
     charityFixedMonthly + 
     livingExpensesMonthly +
     otherFixedExpensesMonthly + 
-    totalItemizedExpensesThisMonth + 
-    realEstateInstallmentsThisMonth;
-  const totalInvestmentsOnly = investmentsMadeThisMonth;
+    totalItemizedExpensesThisMonth; // real estate installments are now only investments
+  const totalInvestmentsOnly = investmentsMadeThisMonth; // Already includes real estate installments, no need to add again
   const totalExpenses = totalExpensesOnly + totalInvestmentsOnly;
   const netCashFlow = totalIncome - totalExpenses; // net cash flow remains the same, but now we show breakdowns
   const netCashThisMonth = totalIncome - totalExpensesOnly;
@@ -429,28 +440,7 @@ export default function CashFlowPage() {
           {totalItemizedExpensesThisMonth > 0 && (
             <div className="flex justify-between items-center text-red-500 font-semibold">Itemized Logged Expenses: <span>{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span></div>
           )}
-          {realEstateInstallments.installments.length > 0 && (
-            <div>
-              <div className="font-semibold text-base mt-2 mb-1 text-red-700 dark:text-red-300">Real Estate Installments <span className="text-xs font-normal">({realEstateInstallments.installments.length})</span>:</div>
-              <ul className="space-y-2 pl-4 border-l-2 border-red-200 dark:border-red-700">
-                {realEstateInstallments.installments.map((installment) => (
-                  <li key={`${installment.propertyId}-${installment.number}`} className="flex justify-between items-center">
-                    <span className="flex items-center gap-2 text-sm">
-                      <Landmark className="h-4 w-4 text-red-500" />
-                      <span className="whitespace-pre-line">{installment.propertyName} (#{installment.number})</span>
-                    </span>
-                    <span className="font-medium text-right">
-                      {formatCurrencyEGPForMobile(installment.amount || 0)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex justify-between pt-2 border-t border-red-100 dark:border-red-900 mt-2 font-bold">
-                <span>Total Real Estate Installments:</span>
-                <span>{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span>
-              </div>
-            </div>
-          )}
+          
           <hr className="my-2" />
           <div className="flex justify-between font-bold">
             <span>Total Projected Expenses:</span>
@@ -465,14 +455,107 @@ export default function CashFlowPage() {
           <CardDescription>New investments made in {formatMonthYear(currentMonthStart)}.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          {investmentsMadeThisMonth > 0 ? (
-            <div className="flex justify-between items-center text-blue-600 font-semibold">
-              <Briefcase className="h-4 w-4 mr-1" />Investments Made This Month:
-              <span>{formatCurrencyEGPForMobile(investmentsMadeThisMonth)}</span>
+          <div>
+            {/* Total Stock Investment */}
+            <div className="flex justify-between items-center text-blue-600 font-semibold mb-2">
+              <span className="flex items-center gap-2">
+                Total Stock:
+              </span>
+              <span>{formatCurrencyEGPForMobile(totalStockInvestmentThisMonth)}</span>
             </div>
-          ) : (
-            <div className="text-muted-foreground">No new investments this month.</div>
+            {/* Stocks */}
+            {investments && investments.filter(inv => {
+  if (inv.type !== 'Stocks' || !inv.purchaseDate) return false;
+  const parsed = parseDateString(inv.purchaseDate);
+  return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+}).length > 0 && (
+  <div className="mb-2">
+    <div className="font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2"></div>
+    <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
+      {investments.filter(inv => {
+        if (inv.type !== 'Stocks' || !inv.purchaseDate) return false;
+        const parsed = parseDateString(inv.purchaseDate);
+        return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+      }).map(investment => {
+        const stock = investment as StockInvestment;
+        return (
+          <li key={stock.id} className="flex justify-between items-center text-sm">
+            <span>{stock.tickerSymbol || stock.id || 'Unnamed Stock'}</span>
+            <span>{formatCurrencyEGPForMobile(stock.amountInvested || 0)}</span>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
+            {/* Debt Instruments */}
+            {investments && investments.filter(inv => {
+  if (inv.type !== 'Debt Instruments' || !inv.purchaseDate) return false;
+  const parsed = parseDateString(inv.purchaseDate);
+  return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+}).length > 0 && (
+  <div className="mb-2">
+    <div className="font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2"><Wallet className="h-4 w-4" />Debt Instruments Purchased:</div>
+    <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
+      {investments.filter(inv => {
+        if (inv.type !== 'Debt Instruments' || !inv.purchaseDate) return false;
+        const parsed = parseDateString(inv.purchaseDate);
+        return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+      }).map(debt => (
+        <li key={debt.id} className="flex justify-between items-center text-sm">
+          <span>{debt.name || 'Unnamed Debt'}</span>
+          <span>{formatCurrencyEGPForMobile(debt.amountInvested || 0)}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+            {/* Gold */}
+            {investments && investments.filter(inv => {
+  if (inv.type !== 'Gold' || !inv.purchaseDate) return false;
+  const parsed = parseDateString(inv.purchaseDate);
+  return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+}).length > 0 && (
+              <div className="mb-2">
+                <div className="font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2"><Coins className="h-4 w-4" />Gold Purchased:</div>
+                <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
+                  {investments.filter(inv => {
+  if (inv.type !== 'Gold' || !inv.purchaseDate) return false;
+  const parsed = parseDateString(inv.purchaseDate);
+  return parsed && isWithinInterval(parsed, { start: currentMonthStart, end: currentMonthEnd });
+}).map(gold => (
+                    <li key={gold.id} className="flex justify-between items-center text-sm">
+                      <span>{gold.name || 'Unnamed Gold'}</span>
+                      <span>{formatCurrencyEGPForMobile(gold.amountInvested || 0)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {realEstateInstallments.installments.length > 0 && (
+            <div className="mt-2">
+              <div className="flex justify-between text-blue-700 pt-2 border-t border-blue-100 dark:border-blue-900 mt-2 font-bold">
+                <span>Total Real Estate:</span>
+                <span>{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span>
+              </div>
+              <ul className="space-y-2 pl-4 border-l-2 border-blue-200 dark:border-blue-700">
+                {realEstateInstallments.installments.map((installment) => (
+                  <li key={`invest-${installment.propertyId}-${installment.number}`} className="flex justify-between items-center">
+                    <span className="flex items-center gap-2 text-sm">
+                      <Landmark className="h-4 w-4 text-blue-500" />
+                      <span className="whitespace-pre-line">{installment.propertyName} (#{installment.number})</span>
+                    </span>
+                    <span className="font-medium text-right">
+                      {formatCurrencyEGPForMobile(installment.amount || 0)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
+
           <hr className="my-2" />
           <div className="flex justify-between font-bold">
             <span>Total Investments:</span>
