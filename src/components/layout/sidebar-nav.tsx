@@ -41,9 +41,9 @@ const navItems: NavItem[] = [
     icon: TrendingDown,
   },
   {
-    title: 'Fixed Estimates', // New menu item
+    title: 'Fixed Estimates',
     href: '/fixed-estimates',
-    icon: Settings, // Using Settings icon, can be changed
+    icon: Settings, 
   },
   {
     title: 'Cash Flow',
@@ -80,11 +80,17 @@ const navItems: NavItem[] = [
     href: '/investments/currencies',
     icon: DollarSign,
   },
+  {
+    title: 'Settings', // Added Settings item
+    href: '/settings',
+    icon: Settings,
+    exactMatch: true, // Typically settings pages are an exact match
+  },
 ];
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const { setOpenMobile } = useSidebar(); // useIsMobile is not used here
+  const { setOpenMobile } = useSidebar();
 
 
   if (!navItems?.length) {

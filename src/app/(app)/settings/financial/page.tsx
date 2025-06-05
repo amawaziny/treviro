@@ -1,28 +1,32 @@
 
 "use client";
 
-// This page is no longer used for setting estimated living expenses, Zakat, or Charity.
-// These concepts are now integrated into logging individual expenses and managing fixed estimates on the Expenses page.
-// This page can be repurposed or removed. For now, I'll leave a placeholder.
+// This page is no longer used.
+// Settings are now managed at /settings.
+// This file can be removed in the future if no longer referenced.
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
-export default function FinancialSettingsPage() {
+export default function DeprecatedFinancialSettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Financial Settings</h1>
-        <p className="text-muted-foreground">Manage your financial preferences.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Old Financial Settings</h1>
+        <p className="text-muted-foreground">This page is no longer in use.</p>
       </div>
       <Separator />
       <Card>
         <CardHeader>
-          <CardTitle>Settings Overview</CardTitle>
-          <CardDescription>Fixed monthly estimates for Living Expenses, Zakat, and Charity are now managed on the "Expenses" page. This page can be used for other application-wide settings in the future.</CardDescription>
+          <CardTitle>Page Deprecated</CardTitle>
+          <CardDescription>
+            Financial settings, including the financial year start month, are now managed on the main {" "}
+            <Link href="/settings" className="underline text-primary">Settings page</Link>.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No settings available here at the moment.</p>
+          <p className="text-muted-foreground">Please use the new settings page.</p>
         </CardContent>
       </Card>
     </div>
