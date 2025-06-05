@@ -9,7 +9,7 @@ export const incomeTypes = ['Profit Share', 'Bonus', 'Gift', 'Rental Income', 'F
 export const expenseCategories = ['Credit Card', 'Other'] as const;
 
 // New constants for Fixed Estimates
-export const fixedEstimateTypes = ['Salary', 'Zakat', 'Charity', 'Other'] as const;
+export const fixedEstimateTypes = ['Salary', 'Zakat', 'Charity', 'Living Expenses', 'Other'] as const;
 export const fixedEstimatePeriods = ['Monthly', 'Quarterly', 'Yearly'] as const;
 
 // Coercion helpers for numeric string inputs
@@ -195,7 +195,15 @@ export const FixedEstimateSchema = z.object({
   amount: stringToRequiredNonNegativeNumberCoerced,
   period: z.enum(fixedEstimatePeriods, { required_error: "Period is required." }),
   isExpense: z.boolean().optional(),
-}).superRefine((data, ctx) => {
+})
+.transform((data) => {
+  let isExpense: boolean | undefined = data.isExpense;
+  if (data.type === 'Salary') isExpense = false;
+  if (data.type === 'Zakat' || data.type === 'Charity' || data.type === 'Living Expenses') isExpense = true;
+  // For 'Other', leave as provided
+  return { ...data, isExpense };
+})
+.superRefine((data, ctx) => {
   if (data.type === 'Other' && (!data.name || data.name.trim() === "")) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
