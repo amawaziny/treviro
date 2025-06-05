@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo } from 'react';
@@ -203,7 +204,7 @@ export default function CashFlowPage() {
     otherFixedExpensesMonthly + 
     totalItemizedExpensesThisMonth + 
     realEstateInstallmentsThisMonth;
-  const remainingAmount = totalIncome - totalExpenses;
+  const netCashFlow = totalIncome - totalExpenses;
 
   if (isLoading) {
     return (
@@ -281,20 +282,20 @@ export default function CashFlowPage() {
           </CardContent>
         </Card>
 
-        <Card className={remainingAmount >= 0 ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700" : "bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700"}>
+        <Card className={netCashFlow >= 0 ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700" : "bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700"}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className={`text-sm font-medium ${remainingAmount >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>
-                Remaining Amount
+            <CardTitle className={`text-sm font-medium ${netCashFlow >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>
+                Net Cash Flow
             </CardTitle>
-            <Wallet className={`h-5 w-5 ${remainingAmount >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`} />
+            <Wallet className={`h-5 w-5 ${netCashFlow >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`} />
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-bold ${remainingAmount >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>             
-              <span className="md:hidden">{formatCurrencyEGPForMobile(remainingAmount)}</span>
-              <span className="hidden md:inline">{formatCurrencyEGP(remainingAmount)}</span>
+            <p className={`text-2xl font-bold ${netCashFlow >=0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'}`}>             
+              <span className="md:hidden">{formatCurrencyEGPForMobile(netCashFlow)}</span>
+              <span className="hidden md:inline">{formatCurrencyEGP(netCashFlow)}</span>
             </p>
-            <p className={`text-xs mt-1 ${remainingAmount >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-              {remainingAmount >= 0 ? "Available for investment or savings." : "Expenses exceed income this month."}
+            <p className={`text-xs mt-1 ${netCashFlow >=0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              {netCashFlow >= 0 ? "Available for investment or savings." : "Expenses exceed income this month."}
             </p>
           </CardContent>
         </Card>
@@ -360,3 +361,4 @@ export default function CashFlowPage() {
     </div>
   );
 }
+
