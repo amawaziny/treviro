@@ -1,6 +1,6 @@
 
 export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
-export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Stock Dividend' | 'Other';
+export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
 export type ExpenseCategory = 'Credit Card' | 'Other';
 
 export interface BaseInvestment {
@@ -149,7 +149,7 @@ export interface StockChartDataPoint {
 
 export type StockChartTimeRange = '1W' | '1M' | '6M' | '1Y' | '5Y';
 
-export type TransactionType = 'buy' | 'sell';
+export type TransactionType = 'buy' | 'sell' | 'dividend';
 
 export interface Transaction {
   id: string;
@@ -165,6 +165,7 @@ export interface Transaction {
   profitOrLoss?: number;
   createdAt: string;
   isInvestmentRecord?: boolean; 
+  amount?: number; // Optional, for dividend or other transactions
 }
 
 export interface DashboardSummary {

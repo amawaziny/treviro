@@ -5,7 +5,9 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'; // Adde
 import React, { useEffect, useState } from 'react';
 import { useListedSecurities } from '@/hooks/use-listed-securities'; 
 import type { ListedSecurity, StockInvestment, Transaction } from '@/lib/types'; 
+import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AddDividendSheet } from '@/components/stocks/add-dividend-sheet';
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,6 +45,11 @@ export default function SecurityDetailPage() {
 
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities(); 
   const { investments, isLoading: isLoadingInvestments, transactions, deleteSellTransaction } = useInvestments();
+  const { user } = useAuth();
+  const userId = user?.uid;
+
+  const [dividendSheetOpen, setDividendSheetOpen] = useState(false);
+  const [dividendLoading, setDividendLoading] = useState(false);
   
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(null); 
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
@@ -82,6 +89,39 @@ export default function SecurityDetailPage() {
 
   const hasPosition = totalSharesOwned > 0;
 
+  // Add Dividend Handler
+  const handleAddDividend = async (amount: number, date: string) => {
+    setDividendLoading(true);
+    try {
+      // Compose dividend transaction object
+      const transactionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      const newDividendTx = {
+        id: transactionId,
+        type: 'dividend',
+        tickerSymbol: security?.symbol,
+        stockId: security?.id,
+        date,
+        amount,
+        totalAmount: amount,
+        shares: totalSharesOwned, // Add shares field for dividend
+        createdAt: new Date().toISOString(),
+      };
+      // Save to Firestore via REST or context (ideally via context action, but fallback to direct call if not exposed)
+      // For now, add to /transactions collection
+      // You may want to expose an addTransaction method in your context for a cleaner approach
+      const { db } = await import('@/lib/firebase');
+      const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+      if (!userId || !db) throw new Error('User not authenticated or db unavailable');
+      await setDoc(doc(db, `users/${userId}/transactions`, transactionId), { ...newDividendTx, createdAt: serverTimestamp() });
+      setDividendSheetOpen(false);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to add dividend.', variant: 'destructive' });
+    } finally {
+      setDividendLoading(false);
+    }
+  };
+
+
   const securityTransactions = React.useMemo(() => {
     if (!security) return [];
     
@@ -107,13 +147,33 @@ export default function SecurityDetailPage() {
         ...tx, 
         isInvestmentRecord: false, 
       }));
+
+    // ADD: Dividend transactions for this security
+    const dividendTransactions = transactions
+      .filter(tx => tx.tickerSymbol === security.symbol && tx.type === 'dividend')
+      .map(tx => ({
+        ...tx,
+        shares: totalSharesOwned, // Always show latest shares owned for display
+        isInvestmentRecord: false,
+      }));
     
-    const allTransactions = [...buyTransactions, ...sellTransactionsFromContext].map(tx => ({
+    const allTransactions = [
+      ...buyTransactions,
+      ...sellTransactionsFromContext,
+      ...dividendTransactions,
+    ].map(tx => ({
         ...tx,
         createdAt: tx.createdAt || new Date(0).toISOString() 
     }));
 
-    return allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return allTransactions.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      if (dateB !== dateA) return dateB - dateA;
+      const createdA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const createdB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return createdB - createdA;
+    });
   }, [investments, transactions, security]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -209,7 +269,11 @@ export default function SecurityDetailPage() {
 
   const formatDateDisplay = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return format(new Date(dateString + "T00:00:00Z"), 'dd-MM-yyyy'); // Ensure UTC interpretation
+    try {
+      return format(new Date(dateString + "T00:00:00Z"), 'dd-MM-yyyy');
+    } catch {
+      return 'Invalid Date';
+    }
   };
 
 
@@ -248,11 +312,22 @@ export default function SecurityDetailPage() {
               </Button>
             </Link>
             {hasPosition && (
-              <Link href={`/investments/sell-stock/${security.id}`} passHref> 
-                <Button variant="outline" > 
-                  <DollarSign className="mr-2 h-4 w-4" /> Sell
+              <>
+                <Link href={`/investments/sell-stock/${security.id}`} passHref> 
+                  <Button variant="outline" > 
+                    <DollarSign className="mr-2 h-4 w-4" /> Sell
+                  </Button>
+                </Link>
+                <Button variant="secondary" onClick={() => setDividendSheetOpen(true)}>
+                  Add Dividend
                 </Button>
-              </Link>
+                <AddDividendSheet
+                  open={dividendSheetOpen}
+                  onOpenChange={setDividendSheetOpen}
+                  onSubmit={handleAddDividend}
+                  defaultDate={new Date().toISOString().slice(0, 10)}
+                />
+              </>
             )}
           </CardContent>
         </Card>
@@ -340,90 +415,59 @@ export default function SecurityDetailPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {currentTransactions.map((tx) => (
-                          <TableRow key={tx.id}>
-                            <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(tx.date)}</TableCell>
-                            <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
-                              <Badge variant={tx.type === 'Buy' ? 'secondary' : 'outline'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
-                                {tx.type}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">{(tx.shares ?? 0).toLocaleString()}</TableCell>
-                            <TableCell className="text-right">{formatCurrency((tx.price ?? 0))}</TableCell>
-                            <TableCell className="text-right">{formatCurrency((tx.fees ?? 0))}</TableCell>
-                            <TableCell className="text-right">{formatCurrency((tx.totalAmount ?? 0))}</TableCell>
-                            {currentTransactions.some(t => t.profitOrLoss !== undefined) && (
-                                <TableCell className={cn("text-right", tx.profitOrLoss && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                                {tx.profitOrLoss !== undefined ? formatCurrency((tx.profitOrLoss ?? 0)) : 'N/A'}
+                        {currentTransactions.map((tx) => {
+                          const isDividend = tx.type === 'dividend';
+                          return (
+                            <TableRow key={tx.id}>
+                              <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(tx.date ?? '')}</TableCell>
+                              <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
+                                <Badge variant={tx.type === 'Buy' ? 'secondary' : tx.type === 'Sell' ? 'outline' : 'default'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
+                                  {tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+                                </Badge>
+                              </TableCell>
+                              {isDividend ? (
+  <>
+    <TableCell className="text-right">{typeof tx.shares === 'number' ? tx.shares.toLocaleString() : '—'}</TableCell>
+    <TableCell className="text-right">—</TableCell>
+    <TableCell className="text-right">—</TableCell>
+    <TableCell className="text-right">{formatCurrency((tx as any).amount ?? (tx as any).totalAmount ?? 0)}</TableCell>
+  </>
+) : (
+  <>
+    <TableCell className="text-right">{typeof (tx as any).shares === 'number' ? (tx as any).shares.toLocaleString() : (typeof (tx as any).numberOfShares === 'number' ? (tx as any).numberOfShares.toLocaleString() : 0)}</TableCell>
+    <TableCell className="text-right">{formatCurrency(typeof (tx as any).price === 'number' ? (tx as any).price : (typeof (tx as any).pricePerShare === 'number' ? (tx as any).pricePerShare : 0))}</TableCell>
+    <TableCell className="text-right">{formatCurrency(typeof (tx as any).fees === 'number' ? (tx as any).fees : 0)}</TableCell>
+    <TableCell className="text-right">{formatCurrency((tx as any).totalAmount ?? 0)}</TableCell>
+  </>
+)}
+                              {currentTransactions.some(t => t.profitOrLoss !== undefined) && (
+                                <TableCell className={cn("text-right", tx.profitOrLoss !== undefined && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss !== undefined && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
+                                  {tx.profitOrLoss !== undefined ? formatCurrency(tx.profitOrLoss ?? 0) : 'N/A'}
                                 </TableCell>
-                            )}
-                            <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>
-                              {tx.isInvestmentRecord && (
-                                <Button variant="ghost" size="icon" asChild>
-                                  <Link href={`/investments/edit/${tx.id}`}>
-                                    <Edit3 className="h-4 w-4" />
-                                    <span className="sr-only">Edit Purchase</span>
-                                  </Link>
-                                </Button>
                               )}
-                              {!tx.isInvestmentRecord && tx.type === 'sell' && (
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete Sell Transaction</span>
+                              <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>
+                                {tx.isInvestmentRecord && (
+                                  <Button variant="ghost" size="icon" asChild>
+                                    <Link href={`/investments/edit/${tx.id}`}>
+                                      <Edit3 className="h-4 w-4" />
+                                      <span className="sr-only">Edit Purchase</span>
+                                    </Link>
                                   </Button>
-                                </AlertDialogTrigger>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                                )}
+                                {!tx.isInvestmentRecord && tx.type === 'sell' && (
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">Delete Sell Transaction</span>
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-between mt-4 py-2 border-t">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                          disabled={currentPage === 1}
-                          className="flex items-center gap-1"
-                        >
-                          {language === 'ar' ? (
-                            <>
-                              <span>السابق</span> 
-                              <ChevronRight className="h-4 w-4" />
-                            </>
-                          ) : (
-                            <>
-                              <ChevronLeft className="h-4 w-4" />
-                              <span>Previous</span>
-                            </>
-                          )}
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                          Page {currentPage} of {totalPages}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                          disabled={currentPage === totalPages}
-                          className="flex items-center gap-1"
-                        >
-                          {language === 'ar' ? (
-                            <>
-                              <ChevronLeft className="h-4 w-4" />
-                              <span>التالي</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Next</span>
-                              <ChevronRight className="h-4 w-4" />
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    )}
                   </>
                 ) : (
                   <p className="text-muted-foreground py-4 text-center">No transactions recorded for this security yet.</p>
@@ -437,7 +481,7 @@ export default function SecurityDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the record of selling {(transactionToDelete?.shares ?? 0).toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ''}.
+              This will remove the record of selling {(('shares' in (transactionToDelete ?? {})) ? (transactionToDelete as any).shares : (transactionToDelete?.numberOfShares ?? 0)).toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ''}.
               This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

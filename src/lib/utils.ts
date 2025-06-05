@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { format } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -48,6 +49,24 @@ export function formatNumberWithSuffix(num: number): string {
 }
 
 
+
+/**
+ * Formats a date as 'Month YYYY' (e.g., 'June 2025').
+ * Accepts either a Date object or a date string.
+ */
+export function formatMonthYear(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '';
+  return format(d, 'MMMM yyyy');
+}
+
+// Checks if a given date is in the current month
+export function isInCurrentMonth(date: Date | string): boolean {
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
 
 // Helper function to identify stock-related funds
 export function isStockRelatedFund(fundType?: string): boolean {
