@@ -336,112 +336,152 @@ export default function CashFlowPage() {
           </CardContent>
         </Card>
       </div>
-      {incomeRecords.filter((income: IncomeRecord) => {
-        const incomeDate = parseDateString(income.date);
-        return incomeDate && isWithinInterval(incomeDate, { start: currentMonthStart, end: currentMonthEnd });
-      }).map((income: IncomeRecord, idx: number) => (
-        <div key={`manual-income-${idx}`} className="flex justify-between text-xs">
-          <span>{format(new Date(income.date), 'dd-MM-yyyy')} {income.description ? `- ${income.description}` : ''}</span>
-          <span>{formatCurrencyEGP(income.amount)}</span>
-        </div>
-      ))}
-      {transactions && transactions.filter((tx: Transaction) => tx.type === 'dividend').filter((tx: Transaction) => {
-        const txDate = parseDateString(tx.date);
-        return txDate && isWithinInterval(txDate, { start: currentMonthStart, end: currentMonthEnd });
-      }).map((tx: Transaction, idx: number) => (
-        <div key={`dividend-income-${idx}`} className="flex justify-between text-xs">
-          <span>{format(new Date(tx.date), 'dd-MM-yyyy')} - Dividend {tx.tickerSymbol ? `(${tx.tickerSymbol})` : ''}</span>
-          <span>{formatCurrencyEGP((tx as any).amount ?? (tx as any).totalAmount ?? 0)}</span>
-        </div>
-      ))}
-      <div className="flex justify-between text-xs font-semibold mt-1">
-        <span>Total Other Logged Income:</span>
-        <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalManualIncomeThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></span>
-      </div>
-      {totalProjectedCertificateInterestThisMonth > 0 && (
-        <div className="flex justify-between">
-          <span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Debt Interest:</span>
-          <span>
-            <span className="md:hidden">{formatCurrencyEGPForMobile(totalProjectedCertificateInterestThisMonth)}</span>
-            <span className="hidden md:inline">{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span>
-          </span>
-    <hr className="my-2" />
-    <div className="flex justify-between font-bold">
-      <span>Total Projected Income:</span>
-      <span>{formatCurrencyEGPForMobile(totalIncome)}</span>
-    </div>
-    <Card className="flex flex-col h-full flex-1 min-h-[120px]">
-      <CardHeader>
-        <CardTitle>Expense Details</CardTitle>
-        <CardDescription>Breakdown of expenses for {formatMonthYear(currentMonthStart)}.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {zakatFixedMonthly > 0 && (
-          <div className="flex justify-between items-center text-red-500 font-semibold"><Gift className="h-4 w-4 mr-1" /> Zakat (Fixed): <span>{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span></div>
-        )}
-        {charityFixedMonthly > 0 && (
-          <div className="flex justify-between items-center text-red-500 font-semibold"><HandHeart className="h-4 w-4 mr-1" /> Charity (Fixed): <span>{formatCurrencyEGPForMobile(charityFixedMonthly)}</span></div>
-        )}
-        {livingExpensesMonthly > 0 && (
-          <div className="flex justify-between items-center text-red-500 font-semibold"><TrendingDown className="h-4 w-4 mr-1" /> Living Expenses: <span>{formatCurrencyEGPForMobile(livingExpensesMonthly)}</span></div>
-        )}
-        {otherFixedExpensesMonthly > 0 && (
-          <div className="flex justify-between items-center text-red-500 font-semibold">Other Fixed Expenses: <span>{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span></div>
-        )}
-        {totalItemizedExpensesThisMonth > 0 && (
-          <div className="flex justify-between items-center text-red-500 font-semibold">Itemized Logged Expenses: <span>{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span></div>
-        )}
-        {realEstateInstallments.installments.length > 0 && (
-          <div>
-            <div className="font-semibold text-base mt-2 mb-1 text-red-700 dark:text-red-300">Real Estate Installments <span className="text-xs font-normal">({realEstateInstallments.installments.length})</span>:</div>
-            <ul className="space-y-2 pl-4 border-l-2 border-red-200 dark:border-red-700">
-              {realEstateInstallments.installments.map((installment) => (
-                <li key={`${installment.propertyId}-${installment.number}`} className="flex justify-between items-center">
-                  <span className="flex items-center gap-2 text-sm">
-                    <Landmark className="h-4 w-4 text-red-500" />
-                    <span className="whitespace-pre-line">{installment.propertyName} (#{installment.number})</span>
-                  </span>
-                  <span className="font-medium text-right">
-                    {formatCurrencyEGPForMobile(installment.amount || 0)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex justify-between pt-2 border-t border-red-100 dark:border-red-900 mt-2 font-bold">
-              <span>Total Real Estate Installments:</span>
-              <span>{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span>
+
+    {/* Details Section: 3 Columns */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-6">
+      {/* Income Details */}
+      <Card className="flex flex-col h-full min-h-[220px]">
+        <CardHeader>
+          <CardTitle>Income Details</CardTitle>
+          <CardDescription>Breakdown of income for {formatMonthYear(currentMonthStart)}.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {incomeRecords.filter((income: IncomeRecord) => {
+            const incomeDate = parseDateString(income.date);
+            return incomeDate && isWithinInterval(incomeDate, { start: currentMonthStart, end: currentMonthEnd });
+          }).map((income: IncomeRecord, idx: number) => (
+            <div key={`manual-income-${idx}`} className="flex justify-between text-xs">
+              <span>{format(new Date(income.date), 'dd-MM-yyyy')} {income.description ? `- ${income.description}` : ''}</span>
+              <span>{formatCurrencyEGP(income.amount)}</span>
             </div>
+          ))}
+          {transactions && transactions.filter((tx: Transaction) => tx.type === 'dividend').filter((tx: Transaction) => {
+            const txDate = parseDateString(tx.date);
+            return txDate && isWithinInterval(txDate, { start: currentMonthStart, end: currentMonthEnd });
+          }).map((tx: Transaction, idx: number) => (
+            <div key={`dividend-income-${idx}`} className="flex justify-between text-xs">
+              <span>{format(new Date(tx.date), 'dd-MM-yyyy')} - Dividend {tx.tickerSymbol ? `(${tx.tickerSymbol})` : ''}</span>
+              <span>{formatCurrencyEGP((tx as any).amount ?? (tx as any).totalAmount ?? 0)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between text-xs font-semibold mt-1">
+            <span>Total Other Logged Income:</span>
+            <span><span className="md:hidden">{formatCurrencyEGPForMobile(totalManualIncomeThisMonth)}</span><span className="hidden md:inline">{formatCurrencyEGP(totalManualIncomeThisMonth)}</span></span>
           </div>
-        )}
-        <hr className="my-2" />
-        <div className="flex justify-between font-bold">
-          <span>Total Projected Expenses:</span>
-          <span>{formatCurrencyEGPForMobile(totalExpensesOnly)}</span>
-        </div>
-      </CardContent>
-    </Card>
-    <Card className="flex flex-col h-full flex-1 min-h-[120px]">
-      <CardHeader>
-        <CardTitle>Investments Details</CardTitle>
-        <CardDescription>New investments made in {formatMonthYear(currentMonthStart)}.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {investmentsMadeThisMonth > 0 ? (
-          <div className="flex justify-between items-center text-blue-600 font-semibold">
-            <Briefcase className="h-4 w-4 mr-1" />Investments Made This Month:
-            <span>{formatCurrencyEGPForMobile(investmentsMadeThisMonth)}</span>
+          {totalProjectedCertificateInterestThisMonth > 0 && (
+            <div className="flex justify-between text-xs">
+              <span><FileText className="inline mr-2 h-4 w-4 text-green-600" />Projected Debt Interest:</span>
+              <span>
+                <span className="md:hidden">{formatCurrencyEGPForMobile(totalProjectedCertificateInterestThisMonth)}</span>
+                <span className="hidden md:inline">{formatCurrencyEGP(totalProjectedCertificateInterestThisMonth)}</span>
+              </span>
+            </div>
+          )}
+          <hr className="my-2" />
+          <div className="flex justify-between font-bold">
+            <span>Total Projected Income:</span>
+            <span>{formatCurrencyEGPForMobile(totalIncome)}</span>
           </div>
-        ) : (
-          <div className="text-muted-foreground">No new investments this month.</div>
-        )}
-        <hr className="my-2" />
-        <div className="flex justify-between font-bold">
-          <span>Total Investments:</span>
-          <span>{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-  )}
-  </div>
-)}
+        </CardContent>
+      </Card>
+      {/* Expense Details */}
+      <Card className="flex flex-col h-full min-h-[220px]">
+        <CardHeader>
+          <CardTitle>Expense Details</CardTitle>
+          <CardDescription>Breakdown of expenses for {formatMonthYear(currentMonthStart)}.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {zakatFixedMonthly > 0 && (
+            <div className="flex justify-between items-center text-red-500 font-semibold">
+              <span className="flex items-center gap-1">
+                <Gift className="h-4 w-4" />
+                Zakat (Fixed):
+              </span>
+              <span>{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span>
+            </div>
+          )}
+          {charityFixedMonthly > 0 && (
+            <div className="flex justify-between items-center text-red-500 font-semibold">
+              <span className="flex items-center gap-1">
+                <HandHeart className="h-4 w-4" />
+                Charity (Fixed):
+              </span>
+              <span>{formatCurrencyEGPForMobile(charityFixedMonthly)}</span>
+            </div>
+          )}
+          {livingExpensesMonthly > 0 && (
+            <div className="flex justify-between items-center text-red-500 font-semibold">
+              <span className="flex items-center gap-1">
+                <TrendingDown className="h-4 w-4" />
+                Living Expenses:
+              </span>
+              <span>{formatCurrencyEGPForMobile(livingExpensesMonthly)}</span>
+            </div>
+          )}
+          {otherFixedExpensesMonthly > 0 && (
+            <div className="flex justify-between items-center text-red-500 font-semibold">
+              <span className="flex items-center gap-1">
+                Other Fixed Expenses:
+              </span>
+              <span>{formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}</span>
+            </div>
+          )}
+          {totalItemizedExpensesThisMonth > 0 && (
+            <div className="flex justify-between items-center text-red-500 font-semibold">Itemized Logged Expenses: <span>{formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}</span></div>
+          )}
+          {realEstateInstallments.installments.length > 0 && (
+            <div>
+              <div className="font-semibold text-base mt-2 mb-1 text-red-700 dark:text-red-300">Real Estate Installments <span className="text-xs font-normal">({realEstateInstallments.installments.length})</span>:</div>
+              <ul className="space-y-2 pl-4 border-l-2 border-red-200 dark:border-red-700">
+                {realEstateInstallments.installments.map((installment) => (
+                  <li key={`${installment.propertyId}-${installment.number}`} className="flex justify-between items-center">
+                    <span className="flex items-center gap-2 text-sm">
+                      <Landmark className="h-4 w-4 text-red-500" />
+                      <span className="whitespace-pre-line">{installment.propertyName} (#{installment.number})</span>
+                    </span>
+                    <span className="font-medium text-right">
+                      {formatCurrencyEGPForMobile(installment.amount || 0)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex justify-between pt-2 border-t border-red-100 dark:border-red-900 mt-2 font-bold">
+                <span>Total Real Estate Installments:</span>
+                <span>{formatCurrencyEGPForMobile(realEstateInstallments.total)}</span>
+              </div>
+            </div>
+          )}
+          <hr className="my-2" />
+          <div className="flex justify-between font-bold">
+            <span>Total Projected Expenses:</span>
+            <span>{formatCurrencyEGPForMobile(totalExpensesOnly)}</span>
+          </div>
+        </CardContent>
+      </Card>
+      {/* Investments Details */}
+      <Card className="flex flex-col h-full min-h-[220px]">
+        <CardHeader>
+          <CardTitle>Investments Details</CardTitle>
+          <CardDescription>New investments made in {formatMonthYear(currentMonthStart)}.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {investmentsMadeThisMonth > 0 ? (
+            <div className="flex justify-between items-center text-blue-600 font-semibold">
+              <Briefcase className="h-4 w-4 mr-1" />Investments Made This Month:
+              <span>{formatCurrencyEGPForMobile(investmentsMadeThisMonth)}</span>
+            </div>
+          ) : (
+            <div className="text-muted-foreground">No new investments this month.</div>
+          )}
+          <hr className="my-2" />
+          <div className="flex justify-between font-bold">
+            <span>Total Investments:</span>
+            <span>{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+    {/* End Details Section */}
+    </div>
+  )
+}
