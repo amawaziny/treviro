@@ -264,8 +264,8 @@ export default function CashFlowPage() {
           <p className="text-muted-foreground">Track your income, expenses, and recurring estimates to understand your monthly cash flow and financial health.</p>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row gap-4 mb-6 w-full">
-        <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-full flex-1 min-h-[120px]">
+      <div className="flex flex-col md:flex-row gap-4 mb-6 w-full items-stretch">
+        <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Total Income This Month</CardTitle>
             <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -283,7 +283,7 @@ export default function CashFlowPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-full flex-1 min-h-[120px]">
+        <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses This Month</CardTitle>
             <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -305,7 +305,7 @@ export default function CashFlowPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-full flex-1 min-h-[120px]">
+        <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Investments This Month</CardTitle>
             <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -320,7 +320,7 @@ export default function CashFlowPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-full flex-1 min-h-[120px]">
+        <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Remaining Cash After Expenses & Investments</CardTitle>
             <Wallet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
