@@ -154,7 +154,7 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className="text-3xl font-bold">{isMobile ? formatCurrencyEGPWithSuffix(totalInvested) : formatCurrencyEGP(totalInvested)}</p>}
+            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className="text-2xl font-medium">{isMobile ? formatCurrencyEGPWithSuffix(totalInvested) : formatCurrencyEGP(totalInvested)}</p>}
             <p className="text-xs text-muted-foreground">Sum of all purchase costs.</p>
           </CardContent>
         </Card>
@@ -164,7 +164,7 @@ export default function DashboardPage() {
             {totalRealizedPnL >= 0 ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className={`text-3xl font-bold ${totalRealizedPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>{isMobile ? formatCurrencyEGPWithSuffix(totalRealizedPnL) : formatCurrencyEGP(totalRealizedPnL)}</p>}
+            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>{isMobile ? formatCurrencyEGPWithSuffix(totalRealizedPnL) : formatCurrencyEGP(totalRealizedPnL)}</p>}
             <p className="text-xs text-muted-foreground">Profit/Loss from all completed sales.</p>
           </CardContent>
         </Card>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
              {totalCurrentPortfolioPnL >= 0 ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
           </CardHeader>
           <CardContent>
-             {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className={`text-3xl font-bold ${totalCurrentPortfolioPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>{isMobile ? formatCurrencyEGPWithSuffix(totalCurrentPortfolioPnL) : formatCurrencyEGP(totalCurrentPortfolioPnL)}</p>}
+             {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? 'text-accent' : 'text-destructive'}`}>{isMobile ? formatCurrencyEGPWithSuffix(totalCurrentPortfolioPnL) : formatCurrencyEGP(totalCurrentPortfolioPnL)}</p>}
             <p className="text-xs text-muted-foreground">Current market value vs. total cost.</p>
           </CardContent>
         </Card>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
             <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className="text-3xl font-bold">{isMobile ? formatCurrencyEGPWithSuffix(totalCashBalance) : formatCurrencyEGP(totalCashBalance)}</p>}
+            {isLoading ? <Skeleton className="h-8 w-3/4 mt-1" /> : <p className="text-2xl font-medium">{isMobile ? formatCurrencyEGPWithSuffix(totalCashBalance) : formatCurrencyEGP(totalCashBalance)}</p>}
             <p className="text-xs text-muted-foreground">Estimated available cash.</p>
           </CardContent>
         </Card>
@@ -206,12 +206,12 @@ export default function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-4">
             {/* Total Income Card */}
             <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Total Income This Month</CardTitle>
                 <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                <p className="text-2xl font-medium text-green-700 dark:text-green-300">
                   <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalIncome)}</span>
                   <span className="hidden md:inline">{formatCurrencyEGP(totalIncome)}</span>
                 </p>
@@ -225,12 +225,12 @@ export default function DashboardPage() {
             </Card>
             {/* Total Expenses Card */}
             <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses This Month</CardTitle>
                 <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                <p className="text-2xl font-medium text-red-700 dark:text-red-300">
                   <span className="md:hidden">{formatCurrencyEGPWithSuffix(totalExpensesOnly)}</span>
                   <span className="hidden md:inline">{formatCurrencyEGP(totalExpensesOnly)}</span>
                 </p>
@@ -248,7 +248,7 @@ export default function DashboardPage() {
             </Card>
             {/* Total Investments Card */}
             <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-[220px] flex-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Investments This Month</CardTitle>
                 <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </CardHeader>
@@ -279,12 +279,12 @@ export default function DashboardPage() {
             </Card>
             {/* Remaining Cash Card */}
             <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-[220px] flex-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Remaining Cash After Expenses & Investments</CardTitle>
                 <Wallet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                <p className="text-2xl font-medium text-gray-700 dark:text-gray-300">
                   <span className="md:hidden">{formatCurrencyEGPWithSuffix(netCashFlowThisMonth)}</span>
                   <span className="hidden md:inline">{formatCurrencyEGP(netCashFlowThisMonth)}</span>
                 </p>

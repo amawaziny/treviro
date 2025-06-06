@@ -39,13 +39,22 @@ export function isDebtRelatedFund(fundType?: string): boolean {
 }
 
 export function formatNumberWithSuffix(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+  const absNum = Math.abs(num);
+  let suffix = '';
+  let value = absNum;
+
+  if (absNum >= 1000000) {
+    value = absNum / 1000000;
+    suffix = 'M';
+  } else if (absNum >= 1000) {
+    value = absNum / 1000;
+    suffix = 'K';
   }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-  return num.toString();
+
+  let formatted = value.toFixed(1).replace(/\.0$/, '');
+  if (suffix) formatted += suffix;
+
+  return (num < 0 ? '-' : '') + formatted;
 }
 
 
