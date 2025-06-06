@@ -57,7 +57,7 @@ const InvestmentRow = React.memo(function InvestmentRow({ investment, language }
       <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
         <div className={cn("flex items-center gap-2", language === 'ar' ? 'flex-row-reverse' : '')}>
           <Icon className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium">{investment.name}</span>
+          <span className="font-medium truncate max-w-[120px] sm:max-w-[200px] md:max-w-[300px] block" title={investment.name}>{investment.name}</span>
         </div>
       </TableCell>
       <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
@@ -114,7 +114,8 @@ export function RecentInvestmentsList() {
         <CardDescription>Your latest investment entries.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Name</TableHead>
@@ -129,6 +130,7 @@ export function RecentInvestmentsList() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
   );

@@ -102,7 +102,7 @@ export function InvestmentBreakdownCards() {
                 >
                   <Icon className="h-7 w-7 text-[#23255a] dark:text-white" />
                 </span>
-                <span className="text-lg font-bold flex-1 text-[#23255a] dark:text-white">{type}</span>
+                <span className="text-lg md:text-xl font-bold flex-1 text-[#23255a] dark:text-white truncate" title={type}>{type}</span>
                 <Badge className={`text-xs px-2 py-1 bg-green-600 text-white`}>
                   {plAmount >= 0 ? (
                     <TrendingUp className="inline h-4 w-4 mr-1" />
@@ -116,30 +116,30 @@ export function InvestmentBreakdownCards() {
               <div className="flex flex-wrap gap-4 items-end justify-between mt-2">
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">Invested</div>
-                  <div className="font-bold text-base text-[#23255a] dark:text-white">
+                  <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {formatNumberWithSuffix(invested)}
                   </div>
                 </div>
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">Current</div>
-                  <div className="font-bold text-base text-[#23255a] dark:text-white">
+                  <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {formatNumberWithSuffix(current)}
                   </div>
                 </div>
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">% of Portfolio</div>
-                  <div className="font-bold text-base text-[#23255a] dark:text-white">
+                  <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {percent.toFixed(1)}%
                   </div>
                 </div>
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">P/L %</div>
                   <div
-                    className={`font-bold text-base ${
+                    className={`font-bold text-lg md:text-xl ${
                       plAmount >= 0
                         ? 'text-green-700 dark:text-green-400'
                         : 'text-red-700 dark:text-red-400'
-                    }`}
+                    } truncate`}
                   >
                     {plPercent.toFixed(1)}%
                   </div>
