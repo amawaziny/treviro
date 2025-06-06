@@ -54,7 +54,7 @@ const stringToRequiredPositiveIntegerCoerced = z.preprocess(
 const StockInvestmentSchema = z.object({
   type: z.literal('Stocks'),
   name: z.string().optional(),
-  selectedStockId: z.string({ required_error: 'Please select a security.' }).min(1, 'Please select a security.'),
+  selectedsecurityId: z.string({ required_error: 'Please select a security.' }).min(1, 'Please select a security.'),
   numberOfShares: stringToRequiredPositiveIntegerCoerced,
   purchasePricePerShare: stringToRequiredNonNegativeNumberCoerced,
   purchaseFees: stringToOptionalNonNegativeNumberCoerced.default('0').transform(v => parseFloat(String(v) || '0')),
@@ -125,7 +125,7 @@ export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
 
 
 export const SellStockSchema = z.object({
-  stockId: z.string(),
+  securityId: z.string(),
   numberOfSharesToSell: stringToRequiredPositiveIntegerCoerced,
   sellPricePerShare: stringToRequiredNonNegativeNumberCoerced,
   sellDate: z.string().min(1, { message: "Date is required." }).refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format."}),

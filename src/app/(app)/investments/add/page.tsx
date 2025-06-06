@@ -50,7 +50,7 @@ export default function AddInvestmentPage() {
 // Extract the component logic that uses hooks into a new component
 function AddInvestmentPageContent() {
   const searchParams = useSearchParams();
-  const securityId = searchParams.get('stockId');
+  const securityId = searchParams.get('securityId');
   const { language } = useLanguage();
 
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
@@ -75,7 +75,7 @@ function AddInvestmentPageContent() {
     <>
       {showBackButton && (
         <div className="mb-6">
-          <Link href={`/stocks/${security.id}`} passHref>
+          <Link href={`/securities/${security.id}`} passHref>
             <Button variant="outline" size="sm">
               <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
               Back to {security.name}

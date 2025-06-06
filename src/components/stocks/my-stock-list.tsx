@@ -153,7 +153,7 @@ export function MyStockList() {
             // Pass a stock ID if available to link to detail page
             // This requires finding the corresponding ListedStock ID.
             // For now, we'll omit direct linking from MyStockListItem to StockDetail.
-            // listedStockId={findListedStockIdBySymbol(tickerSymbol)} // Placeholder for logic
+            // listedsecurityId={findListedsecurityIdBySymbol(tickerSymbol)} // Placeholder for logic
           />
         );
       })}

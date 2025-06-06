@@ -123,7 +123,7 @@ export default function MyStocksPage() {
 
       <MyStockList />
 
-      <Link href="/stocks" passHref>
+      <Link href="/securities" passHref>
         <Button
           variant="default"
           size="icon"

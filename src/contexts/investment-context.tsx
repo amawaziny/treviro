@@ -16,7 +16,7 @@ interface InvestmentContextType {
   isLoading: boolean;
   currencyAnalyses: Record<string, CurrencyFluctuationAnalysisResult>;
   recordSellStockTransaction: (
-    listedStockId: string,
+    listedsecurityId: string,
     tickerSymbol: string,
     numberOfSharesToSell: number,
     sellPricePerShare: number,
@@ -354,7 +354,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
   const getInvestmentsByType = useCallback((type: string) => investments.filter(inv => inv.type === type), [investments]);
 
-  const recordSellStockTransaction = useCallback(async (listedStockId: string, tickerSymbol: string, numberOfSharesToSell: number, sellPricePerShare: number, sellDate: string, fees: number) => {
+  const recordSellStockTransaction = useCallback(async (listedsecurityId: string, tickerSymbol: string, numberOfSharesToSell: number, sellPricePerShare: number, sellDate: string, fees: number) => {
     if (!firestoreInstance || !isAuthenticated || !userId) {
       throw new Error("User not authenticated or Firestore not available.");
     }
@@ -378,7 +378,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     const transactionId = uuidv4();
     const newTransaction: Omit<Transaction, 'createdAt'> & { createdAt: FieldValue } = { 
       id: transactionId,
-      stockId: listedStockId, 
+      securityId: listedsecurityId, 
       tickerSymbol,
       type: 'sell',
       date: sellDate,

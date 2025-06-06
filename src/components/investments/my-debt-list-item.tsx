@@ -120,7 +120,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     setIsAlertDialogOpen(false);
   };
   
-  const detailPageLink = fundDetails ? `/stocks/${fundDetails.id}?previousTab=funds` : undefined; 
+  const detailPageLink = fundDetails ? `/securities/${fundDetails.id}?previousTab=funds` : undefined; 
 
 
   return (

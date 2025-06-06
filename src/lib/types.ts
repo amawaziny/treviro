@@ -155,7 +155,7 @@ export type TransactionType = 'buy' | 'sell' | 'dividend';
 export interface Transaction {
   id: string;
   investmentId?: string;
-  stockId?: string; 
+  securityId?: string; 
   tickerSymbol: string;
   type: TransactionType;
   date: string;
@@ -167,6 +167,7 @@ export interface Transaction {
   createdAt: string;
   isInvestmentRecord?: boolean; 
   amount?: number; // Optional, for dividend or other transactions
+  shares?: number; // Optional, for dividend or display-only transactions
 }
 
 export interface DashboardSummary {

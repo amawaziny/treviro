@@ -279,7 +279,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
         {!isPreSelectedStockMode && (
           <FormField
             control={control}
-            name="selectedStockId"
+            name="selectedsecurityId"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>Select Security (Stock or Fund)</FormLabel>
@@ -524,7 +524,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
   const searchParams = useSearchParams();
   const { language } = useLanguage();
 
-  const preSelectedSecurityId = searchParams.get('stockId');
+  const preSelectedSecurityId = searchParams.get('securityId');
   const preSelectedInvestmentTypeQueryParam = searchParams.get('type') as InvestmentType | null;
 
 
@@ -626,7 +626,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
       resetFormWithType("Real Estate");
     } else if (calculatedIsPreSelectedStockMode && preSelectedSecurityId) {
       console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode settings to form.");
-      form.reset({ ...baseResetValues, type: "Stocks", selectedStockId: preSelectedSecurityId });
+      form.reset({ ...baseResetValues, type: "Stocks", selectedsecurityId: preSelectedSecurityId });
       getListedSecurityById(preSelectedSecurityId).then(security => {
         if (isMounted && security) {
           setPreSelectedSecurityDetails(security);
@@ -689,7 +689,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
 
     // Remove all parsed* variables, use type narrowing instead
     if (finalInvestmentType === "Stocks" && values.type === "Stocks") {
-      const securityToProcessId = values.selectedStockId || preSelectedSecurityId;
+      const securityToProcessId = values.selectedsecurityId || preSelectedSecurityId;
       console.log("AddInvestmentForm - onSubmit - Stocks - securityToProcessId:", securityToProcessId);
       console.log("AddInvestmentForm - onSubmit - Stocks - listedSecurities (sample):", listedSecurities.slice(0,3).map(s => ({id: s.id, name: s.name})));
       const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
@@ -981,7 +981,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
                     isDedicatedGoldMode ? "/investments/gold" :
                     isDedicatedCurrencyMode ? "/investments/currencies" :
                     isDedicatedRealEstateMode ? "/investments/real-estate" :
-                    isPreSelectedStockMode && preSelectedSecurityDetails ? `/stocks/${preSelectedSecurityDetails.id}` :
+                    isPreSelectedStockMode && preSelectedSecurityDetails ? `/securities/${preSelectedSecurityDetails.id}` :
                     "/dashboard" 
                 } passHref>
                     <Button variant="outline" size="sm">
@@ -1053,7 +1053,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
               className="w-full md:w-auto"
               disabled={
                 form.formState.isSubmitting || isLoadingAi ||
-                (effectiveSelectedType === "Stocks" && !isPreSelectedStockMode && (isLoadingListedSecurities || !!listedSecuritiesError || !form.getValues("selectedStockId"))) ||
+                (effectiveSelectedType === "Stocks" && !isPreSelectedStockMode && (isLoadingListedSecurities || !!listedSecuritiesError || !form.getValues("selectedsecurityId"))) ||
                 (isPreSelectedStockMode && (!preSelectedSecurityDetails || isLoadingListedSecurities))
               }
             >

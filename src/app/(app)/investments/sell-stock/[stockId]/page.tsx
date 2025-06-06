@@ -11,8 +11,8 @@ import { useListedSecurities } from '@/hooks/use-listed-securities'; // Updated 
 import React, { useEffect, useState } from 'react';
 import type { ListedSecurity } from '@/lib/types'; // ListedStock -> ListedSecurity
 
-export default function SellSecurityPage({ params }: { params: { stockId: string } }) { // stockId is securityId
-  const securityId = params.stockId;
+export default function SellSecurityPage({ params }: { params: { securityId: string } }) { // securityId is securityId
+  const securityId = params.securityId;
   const router = useRouter();
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const [securityBeingSold, setSecurityBeingSold] = useState<ListedSecurity | null>(null);
@@ -39,7 +39,7 @@ export default function SellSecurityPage({ params }: { params: { stockId: string
     <div className="container mx-auto py-8 space-y-6">
        <Button variant="outline" size="sm" asChild className="mb-4">
          {/* Link back to the main securities detail page */}
-        <Link href={`/stocks/${securityId}`}> 
+        <Link href={`/securities/${securityId}`}> 
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Security Details
         </Link>
       </Button>
@@ -56,7 +56,7 @@ export default function SellSecurityPage({ params }: { params: { stockId: string
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" /> Loading security details...
              </div>
           ) : (
-            <SellStockForm stockId={securityId} /> // stockId prop for SellStockForm now means securityId
+            <SellStockForm securityId={securityId} /> // securityId prop for SellStockForm now means securityId
           )}
         </CardContent>
       </Card>

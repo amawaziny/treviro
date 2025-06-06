@@ -39,7 +39,7 @@ export default function SecurityDetailPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams(); 
-  const securityId = params.stockId as string; 
+  const securityId = params.securityId as string; 
   const { toast } = useToast();
   const { language } = useLanguage();
 
@@ -59,7 +59,7 @@ export default function SecurityDetailPage() {
   const itemsPerPage = 5;
 
   const previousTab = searchParams.get('previousTab');
-  const backLinkHref = previousTab ? `/stocks?tab=${previousTab}` : '/stocks';
+  const backLinkHref = previousTab ? `/securities?tab=${previousTab}` : '/securities';
 
 
   useEffect(() => {
@@ -306,7 +306,7 @@ export default function SecurityDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="flex justify-end space-x-2 pb-4">
-            <Link href={`/investments/add?stockId=${security.id}`} passHref> 
+            <Link href={`/investments/add?securityId=${security.id}`} passHref> 
               <Button variant="default">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Buy
               </Button>

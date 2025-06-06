@@ -23,7 +23,7 @@ export const StockListItem = React.memo(function StockListItem({ stock }: StockL
   const isPositiveChange = stock.changePercent >= 0;
 
   return (
-    <Link href={`/stocks/${stock.id}`} passHref>
+    <Link href={`/securities/${stock.id}`} passHref>
       <Card className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm">
         <div className="flex flex-col items-start">
           <Badge

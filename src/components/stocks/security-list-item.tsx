@@ -22,7 +22,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
 
   const isPositiveChange = security.changePercent >= 0;
 
-  const detailPageLink = `/stocks/${security.id}?previousTab=${currentTab}`;
+  const detailPageLink = `/securities/${security.id}?previousTab=${currentTab}`;
 
   return (
     <Link href={detailPageLink} passHref>

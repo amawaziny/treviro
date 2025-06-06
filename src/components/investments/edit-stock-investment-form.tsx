@@ -97,7 +97,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
         title: "Investment Updated",
         description: `${investmentToEdit.actualStockName || investmentToEdit.name} purchase details updated.`,
       });
-      router.push(`/stocks/${investmentToEdit.tickerSymbol}`);
+      router.push(`/securities/${investmentToEdit.tickerSymbol}`);
     } catch (error: any) {
       console.error("Error updating investment:", error);
       toast({

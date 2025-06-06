@@ -34,10 +34,10 @@ const getCurrentDate = () => {
 };
 
 interface SellSecurityFormProps {
-  stockId: string;
+  securityId: string;
 }
 
-export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
+export function SellStockForm({ securityId: securityId }: SellSecurityFormProps) {
   const { recordSellStockTransaction, investments, isLoading: isLoadingInvestmentsContext } = useInvestments();
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const { toast } = useToast();
@@ -50,7 +50,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
   const form = useForm<SellStockFormValues>({
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
-      stockId: securityId,
+      securityId: securityId,
       numberOfSharesToSell: '', // Keep as string
       sellPricePerShare: '', // Keep as string
       sellDate: getCurrentDate(),
@@ -115,7 +115,7 @@ export function SellStockForm({ stockId: securityId }: SellSecurityFormProps) {
         title: "Sale Recorded",
         description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityLabel} of ${securityBeingSold.name}.`,
       });
-      router.push(`/stocks/${securityId}`);
+      router.push(`/securities/${securityId}`);
     } catch (error: any) {
       console.error("Error recording sale:", error);
       toast({

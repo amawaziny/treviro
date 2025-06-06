@@ -119,7 +119,7 @@ export function MyStockListItem({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-grow min-w-0">
           {correspondingListedSecurity ? (
-             <Link href={`/stocks/${correspondingListedSecurity.id}`} passHref className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2">
+             <Link href={`/securities/${correspondingListedSecurity.id}`} passHref className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2">
                 <Image
                   src={logoUrl}
                   alt={`${name} logo`}

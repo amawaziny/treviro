@@ -3,14 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { LayoutDashboard, Briefcase, Gem, ScrollText } from 'lucide-react';
-
-const TABS = [
-  { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "Stocks", href: "/investments/stocks", icon: <Briefcase className="h-5 w-5" /> },
-  { label: "Debts", href: "/investments/debt-instruments", icon: <ScrollText className="h-5 w-5" /> },
-  { label: "Golds", href: "/investments/gold", icon: <Gem className="h-5 w-5" /> },
-];
+import { navItems } from '@/lib/navigation';
 
 export function BottomTabBar() {
   const isMobile = useIsMobile();
@@ -32,22 +25,20 @@ export function BottomTabBar() {
           height: TAB_BAR_HEIGHT,
         }}
       >
-        {TABS.map((tab) => (
+        {navItems.slice(0, 4).map((item, idx) => (
           <Link
-            key={tab.label}
-            href={tab.href}
+            key={item.href + idx}
+            href={item.href}
             className={`flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors ${
-              pathname.startsWith(tab.href.split("?")[0])
-                ? resolvedTheme === "dark"
-                  ? "text-green-400"
-                  : "text-[#b6d037]"
-                : resolvedTheme === "dark"
-                ? "text-white"
-                : "text-[#23255a]"
+              pathname.startsWith(item.href.split("?")[0])
+                ? 'text-primary'
+                : 'text-muted-foreground'
             }`}
           >
-            <span className="text-lg">{tab.icon}</span>
-            {tab.label}
+            {item.icon ? (
+              <item.icon className="h-5 w-5 mb-1" />
+            ) : null}
+            <span>{item.mobileTitle || item.title}</span>
           </Link>
         ))}
         <button
@@ -73,12 +64,17 @@ export function BottomTabBar() {
             aria-labelledby="bottom-tab-bar-more-title"
           >
             <h2 id="bottom-tab-bar-more-title" className="text-lg font-bold mb-4 dark:text-white text-[#23255a]">More Menu</h2>
-            {/* Add your extra menu items here */}
             <ul className="space-y-4">
-              <li><Link href="/expenses" className="block">Expenses</Link></li>
-              <li><Link href="/income" className="block">Income</Link></li>
-              <li><Link href="/settings" className="block">Settings</Link></li>
-              {/* Add more as needed */}
+              {navItems.slice(4).map((item, idx) => (
+                <li key={item.href + idx}>
+                  <Link href={item.href} className="flex items-center gap-3 block text-base font-medium">
+                    {item.icon ? (
+                      <item.icon className="h-5 w-5" />
+                    ) : null}
+                    <span>{item.mobileTitle || item.title}</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
             <button className="mt-6 w-full py-2 rounded bg-gray-200 dark:bg-[#23255a] text-[#23255a] dark:text-white font-semibold" onClick={() => setMenuOpen(false)}>Close</button>
           </div>
