@@ -21,23 +21,61 @@ const investmentTypeColors = {
   'Currencies': '#45818e',
 };
 
+import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+
 export function InvestmentBreakdownCards() {
   const { investments } = useInvestments();
   if (!investments || investments.length === 0) {
     return <div className="text-center text-muted-foreground py-8">No investments found.</div>;
   }
+
+  // Helper: parse YYYY-MM-DD to Date
+  const parseDateString = (dateStr?: string): Date | null => {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (isNaN(year) || isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return new Date(year, month - 1, day);
+  };
+
+  // Calculate invested amount for each type
+  const now = new Date();
+  const currentMonthStart = startOfMonth(now);
+  const currentMonthEnd = endOfMonth(now);
+
   // Group by type
   const typeGroups = investments.reduce((acc, inv) => {
     acc[inv.type] = acc[inv.type] || [];
     acc[inv.type].push(inv);
     return acc;
   }, {} as Record<string, typeof investments>);
+
+  // For percent, use the sum of all invested (legacy: full amount for all types)
   const totalInvested = investments.reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Object.entries(typeGroups).map(([type, invs]) => {
-        const invested = invs.reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
+        let invested = 0;
+        if (type === 'Real Estate') {
+          // Only sum paid installments due this month
+          invs.forEach(inv => {
+            const reInv = inv as import('@/lib/types').RealEstateInvestment;
+            if (Array.isArray(reInv.installments)) {
+              (reInv.installments as any[]).forEach((inst: any) => {
+                const dueDate = parseDateString(inst.dueDate);
+                if (
+                  inst.status === 'Paid' &&
+                  dueDate &&
+                  isWithinInterval(dueDate, { start: currentMonthStart, end: currentMonthEnd })
+                ) {
+                  invested += inst.amount || 0;
+                }
+              });
+            }
+          });
+        } else {
+          invested = invs.reduce((sum, inv) => sum + (inv.amountInvested || 0), 0);
+        }
         const current = invs.reduce((sum, inv) => sum + (inv.currentValue ?? inv.amountInvested ?? 0), 0);
         const percent = totalInvested > 0 ? (invested / totalInvested) * 100 : 0;
         const plAmount = current - invested;

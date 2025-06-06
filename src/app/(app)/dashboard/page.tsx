@@ -2,6 +2,7 @@
 "use client"; 
 
 import { InvestmentDistributionChart } from "@/components/dashboard/investment-distribution-chart";
+import { MonthlyInvestmentDistributionChart } from "@/components/dashboard/monthly-investment-distribution-chart";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useInvestments } from '@/hooks/use-investments';
@@ -295,8 +296,9 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-      <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <InvestmentDistributionChart />
+        <MonthlyInvestmentDistributionChart />
       </div>
       <div className="lg:col-span-3">
         <InvestmentBreakdownCards />

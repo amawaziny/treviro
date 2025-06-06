@@ -87,11 +87,9 @@ export default function CashFlowPage() {
   // Get real estate installments due this month with property info
   const realEstateInstallments = useMemo<{ total: number; installments: InstallmentWithProperty[] }>(() => {
     if (!investments) return { total: 0, installments: [] };
-    
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
-    
     const installmentsList = investments
       .filter((inv): inv is RealEstateInvestment => inv.type === 'Real Estate' && inv.installments !== undefined)
       .flatMap((inv: RealEstateInvestment) => {
@@ -102,11 +100,12 @@ export default function CashFlowPage() {
         }));
       })
       .filter((installment: InstallmentWithProperty) => {
-        if (installment.status === 'Paid') return false;
-        
+        // Only include PAID installments due this month
+        if (installment.status !== 'Paid') return false;
         try {
-          const dueDate = new Date(installment.dueDate);
+          const dueDate = parseDateString(installment.dueDate);
           return (
+            dueDate &&
             dueDate.getMonth() === currentMonth &&
             dueDate.getFullYear() === currentYear
           );
@@ -114,7 +113,6 @@ export default function CashFlowPage() {
           return false;
         }
       });
-
     return {
       total: installmentsList.reduce((sum, inst) => sum + (inst.amount || 0), 0),
       installments: installmentsList

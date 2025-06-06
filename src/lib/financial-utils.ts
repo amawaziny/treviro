@@ -100,14 +100,22 @@ export function calculateMonthlyCashFlowSummary({
     }
   });
 
-  // Real estate installments (from investments)
+  // Real estate installments (sum only PAID installments due this month)
   let realEstateInstallmentsMonthly = 0;
   (investments || []).forEach(inv => {
     if (inv.type === 'Real Estate') {
       const reInv = inv as RealEstateInvestment;
-      const date = parseDateString(reInv.purchaseDate);
-      if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
-        realEstateInstallmentsMonthly += reInv.amountInvested || 0;
+      if (Array.isArray(reInv.installments)) {
+        reInv.installments.forEach(inst => {
+          const dueDate = parseDateString(inst.dueDate);
+          if (
+            inst.status === 'Paid' &&
+            dueDate &&
+            isWithinInterval(dueDate, { start: currentMonthStart, end: currentMonthEnd })
+          ) {
+            realEstateInstallmentsMonthly += inst.amount || 0;
+          }
+        });
       }
     }
   });
