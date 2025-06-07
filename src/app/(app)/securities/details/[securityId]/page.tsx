@@ -287,25 +287,29 @@ export default function SecurityDetailPage() {
         </Button>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-4">
+          <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
+            <div className="flex gap-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
                 <AvatarFallback>{security.symbol.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-2xl font-bold">{pageTitle}</CardTitle>
-                <CardDescription>{security.market} - {displayCurrency}</CardDescription>
+                <CardTitle className="text-xl font-bold">{security.symbol}</CardTitle>
+                <CardDescription>
+                  <div className="text-sm font-medium">{security.name}</div>
+                  <div className="text-xs">{security.market} - {displayCurrency}</div>
+                </CardDescription>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">{formatCurrency(currentMarketPrice)}</p>
-              <p className={cn("text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
+              <p className="text-xl font-bold">{formatCurrency(currentMarketPrice)}</p>
+              <p className={cn("text-xs", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
                   {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
               </p>
             </div>
           </CardHeader>
-          <CardContent className="flex justify-end space-x-2 pb-4">
+          {/* Desktop Buttons */}
+          <CardContent className="hidden md:flex justify-end space-x-2 pb-4">
             <Link href={`/investments/add?securityId=${security.id}`} passHref> 
               <Button variant="default">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Buy
@@ -330,6 +334,33 @@ export default function SecurityDetailPage() {
               </>
             )}
           </CardContent>
+
+          {/* Mobile Fixed Action Bar */}
+          <div className="fixed bottom-0 left-0 w-full bg-background border-t z-50 flex md:hidden px-4 py-3 gap-2 justify-between">
+            <Link href={`/investments/add?securityId=${security.id}`} passHref className="flex-1">
+              <Button variant="default" className="w-full">
+                <ShoppingCart className="mr-2 h-4 w-4" /> Buy
+              </Button>
+            </Link>
+            {hasPosition && (
+              <>
+                <Link href={`/investments/sell-stock/${security.id}`} passHref className="flex-1">
+                  <Button variant="outline" className="w-full">
+                    <DollarSign className="mr-2 h-4 w-4" /> Sell
+                  </Button>
+                </Link>
+                <Button variant="secondary" className="flex-1 w-full" onClick={() => setDividendSheetOpen(true)}>
+                  Add Dividend
+                </Button>
+                <AddDividendSheet
+                  open={dividendSheetOpen}
+                  onOpenChange={setDividendSheetOpen}
+                  onSubmit={handleAddDividend}
+                  defaultDate={new Date().toISOString().slice(0, 10)}
+                />
+              </>
+            )}
+          </div>
         </Card>
 
         <Tabs defaultValue="performance" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
