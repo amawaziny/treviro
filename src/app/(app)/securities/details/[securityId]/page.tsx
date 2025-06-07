@@ -364,15 +364,22 @@ export default function SecurityDetailPage() {
         </Card>
 
         <Tabs defaultValue="performance" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 md:w-[500px]">
-            <TabsTrigger value="performance">
+          <TabsList
+            className="
+              flex w-full overflow-x-auto whitespace-nowrap gap-2
+              md:grid md:grid-cols-3 md:w-[500px] md:gap-0
+              px-1
+              scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent
+            "
+          >
+            <TabsTrigger value="performance" className="flex-1 min-w-[120px]">
               <LineChart className="mr-2 h-4 w-4" /> Performance
             </TabsTrigger>
-            <TabsTrigger value="position" disabled={!hasPosition}>
+            <TabsTrigger value="position" className="flex-1 min-w-[120px]" disabled={!hasPosition}>
               <Briefcase className="mr-2 h-4 w-4" /> My Position
             </TabsTrigger>
-            <TabsTrigger value="transactions">
-              <Briefcase className="mr-2 h-4 w-4" /> Transactions
+            <TabsTrigger value="transactions" className="flex-1 min-w-[120px]">
+              <DollarSign className="mr-2 h-4 w-4" /> Transactions
             </TabsTrigger>
           </TabsList>
           <TabsContent value="performance">
