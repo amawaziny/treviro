@@ -168,7 +168,9 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
       {filteredAndTypedSecurities.length > 0 ? (
         <div className="space-y-3">
           {filteredAndTypedSecurities.map(security => (
-            <SecurityListItem key={security.id} security={security} currentTab={currentTab} />
+            <div key={security.id} className="mb-3 last:mb-0">
+              <SecurityListItem security={security} currentTab={currentTab} />
+            </div>
           ))}
         </div>
       ) : (
