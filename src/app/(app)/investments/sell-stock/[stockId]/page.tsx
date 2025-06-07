@@ -39,7 +39,7 @@ export default function SellSecurityPage({ params }: { params: { securityId: str
     <div className="container mx-auto py-8 space-y-6">
        <Button variant="outline" size="sm" asChild className="mb-4">
          {/* Link back to the main securities detail page */}
-        <Link href={`/securities/${securityId}`}> 
+        <Link href={`/securities/details/${securityId}`}> 
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Security Details
         </Link>
       </Button>

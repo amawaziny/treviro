@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, FormProvider, useFormContext } from "react-hook-form";
+import { useForm as useReactHookForm, FormProvider, useFormContext as useReactHookFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import {
@@ -37,6 +37,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useLanguage } from '@/contexts/language-context';
 import { RealEstateForm } from './real-estate-form';
+import { useForm } from '@/contexts/form-context';
 
 const getCurrentDate = () => {
   const date = new Date();
@@ -397,7 +398,7 @@ interface RenderDebtFieldsProps {
   watch: any;
 }
 const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue, watch } = useReactHookFormContext<AddInvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
   console.log("RenderDebtFieldsComponent rendered, watchedDebtSubType:", watchedDebtSubType);
 
@@ -420,16 +421,23 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
         <FormField control={control} name="issuer" render={({ field }) => (
           <FormItem><FormLabel>Issuer / Institution</FormLabel><FormControl><Input placeholder="e.g., US Treasury, XYZ Corp" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
         )} />
-        <FormField control={control} name="interestRate" render={({ field }) => (
-          <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl>
-            <NumericInput
-              placeholder="e.g., 5.5"
-              value={field.value}
-              onChange={field.onChange}
-              allowDecimal={true}
-            />
+        <FormField control={control} name="interestRate" render={({ field }) => {
+          // Convert value to string for the NumericInput component
+          const value = field.value !== undefined ? String(field.value) : '';
+          return (
+            <FormItem><FormLabel>Interest Rate (%)</FormLabel><FormControl>
+              <NumericInput
+                placeholder="e.g., 5.5"
+                value={value}
+                onChange={(val) => {
+                  // Convert back to number when updating the form
+                  field.onChange(val === '' ? undefined : Number(val));
+                }}
+                allowDecimal={true}
+              />
             </FormControl><FormMessage /></FormItem>
-        )} />
+          );
+        }} />
         <FormField control={control} name="maturityDate" render={({ field }) => (
           <FormItem><FormLabel>Maturity Date</FormLabel><FormControl><Input type="date" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -514,7 +522,21 @@ function removeUndefinedFields(obj: any) {
 }
 
 export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add" | "edit"; initialValues?: Partial<AddInvestmentFormValues> }) {
-  // ...existing code
+  const { openForm, closeForm } = useForm();
+  
+  // Open form when component mounts
+  useEffect(() => {
+    openForm();
+    return () => closeForm();
+  }, [openForm, closeForm]);
+  
+  // Use a state to track the current type for initial values
+  const [currentType, setCurrentType] = useState<InvestmentType>(initialValues?.type as InvestmentType || "Stocks");
+
+  const form = useReactHookForm<AddInvestmentFormValues>({
+    resolver: zodResolver(AddInvestmentSchema),
+    defaultValues: mode === "edit" && initialValues ? { ...getInitialFormValues(initialValues.type as InvestmentType), ...initialValues } : getInitialFormValues(currentType),
+  });
 
   const { addInvestment, investments, updateRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
@@ -525,19 +547,10 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
   const preSelectedSecurityId = searchParams.get('securityId');
   const preSelectedInvestmentTypeQueryParam = searchParams.get('type') as InvestmentType | null;
 
-
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<CurrencyFluctuationAnalysisOutput | null>(null);
   const { listedSecurities, isLoading: isLoadingListedSecurities, error: listedSecuritiesError, getListedSecurityById } = useListedSecurities();
   const [preSelectedSecurityDetails, setPreSelectedSecurityDetails] = useState<ListedSecurity | null>(null);
-
-  // Use a state to track the current type for initial values
-  const [currentType, setCurrentType] = useState<InvestmentType>(initialValues?.type as InvestmentType || "Stocks");
-
-  const form = useForm<AddInvestmentFormValues>({
-    resolver: zodResolver(AddInvestmentSchema),
-    defaultValues: mode === "edit" && initialValues ? { ...getInitialFormValues(initialValues.type as InvestmentType), ...initialValues } : getInitialFormValues(currentType),
-  });
 
   const selectedTypeFromFormWatch = form.watch("type");
 
@@ -661,6 +674,9 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
       toast({ title: "Validation Error", description: "Please check the form for errors.", variant: "destructive" });
       return;
     }
+    
+    // Close the form when submitting
+    closeForm();
 
     setIsLoadingAi(false); 
     setAiAnalysisResult(null);

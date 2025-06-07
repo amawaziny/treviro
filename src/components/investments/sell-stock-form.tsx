@@ -115,7 +115,7 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
         title: "Sale Recorded",
         description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityLabel} of ${securityBeingSold.name}.`,
       });
-      router.push(`/securities/${securityId}`);
+      router.push(`/securities/details/${securityId}`);
     } catch (error: any) {
       console.error("Error recording sale:", error);
       toast({
@@ -177,8 +177,8 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
                 <FormControl>
                   <NumericInput
                     placeholder={`e.g., 50 or 10`}
-                    value={field.value}
-                    onChange={field.onChange}
+                    value={field.value?.toString() || ''}
+                    onChange={(value) => field.onChange(Number(value))}
                     allowDecimal={false}
                   />
                 </FormControl>
@@ -196,8 +196,8 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 160.25"
-                    value={field.value}
-                    onChange={field.onChange}
+                    value={field.value?.toString() || ''}
+                    onChange={(value) => field.onChange(Number(value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -226,8 +226,8 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5.00"
-                    value={field.value}
-                    onChange={field.onChange}
+                    value={field.value?.toString() || ''}
+                    onChange={(value) => field.onChange(Number(value))}
                   />
                 </FormControl>
                 <FormDescription>Total fees for this transaction.</FormDescription>

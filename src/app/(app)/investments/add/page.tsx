@@ -73,16 +73,23 @@ function AddInvestmentPageContent() {
 
   return (
     <>
-      {showBackButton && (
-        <div className="mb-6">
-          <Link href={`/securities/${security.id}`} passHref>
+      <div className="mb-6">
+        {showBackButton ? (
+          <Link href={`/securities/details/${security.id}`} passHref>
             <Button variant="outline" size="sm">
               <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
               Back to {security.name}
             </Button>
           </Link>
-        </div>
-      )}
+        ) : (
+          <Link href="/investments" passHref>
+            <Button variant="outline" size="sm">
+              <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+              Back to Investments
+            </Button>
+          </Link>
+        )}
+      </div>
       
       {/* The dynamically imported form, already set up for SSR=false and suspense */}
       <AddInvestmentForm />

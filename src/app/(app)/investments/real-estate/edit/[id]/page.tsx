@@ -4,15 +4,21 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { AddInvestmentForm } from "@/components/investments/add-investment-form";
 import type { RealEstateInvestment } from "@/lib/types";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/language-context";
 
 export default function EditRealEstateInvestmentPage() {
   const router = useRouter();
   const params = useParams();
   const { investments, isLoading } = useInvestments();
   const [investment, setInvestment] = useState<RealEstateInvestment | null>(null);
+  const { language } = useLanguage();
+  
+  const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
 
   useEffect(() => {
     if (!params?.id) return;
@@ -49,7 +55,15 @@ export default function EditRealEstateInvestmentPage() {
   }
 
   return (
-    <div className="container mx-auto mt-8">
+    <div className="container mx-auto py-8">
+      <div className="mb-6">
+        <Link href="/investments/real-estate" passHref>
+          <Button variant="outline" size="sm">
+            <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+            Back to Real Estate
+          </Button>
+        </Link>
+      </div>
       <AddInvestmentForm mode="edit" initialValues={investment} />
     </div>
   );

@@ -13,12 +13,15 @@ import {
   SidebarHeader,
   SidebarInset, // This is the main content area container
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Coins } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/language-context'; // Added import
 import { BottomTabBar } from '@/components/layout/bottom-tab-bar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FormProvider, useForm } from '@/contexts/form-context';
+import { useIsDetailsPage } from '@/hooks/use-route-check';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -44,9 +47,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
+    <FormProvider>
+      <FormAwareLayout isMobile={isMobile} language={language}>
+        {children}
+      </FormAwareLayout>
+    </FormProvider>
+  );
+}
+
+function FormAwareLayout({ 
+  isMobile, 
+  language, 
+  children 
+}: { 
+  isMobile: boolean; 
+  language: string; 
+  children: React.ReactNode 
+}) {
+  const { isFormOpen } = useForm();
+  const { setOpenMobile } = useSidebar(); // This comes from @/components/ui/sidebar
+  const isDetailsPage = useIsDetailsPage();
+  
+  // Close sidebar and bottom tabs when form is open or on details page
+  React.useEffect(() => {
+    if (isFormOpen) {
+      setOpenMobile(false);
+    }
+  }, [isFormOpen, setOpenMobile]);
+
+  return (
     <>
-      {/* Only render Sidebar on desktop/tablet */}
-      {!isMobile && (
+      {/* Only render Sidebar on desktop/tablet and when form is not open */}
+      {!isMobile && !isFormOpen && (
         <Sidebar variant="sidebar" collapsible="icon" side={language === 'ar' ? 'right' : 'left'}>
           <SidebarRail />
           <SidebarHeader className="p-4 justify-center items-center group-data-[collapsible=icon]:justify-start">
@@ -66,7 +98,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
           {children} {/* This is the page-specific content, e.g., DashboardPage */}
         </div>
-        <BottomTabBar />
+        {!isFormOpen && !isDetailsPage && <BottomTabBar />}
       </SidebarInset>
     </>
   );
