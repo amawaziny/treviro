@@ -32,6 +32,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/language-context';
 import { format } from 'date-fns';
+import { useSwipeable } from 'react-swipeable';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 
 export default function SecurityDetailPage() { 
@@ -53,6 +55,8 @@ export default function SecurityDetailPage() {
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(null); 
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [swipedId, setSwipedId] = useState<string | null>(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -218,6 +222,15 @@ export default function SecurityDetailPage() {
       setTransactionToDelete(null);
     }
   };
+
+  const createSwipeHandlers = (id: string) => useSwipeable({
+    onSwipedLeft: () => setSwipedId(id),
+    onSwipedRight: () => setSwipedId(null),
+    trackMouse: false,
+    delta: 10,
+    preventScrollOnSwipe: true,
+    trackTouch: true,
+  });
 
   if (isLoadingListedSecurities || isLoadingInvestments || security === undefined) {
     return (
@@ -466,7 +479,30 @@ export default function SecurityDetailPage() {
                         : (tx as any).totalAmount || 0;
                       
                       return (
-                        <div key={tx.id} className="p-4 hover:bg-muted/50 transition-colors">
+                        <div 
+                          key={tx.id} 
+                          className="relative overflow-hidden"
+                        >
+                          {/* Delete action overlay for mobile swipe */}
+                          <div 
+                            className={cn(
+                              'absolute right-0 top-0 h-full w-20 bg-destructive/90 flex items-center justify-center transition-transform duration-300',
+                              swipedId === tx.id ? 'translate-x-0' : 'translate-x-full'
+                            )}
+                            onClick={() => handleDeleteConfirmation(tx as unknown as Transaction)}
+                          >
+                            <Trash2 className="h-5 w-5 text-white" />
+                          </div>
+                          
+                          {/* Transaction content */}
+                          <div 
+                            {...(!isDesktop && tx.type === 'Sell' ? createSwipeHandlers(tx.id) : {})}
+                            className={cn(
+                              'p-4 hover:bg-muted/50 transition-transform duration-300 bg-background',
+                              swipedId === tx.id ? '-translate-x-20' : 'translate-x-0',
+                              'touch-none'
+                            )}
+                          >
                           <div className="flex justify-between items-start">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
@@ -517,7 +553,7 @@ export default function SecurityDetailPage() {
                                   </Link>
                                 </Button>
                               )}
-                              {isSell && !(tx as any).isInvestmentRecord && (
+                              {isSell && !(tx as any).isInvestmentRecord && isDesktop && (
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
@@ -528,7 +564,13 @@ export default function SecurityDetailPage() {
                                   <span className="sr-only">Delete</span>
                                 </Button>
                               )}
+                              {isSell && !isDesktop && (
+                                <div className="h-6 w-6 flex items-center justify-center opacity-50">
+                                  <span className="text-xs">Swipe left to delete</span>
+                                </div>
+                              )}
                             </div>
+                          </div>
                           </div>
                         </div>
                       );
