@@ -29,7 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog"; // Corrected import
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/language-context';
 import { format } from 'date-fns';
@@ -220,7 +219,6 @@ export default function SecurityDetailPage() {
     }
   };
 
-
   if (isLoadingListedSecurities || isLoadingInvestments || security === undefined) {
     return (
       <div className="flex h-[calc(100vh-8rem)] w-full items-center justify-center">
@@ -387,153 +385,215 @@ export default function SecurityDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Price History</CardTitle>
-                <CardDescription>Daily closing prices from admin-entered data.</CardDescription>
+                <CardDescription>Historical price performance of {security.name}</CardDescription>
               </CardHeader>
               <CardContent className="h-[400px]">
                 <StockDetailChart securityId={security.id} currency={displayCurrency} />
               </CardContent>
             </Card>
           </TabsContent>
+
           <TabsContent value="position">
             <Card>
               <CardHeader>
-                <CardTitle>My Position in {security.name}</CardTitle>
-                <CardDescription>Overview of your investment in this security.</CardDescription>
+                <CardTitle>My Position</CardTitle>
+                <CardDescription>Your current investment in {security.name}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent>
                 {hasPosition ? (
-                  <>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div><span className="font-medium text-muted-foreground">Total {security.securityType === 'Fund' ? 'Units' : 'Shares'}:</span> {totalSharesOwned.toLocaleString()}</div>
-                      <div><span className="font-medium text-muted-foreground">Avg. Purchase Price:</span> {formatCurrency(averagePurchasePrice)}</div>
-                      <div><span className="font-medium text-muted-foreground">Total Cost Basis:</span> {formatCurrency(totalCostBasis)}</div>
-                      <div><span className="font-medium text-muted-foreground">Current Market Price:</span> {formatCurrency(currentMarketPrice)}</div>
-                      <div><span className="font-medium text-muted-foreground">Total Current Value:</span> {formatCurrency(totalInvestmentValue)}</div>
-                    </div>
-                    <Separator />
-                    <div className="flex items-center justify-between pt-2">
-                      <p className="text-lg font-semibold">Profit / Loss:</p>
-                      <div className="text-right">
-                          <p className={cn("text-2xl font-bold", isProfitable ? "text-accent" : "text-destructive")}>
-                              {formatCurrency(PnL)}
-                          </p>
-                          <Badge variant={isProfitable ? 'default' : 'destructive'} 
-                                className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
-                              {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
-                              {PnLPercentage === Infinity ? '∞%' : PnLPercentage.toFixed(2) + '%'}
-                          </Badge>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Shares Owned</p>
+                        <p className="font-medium">{totalSharesOwned.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Avg. Cost</p>
+                        <p className="font-medium">{formatCurrency(averagePurchasePrice)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Cost</p>
+                        <p className="font-medium">{formatCurrency(totalCostBasis)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Market Value</p>
+                        <p className="font-medium">{formatCurrency(totalInvestmentValue)}</p>
                       </div>
                     </div>
-                  </>
+                    <Separator />
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium">Total Return</p>
+                        <div className="text-right">
+                          <p className={cn("text-lg font-bold", isProfitable ? "text-accent" : "text-destructive")}>
+                            {formatCurrency(PnL)}
+                          </p>
+                          <p className={cn("text-sm", isProfitable ? "text-accent" : "text-destructive")}>
+                            {isProfitable ? '+' : ''}{PnLPercentage.toFixed(2)}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <p className="text-muted-foreground">You do not have a position in this security.</p>
+                  <p className="text-muted-foreground text-center py-4">You don't have a position in this security yet.</p>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
+
           <TabsContent value="transactions">
             <Card>
               <CardHeader>
-                <CardTitle>Transaction History for {security.name}</CardTitle>
-                <CardDescription>All buy and sell records for this security.</CardDescription>
+                <CardTitle>Transaction History</CardTitle>
+                <CardDescription>All buy, sell, and dividend records for {security.name}</CardDescription>
               </CardHeader>
-              <CardContent className="overflow-x-auto">
+              <CardContent className="p-0">
                 {securityTransactions.length > 0 ? (
-                  <>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Date</TableHead>
-                          <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Type</TableHead>
-                          <TableHead className="text-right">Shares/Units</TableHead>
-                          <TableHead className="text-right">Price</TableHead>
-                          <TableHead className="text-right">Fees</TableHead>
-                          <TableHead className="text-right">Total Amount</TableHead>
-                          {currentTransactions.some(tx => tx.profitOrLoss !== undefined) && <TableHead className="text-right">P/L</TableHead>}
-                          <TableHead className={cn(language === 'ar' ? 'text-left' : 'text-right')}>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {currentTransactions.map((tx) => {
-                          const isDividend = tx.type === 'dividend';
-                          return (
-                            <TableRow key={tx.id}>
-                              <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{formatDateDisplay(tx.date ?? '')}</TableCell>
-                              <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>
-                                <Badge variant={tx.type === 'Buy' ? 'secondary' : tx.type === 'Sell' ? 'outline' : 'default'} className={tx.type === 'Sell' ? 'border-destructive text-destructive' : ''}>
-                                  {tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+                  <div className="divide-y">
+                    {currentTransactions.map((tx) => {
+                      const isDividend = tx.type === 'dividend';
+                      const isBuy = tx.type === 'Buy';
+                      const isSell = tx.type === 'Sell';
+                      const shares = isDividend 
+                        ? (tx as any).shares 
+                        : (tx as any).shares || (tx as any).numberOfShares || 0;
+                      const price = isDividend 
+                        ? 0 
+                        : (tx as any).price || (tx as any).pricePerShare || 0;
+                      const amount = isDividend 
+                        ? (tx as any).amount || (tx as any).totalAmount || 0 
+                        : (tx as any).totalAmount || 0;
+                      
+                      return (
+                        <div key={tx.id} className="p-4 hover:bg-muted/50 transition-colors">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant={isBuy ? 'secondary' : isSell ? 'destructive' : 'default'}
+                                  className={cn(
+                                    isSell && 'bg-destructive/10 text-destructive hover:bg-destructive/20',
+                                    'text-xs'
+                                  )}
+                                >
+                                  {tx.type}
                                 </Badge>
-                              </TableCell>
-                              {isDividend ? (
-  <>
-    <TableCell className="text-right">{typeof tx.shares === 'number' ? tx.shares.toLocaleString() : '—'}</TableCell>
-    <TableCell className="text-right">—</TableCell>
-    <TableCell className="text-right">—</TableCell>
-    <TableCell className="text-right">{formatCurrency((tx as any).amount ?? (tx as any).totalAmount ?? 0)}</TableCell>
-  </>
-) : (
-  <>
-    <TableCell className="text-right">{typeof (tx as any).shares === 'number' ? (tx as any).shares.toLocaleString() : (typeof (tx as any).numberOfShares === 'number' ? (tx as any).numberOfShares.toLocaleString() : 0)}</TableCell>
-    <TableCell className="text-right">{formatCurrency(typeof (tx as any).price === 'number' ? (tx as any).price : (typeof (tx as any).pricePerShare === 'number' ? (tx as any).pricePerShare : 0))}</TableCell>
-    <TableCell className="text-right">{formatCurrency(typeof (tx as any).fees === 'number' ? (tx as any).fees : 0)}</TableCell>
-    <TableCell className="text-right">{formatCurrency((tx as any).totalAmount ?? 0)}</TableCell>
-  </>
-)}
-                              {currentTransactions.some(t => t.profitOrLoss !== undefined) && (
-                                <TableCell className={cn("text-right", tx.profitOrLoss !== undefined && tx.profitOrLoss < 0 ? 'text-destructive' : tx.profitOrLoss !== undefined && tx.profitOrLoss > 0 ? 'text-accent' : '')}>
-                                  {tx.profitOrLoss !== undefined ? formatCurrency(tx.profitOrLoss ?? 0) : 'N/A'}
-                                </TableCell>
+                                <span className="text-sm text-muted-foreground">
+                                  {formatDateDisplay(tx.date ?? '')}
+                                </span>
+                              </div>
+                              <div className="text-sm font-medium">
+                                {shares.toLocaleString()} {security.securityType === 'Fund' ? 'Units' : 'Shares'}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={cn(
+                                'font-medium',
+                                isBuy ? 'text-foreground' : isSell ? 'text-destructive' : 'text-accent'
+                              )}>
+                                {isBuy ? '-' : ''}{formatCurrency(amount)}
+                              </div>
+                              {!isDividend && (
+                                <div className="text-xs text-muted-foreground">
+                                  {formatCurrency(price)} each
+                                </div>
                               )}
-                              <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>
-                                {tx.isInvestmentRecord && (
-                                  <Button variant="ghost" size="icon" asChild>
-                                    <Link href={`/investments/edit/${tx.id}`}>
-                                      <Edit3 className="h-4 w-4" />
-                                      <span className="sr-only">Edit Purchase</span>
-                                    </Link>
-                                  </Button>
-                                )}
-                                {!tx.isInvestmentRecord && tx.type === 'sell' && (
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" onClick={() => handleDeleteConfirmation(tx as Transaction)}>
-                                      <Trash2 className="h-4 w-4" />
-                                      <span className="sr-only">Delete Sell Transaction</span>
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-2 flex justify-between items-center text-xs text-muted-foreground">
+                            <div>
+                              {!isDividend && (
+                                <span>Fees: {formatCurrency((tx as any).fees || 0)}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {tx.isInvestmentRecord && (
+                                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                                  <Link href={`/investments/edit/${tx.id}`}>
+                                    <Edit3 className="h-3.5 w-3.5" />
+                                    <span className="sr-only">Edit</span>
+                                  </Link>
+                                </Button>
+                              )}
+                              {isSell && !(tx as any).isInvestmentRecord && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-6 w-6 text-destructive/70 hover:text-destructive"
+                                  onClick={() => handleDeleteConfirmation(tx as unknown as Transaction)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <span className="sr-only">Delete</span>
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
-                  <p className="text-muted-foreground py-4 text-center">No transactions recorded for this security yet.</p>
+                  <div className="py-8 text-center">
+                    <p className="text-muted-foreground">No transactions recorded yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">Add your first transaction to get started</p>
+                  </div>
+                )}
+                
+                {/* Pagination */}
+                {securityTransactions.length > itemsPerPage && (
+                  <div className="flex justify-between items-center px-4 py-3 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="gap-1"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>Previous</span>
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {currentPage} of {Math.ceil(securityTransactions.length / itemsPerPage)}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(Math.ceil(securityTransactions.length / itemsPerPage), prev + 1))}
+                      disabled={currentPage >= Math.ceil(securityTransactions.length / itemsPerPage)}
+                      className="gap-1"
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove the record of selling {(('shares' in (transactionToDelete ?? {})) ? (transactionToDelete as any).shares : (transactionToDelete?.numberOfShares ?? 0)).toLocaleString()} {security.securityType === 'Fund' ? 'units' : 'shares'} of {security.name} on {transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ''}.
-              This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteSellTransaction}
-              className={buttonVariants({ variant: "destructive" })}
-            >
-              Delete Transaction
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        
+        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove the record of selling {(('shares' in (transactionToDelete ?? {})) ? (transactionToDelete as any).shares : (transactionToDelete?.numberOfShares ?? 0)).toLocaleString()} {security?.securityType === 'Fund' ? 'units' : 'shares'} of {security?.name} on {transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ''}.
+                This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteSellTransaction}
+                className={buttonVariants({ variant: "destructive" })}
+              >
+                Delete Transaction
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AlertDialog>
   );
