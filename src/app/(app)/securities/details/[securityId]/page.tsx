@@ -395,7 +395,7 @@ export default function SecurityDetailPage() {
             {/* Add more TabsTrigger here for future tabs—they will scroll! */}
           </TabsList>
           <TabsContent value="performance">
-            <Card>
+            <Card className="mb-16 md:mb-4">
               <CardHeader>
                 <CardTitle>Price History</CardTitle>
                 <CardDescription>Historical price performance of {security.name}</CardDescription>
@@ -407,7 +407,7 @@ export default function SecurityDetailPage() {
           </TabsContent>
 
           <TabsContent value="position">
-            <Card>
+            <Card className="mb-16 md:mb-4">
               <CardHeader>
                 <CardTitle>My Position</CardTitle>
                 <CardDescription>Your current investment in {security.name}</CardDescription>
@@ -456,7 +456,7 @@ export default function SecurityDetailPage() {
           </TabsContent>
 
           <TabsContent value="transactions">
-            <Card>
+            <Card className='mb-16 md:mb-4'>
               <CardHeader>
                 <CardTitle>Transaction History</CardTitle>
                 <CardDescription>All buy, sell, and dividend records for {security.name}</CardDescription>
