@@ -132,7 +132,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
           <Search className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ltr:left-3 rtl:right-3" />
           <Input
             type="text"
-            placeholder={`Search ${filterType ? filterType.toLowerCase() : 'securit'}ies by name, symbol, market, or type...`}
+            placeholder={`Search Securities by name, symbol, market, or type...`}
             className="w-full ltr:pl-10 rtl:pr-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -158,7 +158,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
         <Search className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ltr:left-3 rtl:right-3" />
         <Input
           type="text"
-          placeholder={`Search ${filterType ? filterType.toLowerCase() : 'securit'}ies by name, symbol, market, or type...`}
+          placeholder={`Search Securities by name, symbol, market, or type...`}
           className="w-full ltr:pl-10 rtl:pr-10 text-xs sm:text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -175,7 +175,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
         </div>
       ) : (
          <p className="text-center text-muted-foreground py-10">
-            {searchTerm ? `No ${filterType ? filterType.toLowerCase() : ''} securities found matching your search.` : `No ${filterType ? filterType.toLowerCase() : ''} securities available to display.`}
+            {searchTerm ? `No Securities found matching your search.` : `No Securities available to display.`}
          </p>
       )}
     </div>
