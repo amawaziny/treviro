@@ -141,6 +141,7 @@ export interface ListedSecurity {
   market: string;
   securityType?: 'Stock' | 'Fund';
   fundType?: string;
+  description?: string;
 }
 
 export interface StockChartDataPoint {
