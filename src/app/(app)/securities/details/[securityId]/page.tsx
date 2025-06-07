@@ -280,7 +280,7 @@ export default function SecurityDetailPage() {
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
       <div className="container mx-auto py-8 space-y-6">
-        <Button variant="outline" size="sm" asChild className="mb-4">
+        <Button variant="outline" size="sm" asChild className="mb-4 text-xs md:text-sm">
            <Link href={backLinkHref}> 
              <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} /> Back to Explore
            </Link>
@@ -289,21 +289,21 @@ export default function SecurityDetailPage() {
         <Card>
           <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
             <div className="flex gap-4">
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-10 w-10 md:h-12 md:w-12">
                 <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
-                <AvatarFallback>{security.symbol.substring(0, 2)}</AvatarFallback>
+                <AvatarFallback className="text-xs md:text-base">{security.symbol.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-xl font-bold">{security.symbol}</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-base md:text-xl font-bold">{security.symbol}</CardTitle>
+                <CardDescription className="text-xs md:text-sm">
                   <div className="text-sm font-medium">{security.name}</div>
                   <div className="text-xs">{security.market} - {displayCurrency}</div>
                 </CardDescription>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold">{formatCurrency(currentMarketPrice)}</p>
-              <p className={cn("text-xs", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
+              <p className="text-sm md:text-xl font-bold">{formatCurrency(currentMarketPrice)}</p>
+              <p className={cn("text-xs md:text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
                   {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
               </p>
             </div>
@@ -366,21 +366,22 @@ export default function SecurityDetailPage() {
         <Tabs defaultValue="performance" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList
             className="
-              flex w-full overflow-x-auto whitespace-nowrap gap-2
+              flex w-full overflow-x-auto flex-nowrap whitespace-nowrap gap-1
               md:grid md:grid-cols-3 md:w-[500px] md:gap-0
-              px-1
               scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent
             "
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            <TabsTrigger value="performance" className="flex-1 min-w-[120px]">
+            <TabsTrigger value="performance" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base">
               <LineChart className="mr-2 h-4 w-4" /> Performance
             </TabsTrigger>
-            <TabsTrigger value="position" className="flex-1 min-w-[120px]" disabled={!hasPosition}>
+            <TabsTrigger value="position" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base" disabled={!hasPosition}>
               <Briefcase className="mr-2 h-4 w-4" /> My Position
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="flex-1 min-w-[120px]">
+            <TabsTrigger value="transactions" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base">
               <DollarSign className="mr-2 h-4 w-4" /> Transactions
             </TabsTrigger>
+            {/* Add more TabsTrigger here for future tabs—they will scroll! */}
           </TabsList>
           <TabsContent value="performance">
             <Card>
