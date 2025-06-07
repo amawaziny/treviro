@@ -19,7 +19,7 @@ export const navItems: NavItem[] = [
 
   { title: 'Currencies', href: '/investments/currencies', icon: DollarSign },
 
-  { title: 'Cash Flow', href: '/cashflow', icon: CashFlowIcon },
+  { title: 'Cash Flow', href: '/cash-flow', icon: CashFlowIcon },
   { title: 'Expenses', href: '/expenses', icon: TrendingDown },
   { title: 'Income', href: '/income', icon: DollarSign },
   { title: 'Settings', href: '/settings', icon: Settings },
