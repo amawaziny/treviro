@@ -54,7 +54,7 @@ const stringToRequiredPositiveIntegerCoerced = z.preprocess(
 const StockInvestmentSchema = z.object({
   type: z.literal('Stocks'),
   name: z.string().optional(),
-  selectedsecurityId: z.string({ required_error: 'Please select a security.' }).min(1, 'Please select a security.'),
+  selectedSecurityId: z.string({ required_error: 'Please select a security.' }).min(1, 'Please select a security.'),
   numberOfShares: stringToRequiredPositiveIntegerCoerced,
   purchasePricePerShare: stringToRequiredNonNegativeNumberCoerced,
   purchaseFees: stringToOptionalNonNegativeNumberCoerced.default('0').transform(v => parseFloat(String(v) || '0')),

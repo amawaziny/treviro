@@ -30,7 +30,6 @@ import { currencyFluctuationAnalysis } from "@/ai/flows/currency-fluctuation-ana
 import type { CurrencyFluctuationAnalysisInput, CurrencyFluctuationAnalysisOutput } from "@/ai/flows/currency-fluctuation-analysis";
 import React, { useState, useEffect, useCallback } from "react";
 import { CurrencyAnalysisDisplay } from "./currency-analysis-display";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type { ListedSecurity, InvestmentType, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, DebtInstrumentInvestment } from "@/lib/types";
@@ -38,7 +37,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useLanguage } from '@/contexts/language-context';
 import { RealEstateForm } from './real-estate-form';
-import { Controller } from "react-hook-form";
 
 const getCurrentDate = () => {
   const date = new Date();
@@ -49,7 +47,7 @@ const getCurrentDate = () => {
 const initialFormValuesByType: Record<InvestmentType, AddInvestmentFormValues> = {
   "Stocks": {
     type: "Stocks",
-    selectedStockId: "",
+    selectedSecurityId: "",
     numberOfShares: 1, // must be number for Zod transform result
     purchasePricePerShare: 1,
     purchaseFees: 0,
@@ -626,7 +624,8 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
       resetFormWithType("Real Estate");
     } else if (calculatedIsPreSelectedStockMode && preSelectedSecurityId) {
       console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode settings to form.");
-      form.reset({ ...baseResetValues, type: "Stocks", selectedsecurityId: preSelectedSecurityId });
+      resetFormWithType("Stocks");
+      form.setValue("selectedSecurityId", preSelectedSecurityId);
       getListedSecurityById(preSelectedSecurityId).then(security => {
         if (isMounted && security) {
           setPreSelectedSecurityDetails(security);
@@ -689,7 +688,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
 
     // Remove all parsed* variables, use type narrowing instead
     if (finalInvestmentType === "Stocks" && values.type === "Stocks") {
-      const securityToProcessId = values.selectedsecurityId || preSelectedSecurityId;
+      const securityToProcessId = values.selectedSecurityId || preSelectedSecurityId;
       console.log("AddInvestmentForm - onSubmit - Stocks - securityToProcessId:", securityToProcessId);
       console.log("AddInvestmentForm - onSubmit - Stocks - listedSecurities (sample):", listedSecurities.slice(0,3).map(s => ({id: s.id, name: s.name})));
       const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
@@ -956,48 +955,25 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
 
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-            {(isPreSelectedStockMode && isLoadingListedSecurities && !preSelectedSecurityDetails) ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-            {pageTitle}
-        </CardTitle>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold tracking-tight">
+          {(isPreSelectedStockMode && isLoadingListedSecurities && !preSelectedSecurityDetails) ? <Loader2 className="inline-block mr-2 h-5 w-5 animate-spin" /> : null}
+          {pageTitle}
+        </h2>
         {mode === "edit" && effectiveSelectedType === "Real Estate" && (
           <div className="mt-2">
             <Link href="/investments/real-estate" passHref>
-              <Button variant="outline" size="sm">
-                <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+              <Button variant="outline" size="sm" className="text-sm">
+                <BackArrowIcon className={language === 'ar' ? "ml-1 h-3.5 w-3.5" : "mr-1 h-3.5 w-3.5"} />
                 Back to Real Estate
               </Button>
             </Link>
           </div>
         )}
-      </CardHeader>
-      <CardContent>
-        {(isDedicatedDebtMode || isDedicatedGoldMode || isDedicatedCurrencyMode || isDedicatedRealEstateMode || isPreSelectedStockMode) && (
-             <div className="mb-6">
-                <Link href={
-                    isDedicatedDebtMode ? "/investments/debt-instruments" :
-                    isDedicatedGoldMode ? "/investments/gold" :
-                    isDedicatedCurrencyMode ? "/investments/currencies" :
-                    isDedicatedRealEstateMode ? "/investments/real-estate" :
-                    isPreSelectedStockMode && preSelectedSecurityDetails ? `/securities/${preSelectedSecurityDetails.id}` :
-                    "/dashboard" 
-                } passHref>
-                    <Button variant="outline" size="sm">
-                    <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
-                    Back to {
-                        isDedicatedDebtMode ? "Debt Instruments" :
-                        isDedicatedGoldMode ? "Gold" :
-                        isDedicatedCurrencyMode ? "Currencies" :
-                        isDedicatedRealEstateMode ? "Real Estate" :
-                        isPreSelectedStockMode && preSelectedSecurityDetails ? preSelectedSecurityDetails.name :
-                        "Previous Page"
-                    }
-                    </Button>
-                </Link>
-            </div>
-        )}
+      </div>
+      <div className="space-y-4">
+
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -1053,7 +1029,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
               className="w-full md:w-auto"
               disabled={
                 form.formState.isSubmitting || isLoadingAi ||
-                (effectiveSelectedType === "Stocks" && !isPreSelectedStockMode && (isLoadingListedSecurities || !!listedSecuritiesError || !form.getValues("selectedsecurityId"))) ||
+                (effectiveSelectedType === "Stocks" && !isPreSelectedStockMode && (isLoadingListedSecurities || !!listedSecuritiesError || !form.getValues("selectedSecurityId"))) ||
                 (isPreSelectedStockMode && (!preSelectedSecurityDetails || isLoadingListedSecurities))
               }
             >
@@ -1070,7 +1046,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
       {/* End of main form rendering */}
       {/* Debug: show current form values and errors */}
       {/* Debug output removed for Real Estate edit mode as requested */}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
