@@ -12,23 +12,23 @@ import React, { useEffect, useState } from 'react';
 import type { ListedSecurity } from '@/lib/types'; // ListedStock -> ListedSecurity
 
 export default function SellSecurityPage({ params }: { params: { securityId: string } }) { // securityId is securityId
-  const securityId = params.securityId;
+  const stockId = params.securityId;
   const router = useRouter();
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const [securityBeingSold, setSecurityBeingSold] = useState<ListedSecurity | null>(null);
   const [loadingTitle, setLoadingTitle] = useState(true);
 
   useEffect(() => {
-    if (securityId) {
+    if (stockId) {
       setLoadingTitle(true);
-      getListedSecurityById(securityId).then(data => {
+      getListedSecurityById(stockId).then(data => {
         setSecurityBeingSold(data || null);
         setLoadingTitle(false);
       });
     } else {
       setLoadingTitle(false);
     }
-  }, [securityId, getListedSecurityById]);
+  }, [stockId, getListedSecurityById]);
 
   const pageTitle = securityBeingSold 
     ? `Sell: ${securityBeingSold.name} ${securityBeingSold.securityType === 'Fund' ? `(${securityBeingSold.fundType})` : ''}` 
@@ -39,7 +39,7 @@ export default function SellSecurityPage({ params }: { params: { securityId: str
     <div className="container mx-auto py-8 space-y-6">
        <Button variant="outline" size="sm" asChild className="mb-4">
          {/* Link back to the main securities detail page */}
-        <Link href={`/securities/details/${securityId}`}> 
+        <Link href={`/securities/details/${stockId}`}> 
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Security Details
         </Link>
       </Button>
@@ -56,7 +56,7 @@ export default function SellSecurityPage({ params }: { params: { securityId: str
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" /> Loading security details...
              </div>
           ) : (
-            <SellStockForm securityId={securityId} /> // securityId prop for SellStockForm now means securityId
+            <SellStockForm securityId={stockId} /> // securityId prop for SellStockForm now means securityId
           )}
         </CardContent>
       </Card>
