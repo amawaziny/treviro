@@ -38,9 +38,11 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
             data-ai-hint={security.securityType === 'Fund' ? "fund logo" : "company logo"}
           />
           <div className="truncate">
-            <p className="font-semibold text-sm text-foreground truncate">{security.name}</p>
+            <p className="font-semibold text-sm text-foreground truncate">{security.symbol}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {security.symbol} - {security.market.toUpperCase()}
+              {security.name.length > 30 ? `${security.name.substring(0, 27)}...` : security.name}
+              <span className="mx-1">•</span>
+              {security.market.toUpperCase()}
               {security.securityType === 'Fund' && security.fundType && (
                 <span className="ml-1 text-primary">({security.fundType})</span>
               )}
