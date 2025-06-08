@@ -30,15 +30,18 @@ export function FormProvider({ children }: { children: ReactNode }) {
 
   const openForm = useCallback(() => {
     setIsFormOpen(true);
+    // When form opens, ensure nav controls are hidden
+    setHeaderProps(prev => ({
+      ...prev,
+      showNavControls: false
+    }));
   }, []);
 
   const closeForm = useCallback(() => {
     setIsFormOpen(false);
-    // Reset header props when form is closed
+    // When form closes, show nav controls again
     setHeaderProps(prev => ({
       ...prev,
-      showBackButton: false,
-      title: '',
       showNavControls: true
     }));
   }, []);

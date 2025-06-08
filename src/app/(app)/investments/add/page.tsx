@@ -52,13 +52,16 @@ function AddInvestmentPageContent() {
   const searchParams = useSearchParams();
   const securityId = searchParams.get('securityId');
   const { language } = useLanguage();
-  const { setHeaderProps } = useForm();
+  const { setHeaderProps, openForm, closeForm } = useForm();
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const [security, setSecurity] = useState<ListedSecurity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Set up header props effect based on investment type
   useEffect(() => {
+    // Open form when component mounts
+    openForm();
+    
     // Get the investment type from URL parameters
     const investmentType = searchParams.get('type') || 'investment';
     
@@ -108,16 +111,16 @@ function AddInvestmentPageContent() {
     setHeaderProps({
       showBackButton: true,
       showNavControls: false,
-      ...config
+      title: config.title,
+      backHref: config.backHref,
+      backLabel: config.backLabel
     });
 
     // Clean up when component unmounts
     return () => {
-      setHeaderProps({
-        showBackButton: false
-      });
+      closeForm();
     };
-  }, [searchParams.toString(), setHeaderProps]);
+  }, [searchParams.toString(), setHeaderProps, openForm, closeForm]);
 
   // Fetch security data
   useEffect(() => {
