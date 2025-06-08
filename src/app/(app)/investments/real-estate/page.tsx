@@ -131,8 +131,8 @@ export default function MyRealEstatePage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-56px)] pb-4">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Real Estate</h1>
-        <p className="text-muted-foreground">Overview of your direct real estate and real estate fund investments.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Real Estate</h1>
+        <p className="text-muted-foreground text-sm">Overview of your direct real estate and real estate fund investments.</p>
       </div>
       <Separator />
 

@@ -186,8 +186,8 @@ export default function MyGoldPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-56px)] pb-4">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Gold</h1>
-        <p className="text-muted-foreground">Overview of your direct gold and gold fund investments.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Gold</h1>
+        <p className="text-muted-foreground text-sm">Overview of your direct gold and gold fund investments.</p>
       </div>
       <Separator />
 

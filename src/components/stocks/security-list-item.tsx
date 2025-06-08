@@ -42,7 +42,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm text-foreground">{security.symbol}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {security.name.length > 25 ? `${security.name.substring(0, 22)}...` : security.name}
+              {security.name.length > 15 ? `${security.name.substring(0, 15)}...` : security.name}
               <span className="mx-1">•</span>
               {security.market.toUpperCase()}
               {security.securityType === 'Fund' && security.fundType && (

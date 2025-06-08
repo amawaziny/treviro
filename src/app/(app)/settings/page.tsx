@@ -69,8 +69,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-muted-foreground">Adjust your financial settings, such as your financial year start month and other preferences.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Settings</h1>
+        <p className="text-muted-foreground text-sm">Adjust your financial settings, such as your financial year start month and other preferences.</p>
       </div>
       <Separator />
 

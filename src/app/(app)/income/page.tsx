@@ -64,8 +64,8 @@ export default function IncomePage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Income</h1>
-        <p className="text-muted-foreground">Record and review your income sources, including salaries, gifts, and other earnings.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Income</h1>
+        <p className="text-muted-foreground text-sm">Record and review your income sources, including salaries, gifts, and other earnings.</p>
       </div>
       <Separator />
 
