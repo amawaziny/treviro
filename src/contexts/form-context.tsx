@@ -4,6 +4,8 @@ interface HeaderProps {
   showBackButton?: boolean;
   backHref?: string;
   backLabel?: string;
+  title?: string;
+  showNavControls?: boolean;
 }
 
 interface FormContextType {
@@ -21,7 +23,9 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [headerProps, setHeaderProps] = useState<HeaderProps>({
     showBackButton: false,
     backHref: '/',
-    backLabel: 'Back'
+    backLabel: 'Back',
+    title: '',
+    showNavControls: true
   });
 
   const openForm = useCallback(() => {

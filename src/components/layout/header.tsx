@@ -14,21 +14,42 @@ export function Header() {
   const isMobile = useIsMobile();
   const { language } = useLanguage();
   const { headerProps } = useForm();
-  const { showBackButton = false, backHref = '/dashboard', backLabel = 'Back' } = headerProps;
+  interface HeaderProps {
+    showBackButton?: boolean;
+    backHref?: string;
+    backLabel?: string;
+    title?: string;
+    showNavControls?: boolean;
+  }
+  const { 
+    showBackButton = false, 
+    backHref = '/dashboard', 
+    backLabel = 'Back',
+    title = '',
+    showNavControls = true
+  } = headerProps;
   const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
   
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-        <div className="flex items-center gap-2">
-          {!isMobile && <SidebarTrigger className="md:hidden" />}
+        <div className="flex items-center gap-4">
+          {!isMobile && !showBackButton && <SidebarTrigger className="md:hidden" />}
+          
           {showBackButton ? (
-            <Link href={backHref} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
-                <BackArrowIcon className="h-5 w-5" />
-                <span className="sr-only">{backLabel}</span>
-              </Button>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href={backHref} className="flex items-center hover:opacity-80 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
+                  <BackArrowIcon className="h-5 w-5" />
+                  <span className="sr-only">{backLabel}</span>
+                </Button>
+              </Link>
+              {title && (
+                <h1 className="text-xl font-semibold text-foreground">
+                  {title}
+                </h1>
+              )}
+            </div>
           ) : (
             <Link href="/dashboard" className="flex items-center space-x-2">
               <Coins className="h-7 w-7 text-primary" />
@@ -36,13 +57,15 @@ export function Header() {
             </Link>
           )}
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-1">
-            <LanguageToggle /> {/* Added LanguageToggle component */}
-            <ThemeToggle />
-            <UserNav />
-          </nav>
-        </div>
+        {showNavControls && (
+          <div className="flex flex-1 items-center justify-end space-x-4">
+            <nav className="flex items-center space-x-1">
+              <LanguageToggle />
+              <ThemeToggle />
+              <UserNav />
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

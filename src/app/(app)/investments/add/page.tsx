@@ -38,7 +38,7 @@ const AddInvestmentForm = dynamic(
 
 export default function AddInvestmentPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col">
       <Suspense fallback={<PageLoadingFallback />}>
         <AddInvestmentPageContent />
       </Suspense>
@@ -62,7 +62,9 @@ function AddInvestmentPageContent() {
     setHeaderProps({
       showBackButton: true,
       backHref: securityId && security ? `/securities/details/${security.id}` : '/investments',
-      backLabel: security ? `Back to ${security.name}` : 'Back to Investments'
+      backLabel: security ? `Back to ${security.name}` : 'Back to Investments',
+      title: 'Buy Debt Instrument',
+      showNavControls: false
     });
 
     // Clean up when component unmounts

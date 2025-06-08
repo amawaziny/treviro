@@ -971,23 +971,17 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
 
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight">
-          {(isPreSelectedStockMode && isLoadingListedSecurities && !preSelectedSecurityDetails) ? <Loader2 className="inline-block mr-2 h-5 w-5 animate-spin" /> : null}
-          {pageTitle}
-        </h2>
-        {mode === "edit" && effectiveSelectedType === "Real Estate" && (
-          <div className="mt-2">
-            <Link href="/investments/real-estate" passHref>
-              <Button variant="outline" size="sm" className="text-sm">
-                <BackArrowIcon className={language === 'ar' ? "ml-1 h-3.5 w-3.5" : "mr-1 h-3.5 w-3.5"} />
-                Back to Real Estate
-              </Button>
-            </Link>
-          </div>
-        )}
-      </div>
+    <div className="pt-2">
+      {mode === "edit" && effectiveSelectedType === "Real Estate" && (
+        <div className="mb-4">
+          <Link href="/investments/real-estate" passHref>
+            <Button variant="outline" size="sm" className="text-sm">
+              <BackArrowIcon className={language === 'ar' ? "ml-1 h-3.5 w-3.5" : "mr-1 h-3.5 w-3.5"} />
+              Back to Real Estate
+            </Button>
+          </Link>
+        </div>
+      )}
       <div className="space-y-4">
 
 
