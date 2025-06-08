@@ -36,8 +36,19 @@ const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "out
 };
 
 // Helper for mobile: 6 digits for avg cost and market price, but not for invested amount or P/L
-const formatCurrencyForGoldMobile = (value: number, currencyCode: string, digits = 2) => {
+const formatCurrencyForGoldMobile = (value: number, currencyCode: string, digits = 2, isMobile = true) => {
   if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0.00`;
+  
+  // For mobile view, format with K/M suffixes
+  if (isMobile && typeof window !== 'undefined' && window.innerWidth < 768) {
+    if (Math.abs(value) >= 1000000) {
+      return `${currencyCode} ${(value / 1000000).toFixed(1)}M`;
+    } else if (Math.abs(value) >= 1000) {
+      return `${currencyCode} ${(value / 1000).toFixed(1)}K`;
+    }
+  }
+  
+  // Default formatting for desktop or small numbers
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,
