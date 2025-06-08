@@ -3,26 +3,11 @@
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LineChart, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
-import type { ListedSecurity, StockInvestment } from '@/lib/types';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { formatNumberWithSuffix } from '@/lib/utils';
-import { useInvestments } from '@/hooks/use-investments';
-import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 
 interface MyStockListItemProps {
@@ -159,7 +144,7 @@ export function MyStockListItem({
             <span className="md:hidden ml-1">{formatCurrencyWithSuffixForMobile(averagePurchasePrice, currency)}</span>
             <span className="hidden md:inline ml-1">{formattedAvgPrice}</span>
         </p>
-        <p>Current Market Price: 
+        <p className="text-end">Current Market Price: 
            {currentMarketPrice !== undefined ? (
              <>
                <span className="md:hidden ml-1">{formatCurrencyWithSuffixForMobile(currentMarketPrice, currency)}</span>
