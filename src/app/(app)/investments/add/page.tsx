@@ -61,8 +61,8 @@ function AddInvestmentPageContent() {
   useEffect(() => {
     setHeaderProps({
       showBackButton: true,
-      backHref: securityId && security ? `/securities/details/${security.id}` : '/investments',
-      backLabel: security ? `Back to ${security.name}` : 'Back to Investments',
+      backHref: '/investments/debt-instruments',
+      backLabel: 'Back to Debt Instruments',
       title: 'Buy Debt Instrument',
       showNavControls: false
     });
