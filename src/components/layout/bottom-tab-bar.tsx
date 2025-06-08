@@ -67,7 +67,11 @@ export function BottomTabBar() {
             <ul className="space-y-4">
               {navItems.slice(4).map((item, idx) => (
                 <li key={item.href + idx}>
-                  <Link href={item.href} className="flex items-center gap-3 block text-base font-medium">
+                  <Link 
+                    href={item.href} 
+                    className="flex items-center gap-3 block text-base font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     {item.icon ? (
                       <item.icon className="h-5 w-5" />
                     ) : null}

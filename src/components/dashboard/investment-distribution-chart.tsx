@@ -81,7 +81,7 @@ export function InvestmentDistributionChart() {
         <CardTitle className={resolvedTheme === 'dark' ? 'text-white text-lg font-bold' : 'text-[#23255a] text-lg font-bold'}>Investment Distribution</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative mx-auto h-[300px] max-w-full overflow-x-auto">
+        <div className="relative mx-auto h-[300px] max-w-full overflow-hidden">
           <ResponsivePie
             data={chartData}
             margin={{ top: 20, right: 10, bottom: 10, left: 10 }}
