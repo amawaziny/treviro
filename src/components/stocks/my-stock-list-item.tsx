@@ -63,7 +63,7 @@ export function MyStockListItem({
     }).format(value);
   };
   
-   const formatCurrencyWithSuffixForMobile = (value: number, currencyCode: string) => {
+  const formatCurrencyWithSuffixForMobile = (value: number, currencyCode: string) => {
     if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0`;
     const formattedNumber = formatNumberWithSuffix(value);
     // Prepend currency code and handle potential negative sign from suffix formatting
@@ -78,40 +78,47 @@ export function MyStockListItem({
   
   const sharesLabel = isFund ? 'Units' : 'Shares';
 
+  const renderStockInfo = () => (
+    <div className="truncate">
+      <div className="flex items-baseline gap-2">
+        <p className="text-md font-bold truncate">{symbol}</p>
+        {isFund && fundType && <span className="text-sm text-primary whitespace-nowrap">({fundType})</span>}
+      </div>
+      <p className="text-xs text-muted-foreground">{sharesLabel}: {totalShares.toLocaleString()}</p>
+    </div>
+  );
 
   const cardContent = (
     <CardContent className="pt-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-grow min-w-0">
           {correspondingListedSecurity ? (
-             <Link href={`/securities/details/${correspondingListedSecurity.id}`} passHref className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2">
-                <Image
-                  src={logoUrl}
-                  alt={`${name} logo`}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                  data-ai-hint={isFund ? "logo fund" : "logo company"}
-                />
-                <div className="truncate">
-                  <p className="text-lg font-semibold truncate">{name} {isFund && fundType ? <span className="text-sm text-primary">({fundType})</span> : ''}</p>
-                  <p className="text-xs text-muted-foreground truncate">{symbol} - {sharesLabel}: {totalShares.toLocaleString()}</p>
-                </div>
-             </Link>
+            <Link 
+              href={`/securities/details/${correspondingListedSecurity.id}`} 
+              passHref 
+              className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2"
+            >
+              <Image
+                src={logoUrl}
+                alt={`${name} logo`}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+                data-ai-hint={isFund ? "logo fund" : "logo company"}
+              />
+              {renderStockInfo()}
+            </Link>
           ) : (
-             <div className="flex items-center gap-3 flex-grow min-w-0 p-2 rounded-md -ml-2">
-                <Image
-                  src={logoUrl}
-                  alt={`${name} logo`}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                  data-ai-hint={isFund ? "logo fund" : "logo company"}
-                />
-                <div className="truncate">
-                  <p className="text-lg font-semibold truncate">{name} {isFund && fundType ? <span className="text-sm text-primary">({fundType})</span> : ''}</p>
-                  <p className="text-xs text-muted-foreground truncate">{symbol} - {sharesLabel}: {totalShares.toLocaleString()}</p>
-                </div>
+            <div className="flex items-center gap-3 flex-grow min-w-0 p-2 rounded-md -ml-2">
+              <Image
+                src={logoUrl}
+                alt={`${name} logo`}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+                data-ai-hint={isFund ? "logo fund" : "logo company"}
+              />
+              {renderStockInfo()}
             </div>
           )}
         </div>
@@ -124,11 +131,16 @@ export function MyStockListItem({
               <p className={`text-lg font-bold ${isProfitable ? 'text-accent' : 'text-destructive'} md:hidden`}>
                 {formatCurrencyWithSuffixForMobile(profitLoss, currency)}
               </p>
-               <p className={`text-lg font-bold ${isProfitable ? 'text-accent' : 'text-destructive'} hidden md:block`}>
+              <p className={`text-lg font-bold ${isProfitable ? 'text-accent' : 'text-destructive'} hidden md:block`}>
                 {formattedProfitLoss}
               </p>
-              <Badge variant={isProfitable ? 'default' : 'destructive'} 
-                     className={cn(isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", "text-xs")}>
+              <Badge 
+                variant={isProfitable ? 'default' : 'destructive'} 
+                className={cn(
+                  isProfitable ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground", 
+                  "text-xs"
+                )}
+              >
                 {isProfitable ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
                 {profitLossPercent === Infinity ? '∞%' : profitLossPercent.toFixed(2) + '%'}
               </Badge>
@@ -137,7 +149,6 @@ export function MyStockListItem({
             <p className="text-sm text-muted-foreground">Market N/A</p>
           )}
         </div>
- 
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>Avg. Purchase Price: 
@@ -156,8 +167,6 @@ export function MyStockListItem({
     </CardContent>
   );
 
-
-  // The Card itself is no longer a Link, the link is now within the content if security is found.
   return (
     <Card className="hover:shadow-md transition-shadow">
       {cardContent}
