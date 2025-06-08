@@ -1,15 +1,28 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
+interface HeaderProps {
+  showBackButton?: boolean;
+  backHref?: string;
+  backLabel?: string;
+}
+
 interface FormContextType {
   isFormOpen: boolean;
   openForm: () => void;
   closeForm: () => void;
+  headerProps: HeaderProps;
+  setHeaderProps: (props: HeaderProps) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export function FormProvider({ children }: { children: ReactNode }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [headerProps, setHeaderProps] = useState<HeaderProps>({
+    showBackButton: false,
+    backHref: '/',
+    backLabel: 'Back'
+  });
 
   const openForm = useCallback(() => {
     setIsFormOpen(true);
@@ -19,8 +32,21 @@ export function FormProvider({ children }: { children: ReactNode }) {
     setIsFormOpen(false);
   }, []);
 
+  const updateHeaderProps = useCallback((props: HeaderProps) => {
+    setHeaderProps(prev => ({
+      ...prev,
+      ...props
+    }));
+  }, []);
+
   return (
-    <FormContext.Provider value={{ isFormOpen, openForm, closeForm }}>
+    <FormContext.Provider value={{ 
+      isFormOpen, 
+      openForm, 
+      closeForm, 
+      headerProps,
+      setHeaderProps: updateHeaderProps 
+    }}>
       {children}
     </FormContext.Provider>
   );

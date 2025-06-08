@@ -9,7 +9,7 @@ import { useListedSecurities } from '@/hooks/use-listed-securities'; // Import h
 import type { ListedSecurity } from '@/lib/types'; // Import type
 import { useLanguage } from '@/contexts/language-context'; // Import hook
 
-import { Button } from '@/components/ui/button';
+import { useForm } from '@/contexts/form-context';
 
 // Define a simple loading fallback for the Suspense boundary
 function PageLoadingFallback() {
@@ -38,8 +38,7 @@ const AddInvestmentForm = dynamic(
 
 export default function AddInvestmentPage() {
   return (
-    <div className="container mx-auto py-8">
-      {/* Wrap the content that uses useSearchParams in Suspense */}
+    <div className="min-h-screen flex flex-col">
       <Suspense fallback={<PageLoadingFallback />}>
         <AddInvestmentPageContent />
       </Suspense>
@@ -49,50 +48,58 @@ export default function AddInvestmentPage() {
 
 // Extract the component logic that uses hooks into a new component
 function AddInvestmentPageContent() {
+  // All hooks must be called at the top level, before any conditional returns
   const searchParams = useSearchParams();
   const securityId = searchParams.get('securityId');
   const { language } = useLanguage();
-
+  const { setHeaderProps } = useForm();
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const [security, setSecurity] = useState<ListedSecurity | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Set up header props effect
   useEffect(() => {
-    if (securityId) {
-      // Assuming getListedSecurityById can handle both stock and fund IDs if they share a namespace
-      // If not, additional logic might be needed based on security type from URL if available
-      getListedSecurityById(securityId).then(data => {
-        setSecurity(data || null);
+    setHeaderProps({
+      showBackButton: true,
+      backHref: securityId && security ? `/securities/details/${security.id}` : '/investments',
+      backLabel: security ? `Back to ${security.name}` : 'Back to Investments'
+    });
+
+    // Clean up when component unmounts
+    return () => {
+      setHeaderProps({
+        showBackButton: false
       });
-    }
+    };
+  }, [securityId, security, setHeaderProps]);
+
+  // Fetch security data
+  useEffect(() => {
+    const fetchSecurity = async () => {
+      if (securityId) {
+        try {
+          const data = await getListedSecurityById(securityId);
+          setSecurity(data || null);
+        } catch (error) {
+          console.error('Error fetching security:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSecurity();
   }, [securityId, getListedSecurityById]);
 
-  const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
-
-  // Only show the back button if we have a securityId and the security details are loaded
-  const showBackButton = securityId && security && !isLoadingListedSecurities;
+  if (isLoading) {
+    return <PageLoadingFallback />;
+  }
 
   return (
-    <>
-      <div className="mb-6">
-        {showBackButton ? (
-          <Link href={`/securities/details/${security.id}`} passHref>
-            <Button variant="outline" size="sm">
-              <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
-              Back to {security.name}
-            </Button>
-          </Link>
-        ) : (
-          <Link href="/investments" passHref>
-            <Button variant="outline" size="sm">
-              <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
-              Back to Investments
-            </Button>
-          </Link>
-        )}
-      </div>
-      
-      {/* The dynamically imported form, already set up for SSR=false and suspense */}
+    <div className="container mx-auto py-8 flex-1">
       <AddInvestmentForm />
-    </>
+    </div>
   );
 }

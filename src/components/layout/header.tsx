@@ -5,19 +5,36 @@ import { UserNav } from '@/components/auth/user-nav';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { LanguageToggle } from './language-toggle'; // Added import
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ArrowLeft, ArrowRight } from 'lucide-react'; // Added import
+import { Button } from '@/components/ui/button'; // Added import
+import { useLanguage } from '@/contexts/language-context';
+import { useForm } from '@/contexts/form-context';
 
 export function Header() {
   const isMobile = useIsMobile();
+  const { language } = useLanguage();
+  const { headerProps } = useForm();
+  const { showBackButton = false, backHref = '/dashboard', backLabel = 'Back' } = headerProps;
+  const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
+  
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex items-center gap-2">
-          {/* Hide SidebarTrigger on mobile if sidebar is removed */}
           {!isMobile && <SidebarTrigger className="md:hidden" />}
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <Coins className="h-7 w-7 text-primary" />
-            <span className="text-2xl font-bold text-primary">Treviro</span>
-          </Link>
+          {showBackButton ? (
+            <Link href={backHref} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
+                <BackArrowIcon className="h-5 w-5" />
+                <span className="sr-only">{backLabel}</span>
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/dashboard" className="flex items-center space-x-2">
+              <Coins className="h-7 w-7 text-primary" />
+              <span className="text-2xl font-bold text-primary">Treviro</span>
+            </Link>
+          )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-1">
