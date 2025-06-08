@@ -479,16 +479,21 @@ export default function SecurityDetailPage() {
                         ? (tx as any).amount || (tx as any).totalAmount || 0 
                         : (tx as any).totalAmount || 0;
                       
+                      // Create swipe handlers for mobile delete
+                      const swipeHandlers = !isDesktop && tx.type === 'Sell' ? createSwipeHandlers(tx.id) : {};
+                      
                       return (
                         <div 
                           key={tx.id} 
                           className="relative overflow-hidden"
+                          {...swipeHandlers}
                         >
                           {/* Delete action overlay for mobile swipe */}
                           <div 
                             className={cn(
                               'absolute right-0 top-0 h-full w-20 bg-destructive/90 flex items-center justify-center transition-transform duration-300',
-                              swipedId === tx.id ? 'translate-x-0' : 'translate-x-full'
+                              swipedId === tx.id ? 'translate-x-0' : 'translate-x-full',
+                              'z-10' // Ensure delete button is above other content
                             )}
                             onClick={() => handleDeleteConfirmation(tx as unknown as Transaction)}
                           >
@@ -497,11 +502,10 @@ export default function SecurityDetailPage() {
                           
                           {/* Transaction content */}
                           <div 
-                            {...(!isDesktop && tx.type === 'Sell' ? createSwipeHandlers(tx.id) : {})}
                             className={cn(
-                              'p-4 hover:bg-muted/50 transition-transform duration-300 bg-background',
+                              'p-4 hover:bg-muted/50 transition-transform duration-300 bg-background relative z-0',
                               swipedId === tx.id ? '-translate-x-20' : 'translate-x-0',
-                              'touch-none'
+                              'touch-pan-y select-none' // Better touch handling
                             )}
                           >
                           <div className="flex justify-between items-start">
