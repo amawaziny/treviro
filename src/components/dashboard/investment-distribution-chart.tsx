@@ -84,19 +84,19 @@ export function InvestmentDistributionChart() {
         <div className="relative mx-auto h-[300px] max-w-full overflow-hidden">
           <ResponsivePie
             data={chartData}
-            margin={{ top: 20, right: 10, bottom: 10, left: 10 }}
+            margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
             innerRadius={0.5}
             padAngle={4}
             cornerRadius={8}
-            activeOuterRadiusOffset={5}
+            activeOuterRadiusOffset={3}
             colors={chartData.map(d => d.color)}
             borderWidth={4}
             enableArcLabels={true}
             enableArcLinkLabels={true}
             arcLinkLabelsTextColor={d => d.color}
-            arcLinkLabelsSkipAngle={3}
-            arcLinkLabelsDiagonalLength={10}
-            arcLinkLabelsStraightLength={10}
+            arcLinkLabelsSkipAngle={2}
+            arcLinkLabelsDiagonalLength={5}
+            arcLinkLabelsStraightLength={5}
             arcLinkLabelsThickness={4}
             arcLinkLabelsColor={{ from: 'color' }}
             arcLinkLabel={d => `${d.label} ${((d.value/total)*100).toFixed(0)}%`}
@@ -110,7 +110,7 @@ export function InvestmentDistributionChart() {
             theme={{
               labels: {
                 text: {
-                  fontSize: 14,
+                  fontSize: 11,
                   fontWeight: 700,
                   fill: resolvedTheme === 'dark' ? '#fff' : '#23255a',
                   textShadow: resolvedTheme === 'dark' ? '0 2px 8px #181c2a' : '0 2px 8px #fff',
@@ -130,7 +130,7 @@ export function InvestmentDistributionChart() {
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
-                      style={{ fontSize: 28, fontWeight: 700, fill: resolvedTheme === 'dark' ? '#fff' : '#23255a' }}
+                      style={{ fontSize: 24, fontWeight: 700, fill: resolvedTheme === 'dark' ? '#fff' : '#23255a' }}
                     >
                       {formatNumberWithSuffix(total)}
                     </text>
@@ -138,7 +138,7 @@ export function InvestmentDistributionChart() {
                       y={24}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      style={{ fontSize: 14, fill: resolvedTheme === 'dark' ? '#fff' : '#23255a', opacity: 0.7 }}
+                      style={{ fontSize: 12, fill: resolvedTheme === 'dark' ? '#fff' : '#23255a', opacity: 0.7 }}
                     >
                       Total
                     </text>
@@ -149,12 +149,12 @@ export function InvestmentDistributionChart() {
           />
         </div>
         {/* Custom legend below chart */}
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4">
+        <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 mt-2 sm:mt-4 px-2">
           {chartData.map((d, i) => (
-            <div key={d.id} className="flex items-center gap-2 min-w-[110px]">
-              <span className="inline-block w-3 h-3 rounded-full" style={{ background: d.color }} />
-              <span className={resolvedTheme === 'dark' ? 'font-semibold text-white' : 'font-semibold text-[#23255a]'}>{d.label}:</span>
-              <span className={resolvedTheme === 'dark' ? 'font-semibold text-white' : 'font-semibold text-[#23255a]'}>{((d.value/total)*100).toFixed(0)}%</span>
+            <div key={d.id} className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+              <span className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0" style={{ background: d.color }} />
+              <span className={resolvedTheme === 'dark' ? 'font-medium text-white' : 'font-medium text-[#23255a] truncate max-w-[70px] sm:max-w-none'}>{d.label}:</span>
+              <span className={resolvedTheme === 'dark' ? 'font-medium text-white' : 'font-medium text-[#23255a]'}>{((d.value/total)*100).toFixed(0)}%</span>
             </div>
           ))}
         </div>
