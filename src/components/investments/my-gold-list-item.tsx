@@ -155,9 +155,13 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
               <Gem className="h-10 w-10 text-amber-400" /> // Generic icon for physical gold
             )}
             <div className="truncate">
-              <p className="text-lg font-semibold truncate">{displayName}</p>
+              <p className="text-lg font-semibold truncate">
+                {itemType === 'fund' ? 
+                  (fundDetails?.symbol || displayName) : 
+                  (physicalGoldType || displayName)
+                }
+              </p>
               <p className="text-xs text-muted-foreground truncate">
-                {itemType === 'fund' && fundDetails?.symbol ? `${fundDetails.symbol} - ` : ''}
                 {quantityLabel}: {totalQuantity.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits: 2})}
               </p>
             </div>
@@ -167,9 +171,8 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
         <div className="text-right pl-2">
           {currentMarketPrice !== undefined ? (
             <div className="flex flex-col items-end">
-              <p className={cn("font-bold", 
-                              isProfitable ? 'text-accent' : 'text-destructive',
-                              "text-lg md:text-xl")}>
+              <p className={cn("font-bold text-base", 
+                              isProfitable ? 'text-accent' : 'text-destructive')}>
                   {formatCurrencyForGoldMobile(profitLoss, currency)}
               </p>
 
@@ -206,14 +209,12 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
+      <div className="md:mx-14 mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>Avg. Cost: 
-          <span className="md:hidden">{formatCurrencyForGoldMobile(averagePurchasePrice, currency, 6)}</span>
-          <span className="hidden md:inline">{formattedAvgPrice}</span>
+          <span> {formatCurrencyForGoldMobile(averagePurchasePrice, currency, 6)}</span>
         </p>
-        <p>Market Price: 
-          <span className="md:hidden">{formatCurrencyForGoldMobile(currentMarketPrice || 0, currency, 6)}</span>
-          <span className="hidden md:inline">{formattedMarketPrice}</span>
+        <p className="text-end">Market Price: 
+          <span> {formatCurrencyForGoldMobile(currentMarketPrice || 0, currency, 6)}</span>
         </p>
       </div>
     </CardContent>
