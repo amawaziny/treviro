@@ -412,7 +412,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
   }, [watchedDebtSubType, setValue, watch]);
 
   return (
-    <div className="space-y-6 mt-6 p-6 border rounded-md">
+    <div className="space-y-6 mt-0 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">Debt Instrument Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField control={control} name="debtSubType" render={({ field }) => (
