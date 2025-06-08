@@ -197,30 +197,8 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
             <p className="text-sm text-muted-foreground">Market N/A</p>
           )}
         </div>
-        <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="ml-2 text-muted-foreground hover:text-destructive">
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Remove {displayName}</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action will permanently remove all your investment records for {displayName}. This cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRemove} className={buttonVariants({variant: "destructive"})}>
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
-      <div className="md:mx-14 mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
+      <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>Avg. Cost: 
           <span> {formatCurrencyForGoldMobile(averagePurchasePrice, currency, 6)}</span>
         </p>
