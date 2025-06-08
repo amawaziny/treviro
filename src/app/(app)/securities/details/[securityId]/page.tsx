@@ -377,9 +377,10 @@ export default function SecurityDetailPage() {
         <Tabs defaultValue="performance" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList
             className="
-              flex w-full overflow-x-auto flex-nowrap whitespace-nowrap gap-1
+              flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1
               md:grid md:grid-cols-3 md:w-[500px] md:gap-0
               scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent
+              h-10 items-center
             "
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
