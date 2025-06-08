@@ -155,7 +155,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
               <Gem className="h-10 w-10 text-amber-400" /> // Generic icon for physical gold
             )}
             <div className="truncate">
-              <p className="text-lg font-semibold truncate">
+              <p className="text-base font-medium truncate">
                 {itemType === 'fund' ? 
                   (fundDetails?.symbol || displayName) : 
                   (physicalGoldType || displayName)
