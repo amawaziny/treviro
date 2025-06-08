@@ -1,6 +1,6 @@
 "use client";
 
-import { SecurityListItem } from './security-list-item'; 
+import { SecurityListItem } from '../stocks/security-list-item'; 
 import { Input } from '@/components/ui/input';
 import { useState, useMemo, useEffect } from 'react';
 import { Search, Loader2 } from 'lucide-react';
