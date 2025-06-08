@@ -41,9 +41,6 @@ export function MyStockListItem({
   averagePurchasePrice,
 }: MyStockListItemProps) {
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
-  const { removeStockInvestmentsBySymbol } = useInvestments();
-  const { toast } = useToast();
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
   
   const correspondingListedSecurity = listedSecurities.find(ls => ls.symbol === symbol);
   const currentMarketPrice = correspondingListedSecurity?.price;
@@ -96,23 +93,6 @@ export function MyStockListItem({
   
   const sharesLabel = isFund ? 'Units' : 'Shares';
 
-  const handleRemoveStock = async () => {
-    try {
-      await removeStockInvestmentsBySymbol(symbol);
-      toast({
-        title: "Stock Removed",
-        description: `All investments in ${name} (${symbol}) have been removed.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error Removing Stock",
-        description: `Could not remove investments in ${name} (${symbol}). Please try again.`,
-        variant: "destructive",
-      });
-      console.error("Error removing stock:", error);
-    }
-    setIsAlertDialogOpen(false);
-  };
 
   const cardContent = (
     <CardContent className="pt-4">
@@ -172,28 +152,7 @@ export function MyStockListItem({
             <p className="text-sm text-muted-foreground">Market N/A</p>
           )}
         </div>
-         <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="ml-2 text-muted-foreground hover:text-destructive">
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Remove {name}</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action will permanently remove all your investment records for {name} ({symbol}). This cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRemoveStock} className={buttonVariants({variant: "destructive"})}>
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+ 
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>Avg. Purchase Price: 
@@ -220,13 +179,5 @@ export function MyStockListItem({
     </Card>
   );
 }
-
-// Helper for buttonVariants in AlertDialogAction
-const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
-  if (variant === "destructive") {
-    return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
-  }
-  return ""; // Default or other variants can be handled by AlertDialog's default styling
-};
 
 MyStockListItem.displayName = 'MyStockListItem';
