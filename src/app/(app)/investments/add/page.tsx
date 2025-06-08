@@ -57,14 +57,58 @@ function AddInvestmentPageContent() {
   const [security, setSecurity] = useState<ListedSecurity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Set up header props effect
+  // Set up header props effect based on investment type
   useEffect(() => {
+    // Get the investment type from URL parameters
+    const investmentType = searchParams.get('type') || 'investment';
+    
+    // Map investment types to their display configurations
+    const typeConfigs = {
+      'stocks': {
+        title: 'Buy Stock',
+        backHref: '/investments/stocks',
+        backLabel: 'Back to Stocks'
+      },
+      'funds': {
+        title: 'Buy Fund',
+        backHref: '/investments/funds',
+        backLabel: 'Back to Funds'
+      },
+      'gold': {
+        title: 'Buy Gold',
+        backHref: '/investments/gold',
+        backLabel: 'Back to Gold'
+      },
+      'debt-instruments': {
+        title: 'Buy Debt Instrument',
+        backHref: '/investments/debt-instruments',
+        backLabel: 'Back to Debt Instruments'
+      },
+      'real-estate': {
+        title: 'Add Real Estate',
+        backHref: '/investments/real-estate',
+        backLabel: 'Back to Real Estate'
+      },
+      'currencies': {
+        title: 'Add Currency',
+        backHref: '/investments/currencies',
+        backLabel: 'Back to Currencies'
+      }
+    };
+
+    // Get the config for the current type or use a default
+    const normalizedType = investmentType.toLowerCase().replace(/\s+/g, '-');   
+    const config = typeConfigs[normalizedType as keyof typeof typeConfigs] || {
+      title: `Add ${investmentType}`,
+      backHref: '/investments',
+      backLabel: 'Back to Investments'
+    };
+
+    // Update header with the current config
     setHeaderProps({
       showBackButton: true,
-      backHref: '/investments/debt-instruments',
-      backLabel: 'Back to Debt Instruments',
-      title: 'Buy Debt Instrument',
-      showNavControls: false
+      showNavControls: false,
+      ...config
     });
 
     // Clean up when component unmounts
@@ -73,7 +117,7 @@ function AddInvestmentPageContent() {
         showBackButton: false
       });
     };
-  }, [securityId, security, setHeaderProps]);
+  }, [searchParams.toString(), setHeaderProps]);
 
   // Fetch security data
   useEffect(() => {
