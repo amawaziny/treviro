@@ -34,6 +34,13 @@ export function FormProvider({ children }: { children: ReactNode }) {
 
   const closeForm = useCallback(() => {
     setIsFormOpen(false);
+    // Reset header props when form is closed
+    setHeaderProps(prev => ({
+      ...prev,
+      showBackButton: false,
+      title: '',
+      showNavControls: true
+    }));
   }, []);
 
   const updateHeaderProps = useCallback((props: HeaderProps) => {
