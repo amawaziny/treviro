@@ -101,8 +101,8 @@ export function MyStockListItem({
               <Image
                 src={logoUrl}
                 alt={`${name} logo`}
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 className="rounded-full object-cover"
                 data-ai-hint={isFund ? "logo fund" : "logo company"}
               />
@@ -113,8 +113,8 @@ export function MyStockListItem({
               <Image
                 src={logoUrl}
                 alt={`${name} logo`}
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 className="rounded-full object-cover"
                 data-ai-hint={isFund ? "logo fund" : "logo company"}
               />

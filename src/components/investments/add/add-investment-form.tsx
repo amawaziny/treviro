@@ -29,14 +29,14 @@ import { v4 as uuidv4 } from "uuid";
 import { currencyFluctuationAnalysis } from "@/ai/flows/currency-fluctuation-analysis";
 import type { CurrencyFluctuationAnalysisInput, CurrencyFluctuationAnalysisOutput } from "@/ai/flows/currency-fluctuation-analysis";
 import React, { useState, useEffect, useCallback } from "react";
-import { CurrencyAnalysisDisplay } from "./currency-analysis-display";
+import { CurrencyAnalysisDisplay } from "../currencies/currency-analysis-display";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type { ListedSecurity, InvestmentType, StockInvestment, GoldInvestment, CurrencyInvestment, RealEstateInvestment, DebtInstrumentInvestment } from "@/lib/types";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useLanguage } from '@/contexts/language-context';
-import { RealEstateForm } from './real-estate-form';
+import { RealEstateForm } from '../real-estate/real-estate-form';
 import { useForm } from '@/contexts/form-context';
 
 const getCurrentDate = () => {

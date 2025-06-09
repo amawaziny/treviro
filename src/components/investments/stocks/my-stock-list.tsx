@@ -3,7 +3,7 @@
 import React from 'react';
 import { useInvestments } from '@/hooks/use-investments';
 import { useListedSecurities } from '@/hooks/use-listed-securities'; // Import the hook
-import type { Investment, StockInvestment } from '@/lib/types'; // Import Investment type
+import type { StockInvestment } from '@/lib/types'; // Import Investment type
 import { MyStockListItem } from './my-stock-list-item';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';

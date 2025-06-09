@@ -66,7 +66,7 @@ export function StockDetailChart({ securityId, currency }: StockDetailChartProps
 
       try {
         let firestoreQuery;
-        const priceHistoryRef = collection(db, `listedStocks/${securityId}/priceHistory`);
+        const priceHistoryRef = collection(db!, `listedStocks/${securityId}/priceHistory`);
 
         if (selectedRange === '1W' || selectedRange === '1M') {
           const today = new Date();

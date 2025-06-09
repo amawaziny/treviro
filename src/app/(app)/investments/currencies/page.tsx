@@ -12,7 +12,7 @@ import { DollarSign, AlertCircle, Plus, Coins, TrendingUp, TrendingDown, Wallet 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { MyCurrencyListItem } from '@/components/investments/my-currency-list-item';
+import { MyCurrencyListItem } from '@/components/investments/currencies/my-currency-list-item';
 import { useLanguage } from '@/contexts/language-context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { formatNumberWithSuffix, cn } from '@/lib/utils';

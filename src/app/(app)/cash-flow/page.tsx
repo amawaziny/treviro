@@ -17,7 +17,7 @@ import {
   DebtInstrumentInvestment, 
   GoldInvestment 
 } from '@/lib/types';
-import type { Installment } from '@/components/investments/installment-table';
+import type { Installment } from '@/components/investments/real-estate/installment-table';
 
 // Helper function to parse YYYY-MM-DD string to a local Date object
 const parseDateString = (dateStr?: string): Date | null => {

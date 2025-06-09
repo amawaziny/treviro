@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Gem, Coins, Plus, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { MyGoldListItem } from '@/components/investments/my-gold-list-item';
+import { MyGoldListItem } from '@/components/investments/gold/my-gold-list-item';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useLanguage } from '@/contexts/language-context';
 import { useIsMobile } from '@/hooks/use-mobile';

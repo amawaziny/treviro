@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from "next/navigation";
-import { MyRealEstateListItem } from '@/components/investments/my-real-estate-list-item';
+import { MyRealEstateListItem } from '@/components/investments/real-estate/my-real-estate-list-item';
 
 export default function MyRealEstatePage() {
   const { investments, isLoading: isLoadingInvestments, removeRealEstateInvestment } = useInvestments();

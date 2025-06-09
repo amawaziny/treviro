@@ -7,12 +7,12 @@ import { useListedSecurities } from '@/hooks/use-listed-securities';
 import type { ListedSecurity, StockInvestment, Transaction } from '@/lib/types'; 
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AddDividendSheet } from '@/components/stocks/add-dividend-sheet';
+import { AddDividendSheet } from '@/components/investments/stocks/add-dividend-sheet';
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, ArrowRight, LineChart, ShoppingCart, DollarSign, TrendingUp, TrendingDown, Loader2, Briefcase, Edit3, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { StockDetailChart } from '@/components/stocks/stock-detail-chart'; 
+import { StockDetailChart } from '@/components/investments/stocks/stock-detail-chart'; 
 import { useInvestments } from '@/hooks/use-investments';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
@@ -552,7 +552,7 @@ export default function SecurityDetailPage() {
                             <div className="flex items-center gap-2">
                               {tx.isInvestmentRecord && (
                                 <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
-                                  <Link href={`/investments/edit/${tx.id}`}>
+                                  <Link href={`/investments/stocks/edit/${tx.id}`}>
                                     <Edit3 className="h-3.5 w-3.5" />
                                     <span className="sr-only">Edit</span>
                                   </Link>

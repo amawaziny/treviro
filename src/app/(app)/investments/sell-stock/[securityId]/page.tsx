@@ -1,7 +1,7 @@
 
 "use client";
 
-import { SellStockForm } from '@/components/investments/sell-stock-form';
+import { SellStockForm } from '@/components/investments/stocks/sell-stock-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';

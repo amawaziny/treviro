@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
-import { EditStockInvestmentForm } from "@/components/investments/edit-stock-investment-form";
+import { EditStockInvestmentForm } from "@/components/investments/stocks/edit-stock-investment-form";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 

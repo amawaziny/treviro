@@ -1,6 +1,6 @@
 import { addMonths, addQuarters, addYears, isBefore, isEqual, parseISO } from "date-fns";
 import { RealEstateInvestment } from "@/lib/types";
-import { Installment } from "@/components/investments/installment-table";
+import { Installment } from "@/components/investments/real-estate/installment-table";
 
 // Helper function to compare dates safely
 const safeDateCompare = (date1: string | Date, date2: string | Date) => {

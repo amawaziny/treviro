@@ -1,7 +1,7 @@
 
 "use client"; 
 
-import { MyStockList } from "@/components/stocks/my-stock-list";
+import { MyStockList } from "@/components/investments/stocks/my-stock-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";

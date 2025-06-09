@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { MyDebtListItem } from '@/components/investments/my-debt-list-item';
+import { MyDebtListItem } from '@/components/investments/debt/my-debt-list-item';
 import {
   Table,
   TableHeader,

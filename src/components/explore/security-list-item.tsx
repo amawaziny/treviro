@@ -32,8 +32,8 @@ export const SecurityListItem = React.memo(function SecurityListItem({ security,
           <Image
             src={security.logoUrl || 'https://placehold.co/40x40.png'}
             alt={`${security.name} logo`}
-            width={40}
-            height={40}
+            width={32}
+            height={32}
             className="rounded-full object-cover flex-shrink-0 mt-1"
             data-ai-hint={security.securityType === 'Fund' ? "fund logo" : "company logo"}
           />
