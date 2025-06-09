@@ -174,7 +174,7 @@ export default function MyRealEstatePage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Home className="mr-2 h-6 w-6 text-primary" />
+              <Home className="mr-2 h-4 w-4 text-primary" />
               No Direct Real Estate Holdings
             </CardTitle>
           </CardHeader>
@@ -189,7 +189,7 @@ export default function MyRealEstatePage() {
       <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Building className="mr-2 h-6 w-6 text-primary" />
+            <Building className="mr-2 h-4 w-4 text-primary" />
             Real Estate Fund Investments (REITs, etc.)
           </CardTitle>
           <CardDescription>Funds primarily investing in real estate.</CardDescription>

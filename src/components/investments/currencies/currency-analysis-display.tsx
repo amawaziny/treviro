@@ -17,11 +17,11 @@ export function CurrencyAnalysisDisplay({ result }: CurrencyAnalysisDisplayProps
   let variant: "default" | "destructive" = "default";
 
   if (isSignificant) {
-    icon = <AlertCircle className="h-5 w-5" />;
+    icon = <AlertCircle className="h-4 w-4" />;
     title = "Significant Currency Fluctuation Alert";
     variant = "destructive";
   } else {
-    icon = result.deviationPercentage >= 0 ? <TrendingUp className="h-5 w-5 text-accent" /> : <TrendingDown className="h-5 w-5 text-destructive" />;
+    icon = result.deviationPercentage >= 0 ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />;
     title = "Currency Fluctuation Analysis";
   }
   

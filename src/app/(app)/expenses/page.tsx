@@ -203,7 +203,7 @@ export default function ExpensesPage() {
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <TrendingDown className="mr-2 h-6 w-6 text-primary" />
+                <TrendingDown className="mr-2 h-4 w-4 text-primary" />
                 {showAll ? 'Total Spent (All)' : 'Total Spent This Month'}
               </CardTitle>
               <CardDescription>
@@ -311,7 +311,7 @@ export default function ExpensesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <TrendingDown className="mr-2 h-6 w-6 text-primary" />
+              <TrendingDown className="mr-2 h-4 w-4 text-primary" />
               No Itemized Expenses Recorded This Month
             </CardTitle>
           </CardHeader>

@@ -123,7 +123,7 @@ export default function IncomePage() {
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <PiggyBank className="mr-2 h-6 w-6 text-primary" />
+                <PiggyBank className="mr-2 h-4 w-4 text-primary" />
                 {showAll ? 'Total Income (All)' : 'Total Income This Month'}
               </CardTitle>
               <CardDescription>
@@ -209,7 +209,7 @@ export default function IncomePage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <PiggyBank className="mr-2 h-6 w-6 text-primary" />
+              <PiggyBank className="mr-2 h-4 w-4 text-primary" />
               No Income Recorded This Month
             </CardTitle>
           </CardHeader>

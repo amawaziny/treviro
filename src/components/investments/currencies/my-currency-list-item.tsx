@@ -53,7 +53,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-grow min-w-0">
             <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary">
-              <DollarSign className="h-6 w-6" />
+              <DollarSign className="h-4 w-4" />
             </div>
             <div className="truncate">
               <p className="text-lg font-semibold truncate">{currencyCode}</p>

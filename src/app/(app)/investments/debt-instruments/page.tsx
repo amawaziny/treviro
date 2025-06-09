@@ -273,7 +273,7 @@ export default function MyDebtInstrumentsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Landmark className="mr-2 h-6 w-6 text-primary" />
+            <Landmark className="mr-2 h-4 w-4 text-primary" />
             Direct Debt Instruments
           </CardTitle>
           <CardDescription>Bonds, Certificates, Treasury Bills you own directly. (Projected Interest: {formatCurrencyEGP(totalProjectedAnnualInterest)} annually)</CardDescription>
@@ -295,7 +295,7 @@ export default function MyDebtInstrumentsPage() {
          <Card className="mt-6">
             <CardHeader>
             <CardTitle className="flex items-center">
-                <Building className="mr-2 h-6 w-6 text-primary" />
+                <Building className="mr-2 h-4 w-4 text-primary" />
                 Debt Fund Investments
             </CardTitle>
             <CardDescription>Funds primarily investing in debt instruments.</CardDescription>

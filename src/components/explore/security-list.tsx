@@ -129,7 +129,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
       <div className="space-y-6">
          {title && <h2 className="text-xl font-semibold tracking-tight">{title}</h2>}
         <div className="relative">
-          <Search className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ltr:left-3 rtl:right-3" />
+          <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ltr:left-3 rtl:right-3" />
           <Input
             type="text"
             placeholder={`Search Securities by name, symbol, market, or type...`}
@@ -155,7 +155,7 @@ export function SecurityList({ filterType, title, currentTab }: SecurityListProp
         </div>
       )}
       <div className="relative">
-        <Search className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ltr:left-3 rtl:right-3" />
+        <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ltr:left-3 rtl:right-3" />
         <Input
           type="text"
           placeholder={`Search Securities by name, symbol, market, or type...`}

@@ -40,62 +40,6 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
   const { toast } = useToast();
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
-  const {
-    id,
-    displayName,
-    fundDetails, 
-    totalUnits,
-    averagePurchasePrice,
-    currentMarketPrice,
-    profitLoss,
-    profitLossPercent,
-    currency,
-    logoUrl
-  } = holding;
-
-  if (holding.itemType !== 'fund' || !holding.fundDetails) {
-    // Render direct debt instrument (bonds, certificates, etc.)
-    return (
-      <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
-        <CardContent className="pt-6">
-          <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
-            <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary flex-shrink-0">
-                <Building className="h-6 w-6" />
-              </div>
-              <div className="truncate min-w-0 w-0">
-                <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName}>
-                  {holding.displayName ?
-                    (holding.displayName.length > 16 ? holding.displayName.slice(0, 14) + '…' : holding.displayName)
-                    : (typeof holding.amountInvested === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.amountInvested)}` : 'Debt Item')}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {holding.debtSubType} {holding.issuer ? `- ${holding.issuer}` : ''}
-                </p>
-              </div>
-            </div>
-            <div className="text-right flex-shrink-0">
-              {typeof holding.amountInvested === 'number' ? (
-                <p className="text-lg font-bold">
-                  {(holding.currency || 'EGP')} {formatNumberWithSuffix(holding.amountInvested)}
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground">N/A</p>
-              )}
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
-            <p>Interest Rate: <span>{holding.interestRate ? `${holding.interestRate}%` : 'N/A'}</span></p>
-            <p>Maturity: <span>{holding.maturityDate || 'N/A'}</span></p>
-            <p>Monthly Interest: <span>{typeof holding.projectedMonthlyInterest === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.projectedMonthlyInterest)}` : 'N/A'}</span></p>
-            <p>Annual Interest: <span>{typeof holding.projectedAnnualInterest === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.projectedAnnualInterest)}` : 'N/A'}</span></p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const isProfitable = profitLoss !== undefined && profitLoss >= 0;
 
   const formatDisplayCurrency = (value: number | undefined, curr = "USD", digitsOverride?: number) => {
     if (value === undefined || value === null || Number.isNaN(value)) return "N/A";
@@ -120,8 +64,64 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     setIsAlertDialogOpen(false);
   };
   
-  const detailPageLink = fundDetails ? `/securities/details/${fundDetails.id}?previousTab=funds` : undefined;
 
+  const {
+    id,
+    displayName,
+    fundDetails, 
+    totalUnits,
+    averagePurchasePrice,
+    currentMarketPrice,
+    profitLoss,
+    profitLossPercent,
+    currency,
+    logoUrl
+  } = holding;
+
+  if (holding.itemType !== 'fund' || !holding.fundDetails) {
+    // Render direct debt instrument (bonds, certificates, etc.)
+    return (
+      <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
+            <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary flex-shrink-0">
+                <Building className="h-4 w-4" />
+              </div>
+              <div className="truncate min-w-0 w-0">
+                <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName}>
+                  {holding.displayName ?
+                    (holding.displayName.length > 16 ? holding.displayName.slice(0, 14) + '…' : holding.displayName)
+                    : (typeof holding.amountInvested === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.amountInvested)}` : 'Debt Item')}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {holding.debtSubType} {holding.issuer ? `- ${holding.issuer}` : ''}
+                </p>
+              </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+              {typeof holding.amountInvested === 'number' ? (
+                <p className="text-lg font-bold">
+                  {(holding.currency || 'EGP')} {formatNumberWithSuffix(holding.amountInvested)}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">N/A</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
+            <p>Interest Rate: <span>{holding.interestRate ? `${holding.interestRate}%` : 'N/A'}</span></p>
+            <p className="text-end">Maturity: <span>{holding.maturityDate || 'N/A'}</span></p>
+            <p>Monthly Interest: <span>{typeof holding.projectedMonthlyInterest === 'number' ? `${holding.currency || 'EGP'} ${formatCurrencyForDebtMobile(holding.projectedMonthlyInterest, holding.currency || 'EGP')}` : 'N/A'}</span></p>
+            <p className="text-end">Annual Interest: <span>{typeof holding.projectedAnnualInterest === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.projectedAnnualInterest)}` : 'N/A'}</span></p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const detailPageLink = fundDetails ? `/securities/details/${fundDetails.id}?previousTab=funds` : undefined;
+  const isProfitable = profitLoss !== undefined && profitLoss >= 0;
 
   return (
     <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
@@ -134,7 +134,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
               </Link>
             ) : (
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary">
-                <Building className="h-6 w-6" />
+                <Building className="h-4 w-4" />
               </div>
             )}
             <div className="truncate min-w-0 w-0">

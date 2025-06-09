@@ -36,7 +36,7 @@ export function BottomTabBar() {
             }`}
           >
             {item.icon ? (
-              <item.icon className="h-5 w-5 mb-1" />
+              <item.icon className="h-4 w-4 mb-1" />
             ) : null}
             <span>{item.mobileTitle || item.title}</span>
           </Link>
@@ -73,7 +73,7 @@ export function BottomTabBar() {
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.icon ? (
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-4 w-4" />
                     ) : null}
                     <span>{item.mobileTitle || item.title}</span>
                   </Link>

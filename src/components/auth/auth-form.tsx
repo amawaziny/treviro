@@ -22,9 +22,9 @@ export function AuthForm() {
         <CardContent>
           <Button onClick={login} className="w-full" size="lg" disabled={showSpinner}>
             {showSpinner ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <LogIn className="mr-2 h-5 w-5" />
+              <LogIn className="mr-2 h-4 w-4" />
             )}
             {showSpinner ? "Processing..." : "Login with Google"}
           </Button>

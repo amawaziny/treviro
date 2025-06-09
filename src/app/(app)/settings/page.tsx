@@ -82,7 +82,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-6">
           {isLoading ? (
             <div className="flex items-center space-x-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span>Loading settings...</span>
             </div>
           ) : (

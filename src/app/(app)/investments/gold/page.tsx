@@ -230,7 +230,7 @@ export default function MyGoldPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Gem className="mr-2 h-6 w-6 text-primary" />
+              <Gem className="mr-2 h-4 w-4 text-primary" />
               No Gold Holdings
             </CardTitle>
           </CardHeader>

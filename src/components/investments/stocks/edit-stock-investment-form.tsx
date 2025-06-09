@@ -111,7 +111,7 @@ export function EditStockInvestmentForm({ investmentId }: EditStockInvestmentFor
   if (isLoadingData || isLoadingContext) {
     return (
       <div className="flex items-center justify-center py-10">
-        <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         Loading investment details...
       </div>
     );

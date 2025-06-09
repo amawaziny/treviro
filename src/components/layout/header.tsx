@@ -40,7 +40,7 @@ export function Header() {
             <div className="flex items-center gap-4">
               <Link href={backHref} className="flex items-center hover:opacity-80 transition-opacity">
                 <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
-                  <BackArrowIcon className="h-5 w-5" />
+                  <BackArrowIcon className="h-4 w-4" />
                   <span className="sr-only">{backLabel}</span>
                 </Button>
               </Link>

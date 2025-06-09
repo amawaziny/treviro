@@ -102,7 +102,7 @@ export default function FixedEstimatesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Settings className="mr-2 h-6 w-6 text-primary" />
+              <Settings className="mr-2 h-4 w-4 text-primary" />
               No Fixed Estimates Set
             </CardTitle>
           </CardHeader>

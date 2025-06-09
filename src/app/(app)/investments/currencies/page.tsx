@@ -159,7 +159,7 @@ export default function MyCurrenciesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Coins className="mr-2 h-6 w-6 text-primary" />
+              <Coins className="mr-2 h-4 w-4 text-primary" />
               No Currency Holdings
             </CardTitle>
           </CardHeader>

@@ -289,7 +289,7 @@ export default function CashFlowPage() {
         <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Total Income This Month</CardTitle>
-            <Coins className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-700 dark:text-green-300">
@@ -307,7 +307,7 @@ export default function CashFlowPage() {
         <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses This Month</CardTitle>
-            <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-red-700 dark:text-red-300">
@@ -329,7 +329,7 @@ export default function CashFlowPage() {
         <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Investments This Month</CardTitle>
-            <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between items-center">
@@ -359,7 +359,7 @@ export default function CashFlowPage() {
         <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Remaining Cash After Expenses & Investments</CardTitle>
-            <Wallet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">

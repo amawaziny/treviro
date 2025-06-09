@@ -378,7 +378,7 @@ export default function SecurityDetailPage() {
                     <DollarSign className="mr-2 h-4 w-4" /> Sell
                   </Button>
                 </Link>
-                <Button variant="secondary" className="hidden flex-1 w-full" onClick={() => setDividendSheetOpen(true)}>
+                <Button variant="secondary" className="flex-1 w-full" onClick={() => setDividendSheetOpen(true)}>
                   Add Dividend
                 </Button>
                 <AddDividendSheet
@@ -515,7 +515,7 @@ export default function SecurityDetailPage() {
                             )}
                             onClick={() => handleDeleteConfirmation(tx as unknown as Transaction)}
                           >
-                            <Trash2 className="h-5 w-5 text-white" />
+                            <Trash2 className="h-4 w-4 text-white" />
                           </div>
                           
                           {/* Transaction content */}
@@ -569,7 +569,7 @@ export default function SecurityDetailPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               {tx.isInvestmentRecord && (
-                                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                                <Button variant="ghost" size="icon" className="h-4 w-4" asChild>
                                   <Link href={`/investments/stocks/edit/${tx.id}`}>
                                     <Edit3 className="h-3.5 w-3.5" />
                                     <span className="sr-only">Edit</span>
@@ -580,7 +580,7 @@ export default function SecurityDetailPage() {
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
-                                  className="h-6 w-6 text-destructive/70 hover:text-destructive"
+                                  className="h-4 w-4 text-destructive/70 hover:text-destructive"
                                   onClick={() => handleDeleteConfirmation(tx as unknown as Transaction)}
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
@@ -588,7 +588,7 @@ export default function SecurityDetailPage() {
                                 </Button>
                               )}
                               {isSell && !isDesktop && (
-                                <div className="h-6 w-6 flex items-center justify-center opacity-50">
+                                <div className="h-4 w-4 flex items-center justify-center opacity-50">
                                   <span className="text-xs">Swipe left to delete</span>
                                 </div>
                               )}
