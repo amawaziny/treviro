@@ -54,7 +54,7 @@ export default function FixedEstimatesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Fixed Estimates</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Fixed Estimates</h1>
         <p className="text-muted-foreground text-sm">Manage your recurring income and expenses like salary, Zakat, and charity.</p>
       </div>
       <Separator />

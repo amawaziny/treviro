@@ -237,7 +237,7 @@ export default function MyDebtInstrumentsPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Debt Instruments</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Debt Instruments</h1>
         <p className="text-muted-foreground text-sm">Track your direct debt instruments and debt-related fund investments.</p>
       </div>
       <Separator />

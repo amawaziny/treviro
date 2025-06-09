@@ -170,7 +170,7 @@ export default function ExpensesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Expenses Management</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Expenses Management</h1>
         <p className="text-muted-foreground text-sm">Log and manage all your itemized expenses, including credit card payments and utility bills.</p>
       </div>
       <Separator />

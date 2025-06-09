@@ -91,7 +91,7 @@ export default function MyStocksPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">My Stocks & Equity Funds</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">My Stocks & Equity Funds</h1>
         <p className="text-muted-foreground text-sm">Overview of your stock and equity fund investments.</p>
       </div>
       <Separator />

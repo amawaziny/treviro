@@ -137,7 +137,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm">Overview of your investment portfolio and monthly cash flow.</p>
       </div>
       <Separator />
