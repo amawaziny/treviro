@@ -315,8 +315,6 @@ export default function SecurityDetailPage() {
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
       <div className="container mx-auto py-8 space-y-6">
-
-
         <Card>
           <CardHeader className="flex flex-row justify-between space-y-0 p-4">
             <div className="flex gap-4">
