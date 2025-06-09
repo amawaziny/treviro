@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useListedSecurities } from '@/hooks/use-listed-securities'; 
 import type { ListedSecurity, StockInvestment, Transaction } from '@/lib/types'; 
 import { useAuth } from '@/hooks/use-auth';
+import { useForm } from '@/contexts/form-context';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AddDividendSheet } from '@/components/investments/stocks/add-dividend-sheet';
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -48,11 +49,38 @@ export default function SecurityDetailPage() {
   const { investments, isLoading: isLoadingInvestments, transactions, deleteSellTransaction } = useInvestments();
   const { user } = useAuth();
   const userId = user?.uid;
+  const { setHeaderProps } = useForm();
+  const previousTab = searchParams.get('previousTab');
+  const backLinkHref = previousTab ? `/securities?tab=${previousTab}` : '/securities';
 
   const [dividendSheetOpen, setDividendSheetOpen] = useState(false);
   const [dividendLoading, setDividendLoading] = useState(false);
   
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(null); 
+  
+  // Set up header props after security data is loaded
+  useEffect(() => {
+    if (!security) return;
+    
+    setHeaderProps({
+      showBackButton: true,
+      backHref: backLinkHref,
+      backLabel: 'Back',
+      title: security.name,
+      showNavControls: false
+    });
+    
+    return () => {
+      setHeaderProps({
+        showBackButton: false,
+        showNavControls: true,
+        title: '',
+        backHref: '/securities',
+        backLabel: 'Back'
+      });
+    };
+  }, [security, backLinkHref, setHeaderProps]);
+  
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [swipedId, setSwipedId] = useState<string | null>(null);
@@ -60,10 +88,6 @@ export default function SecurityDetailPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
-  const previousTab = searchParams.get('previousTab');
-  const backLinkHref = previousTab ? `/securities?tab=${previousTab}` : '/securities';
-
 
   useEffect(() => {
     if (securityId) {
@@ -291,14 +315,10 @@ export default function SecurityDetailPage() {
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
       <div className="container mx-auto py-8 space-y-6">
-        <Button variant="outline" size="sm" asChild className="mb-4 text-xs md:text-sm">
-           <Link href={backLinkHref}> 
-             <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} /> Back to Explore
-           </Link>
-        </Button>
+
 
         <Card>
-          <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row justify-between space-y-0 p-4">
             <div className="flex gap-4">
               <Avatar className="h-10 w-10 md:h-12 md:w-12">
                 <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
@@ -307,8 +327,7 @@ export default function SecurityDetailPage() {
               <div>
                 <CardTitle className="text-base md:text-xl font-bold">{security.symbol}</CardTitle>
                 <CardDescription className="text-xs md:text-sm">
-                  <div className="text-sm font-medium">{security.name}</div>
-                  <div className="text-xs">{security.market} - {displayCurrency}</div>
+                  <div className="text-xs">{security.market}</div>
                 </CardDescription>
               </div>
             </div>
