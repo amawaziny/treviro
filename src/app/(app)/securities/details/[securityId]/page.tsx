@@ -378,7 +378,7 @@ export default function SecurityDetailPage() {
                     <DollarSign className="mr-2 h-4 w-4" /> Sell
                   </Button>
                 </Link>
-                <Button variant="secondary" className="flex-1 w-full" onClick={() => setDividendSheetOpen(true)}>
+                <Button variant="secondary" className="hidden flex-1 w-full" onClick={() => setDividendSheetOpen(true)}>
                   Add Dividend
                 </Button>
                 <AddDividendSheet
