@@ -94,7 +94,7 @@ export function MyStockListItem({
         <div className="flex items-center gap-3 flex-grow min-w-0">
           {correspondingListedSecurity ? (
             <Link 
-              href={`/securities/details/${correspondingListedSecurity.id}`} 
+              href={`/securities/details/${correspondingListedSecurity.id}?fromMyStocks=true`} 
               passHref 
               className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2"
             >

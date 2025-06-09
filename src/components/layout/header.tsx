@@ -45,8 +45,8 @@ export function Header() {
                 </Button>
               </Link>
               {title && (
-                <h1 className="text-xl font-semibold text-foreground">
-                  {title}
+                <h1 className="text-md font-semibold text-foreground">
+                  {title.length > 15 ? `${title.substring(0, 15)}...` : title}
                 </h1>
               )}
             </div>

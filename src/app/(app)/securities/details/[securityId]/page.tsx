@@ -51,7 +51,8 @@ export default function SecurityDetailPage() {
   const userId = user?.uid;
   const { setHeaderProps } = useForm();
   const previousTab = searchParams.get('previousTab');
-  const backLinkHref = previousTab ? `/securities?tab=${previousTab}` : '/securities';
+  const fromMyStocks = searchParams.get('fromMyStocks') === 'true';
+  const backLinkHref = fromMyStocks ? '/investments/stocks' : (previousTab ? `/securities?tab=${previousTab}` : '/securities');
 
   const [dividendSheetOpen, setDividendSheetOpen] = useState(false);
   const [dividendLoading, setDividendLoading] = useState(false);
