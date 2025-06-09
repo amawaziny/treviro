@@ -147,7 +147,7 @@ function AddInvestmentPageContent() {
   }
 
   return (
-    <div className="container mx-auto py-8 flex-1">
+    <div className="container mx-auto flex-1">
       <AddInvestmentForm />
     </div>
   );

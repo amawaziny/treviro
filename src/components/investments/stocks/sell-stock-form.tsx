@@ -160,7 +160,7 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="p-4 border rounded-md bg-muted/50">
             <h3 className="text-lg font-medium">Selling: {securityBeingSold.name} ({securityBeingSold.symbol})</h3>
             <p className="text-sm text-muted-foreground">You currently own: {maxSharesToSell.toLocaleString()} {securityLabel}.</p>

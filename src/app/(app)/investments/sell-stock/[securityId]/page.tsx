@@ -3,12 +3,11 @@
 
 import { SellStockForm } from '@/components/investments/stocks/sell-stock-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useListedSecurities } from '@/hooks/use-listed-securities';
-import { Button } from '@/components/ui/button';
 import { useParams } from 'next/navigation';
+import { useForm } from '@/contexts/form-context';
 import type { ListedSecurity } from '@/lib/types';
 
 export default function SellSecurityPage() {
@@ -16,7 +15,31 @@ export default function SellSecurityPage() {
   const securityId = params.securityId as string;
   const { listedSecurities, isLoading } = useListedSecurities();
   const [security, setSecurity] = useState<ListedSecurity | null>(null);
+  const { setHeaderProps, openForm, closeForm } = useForm();
 
+  // Set up header props when component mounts and when security is loaded
+  useEffect(() => {
+    openForm();
+    
+    if (security) {
+      const pageTitle = `Sell: ${security.name} ${security.securityType === 'Fund' ? `(${security.fundType})` : ''}`;
+      
+      setHeaderProps({
+        showBackButton: true,
+        backHref: `/securities/details/${securityId}`,
+        backLabel: 'Back to Security Details',
+        title: 'Sell Order',
+        showNavControls: false
+      });
+    }
+    
+    // Clean up when component unmounts
+    return () => {
+      closeForm();
+    };
+  }, [security, securityId, setHeaderProps, openForm, closeForm]);
+
+  // Fetch security data
   useEffect(() => {
     if (listedSecurities.length > 0) {
       const foundSecurity = listedSecurities.find(s => s.id === securityId);
@@ -32,22 +55,11 @@ export default function SellSecurityPage() {
     );
   }
 
-  const pageTitle = `Sell: ${security.name} ${security.securityType === 'Fund' ? `(${security.fundType})` : ''}`;
-
   return (
-    <div className="container mx-auto py-8 px-4 space-y-6">
-      <Button variant="outline" size="sm" asChild className="mb-4">
-        <Link href={`/securities/details/${securityId}`}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Security Details
-        </Link>
-      </Button>
-      <h1 className="text-2xl font-bold mb-6">{pageTitle}</h1>
+    <div className="container mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Sell Order</CardTitle>
-          <CardDescription>
-            {security?.description ? String(security.description) : 'No description available'}
-          </CardDescription>
+          {security?.description && <CardDescription> {security.description} </CardDescription>}
         </CardHeader>
         <CardContent>
           <SellStockForm securityId={security.id} />
