@@ -62,16 +62,12 @@ function AddInvestmentPageContent() {
     // Open form when component mounts
     openForm();
     
+    const securityId = searchParams.get('securityId');
     // Get the investment type from URL parameters
-    const investmentType = searchParams.get('type') || 'investment';
+    const investmentType = searchParams.get('type') || securityId ? 'Buy Security' : 'investment';
     
     // Map investment types to their display configurations
     const typeConfigs = {
-      'stocks': {
-        title: 'Buy Stock',
-        backHref: '/investments/stocks',
-        backLabel: 'Back to Stocks'
-      },
       'funds': {
         title: 'Buy Fund',
         backHref: '/investments/funds',
@@ -96,6 +92,11 @@ function AddInvestmentPageContent() {
         title: 'Add Currency',
         backHref: '/investments/currencies',
         backLabel: 'Back to Currencies'
+      },
+      'buy-security': {
+        title: `Buy ${securityId}`,
+        backHref: `/securities/details/${securityId}`,
+        backLabel: 'Back to Buy Security'
       }
     };
 
