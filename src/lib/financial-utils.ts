@@ -7,7 +7,8 @@ import type {
   DebtInstrumentInvestment,
   StockInvestment,
   GoldInvestment,
-  RealEstateInvestment
+  RealEstateInvestment,
+  CurrencyInvestment
 } from '@/lib/types';
 
 export interface CashFlowSummaryArgs {
@@ -35,6 +36,7 @@ export interface CashFlowSummaryResult {
   totalStockInvestmentThisMonth: number;
   totalDebtInvestmentThisMonth: number;
   totalGoldInvestmentThisMonth: number;
+  totalCurrencyInvestmentThisMonth: number;
   totalInvestmentsOnly: number;
   netCashFlowThisMonth: number;
 }
@@ -121,13 +123,14 @@ export function calculateMonthlyCashFlowSummary({
   });
 
   // Investments breakdown
-  let totalStockInvestmentThisMonth = 0, totalDebtInvestmentThisMonth = 0, totalGoldInvestmentThisMonth = 0;
+  let totalStockInvestmentThisMonth = 0, totalDebtInvestmentThisMonth = 0, totalGoldInvestmentThisMonth = 0, totalCurrencyInvestmentThisMonth = 0;
   (investments || []).forEach(inv => {
     const date = parseDateString((inv as any).purchaseDate);
     if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
       if (inv.type === 'Stocks') totalStockInvestmentThisMonth += (inv as StockInvestment).amountInvested || 0;
       else if (inv.type === 'Debt Instruments') totalDebtInvestmentThisMonth += (inv as DebtInstrumentInvestment).amountInvested || 0;
       else if (inv.type === 'Gold') totalGoldInvestmentThisMonth += (inv as GoldInvestment).amountInvested || 0;
+      else if (inv.type === 'Currencies') totalCurrencyInvestmentThisMonth += (inv as CurrencyInvestment).amountInvested || 0;
     }
   });
 
@@ -155,6 +158,7 @@ export function calculateMonthlyCashFlowSummary({
     totalStockInvestmentThisMonth,
     totalDebtInvestmentThisMonth,
     totalGoldInvestmentThisMonth,
+    totalCurrencyInvestmentThisMonth,
     totalInvestmentsOnly,
     netCashFlowThisMonth
   };
