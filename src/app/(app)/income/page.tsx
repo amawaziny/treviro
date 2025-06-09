@@ -7,7 +7,6 @@ import { useInvestments } from '@/hooks/use-investments';
 import { useLanguage } from '@/contexts/language-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, PiggyBank } from 'lucide-react';
@@ -26,7 +25,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import type { IncomeRecord } from '@/lib/types';
 
 export default function IncomePage() {
   // UI state for filters
