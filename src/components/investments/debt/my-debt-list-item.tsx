@@ -91,8 +91,14 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
               <div className="truncate min-w-0 w-0">
                 <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName}>
                   {holding.displayName ?
-                    (holding.displayName.length > 16 ? holding.displayName.slice(0, 14) + '…' : holding.displayName)
-                    : (typeof holding.amountInvested === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.amountInvested)}` : 'Debt Item')}
+                    (holding.displayName.length > 16 ? displayName.slice(0, 14) + '…' : displayName)
+                    : (typeof holding.amountInvested === 'number' ? 
+                        <>
+                          <span className="md:hidden">{holding.currency || 'EGP'} {formatNumberWithSuffix(holding.amountInvested)}</span>
+                          <span className="hidden md:inline">{holding.currency || 'EGP'} {holding.amountInvested.toLocaleString()}</span>
+                        </>
+                        : 'Debt Item'
+                      )}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {holding.debtSubType} {holding.issuer ? `- ${holding.issuer}` : ''}
@@ -112,8 +118,22 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
           <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
             <p>Interest Rate: <span>{holding.interestRate ? `${holding.interestRate}%` : 'N/A'}</span></p>
             <p className="text-end">Maturity: <span>{holding.maturityDate || 'N/A'}</span></p>
-            <p>Monthly Interest: <span>{typeof holding.projectedMonthlyInterest === 'number' ? `${holding.currency || 'EGP'} ${formatCurrencyForDebtMobile(holding.projectedMonthlyInterest, holding.currency || 'EGP')}` : 'N/A'}</span></p>
-            <p className="text-end">Annual Interest: <span>{typeof holding.projectedAnnualInterest === 'number' ? `${holding.currency || 'EGP'} ${formatNumberWithSuffix(holding.projectedAnnualInterest)}` : 'N/A'}</span></p>
+            <p>Monthly Interest: 
+              {typeof holding.projectedMonthlyInterest === 'number' ? (
+                <>
+                  <span className="md:hidden">{holding.currency || 'EGP'} {formatNumberWithSuffix(holding.projectedMonthlyInterest)}</span>
+                  <span className="hidden md:inline">{holding.currency || 'EGP'} {holding.projectedMonthlyInterest.toLocaleString()}</span>
+                </>
+              ) : 'N/A'}
+            </p>
+            <p className="text-end">Annual Interest: 
+              {typeof holding.projectedAnnualInterest === 'number' ? (
+                <>
+                  <span className="md:hidden">{holding.currency || 'EGP'} {formatNumberWithSuffix(holding.projectedAnnualInterest)}</span>
+                  <span className="hidden md:inline">{holding.currency || 'EGP'} {holding.projectedAnnualInterest.toLocaleString()}</span>
+                </>
+              ) : 'N/A'}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -150,7 +170,9 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 </p>
                )}
               <p className="text-xs text-muted-foreground truncate">
-                {fundDetails?.symbol} - Units: {totalUnits?.toLocaleString() ?? 'N/A'}
+                {fundDetails?.symbol} - Units: 
+                <span className="md:hidden">{totalUnits ? formatNumberWithSuffix(totalUnits) : 'N/A'}</span>
+                <span className="hidden md:inline">{totalUnits?.toLocaleString() ?? 'N/A'}</span>
               </p>
             </div>
           </div>
@@ -199,12 +221,12 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
           <p>Avg. Cost: 
             <span className="md:hidden">{formatCurrencyForDebtMobile(averagePurchasePrice || 0, currency || "EGP")}</span>
- <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice || 0, currency, 6)}</span>
- </p>
-          <p>Market Price: 
-            <span className="md:hidden">{formatCurrencyForDebtMobile(currentMarketPrice, currency || "EGP")}</span>
- <span className="hidden md:inline">{formatDisplayCurrency(currentMarketPrice, currency)}</span>
- </p>
+            <span className="hidden md:inline">{formatDisplayCurrency(averagePurchasePrice, currency)}</span>
+          </p>
+          <p>Current Value: 
+            <span className="md:hidden">{formatCurrencyForDebtMobile(currentMarketPrice || 0, currency || "EGP")}</span>
+            <span className="hidden md:inline">{formatDisplayCurrency(currentMarketPrice, currency)}</span>
+          </p>
         </div>
       </CardContent>
     </Card>
