@@ -88,10 +88,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary flex-shrink-0">
                 <Building className="h-4 w-4" />
               </div>
-              <div className="truncate min-w-0 w-0">
-                <p className="text-lg font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName}>
+              <div className="truncate">
+                <p className="text-sm font-semibold truncate max-w-[120px] md:max-w-[200px]" title={holding.displayName}>
                   {holding.displayName ?
-                    (holding.displayName.length > 16 ? displayName.slice(0, 14) + '…' : displayName)
+                    (holding.displayName.length > 15 ? displayName.slice(0, 15) + '…' : displayName)
                     : (typeof holding.amountInvested === 'number' ? 
                         <>
                           <span className="md:hidden">{holding.currency || 'EGP'} {formatNumberWithSuffix(holding.amountInvested)}</span>

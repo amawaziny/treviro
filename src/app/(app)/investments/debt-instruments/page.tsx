@@ -9,54 +9,20 @@ import { isDebtRelatedFund } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollText, Plus, Building, Trash2, Landmark, ArrowUpDown, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { Plus, Building, TrendingUp, Landmark, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MyDebtListItem } from '@/components/investments/debt/my-debt-list-item';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableFooter
-} from '@/components/ui/table';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useToast } from '@/hooks/use-toast';
 import { cn, formatNumberWithSuffix } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
 import { useLanguage } from '@/contexts/language-context';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-
-const buttonVariants = ({ variant }: { variant: "destructive" | "default" | "outline" | "secondary" | "ghost" | "link" | null | undefined }) => {
-  if (variant === "destructive") {
-    return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
-  }
-  return "";
-};
-
-
 export default function MyDebtInstrumentsPage() {
   const { investments, isLoading: isLoadingInvestments, removeDirectDebtInvestment } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
-  const { toast } = useToast();
   const { language } = useLanguage(); 
   const isMobile = useIsMobile();
-
-  const [itemToDelete, setItemToDelete] = React.useState<AggregatedDebtHolding | null>(null);
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
   const { directDebtHoldings, debtFundHoldings, totalProjectedMonthlyInterest, totalProjectedAnnualInterest, totalDebtFundPnL, totalDebtFundCost, totalDirectDebtInvested } = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) {
@@ -78,7 +44,6 @@ export default function MyDebtInstrumentsPage() {
     let debtFundPnLSum = 0;
     let debtFundCostSum = 0;
     let directDebtInvestedSum = 0;
-
 
     const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
     directDebtInvestments.forEach(debt => {

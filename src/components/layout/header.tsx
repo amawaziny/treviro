@@ -14,13 +14,7 @@ export function Header() {
   const isMobile = useIsMobile();
   const { language } = useLanguage();
   const { headerProps } = useForm();
-  interface HeaderProps {
-    showBackButton?: boolean;
-    backHref?: string;
-    backLabel?: string;
-    title?: string;
-    showNavControls?: boolean;
-  }
+
   const { 
     showBackButton = false, 
     backHref = '/dashboard', 
@@ -46,7 +40,7 @@ export function Header() {
               </Link>
               {title && (
                 <h1 className="text-md font-semibold text-foreground">
-                  {title.length > 15 ? `${title.substring(0, 15)}...` : title}
+                  {title.length > 20 ? `${title.substring(0, 20)}...` : title}
                 </h1>
               )}
             </div>
