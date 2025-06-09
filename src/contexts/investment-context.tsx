@@ -33,6 +33,7 @@ interface InvestmentContextType {
   dashboardSummary: DashboardSummary | null;
   incomeRecords: IncomeRecord[];
   addIncomeRecord: (incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  deleteIncomeRecord: (incomeId: string) => Promise<void>;
   expenseRecords: ExpenseRecord[];
   addExpenseRecord: (expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   deleteExpenseRecord: (expenseId: string) => Promise<void>;
@@ -685,20 +686,30 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [userId, firestoreInstance, getAppSettingsDocRef]);
 
+  const deleteIncomeRecord = useCallback(async (incomeId: string) => {
+    if (!firestoreInstance || !userId) {
+      throw new Error('Firestore instance or user ID is not initialized');
+    }
+    try {
+      await deleteDoc(doc(firestoreInstance, `users/${userId}/income/${incomeId}`));
+    } catch (error) {
+      console.error('Error deleting income record:', error);
+    }
+  }, [userId, firestoreInstance]);
+
   return (
     <InvestmentContext.Provider value={{
-      investments, addInvestment, getInvestmentsByType, isLoading, currencyAnalyses,
-      recordSellStockTransaction, transactions, removeStockInvestmentsBySymbol,
-      updateStockInvestment: correctedUpdateStockInvestment,
-      deleteSellTransaction, removeGoldInvestments, removeDirectDebtInvestment,
-      removeRealEstateInvestment, updateRealEstateInvestment,
-      dashboardSummary, incomeRecords, addIncomeRecord, expenseRecords, addExpenseRecord,
-      deleteExpenseRecord, updateExpenseRecord,
-      fixedEstimates, addFixedEstimate, recalculateDashboardSummary,
-      appSettings, updateAppSettings,
+       investments, addInvestment, getInvestmentsByType, isLoading, currencyAnalyses,
+       recordSellStockTransaction, transactions, removeStockInvestmentsBySymbol,
+       updateStockInvestment: correctedUpdateStockInvestment,
+       deleteSellTransaction, removeGoldInvestments, removeDirectDebtInvestment,
+       removeRealEstateInvestment, updateRealEstateInvestment,
+       dashboardSummary, incomeRecords, addIncomeRecord, deleteIncomeRecord,
+       expenseRecords, addExpenseRecord, deleteExpenseRecord, updateExpenseRecord,
+       fixedEstimates, addFixedEstimate, recalculateDashboardSummary,
+       appSettings, updateAppSettings,
     }}>
       {children}
     </InvestmentContext.Provider>
   );
 };
-
