@@ -315,8 +315,8 @@ export default function SecurityDetailPage() {
 
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-      <div className="container mx-auto py-4 space-y-6">
-        <Card>
+      <div className="w-full max-w-full mx-auto md:pb-6 space-y-6 overflow-x-hidden">
+        <Card className="overflow-hidden">
           <CardHeader className="flex flex-row justify-between space-y-0 p-4">
             <div className="flex gap-4">
               <Avatar className="h-10 w-10 md:h-12 md:w-12">
@@ -365,7 +365,7 @@ export default function SecurityDetailPage() {
           </CardContent>
 
           {/* Mobile Fixed Action Bar */}
-          <div className="fixed bottom-0 left-0 w-full bg-background border-t z-50 flex md:hidden px-4 py-3 gap-2 justify-between">
+          <div className="fixed bottom-0 left-0 w-full bg-background/95 backdrop-blur-sm border-t z-50 flex md:hidden px-4 py-3 gap-2 justify-between safe-bottom">
             <Link href={`/investments/add?securityId=${security.id}`} passHref className="flex-1">
               <Button variant="default" className="w-full">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Buy
@@ -392,14 +392,9 @@ export default function SecurityDetailPage() {
           </div>
         </Card>
 
-        <Tabs defaultValue="performance" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <Tabs defaultValue="performance" className="w-full max-w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList
-            className="
-              flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1
-              md:grid md:grid-cols-3 md:w-[500px] md:gap-0
-              scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent
-              h-10 items-center
-            "
+            className="flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1 md:grid md:grid-cols-3 md:w-[500px] md:gap-0 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent h-10 items-center px-1"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <TabsTrigger value="performance" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base">
@@ -413,8 +408,8 @@ export default function SecurityDetailPage() {
             </TabsTrigger>
             {/* Add more TabsTrigger here for future tabs—they will scroll! */}
           </TabsList>
-          <TabsContent value="performance">
-            <Card className="mb-16 md:mb-4">
+          <TabsContent value="performance" className="w-full max-w-full">
+            <Card className="mb-16 md:mb-4 overflow-hidden">
               <CardHeader>
                 <CardTitle className='text-md'>Price History</CardTitle>
                 <CardDescription className='text-xs'>Historical price performance of {security.name}</CardDescription>
