@@ -400,7 +400,7 @@ export default function SecurityDetailPage() {
 
         <Tabs defaultValue="performance" className="w-full max-w-full overflow-hidden" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList
-            className="flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1 md:grid md:grid-cols-3 md:w-[500px] md:gap-0 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent h-10 items-center px-1 touch-pan-x"
+            className="flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1 md:grid md:grid-cols-3 md:w-full md:gap-0 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent h-10 items-center px-1 touch-pan-x"
             style={{
               WebkitOverflowScrolling: 'touch',
               msOverflowStyle: 'none',
@@ -408,13 +408,13 @@ export default function SecurityDetailPage() {
               overscrollBehaviorX: 'contain'
             }}
           >
-            <TabsTrigger value="performance" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base">
+            <TabsTrigger value="performance" className="flex-1 flex-shrink-0 text-xs md:text-base">
               <LineChart className="mr-2 h-4 w-4" /> Performance
             </TabsTrigger>
-            <TabsTrigger value="position" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base" disabled={!hasPosition}>
+            <TabsTrigger value="position" className="flex-1 flex-shrink-0 text-xs md:text-base" disabled={!hasPosition}>
               <Briefcase className="mr-2 h-4 w-4" /> My Position
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base">
+            <TabsTrigger value="transactions" className="flex-1 flex-shrink-0 text-xs md:text-base">
               <DollarSign className="mr-2 h-4 w-4" /> Transactions
             </TabsTrigger>
             {/* Add more TabsTrigger here for future tabs—they will scroll! */}
