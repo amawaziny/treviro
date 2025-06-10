@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { formatNumberWithSuffix } from "@/lib/utils";
 import { RealEstateInvestment } from "@/lib/types";
 
-interface Installment {
+export interface Installment {
   number: number;
   dueDate: string;
   amount: number;

@@ -158,9 +158,7 @@ export default function RealEstateDetailPage() {
       }
 
       const updatedInstallments = installments.filter(inst => inst.number !== installmentNumber);
-      const cleanInstallments = updatedInstallments.map(inst => {
-        const { displayNumber, ...rest } = inst; // Exclude displayNumber
-        return { ...rest, isMaintenance: inst.isMaintenance || false };
+      const cleanInstallments = updatedInstallments.map(inst => {        return { ...inst, isMaintenance: inst.isMaintenance || false };
       });
 
       await updateRealEstateInvestment(investment.id, { installments: cleanInstallments });
