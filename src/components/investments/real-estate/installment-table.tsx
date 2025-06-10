@@ -1,39 +1,26 @@
-
 import React, { useState, useEffect, useMemo } from "react";
-import { format, isBefore } from "date-fns";
+import { format } from "date-fns";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { ChevronRight, ChevronDown, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { formatNumberWithSuffix } from "@/lib/utils";
 import { RealEstateInvestment } from "@/lib/types";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter
-} from "@/components/ui/sheet";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
-export interface Installment {
+interface Installment {
   number: number;
   dueDate: string;
   amount: number;
   status: 'Paid' | 'Unpaid';
   chequeNumber?: string;
   description?: string;
-  displayNumber?: number;
-  isMaintenance?: boolean; // Added flag
+  isMaintenance?: boolean;
 }
 
-export interface InstallmentTableProps {
+interface InstallmentTableProps {
   installments: Installment[];
   investmentId: string;
   investment: RealEstateInvestment;
@@ -50,58 +37,63 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
 }) => {
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
+
   const [chequeNumber, setChequeNumber] = useState("");
   const [localInstallments, setLocalInstallments] = useState<Installment[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
-  const [showUnpaidDialog, setShowUnpaidDialog] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
+
+  useEffect(() => {
+    setLocalInstallments(installments);
+  }, [installments]);
+
+  const handleRowClick = (installment: Installment) => {
+    setSelectedNumber(installment.number);
+    setSelectedInstallment(installment);
+    setChequeNumber(installment.chequeNumber || '');
+    setShowSheet(true);
+  };
 
   const sortedInstallments = useMemo(() => {
     return [...installments].sort((a, b) => {
       try {
-        const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
-        const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
-        return dateA - dateB;
-      } catch {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } catch (error) {
         return 0;
       }
     });
   }, [installments]);
 
-  useEffect(() => {
-    setLocalInstallments(sortedInstallments);
+  const totalPaidAmount = useMemo(() => {
+    return sortedInstallments
+      .filter(inst => inst.status === 'Paid')
+      .reduce((sum, inst) => sum + inst.amount, 0);
   }, [sortedInstallments]);
 
-  const totalPaidAmount = useMemo(() => {
-    return localInstallments
-      .filter(i => i.status === 'Paid' && !i.isMaintenance) // Exclude maintenance from property paid amount
-      .reduce((sum, installment) => sum + (installment.amount || 0), 0);
-  }, [localInstallments]);
+  const totalAmount = useMemo(() => {
+    return sortedInstallments.reduce((sum, inst) => sum + inst.amount, 0);
+  }, [sortedInstallments]);
 
   const remainingAmount = useMemo(() => {
-    // Remaining for property purchase, excluding maintenance
-    const totalPurchaseInstallments = localInstallments
-      .filter(i => !i.isMaintenance)
-      .reduce((sum, inst) => sum + (inst.amount || 0), 0);
-    return totalPurchaseInstallments - totalPaidAmount;
-  }, [localInstallments, totalPaidAmount]);
+    return totalAmount - totalPaidAmount;
+  }, [totalAmount, totalPaidAmount]);
 
-  const totalAmount = useMemo(() => {
-    // Total property purchase price, excluding maintenance
-    return localInstallments
-      .filter(i => !i.isMaintenance)
-      .reduce((sum, inst) => sum + (inst.amount || 0), 0);
-  }, [localInstallments]);
+  const displayInstallments = useMemo(() => {
+    return sortedInstallments.map((installment, index) => ({
+      ...installment,
+      isMaintenance: installment.description?.toLowerCase().includes('maintenance')
+    }));
+  }, [sortedInstallments]);
 
-  const displayInstallments = localInstallments;
-  const unpaidInstallments = displayInstallments.filter(i => i.status === "Unpaid");
-
-  const handleOpenSheet = () => {
-    setShowSheet(true);
-    setSelectedNumber(unpaidInstallments[0]?.number || null);
-    setChequeNumber("");
+  const handleDeleteInstallment = async (installmentNumber: number) => {
+    if (onDeleteInstallment) {
+      await onDeleteInstallment(installmentNumber);
+      setLocalInstallments(prev => prev.filter(inst => inst.number !== installmentNumber));
+      setShowDeleteDialog(null);
+    }
   };
 
   const handleStatusChange = async (markAsPaid: boolean) => {
@@ -117,13 +109,13 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     const newStatus = markAsPaid ? 'Paid' : 'Unpaid';
     let newAmountInvested = investment.amountInvested || 0;
 
-    if (!installmentToUpdate.isMaintenance) { // Only adjust amountInvested for non-maintenance items
+    if (!installmentToUpdate.isMaintenance) { 
       const amountChange = markAsPaid ? installmentToUpdate.amount : -installmentToUpdate.amount;
       newAmountInvested += amountChange;
     }
 
     try {
-      const cleanInstallments = localInstallments.map(inst => {
+      const updatedInstallments = localInstallments.map(inst => {
         const isMatchingInstallment = inst.number === selectedNumber;
         
         const baseInstClean: any = {
@@ -132,290 +124,179 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
           amount: inst.amount,
           status: isMatchingInstallment ? newStatus : inst.status,
           isMaintenance: inst.isMaintenance || false, // Ensure flag is preserved
-        };
-
-        if (isMatchingInstallment) {
-          if (markAsPaid) {
-             if (chequeNumber) baseInstClean.chequeNumber = chequeNumber;
-          }
-          // Preserve description regardless
-          if (inst.description) baseInstClean.description = inst.description;
-        } else {
-          if (inst.chequeNumber) baseInstClean.chequeNumber = inst.chequeNumber;
-          if (inst.description) baseInstClean.description = inst.description;
         }
         return baseInstClean;
       });
-      
+
       await updateRealEstateInvestment(investmentId, {
-        installments: cleanInstallments,
-        // Only update amountInvested if it's not a maintenance item,
-        // otherwise pass the original amountInvested to avoid changing it.
-        amountInvested: installmentToUpdate.isMaintenance ? investment.amountInvested : newAmountInvested
+        installments: updatedInstallments
       });
-      
-      const updatedLocalInstallments = localInstallments.map(inst => {
-        const isMatchingInstallment = inst.number === selectedNumber;
-        return isMatchingInstallment
-          ? { 
-              ...inst, 
-              status: newStatus as 'Paid' | 'Unpaid',
-              ...(markAsPaid ? { chequeNumber: chequeNumber || inst.chequeNumber } : { chequeNumber: undefined })
-            }
-          : inst;
-      });
-      
-      setLocalInstallments(updatedLocalInstallments);
+
+      setLocalInstallments(updatedInstallments);
       setShowSheet(false);
-      setShowUnpaidDialog(null);
-    } catch {
-      setLocalInstallments(localInstallments); // Revert optimistic update
-      setErrorMessage('Failed to save payment. Please try again.');
+      setSelectedNumber(null);
+      setChequeNumber("");
+      setSelectedInstallment(null);
+    } catch (error) {
+      setErrorMessage("Failed to update installment status");
       setShowErrorDialog(true);
     }
   };
 
-  const handleRowClick = (installment: Installment) => {
-    if (installment.status === 'Unpaid') {
-      setSelectedNumber(installment.number);
-      setChequeNumber(installment.chequeNumber || '');
-      setShowSheet(true);
-    } else if (installment.status === 'Paid') {
-      setSelectedNumber(installment.number);
-      setSelectedInstallment(installment);
-      setShowUnpaidDialog(installment.number);
-    }
-  };
-
-  const handleDeleteInstallment = async (installmentNumber: number) => {
-    if (onDeleteInstallment) {
-      await onDeleteInstallment(installmentNumber);
-      setShowDeleteDialog(null);
-    }
-  };
-
   return (
-    <div className="mt-8 space-y-4">
-      <div className="bg-white dark:bg-[#23255a] p-4 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-2">Payment Summary (Purchase Installments)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded">
-            <p className="text-sm text-muted-foreground dark:text-green-200">Total Paid (Purchase)</p>
-            <p className="text-2xl font-bold text-foreground">EGP {totalPaidAmount.toLocaleString()}</p>
-          </div>
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
-            <p className="text-sm text-muted-foreground dark:text-blue-200">Remaining (Purchase)</p>
-            <p className="text-2xl font-bold text-foreground">
-              EGP {remainingAmount.toLocaleString()}
-            </p>
-          </div>
-          <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded">
-            <p className="text-sm text-muted-foreground dark:text-amber-200">Total Purchase Price</p>
-            <p className="text-2xl font-bold text-foreground">
-              EGP {totalAmount.toLocaleString()}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-4">
+      <div className="rounded-lg shadow">
+        <Card>
+          <CardHeader className="pb-0">
+            <CardTitle className="text-lg font-semibold">Payment Summary</CardTitle>
+            <CardDescription className="text-sm">(Purchase Installments)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded">
+                <p className="text-sm text-muted-foreground dark:text-green-200">Total Paid (Purchase)</p>
+                <p className="text-2xl font-bold text-foreground">EGP {totalPaidAmount.toLocaleString()}</p>
+              </div>
+              <div className="bg-yellow-50 dark:bg-gray-800/50 p-4 rounded">
+                <p className="text-sm text-muted-foreground dark:text-yellow-200">Remaining Amount</p>
+                <p className="text-2xl font-bold text-foreground">EGP {remainingAmount.toLocaleString()}</p>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
+                <p className="text-sm text-muted-foreground dark:text-blue-200">Total Amount</p>
+                <p className="text-2xl font-bold text-foreground">EGP {totalAmount.toLocaleString()}</p>
+              </div>
+            </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border text-sm bg-white dark:bg-[#23255a] dark:text-white">
-          <thead>
-            <tr className="bg-muted dark:bg-[#181c2a] dark:text-white">
-              <th className="px-3 py-2 border">#</th>
-              <th className="px-3 py-2 border">Due Date</th>
-              <th className="px-3 py-2 border">Amount</th>
-              <th className="px-3 py-2 border">Description</th>
-              <th className="px-3 py-2 border">Status</th>
-              <th className="px-3 py-2 border">Cheque Number</th>
-              <th className="px-3 py-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {localInstallments.map((inst) => (
-              <tr
-                key={`${inst.number}-${inst.dueDate}`}
-                onClick={() => handleRowClick(inst)}
-                className={`
-                  ${inst.isMaintenance ? 'bg-yellow-50 dark:bg-yellow-900/30' : 
-                    inst.status === "Paid" ? "bg-green-50 dark:bg-green-900/30" : 
-                    isBefore(new Date(inst.dueDate), new Date()) && inst.status === "Unpaid" ? "bg-red-50 dark:bg-red-900/30" : 
-                    "bg-white dark:bg-[#23255a]"}
-                  cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30
-                `}
-              >
-                <td className="px-3 py-2 border text-center">{inst.number}</td>
-                <td className="px-3 py-2 border text-center">{format(new Date(inst.dueDate), "dd-MM-yyyy")}</td>
-                <td className="px-3 py-2 border text-center">EGP {inst.amount.toLocaleString()}</td>
-                <td className="px-3 py-2 border text-center max-w-[200px] truncate" title={inst.description}>{inst.description || '-'}</td>
-                <td className={`px-3 py-2 border text-center font-semibold ${
-                  inst.status === 'Paid' 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : 'text-red-600 dark:text-red-400'
-                }`}>
-                  {inst.status}
-                </td>
-                <td className="px-3 py-2 border text-center">{inst.chequeNumber || '-'}</td>
-                <td className="px-3 py-2 border text-center">
-                  <AlertDialog open={showDeleteDialog === inst.number} onOpenChange={(open) => setShowDeleteDialog(open ? inst.number : null)}>
-                    <AlertDialogTrigger asChild>
-                      <button
+            <div className="space-y-4">
+              {displayInstallments.map((installment, index) => (
+                <Card key={installment.number} className="border-b border-gray-200 dark:border-gray-800">
+                  <div className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[#181c2a] cursor-pointer" onClick={() => handleRowClick(installment)}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">#{installment.number}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{format(new Date(installment.dueDate), 'MMM d, yyyy')}</span>
+                      </div>
+                      <div className="text-sm font-medium mt-1">{formatNumberWithSuffix(installment.amount)}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {installment.status === 'Paid' ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        installment.status === 'Paid' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                      }`}>{installment.status}</span>
+                      {installment.chequeNumber && (
+                        <span className="text-sm text-gray-500 dark:text-gray-400">#{installment.chequeNumber}</span>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowDeleteDialog(inst.number);
+                          setShowDeleteDialog(installment.number);
                         }}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 px-2 py-1 rounded"
-                        title="Delete Installment"
                       >
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className="h-4 w-4" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                        >
-                          <path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            strokeWidth={2} 
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                          />
-                        </svg>
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action will permanently remove installment #{inst.number} ({inst.description}) from the schedule. This cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            await handleDeleteInstallment(inst.number);
-                          }}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
 
-                  <Sheet open={showUnpaidDialog === inst.number} onOpenChange={(open) => {
-                    if (!open) {
-                      setShowUnpaidDialog(null);
-                    }
-                  }}>
-                    <SheetContent 
-                      side="bottom" 
-                      className="max-w-lg w-full bottom-0 left-0 right-0 fixed rounded-t-lg bg-white dark:bg-[#181c2a] text-[#23255a] dark:text-white"
-                      style={{ top: 'auto' }}
-                      onInteractOutside={(e) => {
-                        e.preventDefault();
-                        setShowUnpaidDialog(null);
+            <Sheet open={showSheet} onOpenChange={setShowSheet}>
+              <SheetContent side="bottom">
+                <SheetHeader>
+                  <SheetTitle>
+                    {selectedInstallment?.status === 'Paid' ? 'Mark as Unpaid' : 'Mark as Paid'}
+                  </SheetTitle>
+                  <SheetDescription>
+                    {selectedInstallment?.status === 'Paid' 
+                      ? 'Are you sure you want to mark this installment as unpaid? This will remove the payment record.'
+                      : 'Enter the cheque number to mark this installment as paid.'}
+                  </SheetDescription>
+                </SheetHeader>
+                
+                {selectedInstallment?.status !== 'Paid' && (
+                  <div className="py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="chequeNumber">Cheque Number</Label>
+                      <Input
+                        id="chequeNumber"
+                        value={chequeNumber}
+                        onChange={(e) => setChequeNumber(e.target.value)}
+                        placeholder="Enter cheque number"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <SheetFooter>
+                  <div className="flex flex-row-reverse gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowSheet(false);
+                        setSelectedNumber(null);
                       }}
                     >
-                      <SheetHeader className="text-left">
-                        <SheetTitle className="text-xl font-bold">Mark as Unpaid?</SheetTitle>
-                        <p className="text-muted-foreground">
-                          Are you sure you want to mark installment #{inst.number} ({inst.description}) as unpaid? This will remove the payment record.
-                        </p>
-                      </SheetHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="flex gap-4 mt-4">
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowUnpaidDialog(null);
-                              setSelectedNumber(null);
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            variant="destructive"
-                            className="w-full"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (selectedNumber !== null) {
-                                await handleStatusChange(false);
-                                setShowUnpaidDialog(null);
-                                setSelectedNumber(null);
-                                setSelectedInstallment(null);
-                              }
-                            }}
-                          >
-                            Mark as Unpaid
-                          </Button>
-                        </div>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (selectedInstallment?.status === 'Paid') {
+                          handleStatusChange(false);
+                        } else {
+                          handleStatusChange(true);
+                        }
+                      }}
+                    >
+                      {selectedInstallment?.status === 'Paid' ? 'Mark as Unpaid' : 'Mark as Paid'}
+                    </Button>
+                  </div>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+
+            {showDeleteDialog !== null && (
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete installment #{showDeleteDialog}.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteInstallment(showDeleteDialog)}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
+            {showErrorDialog && (
+              <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Error</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {errorMessage}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>OK</AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </CardContent>
+        </Card>
       </div>
-      
-      <Sheet open={showSheet} onOpenChange={setShowSheet}>
-        <SheetContent
-          side="bottom"
-          className="max-w-lg w-full bottom-0 left-0 right-0 fixed rounded-t-lg bg-white dark:bg-[#181c2a] text-[#23255a] dark:text-white"
-          style={{ top: 'auto' }}
-        >
-          <SheetHeader>
-            <SheetTitle>Mark Payment as Paid</SheetTitle>
-          </SheetHeader>
-          <div className="mt-4">
-            <label className="block mb-2 font-medium">Installment Number</label>
-            <input
-              className="w-full border rounded px-3 py-2 mb-4 bg-white dark:bg-[#23255a] text-[#23255a] dark:text-white"
-              type="text"
-              value={selectedNumber ?? ''}
-              disabled
-            />
-            <label className="block mb-2 font-medium">Cheque Number (optional)</label>
-            <input
-              className="w-full border rounded px-3 py-2 mb-4 bg-white dark:bg-[#23255a] text-[#23255a] dark:text-white"
-              type="text"
-              value={chequeNumber}
-              onChange={e => setChequeNumber(e.target.value)}
-              placeholder="Enter cheque number"
-            />
-          </div>
-          <SheetFooter>
-            <Button 
-              onClick={() => handleStatusChange(true)} 
-              disabled={selectedNumber == null} 
-              className="w-full"
-            >
-              Mark as Paid
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Error</AlertDialogTitle>
-            <AlertDialogDescription>
-              {errorMessage}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowErrorDialog(false)}>OK</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
-);
+  );
 };
-
