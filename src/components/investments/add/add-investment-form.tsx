@@ -400,10 +400,8 @@ interface RenderDebtFieldsProps {
 const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
   const { control, setValue, watch } = useReactHookFormContext<AddInvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
-  console.log("RenderDebtFieldsComponent rendered, watchedDebtSubType:", watchedDebtSubType);
 
   useEffect(() => {
-    console.log("useEffect running, watchedDebtSubType:", watchedDebtSubType);
     if (watchedDebtSubType === 'Certificate') {
       setValue('purchaseDate', ''); 
     } else if (watchedDebtSubType && !watch("purchaseDate")) {
@@ -516,11 +514,6 @@ function removeUndefinedFieldsDeep(obj: any): any {
   return obj;
 }
 
-// Remove undefined fields before saving to Firestore
-function removeUndefinedFields(obj: any) {
-  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
-}
-
 export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add" | "edit"; initialValues?: Partial<AddInvestmentFormValues> }) {
   const { openForm, closeForm } = useForm();
   
@@ -538,7 +531,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
     defaultValues: mode === "edit" && initialValues ? { ...getInitialFormValues(initialValues.type as InvestmentType), ...initialValues } : getInitialFormValues(currentType),
   });
 
-  const { addInvestment, investments, updateRealEstateInvestment } = useInvestments();
+  const { addInvestment, updateRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -559,7 +552,6 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
   const isDedicatedCurrencyMode = preSelectedInvestmentTypeQueryParam === "Currencies" && !preSelectedSecurityId;
   const isDedicatedRealEstateMode = preSelectedInvestmentTypeQueryParam === "Real Estate" && !preSelectedSecurityId;
   const isPreSelectedStockMode = !!preSelectedSecurityId;
-
 
   const effectiveSelectedType = 
       isDedicatedGoldMode ? "Gold" :
@@ -592,11 +584,6 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
       return () => { isMounted = false; };
     }
     const currentFormValues = form.getValues();
-    const baseResetValues: AddInvestmentFormValues = {
-        ...initialFormValuesByType[currentType], 
-        purchaseDate: currentFormValues.purchaseDate || getCurrentDate(), 
-        name: "", 
-    };
 
     // Fix: resetFormWithType and form.reset must use correct type for discriminated union
     const resetFormWithType = (type: InvestmentType) => {
@@ -605,38 +592,21 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
       setPreSelectedSecurityDetails(null);
     };
 
-    console.log("AddInvestmentForm: Reading URL Params");
-    console.log("AddInvestmentForm - preSelectedSecurityId from URL:", preSelectedSecurityId);
-    console.log("AddInvestmentForm - preSelectedInvestmentTypeQueryParam from URL:", preSelectedInvestmentTypeQueryParam);
-
     const calculatedIsDedicatedDebtMode = preSelectedInvestmentTypeQueryParam === "Debt Instruments" && !preSelectedSecurityId;
     const calculatedIsDedicatedGoldMode = preSelectedInvestmentTypeQueryParam === "Gold" && !preSelectedSecurityId;
     const calculatedIsDedicatedCurrencyMode = preSelectedInvestmentTypeQueryParam === "Currencies" && !preSelectedSecurityId;
     const calculatedIsDedicatedRealEstateMode = preSelectedInvestmentTypeQueryParam === "Real Estate" && !preSelectedSecurityId;
     const calculatedIsPreSelectedStockMode = !!preSelectedSecurityId;
 
-    console.log("AddInvestmentForm - Calculated Modes:");
-    console.log("AddInvestmentForm - isDedicatedDebtMode:", calculatedIsDedicatedDebtMode);
-    console.log("AddInvestmentForm - isDedicatedGoldMode:", calculatedIsDedicatedGoldMode);
-    console.log("AddInvestmentForm - isDedicatedCurrencyMode:", calculatedIsDedicatedCurrencyMode);
-    console.log("AddInvestmentForm - isDedicatedRealEstateMode:", calculatedIsDedicatedRealEstateMode);
-    console.log("AddInvestmentForm - isPreSelectedStockMode:", calculatedIsPreSelectedStockMode);
-
-
     if (calculatedIsDedicatedGoldMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Gold Mode settings to form.");
       resetFormWithType("Gold");
     } else if (calculatedIsDedicatedDebtMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Debt Mode settings to form.");
       resetFormWithType("Debt Instruments");
     } else if (calculatedIsDedicatedCurrencyMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Currency Mode settings to form.");
       resetFormWithType("Currencies");
     } else if (calculatedIsDedicatedRealEstateMode) {
-      console.log("AddInvestmentForm - useEffect - Applying Dedicated Real Estate Mode settings to form.");
       resetFormWithType("Real Estate");
     } else if (calculatedIsPreSelectedStockMode && preSelectedSecurityId) {
-      console.log("AddInvestmentForm - useEffect - Applying Pre-selected Stock Mode settings to form.");
       resetFormWithType("Stocks");
       form.setValue("selectedSecurityId", preSelectedSecurityId);
       getListedSecurityById(preSelectedSecurityId).then(security => {
@@ -649,11 +619,9 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
         }
       });
     } else if (preSelectedInvestmentTypeQueryParam) {
-        console.log("AddInvestmentForm - useEffect - Applying general pre-selected type from URL.");
-        resetFormWithType(preSelectedInvestmentTypeQueryParam as InvestmentType);
+      resetFormWithType(preSelectedInvestmentTypeQueryParam as InvestmentType);
     } else {
-        console.log("AddInvestmentForm - useEffect - Applying general mode settings (no specific pre-selection).");
-        resetFormWithType("Stocks"); // fallback to Stocks
+      resetFormWithType("Stocks"); // fallback to Stocks
     }
     return () => { isMounted = false; };
   }, [
@@ -663,14 +631,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
 
 
   async function onSubmit(values: AddInvestmentFormValues) {
-    console.log("[DEBUG] onSubmit called");
-    console.log("[DEBUG] Submitted values:", values);
-    console.log("[DEBUG] form.getValues():", form.getValues());
-    console.log("[DEBUG] form.formState.errors:", form.formState.errors);
     if (form.formState.errors && Object.keys(form.formState.errors).length > 0) {
-      console.log("[DEBUG] Entered error block in onSubmit");
-      // Print detailed errors for debugging
-      console.error('Zod Validation Errors:', JSON.stringify(form.formState.errors, null, 2));
       toast({ title: "Validation Error", description: "Please check the form for errors.", variant: "destructive" });
       return;
     }
@@ -705,10 +666,7 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
     // Remove all parsed* variables, use type narrowing instead
     if (finalInvestmentType === "Stocks" && values.type === "Stocks") {
       const securityToProcessId = values.selectedSecurityId || preSelectedSecurityId;
-      console.log("AddInvestmentForm - onSubmit - Stocks - securityToProcessId:", securityToProcessId);
-      console.log("AddInvestmentForm - onSubmit - Stocks - listedSecurities (sample):", listedSecurities.slice(0,3).map(s => ({id: s.id, name: s.name})));
       const selectedSecurity = listedSecurities.find(sec => sec.id === securityToProcessId) || preSelectedSecurityDetails;
-      console.log("AddInvestmentForm - onSubmit - Stocks - selectedSecurity:", selectedSecurity);
 
 
       if (!selectedSecurity) {
@@ -805,7 +763,6 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
          newInvestment = { ...newInvestmentBase, name: investmentName, amountInvested: values.amountInvested, type: finalInvestmentType as any };
     }
 
-    console.log("AddInvestmentForm - onSubmit - newInvestment object:", newInvestment);
     if (mode === "edit" && initialValues && 'id' in initialValues && initialValues['id']) {
       // Only update for Real Estate investments
       if (values.type === "Real Estate") {
@@ -960,15 +917,6 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
   RenderGeneralFields.displayName = 'RenderGeneralFields';
 
   const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
-  
-  // Log values right before rendering the main form structure
-  console.log("AddInvestmentForm - Rendering - isDedicatedDebtMode:", isDedicatedDebtMode);
-  console.log("AddInvestmentForm - Rendering - isDedicatedGoldMode:", isDedicatedGoldMode);
-  console.log("AddInvestmentForm - Rendering - isDedicatedCurrencyMode:", isDedicatedCurrencyMode);
-  console.log("AddInvestmentForm - Rendering - isDedicatedRealEstateMode:", isDedicatedRealEstateMode);
-  console.log("AddInvestmentForm - Rendering - isPreSelectedStockMode:", isPreSelectedStockMode);
-  console.log("AddInvestmentForm - Rendering - effectiveSelectedType:", effectiveSelectedType);
-
 
   return (
     <div className="pt-2">
@@ -983,7 +931,6 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
         </div>
       )}
       <div className="space-y-4">
-
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -1053,9 +1000,6 @@ export function AddInvestmentForm({ mode = "add", initialValues }: { mode?: "add
             )}
           </form>
         </Form>
-      {/* End of main form rendering */}
-      {/* Debug: show current form values and errors */}
-      {/* Debug output removed for Real Estate edit mode as requested */}
       </div>
     </div>
   );

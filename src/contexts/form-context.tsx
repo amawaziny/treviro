@@ -5,6 +5,7 @@ interface HeaderProps {
   backHref?: string;
   backLabel?: string;
   title?: string;
+  description?: string;
   showNavControls?: boolean;
 }
 

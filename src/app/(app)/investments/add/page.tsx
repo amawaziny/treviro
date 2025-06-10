@@ -1,13 +1,9 @@
 "use client"; // This page needs to be a client component to use next/dynamic with ssr:false
 
-import { Suspense, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Suspense, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'; // Import icons
+import { Loader2 } from 'lucide-react'; // Import icons
 import { useSearchParams } from 'next/navigation'; // Import hook
-import { useListedSecurities } from '@/hooks/use-listed-securities'; // Import hook
-import type { ListedSecurity } from '@/lib/types'; // Import type
-import { useLanguage } from '@/contexts/language-context'; // Import hook
 
 import { useForm } from '@/contexts/form-context';
 
@@ -50,12 +46,7 @@ export default function AddInvestmentPage() {
 function AddInvestmentPageContent() {
   // All hooks must be called at the top level, before any conditional returns
   const searchParams = useSearchParams();
-  const securityId = searchParams.get('securityId');
-  const { language } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
-  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
-  const [security, setSecurity] = useState<ListedSecurity | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Set up header props effect based on investment type
   useEffect(() => {
@@ -122,30 +113,6 @@ function AddInvestmentPageContent() {
       closeForm();
     };
   }, [searchParams.toString(), setHeaderProps, openForm, closeForm]);
-
-  // Fetch security data
-  useEffect(() => {
-    const fetchSecurity = async () => {
-      if (securityId) {
-        try {
-          const data = await getListedSecurityById(securityId);
-          setSecurity(data || null);
-        } catch (error) {
-          console.error('Error fetching security:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSecurity();
-  }, [securityId, getListedSecurityById]);
-
-  if (isLoading) {
-    return <PageLoadingFallback />;
-  }
 
   return (
     <div className="container mx-auto flex-1">

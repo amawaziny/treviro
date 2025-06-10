@@ -10,11 +10,10 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { formatNumberWithSuffix } from "@/lib/utils";
-import { Loader2, ArrowLeft, Plus, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
 import { generateInstallmentSchedule } from "@/lib/installment-utils";
 import type { Installment } from "@/components/investments/real-estate/installment-table";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,15 +25,14 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import { RealEstateInvestment } from "@/lib/types";
 
 export default function RealEstateDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { setHeaderProps } = useForm();
+  const { setHeaderProps, closeForm, openForm } = useForm();
   const { investments, isLoading, updateRealEstateInvestment } = useInvestments();
-  const { language } = useLanguage();
   const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
   const [newPayment, setNewPayment] = useState({
     dueDate: new Date(),
@@ -42,27 +40,34 @@ export default function RealEstateDetailPage() {
     description: "",
   } as { dueDate: Date | undefined; amount: number; description: string });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { toast } = useToast();
 
   const investment = useMemo(() => {
     if (!params?.id) return null;
     return investments.find(
       (inv) => inv.type === "Real Estate" && inv.id === params.id
-    ) as import('@/lib/types').RealEstateInvestment | undefined;
+    ) as RealEstateInvestment | undefined;
   }, [params?.id, investments]);
 
   useEffect(() => {
+    // Open form when component mounts
+    openForm();
+    
     if (investment) {
-      const title = language === 'ar' ? investment.name : investment.name;
+      const title = investment.name;
       setHeaderProps({
         showBackButton: true,
         backHref: '/investments/real-estate',
         title: title,
         showNavControls: false
       });
-    }
-  }, [investment, language, setHeaderProps]);
+    }   
+    
+    // Clean up when component unmounts
+    return () => {
+      closeForm();
+    };
+  }, [investment, setHeaderProps, openForm, closeForm]);
 
   const today = useMemo(() => new Date(), []);
   const [installments, setInstallments] = useState<Installment[]>([]);
