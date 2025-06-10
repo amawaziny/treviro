@@ -134,7 +134,7 @@ export default function IncomePage() {
             </CardHeader>
             <CardContent>
               <span className="text-2xl font-bold text-foreground">
-                {formatCurrencyEGP(filteredIncome.reduce((sum, r) => sum + r.amount, 0))}
+                {formatCurrencyEGPWithSuffix(filteredIncome.reduce((sum, r) => sum + r.amount, 0))}
               </span>
             </CardContent>
           </Card>
@@ -154,51 +154,50 @@ export default function IncomePage() {
                         {formatDateDisplay(record.date)}
                       </span>
                     </div>
-                    {/* Amount and Badges */}
+                    {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="text-2xl font-bold">
-                        {formatCurrencyEGP(record.amount)}
+                        {formatCurrencyEGPWithSuffix(record.amount)}
                       </span>
+                      <div className="ml-auto flex items-center gap-2">
+                        <Link href={`/income/edit/${record.id}`} passHref legacyBehavior>
+                          <Button variant="ghost" size="icon" aria-label="Edit">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Remove {record.description || record.type}</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action will permanently delete this income record. This cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={async () => {
+                                  try {
+                                    await deleteIncomeRecord(record.id);
+                                  } catch (e) {
+                                    console.error('Error deleting income record:', e);
+                                  }
+                                }}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
-                  </div>
-                  {/* Actions Column */}
-                  <div className="flex flex-col items-end gap-2 min-w-[56px] mt-2 md:mt-0">
-                    <Link href={`/income/edit/${record.id}`} passHref legacyBehavior>
-                      <Button variant="ghost" size="icon" className="mb-1" aria-label="Edit">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove {record.description || record.type}</span>
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action will permanently delete this income record. This cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={async () => {
-                              try {
-                                await deleteIncomeRecord(record.id);
-                              } catch (e) {
-                                console.error('Error deleting income record:', e);
-                              }
-                            }}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>
