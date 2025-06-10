@@ -40,7 +40,7 @@ export default function RealEstateDetailPage() {
     dueDate: new Date(),
     amount: 0,
     description: "",
-  });
+  } as { dueDate: Date | undefined; amount: number; description: string });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { toast } = useToast();
@@ -290,35 +290,14 @@ export default function RealEstateDetailPage() {
                     Due Date
                   </Label>
                   <div className="col-span-3">
-                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {newPayment.dueDate ? (
-                            format(newPayment.dueDate, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={newPayment.dueDate}
-                          onSelect={(date) => {
-                            if (date) {
-                              setNewPayment({...newPayment, dueDate: date});
-                              setDatePickerOpen(false);
-                            }
-                          }}
-                          disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} // Disable past dates
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Input
+                      type="date"
+                      value={newPayment.dueDate?.toISOString().split('T')[0] || ''}
+                      onChange={(e) => {
+                        const date = e.target.value ? new Date(e.target.value) : undefined;
+                        setNewPayment({...newPayment, dueDate: date});
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
