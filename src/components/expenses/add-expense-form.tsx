@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AddExpenseSchema, type AddExpenseFormValues, expenseCategories } from "@/lib/schemas";
+import {
+  AddExpenseSchema,
+  type AddExpenseFormValues,
+  expenseCategories,
+} from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -52,7 +55,11 @@ export interface AddExpenseFormProps {
   isEditMode?: boolean;
 }
 
-export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpenseFormProps) {
+export function AddExpenseForm({
+  initialValues,
+  onSubmit,
+  isEditMode,
+}: AddExpenseFormProps) {
   const { addExpenseRecord } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -69,7 +76,10 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
     try {
       // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
       // It also ensures numberOfInstallments is a positive int if isInstallment is true.
-      const expenseDataToSave: Omit<ExpenseRecord, 'id' | 'createdAt' | 'userId'> = {
+      const expenseDataToSave: Omit<
+        ExpenseRecord,
+        "id" | "createdAt" | "userId"
+      > = {
         category: values.category!,
         amount: values.amount, // Zod has coerced this to number
         date: values.date,
@@ -79,7 +89,7 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
         expenseDataToSave.description = values.description;
       }
 
-      if (values.category === 'Credit Card') {
+      if (values.category === "Credit Card") {
         expenseDataToSave.isInstallment = values.isInstallment;
         if (values.isInstallment && values.numberOfInstallments) {
           // Zod ensures values.numberOfInstallments is a number here if isInstallment is true
@@ -106,7 +116,10 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit ? onSubmit : handleInternalSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit ? onSubmit : handleInternalSubmit)}
+        className="space-y-8"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -117,9 +130,9 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
-                    if (value !== 'Credit Card') {
-                      form.setValue('isInstallment', false);
-                      form.setValue('numberOfInstallments', 0);
+                    if (value !== "Credit Card") {
+                      form.setValue("isInstallment", false);
+                      form.setValue("numberOfInstallments", 0);
                     }
                   }}
                   value={field.value || ""}
@@ -131,7 +144,7 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {expenseCategories.map(category => (
+                    {expenseCategories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>
@@ -151,7 +164,11 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 500.00 or 3000.00 for total installment"
-                    value={field.value === undefined || field.value === null ? '' : String(field.value)} // ensure value is always a string
+                    value={
+                      field.value === undefined || field.value === null
+                        ? ""
+                        : String(field.value)
+                    } // ensure value is always a string
                     onChange={field.onChange} // RHF onChange expects string or number
                     allowDecimal={true}
                   />
@@ -167,27 +184,35 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
               <FormItem>
                 <FormLabel>Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value || getCurrentDate()} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || getCurrentDate()}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-           <FormField
+          <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>Description (Optional)</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="e.g., Monthly electricity bill, New TV (installment)" {...field} value={field.value ?? ''}/>
+                  <Textarea
+                    placeholder="e.g., Monthly electricity bill, New TV (installment)"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {watchedCategory === 'Credit Card' && (
+          {watchedCategory === "Credit Card" && (
             <>
               <FormField
                 control={form.control}
@@ -198,17 +223,15 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={(checked) => {
-                           field.onChange(checked);
-                           if (!checked) {
-                               form.setValue('numberOfInstallments', 0);
-                           }
+                          field.onChange(checked);
+                          if (!checked) {
+                            form.setValue("numberOfInstallments", 0);
+                          }
                         }}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Is this an installment plan?
-                      </FormLabel>
+                      <FormLabel>Is this an installment plan?</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -223,7 +246,11 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
                       <FormControl>
                         <NumericInput
                           placeholder="e.g., 3, 6, 12"
-                          value={field.value !== undefined ? field.value.toString() : ""} // always pass string to NumericInput
+                          value={
+                            field.value !== undefined
+                              ? field.value.toString()
+                              : ""
+                          } // always pass string to NumericInput
                           onChange={field.onChange} // RHF onChange expects string or number
                           allowDecimal={false}
                         />
@@ -238,8 +265,10 @@ export function AddExpenseForm({ initialValues, onSubmit, isEditMode }: AddExpen
         </div>
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isEditMode ? 'Update Expense Record' : 'Add Expense Record'}
+          {form.formState.isSubmitting && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
+          {isEditMode ? "Update Expense Record" : "Add Expense Record"}
         </Button>
       </form>
     </Form>

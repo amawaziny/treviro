@@ -1,9 +1,8 @@
-
 "use client";
 
-import { useLanguage } from '@/contexts/language-context';
-import { Button } from '@/components/ui/button';
-import { Globe } from 'lucide-react';
+import { useLanguage } from "@/contexts/language-context";
+import { Button } from "@/components/ui/button";
+import { Globe } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,10 +22,16 @@ export function LanguageToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setLanguage('en')} disabled={language === 'en'}>
+        <DropdownMenuItem
+          onClick={() => setLanguage("en")}
+          disabled={language === "en"}
+        >
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('ar')} disabled={language === 'ar'}>
+        <DropdownMenuItem
+          onClick={() => setLanguage("ar")}
+          disabled={language === "ar"}
+        >
           العربية (Arabic)
         </DropdownMenuItem>
       </DropdownMenuContent>

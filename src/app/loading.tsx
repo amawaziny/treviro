@@ -1,4 +1,4 @@
-import { Coins } from 'lucide-react';
+import { Coins } from "lucide-react";
 
 export default function Loading() {
   // This UI will be shown by Next.js during page navigations

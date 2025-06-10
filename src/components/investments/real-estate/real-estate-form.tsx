@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { propertyTypes } from "@/lib/schemas";
 import { format } from "date-fns";
-import { useLanguage } from '@/contexts/language-context';
+import { useLanguage } from "@/contexts/language-context";
 // Removed Controller import from react-hook-form as FormField handles it
 
 interface RealEstateFormProps {
@@ -53,7 +52,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                   <Input
                     placeholder="e.g., Downtown Apartment or Beach House Plot"
                     {...field}
-                    value={field.value || ''}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -70,7 +69,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                   <Input
                     placeholder="e.g., 123 Main St, Anytown"
                     {...field}
-                    value={field.value || ''}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -86,13 +85,14 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormControl>
                   <NumericInput
                     placeholder="Enter total price at end"
-                    value={field.value || ''}
+                    value={field.value || ""}
                     onChange={field.onChange}
                     allowDecimal={true}
                   />
                 </FormControl>
                 <FormDescription>
-                  The total price of the property at the end of all installments.
+                  The total price of the property at the end of all
+                  installments.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -114,8 +114,10 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {propertyTypes.map(pType => (
-                      <SelectItem key={pType} value={pType}>{pType}</SelectItem>
+                    {propertyTypes.map((pType) => (
+                      <SelectItem key={pType} value={pType}>
+                        {pType}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -128,7 +130,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
 
       {/* Installment Details Section */}
       <div className="space-y-6 mt-6 p-6 border rounded-md">
-        <h3 className="text-lg font-medium text-primary">Installment Details</h3>
+        <h3 className="text-lg font-medium text-primary">
+          Installment Details
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={control}
@@ -156,12 +160,22 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 50000.00"
-                    value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-                    onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
+                    value={
+                      field.value !== undefined && field.value !== null
+                        ? String(field.value)
+                        : ""
+                    }
+                    onChange={(val) =>
+                      field.onChange(
+                        val === undefined || val === null ? "" : String(val),
+                      )
+                    }
                     allowDecimal={true}
                   />
                 </FormControl>
-                <FormDescription>Initial payment made at the start of the contract.</FormDescription>
+                <FormDescription>
+                  Initial payment made at the start of the contract.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -176,12 +190,22 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 10000.00"
-                    value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-                    onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
+                    value={
+                      field.value !== undefined && field.value !== null
+                        ? String(field.value)
+                        : ""
+                    }
+                    onChange={(val) =>
+                      field.onChange(
+                        val === undefined || val === null ? "" : String(val),
+                      )
+                    }
                     allowDecimal={true}
                   />
                 </FormControl>
-                <FormDescription>Amount of each installment payment.</FormDescription>
+                <FormDescription>
+                  Amount of each installment payment.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -192,7 +216,10 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Installment Frequency</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select frequency" />
@@ -204,7 +231,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                     <SelectItem value="Yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>How often do you pay the installment?</FormDescription>
+                <FormDescription>
+                  How often do you pay the installment?
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -217,9 +246,11 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               <FormItem>
                 <FormLabel>Installment Start Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value || ''} />
+                  <Input type="date" {...field} value={field.value || ""} />
                 </FormControl>
-                <FormDescription>When do the installments start?</FormDescription>
+                <FormDescription>
+                  When do the installments start?
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -231,9 +262,11 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               <FormItem>
                 <FormLabel>Installment End Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value || ''} />
+                  <Input type="date" {...field} value={field.value || ""} />
                 </FormControl>
-                <FormDescription>When will the installments end?</FormDescription>
+                <FormDescription>
+                  When will the installments end?
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -247,12 +280,22 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 1000.00"
-                    value={field.value !== undefined && field.value !== null ? String(field.value) : ''}
-                    onChange={val => field.onChange(val === undefined || val === null ? '' : String(val))}
+                    value={
+                      field.value !== undefined && field.value !== null
+                        ? String(field.value)
+                        : ""
+                    }
+                    onChange={(val) =>
+                      field.onChange(
+                        val === undefined || val === null ? "" : String(val),
+                      )
+                    }
                     allowDecimal={true}
                   />
                 </FormControl>
-                <FormDescription>Maintenance fee for the property, if applicable.</FormDescription>
+                <FormDescription>
+                  Maintenance fee for the property, if applicable.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -264,9 +307,11 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               <FormItem>
                 <FormLabel>Maintenance Payment Date (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value || ''} />
+                  <Input type="date" {...field} value={field.value || ""} />
                 </FormControl>
-                <FormDescription>Date when the maintenance payment is due, if applicable.</FormDescription>
+                <FormDescription>
+                  Date when the maintenance payment is due, if applicable.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

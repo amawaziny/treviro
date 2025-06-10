@@ -1,12 +1,12 @@
 "use client";
 
-import { Header } from '@/components/layout/header';
-import { SidebarNav } from '@/components/layout/sidebar-nav';
-import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import { Header } from "@/components/layout/header";
+import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 // Skeleton import might be used by the loading state, ensure it's available if that part of the code is active.
-// import { Skeleton } from '@/components/ui/skeleton'; 
+// import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sidebar,
   SidebarContent,
@@ -15,13 +15,13 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Coins } from 'lucide-react';
-import Link from 'next/link';
-import { useLanguage } from '@/contexts/language-context'; // Added import
-import { BottomTabBar } from '@/components/layout/bottom-tab-bar';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { FormProvider, useForm } from '@/contexts/form-context';
-import { useIsDetailsPage } from '@/hooks/use-route-check';
+import { Coins } from "lucide-react";
+import Link from "next/link";
+import { useLanguage } from "@/contexts/language-context"; // Added import
+import { BottomTabBar } from "@/components/layout/bottom-tab-bar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { FormProvider, useForm } from "@/contexts/form-context";
+import { useIsDetailsPage } from "@/hooks/use-route-check";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,7 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/');
+      router.replace("/");
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -55,19 +55,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FormAwareLayout({ 
-  isMobile, 
-  language, 
-  children 
-}: { 
-  isMobile: boolean; 
-  language: string; 
-  children: React.ReactNode 
+function FormAwareLayout({
+  isMobile,
+  language,
+  children,
+}: {
+  isMobile: boolean;
+  language: string;
+  children: React.ReactNode;
 }) {
   const { isFormOpen } = useForm();
   const { setOpenMobile } = useSidebar(); // This comes from @/components/ui/sidebar
   const isDetailsPage = useIsDetailsPage();
-  
+
   // Close sidebar and bottom tabs when form is open or on details page
   React.useEffect(() => {
     if (isFormOpen) {
@@ -79,12 +79,18 @@ function FormAwareLayout({
     <>
       {/* Only render Sidebar on desktop/tablet and when form is not open */}
       {!isMobile && !isFormOpen && (
-        <Sidebar variant="sidebar" collapsible="icon" side={language === 'ar' ? 'right' : 'left'}>
+        <Sidebar
+          variant="sidebar"
+          collapsible="icon"
+          side={language === "ar" ? "right" : "left"}
+        >
           <SidebarRail />
           <SidebarHeader className="p-4 justify-center items-center group-data-[collapsible=icon]:justify-start">
             <Link href="/dashboard" className="flex items-center gap-2">
               <Coins className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">Treviro</span>
+              <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">
+                Treviro
+              </span>
             </Link>
           </SidebarHeader>
           <SidebarContent>
@@ -92,11 +98,14 @@ function FormAwareLayout({
           </SidebarContent>
         </Sidebar>
       )}
-      <SidebarInset> {/* This component renders a <main> tag that is flex flex-col */}
+      <SidebarInset>
+        {" "}
+        {/* This component renders a <main> tag that is flex flex-col */}
         <Header /> {/* This is the app's main top bar for the content area */}
         {/* This div will wrap the page content, provide padding, and grow to fill remaining vertical space */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
-          {children} {/* This is the page-specific content, e.g., DashboardPage */}
+          {children}{" "}
+          {/* This is the page-specific content, e.g., DashboardPage */}
         </div>
         {!isFormOpen && !isDetailsPage && <BottomTabBar />}
       </SidebarInset>

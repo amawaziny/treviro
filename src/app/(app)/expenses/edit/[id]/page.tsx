@@ -4,16 +4,26 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { AddExpenseForm } from "@/components/expenses/add-expense-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/contexts/language-context';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
-import { useForm } from '@/contexts/form-context';
+import { useForm } from "@/contexts/form-context";
 import { AddExpenseFormValues } from "@/lib/schemas";
 
-export default function EditExpensePage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditExpensePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { expenseRecords, updateExpenseRecord } = useInvestments();
   const router = useRouter();
   const { id: expenseId } = React.use(params);
@@ -22,7 +32,7 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
   // Find the expense record by id
   const expense = React.useMemo(
     () => expenseRecords.find((rec) => rec.id === expenseId),
-    [expenseRecords, expenseId]
+    [expenseRecords, expenseId],
   );
 
   if (!expense) {
@@ -30,7 +40,7 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
   }
 
   const { language } = useLanguage();
-  const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
+  const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   React.useEffect(() => {
     // Open form when component mounts
@@ -39,10 +49,11 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
     setHeaderProps({
       showBackButton: true,
       showNavControls: false,
-      title: 'Edit Expense Record',
-      description: 'Update your expense details, such as installments, credit card payments, subscriptions, or other spending.',
-      backLabel: 'Back to Expenses',
-      backHref: '/expenses'
+      title: "Edit Expense Record",
+      description:
+        "Update your expense details, such as installments, credit card payments, subscriptions, or other spending.",
+      backLabel: "Back to Expenses",
+      backHref: "/expenses",
     });
 
     // Clean up when component unmounts
@@ -56,25 +67,32 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
       <Card>
         <CardHeader>
           <CardTitle>Edit Expense Record</CardTitle>
-          <CardDescription>Update your expense details, such as installments, credit card payments, subscriptions, or other spending.</CardDescription>
+          <CardDescription>
+            Update your expense details, such as installments, credit card
+            payments, subscriptions, or other spending.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <AddExpenseForm
             initialValues={{
               category: expense.category,
-              description: expense.description ?? '',
+              description: expense.description ?? "",
               //@ts-expect-error
-              amount: expense.amount?.toString() ?? '',
+              amount: expense.amount?.toString() ?? "",
               date: expense.date,
               isInstallment: expense.isInstallment ?? false,
               //@ts-expect-error
-              numberOfInstallments: expense.numberOfInstallments ? expense.numberOfInstallments.toString() : '',
+              numberOfInstallments: expense.numberOfInstallments
+                ? expense.numberOfInstallments.toString()
+                : "",
             }}
             onSubmit={async (values: AddExpenseFormValues) => {
               await updateExpenseRecord(expenseId, {
                 ...values,
                 amount: Number(values.amount),
-                numberOfInstallments: values.numberOfInstallments ? Number(values.numberOfInstallments) : undefined,
+                numberOfInstallments: values.numberOfInstallments
+                  ? Number(values.numberOfInstallments)
+                  : undefined,
               });
               router.push("/expenses");
             }}
@@ -85,4 +103,3 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * @fileOverview Analyzes currency exchange rates for transactions and notifies users of significant deviations from historical rates.
@@ -8,21 +8,25 @@
  * - CurrencyFluctuationAnalysisOutput - The return type for the currencyFluctuationAnalysis function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from "@/ai/genkit";
+import { z } from "genkit";
 
 const CurrencyFluctuationAnalysisInputSchema = z.object({
   transactionCurrency: z
     .string()
-    .describe('The currency of the transaction (e.g., USD).'),
-  transactionAmount: z.number().describe('The amount of the transaction.'),
+    .describe("The currency of the transaction (e.g., USD)."),
+  transactionAmount: z.number().describe("The amount of the transaction."),
   transactionDate: z
     .string()
-    .describe('The date of the transaction in ISO format (YYYY-MM-DD).'),
-  baseCurrency: z.string().describe('The base currency for comparison (e.g., EUR).'),
+    .describe("The date of the transaction in ISO format (YYYY-MM-DD)."),
+  baseCurrency: z
+    .string()
+    .describe("The base currency for comparison (e.g., EUR)."),
   currentExchangeRate: z
     .number()
-    .describe('The current exchange rate between the transaction currency and the base currency.'),
+    .describe(
+      "The current exchange rate between the transaction currency and the base currency.",
+    ),
 });
 
 export type CurrencyFluctuationAnalysisInput = z.infer<
@@ -33,16 +37,16 @@ const CurrencyFluctuationAnalysisOutputSchema = z.object({
   significantDeviation: z
     .boolean()
     .describe(
-      'Whether the current exchange rate deviates significantly from the historical rate.'
+      "Whether the current exchange rate deviates significantly from the historical rate.",
     ),
   deviationPercentage: z
     .number()
     .describe(
-      'The percentage of deviation between the current and historical exchange rates.'
+      "The percentage of deviation between the current and historical exchange rates.",
     ),
   analysisSummary: z
     .string()
-    .describe('A summary of the currency fluctuation analysis.'),
+    .describe("A summary of the currency fluctuation analysis."),
 });
 
 export type CurrencyFluctuationAnalysisOutput = z.infer<
@@ -50,15 +54,15 @@ export type CurrencyFluctuationAnalysisOutput = z.infer<
 >;
 
 export async function currencyFluctuationAnalysis(
-  input: CurrencyFluctuationAnalysisInput
+  input: CurrencyFluctuationAnalysisInput,
 ): Promise<CurrencyFluctuationAnalysisOutput> {
   return currencyFluctuationAnalysisFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'currencyFluctuationAnalysisPrompt',
-  input: {schema: CurrencyFluctuationAnalysisInputSchema},
-  output: {schema: CurrencyFluctuationAnalysisOutputSchema},
+  name: "currencyFluctuationAnalysisPrompt",
+  input: { schema: CurrencyFluctuationAnalysisInputSchema },
+  output: { schema: CurrencyFluctuationAnalysisOutputSchema },
   prompt: `You are an expert financial analyst specializing in currency exchange rates.
 
 You are provided with the details of a transaction, including the currency, amount, and date.
@@ -86,12 +90,12 @@ Output the results in JSON format.
 
 const currencyFluctuationAnalysisFlow = ai.defineFlow(
   {
-    name: 'currencyFluctuationAnalysisFlow',
+    name: "currencyFluctuationAnalysisFlow",
     inputSchema: CurrencyFluctuationAnalysisInputSchema,
     outputSchema: CurrencyFluctuationAnalysisOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const { output } = await prompt(input);
     return output!;
-  }
+  },
 );

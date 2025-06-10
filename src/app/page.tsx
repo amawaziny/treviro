@@ -1,22 +1,22 @@
-
 "use client";
 
-import { AuthForm } from '@/components/auth/auth-form';
-import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-
+import { AuthForm } from "@/components/auth/auth-form";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    console.log(`LoginPage Effect: isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`);
+    console.log(
+      `LoginPage Effect: isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`,
+    );
     if (!isLoading && isAuthenticated) {
       console.log("LoginPage: Redirecting to /dashboard");
-      router.replace('/dashboard');
+      router.replace("/dashboard");
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
       </div>
     );
   }
-  
+
   // console.log(`LoginPage Render: Showing AuthForm. isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`);
   return <AuthForm />;
 }

@@ -6,7 +6,7 @@ import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { formatNumberWithSuffix } from "@/lib/utils";
 import { startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
-import { useTheme } from 'next-themes';
+import { useTheme } from "next-themes";
 
 const INVESTMENT_TYPE_LABELS: Record<string, string> = {
   "Real Estate": "Real Estate",
@@ -44,7 +44,7 @@ export function MonthlyInvestmentDistributionChart() {
         fixedEstimates,
         month: now,
       }),
-    [expenseRecords, investments, fixedEstimates, now]
+    [expenseRecords, investments, fixedEstimates, now],
   );
   const realEstateInstallmentsMonthly =
     cashFlowSummary.realEstateInstallmentsMonthly || 0;
@@ -69,7 +69,7 @@ export function MonthlyInvestmentDistributionChart() {
         id: "Stocks",
         label: "Stocks",
         value: cashFlowSummary.totalStockInvestmentThisMonth,
-        color: resolvedTheme === 'dark' ? '#ff7b6b' : '#e05a47',
+        color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
       });
     }
     if (cashFlowSummary.totalGoldInvestmentThisMonth > 0) {
@@ -77,7 +77,7 @@ export function MonthlyInvestmentDistributionChart() {
         id: "Gold",
         label: "Gold",
         value: cashFlowSummary.totalGoldInvestmentThisMonth,
-        color: '#e6b93e',
+        color: "#e6b93e",
       });
     }
     if (cashFlowSummary.totalDebtInvestmentThisMonth > 0) {
@@ -85,7 +85,7 @@ export function MonthlyInvestmentDistributionChart() {
         id: "Debt instruments",
         label: "Debt instruments",
         value: cashFlowSummary.totalDebtInvestmentThisMonth,
-        color: resolvedTheme === 'dark' ? '#b6d037' : '#5e9c1c',
+        color: resolvedTheme === "dark" ? "#b6d037" : "#5e9c1c",
       });
     }
     if (cashFlowSummary.totalCurrencyInvestmentThisMonth > 0) {
@@ -93,7 +93,7 @@ export function MonthlyInvestmentDistributionChart() {
         id: "Currencies",
         label: "Currencies",
         value: cashFlowSummary.totalCurrencyInvestmentThisMonth,
-        color: resolvedTheme === 'dark' ? '#45818e' : '#7bb661',
+        color: resolvedTheme === "dark" ? "#45818e" : "#7bb661",
       });
     }
     if (realEstateInstallmentsMonthly > 0) {
@@ -101,7 +101,7 @@ export function MonthlyInvestmentDistributionChart() {
         id: "Real Estate",
         label: "Real Estate",
         value: realEstateInstallmentsMonthly,
-        color: resolvedTheme === 'dark' ? '#7bb661' : '#b6d037',
+        color: resolvedTheme === "dark" ? "#7bb661" : "#b6d037",
       });
     }
     return data;

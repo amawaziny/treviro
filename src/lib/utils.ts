@@ -1,9 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { format } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 // Helper function to identify gold-related funds
@@ -11,15 +11,20 @@ export function isGoldRelatedFund(fundType?: string): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
   const goldKeywords = ["gold", "precious metal", "gld", "bullion"]; // Add more keywords if needed
-  return goldKeywords.some(keyword => lowerFundType.includes(keyword));
+  return goldKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
 // Helper function to identify real estate-related funds (REITs)
 export function isRealEstateRelatedFund(fundType?: string): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
-  const realEstateKeywords = ["reit", "real estate", "property fund", "mortgage"]; // Add more keywords if needed
-  return realEstateKeywords.some(keyword => lowerFundType.includes(keyword));
+  const realEstateKeywords = [
+    "reit",
+    "real estate",
+    "property fund",
+    "mortgage",
+  ]; // Add more keywords if needed
+  return realEstateKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
 // Helper function to identify debt-related funds
@@ -27,46 +32,44 @@ export function isDebtRelatedFund(fundType?: string): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
   const debtKeywords = [
-    "debt", 
-    "bond", 
-    "fixed income", 
-    "money market", 
-    "cash management", 
+    "debt",
+    "bond",
+    "fixed income",
+    "money market",
+    "cash management",
     "treasury",
-    "certificate" // For funds that might invest in CDs
+    "certificate", // For funds that might invest in CDs
   ];
-  return debtKeywords.some(keyword => lowerFundType.includes(keyword));
+  return debtKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
 export function formatNumberWithSuffix(num: number): string {
   const absNum = Math.abs(num);
-  let suffix = '';
+  let suffix = "";
   let value = absNum;
 
   if (absNum >= 1000000) {
     value = absNum / 1000000;
-    suffix = 'M';
+    suffix = "M";
   } else if (absNum >= 1000) {
     value = absNum / 1000;
-    suffix = 'K';
+    suffix = "K";
   }
 
-  let formatted = value.toFixed(1).replace(/\.0$/, '');
+  let formatted = value.toFixed(1).replace(/\.0$/, "");
   if (suffix) formatted += suffix;
 
-  return (num < 0 ? '-' : '') + formatted;
+  return (num < 0 ? "-" : "") + formatted;
 }
-
-
 
 /**
  * Formats a date as 'Month YYYY' (e.g., 'June 2025').
  * Accepts either a Date object or a date string.
  */
 export function formatMonthYear(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  return format(d, 'MMMM yyyy');
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "";
+  return format(d, "MMMM yyyy");
 }
 
 // Checks if a given date is in the current month
@@ -74,13 +77,22 @@ export function isInCurrentMonth(date: Date | string): boolean {
   const d = typeof date === "string" ? new Date(date) : date;
   if (isNaN(d.getTime())) return false;
   const now = new Date();
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  return (
+    d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  );
 }
 
 // Helper function to identify stock-related funds
 export function isStockRelatedFund(fundType?: string): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
-  const stockKeywords = ["stock", "equity", "index", "growth", "value", "dividend"]; // Add more keywords as needed
-  return stockKeywords.some(keyword => lowerFundType.includes(keyword));
+  const stockKeywords = [
+    "stock",
+    "equity",
+    "index",
+    "growth",
+    "value",
+    "dividend",
+  ]; // Add more keywords as needed
+  return stockKeywords.some((keyword) => lowerFundType.includes(keyword));
 }

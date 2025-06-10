@@ -1,13 +1,12 @@
-
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { useInvestments } from '@/hooks/use-investments';
-import { useLanguage } from '@/contexts/language-context';
-import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
+import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { useInvestments } from "@/hooks/use-investments";
+import { useLanguage } from "@/contexts/language-context";
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -17,16 +16,29 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-  AlertDialogAction
-} from '@/components/ui/alert-dialog';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, TrendingDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { ExpenseRecord } from '@/lib/types';
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, TrendingDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { ExpenseRecord } from "@/lib/types";
 // Removed FinancialSettingsForm import as its functionality is moved
 
 export default function ExpensesPage() {
@@ -46,7 +58,7 @@ export default function ExpensesPage() {
     const currentMonth = currentMonthStart.getMonth();
     const currentYear = currentMonthStart.getFullYear();
     const now = new Date();
-    
+
     // Helper: is record ended?
     function isEnded(record: ExpenseRecord) {
       if (record.isInstallment && record.numberOfInstallments && record.date) {
@@ -61,7 +73,7 @@ export default function ExpensesPage() {
     // Helper: is record required this month?
     function isRequiredThisMonth(record: ExpenseRecord) {
       if (
-        record.category === 'Credit Card' &&
+        record.category === "Credit Card" &&
         record.isInstallment &&
         record.numberOfInstallments &&
         record.date
@@ -70,15 +82,19 @@ export default function ExpensesPage() {
         const startMonth = startDate.getMonth();
         const startYear = startDate.getFullYear();
         const installmentMonths = record.numberOfInstallments;
-        const monthsSinceStart = (currentYear - startYear) * 12 + (currentMonth - startMonth);
+        const monthsSinceStart =
+          (currentYear - startYear) * 12 + (currentMonth - startMonth);
         return monthsSinceStart >= 0 && monthsSinceStart < installmentMonths;
       } else if (record.date) {
-        return isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd });
+        return isWithinInterval(new Date(record.date), {
+          start: currentMonthStart,
+          end: currentMonthEnd,
+        });
       }
       return false;
     }
 
-    let filtered = recordsToFilter.filter(record => {
+    let filtered = recordsToFilter.filter((record) => {
       // Hide ended if not showing ended
       if (!showEnded && isEnded(record)) return false;
       // If not showAll, only show required this month
@@ -87,67 +103,104 @@ export default function ExpensesPage() {
     });
 
     // For display, augment records as before
-    return filtered.flatMap(record => {
-      if (
-        record.category === 'Credit Card' &&
-        record.isInstallment &&
-        record.numberOfInstallments &&
-        record.date
-      ) {
-        const startDate = new Date(record.date);
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const installmentMonths = record.numberOfInstallments;
-        const monthsSinceStart = (currentYear - startYear) * 12 + (currentMonth - startMonth);
-        if (monthsSinceStart >= 0 && monthsSinceStart < installmentMonths) {
-          return [{
-            ...record,
-            _originalAmount: record.amount,
-            _requiredAmount: record.amount / record.numberOfInstallments,
-            installmentMonthIndex: monthsSinceStart + 1,
-            numberOfInstallments: installmentMonths,
-            installmentStartDate: startDate,
-            _isRequiredThisMonth: true,
-            _isEnded: isEnded(record),
-          }];
+    return filtered
+      .flatMap((record) => {
+        if (
+          record.category === "Credit Card" &&
+          record.isInstallment &&
+          record.numberOfInstallments &&
+          record.date
+        ) {
+          const startDate = new Date(record.date);
+          const startMonth = startDate.getMonth();
+          const startYear = startDate.getFullYear();
+          const installmentMonths = record.numberOfInstallments;
+          const monthsSinceStart =
+            (currentYear - startYear) * 12 + (currentMonth - startMonth);
+          if (monthsSinceStart >= 0 && monthsSinceStart < installmentMonths) {
+            return [
+              {
+                ...record,
+                _originalAmount: record.amount,
+                _requiredAmount: record.amount / record.numberOfInstallments,
+                installmentMonthIndex: monthsSinceStart + 1,
+                numberOfInstallments: installmentMonths,
+                installmentStartDate: startDate,
+                _isRequiredThisMonth: true,
+                _isEnded: isEnded(record),
+              },
+            ];
+          } else {
+            return [
+              {
+                ...record,
+                _isRequiredThisMonth: false,
+                _isEnded: isEnded(record),
+              },
+            ];
+          }
+        } else if (
+          record.date &&
+          isWithinInterval(new Date(record.date), {
+            start: currentMonthStart,
+            end: currentMonthEnd,
+          })
+        ) {
+          return [
+            {
+              ...record,
+              _originalAmount: record.amount,
+              _requiredAmount: record.amount,
+              _isRequiredThisMonth: true,
+              _isEnded: isEnded(record),
+            },
+          ];
         } else {
-          return [{ ...record, _isRequiredThisMonth: false, _isEnded: isEnded(record) }];
+          return [
+            {
+              ...record,
+              _isRequiredThisMonth: false,
+              _isEnded: isEnded(record),
+            },
+          ];
         }
-      } else if (record.date && isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd })) {
-        return [{ ...record, _originalAmount: record.amount, _requiredAmount: record.amount, _isRequiredThisMonth: true, _isEnded: isEnded(record) }];
-      } else {
-        return [{ ...record, _isRequiredThisMonth: false, _isEnded: isEnded(record) }];
-      }
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenseRecords, currentMonthStart, currentMonthEnd, showAll, showEnded]);
 
-
-
   const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString; 
-      return format(date, 'dd-MM-yyyy');
+      if (isNaN(date.getTime())) return dateString;
+      return format(date, "dd-MM-yyyy");
     } catch (e) {
-      return dateString; 
+      return dateString;
     }
   };
 
   const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
-    return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    if (value === undefined || value === null || isNaN(value))
+      return "EGP 0.00";
+    return new Intl.NumberFormat("en-EG", {
+      style: "currency",
+      currency: "EGP",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   };
 
   const formatNumberWithSuffix = (num: number | undefined): string => {
-    if (num === undefined || num === null || isNaN(num)) return '0';
-    if (num === 0) return '0';
+    if (num === undefined || num === null || isNaN(num)) return "0";
+    if (num === 0) return "0";
     const absNum = Math.abs(num);
-    if (absNum >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-    if (absNum >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (absNum >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    return num.toFixed(2).replace(/\.00$/, ''); // Keep two decimal places for smaller numbers
+    if (absNum >= 1000000000)
+      return (num / 1000000000).toFixed(1).replace(/\.0$/, "") + "B";
+    if (absNum >= 1000000)
+      return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (absNum >= 1000)
+      return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    return num.toFixed(2).replace(/\.00$/, ""); // Keep two decimal places for smaller numbers
   };
 
   if (isLoading) {
@@ -160,8 +213,12 @@ export default function ExpensesPage() {
         <Separator />
         {/* Removed skeleton for Monthly Fixed Estimates card */}
         <Card className="mt-6">
-          <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
-          <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
         </Card>
       </div>
     );
@@ -170,8 +227,13 @@ export default function ExpensesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Expenses Management</h1>
-        <p className="text-muted-foreground text-sm">Log and manage all your itemized expenses, including credit card payments and utility bills.</p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          Expenses Management
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Log and manage all your itemized expenses, including credit card
+          payments and utility bills.
+        </p>
       </div>
       <Separator />
 
@@ -204,24 +266,34 @@ export default function ExpensesPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingDown className="mr-2 h-4 w-4 text-primary" />
-                {showAll ? 'Total Spent (All)' : 'Total Spent This Month'}
+                {showAll ? "Total Spent (All)" : "Total Spent This Month"}
               </CardTitle>
               <CardDescription>
                 {showAll
                   ? "View and manage all your recorded expenses, including installments and one-time payments."
-                  : `See and manage all expenses required for ${format(new Date(), 'MMMM yyyy')}, including current installments and one-time payments.`}
+                  : `See and manage all expenses required for ${format(new Date(), "MMMM yyyy")}, including current installments and one-time payments.`}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <span className="text-2xl font-bold text-foreground">
-                {formatCurrencyEGP(filteredExpenses.reduce((sum, r) => sum + (r._requiredAmount || 0), 0))}
+                {formatCurrencyEGP(
+                  filteredExpenses.reduce(
+                    (sum, r) => sum + (r._requiredAmount || 0),
+                    0,
+                  ),
+                )}
               </span>
             </CardContent>
           </Card>
 
           <div className="grid gap-4 mt-8">
-            {filteredExpenses.map(record => (
-              <Card key={record.id + (record.installmentMonthIndex || '')} className={record._isRequiredThisMonth ? 'border-yellow-300' : ''}>
+            {filteredExpenses.map((record) => (
+              <Card
+                key={record.id + (record.installmentMonthIndex || "")}
+                className={
+                  record._isRequiredThisMonth ? "border-yellow-300" : ""
+                }
+              >
                 <CardContent className="flex flex-col md:flex-row md:items-start md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
                   <div className="flex-1 min-w-0">
@@ -233,16 +305,21 @@ export default function ExpensesPage() {
                       <span className="text-xs text-muted-foreground">
                         {formatDateDisplay(record.date)}
                       </span>
-                      {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' && (
-                        <div className="flex items-center gap-2">
-                          <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
-                            Installment {record.installmentMonthIndex}/{record.numberOfInstallments}
-                          </span>
-                          {record._isRequiredThisMonth && (
-                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">Required This Month</span>
-                          )}
-                        </div>
-                      )}
+                      {record.isInstallment &&
+                        record.numberOfInstallments &&
+                        record.category === "Credit Card" && (
+                          <div className="flex items-center gap-2">
+                            <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
+                              Installment {record.installmentMonthIndex}/
+                              {record.numberOfInstallments}
+                            </span>
+                            {record._isRequiredThisMonth && (
+                              <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
+                                Required This Month
+                              </span>
+                            )}
+                          </div>
+                        )}
                     </div>
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
@@ -250,23 +327,35 @@ export default function ExpensesPage() {
                         EGP {formatNumberWithSuffix(record._requiredAmount)}
                       </span>
                       <div className="flex items-center gap-2">
-                        <Link href={`/expenses/edit/${record.id}`} passHref legacyBehavior>
+                        <Link
+                          href={`/expenses/edit/${record.id}`}
+                          passHref
+                          legacyBehavior
+                        >
                           <Button variant="ghost" size="icon" aria-label="Edit">
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-destructive"
+                              aria-label="Delete"
+                            >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Remove {record.description || record.category}</span>
+                              <span className="sr-only">
+                                Remove {record.description || record.category}
+                              </span>
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action will permanently delete this expense record. This cannot be undone.
+                                This action will permanently delete this expense
+                                record. This cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -289,11 +378,17 @@ export default function ExpensesPage() {
                       </div>
                     </div>
                     {/* Installment Details */}
-                    {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Installment: EGP {formatNumberWithSuffix(record.amount / record.numberOfInstallments)} x {record.numberOfInstallments} months
-                      </div>
-                    )}
+                    {record.isInstallment &&
+                      record.numberOfInstallments &&
+                      record.category === "Credit Card" && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Installment: EGP{" "}
+                          {formatNumberWithSuffix(
+                            record.amount / record.numberOfInstallments,
+                          )}{" "}
+                          x {record.numberOfInstallments} months
+                        </div>
+                      )}
                   </div>
                 </CardContent>
               </Card>
@@ -310,7 +405,8 @@ export default function ExpensesPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any itemized expenses for {format(new Date(), 'MMMM yyyy')} yet.
+              You haven't added any itemized expenses for{" "}
+              {format(new Date(), "MMMM yyyy")} yet.
             </p>
           </CardContent>
         </Card>
@@ -320,7 +416,7 @@ export default function ExpensesPage() {
         <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === 'ar' ? 'left-8' : 'right-8'} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new expense record"
         >
           <Plus className="h-7 w-7" />

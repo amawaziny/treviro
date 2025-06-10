@@ -1,10 +1,15 @@
-
 "use client";
 
-import { useAuth } from '@/hooks/use-auth';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn, Loader2 } from 'lucide-react'; 
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { LogIn, Loader2 } from "lucide-react";
 
 export function AuthForm() {
   const { login, isLoading, isProcessingLogin } = useAuth();
@@ -16,11 +21,18 @@ export function AuthForm() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-primary">Treviro</CardTitle>
+          <CardTitle className="text-3xl font-bold text-primary">
+            Treviro
+          </CardTitle>
           <CardDescription>Securely manage your investments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={login} className="w-full" size="lg" disabled={showSpinner}>
+          <Button
+            onClick={login}
+            className="w-full"
+            size="lg"
+            disabled={showSpinner}
+          >
             {showSpinner ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

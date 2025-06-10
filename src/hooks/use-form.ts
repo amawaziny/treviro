@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 export interface FormState {
   [key: string]: any;
@@ -16,25 +16,28 @@ export function useForm(options: FormOptions = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = useCallback((name: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      if (onSubmit) {
-        await onSubmit(formData);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+      try {
+        if (onSubmit) {
+          await onSubmit(formData);
+        }
+      } catch (error) {
+        console.error("Form submission failed:", error);
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error('Form submission failed:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formData, onSubmit]);
+    },
+    [formData, onSubmit],
+  );
 
   const resetForm = useCallback(() => {
     setFormData(initialData);

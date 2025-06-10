@@ -1,11 +1,16 @@
-
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { useForm } from "@/contexts/form-context";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
@@ -32,7 +37,8 @@ export default function RealEstateDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { setHeaderProps, closeForm, openForm } = useForm();
-  const { investments, isLoading, updateRealEstateInvestment } = useInvestments();
+  const { investments, isLoading, updateRealEstateInvestment } =
+    useInvestments();
   const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
   const [newPayment, setNewPayment] = useState({
     dueDate: new Date(),
@@ -45,24 +51,24 @@ export default function RealEstateDetailPage() {
   const investment = useMemo(() => {
     if (!params?.id) return null;
     return investments.find(
-      (inv) => inv.type === "Real Estate" && inv.id === params.id
+      (inv) => inv.type === "Real Estate" && inv.id === params.id,
     ) as RealEstateInvestment | undefined;
   }, [params?.id, investments]);
 
   useEffect(() => {
     // Open form when component mounts
     openForm();
-    
+
     if (investment) {
       const title = investment.name;
       setHeaderProps({
         showBackButton: true,
-        backHref: '/investments/real-estate',
+        backHref: "/investments/real-estate",
         title: title,
-        showNavControls: false
+        showNavControls: false,
       });
-    }   
-    
+    }
+
     // Clean up when component unmounts
     return () => {
       closeForm();
@@ -78,101 +84,143 @@ export default function RealEstateDetailPage() {
     let currentInstallments: Installment[] = [];
 
     if (investment.installments && investment.installments.length > 0) {
-        currentInstallments = investment.installments.map(inst => ({
-            ...inst,
-            description: inst.description || '',
-            isMaintenance: inst.isMaintenance || (inst.description === 'Maintenance' && inst.dueDate === investment.maintenancePaymentDate),
-        }));
-    } else if (investment.paidInstallments) { // Legacy or auto-generation path
-        const generatedInstallments = generateInstallmentSchedule(
-            investment,
-            investment.paidInstallments,
-            today
-        );
-        currentInstallments = generatedInstallments.map(inst => ({
-            ...inst,
-            description: inst.description || '',
-            isMaintenance: false, 
-        }));
+      currentInstallments = investment.installments.map((inst) => ({
+        ...inst,
+        description: inst.description || "",
+        isMaintenance:
+          inst.isMaintenance ||
+          (inst.description === "Maintenance" &&
+            inst.dueDate === investment.maintenancePaymentDate),
+      }));
+    } else if (investment.paidInstallments) {
+      // Legacy or auto-generation path
+      const generatedInstallments = generateInstallmentSchedule(
+        investment,
+        investment.paidInstallments,
+        today,
+      );
+      currentInstallments = generatedInstallments.map((inst) => ({
+        ...inst,
+        description: inst.description || "",
+        isMaintenance: false,
+      }));
     }
-    
-    // Check for and add the main maintenance payment if defined on the investment
-    if (investment.maintenanceAmount && investment.maintenanceAmount > 0 && investment.maintenancePaymentDate) {
-        const maintenanceDateStr = investment.maintenancePaymentDate;
-        // Check if a maintenance payment for this specific date and amount (and description) already exists
-        const alreadyHasThisMaintenance = currentInstallments.some(
-            inst => inst.isMaintenance && inst.dueDate === maintenanceDateStr && inst.amount === investment.maintenanceAmount
-        );
 
-        if (!alreadyHasThisMaintenance) {
-            const maxNumber = currentInstallments.length > 0 
-                ? Math.max(...currentInstallments.map(i => i.number), 0) 
-                : 0;
-            
-            currentInstallments.push({
-                number: maxNumber + 1,
-                dueDate: maintenanceDateStr,
-                amount: investment.maintenanceAmount,
-                status: 'Unpaid', 
-                description: 'Maintenance',
-                isMaintenance: true,
-            });
-        }
+    // Check for and add the main maintenance payment if defined on the investment
+    if (
+      investment.maintenanceAmount &&
+      investment.maintenanceAmount > 0 &&
+      investment.maintenancePaymentDate
+    ) {
+      const maintenanceDateStr = investment.maintenancePaymentDate;
+      // Check if a maintenance payment for this specific date and amount (and description) already exists
+      const alreadyHasThisMaintenance = currentInstallments.some(
+        (inst) =>
+          inst.isMaintenance &&
+          inst.dueDate === maintenanceDateStr &&
+          inst.amount === investment.maintenanceAmount,
+      );
+
+      if (!alreadyHasThisMaintenance) {
+        const maxNumber =
+          currentInstallments.length > 0
+            ? Math.max(...currentInstallments.map((i) => i.number), 0)
+            : 0;
+
+        currentInstallments.push({
+          number: maxNumber + 1,
+          dueDate: maintenanceDateStr,
+          amount: investment.maintenanceAmount,
+          status: "Unpaid",
+          description: "Maintenance",
+          isMaintenance: true,
+        });
+      }
     }
-    
-    currentInstallments.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+    currentInstallments.sort(
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+    );
     setInstallments(currentInstallments);
 
     const totalPaidPurchaseInstallments = currentInstallments
-        .filter(inst => inst.status === 'Paid' && !inst.isMaintenance)
-        .reduce((sum, inst) => sum + (inst.amount || 0), 0);
-    
-    const currentAmountInvested = investment.amountInvested || 0;
-    const hasMeaningfulDifference = Math.abs(totalPaidPurchaseInstallments - currentAmountInvested) > 0.01;
+      .filter((inst) => inst.status === "Paid" && !inst.isMaintenance)
+      .reduce((sum, inst) => sum + (inst.amount || 0), 0);
 
-    if (hasMeaningfulDifference && currentInstallments.some(inst => !inst.isMaintenance)) {
-        const syncAmountInvested = async () => {
-            try {
-                await updateRealEstateInvestment(investment.id, { amountInvested: totalPaidPurchaseInstallments });
-            } catch (error) {
-                console.error("Failed to sync amountInvested based on paid purchase installments:", error);
-            }
-        };
-        syncAmountInvested();
+    const currentAmountInvested = investment.amountInvested || 0;
+    const hasMeaningfulDifference =
+      Math.abs(totalPaidPurchaseInstallments - currentAmountInvested) > 0.01;
+
+    if (
+      hasMeaningfulDifference &&
+      currentInstallments.some((inst) => !inst.isMaintenance)
+    ) {
+      const syncAmountInvested = async () => {
+        try {
+          await updateRealEstateInvestment(investment.id, {
+            amountInvested: totalPaidPurchaseInstallments,
+          });
+        } catch (error) {
+          console.error(
+            "Failed to sync amountInvested based on paid purchase installments:",
+            error,
+          );
+        }
+      };
+      syncAmountInvested();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [investment?.id, JSON.stringify(investment?.installments), JSON.stringify(investment?.paidInstallments), investment?.amountInvested, investment?.maintenanceAmount, investment?.maintenancePaymentDate, today]);
-
+  }, [
+    investment?.id,
+    JSON.stringify(investment?.installments),
+    JSON.stringify(investment?.paidInstallments),
+    investment?.amountInvested,
+    investment?.maintenanceAmount,
+    investment?.maintenancePaymentDate,
+    today,
+  ]);
 
   const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'N/A';
-      return format(date, 'dd-MM-yyyy');
+      if (isNaN(date.getTime())) return "N/A";
+      return format(date, "dd-MM-yyyy");
     } catch (e) {
-      return 'N/A';
+      return "N/A";
     }
   };
 
   const handleDeleteInstallment = async (installmentNumber: number) => {
     try {
       if (!investment) {
-        toast({ title: "Error", description: "Investment not found", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: "Investment not found",
+          variant: "destructive",
+        });
         return;
       }
 
-      const updatedInstallments = installments.filter(inst => inst.number !== installmentNumber);
-      const cleanInstallments = updatedInstallments.map(inst => {
+      const updatedInstallments = installments.filter(
+        (inst) => inst.number !== installmentNumber,
+      );
+      const cleanInstallments = updatedInstallments.map((inst) => {
         return { ...inst, isMaintenance: inst.isMaintenance || false };
       });
 
-      await updateRealEstateInvestment(investment.id, { installments: cleanInstallments });
+      await updateRealEstateInvestment(investment.id, {
+        installments: cleanInstallments,
+      });
       // setInstallments(updatedInstallments); // Local state will be updated by useEffect
       toast({ title: "Success", description: "Payment deleted successfully" });
     } catch (error) {
       console.error("Error deleting payment:", error);
-      toast({ title: "Error", description: "Failed to delete payment", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to delete payment",
+        variant: "destructive",
+      });
     }
   };
 
@@ -180,36 +228,52 @@ export default function RealEstateDetailPage() {
     if (!investment) return;
     try {
       setIsSubmitting(true);
-      const maxExistingNumber = installments.length > 0 ? Math.max(...installments.map(i => i.number), 0) : 0;
+      const maxExistingNumber =
+        installments.length > 0
+          ? Math.max(...installments.map((i) => i.number), 0)
+          : 0;
       const nextNumber = maxExistingNumber + 1;
-      
+
       const newPaymentObj: Installment = {
         number: nextNumber,
-        dueDate: newPayment.dueDate?.toISOString().split('T')[0] || '', // Format as YYYY-MM-DD
+        dueDate: newPayment.dueDate?.toISOString().split("T")[0] || "", // Format as YYYY-MM-DD
         amount: Number(newPayment.amount) || 0,
-        status: 'Unpaid',
+        status: "Unpaid",
         description: newPayment.description.trim() || undefined,
-        isMaintenance: newPayment.description.toLowerCase().includes('maintenance'), // Basic heuristic
+        isMaintenance: newPayment.description
+          .toLowerCase()
+          .includes("maintenance"), // Basic heuristic
       };
-      
-      const updatedInstallments = [...(investment.installments || []), newPaymentObj];
-      const cleanInstallments = updatedInstallments.map(inst => {
+
+      const updatedInstallments = [
+        ...(investment.installments || []),
+        newPaymentObj,
+      ];
+      const cleanInstallments = updatedInstallments.map((inst) => {
         return { ...inst, isMaintenance: inst.isMaintenance || false }; // Ensure isMaintenance is boolean
       });
-      
-      await updateRealEstateInvestment(investment.id, { installments: cleanInstallments });
-      
-      toast({ title: "Success", description: `Payment #${nextNumber} has been added.` });
+
+      await updateRealEstateInvestment(investment.id, {
+        installments: cleanInstallments,
+      });
+
+      toast({
+        title: "Success",
+        description: `Payment #${nextNumber} has been added.`,
+      });
       setNewPayment({ dueDate: new Date(), amount: 0, description: "" });
       setShowAddPaymentDialog(false);
     } catch (error) {
-      console.error('Error adding payment:', error);
-      toast({ title: "Error", description: "Failed to add payment.", variant: "destructive" });
+      console.error("Error adding payment:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add payment.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   if (isLoading) {
     return (
@@ -227,8 +291,14 @@ export default function RealEstateDetailPage() {
           <CardTitle>Real Estate Not Found</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No real estate investment found for this ID.</p>
-          <Button variant="outline" className="mt-4" onClick={() => router.back()}>
+          <p className="text-muted-foreground">
+            No real estate investment found for this ID.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => router.back()}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
         </CardContent>
@@ -240,29 +310,55 @@ export default function RealEstateDetailPage() {
     <div className="w-full">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">{investment.name || investment.propertyAddress}</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {investment.name || investment.propertyAddress}
+          </CardTitle>
           <CardDescription>{investment.propertyType || "N/A"}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="font-medium text-muted-foreground">Address:</div>
             <div>{investment.propertyAddress || "N/A"}</div>
-            <div className="font-medium text-muted-foreground">Paid Towards Purchase:</div>
+            <div className="font-medium text-muted-foreground">
+              Paid Towards Purchase:
+            </div>
             <div>EGP {formatNumberWithSuffix(investment.amountInvested)}</div>
-            <div className="font-medium text-muted-foreground">Installment Amount:</div>
-            <div>{investment.installmentAmount ? `EGP ${formatNumberWithSuffix(investment.installmentAmount)}` : 'N/A'}</div>
-            <div className="font-medium text-muted-foreground">Installment Frequency:</div>
-            <div>{investment.installmentFrequency || 'N/A'}</div>
-            <div className="font-medium text-muted-foreground">Total Price at End:</div>
-            <div>{investment.totalInstallmentPrice ? `EGP ${formatNumberWithSuffix(investment.totalInstallmentPrice)}` : 'N/A'}</div>
-            <div className="font-medium text-muted-foreground">Installment End Date:</div>
+            <div className="font-medium text-muted-foreground">
+              Installment Amount:
+            </div>
+            <div>
+              {investment.installmentAmount
+                ? `EGP ${formatNumberWithSuffix(investment.installmentAmount)}`
+                : "N/A"}
+            </div>
+            <div className="font-medium text-muted-foreground">
+              Installment Frequency:
+            </div>
+            <div>{investment.installmentFrequency || "N/A"}</div>
+            <div className="font-medium text-muted-foreground">
+              Total Price at End:
+            </div>
+            <div>
+              {investment.totalInstallmentPrice
+                ? `EGP ${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
+                : "N/A"}
+            </div>
+            <div className="font-medium text-muted-foreground">
+              Installment End Date:
+            </div>
             <div>{formatDateDisplay(investment.installmentEndDate)}</div>
-            {investment.maintenanceAmount && investment.maintenancePaymentDate && (
-              <>
-                <div className="font-medium text-muted-foreground">Maintenance Payment:</div>
-                <div>EGP {formatNumberWithSuffix(investment.maintenanceAmount)} on {formatDateDisplay(investment.maintenancePaymentDate)}</div>
-              </>
-            )}
+            {investment.maintenanceAmount &&
+              investment.maintenancePaymentDate && (
+                <>
+                  <div className="font-medium text-muted-foreground">
+                    Maintenance Payment:
+                  </div>
+                  <div>
+                    EGP {formatNumberWithSuffix(investment.maintenanceAmount)}{" "}
+                    on {formatDateDisplay(investment.maintenancePaymentDate)}
+                  </div>
+                </>
+              )}
           </div>
           <div className="mt-8">
             <div className="flex justify-between items-center mb-2">
@@ -281,7 +377,10 @@ export default function RealEstateDetailPage() {
               />
             </div>
           </div>
-          <Sheet open={showAddPaymentDialog} onOpenChange={setShowAddPaymentDialog}>
+          <Sheet
+            open={showAddPaymentDialog}
+            onOpenChange={setShowAddPaymentDialog}
+          >
             <SheetContent side="bottom" className="sm:max-w-[425px]">
               <SheetHeader>
                 <SheetTitle>Add Payment</SheetTitle>
@@ -297,10 +396,14 @@ export default function RealEstateDetailPage() {
                   <div className="col-span-3">
                     <Input
                       type="date"
-                      value={newPayment.dueDate?.toISOString().split('T')[0] || ''}
+                      value={
+                        newPayment.dueDate?.toISOString().split("T")[0] || ""
+                      }
                       onChange={(e) => {
-                        const date = e.target.value ? new Date(e.target.value) : undefined;
-                        setNewPayment({...newPayment, dueDate: date});
+                        const date = e.target.value
+                          ? new Date(e.target.value)
+                          : undefined;
+                        setNewPayment({ ...newPayment, dueDate: date });
                       }}
                     />
                   </div>
@@ -313,7 +416,7 @@ export default function RealEstateDetailPage() {
                     id="amount"
                     type="number"
                     className="col-span-3"
-                    value={newPayment.amount || ''}
+                    value={newPayment.amount || ""}
                     onChange={(e) =>
                       setNewPayment({
                         ...newPayment,
@@ -343,7 +446,9 @@ export default function RealEstateDetailPage() {
               <SheetFooter>
                 <div className="space-y-2">
                   <Button
-                    disabled={isSubmitting || !newPayment.amount || !newPayment.dueDate}
+                    disabled={
+                      isSubmitting || !newPayment.amount || !newPayment.dueDate
+                    }
                     onClick={handleAddPayment}
                     className="w-full justify-center"
                   >
@@ -353,7 +458,7 @@ export default function RealEstateDetailPage() {
                         Adding...
                       </>
                     ) : (
-                      'Add Payment'
+                      "Add Payment"
                     )}
                   </Button>
                   <Button
@@ -372,5 +477,3 @@ export default function RealEstateDetailPage() {
     </div>
   );
 }
-
-    

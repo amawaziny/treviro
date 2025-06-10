@@ -1,8 +1,11 @@
-
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { getFirestore, type Firestore } from 'firebase/firestore';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getAnalytics, isSupported as isAnalyticsSupported, type Analytics } from 'firebase/analytics';
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getAuth, type Auth } from "firebase/auth";
+import {
+  getAnalytics,
+  isSupported as isAnalyticsSupported,
+  type Analytics,
+} from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,7 +23,11 @@ let auth: Auth | null = null;
 let analytics: Analytics | null = null;
 
 // Only initialize Firebase if the API key is present and a non-empty string.
-if (firebaseConfig.apiKey && typeof firebaseConfig.apiKey === 'string' && firebaseConfig.apiKey.trim() !== '') {
+if (
+  firebaseConfig.apiKey &&
+  typeof firebaseConfig.apiKey === "string" &&
+  firebaseConfig.apiKey.trim() !== ""
+) {
   if (!getApps().length) {
     try {
       app = initializeApp(firebaseConfig);
@@ -37,22 +44,25 @@ if (firebaseConfig.apiKey && typeof firebaseConfig.apiKey === 'string' && fireba
       db = getFirestore(app);
       auth = getAuth(app);
 
-      if (typeof window !== 'undefined') {
-        isAnalyticsSupported().then((supported) => {
-          if (supported && app) { // ensure app is still valid
-            try {
-              analytics = getAnalytics(app);
-              // console.log("Firebase Analytics initialized.");
-            } catch (e) {
-              console.error("Firebase Analytics initialization error:", e);
-              // analytics will remain null
+      if (typeof window !== "undefined") {
+        isAnalyticsSupported()
+          .then((supported) => {
+            if (supported && app) {
+              // ensure app is still valid
+              try {
+                analytics = getAnalytics(app);
+                // console.log("Firebase Analytics initialized.");
+              } catch (e) {
+                console.error("Firebase Analytics initialization error:", e);
+                // analytics will remain null
+              }
+            } else {
+              // console.log("Firebase Analytics is not supported in this environment or app not initialized.");
             }
-          } else {
-            // console.log("Firebase Analytics is not supported in this environment or app not initialized.");
-          }
-        }).catch(error => {
-          console.error("Error checking Firebase Analytics support:", error);
-        });
+          })
+          .catch((error) => {
+            console.error("Error checking Firebase Analytics support:", error);
+          });
       }
     } catch (e) {
       console.error("Error initializing Firestore/Auth:", e);
@@ -61,8 +71,8 @@ if (firebaseConfig.apiKey && typeof firebaseConfig.apiKey === 'string' && fireba
   }
 } else {
   console.warn(
-    'Firebase API key is missing or invalid. Firebase services will not be initialized. ' +
-    'Ensure NEXT_PUBLIC_FIREBASE_API_KEY (and other Firebase env vars) are correctly set.'
+    "Firebase API key is missing or invalid. Firebase services will not be initialized. " +
+      "Ensure NEXT_PUBLIC_FIREBASE_API_KEY (and other Firebase env vars) are correctly set.",
   );
 }
 

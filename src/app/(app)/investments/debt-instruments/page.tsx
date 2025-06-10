@@ -1,33 +1,62 @@
-
 "use client";
 
-import React from 'react';
-import { useInvestments } from '@/hooks/use-investments';
-import { useListedSecurities } from '@/hooks/use-listed-securities';
-import type { DebtInstrumentInvestment, StockInvestment, ListedSecurity, AggregatedDebtHolding } from '@/lib/types';
-import { isDebtRelatedFund } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { useInvestments } from "@/hooks/use-investments";
+import { useListedSecurities } from "@/hooks/use-listed-securities";
+import type {
+  DebtInstrumentInvestment,
+  StockInvestment,
+  ListedSecurity,
+  AggregatedDebtHolding,
+} from "@/lib/types";
+import { isDebtRelatedFund } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Building, TrendingUp, Landmark, TrendingDown } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { MyDebtListItem } from '@/components/investments/debt/my-debt-list-item';
-import { cn, formatNumberWithSuffix } from '@/lib/utils';
-import { format, parseISO, isValid } from 'date-fns';
-import { useLanguage } from '@/contexts/language-context';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Plus,
+  Building,
+  TrendingUp,
+  Landmark,
+  TrendingDown,
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { MyDebtListItem } from "@/components/investments/debt/my-debt-list-item";
+import { cn, formatNumberWithSuffix } from "@/lib/utils";
+import { format, parseISO, isValid } from "date-fns";
+import { useLanguage } from "@/contexts/language-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MyDebtInstrumentsPage() {
-  const { investments, isLoading: isLoadingInvestments, removeDirectDebtInvestment } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
-  const { language } = useLanguage(); 
+  const {
+    investments,
+    isLoading: isLoadingInvestments,
+    removeDirectDebtInvestment,
+  } = useInvestments();
+  const { listedSecurities, isLoading: isLoadingListedSecurities } =
+    useListedSecurities();
+  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
-  const { directDebtHoldings, debtFundHoldings, totalProjectedMonthlyInterest, totalProjectedAnnualInterest, totalDebtFundPnL, totalDebtFundCost, totalDirectDebtInvested } = React.useMemo(() => {
+  const {
+    directDebtHoldings,
+    debtFundHoldings,
+    totalProjectedMonthlyInterest,
+    totalProjectedAnnualInterest,
+    totalDebtFundPnL,
+    totalDebtFundCost,
+    totalDirectDebtInvested,
+  } = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) {
-      return { 
-        directDebtHoldings: [], 
+      return {
+        directDebtHoldings: [],
         debtFundHoldings: [],
         totalProjectedMonthlyInterest: 0,
         totalProjectedAnnualInterest: 0,
@@ -45,8 +74,10 @@ export default function MyDebtInstrumentsPage() {
     let debtFundCostSum = 0;
     let directDebtInvestedSum = 0;
 
-    const directDebtInvestments = investments.filter(inv => inv.type === 'Debt Instruments') as DebtInstrumentInvestment[];
-    directDebtInvestments.forEach(debt => {
+    const directDebtInvestments = investments.filter(
+      (inv) => inv.type === "Debt Instruments",
+    ) as DebtInstrumentInvestment[];
+    directDebtInvestments.forEach((debt) => {
       let maturityDay: string | undefined;
       let maturityMonth: string | undefined;
       let maturityYear: string | undefined;
@@ -55,18 +86,26 @@ export default function MyDebtInstrumentsPage() {
 
       if (debt.maturityDate) {
         try {
-          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z"); 
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z");
           if (isValid(parsedMaturityDate)) {
-            maturityDay = format(parsedMaturityDate, 'dd');
-            maturityMonth = format(parsedMaturityDate, 'MM');
-            maturityYear = format(parsedMaturityDate, 'yyyy');
+            maturityDay = format(parsedMaturityDate, "dd");
+            maturityMonth = format(parsedMaturityDate, "MM");
+            maturityYear = format(parsedMaturityDate, "yyyy");
           }
         } catch (e) {
-          console.error("Error parsing maturity date for debt holding:", debt.id, e);
+          console.error(
+            "Error parsing maturity date for debt holding:",
+            debt.id,
+            e,
+          );
         }
       }
 
-      if (typeof debt.amountInvested === 'number' && typeof debt.interestRate === 'number' && debt.interestRate > 0) {
+      if (
+        typeof debt.amountInvested === "number" &&
+        typeof debt.interestRate === "number" &&
+        debt.interestRate > 0
+      ) {
         const principal = debt.amountInvested;
         const annualRateDecimal = debt.interestRate / 100;
         projectedMonthly = (principal * annualRateDecimal) / 12;
@@ -78,29 +117,39 @@ export default function MyDebtInstrumentsPage() {
 
       directHoldings.push({
         id: debt.id,
-        itemType: 'direct',
-        displayName: debt.name || `${debt.debtSubType} - ${debt.issuer || 'N/A'}`,
+        itemType: "direct",
+        displayName:
+          debt.name || `${debt.debtSubType} - ${debt.issuer || "N/A"}`,
         debtSubType: debt.debtSubType,
         issuer: debt.issuer,
         interestRate: debt.interestRate,
         maturityDate: debt.maturityDate,
         amountInvested: debt.amountInvested,
-        purchaseDate: debt.debtSubType === 'Certificate' ? undefined : debt.purchaseDate,
+        purchaseDate:
+          debt.debtSubType === "Certificate" ? undefined : debt.purchaseDate,
         maturityDay,
         maturityMonth,
         maturityYear,
         projectedMonthlyInterest: projectedMonthly,
         projectedAnnualInterest: projectedAnnual,
-        currency: 'EGP', 
+        currency: "EGP",
       });
     });
 
-    const stockInvestments = investments.filter(inv => inv.type === 'Stocks') as StockInvestment[];
+    const stockInvestments = investments.filter(
+      (inv) => inv.type === "Stocks",
+    ) as StockInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
-    stockInvestments.forEach(stockInv => {
-      const security = listedSecurities.find(ls => ls.symbol === stockInv.tickerSymbol);
-      if (security && security.securityType === 'Fund' && isDebtRelatedFund(security.fundType)) {
+    stockInvestments.forEach((stockInv) => {
+      const security = listedSecurities.find(
+        (ls) => ls.symbol === stockInv.tickerSymbol,
+      );
+      if (
+        security &&
+        security.securityType === "Fund" &&
+        isDebtRelatedFund(security.fundType)
+      ) {
         const symbol = security.symbol;
         const costOfThisLot = stockInv.amountInvested || 0;
         const unitsOfThisLot = stockInv.numberOfShares || 0;
@@ -112,7 +161,7 @@ export default function MyDebtInstrumentsPage() {
         } else {
           debtFundAggregationMap.set(symbol, {
             id: security.id,
-            itemType: 'fund',
+            itemType: "fund",
             displayName: security.name,
             fundDetails: security,
             totalUnits: unitsOfThisLot,
@@ -125,57 +174,101 @@ export default function MyDebtInstrumentsPage() {
       }
     });
 
-    Array.from(debtFundAggregationMap.values()).forEach(aggHolding => {
-      if (aggHolding.totalUnits && aggHolding.totalUnits > 0 && aggHolding.totalCost) {
-        aggHolding.averagePurchasePrice = aggHolding.totalCost / aggHolding.totalUnits;
+    Array.from(debtFundAggregationMap.values()).forEach((aggHolding) => {
+      if (
+        aggHolding.totalUnits &&
+        aggHolding.totalUnits > 0 &&
+        aggHolding.totalCost
+      ) {
+        aggHolding.averagePurchasePrice =
+          aggHolding.totalCost / aggHolding.totalUnits;
       }
-      if (aggHolding.currentMarketPrice && aggHolding.totalUnits && aggHolding.totalCost) {
-        aggHolding.currentValue = aggHolding.currentMarketPrice * aggHolding.totalUnits;
+      if (
+        aggHolding.currentMarketPrice &&
+        aggHolding.totalUnits &&
+        aggHolding.totalCost
+      ) {
+        aggHolding.currentValue =
+          aggHolding.currentMarketPrice * aggHolding.totalUnits;
         aggHolding.profitLoss = aggHolding.currentValue - aggHolding.totalCost;
-        aggHolding.profitLossPercent = aggHolding.totalCost > 0 ? (aggHolding.profitLoss / aggHolding.totalCost) * 100 : (aggHolding.currentValue > 0 ? Infinity : 0);
+        aggHolding.profitLossPercent =
+          aggHolding.totalCost > 0
+            ? (aggHolding.profitLoss / aggHolding.totalCost) * 100
+            : aggHolding.currentValue > 0
+              ? Infinity
+              : 0;
         debtFundPnLSum += aggHolding.profitLoss || 0;
         debtFundCostSum += aggHolding.totalCost || 0;
       }
       fundHoldingsAggregated.push(aggHolding);
     });
 
-
     return {
-      directDebtHoldings: directHoldings.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
-      debtFundHoldings: fundHoldingsAggregated.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '')),
+      directDebtHoldings: directHoldings.sort((a, b) =>
+        (a.displayName || "").localeCompare(b.displayName || ""),
+      ),
+      debtFundHoldings: fundHoldingsAggregated.sort((a, b) =>
+        (a.displayName || "").localeCompare(b.displayName || ""),
+      ),
       totalProjectedMonthlyInterest: monthlyInterestSum,
       totalProjectedAnnualInterest: annualInterestSum,
       totalDebtFundPnL: debtFundPnLSum,
       totalDebtFundCost: debtFundCostSum,
       totalDirectDebtInvested: directDebtInvestedSum,
     };
+  }, [
+    investments,
+    listedSecurities,
+    isLoadingInvestments,
+    isLoadingListedSecurities,
+  ]);
 
-  }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities]);
-  
-  const totalDebtFundPnLPercent = totalDebtFundCost > 0 ? (totalDebtFundPnL / totalDebtFundCost) * 100 : (totalDebtFundPnL !== 0 ? Infinity : 0);
+  const totalDebtFundPnLPercent =
+    totalDebtFundCost > 0
+      ? (totalDebtFundPnL / totalDebtFundCost) * 100
+      : totalDebtFundPnL !== 0
+        ? Infinity
+        : 0;
   const isTotalFundProfitable = totalDebtFundPnL >= 0;
   const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
-
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value)) return 'EGP 0.00';
-    return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-  };
-  
-  const formatSecurityCurrency = (value: number | undefined, currencyCode: string = 'EGP') => {
-    if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0.00`;
-    const digits = currencyCode === 'EGP' ? 2 : 2; 
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+    if (value === undefined || value === null || isNaN(value))
+      return "EGP 0.00";
+    return new Intl.NumberFormat("en-EG", {
+      style: "currency",
+      currency: "EGP",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   };
 
-  const formatCurrencyWithSuffix = (value: number | undefined, currencyCode: string = 'EGP') => {
-    if (value === undefined || value === null || isNaN(value)) return `${currencyCode} 0`;
+  const formatSecurityCurrency = (
+    value: number | undefined,
+    currencyCode: string = "EGP",
+  ) => {
+    if (value === undefined || value === null || isNaN(value))
+      return `${currencyCode} 0.00`;
+    const digits = currencyCode === "EGP" ? 2 : 2;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(value);
+  };
+
+  const formatCurrencyWithSuffix = (
+    value: number | undefined,
+    currencyCode: string = "EGP",
+  ) => {
+    if (value === undefined || value === null || isNaN(value))
+      return `${currencyCode} 0`;
     const formattedNumber = formatNumberWithSuffix(value);
     return `${currencyCode} ${formattedNumber}`;
   };
-
 
   if (isLoading) {
     return (
@@ -186,13 +279,21 @@ export default function MyDebtInstrumentsPage() {
         </div>
         <Separator />
         <Card className="mt-6">
-            <CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader>
-            <CardContent><Skeleton className="h-10 w-1/2" /></CardContent>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/3" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-1/2" />
+          </CardContent>
         </Card>
         {[...Array(2)].map((_, i) => (
           <Card key={i} className="mt-4">
-            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
-            <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+            <CardHeader>
+              <Skeleton className="h-6 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
           </Card>
         ))}
       </div>
@@ -202,38 +303,76 @@ export default function MyDebtInstrumentsPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Debt Instruments</h1>
-        <p className="text-muted-foreground text-sm">Track your direct debt instruments and debt-related fund investments.</p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          Debt Instruments
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Track your direct debt instruments and debt-related fund investments.
+        </p>
       </div>
       <Separator />
 
-       <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Debt Instruments P/L (Funds)</CardTitle>
-                {isTotalFundProfitable ? <TrendingUp className="h-4 w-4 text-accent" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
-            </CardHeader>
-            <CardContent>
-                <div className={cn("text-2xl font-bold", isTotalFundProfitable ? "text-accent" : "text-destructive")}>
-                    {isMobile ? formatCurrencyWithSuffix(totalDebtFundPnL, debtFundHoldings[0]?.currency || 'EGP') : formatSecurityCurrency(totalDebtFundPnL, debtFundHoldings[0]?.currency || 'EGP')}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                    {totalDebtFundPnLPercent === Infinity ? '∞' : totalDebtFundPnLPercent.toFixed(2)}% overall P/L from funds
-                </p>
-                <div className="mt-2 pt-2 border-t">
-                  <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Total Invested in Debt:</span>
-                      <span className="font-semibold">
-                          {isMobile ? formatCurrencyWithSuffix(totalInvestedInDebt) : formatCurrencyEGP(totalInvestedInDebt)}
-                      </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>(Direct: {formatCurrencyEGP(totalDirectDebtInvested)})</span>
-                      <span>(Funds: {formatSecurityCurrency(totalDebtFundCost, debtFundHoldings[0]?.currency || 'EGP')})</span>
-                  </div>
-                </div>
-            </CardContent>
-        </Card>
-
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Total Debt Instruments P/L (Funds)
+          </CardTitle>
+          {isTotalFundProfitable ? (
+            <TrendingUp className="h-4 w-4 text-accent" />
+          ) : (
+            <TrendingDown className="h-4 w-4 text-destructive" />
+          )}
+        </CardHeader>
+        <CardContent>
+          <div
+            className={cn(
+              "text-2xl font-bold",
+              isTotalFundProfitable ? "text-accent" : "text-destructive",
+            )}
+          >
+            {isMobile
+              ? formatCurrencyWithSuffix(
+                  totalDebtFundPnL,
+                  debtFundHoldings[0]?.currency || "EGP",
+                )
+              : formatSecurityCurrency(
+                  totalDebtFundPnL,
+                  debtFundHoldings[0]?.currency || "EGP",
+                )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {totalDebtFundPnLPercent === Infinity
+              ? "∞"
+              : totalDebtFundPnLPercent.toFixed(2)}
+            % overall P/L from funds
+          </p>
+          <div className="mt-2 pt-2 border-t">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                Total Invested in Debt:
+              </span>
+              <span className="font-semibold">
+                {isMobile
+                  ? formatCurrencyWithSuffix(totalInvestedInDebt)
+                  : formatCurrencyEGP(totalInvestedInDebt)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                (Direct: {formatCurrencyEGP(totalDirectDebtInvested)})
+              </span>
+              <span>
+                (Funds:{" "}
+                {formatSecurityCurrency(
+                  totalDebtFundCost,
+                  debtFundHoldings[0]?.currency || "EGP",
+                )}
+                )
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -241,11 +380,15 @@ export default function MyDebtInstrumentsPage() {
             <Landmark className="mr-2 h-4 w-4 text-primary" />
             Direct Debt Instruments
           </CardTitle>
-          <CardDescription>Bonds, Certificates, Treasury Bills you own directly. (Projected Interest: {formatCurrencyEGP(totalProjectedAnnualInterest)} annually)</CardDescription>
+          <CardDescription>
+            Bonds, Certificates, Treasury Bills you own directly. (Projected
+            Interest: {formatCurrencyEGP(totalProjectedAnnualInterest)}{" "}
+            annually)
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {directDebtHoldings.length > 0 ? (
-            directDebtHoldings.map(debt => (
+            directDebtHoldings.map((debt) => (
               <MyDebtListItem key={debt.id} holding={debt} />
             ))
           ) : (
@@ -255,21 +398,23 @@ export default function MyDebtInstrumentsPage() {
           )}
         </CardContent>
       </Card>
-      
+
       {debtFundHoldings.length > 0 && (
-         <Card className="mt-6">
-            <CardHeader>
+        <Card className="mt-6">
+          <CardHeader>
             <CardTitle className="flex items-center">
-                <Building className="mr-2 h-4 w-4 text-primary" />
-                Debt Fund Investments
+              <Building className="mr-2 h-4 w-4 text-primary" />
+              Debt Fund Investments
             </CardTitle>
-            <CardDescription>Funds primarily investing in debt instruments.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {debtFundHoldings.map(holding => (
-                    <MyDebtListItem key={holding.id} holding={holding} />
-                ))}
-            </CardContent>
+            <CardDescription>
+              Funds primarily investing in debt instruments.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {debtFundHoldings.map((holding) => (
+              <MyDebtListItem key={holding.id} holding={holding} />
+            ))}
+          </CardContent>
         </Card>
       )}
 
@@ -277,7 +422,7 @@ export default function MyDebtInstrumentsPage() {
         <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === 'ar' ? 'left-8' : 'right-8'} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new debt instrument"
         >
           <Plus className="h-7 w-7" />
@@ -286,4 +431,3 @@ export default function MyDebtInstrumentsPage() {
     </div>
   );
 }
-    

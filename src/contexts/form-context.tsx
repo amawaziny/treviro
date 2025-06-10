@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -23,45 +29,47 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [headerProps, setHeaderProps] = useState<HeaderProps>({
     showBackButton: false,
-    backHref: '/',
-    backLabel: 'Back',
-    title: '',
-    showNavControls: true
+    backHref: "/",
+    backLabel: "Back",
+    title: "",
+    showNavControls: true,
   });
 
   const openForm = useCallback(() => {
     setIsFormOpen(true);
     // When form opens, ensure nav controls are hidden
-    setHeaderProps(prev => ({
+    setHeaderProps((prev) => ({
       ...prev,
-      showNavControls: false
+      showNavControls: false,
     }));
   }, []);
 
   const closeForm = useCallback(() => {
     setIsFormOpen(false);
     // When form closes, show nav controls again
-    setHeaderProps(prev => ({
+    setHeaderProps((prev) => ({
       ...prev,
-      showNavControls: true
+      showNavControls: true,
     }));
   }, []);
 
   const updateHeaderProps = useCallback((props: HeaderProps) => {
-    setHeaderProps(prev => ({
+    setHeaderProps((prev) => ({
       ...prev,
-      ...props
+      ...props,
     }));
   }, []);
 
   return (
-    <FormContext.Provider value={{ 
-      isFormOpen, 
-      openForm, 
-      closeForm, 
-      headerProps,
-      setHeaderProps: updateHeaderProps 
-    }}>
+    <FormContext.Provider
+      value={{
+        isFormOpen,
+        openForm,
+        closeForm,
+        headerProps,
+        setHeaderProps: updateHeaderProps,
+      }}
+    >
       {children}
     </FormContext.Provider>
   );
@@ -70,7 +78,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
 export function useForm() {
   const context = useContext(FormContext);
   if (context === undefined) {
-    throw new Error('useForm must be used within a FormProvider');
+    throw new Error("useForm must be used within a FormProvider");
   }
   return context;
 }

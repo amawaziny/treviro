@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,8 +27,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 const getCurrentDate = () => {
   const date = new Date();
   const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
@@ -37,13 +36,21 @@ interface SellSecurityFormProps {
   securityId: string;
 }
 
-export function SellStockForm({ securityId: securityId }: SellSecurityFormProps) {
-  const { recordSellStockTransaction, investments, isLoading: isLoadingInvestmentsContext } = useInvestments();
-  const { getListedSecurityById, isLoading: isLoadingListedSecurities } = useListedSecurities();
+export function SellStockForm({
+  securityId: securityId,
+}: SellSecurityFormProps) {
+  const {
+    recordSellStockTransaction,
+    investments,
+    isLoading: isLoadingInvestmentsContext,
+  } = useInvestments();
+  const { getListedSecurityById, isLoading: isLoadingListedSecurities } =
+    useListedSecurities();
   const { toast } = useToast();
   const router = useRouter();
 
-  const [securityBeingSold, setSecurityBeingSold] = useState<ListedSecurity | null>(null);
+  const [securityBeingSold, setSecurityBeingSold] =
+    useState<ListedSecurity | null>(null);
   const [maxSharesToSell, setMaxSharesToSell] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,10 +58,10 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
     resolver: zodResolver(SellStockSchema),
     defaultValues: {
       securityId: securityId,
-      numberOfSharesToSell: '', // Keep as string
-      sellPricePerShare: '', // Keep as string
+      numberOfSharesToSell: "", // Keep as string
+      sellPricePerShare: "", // Keep as string
       sellDate: getCurrentDate(),
-      fees: '', // Keep as string
+      fees: "", // Keep as string
     },
   });
 
@@ -66,39 +73,55 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
 
       if (listedSecurityData) {
         const userOwnedForThisSymbol = investments.filter(
-          (inv) => inv.type === 'Stocks' && inv.tickerSymbol === listedSecurityData.symbol
+          (inv) =>
+            inv.type === "Stocks" &&
+            inv.tickerSymbol === listedSecurityData.symbol,
         ) as StockInvestment[];
 
         const totalOwned = userOwnedForThisSymbol.reduce(
           (sum, inv) => sum + (inv.numberOfShares || 0),
-          0
+          0,
         );
         setMaxSharesToSell(totalOwned);
-        if (listedSecurityData.price && form.getValues("sellPricePerShare") === '') {
-            form.setValue("sellPricePerShare", String(listedSecurityData.price));
+        if (
+          listedSecurityData.price &&
+          form.getValues("sellPricePerShare") === ""
+        ) {
+          form.setValue("sellPricePerShare", String(listedSecurityData.price));
         }
       }
       setIsLoading(false);
     }
     if (securityId && !isLoadingInvestmentsContext) {
-        fetchData();
+      fetchData();
     } else if (!isLoadingInvestmentsContext) {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-
-  }, [securityId, getListedSecurityById, investments, isLoadingInvestmentsContext, form]);
-
+  }, [
+    securityId,
+    getListedSecurityById,
+    investments,
+    isLoadingInvestmentsContext,
+    form,
+  ]);
 
   async function onSubmit(values: SellStockFormValues) {
     if (!securityBeingSold) {
-      toast({ title: "Error", description: "Security details not found.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Security details not found.",
+        variant: "destructive",
+      });
       return;
     }
 
     const numberOfSharesToSellNum = values.numberOfSharesToSell;
 
     if (numberOfSharesToSellNum > maxSharesToSell) {
-      form.setError("numberOfSharesToSell", { type: "manual", message: `You only own ${maxSharesToSell} ${securityLabel}.` });
+      form.setError("numberOfSharesToSell", {
+        type: "manual",
+        message: `You only own ${maxSharesToSell} ${securityLabel}.`,
+      });
       return;
     }
 
@@ -109,7 +132,7 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
         numberOfSharesToSellNum,
         values.sellPricePerShare,
         values.sellDate,
-        values.fees ?? 0 // Zod default ensures this is 0 if undefined
+        values.fees ?? 0, // Zod default ensures this is 0 if undefined
       );
       toast({
         title: "Sale Recorded",
@@ -120,7 +143,8 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
       console.error("Error recording sale:", error);
       toast({
         title: "Sale Recording Failed",
-        description: error.message || "Could not record the sale. Please try again.",
+        description:
+          error.message || "Could not record the sale. Please try again.",
         variant: "destructive",
       });
     }
@@ -140,31 +164,47 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Could not load security details to sell. Please go back and try again.</AlertDescription>
+        <AlertDescription>
+          Could not load security details to sell. Please go back and try again.
+        </AlertDescription>
       </Alert>
     );
   }
 
-  const securityLabel = securityBeingSold.securityType === 'Fund' ? 'units' : 'shares';
+  const securityLabel =
+    securityBeingSold.securityType === "Fund" ? "units" : "shares";
 
   if (maxSharesToSell === 0 && !isLoading) {
-     return (
+    return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>No Holdings to Sell</AlertTitle>
-        <AlertDescription>You do not currently own any holdings of {securityBeingSold.name} ({securityBeingSold.symbol}) to sell.</AlertDescription>
+        <AlertDescription>
+          You do not currently own any holdings of {securityBeingSold.name} (
+          {securityBeingSold.symbol}) to sell.
+        </AlertDescription>
       </Alert>
     );
   }
-
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="p-4 border rounded-md bg-muted/50">
-            <h3 className="text-lg font-medium">Selling: {securityBeingSold.name} ({securityBeingSold.symbol})</h3>
-            <p className="text-sm text-muted-foreground">You currently own: {maxSharesToSell.toLocaleString()} {securityLabel}.</p>
-            <p className="text-sm text-muted-foreground">Current Market Price: {securityBeingSold.price.toLocaleString(undefined, { style: 'currency', currency: securityBeingSold.currency })}</p>
+          <h3 className="text-lg font-medium">
+            Selling: {securityBeingSold.name} ({securityBeingSold.symbol})
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            You currently own: {maxSharesToSell.toLocaleString()}{" "}
+            {securityLabel}.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Current Market Price:{" "}
+            {securityBeingSold.price.toLocaleString(undefined, {
+              style: "currency",
+              currency: securityBeingSold.currency,
+            })}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,7 +217,7 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
                 <FormControl>
                   <NumericInput
                     placeholder={`e.g., 50 or 10`}
-                    value={field.value?.toString() || ''}
+                    value={field.value?.toString() || ""}
                     onChange={(value) => field.onChange(Number(value))}
                     allowDecimal={false}
                   />
@@ -192,11 +232,13 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
             name="sellPricePerShare"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sell Price (per {securityLabel.slice(0,-1)})</FormLabel>
+                <FormLabel>
+                  Sell Price (per {securityLabel.slice(0, -1)})
+                </FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 160.25"
-                    value={field.value?.toString() || ''}
+                    value={field.value?.toString() || ""}
                     onChange={(value) => field.onChange(Number(value))}
                   />
                 </FormControl>
@@ -211,7 +253,11 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
               <FormItem>
                 <FormLabel>Sell Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value || getCurrentDate()} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || getCurrentDate()}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -226,18 +272,26 @@ export function SellStockForm({ securityId: securityId }: SellSecurityFormProps)
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5.00"
-                    value={field.value?.toString() || ''}
+                    value={field.value?.toString() || ""}
                     onChange={(value) => field.onChange(Number(value))}
                   />
                 </FormControl>
-                <FormDescription>Total fees for this transaction.</FormDescription>
+                <FormDescription>
+                  Total fees for this transaction.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <Button type="submit" className="w-full md:w-auto" disabled={form.formState.isSubmitting || maxSharesToSell === 0}>
-          {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        <Button
+          type="submit"
+          className="w-full md:w-auto"
+          disabled={form.formState.isSubmitting || maxSharesToSell === 0}
+        >
+          {form.formState.isSubmitting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : null}
           Record Sale
         </Button>
       </form>

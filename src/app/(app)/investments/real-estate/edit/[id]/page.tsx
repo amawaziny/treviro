@@ -15,15 +15,17 @@ export default function EditRealEstateInvestmentPage() {
   const router = useRouter();
   const params = useParams();
   const { investments, isLoading } = useInvestments();
-  const [investment, setInvestment] = useState<RealEstateInvestment | null>(null);
+  const [investment, setInvestment] = useState<RealEstateInvestment | null>(
+    null,
+  );
   const { language } = useLanguage();
-  
-  const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
+
+  const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   useEffect(() => {
     if (!params?.id) return;
     const found = investments.find(
-      (inv) => inv.type === "Real Estate" && inv.id === params.id
+      (inv) => inv.type === "Real Estate" && inv.id === params.id,
     ) as RealEstateInvestment | undefined;
     if (found) {
       setInvestment(found);
@@ -59,7 +61,9 @@ export default function EditRealEstateInvestmentPage() {
       <div className="mb-6">
         <Link href="/investments/real-estate" passHref>
           <Button variant="outline" size="sm">
-            <BackArrowIcon className={language === 'ar' ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+            <BackArrowIcon
+              className={language === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"}
+            />
             Back to Real Estate
           </Button>
         </Link>

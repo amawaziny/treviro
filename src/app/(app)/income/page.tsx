@@ -1,17 +1,23 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { useInvestments } from '@/hooks/use-investments';
-import { useLanguage } from '@/contexts/language-context';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, PiggyBank } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { formatNumberWithSuffix } from '@/lib/utils';
+import React from "react";
+import Link from "next/link";
+import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { useInvestments } from "@/hooks/use-investments";
+import { useLanguage } from "@/contexts/language-context";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, PiggyBank } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { formatNumberWithSuffix } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -21,10 +27,10 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-  AlertDialogAction
-} from '@/components/ui/alert-dialog';
-import { Pencil, Trash2 } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Pencil, Trash2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export default function IncomePage() {
   // UI state for filters
@@ -32,7 +38,9 @@ export default function IncomePage() {
 
   const { incomeRecords, isLoading, deleteIncomeRecord } = useInvestments();
   if (!deleteIncomeRecord) {
-    throw new Error('deleteIncomeRecord function is required but not provided by useInvestments');
+    throw new Error(
+      "deleteIncomeRecord function is required but not provided by useInvestments",
+    );
   }
   const { language } = useLanguage();
   const isMobile = useIsMobile();
@@ -46,19 +54,23 @@ export default function IncomePage() {
     const currentMonth = currentMonthStart.getMonth();
     const currentYear = currentMonthStart.getFullYear();
     const now = new Date();
-    
-    return recordsToFilter.filter(record => {
-      // If not showAll, only show income from this month
-      if (!showAll && record.date) {
-        return isWithinInterval(new Date(record.date), { start: currentMonthStart, end: currentMonthEnd });
-      }
-      return true;
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return recordsToFilter
+      .filter((record) => {
+        // If not showAll, only show income from this month
+        if (!showAll && record.date) {
+          return isWithinInterval(new Date(record.date), {
+            start: currentMonthStart,
+            end: currentMonthEnd,
+          });
+        }
+        return true;
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [incomeRecords, currentMonthStart, currentMonthEnd, showAll]);
 
   const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
       // Handle potential "Invalid Date" if dateString is not a valid ISO format
@@ -66,14 +78,19 @@ export default function IncomePage() {
       // or client-set dates could be in various formats.
       // For robustness, ensure it's a valid date.
       if (isNaN(date.getTime())) return dateString; // Or 'Invalid Date'
-      return format(date, 'dd-MM-yyyy');
+      return format(date, "dd-MM-yyyy");
     } catch (e) {
       return dateString; // Or 'Error formatting date'
     }
   };
 
   const formatCurrencyEGP = (value: number) => {
-    return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat("en-EG", {
+      style: "currency",
+      currency: "EGP",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   };
 
   const formatCurrencyEGPWithSuffix = (value: number) => {
@@ -90,8 +107,12 @@ export default function IncomePage() {
         </div>
         <Separator />
         <Card className="mt-6">
-          <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
-          <CardContent><Skeleton className="h-24 w-full" /></CardContent>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
         </Card>
       </div>
     );
@@ -100,8 +121,13 @@ export default function IncomePage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Income Management</h1>
-        <p className="text-muted-foreground text-sm">Log and manage all your income sources, including salaries, gifts, and other earnings.</p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          Income Management
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Log and manage all your income sources, including salaries, gifts, and
+          other earnings.
+        </p>
       </div>
       <Separator />
 
@@ -124,23 +150,25 @@ export default function IncomePage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <PiggyBank className="mr-2 h-4 w-4 text-primary" />
-                {showAll ? 'Total Income (All)' : 'Total Income This Month'}
+                {showAll ? "Total Income (All)" : "Total Income This Month"}
               </CardTitle>
               <CardDescription>
                 {showAll
                   ? "View and manage all your recorded income sources."
-                  : `See and manage all income received in ${format(new Date(), 'MMMM yyyy')}.`}
+                  : `See and manage all income received in ${format(new Date(), "MMMM yyyy")}.`}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <span className="text-2xl font-bold text-foreground">
-                {formatCurrencyEGPWithSuffix(filteredIncome.reduce((sum, r) => sum + r.amount, 0))}
+                {formatCurrencyEGPWithSuffix(
+                  filteredIncome.reduce((sum, r) => sum + r.amount, 0),
+                )}
               </span>
             </CardContent>
           </Card>
 
           <div className="grid gap-4 mt-8">
-            {filteredIncome.map(record => (
+            {filteredIncome.map((record) => (
               <Card key={record.id} className="">
                 <CardContent className="flex flex-col md:flex-row md:items-start md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
@@ -160,23 +188,35 @@ export default function IncomePage() {
                         {formatCurrencyEGPWithSuffix(record.amount)}
                       </span>
                       <div className="ml-auto flex items-center gap-2">
-                        <Link href={`/income/edit/${record.id}`} passHref legacyBehavior>
+                        <Link
+                          href={`/income/edit/${record.id}`}
+                          passHref
+                          legacyBehavior
+                        >
                           <Button variant="ghost" size="icon" aria-label="Edit">
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-destructive"
+                              aria-label="Delete"
+                            >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Remove {record.description || record.type}</span>
+                              <span className="sr-only">
+                                Remove {record.description || record.type}
+                              </span>
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action will permanently delete this income record. This cannot be undone.
+                                This action will permanently delete this income
+                                record. This cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -187,7 +227,10 @@ export default function IncomePage() {
                                   try {
                                     await deleteIncomeRecord(record.id);
                                   } catch (e) {
-                                    console.error('Error deleting income record:', e);
+                                    console.error(
+                                      "Error deleting income record:",
+                                      e,
+                                    );
                                   }
                                 }}
                               >
@@ -214,7 +257,8 @@ export default function IncomePage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any income records for {format(new Date(), 'MMMM yyyy')} yet.
+              You haven't added any income records for{" "}
+              {format(new Date(), "MMMM yyyy")} yet.
             </p>
           </CardContent>
         </Card>
@@ -225,7 +269,7 @@ export default function IncomePage() {
           variant="default"
           size="icon"
           className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
-            language === 'ar' ? 'left-8' : 'right-8'
+            language === "ar" ? "left-8" : "right-8"
           }`}
           aria-label="Add new income record"
         >

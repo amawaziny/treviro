@@ -1,7 +1,17 @@
-
-export type InvestmentType = 'Real Estate' | 'Gold' | 'Stocks' | 'Debt Instruments' | 'Currencies';
-export type IncomeType = 'Profit Share' | 'Bonus' | 'Gift' | 'Rental Income' | 'Freelance' | 'Other';
-export type ExpenseCategory = 'Credit Card' | 'Other';
+export type InvestmentType =
+  | "Real Estate"
+  | "Gold"
+  | "Stocks"
+  | "Debt Instruments"
+  | "Currencies";
+export type IncomeType =
+  | "Profit Share"
+  | "Bonus"
+  | "Gift"
+  | "Rental Income"
+  | "Freelance"
+  | "Other";
+export type ExpenseCategory = "Credit Card" | "Other";
 
 export interface BaseInvestment {
   id: string;
@@ -14,7 +24,7 @@ export interface BaseInvestment {
 }
 
 export interface StockInvestment extends BaseInvestment {
-  type: 'Stocks';
+  type: "Stocks";
   actualStockName?: string;
   tickerSymbol?: string;
   numberOfShares?: number;
@@ -23,26 +33,26 @@ export interface StockInvestment extends BaseInvestment {
   purchaseFees?: number;
 }
 
-export type GoldType = 'K24' | 'K21' | 'Pound' | 'Ounce';
+export type GoldType = "K24" | "K21" | "Pound" | "Ounce";
 export interface GoldInvestment extends BaseInvestment {
-  type: 'Gold';
+  type: "Gold";
   goldType: GoldType;
   quantityInGrams: number; // Represents units for Pound/Ounce
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
-  type: 'Currencies';
+  type: "Currencies";
   currencyCode: string;
   foreignCurrencyAmount: number;
   exchangeRateAtPurchase: number;
 }
 
-export type PropertyType = 'Residential' | 'Commercial' | 'Land';
+export type PropertyType = "Residential" | "Commercial" | "Land";
 export interface RealEstateInvestment extends BaseInvestment {
-  type: 'Real Estate';
+  type: "Real Estate";
   propertyAddress?: string;
   propertyType?: PropertyType;
-  installmentFrequency?: 'Monthly' | 'Quarterly' | 'Yearly';
+  installmentFrequency?: "Monthly" | "Quarterly" | "Yearly";
   installmentAmount?: number;
   totalInstallmentPrice?: number; // New: total price at end of all installments
   installmentStartDate?: string; // NEW FIELD
@@ -54,12 +64,13 @@ export interface RealEstateInvestment extends BaseInvestment {
     number: number;
     dueDate: string;
     amount: number;
-    status: 'Paid' | 'Unpaid';
+    status: "Paid" | "Unpaid";
     chequeNumber?: string;
     description?: string;
     isMaintenance?: boolean; // Added
   }>;
-  paidInstallments?: Array<{ // This is likely legacy, but keep for now if generateInstallmentSchedule uses it
+  paidInstallments?: Array<{
+    // This is likely legacy, but keep for now if generateInstallmentSchedule uses it
     number: number;
     dueDate?: string;
     amount?: number;
@@ -69,18 +80,23 @@ export interface RealEstateInvestment extends BaseInvestment {
   }>;
 }
 
-export type DebtSubType = 'Certificate' | 'Treasury Bill' | 'Bond' | 'Other';
+export type DebtSubType = "Certificate" | "Treasury Bill" | "Bond" | "Other";
 export interface DebtInstrumentInvestment extends BaseInvestment {
-  type: 'Debt Instruments';
+  type: "Debt Instruments";
   debtSubType: DebtSubType;
   issuer: string;
   interestRate: number;
   maturityDate: string; // YYYY-MM-DD
-  certificateInterestFrequency: 'Monthly' | 'Quarterly' | 'Yearly';
+  certificateInterestFrequency: "Monthly" | "Quarterly" | "Yearly";
   interestAmount?: number; // Optional: actual or projected interest amount
 }
 
-export type Investment = StockInvestment | GoldInvestment | CurrencyInvestment | RealEstateInvestment | DebtInstrumentInvestment;
+export type Investment =
+  | StockInvestment
+  | GoldInvestment
+  | CurrencyInvestment
+  | RealEstateInvestment
+  | DebtInstrumentInvestment;
 
 export interface IncomeRecord {
   id: string;
@@ -108,8 +124,13 @@ export interface ExpenseRecord {
   installmentMonthIndex?: number;
 }
 
-export type FixedEstimateType = 'Salary' | 'Zakat' | 'Charity' | 'Living Expenses' | 'Other';
-export type FixedEstimatePeriod = 'Monthly' | 'Quarterly' | 'Yearly';
+export type FixedEstimateType =
+  | "Salary"
+  | "Zakat"
+  | "Charity"
+  | "Living Expenses"
+  | "Other";
+export type FixedEstimatePeriod = "Monthly" | "Quarterly" | "Yearly";
 
 export interface FixedEstimateRecord {
   id: string;
@@ -122,7 +143,6 @@ export interface FixedEstimateRecord {
   createdAt: string;
   updatedAt?: string;
 }
-
 
 export interface CurrencyFluctuationAnalysisResult {
   significantDeviation: boolean;
@@ -139,7 +159,7 @@ export interface ListedSecurity {
   currency: string;
   changePercent: number;
   market: string;
-  securityType?: 'Stock' | 'Fund';
+  securityType?: "Stock" | "Fund";
   fundType?: string;
   description?: string;
 }
@@ -149,14 +169,14 @@ export interface StockChartDataPoint {
   price: number;
 }
 
-export type StockChartTimeRange = '1W' | '1M' | '6M' | '1Y' | '5Y';
+export type StockChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 
-export type TransactionType = 'buy' | 'sell' | 'dividend';
+export type TransactionType = "buy" | "sell" | "dividend";
 
 export interface Transaction {
   id: string;
   investmentId?: string;
-  securityId?: string; 
+  securityId?: string;
   tickerSymbol: string;
   type: TransactionType;
   date: string;
@@ -166,7 +186,7 @@ export interface Transaction {
   totalAmount: number;
   profitOrLoss?: number;
   createdAt: string;
-  isInvestmentRecord?: boolean; 
+  isInvestmentRecord?: boolean;
   amount?: number; // Optional, for dividend or other transactions
   shares?: number; // Optional, for dividend or display-only transactions
 }
@@ -182,11 +202,11 @@ export interface GoldMarketPrices {
   pricePerGramK21?: number;
   pricePerGoldPound?: number;
   pricePerOunce?: number;
-  lastUpdated?: any; 
+  lastUpdated?: any;
 }
 
 export interface ExchangeRates {
-  [key: string]: number; 
+  [key: string]: number;
 }
 
 // Placeholder for AppSettings. Update with real fields as needed.
@@ -198,19 +218,18 @@ export interface AppSettings {
   // Add more fields as needed
 }
 
-
 export type AggregatedGoldHolding = {
   id: string;
   displayName: string;
-  itemType: 'physical' | 'fund';
+  itemType: "physical" | "fund";
   logoUrl?: string;
-  totalQuantity: number; 
+  totalQuantity: number;
   averagePurchasePrice: number;
   totalCost: number;
   currentMarketPrice?: number;
-  currency: string; 
-  fundDetails?: ListedSecurity; 
-  physicalGoldType?: GoldType; 
+  currency: string;
+  fundDetails?: ListedSecurity;
+  physicalGoldType?: GoldType;
 };
 
 export interface AggregatedCurrencyHolding {
@@ -226,31 +245,31 @@ export interface AggregatedCurrencyHolding {
 
 export interface AggregatedDebtHolding {
   id: string;
-  itemType: 'direct' | 'fund';
+  itemType: "direct" | "fund";
   displayName: string;
-  
+
   debtSubType?: DebtSubType;
   issuer?: string;
   interestRate?: number;
   maturityDate?: string;
-  amountInvested?: number; 
+  amountInvested?: number;
   purchaseDate?: string;
   maturityDay?: string;
   maturityMonth?: string;
   maturityYear?: string;
   projectedMonthlyInterest?: number;
   projectedAnnualInterest?: number;
-  
+
   fundDetails?: ListedSecurity;
-  totalUnits?: number; 
-  averagePurchasePrice?: number; 
-  totalCost?: number; 
-  currentMarketPrice?: number; 
-  currentValue?: number; 
-  profitLoss?: number; 
-  profitLossPercent?: number; 
-  currency?: string; 
-  logoUrl?: string; 
+  totalUnits?: number;
+  averagePurchasePrice?: number;
+  totalCost?: number;
+  currentMarketPrice?: number;
+  currentValue?: number;
+  profitLoss?: number;
+  profitLossPercent?: number;
+  currency?: string;
+  logoUrl?: string;
 }
 
 export interface AppSettings {

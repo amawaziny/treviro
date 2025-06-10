@@ -1,14 +1,19 @@
-
 "use client";
 
-import { SellStockForm } from '@/components/investments/stocks/sell-stock-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useListedSecurities } from '@/hooks/use-listed-securities';
-import { useParams } from 'next/navigation';
-import { useForm } from '@/contexts/form-context';
-import type { ListedSecurity } from '@/lib/types';
+import { SellStockForm } from "@/components/investments/stocks/sell-stock-form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useListedSecurities } from "@/hooks/use-listed-securities";
+import { useParams } from "next/navigation";
+import { useForm } from "@/contexts/form-context";
+import type { ListedSecurity } from "@/lib/types";
 
 export default function SellSecurityPage() {
   const params = useParams();
@@ -20,19 +25,19 @@ export default function SellSecurityPage() {
   // Set up header props when component mounts and when security is loaded
   useEffect(() => {
     openForm();
-    
+
     if (security) {
-      const pageTitle = `Sell: ${security.name} ${security.securityType === 'Fund' ? `(${security.fundType})` : ''}`;
-      
+      const pageTitle = `Sell: ${security.name} ${security.securityType === "Fund" ? `(${security.fundType})` : ""}`;
+
       setHeaderProps({
         showBackButton: true,
         backHref: `/securities/details/${securityId}`,
-        backLabel: 'Back to Security Details',
-        title: 'Sell Order',
-        showNavControls: false
+        backLabel: "Back to Security Details",
+        title: "Sell Order",
+        showNavControls: false,
       });
     }
-    
+
     // Clean up when component unmounts
     return () => {
       closeForm();
@@ -42,7 +47,7 @@ export default function SellSecurityPage() {
   // Fetch security data
   useEffect(() => {
     if (listedSecurities.length > 0) {
-      const foundSecurity = listedSecurities.find(s => s.id === securityId);
+      const foundSecurity = listedSecurities.find((s) => s.id === securityId);
       setSecurity(foundSecurity || null);
     }
   }, [listedSecurities, securityId]);
@@ -59,7 +64,9 @@ export default function SellSecurityPage() {
     <div className="container mx-auto">
       <Card>
         <CardHeader>
-          {security?.description && <CardDescription> {security.description} </CardDescription>}
+          {security?.description && (
+            <CardDescription> {security.description} </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <SellStockForm securityId={security.id} />
