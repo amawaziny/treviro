@@ -198,6 +198,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowDeleteDialog(installment.number);
+                          setIsDeleteDialogOpen(true);
                         }}
                       >
                         <XCircle className="h-4 w-4 text-red-500" />
