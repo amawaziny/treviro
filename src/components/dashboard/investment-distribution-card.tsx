@@ -3,7 +3,6 @@
 import * as React from "react"
 import { ResponsivePie } from '@nivo/pie';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useTheme } from 'next-themes';
 import { formatNumberWithSuffix } from "@/lib/utils";
 
@@ -49,7 +48,7 @@ export function InvestmentDistributionCard({ title, chartData, total }: Investme
           arcLinkLabel={d => `${d.label} ${((d.value/total)*100).toFixed(0)}%`}
           arcLinkLabelsTextOffset={10}
           tooltip={({ datum }) => (
-            <div style={{ padding: 10, background: resolvedTheme === 'dark' ? '#181c2a' : '#fff', color: resolvedTheme === 'dark' ? '#fff' : '#23255a', borderRadius: 6, minWidth: 120, fontWeight: 600 }}>
+            <div className="text-xs sm:text-[11px]" style={{ padding: 10, background: resolvedTheme === 'dark' ? '#181c2a' : '#fff', color: resolvedTheme === 'dark' ? '#fff' : '#23255a', borderRadius: 6, minWidth: 120, fontWeight: 600 }}>
               <strong>{datum.label}: </strong>
               {formatNumberWithSuffix(datum.value)}
             </div>
