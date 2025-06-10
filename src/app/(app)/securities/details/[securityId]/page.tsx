@@ -443,11 +443,11 @@ export default function SecurityDetailPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-xs text-muted-foreground">Shares Owned</p>
-                        <p className="font-medium">{totalSharesOwned.toLocaleString()}</p>
+                        <p className="text-xs font-medium">{totalSharesOwned.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Avg. Cost</p>
-                        <p className="font-medium">{formatCurrency(averagePurchasePrice)}</p>
+                        <p className="text-xs font-medium">{formatCurrency(averagePurchasePrice)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Total Cost</p>
@@ -461,9 +461,9 @@ export default function SecurityDetailPage() {
                     <Separator />
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <p className="text-xs font-medium">Total Return</p>
+                        <p className="text-sm font-medium">Total Return</p>
                         <div className="text-end">
-                          <p className={cn("text-lg font-bold", isProfitable ? "text-accent" : "text-destructive")}>
+                          <p className={cn("text-sm font-bold", isProfitable ? "text-accent" : "text-destructive")}>
                             {formatCurrency(PnL)}
                           </p>
                           <p className={cn("text-xs", isProfitable ? "text-accent" : "text-destructive")}>
