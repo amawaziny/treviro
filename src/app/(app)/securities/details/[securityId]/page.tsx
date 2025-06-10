@@ -464,10 +464,10 @@ export default function SecurityDetailPage() {
                         <p className="text-sm font-medium">Total Return</p>
                         <div className="text-end">
                           <p className={cn("text-sm font-bold", isProfitable ? "text-accent" : "text-destructive")}>
-                            {formatCurrency(PnL)}
+                            {0}
                           </p>
                           <p className={cn("text-xs", isProfitable ? "text-accent" : "text-destructive")}>
-                            {isProfitable ? '+' : ''}{PnLPercentage.toFixed(2)}%
+                            {isProfitable ? '+' : ''}{0}%
                           </p>
                         </div>
                       </div>
