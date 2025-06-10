@@ -19,13 +19,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 
@@ -276,14 +276,14 @@ export default function RealEstateDetailPage() {
               />
             </div>
           </div>
-          <Dialog open={showAddPaymentDialog} onOpenChange={setShowAddPaymentDialog}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add Payment</DialogTitle>
-                <DialogDescription>
+          <Sheet open={showAddPaymentDialog} onOpenChange={setShowAddPaymentDialog}>
+            <SheetContent side="bottom" className="sm:max-w-[425px]">
+              <SheetHeader>
+                <SheetTitle>Add Payment</SheetTitle>
+                <SheetDescription>
                   Add a new future payment to the schedule.
-                </DialogDescription>
-              </DialogHeader>
+                </SheetDescription>
+              </SheetHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="dueDate" className="text-end">
@@ -356,9 +356,8 @@ export default function RealEstateDetailPage() {
                   />
                 </div>
               </div>
-              <DialogFooter>
+              <SheetFooter>
                 <Button
-                  type="button"
                   variant="outline"
                   onClick={() => setShowAddPaymentDialog(false)}
                 >
@@ -377,9 +376,9 @@ export default function RealEstateDetailPage() {
                     'Add Payment'
                   )}
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
         </CardContent>
       </Card>
     </div>
