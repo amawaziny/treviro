@@ -158,7 +158,8 @@ export default function RealEstateDetailPage() {
       }
 
       const updatedInstallments = installments.filter(inst => inst.number !== installmentNumber);
-      const cleanInstallments = updatedInstallments.map(inst => {        return { ...inst, isMaintenance: inst.isMaintenance || false };
+      const cleanInstallments = updatedInstallments.map(inst => {
+        return { ...inst, isMaintenance: inst.isMaintenance || false };
       });
 
       await updateRealEstateInvestment(investment.id, { installments: cleanInstallments });
@@ -364,7 +365,6 @@ export default function RealEstateDetailPage() {
                   Cancel
                 </Button>
                 <Button
-                  type="button"
                   disabled={isSubmitting || !newPayment.amount || !newPayment.dueDate}
                   onClick={handleAddPayment}
                 >
