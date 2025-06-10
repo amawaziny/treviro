@@ -4,6 +4,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
+import { useForm } from "@/contexts/form-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -31,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function RealEstateDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const { setHeaderProps } = useForm();
   const { investments, isLoading, updateRealEstateInvestment } = useInvestments();
   const { language } = useLanguage();
   const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
@@ -49,6 +51,18 @@ export default function RealEstateDetailPage() {
       (inv) => inv.type === "Real Estate" && inv.id === params.id
     ) as import('@/lib/types').RealEstateInvestment | undefined;
   }, [params?.id, investments]);
+
+  useEffect(() => {
+    if (investment) {
+      const title = language === 'ar' ? investment.name : investment.name;
+      setHeaderProps({
+        showBackButton: true,
+        backHref: '/investments/real-estate',
+        title: title,
+        showNavControls: false
+      });
+    }
+  }, [investment, language, setHeaderProps]);
 
   const today = useMemo(() => new Date(), []);
   const [installments, setInstallments] = useState<Installment[]>([]);
@@ -176,8 +190,7 @@ export default function RealEstateDetailPage() {
       
       const updatedInstallments = [...(investment.installments || []), newPaymentObj];
       const cleanInstallments = updatedInstallments.map(inst => {
-        const { displayNumber, ...rest } = inst; // Exclude displayNumber
-        return { ...rest, isMaintenance: inst.isMaintenance || false }; // Ensure isMaintenance is boolean
+        return { ...inst, isMaintenance: inst.isMaintenance || false }; // Ensure isMaintenance is boolean
       });
       
       await updateRealEstateInvestment(investment.id, { installments: cleanInstallments });
@@ -221,9 +234,6 @@ export default function RealEstateDetailPage() {
 
   return (
     <div className="w-full">
-      <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back
-      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">{investment.name || investment.propertyAddress}</CardTitle>
