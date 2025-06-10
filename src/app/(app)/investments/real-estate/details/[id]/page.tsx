@@ -357,25 +357,29 @@ export default function RealEstateDetailPage() {
                 </div>
               </div>
               <SheetFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAddPaymentDialog(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  disabled={isSubmitting || !newPayment.amount || !newPayment.dueDate}
-                  onClick={handleAddPayment}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add Payment'
-                  )}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    disabled={isSubmitting || !newPayment.amount || !newPayment.dueDate}
+                    onClick={handleAddPayment}
+                    className="w-full justify-center"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add Payment'
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAddPaymentDialog(false)}
+                    className="w-full justify-center"
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </SheetFooter>
             </SheetContent>
           </Sheet>
