@@ -37,6 +37,9 @@ import { useSwipeable } from 'react-swipeable';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 
+// Add viewport meta tag for mobile
+import Head from 'next/head';
+
 export default function SecurityDetailPage() { 
   const params = useParams();
   const router = useRouter();
@@ -314,28 +317,31 @@ export default function SecurityDetailPage() {
 
 
   return (
-    <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-      <div className="w-full max-w-full mx-auto md:pb-6 space-y-6 overflow-x-hidden">
-        <Card className="overflow-hidden">
-          <CardHeader className="flex flex-row justify-between space-y-0 p-4">
-            <div className="flex gap-4">
-              <Avatar className="h-10 w-10 md:h-12 md:w-12">
-                <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
-                <AvatarFallback className="text-xs md:text-base">{security.symbol.substring(0, 2)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-base md:text-xl font-bold">{security.symbol}</CardTitle>
-                <CardDescription className="text-xs md:text-sm">
-                  <div className="text-xs">{security.market}</div>
-                </CardDescription>
-              </div>
+    <div className="w-full max-w-full mx-auto md:pb-6 space-y-6 overflow-x-hidden">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+      </Head>
+      
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row justify-between space-y-0 p-4">
+          <div className="flex gap-4">
+            <Avatar className="h-10 w-10 md:h-12 md:w-12">
+              <AvatarImage src={security.logoUrl} alt={security.name} data-ai-hint={security.securityType === 'Fund' ? "logo fund" : "logo company"}/>
+              <AvatarFallback className="text-xs md:text-base">{security.symbol.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-base md:text-xl font-bold">{security.symbol}</CardTitle>
+              <CardDescription className="text-xs md:text-sm">
+                <div className="text-xs">{security.market}</div>
+              </CardDescription>
             </div>
-            <div className="text-end">
-              <p className="text-sm md:text-xl font-bold">{formatCurrency(currentMarketPrice)}</p>
-              <p className={cn("text-xs md:text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
-                  {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
-              </p>
-            </div>
+          </div>
+          <div className="text-end">
+            <p className="text-sm md:text-xl font-bold">{formatCurrency(currentMarketPrice)}</p>
+            <p className={cn("text-xs md:text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
+              {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
+            </p>
+          </div>
           </CardHeader>
           {/* Desktop Buttons */}
           <CardContent className="hidden md:flex justify-end space-x-2 pb-4">
@@ -392,10 +398,15 @@ export default function SecurityDetailPage() {
           </div>
         </Card>
 
-        <Tabs defaultValue="performance" className="w-full max-w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <Tabs defaultValue="performance" className="w-full max-w-full overflow-hidden" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList
-            className="flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1 md:grid md:grid-cols-3 md:w-[500px] md:gap-0 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent h-10 items-center px-1"
-            style={{ WebkitOverflowScrolling: 'touch' }}
+            className="flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1 md:grid md:grid-cols-3 md:w-[500px] md:gap-0 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent h-10 items-center px-1 touch-pan-x"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              overscrollBehaviorX: 'contain'
+            }}
           >
             <TabsTrigger value="performance" className="flex-1 min-w-[90px] flex-shrink-0 text-xs md:text-base">
               <LineChart className="mr-2 h-4 w-4" /> Performance
@@ -652,9 +663,24 @@ export default function SecurityDetailPage() {
                 Delete Transaction
               </AlertDialogAction>
             </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </AlertDialog>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this sell transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the record of selling {(('shares' in (transactionToDelete ?? {})) ? (transactionToDelete as any).shares : (transactionToDelete?.numberOfShares ?? 0)).toLocaleString()} {security?.securityType === 'Fund' ? 'units' : 'shares'} of {security?.name} on {transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ''}.
+              This action will reverse its impact on your total realized P/L. It will NOT automatically add the shares back to your holdings; you may need to re-enter purchases or adjust existing ones if this sale previously depleted them. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSellTransaction}
+              className={buttonVariants({ variant: "destructive" })}
+            >
+              Delete Transaction
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
