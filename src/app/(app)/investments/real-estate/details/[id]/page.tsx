@@ -180,7 +180,7 @@ export default function RealEstateDetailPage() {
       
       const newPaymentObj: Installment = {
         number: nextNumber,
-        dueDate: newPayment.dueDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        dueDate: newPayment.dueDate?.toISOString().split('T')[0] || '', // Format as YYYY-MM-DD
         amount: Number(newPayment.amount) || 0,
         status: 'Unpaid',
         description: newPayment.description.trim() || undefined,
