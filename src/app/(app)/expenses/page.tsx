@@ -234,73 +234,66 @@ export default function ExpensesPage() {
                         {formatDateDisplay(record.date)}
                       </span>
                       {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' && (
-                        <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
-                          Installment {record.installmentMonthIndex}/{record.numberOfInstallments}
-                        </span>
-                      )}
-                      {record._isEnded && (
-                        <span className="px-2 py-0.5 rounded-full bg-gray-200 text-gray-600 text-xs">Ended</span>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
+                            Installment {record.installmentMonthIndex}/{record.numberOfInstallments}
+                          </span>
+                          {record._isRequiredThisMonth && (
+                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">Required This Month</span>
+                          )}
+                        </div>
                       )}
                     </div>
-                    {/* Amount and Badges */}
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                    {/* Amount and Actions */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-2xl font-bold">
-                        {formatCurrencyEGP(record._requiredAmount)}
+                        EGP {formatNumberWithSuffix(record._requiredAmount)}
                       </span>
-                      {record._isRequiredThisMonth && (
-                        <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">Required This Month</span>
-                      )}
-                      {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' && (
-                        <span className="text-xs text-muted-foreground">
-                          Total: {formatCurrencyEGP(record._originalAmount)}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Link href={`/expenses/edit/${record.id}`} passHref legacyBehavior>
+                          <Button variant="ghost" size="icon" aria-label="Edit">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Remove {record.description || record.category}</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action will permanently delete this expense record. This cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={async () => {
+                                  try {
+                                    await deleteExpenseRecord(record.id);
+                                  } catch (e) {
+                                    // Optionally show toast or ignore
+                                  }
+                                }}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
-                    {/* Installment summary under amount */}
+                    {/* Installment Details */}
                     {record.isInstallment && record.numberOfInstallments && record.category === 'Credit Card' && (
                       <div className="text-xs text-muted-foreground mt-1">
-                        Installment: {formatCurrencyEGP(record.amount / record.numberOfInstallments)} x {record.numberOfInstallments} months
+                        Installment: EGP {formatNumberWithSuffix(record.amount / record.numberOfInstallments)} x {record.numberOfInstallments} months
                       </div>
                     )}
-                  </div>
-                  {/* Actions Column */}
-                  <div className="flex flex-col items-end gap-2 min-w-[56px] mt-2 md:mt-0">
-                    <Link href={`/expenses/edit/${record.id}`} passHref legacyBehavior>
-                      <Button variant="ghost" size="icon" className="mb-1" aria-label="Edit">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete">
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove {record.description || record.category}</span>
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action will permanently delete this expense record. This cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={async () => {
-                              try {
-                                await deleteExpenseRecord(record.id);
-                              } catch (e) {
-                                // Optionally show toast or ignore
-                              }
-                            }}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>
