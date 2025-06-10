@@ -179,7 +179,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
           </Link>
         </div>
         
-        <div className="text-right pl-2">
+        <div className="text-end pl-2">
           {currentMarketPrice !== undefined ? (
             <div className="flex flex-col items-end">
               <p className={cn("font-bold text-base", 

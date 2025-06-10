@@ -123,7 +123,7 @@ export function MyStockListItem({
           )}
         </div>
         
-        <div className="text-right pl-2">
+        <div className="text-end pl-2">
           {isLoadingListedSecurities && !currentMarketPrice ? (
             <p className="text-sm text-muted-foreground">Loading...</p>
           ) : currentMarketPrice !== undefined ? (

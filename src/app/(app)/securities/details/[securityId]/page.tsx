@@ -315,7 +315,7 @@ export default function SecurityDetailPage() {
 
   return (
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-      <div className="container mx-auto py-8 space-y-6">
+      <div className="container mx-auto py-4 space-y-6">
         <Card>
           <CardHeader className="flex flex-row justify-between space-y-0 p-4">
             <div className="flex gap-4">
@@ -330,7 +330,7 @@ export default function SecurityDetailPage() {
                 </CardDescription>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-end">
               <p className="text-sm md:text-xl font-bold">{formatCurrency(currentMarketPrice)}</p>
               <p className={cn("text-xs md:text-sm", security.changePercent >= 0 ? "text-accent" : "text-destructive")}>
                   {security.changePercent >= 0 ? '+' : ''}{security.changePercent.toFixed(2)}%
@@ -416,8 +416,8 @@ export default function SecurityDetailPage() {
           <TabsContent value="performance">
             <Card className="mb-16 md:mb-4">
               <CardHeader>
-                <CardTitle>Price History</CardTitle>
-                <CardDescription>Historical price performance of {security.name}</CardDescription>
+                <CardTitle className='text-md'>Price History</CardTitle>
+                <CardDescription className='text-xs'>Historical price performance of {security.name}</CardDescription>
               </CardHeader>
               <CardContent className="h-[400px]">
                 <StockDetailChart securityId={security.id} currency={displayCurrency} />
@@ -456,7 +456,7 @@ export default function SecurityDetailPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <p className="font-medium">Total Return</p>
-                        <div className="text-right">
+                        <div className="text-end">
                           <p className={cn("text-lg font-bold", isProfitable ? "text-accent" : "text-destructive")}>
                             {formatCurrency(PnL)}
                           </p>
@@ -546,7 +546,7 @@ export default function SecurityDetailPage() {
                                 {shares.toLocaleString()} {security.securityType === 'Fund' ? 'Units' : 'Shares'}
                               </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-end">
                               <div className={cn(
                                 'font-medium',
                                 isBuy ? 'text-foreground' : isSell ? 'text-destructive' : 'text-accent'

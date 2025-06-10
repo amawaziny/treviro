@@ -277,7 +277,7 @@ export default function RealEstateDetailPage() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dueDate" className="text-right">
+                  <Label htmlFor="dueDate" className="text-end">
                     Due Date
                   </Label>
                   <div className="col-span-3">
@@ -313,7 +313,7 @@ export default function RealEstateDetailPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="amount" className="text-right">
+                  <Label htmlFor="amount" className="text-end">
                     Amount
                   </Label>
                   <Input
@@ -330,7 +330,7 @@ export default function RealEstateDetailPage() {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
-                  <Label htmlFor="description" className="text-right pt-2">
+                  <Label htmlFor="description" className="text-end pt-2">
                     Description
                   </Label>
                   <Textarea

@@ -66,7 +66,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             </div>
           </div>
           
-          <div className="text-right pl-2">
+          <div className="text-end pl-2">
             {hasMarketRate && profitOrLossInEGP !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>

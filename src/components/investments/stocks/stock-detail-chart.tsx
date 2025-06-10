@@ -169,8 +169,8 @@ export function StockDetailChart({ securityId, currency }: StockDetailChartProps
             </Button>
             ))}
         </div>
-        <div className="flex-grow flex items-center justify-center">
-             <p className="text-muted-foreground">No price history data available for this security or selected range ({selectedRange}).</p>
+        <div className="flex-grow flex items-center justify-center text-wrap">
+             <p className="text-muted-foreground text-sm">No price history data available for this security or selected range ({selectedRange}).</p>
         </div>
       </div>
     );
@@ -209,18 +209,18 @@ export function StockDetailChart({ securityId, currency }: StockDetailChartProps
             tickFormatter={(tick) => {
                 try {
                     const dateObj = new Date(tick + "T00:00:00Z"); // Assume UTC
-                    return format(dateObj, 'dd-MM-yyyy');
+                    return format(dateObj, 'dd/MM/yy');
                 } catch (e) { return tick; }
             }}
             stroke="hsl(var(--muted-foreground))"
-            fontSize={12}
+            fontSize={10}
             interval="preserveStartEnd"
             minTickGap={selectedRange === '1W' || selectedRange === '1M' ? 20 : 50}
             reversed={language === 'ar'}
           />
           <YAxis 
             stroke="hsl(var(--muted-foreground))"
-            fontSize={12}
+            fontSize={10}
             tickFormatter={yAxisTickFormatter}
             domain={['auto', 'auto']}
             orientation={language === 'ar' ? 'right' : 'left'}
@@ -242,7 +242,7 @@ export function StockDetailChart({ securityId, currency }: StockDetailChartProps
                  try { return format(new Date(label + "T00:00:00Z"), 'dd-MM-yyyy') } catch(e) { return label; }
             }}
           />
-          <Legend wrapperStyle={{ fontSize: '12px' }}/>
+          <Legend wrapperStyle={{ fontSize: '10px' }}/>
           <Line 
             yAxisId="priceAxis"
             type="monotone" 

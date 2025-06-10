@@ -105,7 +105,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 </p>
               </div>
             </div>
-            <div className="text-right flex-shrink-0">
+            <div className="text-end flex-shrink-0">
               {typeof holding.amountInvested === 'number' ? (
                 <p className="text-lg font-bold">
                   {(holding.currency || 'EGP')} {formatNumberWithSuffix(holding.amountInvested)}
@@ -177,7 +177,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             </div>
           </div>
           
-          <div className="text-right flex-shrink-0">
+          <div className="text-end flex-shrink-0">
             {currentMarketPrice !== undefined && profitLoss !== undefined ? (
               <>
                 <p className={cn("text-lg font-bold", isProfitable ? 'text-accent' : 'text-destructive')}>

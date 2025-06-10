@@ -572,7 +572,7 @@ export default function CashFlowPage() {
                       <Landmark className="h-4 w-4 text-blue-500" />
                       <span className="whitespace-pre-line">{installment.propertyName} (#{installment.number})</span>
                     </span>
-                    <span className="font-medium text-right">
+                    <span className="font-medium text-end">
                       {formatCurrencyEGPForMobile(installment.amount || 0)}
                     </span>
                   </li>

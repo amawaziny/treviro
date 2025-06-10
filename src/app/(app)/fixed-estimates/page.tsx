@@ -69,25 +69,25 @@ export default function FixedEstimatesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Type</TableHead>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Name</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Period</TableHead>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Nature</TableHead>
-                  {/* <TableHead className={cn(language === 'ar' ? 'text-left' : 'text-right')}>Actions</TableHead> */}
+                  <TableHead className={cn(language === 'ar' ? 'text-end' : 'text-left')}>Type</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-end' : 'text-left')}>Name</TableHead>
+                  <TableHead className="text-end">Amount</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-end' : 'text-left')}>Period</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-end' : 'text-left')}>Nature</TableHead>
+                  {/* <TableHead className={cn(language === 'ar' ? 'text-left' : 'text-end')}>Actions</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {fixedEstimates.map((record: FixedEstimateRecord) => (
                   <TableRow key={record.id}>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.type}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.name || 'N/A'}</TableCell>
-                    <TableCell className="text-right">{formatCurrencyEGP(record.amount)}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.period}</TableCell>
-                    <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{record.isExpense ? 'Expense' : 'Income'}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-end' : 'text-left')}>{record.type}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-end' : 'text-left')}>{record.name || 'N/A'}</TableCell>
+                    <TableCell className="text-end">{formatCurrencyEGP(record.amount)}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-end' : 'text-left')}>{record.period}</TableCell>
+                    <TableCell className={cn(language === 'ar' ? 'text-end' : 'text-left')}>{record.isExpense ? 'Expense' : 'Income'}</TableCell>
                     {/* Actions cell for edit/delete will be added in Phase 2 */}
                     {/* 
-                    <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-right')}>
+                    <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-end')}>
                       <Button variant="ghost" size="icon" disabled> <Edit className="h-4 w-4" /> </Button>
                       <Button variant="ghost" size="icon" disabled> <Trash2 className="h-4 w-4 text-destructive" /> </Button>
                     </TableCell> 

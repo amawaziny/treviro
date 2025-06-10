@@ -56,7 +56,7 @@ export function MyRealEstateListItem({ investment }: MyRealEstateListItemProps) 
               <p className="text-xs text-muted-foreground truncate">{investment.propertyAddress}</p>
             </div>
           </div>
-          <div className="text-right pl-2 flex flex-col items-end gap-2" onClick={e => e.stopPropagation()}>
+          <div className="text-end pl-2 flex flex-col items-end gap-2" onClick={e => e.stopPropagation()}>
             <span className="font-bold text-lg">EGP {formatNumberWithSuffix(investment.amountInvested)}</span>
             <Button
               variant="ghost"

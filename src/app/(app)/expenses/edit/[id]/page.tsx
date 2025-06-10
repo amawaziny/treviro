@@ -30,7 +30,7 @@ export default function EditExpensePage({ params }: { params: Promise<{ id: stri
   const BackArrowIcon = language === 'ar' ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto py-4 space-y-6">
       <Button variant="outline" size="sm" asChild className="mb-4">
         <Link href="/expenses">
           <BackArrowIcon className={language === 'ar' ? 'ml-2 h-4 w-4' : 'mr-2 h-4 w-4'} />

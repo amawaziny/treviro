@@ -199,13 +199,13 @@ export default function MyRealEstatePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className={cn(language === 'ar' ? 'text-right' : 'text-left')}>Fund Name (Symbol)</TableHead>
-                  <TableHead className="text-right">Units Held</TableHead>
-                  <TableHead className="text-right">Avg. Purchase Price</TableHead>
-                  <TableHead className="text-right">Total Invested</TableHead>
-                  <TableHead className="text-right">Current Market Price</TableHead>
-                  <TableHead className="text-right">Current Value</TableHead>
-                  <TableHead className="text-right">P/L</TableHead>
+                  <TableHead className={cn(language === 'ar' ? 'text-end' : 'text-left')}>Fund Name (Symbol)</TableHead>
+                  <TableHead className="text-end">Units Held</TableHead>
+                  <TableHead className="text-end">Avg. Purchase Price</TableHead>
+                  <TableHead className="text-end">Total Invested</TableHead>
+                  <TableHead className="text-end">Current Market Price</TableHead>
+                  <TableHead className="text-end">Current Value</TableHead>
+                  <TableHead className="text-end">P/L</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -215,13 +215,13 @@ export default function MyRealEstatePage() {
                   
                   return (
                     <TableRow key={fundInv.id}>
-                      <TableCell className={cn(language === 'ar' ? 'text-right' : 'text-left')}>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
-                      <TableCell className="text-right">{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
-                      <TableCell className="text-right">{formatSecurityCurrency(avgPurchasePrice, displayCurrency)}</TableCell>
-                      <TableCell className="text-right">{formatSecurityCurrency(fundInv.totalCost, displayCurrency)}</TableCell>
-                      <TableCell className="text-right">{formatSecurityCurrency((fundInv.fundDetails.price || 0), displayCurrency)}</TableCell>
-                      <TableCell className="text-right">{formatSecurityCurrency(fundInv.currentValue, displayCurrency)}</TableCell>
-                      <TableCell className={cn("text-right font-semibold", fundInv.profitLoss >= 0 ? "text-accent" : "text-destructive")}>
+                      <TableCell className={cn(language === 'ar' ? 'text-end' : 'text-left')}>{fundInv.fundDetails.name} ({fundInv.fundDetails.symbol})</TableCell>
+                      <TableCell className="text-end">{fundInv.numberOfShares?.toLocaleString() || 'N/A'}</TableCell>
+                      <TableCell className="text-end">{formatSecurityCurrency(avgPurchasePrice, displayCurrency)}</TableCell>
+                      <TableCell className="text-end">{formatSecurityCurrency(fundInv.totalCost, displayCurrency)}</TableCell>
+                      <TableCell className="text-end">{formatSecurityCurrency((fundInv.fundDetails.price || 0), displayCurrency)}</TableCell>
+                      <TableCell className="text-end">{formatSecurityCurrency(fundInv.currentValue, displayCurrency)}</TableCell>
+                      <TableCell className={cn("text-end font-semibold", fundInv.profitLoss >= 0 ? "text-accent" : "text-destructive")}>
                         {formatSecurityCurrency(fundInv.profitLoss, displayCurrency)}
                       </TableCell>
                     </TableRow>
