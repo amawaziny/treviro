@@ -434,39 +434,39 @@ export default function SecurityDetailPage() {
           <TabsContent value="position">
             <Card className="mb-16 md:mb-4">
               <CardHeader>
-                <CardTitle>My Position</CardTitle>
-                <CardDescription>Your current investment in {security.name}</CardDescription>
+                <CardTitle className='text-md'>My Position</CardTitle>
+                <CardDescription className='text-xs'>Your current investment in {security.name}</CardDescription>
               </CardHeader>
               <CardContent>
                 {hasPosition ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-muted-foreground">Shares Owned</p>
+                        <p className="text-xs text-muted-foreground">Shares Owned</p>
                         <p className="font-medium">{totalSharesOwned.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Avg. Cost</p>
+                        <p className="text-xs text-muted-foreground">Avg. Cost</p>
                         <p className="font-medium">{formatCurrency(averagePurchasePrice)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Total Cost</p>
-                        <p className="font-medium">{formatCurrency(totalCostBasis)}</p>
+                        <p className="text-xs text-muted-foreground">Total Cost</p>
+                        <p className="text-xs font-medium">{formatCurrency(totalCostBasis)}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Market Value</p>
-                        <p className="font-medium">{formatCurrency(totalInvestmentValue)}</p>
+                        <p className="text-xs text-muted-foreground">Market Value</p>
+                        <p className="text-xs font-medium">{formatCurrency(totalInvestmentValue)}</p>
                       </div>
                     </div>
                     <Separator />
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <p className="font-medium">Total Return</p>
+                        <p className="text-xs font-medium">Total Return</p>
                         <div className="text-end">
                           <p className={cn("text-lg font-bold", isProfitable ? "text-accent" : "text-destructive")}>
                             {formatCurrency(PnL)}
                           </p>
-                          <p className={cn("text-sm", isProfitable ? "text-accent" : "text-destructive")}>
+                          <p className={cn("text-xs", isProfitable ? "text-accent" : "text-destructive")}>
                             {isProfitable ? '+' : ''}{PnLPercentage.toFixed(2)}%
                           </p>
                         </div>
@@ -483,8 +483,8 @@ export default function SecurityDetailPage() {
           <TabsContent value="transactions">
             <Card className='mb-16 md:mb-4'>
               <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-                <CardDescription>All buy, sell, and dividend records for {security.name}</CardDescription>
+                <CardTitle className='text-md'>Transaction History</CardTitle>
+                <CardDescription className='text-xs'>All buy, sell, and dividend records for {security.name}</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 {securityTransactions.length > 0 ? (
@@ -554,7 +554,7 @@ export default function SecurityDetailPage() {
                             </div>
                             <div className="text-end">
                               <div className={cn(
-                                'font-medium',
+                                'text-xs font-medium',
                                 isBuy ? 'text-foreground' : isSell ? 'text-destructive' : 'text-accent'
                               )}>
                                 {isBuy ? '-' : ''}{formatCurrency(amount)}
