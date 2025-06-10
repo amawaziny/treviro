@@ -64,7 +64,7 @@ function AddInvestmentPageContent() {
     
     const securityId = searchParams.get('securityId');
     // Get the investment type from URL parameters
-    const investmentType = searchParams.get('type') || securityId ? 'Buy Security' : 'investment';
+    const investmentType = searchParams.get('type') || (securityId ? 'Buy Security' : 'investment');
     
     // Map investment types to their display configurations
     const typeConfigs = {
