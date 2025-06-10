@@ -17,8 +17,17 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-let app: FirebaseApp | null = null;
-let db: Firestore | null = null;
+let app: FirebaseApp;
+let db: Firestore;
+
+// Ensure Firebase is initialized
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+} else {
+  app = getApp();
+  db = getFirestore(app);
+}
 let auth: Auth | null = null;
 let analytics: Analytics | null = null;
 

@@ -48,6 +48,20 @@ export interface CurrencyInvestment extends BaseInvestment {
 }
 
 export type PropertyType = "Residential" | "Commercial" | "Land";
+
+export type InstallmentFrequency = "Monthly" | "Quarterly" | "Yearly";
+
+export interface Installment {
+  number: number;
+  chequeNumber?: string;
+  amount: number;
+  dueDate: string;
+  displayNumber: number;
+  status: "pending" | "paid" | "overdue";
+  description?: string;
+  isMaintenance?: boolean;
+}
+
 export interface RealEstateInvestment extends BaseInvestment {
   type: "Real Estate";
   propertyAddress?: string;
