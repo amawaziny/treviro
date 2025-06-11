@@ -67,15 +67,6 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     }).format(value);
   };
 
-  const formatCurrencyForDebtMobile = (
-    value: number | undefined,
-    curr: string,
-  ) => {
-    if (value === undefined || value === null || Number.isNaN(value))
-      return "N/A";
-    return `${curr} ${formatNumberWithSuffix(value)}`;
-  };
-
   const handleRemoveFund = async () => {
     if (fundDetails?.symbol) {
       try {
@@ -130,16 +121,9 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                       displayName
                     )
                   ) : typeof holding.amountInvested === "number" ? (
-                    <>
-                      <span className="md:hidden">
-                        {holding.currency || "EGP"}{" "}
-                        {formatNumberWithSuffix(holding.amountInvested)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {holding.currency || "EGP"}{" "}
-                        {holding.amountInvested.toLocaleString()}
-                      </span>
-                    </>
+                    <span>
+                      {formatNumberWithSuffix(holding.amountInvested, holding.currency)}
+                    </span>
                   ) : (
                     "Debt Item"
                   )}
@@ -153,8 +137,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             <div className="text-end flex-shrink-0">
               {typeof holding.amountInvested === "number" ? (
                 <p className="text-lg font-bold">
-                  {holding.currency || "EGP"}{" "}
-                  {formatNumberWithSuffix(holding.amountInvested)}
+                  {formatNumberWithSuffix(holding.amountInvested, holding.currency)}
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">N/A</p>
@@ -174,16 +157,9 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             <p>
               Monthly Interest:
               {typeof holding.projectedMonthlyInterest === "number" ? (
-                <>
-                  <span className="md:hidden">
-                    {holding.currency || "EGP"}{" "}
-                    {formatNumberWithSuffix(holding.projectedMonthlyInterest)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {holding.currency || "EGP"}{" "}
-                    {holding.projectedMonthlyInterest.toLocaleString()}
-                  </span>
-                </>
+                <span>
+                  {formatNumberWithSuffix(holding.projectedMonthlyInterest, holding.currency)}
+                </span>
               ) : (
                 "N/A"
               )}
@@ -191,16 +167,9 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             <p className="text-end">
               Annual Interest:
               {typeof holding.projectedAnnualInterest === "number" ? (
-                <>
-                  <span className="md:hidden">
-                    {holding.currency || "EGP"}{" "}
-                    {formatNumberWithSuffix(holding.projectedAnnualInterest)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {holding.currency || "EGP"}{" "}
-                    {holding.projectedAnnualInterest.toLocaleString()}
-                  </span>
-                </>
+                <span>
+                  {formatNumberWithSuffix(holding.projectedAnnualInterest, holding.currency)}
+                </span>
               ) : (
                 "N/A"
               )}
@@ -254,7 +223,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                         ? displayName.slice(0, 14) + "…"
                         : displayName
                       : typeof holding.amountInvested === "number"
-                        ? `${currency || "EGP"} ${formatNumberWithSuffix(holding.amountInvested)}`
+                        ? `${formatNumberWithSuffix(holding.amountInvested, holding.currency)}`
                         : "Debt Item"}
                   </p>
                 </Link>
@@ -264,7 +233,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                   title={holding.displayName || ""}
                 >
                   {typeof holding.amountInvested === "number"
-                    ? `${holding.currency || "EGP"} ${formatNumberWithSuffix(holding.amountInvested)}`
+                    ? `${formatNumberWithSuffix(holding.amountInvested, holding.currency)}`
                     : "Debt Item"}
                 </p>
               )}
@@ -290,7 +259,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                   )}
                 >
                   <span className="md:hidden">
-                    {formatCurrencyForDebtMobile(profitLoss, currency || "EGP")}
+                    {formatNumberWithSuffix(profitLoss, currency)}
                   </span>
                   <span className="hidden md:inline">
                     {formatDisplayCurrency(profitLoss, currency)}
@@ -358,9 +327,9 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
           <p>
             Avg. Cost:
             <span className="md:hidden">
-              {formatCurrencyForDebtMobile(
+              {formatNumberWithSuffix(
                 averagePurchasePrice || 0,
-                currency || "EGP",
+                currency,
               )}
             </span>
             <span className="hidden md:inline">
@@ -370,9 +339,9 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
           <p>
             Current Value:
             <span className="md:hidden">
-              {formatCurrencyForDebtMobile(
+              {formatNumberWithSuffix(
                 currentMarketPrice || 0,
-                currency || "EGP",
+                currency,
               )}
             </span>
             <span className="hidden md:inline">

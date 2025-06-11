@@ -16,7 +16,7 @@ import React from "react"; // Added React for useMemo
 import { useInvestments } from "@/hooks/use-investments"; // To calculate total P/L
 import { useListedSecurities } from "@/hooks/use-listed-securities"; // For current prices
 import type { StockInvestment } from "@/lib/types";
-import { cn, formatNumberWithSuffix } from "@/lib/utils"; // For styling and formatting
+import { cn, formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils"; // For styling and formatting
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isStockRelatedFund } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,34 +108,6 @@ export default function MyStocksPage() {
         : 0;
   const isTotalStockProfitable = totalStockPnL >= 0;
 
-  const formatCurrency = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    // Assuming EGP as default for overall summary for now
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0.00`;
-    // For a mixed portfolio, P/L should ideally be converted to a single currency.
-    // For simplicity here, we'll assume EGP for the total P/L summary.
-    // Individual items in MyStockListItem will use their specific currency.
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: currencyCode,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCurrencyWithSuffix = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0`;
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `${currencyCode} ${formattedNumber}`;
-  };
-
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
@@ -177,8 +149,8 @@ export default function MyStocksPage() {
               )}
             >
               {isMobile
-                ? formatCurrencyWithSuffix(totalStockPnL)
-                : formatCurrency(totalStockPnL)}
+                ? formatNumberWithSuffix(totalStockPnL)
+                : formatCurrencyWithCommas(totalStockPnL)}
             </div>
             <p className="text-xs text-muted-foreground">
               {totalStockPnLPercent === Infinity
@@ -187,7 +159,7 @@ export default function MyStocksPage() {
               % overall P/L
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Total Invested: {formatCurrency(totalStockCost)}
+              Total Invested: {formatCurrencyWithCommas(totalStockCost)}
             </p>
           </CardContent>
         </Card>

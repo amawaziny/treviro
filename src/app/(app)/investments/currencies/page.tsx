@@ -128,7 +128,7 @@ export default function MyCurrenciesPage() {
 
   const isLoading = isLoadingInvestments || isLoadingRates;
 
-  const formatCurrencyEGP = (value: number | undefined) => {
+  const formatCurrencyWithCommas = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value))
       return "EGP 0.00";
     return new Intl.NumberFormat("en-EG", {
@@ -137,13 +137,6 @@ export default function MyCurrenciesPage() {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);
-  };
-
-  const formatCurrencyEGPWithSuffix = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `EGP ${formattedNumber}`;
   };
 
   if (isLoading) {
@@ -207,8 +200,8 @@ export default function MyCurrenciesPage() {
             )}
           >
             {isMobile
-              ? formatCurrencyEGPWithSuffix(totalProfitLossEGP)
-              : formatCurrencyEGP(totalProfitLossEGP)}
+              ? formatNumberWithSuffix(totalProfitLossEGP)
+              : formatCurrencyWithCommas(totalProfitLossEGP)}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalProfitLossPercent === Infinity

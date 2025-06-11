@@ -9,7 +9,7 @@ import type {
   ListedSecurity,
   AggregatedDebtHolding,
 } from "@/lib/types";
-import { isDebtRelatedFund } from "@/lib/utils";
+import { formatCurrencyWithCommas, isDebtRelatedFund } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -234,31 +234,6 @@ export default function MyDebtInstrumentsPage() {
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatSecurityCurrency = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0.00`;
-    const digits = currencyCode === "EGP" ? 2 : 2;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currencyCode,
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    }).format(value);
-  };
 
   const formatCurrencyWithSuffix = (
     value: number | undefined,
@@ -333,11 +308,11 @@ export default function MyDebtInstrumentsPage() {
             {isMobile
               ? formatCurrencyWithSuffix(
                   totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency || "EGP",
+                  debtFundHoldings[0]?.currency,
                 )
-              : formatSecurityCurrency(
+              : formatCurrencyWithCommas(
                   totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency || "EGP",
+                  debtFundHoldings[0]?.currency,
                 )}
           </div>
           <p className="text-xs text-muted-foreground">
@@ -353,19 +328,19 @@ export default function MyDebtInstrumentsPage() {
               </span>
               <span className="font-semibold">
                 {isMobile
-                  ? formatCurrencyWithSuffix(totalInvestedInDebt)
-                  : formatCurrencyEGP(totalInvestedInDebt)}
+                  ? formatCurrencyWithSuffix(totalInvestedInDebt, debtFundHoldings[0]?.currency)
+                  : formatCurrencyWithCommas(totalInvestedInDebt, debtFundHoldings[0]?.currency)}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                (Direct: {formatCurrencyEGP(totalDirectDebtInvested)})
+                (Direct: {formatCurrencyWithCommas(totalDirectDebtInvested, debtFundHoldings[0]?.currency)})
               </span>
               <span>
                 (Funds:{" "}
-                {formatSecurityCurrency(
+                {formatCurrencyWithCommas(
                   totalDebtFundCost,
-                  debtFundHoldings[0]?.currency || "EGP",
+                  debtFundHoldings[0]?.currency,
                 )}
                 )
               </span>
@@ -382,7 +357,7 @@ export default function MyDebtInstrumentsPage() {
           </CardTitle>
           <CardDescription>
             Bonds, Certificates, Treasury Bills you own directly. (Projected
-            Interest: {formatCurrencyEGP(totalProjectedAnnualInterest)}{" "}
+            Interest: {formatCurrencyWithCommas(totalProjectedAnnualInterest)}{" "}
             annually)
           </CardDescription>
         </CardHeader>

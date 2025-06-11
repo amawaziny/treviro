@@ -8,7 +8,7 @@ import type {
   StockInvestment,
   ListedSecurity,
 } from "@/lib/types";
-import { isRealEstateRelatedFund } from "@/lib/utils";
+import { formatCurrencyWithCommas, isRealEstateRelatedFund } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -163,42 +163,6 @@ export default function MyRealEstatePage() {
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatSecurityCurrency = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0.00`;
-    const digits = currencyCode === "EGP" ? 2 : 2;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currencyCode,
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    }).format(value);
-  };
-
-  const formatCurrencyWithSuffix = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0`;
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `${currencyCode} ${formattedNumber}`;
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -260,13 +224,13 @@ export default function MyRealEstatePage() {
             )}
           >
             {isMobile
-              ? formatCurrencyWithSuffix(
+              ? formatNumberWithSuffix(
                   totalFundPnL,
-                  realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
+                  realEstateFundHoldings[0]?.fundDetails.currency,
                 )
-              : formatSecurityCurrency(
+              : formatCurrencyWithCommas(
                   totalFundPnL,
-                  realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
+                  realEstateFundHoldings[0]?.fundDetails.currency,
                 )}
           </div>
           <p className="text-xs text-muted-foreground">
@@ -282,17 +246,17 @@ export default function MyRealEstatePage() {
               </span>
               <span className="font-semibold">
                 {isMobile
-                  ? formatCurrencyWithSuffix(totalInvestedInRealEstate)
-                  : formatCurrencyEGP(totalInvestedInRealEstate)}
+                  ? formatNumberWithSuffix(totalInvestedInRealEstate)
+                  : formatCurrencyWithCommas(totalInvestedInRealEstate)}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                (Direct: {formatCurrencyEGP(totalDirectRealEstateInvested)})
+                (Direct: {formatCurrencyWithCommas(totalDirectRealEstateInvested)})
               </span>
               <span>
                 (Funds:{" "}
-                {formatSecurityCurrency(
+                {formatCurrencyWithCommas(
                   totalFundCost,
                   realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
                 )}
@@ -381,25 +345,25 @@ export default function MyRealEstatePage() {
                         {fundInv.numberOfShares?.toLocaleString() || "N/A"}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatSecurityCurrency(
+                        {formatCurrencyWithCommas(
                           avgPurchasePrice,
                           displayCurrency,
                         )}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatSecurityCurrency(
+                        {formatCurrencyWithCommas(
                           fundInv.totalCost,
                           displayCurrency,
                         )}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatSecurityCurrency(
+                        {formatCurrencyWithCommas(
                           fundInv.fundDetails.price || 0,
                           displayCurrency,
                         )}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatSecurityCurrency(
+                        {formatCurrencyWithCommas(
                           fundInv.currentValue,
                           displayCurrency,
                         )}
@@ -412,7 +376,7 @@ export default function MyRealEstatePage() {
                             : "text-destructive",
                         )}
                       >
-                        {formatSecurityCurrency(
+                        {formatCurrencyWithCommas(
                           fundInv.profitLoss,
                           displayCurrency,
                         )}

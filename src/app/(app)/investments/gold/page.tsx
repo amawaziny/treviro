@@ -12,7 +12,7 @@ import type {
   GoldType,
   AggregatedGoldHolding,
 } from "@/lib/types";
-import { isGoldRelatedFund } from "@/lib/utils";
+import { formatCurrencyWithCommas, isGoldRelatedFund } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -232,24 +232,6 @@ export default function MyGoldPage() {
   const isLoading =
     isLoadingInvestments || isLoadingListedSecurities || isLoadingGoldPrices;
 
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCurrencyEGPWithSuffix = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `EGP ${formattedNumber}`;
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -309,8 +291,8 @@ export default function MyGoldPage() {
             )}
           >
             {isMobile
-              ? formatCurrencyEGPWithSuffix(totalProfitLoss)
-              : formatCurrencyEGP(totalProfitLoss)}
+              ? formatNumberWithSuffix(totalProfitLoss)
+              : formatCurrencyWithCommas(totalProfitLoss)}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalProfitLossPercent === Infinity
@@ -319,7 +301,7 @@ export default function MyGoldPage() {
             % overall P/L
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Total Invested: {formatCurrencyEGP(totalCost)}
+            Total Invested: {formatCurrencyWithCommas(totalCost)}
           </p>
         </CardContent>
       </Card>

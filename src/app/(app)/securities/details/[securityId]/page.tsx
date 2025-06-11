@@ -36,7 +36,7 @@ import { StockDetailChart } from "@/components/investments/stocks/stock-detail-c
 import { useInvestments } from "@/hooks/use-investments";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { cn, formatDateDisplay } from "@/lib/utils";
+import { cn, formatCurrencyWithCommas, formatDateDisplay } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -363,19 +363,6 @@ export default function SecurityDetailPage() {
 
   const displayCurrency = security.currency || "EGP"; // Default to EGP if currency not specified
 
-  const formatCurrency = (
-    value: number,
-    currencyCode: string = displayCurrency,
-  ) => {
-    const digits = currencyCode === "EGP" ? 3 : 2;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currencyCode,
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    }).format(value);
-  };
-
   return (
     <div className="md:pb-6 space-y-6">
       <Card>
@@ -406,7 +393,7 @@ export default function SecurityDetailPage() {
           </div>
           <div className="text-end">
             <p className="text-sm md:text-xl font-bold">
-              {formatCurrency(currentMarketPrice)}
+              {formatCurrencyWithCommas(currentMarketPrice, displayCurrency)}
             </p>
             <p
               className={cn(
@@ -560,7 +547,7 @@ export default function SecurityDetailPage() {
                     <div>
                       <p className="text-xs text-muted-foreground">Avg. Cost</p>
                       <p className="text-xs font-medium">
-                        {formatCurrency(averagePurchasePrice)}
+                        {formatCurrencyWithCommas(averagePurchasePrice, displayCurrency)}
                       </p>
                     </div>
                     <div>
@@ -568,7 +555,7 @@ export default function SecurityDetailPage() {
                         Total Cost
                       </p>
                       <p className="text-xs font-medium">
-                        {formatCurrency(totalCostBasis)}
+                        {formatCurrencyWithCommas(totalCostBasis, displayCurrency)}
                       </p>
                     </div>
                     <div>
@@ -576,7 +563,7 @@ export default function SecurityDetailPage() {
                         Market Value
                       </p>
                       <p className="text-xs font-medium">
-                        {formatCurrency(totalInvestmentValue)}
+                        {formatCurrencyWithCommas(totalInvestmentValue, displayCurrency)}
                       </p>
                     </div>
                   </div>
@@ -591,7 +578,7 @@ export default function SecurityDetailPage() {
                             isProfitable ? "text-accent" : "text-destructive",
                           )}
                         >
-                          {formatCurrency(PnL)}
+                          {formatCurrencyWithCommas(PnL, displayCurrency)}
                         </p>
                         <p
                           className={cn(
@@ -692,11 +679,11 @@ export default function SecurityDetailPage() {
                                 )}
                               >
                                 {isBuy ? "-" : ""}
-                                {formatCurrency(amount)}
+                                {formatCurrencyWithCommas(amount, displayCurrency)}
                               </div>
                               {!isDividend && (
                                 <div className="text-xs text-muted-foreground">
-                                  {formatCurrency(price)} each
+                                  {formatCurrencyWithCommas(price, displayCurrency)} each
                                 </div>
                               )}
                             </div>
@@ -706,7 +693,7 @@ export default function SecurityDetailPage() {
                             <div>
                               {!isDividend && (
                                 <span>
-                                  Fees: {formatCurrency((tx as any).fees || 0)}
+                                  Fees: {formatCurrencyWithCommas((tx as any).fees || 0, displayCurrency)}
                                 </span>
                               )}
                             </div>

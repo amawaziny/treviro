@@ -4,82 +4,20 @@ import Image from "next/image";
 import type { AggregatedGoldHolding } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Gem, Coins, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Gem, TrendingUp, TrendingDown } from "lucide-react";
+import { cn, formatNumberWithSuffix } from "@/lib/utils";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
-import { formatNumberWithSuffix } from "@/lib/utils";
+
 interface MyGoldListItemProps {
   holding: AggregatedGoldHolding;
 }
 
-// Helper for buttonVariants in AlertDialogAction
-const buttonVariants = ({
-  variant,
-}: {
-  variant:
-    | "destructive"
-    | "default"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link"
-    | null
-    | undefined;
-}) => {
-  if (variant === "destructive") {
-    return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
-  }
-  return ""; // Default or other variants can be handled by AlertDialog's default styling
-};
-
-// Helper for mobile: 6 digits for avg cost and market price, but not for invested amount or P/L
-const formatCurrencyForGoldMobile = (
-  value: number,
-  currencyCode: string,
-  digits = 2,
-  isMobile = true,
-) => {
-  if (value === undefined || value === null || isNaN(value))
-    return `${currencyCode} 0.00`;
-
-  // For mobile view, format with K/M suffixes
-  if (isMobile && typeof window !== "undefined" && window.innerWidth < 768) {
-    if (Math.abs(value) >= 1000000) {
-      return `${currencyCode} ${(value / 1000000).toFixed(1)}M`;
-    } else if (Math.abs(value) >= 1000) {
-      return `${currencyCode} ${(value / 1000).toFixed(1)}K`;
-    }
-  }
-
-  // Default formatting for desktop or small numbers
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-    useGrouping: false,
-  }).format(value);
-};
-
 export function MyGoldListItem({ holding }: MyGoldListItemProps) {
   const { removeGoldInvestments } = useInvestments();
   const { toast } = useToast();
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
 
   const {
     id,
@@ -143,28 +81,6 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
         ? "Units"
         : "Grams";
 
-  const handleRemove = async () => {
-    try {
-      if (itemType === "physical" && physicalGoldType) {
-        await removeGoldInvestments(physicalGoldType, "physical");
-      } else if (itemType === "fund" && fundDetails?.symbol) {
-        await removeGoldInvestments(fundDetails.symbol, "fund");
-      }
-      toast({
-        title: "Gold Holding Removed",
-        description: `All investments in ${displayName} have been removed.`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error Removing Gold Holding",
-        description: error.message || `Could not remove ${displayName}.`,
-        variant: "destructive",
-      });
-      console.error("Error removing gold holding:", error);
-    }
-    setIsAlertDialogOpen(false);
-  };
-
   // Unify navigation: for gold funds, use fundDetails?.id; for physical gold, use holding.id
   const detailPageLink =
     itemType === "fund" && fundDetails?.id
@@ -218,7 +134,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
                   isProfitable ? "text-accent" : "text-destructive",
                 )}
               >
-                {formatCurrencyForGoldMobile(profitLoss, currency)}
+                {formatNumberWithSuffix(profitLoss, currency)}
               </p>
 
               <Badge
@@ -252,14 +168,14 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
           Avg. Cost:
           <span>
             {" "}
-            {formatCurrencyForGoldMobile(averagePurchasePrice, currency, 6)}
+            {formatNumberWithSuffix(averagePurchasePrice, currency)}
           </span>
         </p>
         <p className="text-end">
           Market Price:
           <span>
             {" "}
-            {formatCurrencyForGoldMobile(currentMarketPrice || 0, currency, 6)}
+            {formatNumberWithSuffix(currentMarketPrice || 0, currency)}
           </span>
         </p>
       </div>

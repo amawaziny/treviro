@@ -89,7 +89,7 @@ export function MyRealEstateListItem({
             onClick={(e) => e.stopPropagation()}
           >
             <span className="font-bold text-lg">
-              EGP {formatNumberWithSuffix(investment.amountInvested)}
+              {formatNumberWithSuffix(investment.amountInvested)}
             </span>
             <Button
               variant="ghost"
@@ -144,14 +144,14 @@ export function MyRealEstateListItem({
           <p>
             Installment:{" "}
             {investment.installmentAmount
-              ? `EGP ${formatNumberWithSuffix(investment.installmentAmount)}`
+              ? `${formatNumberWithSuffix(investment.installmentAmount)}`
               : "N/A"}
           </p>
           <p>Frequency: {investment.installmentFrequency || "N/A"}</p>
           <p>
             Total Price:{" "}
             {investment.totalInstallmentPrice
-              ? `EGP ${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
+              ? `${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
               : "N/A"}
           </p>
           <p>End Date: {investment.installmentEndDate || "N/A"}</p>

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useInvestments } from "@/hooks/use-investments";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
-import { formatNumberWithSuffix } from "@/lib/utils";
 import { startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";

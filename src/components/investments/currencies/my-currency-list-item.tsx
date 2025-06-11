@@ -4,7 +4,7 @@ import type { AggregatedCurrencyHolding } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Info } from "lucide-react"; // Using DollarSign as a generic currency icon
-import { cn } from "@/lib/utils";
+import { cn, formatCurrencyWithCommas } from "@/lib/utils";
 import { formatNumberWithSuffix } from "@/lib/utils"; // Import the utility function
 interface MyCurrencyListItemProps {
   holding: AggregatedCurrencyHolding;
@@ -25,42 +25,13 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
   const hasMarketRate =
     currentMarketRateToEGP !== undefined && currentMarketRateToEGP !== null;
 
-  const formatCurrency = (value: number | undefined, currency = "EGP") => {
-    if (value === undefined || value === null || Number.isNaN(value))
-      return "N/A";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCurrencyForCurrencyMobile = (
-    value: number | undefined,
-    currency = "EGP",
-  ) => {
-    if (value === undefined || value === null || Number.isNaN(value))
-      return "N/A";
-    return `${currency} ${formatNumberWithSuffix(value)}`;
-  };
-
-  const formatAmount = (value: number | undefined) => {
-    if (value === undefined || value === null || Number.isNaN(value))
-      return "N/A";
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
   const formatRate = (value: number | undefined) => {
     if (value === undefined || value === null || Number.isNaN(value))
       return "N/A";
     return value.toFixed(4);
   };
 
-  const formattedProfitLoss = formatCurrency(profitOrLossInEGP);
+  const formattedProfitLoss = formatCurrencyWithCommas(profitOrLossInEGP);
   const displayProfitLossPercent =
     profitOrLossPercentage === Infinity
       ? "∞"
@@ -79,11 +50,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             <div className="truncate">
               <p className="text-lg font-semibold truncate">{currencyCode}</p>
               <p className="text-xs text-muted-foreground truncate md:hidden">
-                Held: {formatNumberWithSuffix(totalForeignAmount || 0)}{" "}
-                {currencyCode}
-              </p>
-              <p className="text-xs text-muted-foreground truncate hidden md:block">
-                Held: {formatAmount(totalForeignAmount)} {currencyCode}
+                Held: {formatNumberWithSuffix(totalForeignAmount || 0, currencyCode)}
               </p>
             </div>
           </div>
@@ -98,7 +65,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
                   )}
                 >
                   <span className="md:hidden">
-                    {formatCurrencyForCurrencyMobile(profitOrLossInEGP)}
+                    {formatNumberWithSuffix(profitOrLossInEGP)}
                   </span>
                   <span
                     className="hidden md:inline"

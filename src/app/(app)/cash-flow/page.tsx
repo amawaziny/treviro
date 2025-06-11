@@ -11,23 +11,20 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  DollarSign,
   TrendingDown,
   Landmark,
-  PiggyBank,
   FileText,
   Wallet,
   Gift,
   HandHeart,
   Coins,
-  Settings2,
   Briefcase,
 } from "lucide-react";
 import {
   formatNumberWithSuffix,
   formatMonthYear,
-  isInCurrentMonth,
   formatDateDisplay,
+  formatCurrencyWithCommas,
 } from "@/lib/utils";
 import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import {
@@ -120,23 +117,6 @@ export default function CashFlowPage() {
       );
     })
     .reduce((sum, inv) => sum + (inv as GoldInvestment).amountInvested, 0);
-
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCurrencyEGPForMobile = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return "EGP " + formatNumberWithSuffix(value);
-  };
 
   // Define the type for installments with property info
   type InstallmentWithProperty = Installment & {
@@ -419,10 +399,10 @@ export default function CashFlowPage() {
           <CardContent>
             <p className="text-2xl font-bold text-green-700 dark:text-green-300">
               <span className="md:hidden">
-                {formatCurrencyEGPForMobile(totalIncome)}
+                {formatNumberWithSuffix(totalIncome)}
               </span>
               <span className="hidden md:inline">
-                {formatCurrencyEGP(totalIncome)}
+                {formatCurrencyWithCommas(totalIncome)}
               </span>
             </p>
             <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
@@ -430,10 +410,10 @@ export default function CashFlowPage() {
                 <p>
                   Monthly Salary (Fixed):{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(monthlySalary)}
+                    {formatNumberWithSuffix(monthlySalary)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(monthlySalary)}
+                    {formatCurrencyWithCommas(monthlySalary)}
                   </span>
                 </p>
               )}
@@ -441,10 +421,10 @@ export default function CashFlowPage() {
                 <p>
                   Other Fixed Income:{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(otherFixedIncomeMonthly)}
+                    {formatNumberWithSuffix(otherFixedIncomeMonthly)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(otherFixedIncomeMonthly)}
+                    {formatCurrencyWithCommas(otherFixedIncomeMonthly)}
                   </span>
                 </p>
               )}
@@ -452,10 +432,10 @@ export default function CashFlowPage() {
                 <p>
                   Other Logged Income (incl. Sales Profit):{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(totalManualIncomeThisMonth)}
+                    {formatNumberWithSuffix(totalManualIncomeThisMonth)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(totalManualIncomeThisMonth)}
+                    {formatCurrencyWithCommas(totalManualIncomeThisMonth)}
                   </span>
                 </p>
               )}
@@ -463,12 +443,12 @@ export default function CashFlowPage() {
                 <p>
                   Projected Debt Interest:{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(
+                    {formatNumberWithSuffix(
                       totalProjectedCertificateInterestThisMonth,
                     )}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(
+                    {formatCurrencyWithCommas(
                       totalProjectedCertificateInterestThisMonth,
                     )}
                   </span>
@@ -487,10 +467,10 @@ export default function CashFlowPage() {
           <CardContent>
             <p className="text-2xl font-bold text-red-700 dark:text-red-300">
               <span className="md:hidden">
-                {formatCurrencyEGPForMobile(totalExpensesOnly)}
+                {formatNumberWithSuffix(totalExpensesOnly)}
               </span>
               <span className="hidden md:inline">
-                {formatCurrencyEGP(totalExpensesOnly)}
+                {formatCurrencyWithCommas(totalExpensesOnly)}
               </span>
             </p>
             <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
@@ -498,10 +478,10 @@ export default function CashFlowPage() {
                 <p>
                   Itemized Logged Expenses:{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}
+                    {formatNumberWithSuffix(totalItemizedExpensesThisMonth)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(totalItemizedExpensesThisMonth)}
+                    {formatCurrencyWithCommas(totalItemizedExpensesThisMonth)}
                   </span>
                 </p>
               )}
@@ -509,10 +489,10 @@ export default function CashFlowPage() {
                 <p>
                   Zakat (Fixed):{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(zakatFixedMonthly)}
+                    {formatNumberWithSuffix(zakatFixedMonthly)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(zakatFixedMonthly)}
+                    {formatCurrencyWithCommas(zakatFixedMonthly)}
                   </span>
                 </p>
               )}
@@ -520,10 +500,10 @@ export default function CashFlowPage() {
                 <p>
                   Charity (Fixed):{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(charityFixedMonthly)}
+                    {formatNumberWithSuffix(charityFixedMonthly)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(charityFixedMonthly)}
+                    {formatCurrencyWithCommas(charityFixedMonthly)}
                   </span>
                 </p>
               )}
@@ -531,10 +511,10 @@ export default function CashFlowPage() {
                 <p>
                   Living Expenses:{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(livingExpensesMonthly)}
+                    {formatNumberWithSuffix(livingExpensesMonthly)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(livingExpensesMonthly)}
+                    {formatCurrencyWithCommas(livingExpensesMonthly)}
                   </span>
                 </p>
               )}
@@ -542,10 +522,10 @@ export default function CashFlowPage() {
                 <p>
                   Other Fixed Expenses:{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}
+                    {formatNumberWithSuffix(otherFixedExpensesMonthly)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(otherFixedExpensesMonthly)}
+                    {formatCurrencyWithCommas(otherFixedExpensesMonthly)}
                   </span>
                 </p>
               )}
@@ -553,10 +533,10 @@ export default function CashFlowPage() {
                 <p>
                   Real Estate Installments:{" "}
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(realEstateInstallments.total)}
+                    {formatNumberWithSuffix(realEstateInstallments.total)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(realEstateInstallments.total)}
+                    {formatCurrencyWithCommas(realEstateInstallments.total)}
                   </span>
                 </p>
               )}
@@ -576,7 +556,7 @@ export default function CashFlowPage() {
                 Stocks:
               </span>
               <span className="font-medium">
-                {formatCurrencyEGPForMobile(totalStockInvestmentThisMonth)}
+                {formatNumberWithSuffix(totalStockInvestmentThisMonth)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -584,7 +564,7 @@ export default function CashFlowPage() {
                 Real Estate:
               </span>
               <span className="font-medium">
-                {formatCurrencyEGPForMobile(realEstateInstallmentsThisMonth)}
+                {formatNumberWithSuffix(realEstateInstallmentsThisMonth)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -592,7 +572,7 @@ export default function CashFlowPage() {
                 Debts:
               </span>
               <span className="font-medium">
-                {formatCurrencyEGPForMobile(totalDebtInvestmentThisMonth)}
+                {formatNumberWithSuffix(totalDebtInvestmentThisMonth)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -600,13 +580,13 @@ export default function CashFlowPage() {
                 Gold:
               </span>
               <span className="font-medium">
-                {formatCurrencyEGPForMobile(totalGoldInvestmentThisMonth)}
+                {formatNumberWithSuffix(totalGoldInvestmentThisMonth)}
               </span>
             </div>
             <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
               <div className="flex justify-between items-center font-semibold">
                 <span className="text-sm">Total:</span>
-                <span>{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span>
+                <span>{formatNumberWithSuffix(totalInvestmentsOnly)}</span>
               </div>
             </div>
           </CardContent>
@@ -621,10 +601,10 @@ export default function CashFlowPage() {
           <CardContent>
             <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
               <span className="md:hidden">
-                {formatCurrencyEGPForMobile(totalIncome - totalExpenses)}
+                {formatNumberWithSuffix(totalIncome - totalExpenses)}
               </span>
               <span className="hidden md:inline">
-                {formatCurrencyEGP(totalIncome - totalExpenses)}
+                {formatCurrencyWithCommas(totalIncome - totalExpenses)}
               </span>
             </p>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -665,7 +645,7 @@ export default function CashFlowPage() {
                     {formatDateDisplay(income.date)}{" "}
                     {income.description ? `- ${income.description}` : ""}
                   </span>
-                  <span>{formatCurrencyEGP(income.amount)}</span>
+                  <span>{formatNumberWithSuffix(income.amount)}</span>
                 </div>
               ))}
             {transactions &&
@@ -691,7 +671,7 @@ export default function CashFlowPage() {
                       {tx.tickerSymbol ? `(${tx.tickerSymbol})` : ""}
                     </span>
                     <span>
-                      {formatCurrencyEGP(
+                      {formatCurrencyWithCommas(
                         (tx as any).amount ?? (tx as any).totalAmount ?? 0,
                       )}
                     </span>
@@ -701,10 +681,10 @@ export default function CashFlowPage() {
               <span>Total Other Logged Income:</span>
               <span>
                 <span className="md:hidden">
-                  {formatCurrencyEGPForMobile(totalManualIncomeThisMonth)}
+                  {formatNumberWithSuffix(totalManualIncomeThisMonth)}
                 </span>
                 <span className="hidden md:inline">
-                  {formatCurrencyEGP(totalManualIncomeThisMonth)}
+                  {formatCurrencyWithCommas(totalManualIncomeThisMonth)}
                 </span>
               </span>
             </div>
@@ -716,12 +696,12 @@ export default function CashFlowPage() {
                 </span>
                 <span>
                   <span className="md:hidden">
-                    {formatCurrencyEGPForMobile(
+                    {formatNumberWithSuffix(
                       totalProjectedCertificateInterestThisMonth,
                     )}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(
+                    {formatCurrencyWithCommas(
                       totalProjectedCertificateInterestThisMonth,
                     )}
                   </span>
@@ -731,7 +711,7 @@ export default function CashFlowPage() {
             <hr className="my-2" />
             <div className="flex justify-between font-bold">
               <span>Total Projected Income:</span>
-              <span>{formatCurrencyEGPForMobile(totalIncome)}</span>
+              <span>{formatNumberWithSuffix(totalIncome)}</span>
             </div>
           </CardContent>
         </Card>
@@ -750,7 +730,7 @@ export default function CashFlowPage() {
                   <Gift className="h-4 w-4" />
                   Zakat (Fixed):
                 </span>
-                <span>{formatCurrencyEGPForMobile(zakatFixedMonthly)}</span>
+                <span>{formatNumberWithSuffix(zakatFixedMonthly)}</span>
               </div>
             )}
             {charityFixedMonthly > 0 && (
@@ -759,7 +739,7 @@ export default function CashFlowPage() {
                   <HandHeart className="h-4 w-4" />
                   Charity (Fixed):
                 </span>
-                <span>{formatCurrencyEGPForMobile(charityFixedMonthly)}</span>
+                <span>{formatNumberWithSuffix(charityFixedMonthly)}</span>
               </div>
             )}
             {livingExpensesMonthly > 0 && (
@@ -768,7 +748,7 @@ export default function CashFlowPage() {
                   <TrendingDown className="h-4 w-4" />
                   Living Expenses:
                 </span>
-                <span>{formatCurrencyEGPForMobile(livingExpensesMonthly)}</span>
+                <span>{formatNumberWithSuffix(livingExpensesMonthly)}</span>
               </div>
             )}
             {otherFixedExpensesMonthly > 0 && (
@@ -777,7 +757,7 @@ export default function CashFlowPage() {
                   Other Fixed Expenses:
                 </span>
                 <span>
-                  {formatCurrencyEGPForMobile(otherFixedExpensesMonthly)}
+                  {formatNumberWithSuffix(otherFixedExpensesMonthly)}
                 </span>
               </div>
             )}
@@ -785,7 +765,7 @@ export default function CashFlowPage() {
               <div className="flex justify-between items-center text-red-500 font-semibold">
                 Itemized Logged Expenses:{" "}
                 <span>
-                  {formatCurrencyEGPForMobile(totalItemizedExpensesThisMonth)}
+                  {formatNumberWithSuffix(totalItemizedExpensesThisMonth)}
                 </span>
               </div>
             )}
@@ -793,7 +773,7 @@ export default function CashFlowPage() {
             <hr className="my-2" />
             <div className="flex justify-between font-bold">
               <span>Total Projected Expenses:</span>
-              <span>{formatCurrencyEGPForMobile(totalExpensesOnly)}</span>
+              <span>{formatNumberWithSuffix(totalExpensesOnly)}</span>
             </div>
           </CardContent>
         </Card>
@@ -811,7 +791,7 @@ export default function CashFlowPage() {
               <div className="flex justify-between items-center text-blue-600 font-semibold mb-2">
                 <span className="flex items-center gap-2">Total Stock:</span>
                 <span>
-                  {formatCurrencyEGPForMobile(totalStockInvestmentThisMonth)}
+                  {formatNumberWithSuffix(totalStockInvestmentThisMonth)}
                 </span>
               </div>
               {/* Stocks */}
@@ -856,7 +836,7 @@ export default function CashFlowPage() {
                                   "Unnamed Stock"}
                               </span>
                               <span>
-                                {formatCurrencyEGPForMobile(
+                                {formatNumberWithSuffix(
                                   stock.amountInvested || 0,
                                 )}
                               </span>
@@ -909,7 +889,7 @@ export default function CashFlowPage() {
                           >
                             <span>{debt.name || "Unnamed Debt"}</span>
                             <span>
-                              {formatCurrencyEGPForMobile(
+                              {formatNumberWithSuffix(
                                 debt.amountInvested || 0,
                               )}
                             </span>
@@ -957,7 +937,7 @@ export default function CashFlowPage() {
                           >
                             <span>{gold.name || "Unnamed Gold"}</span>
                             <span>
-                              {formatCurrencyEGPForMobile(
+                              {formatNumberWithSuffix(
                                 gold.amountInvested || 0,
                               )}
                             </span>
@@ -973,7 +953,7 @@ export default function CashFlowPage() {
                 <div className="flex justify-between text-blue-700 pt-2 border-t border-blue-100 dark:border-blue-900 mt-2 font-bold">
                   <span>Total Real Estate:</span>
                   <span>
-                    {formatCurrencyEGPForMobile(realEstateInstallments.total)}
+                    {formatNumberWithSuffix(realEstateInstallments.total)}
                   </span>
                 </div>
                 <ul className="space-y-2 pl-4 border-l-2 border-blue-200 dark:border-blue-700">
@@ -989,7 +969,7 @@ export default function CashFlowPage() {
                         </span>
                       </span>
                       <span className="font-medium text-end">
-                        {formatCurrencyEGPForMobile(installment.amount || 0)}
+                        {formatNumberWithSuffix(installment.amount || 0)}
                       </span>
                     </li>
                   ))}
@@ -1000,7 +980,7 @@ export default function CashFlowPage() {
             <hr className="my-2" />
             <div className="flex justify-between font-bold">
               <span>Total Investments:</span>
-              <span>{formatCurrencyEGPForMobile(totalInvestmentsOnly)}</span>
+              <span>{formatNumberWithSuffix(totalInvestmentsOnly)}</span>
             </div>
           </CardContent>
         </Card>

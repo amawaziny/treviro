@@ -37,7 +37,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
-import { cn, formatDateDisplay } from "@/lib/utils";
+import { cn, formatCurrencyWithCommas, formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
 import type { ExpenseRecord } from "@/lib/types";
 // Removed FinancialSettingsForm import as its functionality is moved
 
@@ -168,30 +168,6 @@ export default function ExpensesPage() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenseRecords, currentMonthStart, currentMonthEnd, showAll, showEnded]);
 
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatNumberWithSuffix = (num: number | undefined): string => {
-    if (num === undefined || num === null || isNaN(num)) return "0";
-    if (num === 0) return "0";
-    const absNum = Math.abs(num);
-    if (absNum >= 1000000000)
-      return (num / 1000000000).toFixed(1).replace(/\.0$/, "") + "B";
-    if (absNum >= 1000000)
-      return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-    if (absNum >= 1000)
-      return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-    return num.toFixed(2).replace(/\.00$/, ""); // Keep two decimal places for smaller numbers
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -265,7 +241,7 @@ export default function ExpensesPage() {
             </CardHeader>
             <CardContent>
               <span className="text-2xl font-bold text-foreground">
-                {formatCurrencyEGP(
+                {formatCurrencyWithCommas(
                   filteredExpenses.reduce(
                     (sum, r) => sum + (r._requiredAmount || 0),
                     0,
@@ -313,7 +289,7 @@ export default function ExpensesPage() {
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-2xl font-bold">
-                        EGP {formatNumberWithSuffix(record._requiredAmount)}
+                        {formatNumberWithSuffix(record._requiredAmount)}
                       </span>
                       <div className="flex items-center gap-2">
                         <Link

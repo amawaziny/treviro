@@ -53,55 +53,14 @@ export function MyStockListItem({
     isProfitable = profitLoss >= 0;
   }
 
-  const formatCurrencyWithThreeDecimals = (
-    value: number,
-    currencyCode: string,
-  ) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currencyCode,
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3,
-    }).format(value);
-  };
-
-  const formatCurrencyWithSixDecimals = (
-    value: number,
-    currencyCode: string,
-  ) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currencyCode,
-      minimumFractionDigits: 6,
-      maximumFractionDigits: 6,
-    }).format(value);
-  };
-
-  const formatCurrencyWithSuffixForMobile = (
-    value: number,
-    currencyCode: string,
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0`;
-    const formattedNumber = formatNumberWithSuffix(value);
-    // Prepend currency code and handle potential negative sign from suffix formatting
-    const sign = formattedNumber.startsWith("-") ? "-" : "";
-    const numberPart =
-      sign === "-" ? formattedNumber.substring(1) : formattedNumber;
-    return `${sign}${currencyCode} ${numberPart}`;
-  };
-
-  const formattedAvgPrice = formatCurrencyWithSixDecimals(
+  const formattedAvgPrice = formatNumberWithSuffix(
     averagePurchasePrice,
     currency,
   );
   const formattedMarketPrice = currentMarketPrice
-    ? formatCurrencyWithThreeDecimals(currentMarketPrice, currency)
+    ? formatNumberWithSuffix(currentMarketPrice, currency)
     : "N/A";
-  const formattedProfitLoss = formatCurrencyWithThreeDecimals(
-    profitLoss,
-    currency,
-  );
+  const formattedProfitLoss = formatNumberWithSuffix(profitLoss, currency);
 
   const sharesLabel = isFund ? "Units" : "Shares";
 
@@ -164,7 +123,7 @@ export function MyStockListItem({
               <p
                 className={`text-lg font-bold ${isProfitable ? "text-accent" : "text-destructive"} md:hidden`}
               >
-                {formatCurrencyWithSuffixForMobile(profitLoss, currency)}
+                {formatNumberWithSuffix(profitLoss, currency)}
               </p>
               <p
                 className={`text-lg font-bold ${isProfitable ? "text-accent" : "text-destructive"} hidden md:block`}
@@ -199,7 +158,7 @@ export function MyStockListItem({
         <p>
           Avg. Purchase Price:
           <span className="md:hidden ml-1">
-            {formatCurrencyWithSuffixForMobile(averagePurchasePrice, currency)}
+            {formatNumberWithSuffix(averagePurchasePrice, currency)}
           </span>
           <span className="hidden md:inline ml-1">{formattedAvgPrice}</span>
         </p>
@@ -208,10 +167,7 @@ export function MyStockListItem({
           {currentMarketPrice !== undefined ? (
             <>
               <span className="md:hidden ml-1">
-                {formatCurrencyWithSuffixForMobile(
-                  currentMarketPrice,
-                  currency,
-                )}
+                {formatNumberWithSuffix(currentMarketPrice, currency)}
               </span>
               <span className="hidden md:inline ml-1">
                 {formattedMarketPrice}

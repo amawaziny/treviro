@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import React from "react";
 import Link from "next/link";
+import { FundTypeIcon } from "@/components/ui/fund-type-icon";
 
 interface SecurityListItemProps {
   security: ListedSecurity;
@@ -47,6 +48,8 @@ export const SecurityListItem = React.memo(function SecurityListItem({
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm text-foreground">
               {security.symbol}
+              <span className="mx-1">•</span>
+              <FundTypeIcon fundType={security.fundType} size={12}/>
             </p>
             <p className="text-xs text-muted-foreground truncate">
               {security.name.length > 15
@@ -54,7 +57,6 @@ export const SecurityListItem = React.memo(function SecurityListItem({
                 : security.name}
               <span className="mx-1">•</span>
               {security.market.toUpperCase()}
-              
             </p>
           </div>
 

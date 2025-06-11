@@ -311,13 +311,13 @@ export default function RealEstateDetailPage() {
             <div className="font-medium text-muted-foreground">
               Paid Towards Purchase:
             </div>
-            <div>EGP {formatNumberWithSuffix(investment.amountInvested)}</div>
+            <div>{formatNumberWithSuffix(investment.amountInvested)}</div>
             <div className="font-medium text-muted-foreground">
               Installment Amount:
             </div>
             <div>
               {investment.installmentAmount
-                ? `EGP ${formatNumberWithSuffix(investment.installmentAmount)}`
+                ? formatNumberWithSuffix(investment.installmentAmount)
                 : "N/A"}
             </div>
             <div className="font-medium text-muted-foreground">
@@ -329,7 +329,7 @@ export default function RealEstateDetailPage() {
             </div>
             <div>
               {investment.totalInstallmentPrice
-                ? `EGP ${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
+                ? formatNumberWithSuffix(investment.totalInstallmentPrice)
                 : "N/A"}
             </div>
             <div className="font-medium text-muted-foreground">
@@ -343,7 +343,7 @@ export default function RealEstateDetailPage() {
                     Maintenance Payment:
                   </div>
                   <div>
-                    EGP {formatNumberWithSuffix(investment.maintenanceAmount)}{" "}
+                    {formatNumberWithSuffix(investment.maintenanceAmount)}{" "}
                     on {formatDateDisplay(investment.maintenancePaymentDate)}
                   </div>
                 </>

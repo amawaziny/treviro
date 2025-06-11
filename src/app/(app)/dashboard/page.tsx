@@ -45,10 +45,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import {
   formatNumberWithSuffix,
-  isGoldRelatedFund,
-  isDebtRelatedFund,
-  isRealEstateRelatedFund,
-  isStockRelatedFund,
+  formatCurrencyWithCommas,
 } from "@/lib/utils";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
@@ -105,24 +102,6 @@ export default function DashboardPage() {
   const totalInvested = dashboardSummary?.totalInvestedAcrossAllAssets ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
-
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCurrencyEGPWithSuffix = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `EGP ${formattedNumber}`;
-  };
 
   const {
     totalIncome,
@@ -256,8 +235,8 @@ export default function DashboardPage() {
             ) : (
               <p className="text-2xl font-medium">
                 {isMobile
-                  ? formatCurrencyEGPWithSuffix(totalInvested)
-                  : formatCurrencyEGP(totalInvested)}
+                  ? formatNumberWithSuffix(totalInvested)
+                  : formatCurrencyWithCommas(totalInvested)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -284,8 +263,8 @@ export default function DashboardPage() {
                 className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {isMobile
-                  ? formatCurrencyEGPWithSuffix(totalRealizedPnL)
-                  : formatCurrencyEGP(totalRealizedPnL)}
+                  ? formatNumberWithSuffix(totalRealizedPnL)
+                  : formatCurrencyWithCommas(totalRealizedPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -312,8 +291,8 @@ export default function DashboardPage() {
                 className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {isMobile
-                  ? formatCurrencyEGPWithSuffix(totalCurrentPortfolioPnL)
-                  : formatCurrencyEGP(totalCurrentPortfolioPnL)}
+                  ? formatNumberWithSuffix(totalCurrentPortfolioPnL)
+                  : formatCurrencyWithCommas(totalCurrentPortfolioPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -334,8 +313,8 @@ export default function DashboardPage() {
             ) : (
               <p className="text-2xl font-medium">
                 {isMobile
-                  ? formatCurrencyEGPWithSuffix(totalCashBalance)
-                  : formatCurrencyEGP(totalCashBalance)}
+                  ? formatNumberWithSuffix(totalCashBalance)
+                  : formatCurrencyWithCommas(totalCashBalance)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -375,10 +354,10 @@ export default function DashboardPage() {
               <CardContent>
                 <p className="text-2xl font-medium text-green-700 dark:text-green-300">
                   <span className="md:hidden">
-                    {formatCurrencyEGPWithSuffix(totalIncome)}
+                    {formatNumberWithSuffix(totalIncome)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(totalIncome)}
+                    {formatCurrencyWithCommas(totalIncome)}
                   </span>
                 </p>
                 <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
@@ -386,10 +365,10 @@ export default function DashboardPage() {
                     <p>
                       Monthly Salary (Fixed):{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(monthlySalary)}
+                        {formatNumberWithSuffix(monthlySalary)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(monthlySalary)}
+                        {formatCurrencyWithCommas(monthlySalary)}
                       </span>
                     </p>
                   )}
@@ -397,10 +376,10 @@ export default function DashboardPage() {
                     <p>
                       Other Fixed Income:{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(otherFixedIncomeMonthly)}
+                        {formatNumberWithSuffix(otherFixedIncomeMonthly)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(otherFixedIncomeMonthly)}
+                        {formatCurrencyWithCommas(otherFixedIncomeMonthly)}
                       </span>
                     </p>
                   )}
@@ -408,12 +387,12 @@ export default function DashboardPage() {
                     <p>
                       Other Logged Income (incl. Sales Profit):{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(
+                        {formatNumberWithSuffix(
                           totalManualIncomeThisMonth,
                         )}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(totalManualIncomeThisMonth)}
+                        {formatCurrencyWithCommas(totalManualIncomeThisMonth)}
                       </span>
                     </p>
                   )}
@@ -421,12 +400,12 @@ export default function DashboardPage() {
                     <p>
                       Projected Debt Interest:{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(
+                        {formatNumberWithSuffix(
                           totalProjectedCertificateInterestThisMonth,
                         )}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(
+                        {formatCurrencyWithCommas(
                           totalProjectedCertificateInterestThisMonth,
                         )}
                       </span>
@@ -446,10 +425,10 @@ export default function DashboardPage() {
               <CardContent>
                 <p className="text-2xl font-medium text-red-700 dark:text-red-300">
                   <span className="md:hidden">
-                    {formatCurrencyEGPWithSuffix(totalExpensesOnly)}
+                    {formatNumberWithSuffix(totalExpensesOnly)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(totalExpensesOnly)}
+                    {formatCurrencyWithCommas(totalExpensesOnly)}
                   </span>
                 </p>
                 <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
@@ -457,12 +436,12 @@ export default function DashboardPage() {
                     <p>
                       Itemized Logged Expenses:{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(
+                        {formatNumberWithSuffix(
                           totalItemizedExpensesThisMonth,
                         )}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(totalItemizedExpensesThisMonth)}
+                        {formatCurrencyWithCommas(totalItemizedExpensesThisMonth)}
                       </span>
                     </p>
                   )}
@@ -470,10 +449,10 @@ export default function DashboardPage() {
                     <p>
                       Zakat (Fixed):{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(zakatFixedMonthly)}
+                        {formatNumberWithSuffix(zakatFixedMonthly)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(zakatFixedMonthly)}
+                        {formatCurrencyWithCommas(zakatFixedMonthly)}
                       </span>
                     </p>
                   )}
@@ -481,10 +460,10 @@ export default function DashboardPage() {
                     <p>
                       Charity (Fixed):{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(charityFixedMonthly)}
+                        {formatNumberWithSuffix(charityFixedMonthly)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(charityFixedMonthly)}
+                        {formatCurrencyWithCommas(charityFixedMonthly)}
                       </span>
                     </p>
                   )}
@@ -492,10 +471,10 @@ export default function DashboardPage() {
                     <p>
                       Living Expenses:{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(livingExpensesMonthly)}
+                        {formatNumberWithSuffix(livingExpensesMonthly)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(livingExpensesMonthly)}
+                        {formatCurrencyWithCommas(livingExpensesMonthly)}
                       </span>
                     </p>
                   )}
@@ -503,10 +482,10 @@ export default function DashboardPage() {
                     <p>
                       Other Fixed Expenses:{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(otherFixedExpensesMonthly)}
+                        {formatNumberWithSuffix(otherFixedExpensesMonthly)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(otherFixedExpensesMonthly)}
+                        {formatCurrencyWithCommas(otherFixedExpensesMonthly)}
                       </span>
                     </p>
                   )}
@@ -514,12 +493,12 @@ export default function DashboardPage() {
                     <p>
                       Real Estate Installments:{" "}
                       <span className="md:hidden">
-                        {formatCurrencyEGPWithSuffix(
+                        {formatNumberWithSuffix(
                           realEstateInstallmentsMonthly,
                         )}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyEGP(realEstateInstallmentsMonthly)}
+                        {formatCurrencyWithCommas(realEstateInstallmentsMonthly)}
                       </span>
                     </p>
                   )}
@@ -540,7 +519,7 @@ export default function DashboardPage() {
                     Stocks:
                   </span>
                   <span className="font-medium">
-                    {formatCurrencyEGPWithSuffix(totalStockInvestmentThisMonth)}
+                    {formatNumberWithSuffix(totalStockInvestmentThisMonth)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -548,7 +527,7 @@ export default function DashboardPage() {
                     Real Estate:
                   </span>
                   <span className="font-medium">
-                    {formatCurrencyEGPWithSuffix(realEstateInstallmentsMonthly)}
+                    {formatNumberWithSuffix(realEstateInstallmentsMonthly)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -556,7 +535,7 @@ export default function DashboardPage() {
                     Debts:
                   </span>
                   <span className="font-medium">
-                    {formatCurrencyEGPWithSuffix(totalDebtInvestmentThisMonth)}
+                    {formatNumberWithSuffix(totalDebtInvestmentThisMonth)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -564,14 +543,14 @@ export default function DashboardPage() {
                     Gold:
                   </span>
                   <span className="font-medium">
-                    {formatCurrencyEGPWithSuffix(totalGoldInvestmentThisMonth)}
+                    {formatNumberWithSuffix(totalGoldInvestmentThisMonth)}
                   </span>
                 </div>
                 <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
                   <div className="flex justify-between items-center font-semibold">
                     <span className="text-sm">Total:</span>
                     <span>
-                      {formatCurrencyEGPWithSuffix(totalInvestmentsThisMonth)}
+                      {formatNumberWithSuffix(totalInvestmentsThisMonth)}
                     </span>
                   </div>
                 </div>
@@ -588,10 +567,10 @@ export default function DashboardPage() {
               <CardContent>
                 <p className="text-2xl font-medium text-gray-700 dark:text-gray-300">
                   <span className="md:hidden">
-                    {formatCurrencyEGPWithSuffix(netCashFlowThisMonth)}
+                    {formatNumberWithSuffix(netCashFlowThisMonth)}
                   </span>
                   <span className="hidden md:inline">
-                    {formatCurrencyEGP(netCashFlowThisMonth)}
+                    {formatCurrencyWithCommas(netCashFlowThisMonth)}
                   </span>
                 </p>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">

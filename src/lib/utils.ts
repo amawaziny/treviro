@@ -43,7 +43,9 @@ export function isDebtRelatedFund(fundType?: string): boolean {
   return debtKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
-export function formatNumberWithSuffix(num: number): string {
+export function formatNumberWithSuffix(num: number | undefined, currency: string = "EGP"): string {
+  if (num === undefined || num === null || isNaN(num))
+    return `${currency} 0.00`;
   const absNum = Math.abs(num);
   let suffix = "";
   let value = absNum;
@@ -59,7 +61,7 @@ export function formatNumberWithSuffix(num: number): string {
   let formatted = value.toFixed(1).replace(/\.0$/, "");
   if (suffix) formatted += suffix;
 
-  return (num < 0 ? "-" : "") + formatted;
+  return `${currency} ${num < 0 ? "-" : ""}${formatted}`;
 }
 
 /**
@@ -98,33 +100,25 @@ export function isInCurrentMonth(date: Date | string): boolean {
 }
 
 /**
- * Format a number with commas as thousands separators.
- * Example: 1234567 => "1,234,567"
- */
-export function formatNumberWithCommas(x: number | string): string {
-  const parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join(".");
-}
-
-/**
  * Format a number with commas, 3 decimal places, and currency (EGP by default).
  * Example: 1234567.8912 => "1,234,567.891 EGP"
  */
 export function formatCurrencyWithCommas(
-  value: number | string,
-  currency: string = "EGP"
+  value: number | string | undefined,
+  currency: string = "EGP",
+  digitsOverride?: number,
 ): string {
+  if (value === undefined || value === null || Number.isNaN(value))
+    return `${currency} 0.000`;
   const num = typeof value === "number" ? value : parseFloat(value);
-  if (isNaN(num)) return "-";
+  if (isNaN(num)) return `${currency} 0.000`;
   // toFixed(3) ensures 3 digits after decimal
-  const numWithDecimal = new Intl.NumberFormat("en-EG", {
+  return new Intl.NumberFormat("en-EG", {
         style: "currency",
         currency: currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: digitsOverride ?? 3,
+        maximumFractionDigits: digitsOverride ?? 3,
       }).format(num);
-  return formatNumberWithCommas(numWithDecimal);
 }
 
 // Helper function to identify stock-related funds

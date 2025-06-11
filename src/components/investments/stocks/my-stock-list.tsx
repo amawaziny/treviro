@@ -166,12 +166,6 @@ export function MyStockList() {
       {Object.entries(aggregatedStocks).map(([tickerSymbol, data]) => {
         const avgPurchasePrice =
           data.totalShares > 0 ? data.totalCost / data.totalShares : 0;
-        // Find a representative stock item for details like logo, name, ID for linking
-        // Prefer a listed stock that matches this symbol for linking to its detail page
-        // This part needs to connect to listedStocks to get the ID for the link.
-        // For now, MyStockListItem might not link to detail or link differently.
-        // Let's assume MyStockListItem takes aggregated data.
-        const representativeInvestment = data.investments[0];
 
         return (
           <MyStockListItem

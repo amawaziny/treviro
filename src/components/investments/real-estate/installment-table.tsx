@@ -29,7 +29,7 @@ import {
 import { CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { formatNumberWithSuffix } from "@/lib/utils";
+import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
 import { RealEstateInvestment } from "@/lib/types";
 
 export interface Installment {
@@ -233,7 +233,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                           #{installment.number}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {format(new Date(installment.dueDate), "MMM d, yyyy")}
+                          {formatDateDisplay(installment.dueDate)}
                         </span>
                       </div>
                       <div className="text-sm font-medium mt-1">

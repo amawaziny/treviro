@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import { formatNumberWithSuffix } from "@/lib/utils";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";
 
