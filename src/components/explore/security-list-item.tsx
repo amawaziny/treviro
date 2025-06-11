@@ -48,10 +48,12 @@ export const SecurityListItem = React.memo(function SecurityListItem({
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm text-foreground">
               {security.symbol}
-              {security.securityType === "Fund" && <>
-                <span className="mx-1">•</span>
-                <FundTypeIcon fundType={security.fundType} size={12}/>
-              </>}
+              {security.securityType === "Fund" && (
+                <>
+                  <span className="mx-1">•</span>
+                  <FundTypeIcon fundType={security.fundType} size={12}/>
+                </>
+              )}
             </p>
             <p className="text-xs text-muted-foreground truncate">
               {security.name.length > 15
