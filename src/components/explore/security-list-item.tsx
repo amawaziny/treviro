@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { ListedSecurity } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrencyWithCommas } from "@/lib/utils";
 import React from "react";
 import Link from "next/link";
 import { FundTypeIcon } from "@/components/ui/fund-type-icon";
@@ -18,11 +18,8 @@ export const SecurityListItem = React.memo(function SecurityListItem({
   security,
   currentTab,
 }: SecurityListItemProps) {
-  const formattedPrice = new Intl.NumberFormat("en-US", {
-    style: "decimal",
-    minimumFractionDigits: 3, // Changed to 3
-    maximumFractionDigits: 3, // Changed to 3
-  }).format(security.price);
+  
+  const formattedPrice = formatCurrencyWithCommas(security.price, security.currency, 3);
 
   const isPositiveChange = security.changePercent >= 0;
 
@@ -67,10 +64,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
           {/* Right Column: Price and Change */}
           <div className="flex flex-col items-end">
             <p className="text-sm sm:text-base font-semibold text-foreground whitespace-nowrap">
-              {formattedPrice}{" "}
-              <span className="text-xs text-muted-foreground">
-                {security.currency}
-              </span>
+              {formattedPrice}
             </p>
             <Badge
               variant={isPositiveChange ? "default" : "destructive"}
@@ -81,7 +75,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
                 "text-xs px-2 py-0.5 mt-1 whitespace-nowrap",
               )}
             >
-              {security.changePercent.toFixed(2)}%
+              {security.changePercent.toFixed(3)}%
             </Badge>
           </div>
         </div>
