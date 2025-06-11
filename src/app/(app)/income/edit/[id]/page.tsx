@@ -12,12 +12,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
-// You may need to adjust this import based on your schema location
 import { AddIncomeFormValues } from "@/lib/schemas";
 
 export default function EditIncomePage({
@@ -74,6 +71,7 @@ export default function EditIncomePage({
         <CardContent>
           <AddIncomeForm
             initialValues={{
+              type: income.type,
               source: income.source,
               description: income.description ?? "",
               //@ts-expect-error
