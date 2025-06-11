@@ -165,7 +165,11 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
     setIsAlertDialogOpen(false);
   };
 
-  const detailPageLink = `/investments/gold/${id}`; // This page needs to be created
+  // Unify navigation: for gold funds, use fundDetails?.id; for physical gold, use holding.id
+  const detailPageLink =
+    itemType === "fund" && fundDetails?.id
+      ? `/securities/details/${fundDetails.id}`
+      : `/securities/details/${id}`;
 
   const cardContent = (
     <CardContent className="pt-4">

@@ -211,9 +211,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     );
   }
 
+  // Unify navigation: for funds use fundDetails.id, for direct use holding.id
   const detailPageLink = fundDetails
-    ? `/securities/details/${fundDetails.id}?previousTab=funds`
-    : undefined;
+    ? `/securities/details/${fundDetails.id}?previousPage=funds`
+    : `/securities/details/${id}?previousPage=funds`;
   const isProfitable = profitLoss !== undefined && profitLoss >= 0;
 
   return (
@@ -223,7 +224,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
           <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
             {logoUrl ? (
               <Link
-                href={detailPageLink || "#"}
+                href={detailPageLink}
                 passHref
                 className={detailPageLink ? "" : "pointer-events-none"}
               >
