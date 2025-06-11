@@ -59,11 +59,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
 import { format } from "date-fns";
-import { useSwipeable } from "react-swipeable";
 import { useMediaQuery } from "@/hooks/use-media-query";
-
-// Add viewport meta tag for mobile
-import Head from "next/head";
 
 export default function SecurityDetailPage() {
   const params = useParams();
@@ -125,7 +121,6 @@ export default function SecurityDetailPage() {
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  const [swipedId, setSwipedId] = useState<string | null>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -318,16 +313,6 @@ export default function SecurityDetailPage() {
     }
   };
 
-  const createSwipeHandlers = (id: string) =>
-    useSwipeable({
-      onSwipedLeft: () => setSwipedId(id),
-      onSwipedRight: () => setSwipedId(null),
-      trackMouse: false,
-      delta: 10,
-      preventScrollOnSwipe: true,
-      trackTouch: true,
-    });
-
   if (
     isLoadingListedSecurities ||
     isLoadingInvestments ||
@@ -376,13 +361,7 @@ export default function SecurityDetailPage() {
         : 0;
   const isProfitable = PnL >= 0;
 
-  const pageTitle =
-    security.securityType === "Fund"
-      ? `${security.name} (${security.symbol}) - ${security.fundType || "Fund"}`
-      : `${security.name} (${security.symbol})`;
-
   const displayCurrency = security.currency || "EGP"; // Default to EGP if currency not specified
-  const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   const formatCurrency = (
     value: number,
@@ -407,15 +386,8 @@ export default function SecurityDetailPage() {
   };
 
   return (
-    <div className="w-full max-w-full mx-auto md:pb-6 space-y-6 overflow-x-hidden">
-      <Head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover"
-        />
-      </Head>
-
-      <Card className="overflow-hidden">
+    <div className="md:pb-6 space-y-6">
+      <Card>
         <CardHeader className="flex flex-row justify-between space-y-0 p-4">
           <div className="flex gap-4">
             <Avatar className="h-10 w-10 md:h-12 md:w-12">
@@ -530,41 +502,35 @@ export default function SecurityDetailPage() {
 
       <Tabs
         defaultValue="performance"
-        className="w-full max-w-full overflow-hidden"
+        className="w-full max-w-full"
         dir={language === "ar" ? "rtl" : "ltr"}
       >
         <TabsList
-          className="flex w-full overflow-x-auto overflow-y-hidden flex-nowrap whitespace-nowrap gap-1 md:grid md:grid-cols-3 md:w-full md:gap-0 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent h-10 items-center px-1 touch-pan-x"
-          style={{
-            WebkitOverflowScrolling: "touch",
-            msOverflowStyle: "none",
-            scrollbarWidth: "none",
-            overscrollBehaviorX: "contain",
-          }}
+          className="flex w-full gap-3 md:grid md:grid-cols-3 h-11 items-center px-1"
         >
           <TabsTrigger
             value="performance"
-            className="flex-1 flex-shrink-0 text-xs md:text-base"
+            className="flex text-xs md:text-base"
           >
             <LineChart className="mr-2 h-4 w-4" /> Performance
           </TabsTrigger>
           <TabsTrigger
             value="position"
-            className="flex-1 flex-shrink-0 text-xs md:text-base"
+            className="flex text-xs md:text-base"
             disabled={!hasPosition}
           >
             <Briefcase className="mr-2 h-4 w-4" /> My Position
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
-            className="flex-1 flex-shrink-0 text-xs md:text-base"
+            className="flex text-xs md:text-base"
           >
             <DollarSign className="mr-2 h-4 w-4" /> Transactions
           </TabsTrigger>
           {/* Add more TabsTrigger here for future tabs—they will scroll! */}
         </TabsList>
         <TabsContent value="performance" className="w-full max-w-full">
-          <Card className="mb-16 md:mb-4 overflow-hidden">
+          <Card className="mb-16 md:mb-4">
             <CardHeader>
               <CardTitle className="text-md">Price History</CardTitle>
               <CardDescription className="text-xs">
@@ -683,44 +649,14 @@ export default function SecurityDetailPage() {
                       ? (tx as any).amount || (tx as any).totalAmount || 0
                       : (tx as any).totalAmount || 0;
 
-                    // Create swipe handlers for mobile delete
-                    const swipeHandlers =
-                      !isDesktop && tx.type === "Sell"
-                        ? createSwipeHandlers(tx.id)
-                        : {};
-
                     return (
                       <div
                         key={tx.id}
-                        className="relative overflow-hidden"
-                        {...swipeHandlers}
                       >
-                        {/* Delete action overlay for mobile swipe */}
-                        <div
-                          className={cn(
-                            "absolute right-0 top-0 h-full w-20 bg-destructive/90 flex items-center justify-center transition-transform duration-300",
-                            swipedId === tx.id
-                              ? "translate-x-0"
-                              : "translate-x-full",
-                            "z-10", // Ensure delete button is above other content
-                          )}
-                          onClick={() =>
-                            handleDeleteConfirmation(
-                              tx as unknown as Transaction,
-                            )
-                          }
-                        >
-                          <Trash2 className="h-4 w-4 text-white" />
-                        </div>
-
                         {/* Transaction content */}
                         <div
                           className={cn(
                             "p-4 hover:bg-muted/50 transition-transform duration-300 bg-background relative z-0",
-                            swipedId === tx.id
-                              ? "-translate-x-20"
-                              : "translate-x-0",
-                            "touch-pan-y select-none", // Better touch handling
                           )}
                         >
                           <div className="flex justify-between items-start">
@@ -816,13 +752,6 @@ export default function SecurityDetailPage() {
                                     <span className="sr-only">Delete</span>
                                   </Button>
                                 )}
-                              {isSell && !isDesktop && (
-                                <div className="h-4 w-4 flex items-center justify-center opacity-50">
-                                  <span className="text-xs">
-                                    Swipe left to delete
-                                  </span>
-                                </div>
-                              )}
                             </div>
                           </div>
                         </div>
