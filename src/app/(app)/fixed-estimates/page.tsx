@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { format } from "date-fns";
 import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
@@ -23,35 +22,13 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit, Trash2, Settings } from "lucide-react"; // Using Settings icon for title
-import { cn } from "@/lib/utils";
+import { Plus, Settings } from "lucide-react"; // Using Settings icon for title
+import { cn, formatCurrencyWithCommas } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 
 export default function FixedEstimatesPage() {
   const { fixedEstimates, isLoading } = useInvestments();
   const { language } = useLanguage();
-
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-      return format(date, "dd-MM-yyyy");
-    } catch (e) {
-      return dateString;
-    }
-  };
-
-  const formatCurrencyEGP = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
 
   if (isLoading) {
     return (
@@ -140,7 +117,7 @@ export default function FixedEstimatesPage() {
                       {record.name || "N/A"}
                     </TableCell>
                     <TableCell className="text-end">
-                      {formatCurrencyEGP(record.amount)}
+                      {formatCurrencyWithCommas(record.amount)}
                     </TableCell>
                     <TableCell
                       className={cn(

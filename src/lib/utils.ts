@@ -72,6 +72,21 @@ export function formatMonthYear(date: Date | string): string {
   return format(d, "MMMM yyyy");
 }
 
+export const formatDateDisplay = (dateString?: string) => {
+  if (!dateString) return "N/A";
+  try {
+    const date = new Date(dateString);
+    // Handle potential "Invalid Date" if dateString is not a valid ISO format
+    // Firestore serverTimestamp might initially be null before server populates it,
+    // or client-set dates could be in various formats.
+    // For robustness, ensure it's a valid date.
+    if (isNaN(date.getTime())) return dateString; // Or 'Invalid Date'
+    return format(date, "dd-MM-yyyy");
+  } catch (e) {
+    return dateString; // Or 'Error formatting date'
+  }
+};
+
 // Checks if a given date is in the current month
 export function isInCurrentMonth(date: Date | string): boolean {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -80,6 +95,36 @@ export function isInCurrentMonth(date: Date | string): boolean {
   return (
     d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
   );
+}
+
+/**
+ * Format a number with commas as thousands separators.
+ * Example: 1234567 => "1,234,567"
+ */
+export function formatNumberWithCommas(x: number | string): string {
+  const parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+
+/**
+ * Format a number with commas, 3 decimal places, and currency (EGP by default).
+ * Example: 1234567.8912 => "1,234,567.891 EGP"
+ */
+export function formatCurrencyWithCommas(
+  value: number | string,
+  currency: string = "EGP"
+): string {
+  const num = typeof value === "number" ? value : parseFloat(value);
+  if (isNaN(num)) return "-";
+  // toFixed(3) ensures 3 digits after decimal
+  const numWithDecimal = new Intl.NumberFormat("en-EG", {
+        style: "currency",
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(num);
+  return formatNumberWithCommas(numWithDecimal);
 }
 
 // Helper function to identify stock-related funds

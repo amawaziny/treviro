@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { formatCurrencyWithCommas, formatDateDisplay, formatMonthYear } from "@/lib/utils";
 import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, PiggyBank } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { formatNumberWithSuffix } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -43,60 +42,24 @@ export default function IncomePage() {
     );
   }
   const { language } = useLanguage();
-  const isMobile = useIsMobile();
-
-  const currentMonthStart = startOfMonth(new Date());
-  const currentMonthEnd = endOfMonth(new Date());
 
   // Filtering logic for income
   const filteredIncome = React.useMemo(() => {
     const recordsToFilter = incomeRecords || [];
-    const currentMonth = currentMonthStart.getMonth();
-    const currentYear = currentMonthStart.getFullYear();
-    const now = new Date();
-
     return recordsToFilter
       .filter((record) => {
         // If not showAll, only show income from this month
         if (!showAll && record.date) {
           return isWithinInterval(new Date(record.date), {
-            start: currentMonthStart,
-            end: currentMonthEnd,
+            start: startOfMonth(new Date()),
+            end: endOfMonth(new Date()),
           });
         }
         return true;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [incomeRecords, currentMonthStart, currentMonthEnd, showAll]);
+  }, [incomeRecords, showAll]);
 
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      // Handle potential "Invalid Date" if dateString is not a valid ISO format
-      // Firestore serverTimestamp might initially be null before server populates it,
-      // or client-set dates could be in various formats.
-      // For robustness, ensure it's a valid date.
-      if (isNaN(date.getTime())) return dateString; // Or 'Invalid Date'
-      return format(date, "dd-MM-yyyy");
-    } catch (e) {
-      return dateString; // Or 'Error formatting date'
-    }
-  };
-
-  const formatCurrencyEGP = (value: number) => {
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatCurrencyEGPWithSuffix = (value: number) => {
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `EGP ${formattedNumber}`;
-  };
 
   if (isLoading) {
     return (
@@ -159,10 +122,8 @@ export default function IncomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-foreground">
-                {formatCurrencyEGPWithSuffix(
-                  filteredIncome.reduce((sum, r) => sum + r.amount, 0),
-                )}
+              <span className="text-xl font-bold text-foreground">
+                {formatCurrencyWithCommas(filteredIncome.reduce((sum, r) => sum + r.amount, 0))}
               </span>
             </CardContent>
           </Card>
@@ -184,8 +145,8 @@ export default function IncomePage() {
                     </div>
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="text-2xl font-bold">
-                        {formatCurrencyEGPWithSuffix(record.amount)}
+                      <span className="text-xl font-bold">
+                        {formatCurrencyWithCommas(record.amount)}
                       </span>
                       <div className="ml-auto flex items-center gap-2">
                         <Link
@@ -258,7 +219,7 @@ export default function IncomePage() {
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
               You haven't added any income records for{" "}
-              {format(new Date(), "MMMM yyyy")} yet.
+              {formatMonthYear(new Date())} yet.
             </p>
           </CardContent>
         </Card>

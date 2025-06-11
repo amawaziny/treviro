@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
+import { formatDateDisplay } from "@/lib/utils";
 
 interface StockDetailChartProps {
   securityId: string;
@@ -306,7 +307,7 @@ export function StockDetailChart({
             }}
             labelFormatter={(label: string) => {
               try {
-                return format(new Date(label + "T00:00:00Z"), "dd-MM-yyyy");
+                return formatDateDisplay(label + "T00:00:00Z");
               } catch (e) {
                 return label;
               }

@@ -27,6 +27,7 @@ import {
   formatNumberWithSuffix,
   formatMonthYear,
   isInCurrentMonth,
+  formatDateDisplay,
 } from "@/lib/utils";
 import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import {
@@ -661,7 +662,7 @@ export default function CashFlowPage() {
                   className="flex justify-between text-xs"
                 >
                   <span>
-                    {format(new Date(income.date), "dd-MM-yyyy")}{" "}
+                    {formatDateDisplay(income.date)}{" "}
                     {income.description ? `- ${income.description}` : ""}
                   </span>
                   <span>{formatCurrencyEGP(income.amount)}</span>
@@ -686,7 +687,7 @@ export default function CashFlowPage() {
                     className="flex justify-between text-xs"
                   >
                     <span>
-                      {format(new Date(tx.date), "dd-MM-yyyy")} - Dividend{" "}
+                      {formatDateDisplay(tx.date)} - Dividend{" "}
                       {tx.tickerSymbol ? `(${tx.tickerSymbol})` : ""}
                     </span>
                     <span>

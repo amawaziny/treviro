@@ -51,7 +51,7 @@ export function generateInstallmentSchedule(
       displayNumber: number,
       dueDate: currentDate.toISOString(),
       amount: investment.installmentAmount || 0,
-      status: paid ? "paid" : "pending",
+      status: paid ? "Paid" : "Unpaid",
       chequeNumber: paid?.chequeNumber || ""
     } as Installment);
 
@@ -89,7 +89,7 @@ export function generateInstallmentSchedule(
     if (paidInstallment) {
       return {
         ...inst,
-        status: "paid" as const,
+        status: "Paid" as const,
         chequeNumber: paidInstallment.chequeNumber || inst.chequeNumber || "",
         amount: paidInstallment.amount ?? inst.amount,
       };
@@ -118,7 +118,7 @@ export function generateInstallmentSchedule(
       displayNumber: inst.number || 0, // Use number as displayNumber if not provided
       dueDate: inst.dueDate || '',
       amount: inst.amount,
-      status: (inst.status?.toLowerCase() === "paid" ? "paid" : "pending") as Installment["status"],
+      status: (inst.status?.toLowerCase() === "Paid" ? "Paid" : "Unpaid") as Installment["status"],
       chequeNumber: inst.chequeNumber || ""
     } as Installment;
   }).filter(Boolean) as Installment[];

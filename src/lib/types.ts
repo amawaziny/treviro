@@ -57,7 +57,7 @@ export interface Installment {
   amount: number;
   dueDate: string;
   displayNumber: number;
-  status: "pending" | "paid" | "overdue";
+  status: "Paid" | "Unpaid";
   description?: string;
   isMaintenance?: boolean;
 }

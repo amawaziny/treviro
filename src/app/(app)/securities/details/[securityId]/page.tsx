@@ -36,7 +36,7 @@ import { StockDetailChart } from "@/components/investments/stocks/stock-detail-c
 import { useInvestments } from "@/hooks/use-investments";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatDateDisplay } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -299,7 +299,7 @@ export default function SecurityDetailPage() {
       await deleteSellTransaction(transactionToDelete);
       toast({
         title: "Transaction Deleted",
-        description: `Sell transaction from ${transactionToDelete.date ? format(new Date(transactionToDelete.date + "T00:00:00Z"), "dd-MM-yyyy") : ""} has been deleted.`,
+        description: `Sell transaction from ${transactionToDelete.date ? formatDateDisplay(transactionToDelete.date + "T00:00:00Z") : ""} has been deleted.`,
       });
     } catch (error: any) {
       toast({
@@ -374,15 +374,6 @@ export default function SecurityDetailPage() {
       minimumFractionDigits: digits,
       maximumFractionDigits: digits,
     }).format(value);
-  };
-
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    try {
-      return format(new Date(dateString + "T00:00:00Z"), "dd-MM-yyyy");
-    } catch {
-      return "Invalid Date";
-    }
   };
 
   return (

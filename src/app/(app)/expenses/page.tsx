@@ -37,7 +37,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDateDisplay } from "@/lib/utils";
 import type { ExpenseRecord } from "@/lib/types";
 // Removed FinancialSettingsForm import as its functionality is moved
 
@@ -167,17 +167,6 @@ export default function ExpensesPage() {
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenseRecords, currentMonthStart, currentMonthEnd, showAll, showEnded]);
-
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-      return format(date, "dd-MM-yyyy");
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   const formatCurrencyEGP = (value: number | undefined) => {
     if (value === undefined || value === null || isNaN(value))

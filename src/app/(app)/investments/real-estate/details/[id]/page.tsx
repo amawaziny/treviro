@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
-import { formatNumberWithSuffix } from "@/lib/utils";
+import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
 import { generateInstallmentSchedule } from "@/lib/installment-utils";
@@ -179,17 +179,6 @@ export default function RealEstateDetailPage() {
     investment?.maintenancePaymentDate,
     today,
   ]);
-
-  const formatDateDisplay = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "N/A";
-      return format(date, "dd-MM-yyyy");
-    } catch (e) {
-      return "N/A";
-    }
-  };
 
   const handleDeleteInstallment = async (installmentNumber: number) => {
     try {
