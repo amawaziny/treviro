@@ -255,7 +255,7 @@ export default function MyCurrenciesPage() {
       )}
 
       <Link href="/investments/add?type=Currencies" passHref>
-        <Button
+      <Button
           variant="default"
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}

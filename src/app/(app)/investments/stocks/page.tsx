@@ -196,13 +196,10 @@ export default function MyStocksPage() {
       <MyStockList />
 
       <Link href="/securities" passHref>
-        <Button
+      <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg
-            ${language === "ar" ? "left-8" : "right-8"}
-            bottom-[88px] md:bottom-8
-          `}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Browse securities"
         >
           <Plus className="h-7 w-7" />

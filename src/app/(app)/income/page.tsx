@@ -226,12 +226,10 @@ export default function IncomePage() {
       )}
 
       <Link href="/income/add" passHref>
-        <Button
+      <Button
           variant="default"
           size="icon"
-          className={`fixed bottom-8 h-14 w-14 rounded-full shadow-lg z-50 ${
-            language === "ar" ? "left-8" : "right-8"
-          }`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new income record"
         >
           <Plus className="h-7 w-7" />
