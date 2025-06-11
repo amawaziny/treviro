@@ -39,24 +39,35 @@ const getCurrentDate = () => {
 };
 
 const initialFormValues: AddIncomeFormValues = {
-  type: undefined,
+  type: "Profit Share",
   source: "",
+  //@ts-expect-error
   amount: "",
   date: getCurrentDate(),
   description: "",
 };
 
-export function AddIncomeForm() {
+type AddIncomeFormProps = {
+  initialValues?: Partial<AddIncomeFormValues>;
+  onSubmit?: (values: AddIncomeFormValues) => void | Promise<void>;
+  isEditMode?: boolean;
+};
+
+export function AddIncomeForm({
+  initialValues,
+  onSubmit,
+  isEditMode = false,
+}: AddIncomeFormProps) {
   const { addIncomeRecord } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<AddIncomeFormValues>({
     resolver: zodResolver(AddIncomeSchema),
-    defaultValues: initialFormValues,
+    defaultValues: initialValues ?? initialFormValues,
   });
 
-  async function onSubmit(values: AddIncomeFormValues) {
+  async function internalOnSubmit(values: AddIncomeFormValues) {
     try {
       const incomeDataToSave: Omit<
         IncomeRecord,
@@ -93,7 +104,7 @@ export function AddIncomeForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit ? onSubmit : internalOnSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -152,7 +163,7 @@ export function AddIncomeForm() {
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5000.00"
-                    value={field.value}
+                    value={field.value?.toString() ?? ""}
                     onChange={field.onChange}
                     allowDecimal={true}
                   />
@@ -201,7 +212,7 @@ export function AddIncomeForm() {
           {form.formState.isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Add Income Record
+          {isEditMode ? "Update Income Record" : "Add Income Record"}
         </Button>
       </form>
     </Form>

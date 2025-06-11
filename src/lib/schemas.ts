@@ -21,7 +21,6 @@ export const incomeTypes = [
   "Gift",
   "Rental Income",
   "Freelance",
-  "Stock Dividend",
   "Other",
 ] as const;
 export const expenseCategories = ["Credit Card", "Other"] as const;

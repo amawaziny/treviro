@@ -121,6 +121,8 @@ export interface IncomeRecord {
   description?: string;
   createdAt: string;
   userId: string;
+  isRecurring?: boolean;
+  recurrencePeriod?: string;
 }
 
 export interface ExpenseRecord {

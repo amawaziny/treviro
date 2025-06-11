@@ -40,6 +40,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { v4 as uuidv4 } from "uuid";
 
 interface InvestmentContextType {
+  updateIncomeRecord: (
+    incomeId: string,
+    updatedFields: Partial<IncomeRecord>,
+  ) => Promise<void>;
   investments: Investment[];
   addInvestment: (
     investment: Omit<Investment, "createdAt" | "id">,
@@ -122,6 +126,28 @@ const defaultAppSettings: AppSettings = {
 };
 
 export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
+  // ... existing state and hooks
+
+  const updateIncomeRecord = async (
+    incomeId: string,
+    updatedFields: Partial<IncomeRecord>,
+  ) => {
+    if (!firestoreInstance || !userId) {
+      throw new Error("Firestore instance or user ID is not initialized");
+    }
+    try {
+      const incomeDocRef = doc(firestoreInstance, `users/${userId}/income/${incomeId}`);
+      await setDoc(incomeDocRef, updatedFields, { merge: true });
+      setIncomeRecords((prev) =>
+        prev.map((rec) =>
+          rec.id === incomeId ? { ...rec, ...updatedFields } : rec
+        )
+      );
+    } catch (error) {
+      console.error("Error updating income record:", error);
+      throw error;
+    }
+  };
   // ... existing state and hooks
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -1153,6 +1179,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         incomeRecords,
         addIncomeRecord,
         deleteIncomeRecord,
+        updateIncomeRecord,
         expenseRecords,
         addExpenseRecord,
         deleteExpenseRecord,
