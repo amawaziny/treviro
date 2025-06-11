@@ -54,9 +54,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
                 : security.name}
               <span className="mx-1">•</span>
               {security.market.toUpperCase()}
-              {security.securityType === "Fund" && security.fundType && (
-                <span className="ml-1 text-primary">({security.fundType})</span>
-              )}
+              
             </p>
           </div>
 
