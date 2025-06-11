@@ -259,7 +259,7 @@ export default function ExpensesPage() {
                   record._isRequiredThisMonth ? "border-yellow-300" : ""
                 }
               >
-                <CardContent className="flex flex-col md:flex-row md:items-start md:items-center justify-between gap-6 py-4">
+                <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
                   <div className="flex-1 min-w-0">
                     {/* Top Row: Title, Date, Installment Badge */}
