@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "path": "/api/scrape-stock",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}

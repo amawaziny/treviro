@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, updateDoc, doc as firestoreDoc } from "firebase/firestore";
+import axios from "axios";
+import * as cheerio from "cheerio";
+
+export async function GET(req: NextRequest) {
+  try {
+    // 1. Read the list of securities from collection listedStocks in firebase and filter by securityType=Stock
+    const q = query(collection(db, "listedStocks"), where("securityType", "==", "Stock"));
+    const snapshot = await getDocs(q);
+    const updates: Array<Promise<any>> = [];
+    for (const stockDoc of snapshot.docs) {
+      const symbol = stockDoc.get("symbol");
+      if (!symbol) continue;
+      // 2. Concat :EC to symbol
+      const code = `${symbol}:EC`;
+      // 3. Fetch and parse price
+      const url = `https://www.asharqbusiness.com/stocks/security/${code}`;
+      try {
+        const { data: content } = await axios.get(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+        const $ = cheerio.load(content);
+        const priceText = $('.leading-48').first().text();
+        const price = parseFloat(priceText.replace(/[^\d.\-]/g, ""));
+        if (!isNaN(price)) {
+          // 4. Update listedStocks collection in firebase and set price column
+          updates.push((async () => {
+            // Update the price in listedStocks
+            await updateDoc(firestoreDoc(db, "listedStocks", stockDoc.id), { price });
+            // Also update priceHistory subcollection
+            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+            const { setDoc, collection: coll, getDocs, orderBy, limit, query: q } = await import("firebase/firestore");
+            await setDoc(
+              firestoreDoc(db, "listedStocks", stockDoc.id, "priceHistory", today),
+              { price },
+              { merge: true }
+            );
+            // Fetch two most recent priceHistory docs
+            const priceHistRef = coll(db, "listedStocks", stockDoc.id, "priceHistory");
+            const priceHistQuery = q(priceHistRef, orderBy("__name__", "desc"), limit(2));
+            const histSnap = await getDocs(priceHistQuery);
+            const prices: number[] = [];
+            histSnap.forEach(doc => {
+              const p = doc.get("price");
+              if (typeof p === "number") prices.push(p);
+            });
+            let changePercent = 0;
+            if (prices.length === 2 && prices[1] !== 0) {
+              changePercent = ((prices[0] - prices[1]) / prices[1]) * 100;
+            }
+            await updateDoc(firestoreDoc(db, "listedStocks", stockDoc.id), { changePercent });
+          })());
+        }
+      } catch (err) {
+        // Log and skip this stock on error
+        console.error(`Error fetching/parsing for ${code}:`, err);
+      }
+    }
+    await Promise.all(updates);
+    return NextResponse.json({ success: true, updated: updates.length });
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+  }
+}
