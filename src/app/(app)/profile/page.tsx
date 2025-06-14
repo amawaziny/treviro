@@ -6,33 +6,69 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updateProfile, updatePassword } from "firebase/auth";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth } from "@/lib/firebase"; // Make sure 'auth' is exported from your firebase config
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const [providerId, setProviderId] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState<string>("/default-avatar.png");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const currentProviderId = user?.providerData[0]?.providerId || null;
 
   useEffect(() => {
     if (user) {
       setName(user.displayName || "");
-      setImage(user.photoURL || "");
-      setProviderId(user.providerId || null);
-      // For email/password users, try to load image from Firestore
-      if (user.providerId === "password") {
+      // Prioritize user.photoURL if it exists and is a valid URL/path
+      if (user.photoURL && typeof user.photoURL === 'string' && (user.photoURL.startsWith('http') || user.photoURL.startsWith('/'))) {
+        setImage(user.photoURL);
+      } else {
+        setImage("/default-avatar.png"); // Fallback if photoURL is invalid or missing
+      }
+      // For email/password users, try to load image from Firestore if available
+      if (currentProviderId === "password") {
         getDoc(doc(db, "users", user.uid)).then((docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.image) setImage(data.image);
+            if (data.image && typeof data.image === 'string' && (data.image.startsWith('http') || data.image.startsWith('/'))) {
+              setImage(data.image);
+            }
           }
         });
       }
     }
-  }, [user]);
+  }, [user, currentProviderId]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) {
+      setError("No file selected or user not authenticated.");
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+    try {
+      const storage = getStorage();
+      const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setImage(url);
+      setSuccess("Image uploaded successfully. Click Save Changes to update your profile.");
+    } catch (err: any) {
+      console.error("Error uploading image:", err);
+      setError(err.message || "Failed to upload image.");
+    }
+    finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,16 +77,20 @@ export default function ProfilePage() {
     setSuccess("");
     try {
       if (!user) throw new Error("Not authenticated");
+
       // Update Firebase Auth profile
-      await updateProfile(user as any, { displayName: name });
+      await updateProfile(user, { displayName: name, photoURL: image }); // user is now FirebaseUser
+
       // Update Firestore image if provider is password
-      if (providerId === "password") {
+      if (currentProviderId === "password") {
         await setDoc(doc(db, "users", user.uid), { image }, { merge: true });
       }
+
       // Update password if provided
-      if (providerId === "password" && password) {
-        await updatePassword(user as any, password);
+      if (currentProviderId === "password" && password) {
+        await updatePassword(user, password); // user is now FirebaseUser
       }
+
       setSuccess("Profile updated successfully.");
     } catch (err: any) {
       setError(err.message || "Failed to update profile");
@@ -62,59 +102,78 @@ export default function ProfilePage() {
   if (!user) return <div className="p-8">Not logged in.</div>;
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">User Profile</h2>
-      <form onSubmit={handleSave} className="space-y-4">
-        <div>
-          <label className="block font-medium">Name</label>
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            disabled={providerId === "google.com"}
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-6 text-center text-primary">User Profile</h2>
+        <div className="flex flex-col items-center mb-6">
+          <Image
+            src={image}
+            alt="Profile"
+            width={96}
+            height={96}
+            className="w-24 h-24 rounded-full border-4 border-primary object-cover mb-2"
+            loader={({ src, width, quality }) => src}
           />
+          <span className="text-lg font-semibold text-foreground">{name || "No Name"}</span>
+          <span className="text-sm text-muted-foreground">{user.email}</span>
         </div>
-        <div>
-          <label className="block font-medium">Email</label>
-          <input
-            type="email"
-            className="w-full border rounded px-3 py-2 bg-gray-100"
-            value={user.email || ""}
-            disabled
-          />
-        </div>
-        <div>
-          <label className="block font-medium">Profile Image URL</label>
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2"
-            value={image}
-            onChange={e => setImage(e.target.value)}
-            disabled={providerId === "google.com"}
-          />
-          {image && (
-            <img src={image} alt="Profile" className="w-20 h-20 rounded-full mt-2" />
-          )}
-        </div>
-        {providerId === "password" && (
+        <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block font-medium">New Password</label>
+            <label className="block font-medium mb-1 text-foreground">Name</label>
             <input
-              type="password"
-              className="w-full border rounded px-3 py-2"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Leave blank to keep current password"
+              type="text"
+              className="w-full border rounded px-3 py-2 bg-background text-foreground"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              disabled={currentProviderId === "google.com"}
             />
           </div>
-        )}
-        {error && <div className="text-red-500 text-sm">{error}</div>}
-        {success && <div className="text-green-600 text-sm">{success}</div>}
-        <Button type="submit" disabled={loading || providerId === "google.com"}>
-          {loading ? "Saving..." : providerId === "google.com" ? "View Only" : "Save Changes"}
-        </Button>
-      </form>
+          {currentProviderId === "password" && (
+            <div>
+              <label className="block font-medium mb-1 text-foreground">Upload Profile Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="w-full"
+              />
+              {uploading && <div className="text-sm text-muted-foreground">Uploading...</div>}
+            </div>
+          )}
+          <div>
+            <label className="block font-medium mb-1 text-foreground">Profile Image URL</label>
+            <input
+              type="text"
+              className="w-full border rounded px-3 py-2 bg-background text-foreground"
+              value={image}
+              onChange={e => setImage(e.target.value)}
+              disabled={currentProviderId === "google.com"}
+            />
+          </div>
+          {currentProviderId === "password" && (
+            <div>
+              <label className="block font-medium mb-1 text-foreground">New Password</label>
+              <input
+                type="password"
+                className="w-full border rounded px-3 py-2 bg-background text-foreground"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Leave blank to keep current password"
+              />
+            </div>
+          )}
+          {error && <div className="text-red-500 text-sm">{error}</div>}
+          {success && <div className="text-green-600 text-sm">{success}</div>}
+          <button
+            type="submit"
+            className="w-full bg-primary text-white py-2 rounded font-semibold hover:bg-primary-dark transition"
+            disabled={loading || currentProviderId === "google.com"}
+          >
+            {loading ? "Saving..." : currentProviderId === "google.com" ? "View Only" : "Save Changes"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 } 

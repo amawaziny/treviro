@@ -14,17 +14,9 @@ import {
   createUserWithEmailAndPassword as firebaseCreateUserWithEmailAndPassword,
 } from "firebase/auth";
 
-interface AppUser {
-  uid: string;
-  displayName: string | null;
-  email: string | null;
-  photoURL: string | null;
-  providerId: string | null;
-}
-
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: AppUser | null;
+  user: FirebaseUser | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
@@ -38,7 +30,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<AppUser | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessingLogin, setIsProcessingLogin] = useState(false);
   const router = useRouter();
@@ -60,13 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           !!firebaseUser,
         );
         if (firebaseUser) {
-          setUser({
-            uid: firebaseUser.uid,
-            displayName: firebaseUser.displayName,
-            email: firebaseUser.email,
-            photoURL: firebaseUser.photoURL,
-            providerId: firebaseUser.providerData[0]?.providerId || null,
-          });
+          setUser(firebaseUser);
         } else {
           setUser(null);
         }
