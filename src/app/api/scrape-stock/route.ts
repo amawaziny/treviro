@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, updateDoc, doc as firestoreDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, doc as firestoreDoc, collection as coll, doc as docFn, getDoc } from "firebase/firestore";
 import axios from "axios";
 import * as cheerio from "cheerio";
 
 export async function GET(req: NextRequest) {
   try {
+    // Vacation check: skip if today is a vacation
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const vacationDocRef = docFn(db, "vacations", today);
+    const vacationDocSnap = await getDoc(vacationDocRef);
+    if (vacationDocSnap.exists()) {
+      return NextResponse.json({ success: false, message: `Today (${today}) is a vacation. Skipping stock scraping.` });
+    }
     // 1. Read the list of securities from collection listedStocks in firebase and filter by securityType=Stock
     const q = query(collection(db, "listedStocks"), where("securityType", "==", "Stock"));
     const snapshot = await getDocs(q);
@@ -29,7 +36,16 @@ export async function GET(req: NextRequest) {
             await updateDoc(firestoreDoc(db, "listedStocks", stockDoc.id), { price });
             // Also update priceHistory subcollection
             const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-            const { setDoc, collection: coll, getDocs, orderBy, limit, query: q } = await import("firebase/firestore");
+            const { setDoc, collection: coll, getDocs, orderBy, limit, query: q, doc: docFn, getDoc } = await import("firebase/firestore");
+
+            // Check if today's priceHistory record exists and price is the same
+            const todayDocRef = docFn(db, "listedStocks", stockDoc.id, "priceHistory", today);
+            const todayDocSnap = await getDoc(todayDocRef);
+            if (todayDocSnap.exists() && todayDocSnap.get("price") === price) {
+              // Price for today is already recorded and unchanged, do nothing
+              return;
+            }
+
             await setDoc(
               firestoreDoc(db, "listedStocks", stockDoc.id, "priceHistory", today),
               { price },
@@ -62,3 +78,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
 }
+
+// ---
+// Firestore Collection: vacations
+// Each document in 'vacations' has the document ID as the date (YYYY-MM-DD) and can have fields like:
+//   - reason: string (optional, e.g. 'Public holiday')
+// Example: vacations/2024-05-17 { reason: 'Eid al-Fitr' }

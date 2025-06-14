@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/scrape-stock",
-      "schedule": "0 12 * * *"
+      "schedule": "0 12 * * 0-4"
     }
   ]
 }
