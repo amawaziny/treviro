@@ -10,6 +10,8 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User as FirebaseUser,
+  signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
+  createUserWithEmailAndPassword as firebaseCreateUserWithEmailAndPassword,
 } from "firebase/auth";
 
 interface AppUser {
@@ -24,6 +26,8 @@ interface AuthContextType {
   user: AppUser | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
+  signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
+  signUpWithEmailAndPassword: (email: string, password: string) => Promise<void>;
   isLoading: boolean;
   isProcessingLogin: boolean;
 }
@@ -141,6 +145,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [router]);
 
+  const signInWithEmailAndPassword = useCallback(async (email: string, password: string) => {
+    if (!firebaseAuthService) {
+      console.error('AuthContext: Firebase Auth service not available for email sign-in.');
+      return;
+    }
+    setIsProcessingLogin(true);
+    try {
+      await firebaseSignInWithEmailAndPassword(firebaseAuthService, email, password);
+      console.log('AuthContext: Email sign-in successful.');
+    } catch (error: any) {
+      console.error('AuthContext: Error during email sign-in:', error.message);
+    } finally {
+      setIsProcessingLogin(false);
+    }
+  }, []);
+
+  const signUpWithEmailAndPassword = useCallback(async (email: string, password: string) => {
+    if (!firebaseAuthService) {
+      console.error('AuthContext: Firebase Auth service not available for email sign-up.');
+      return;
+    }
+    setIsProcessingLogin(true);
+    try {
+      await firebaseCreateUserWithEmailAndPassword(firebaseAuthService, email, password);
+      console.log('AuthContext: Email sign-up successful.');
+    } catch (error: any) {
+      console.error('AuthContext: Error during email sign-up:', error.message);
+    } finally {
+      setIsProcessingLogin(false);
+    }
+  }, []);
+
   const isAuthenticated = !!user;
 
   return (
@@ -150,6 +186,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         login,
         logout,
+        signInWithEmailAndPassword,
+        signUpWithEmailAndPassword,
         isLoading,
         isProcessingLogin,
       }}
