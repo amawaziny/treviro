@@ -19,6 +19,7 @@ interface AppUser {
   displayName: string | null;
   email: string | null;
   photoURL: string | null;
+  providerId: string | null;
 }
 
 interface AuthContextType {
@@ -64,6 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             displayName: firebaseUser.displayName,
             email: firebaseUser.email,
             photoURL: firebaseUser.photoURL,
+            providerId: firebaseUser.providerData[0]?.providerId || null,
           });
         } else {
           setUser(null);
