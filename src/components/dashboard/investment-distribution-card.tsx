@@ -14,15 +14,48 @@ interface InvestmentDistributionCardProps {
     value: number;
     color: string;
   }>;
+  allChartData?: Array<{
+    id: string;
+    label: string;
+    value: number;
+    color: string;
+  }>;
   total: number;
+  checkedItems?: Record<string, boolean>;
+  onCheckboxChange?: (type: string) => void;
+  isEmpty?: boolean;
 }
 
 export function InvestmentDistributionCard({
   title,
   chartData,
+  allChartData,
   total,
+  checkedItems = {},
+  onCheckboxChange = () => {},
+  isEmpty = false,
 }: InvestmentDistributionCardProps) {
+  // Use allChartData for legend if provided, otherwise fall back to chartData
+  const legendData = allChartData || chartData;
   const { resolvedTheme } = useTheme();
+
+  // When empty, show a skeleton pie chart with $0 total but keep all checkboxes visible
+  const displayChartData = isEmpty ? [] : chartData;
+  const displayTotal = isEmpty ? 0 : total;
+  const isDark = resolvedTheme === 'dark';
+
+  // Create skeleton data for the empty state
+  const skeletonData = [
+    {
+      id: 'empty',
+      label: 'No investments',
+      value: 1,
+      color: isDark ? '#2d3748' : '#e2e8f0',
+    },
+  ];
+
+  const chartToRender = isEmpty ? skeletonData : chartData;
+
 
   return (
     <Card
@@ -46,16 +79,16 @@ export function InvestmentDistributionCard({
       <CardContent>
         <div className="relative mx-auto h-[300px] max-w-full overflow-hidden">
           <ResponsivePie
-            data={chartData}
+            data={chartToRender}
             margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
             innerRadius={0.5}
             padAngle={4}
             cornerRadius={8}
             activeOuterRadiusOffset={3}
-            colors={chartData.map((d) => d.color)}
+            colors={chartToRender.map((d) => d.color)}
             borderWidth={4}
-            enableArcLabels={true}
-            enableArcLinkLabels={true}
+            enableArcLabels={!isEmpty}
+            enableArcLinkLabels={!isEmpty}
             arcLinkLabelsTextColor={(d) => d.color}
             arcLinkLabelsSkipAngle={2}
             arcLinkLabelsDiagonalLength={5}
@@ -63,7 +96,7 @@ export function InvestmentDistributionCard({
             arcLinkLabelsThickness={4}
             arcLinkLabelsColor={{ from: "color" }}
             arcLinkLabel={(d) =>
-              `${d.label} ${((d.value / total) * 100).toFixed(0)}%`
+              `${d.label} ${((d.value / (isEmpty ? 1 : total)) * 100).toFixed(0)}%`
             }
             arcLinkLabelsTextOffset={10}
             tooltip={({ datum }) => (
@@ -118,9 +151,10 @@ export function InvestmentDistributionCard({
                         fontSize: 24,
                         fontWeight: 700,
                         fill: resolvedTheme === "dark" ? "#fff" : "#23255a",
+                        opacity: isEmpty ? 0.7 : 1,
                       }}
                     >
-                      {formatNumberWithSuffix(total)}
+                      {formatNumberWithSuffix(displayTotal)}
                     </text>
                     <text
                       y={24}
@@ -142,35 +176,72 @@ export function InvestmentDistributionCard({
         </div>
         {/* Custom legend below chart */}
         <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 mt-2 sm:mt-4 px-2">
-          {chartData.map((d, i) => (
-            <div
-              key={d.id}
-              className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
-            >
-              <span
-                className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
-                style={{ background: d.color }}
-              />
-              <span
-                className={
-                  resolvedTheme === "dark"
-                    ? "font-medium text-white"
-                    : "font-medium text-[#23255a] truncate max-w-[70px] sm:max-w-none"
-                }
+          {legendData.map((d) => {
+            const isChecked = checkedItems[d.id] !== false;
+            const dataPoint = chartData.find((item) => item.id === d.id) || { value: 0 };
+            const percentage = total > 0 ? (dataPoint.value / total) * 100 : 0;
+            const displayValue = isChecked && dataPoint.value > 0 ? percentage.toFixed(0) : '0';
+
+            return (
+              <div
+                key={d.id}
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm cursor-pointer"
+                onClick={() => onCheckboxChange(d.id)}
               >
-                {d.label}:
-              </span>
-              <span
-                className={
-                  resolvedTheme === "dark"
-                    ? "font-medium text-white"
-                    : "font-medium text-[#23255a]"
-                }
-              >
-                {((d.value / total) * 100).toFixed(0)}%
-              </span>
-            </div>
-          ))}
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => {}}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 rounded border-2 appearance-none transition-colors ${
+                      resolvedTheme === 'dark' ? 'border-gray-500' : 'border-gray-400'
+                    } ${
+                      isChecked
+                        ? 'bg-blue-500 border-blue-500'
+                        : 'bg-transparent'
+                    }`}
+                    style={{
+                      backgroundImage: isChecked 
+                        ? "url(" + (resolvedTheme === 'dark' 
+                          ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"
+                          : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") + ")"
+                        : 'none',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: 'contain',
+                    }}
+                  />
+                  <div 
+                    className="absolute inset-0 rounded-sm"
+                    style={{ 
+                      backgroundColor: d.color,
+                      opacity: isChecked ? 1 : 0.3,
+                      pointerEvents: 'none'
+                    }}
+                  />
+                </div>
+                <span
+                  className={
+                    resolvedTheme === "dark"
+                      ? `font-medium ${isChecked ? 'text-white' : 'text-gray-500'}`
+                      : `font-medium ${isChecked ? 'text-[#23255a]' : 'text-gray-400'} truncate max-w-[70px] sm:max-w-none`
+                  }
+                >
+                  {d.label}:
+                </span>
+                <span
+                  className={
+                    resolvedTheme === "dark"
+                      ? `font-medium ${isChecked ? 'text-white' : 'text-gray-500'}`
+                      : `font-medium ${isChecked ? 'text-[#23255a]' : 'text-gray-400'}`
+                  }
+                >
+                  {displayValue}%
+                </span>
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
