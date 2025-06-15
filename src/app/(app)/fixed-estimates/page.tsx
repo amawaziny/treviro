@@ -12,18 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Settings } from "lucide-react"; // Using Settings icon for title
-import { cn, formatCurrencyWithCommas } from "@/lib/utils";
+import { Plus, Settings, PiggyBank } from "lucide-react";
+import { cn, formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 
 export default function FixedEstimatesPage() {
@@ -51,6 +43,15 @@ export default function FixedEstimatesPage() {
     );
   }
 
+  // Calculate total income and expenses
+  const totalIncome = fixedEstimates
+    .filter(record => !record.isExpense)
+    .reduce((sum, record) => sum + record.amount, 0);
+  
+  const totalExpenses = fixedEstimates
+    .filter(record => record.isExpense)
+    .reduce((sum, record) => sum + record.amount, 0);
+
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
@@ -66,96 +67,95 @@ export default function FixedEstimatesPage() {
       <Separator />
 
       {fixedEstimates.length > 0 ? (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>{t("your_fixed_estimates")}</CardTitle>
-            <CardDescription>
-              {t("a_list_of_your_set_recurring_financial_estimates")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    className={cn(
-                      language === "ar" ? "text-end" : "text-left"
-                    )}
-                  >
-                    Type
-                  </TableHead>
-                  <TableHead
-                    className={cn(
-                      language === "ar" ? "text-end" : "text-left"
-                    )}
-                  >
-                    Name
-                  </TableHead>
-                  <TableHead className="text-end">Amount</TableHead>
-                  <TableHead
-                    className={cn(
-                      language === "ar" ? "text-end" : "text-left"
-                    )}
-                  >
-                    Period
-                  </TableHead>
-                  <TableHead
-                    className={cn(
-                      language === "ar" ? "text-end" : "text-left"
-                    )}
-                  >
-                    Nature
-                  </TableHead>
-                  {/* <TableHead className={cn(language === 'ar' ? 'text-left' : 'text-end')}>Actions</TableHead> */}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fixedEstimates.map((record: FixedEstimateRecord) => (
-                  <TableRow key={record.id}>
-                    <TableCell
-                      className={cn(
-                        language === "ar" ? "text-end" : "text-left"
+        <>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
+                  {t("total_fixed_income")}
+                </CardTitle>
+                <PiggyBank className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  <span className="md:hidden">
+                    {formatNumberWithSuffix(totalIncome)}
+                  </span>
+                  <span className="hidden md:inline">
+                    {formatCurrencyWithCommas(totalIncome)}
+                  </span>
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">
+                  {t("total_fixed_expenses")}
+                </CardTitle>
+                <Settings className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                  <span className="md:hidden">
+                    {formatNumberWithSuffix(totalExpenses)}
+                  </span>
+                  <span className="hidden md:inline">
+                    {formatCurrencyWithCommas(totalExpenses)}
+                  </span>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-4 mt-8">
+            {fixedEstimates.map((record: FixedEstimateRecord) => (
+              <Card
+                key={record.id}
+                className={cn(
+                  record.isExpense ? "border-red-200 dark:border-red-700" : "border-green-200 dark:border-green-700"
+                )}
+              >
+                <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
+                  {/* Main Info Column */}
+                  <div className="flex-1 min-w-0">
+                    {/* Top Row: Type and Name */}
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="font-semibold truncate text-base">
+                        {record.type}
+                      </span>
+                      {record.name && (
+                        <span className="text-sm text-muted-foreground">
+                          ({record.name})
+                        </span>
                       )}
-                    >
-                      {record.type}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        language === "ar" ? "text-end" : "text-left"
-                      )}
-                    >
-                      {record.name || t("na")}
-                    </TableCell>
-                    <TableCell className="text-end">
+                    </div>
+                    {/* Period and Nature */}
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span>{record.period}</span>
+                      <span>•</span>
+                      <span className={cn(
+                        record.isExpense ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
+                      )}>
+                        {record.isExpense ? t("expense") : t("income")}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Amount */}
+                  <div className="text-2xl font-bold">
+                    <span className="md:hidden">
+                      {formatNumberWithSuffix(record.amount)}
+                    </span>
+                    <span className="hidden md:inline">
                       {formatCurrencyWithCommas(record.amount)}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        language === "ar" ? "text-end" : "text-left"
-                      )}
-                    >
-                      {record.period}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        language === "ar" ? "text-end" : "text-left"
-                      )}
-                    >
-                      {record.isExpense ? "Expense" : "Income"}
-                    </TableCell>
-                    {/* Actions cell for edit/delete will be added in Phase 2 */}
-                    {/* 
-                  <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-end')}>
-                   <Button variant="ghost" size="icon" disabled> <Edit className="h-4 w-4" /> </Button>
-                   <Button variant="ghost" size="icon" disabled> <Trash2 className="h-4 w-4 text-destructive" /> </Button>
-                  </TableCell> 
-                  */}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       ) : (
         <Card className="mt-6">
           <CardHeader>
@@ -176,7 +176,7 @@ export default function FixedEstimatesPage() {
         <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new fixed estimate"
         >
           <Plus className="h-7 w-7" />

@@ -123,5 +123,7 @@
   "you_havent_added_any_fixed_estimates_yet": "You haven't added any fixed estimates yet.",
   "you_havent_added_any_itemized_expenses_for": "You haven't added any itemized expenses for",
   "your_fixed_estimates": "Your Fixed Estimates",
-  "zakat_fixed": "Zakat (Fixed):"
+  "zakat_fixed": "Zakat (Fixed):",
+  "total_fixed_income": "Total Fixed Income",
+  "total_fixed_expenses": "Total Fixed Expenses"
 }
