@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
@@ -26,22 +26,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
-import { cn, formatCurrencyWithCommas, formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
+import {
+  cn,
+  formatCurrencyWithCommas,
+  formatDateDisplay,
+  formatMonthYear,
+  formatNumberWithSuffix,
+} from "@/lib/utils";
 import type { ExpenseRecord } from "@/lib/types";
 // Removed FinancialSettingsForm import as its functionality is moved
 
 export default function ExpensesPage() {
+  const { t } = useLanguage();
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
   const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
@@ -73,7 +72,7 @@ export default function ExpensesPage() {
     // Helper: is record required this month?
     function isRequiredThisMonth(record: ExpenseRecord) {
       if (
-        record.category === "Credit Card" &&
+        record.category === t("credit_card") &&
         record.isInstallment &&
         record.numberOfInstallments &&
         record.date
@@ -106,7 +105,7 @@ export default function ExpensesPage() {
     return filtered
       .flatMap((record) => {
         if (
-          record.category === "Credit Card" &&
+          record.category === t("credit_card") &&
           record.isInstallment &&
           record.numberOfInstallments &&
           record.date
@@ -193,11 +192,12 @@ export default function ExpensesPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Expenses Management
+          {t("expenses_management")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Log and manage all your itemized expenses, including credit card
-          payments and utility bills.
+          {t(
+            "log_and_manage_all_your_itemized_expenses_including_credit_card_payments_and_utility_bills"
+          )}
         </p>
       </div>
       <Separator />
@@ -210,7 +210,8 @@ export default function ExpensesPage() {
             onCheckedChange={setShowAll}
             id="show-all-switch"
           />
-          <span>Show All Expenses</span>
+
+          <span>{t("show_all_expenses")}</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <Switch
@@ -218,7 +219,8 @@ export default function ExpensesPage() {
             onCheckedChange={setShowEnded}
             id="show-ended-switch"
           />
-          <span>Show Ended/Old Expenses</span>
+
+          <span>{t("show_endedold_expenses")}</span>
         </label>
       </div>
 
@@ -231,12 +233,14 @@ export default function ExpensesPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingDown className="mr-2 h-4 w-4 text-primary" />
-                {showAll ? "Total Spent (All)" : "Total Spent This Month"}
+                {showAll ? t("total_spent_all") : t("total_spent_this_month")}
               </CardTitle>
               <CardDescription>
                 {showAll
-                  ? "View and manage all your recorded expenses, including installments and one-time payments."
-                  : `See and manage all expenses required for ${format(new Date(), "MMMM yyyy")}, including current installments and one-time payments.`}
+                  ? t(
+                      "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments"
+                    )
+                  : `${t("see_and_manage_all_expenses_required_for")} ${formatMonthYear(new Date())}, ${t("including_current_installments_and_one_time_payments")}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -244,8 +248,8 @@ export default function ExpensesPage() {
                 {formatCurrencyWithCommas(
                   filteredExpenses.reduce(
                     (sum, r) => sum + (r._requiredAmount || 0),
-                    0,
-                  ),
+                    0
+                  )
                 )}
               </span>
             </CardContent>
@@ -272,7 +276,7 @@ export default function ExpensesPage() {
                       </span>
                       {record.isInstallment &&
                         record.numberOfInstallments &&
-                        record.category === "Credit Card" && (
+                        record.category === t("credit_card") && (
                           <div className="flex items-center gap-2">
                             <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
                               Installment {record.installmentMonthIndex}/
@@ -280,7 +284,7 @@ export default function ExpensesPage() {
                             </span>
                             {record._isRequiredThisMonth && (
                               <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
-                                Required This Month
+                                {t("required_this_month")}
                               </span>
                             )}
                           </div>
@@ -317,10 +321,13 @@ export default function ExpensesPage() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                {t("are_you_sure")}
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action will permanently delete this expense
-                                record. This cannot be undone.
+                                {t(
+                                  "this_action_will_permanently_delete_this_expense_record_this_cannot_be_undone"
+                                )}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -345,11 +352,11 @@ export default function ExpensesPage() {
                     {/* Installment Details */}
                     {record.isInstallment &&
                       record.numberOfInstallments &&
-                      record.category === "Credit Card" && (
+                      record.category === t("credit_card") && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          Installment: EGP{" "}
+                          {t("installment_egp")}{" "}
                           {formatNumberWithSuffix(
-                            record.amount / record.numberOfInstallments,
+                            record.amount / record.numberOfInstallments
                           )}{" "}
                           x {record.numberOfInstallments} months
                         </div>
@@ -365,13 +372,14 @@ export default function ExpensesPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <TrendingDown className="mr-2 h-4 w-4 text-primary" />
-              No Itemized Expenses Recorded This Month
+              {t("no_itemized_expenses_recorded_this_month")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any itemized expenses for{" "}
-              {format(new Date(), "MMMM yyyy")} yet.
+              {t("you_havent_added_any_itemized_expenses_for")}{" "}
+              {formatMonthYear(new Date())}
+              {t("yet")}
             </p>
           </CardContent>
         </Card>

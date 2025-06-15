@@ -9,21 +9,18 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  CardTitle } from
+"@/components/ui/card";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { AddExpenseFormValues } from "@/lib/schemas";
 
 export default function EditExpensePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+  params
+}: {params: Promise<{id: string;}>;}) {
+  const { t } = useLanguage();
   const { expenseRecords, updateExpenseRecord } = useInvestments();
   const router = useRouter();
   const { id: expenseId } = React.use(params);
@@ -32,7 +29,7 @@ export default function EditExpensePage({
   // Find the expense record by id
   const expense = React.useMemo(
     () => expenseRecords.find((rec) => rec.id === expenseId),
-    [expenseRecords, expenseId],
+    [expenseRecords, expenseId]
   );
 
   if (!expense) {
@@ -49,11 +46,11 @@ export default function EditExpensePage({
     setHeaderProps({
       showBackButton: true,
       showNavControls: false,
-      title: "Edit Expense Record",
-      description:
-        "Update your expense details, such as installments, credit card payments, subscriptions, or other spending.",
-      backLabel: "Back to Expenses",
-      backHref: "/expenses",
+      title: t("edit_expense_record"),
+      description: t("update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending"),
+
+      backLabel: t("back_to_expenses"),
+      backHref: "/expenses"
     });
 
     // Clean up when component unmounts
@@ -66,10 +63,8 @@ export default function EditExpensePage({
     <div className="container mx-auto py-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Expense Record</CardTitle>
-          <CardDescription>
-            Update your expense details, such as installments, credit card
-            payments, subscriptions, or other spending.
+          <CardTitle>{t("edit_expense_record")}</CardTitle>
+          <CardDescription>{t("update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,24 +77,24 @@ export default function EditExpensePage({
               date: expense.date,
               isInstallment: expense.isInstallment ?? false,
               //@ts-expect-error
-              numberOfInstallments: expense.numberOfInstallments
-                ? expense.numberOfInstallments.toString()
-                : "",
+              numberOfInstallments: expense.numberOfInstallments ?
+              expense.numberOfInstallments.toString() :
+              ""
             }}
             onSubmit={async (values: AddExpenseFormValues) => {
               await updateExpenseRecord(expenseId, {
                 ...values,
                 amount: Number(values.amount),
-                numberOfInstallments: values.numberOfInstallments
-                  ? Number(values.numberOfInstallments)
-                  : undefined,
+                numberOfInstallments: values.numberOfInstallments ?
+                Number(values.numberOfInstallments) :
+                undefined
               });
               router.push("/expenses");
             }}
-            isEditMode
-          />
+            isEditMode />
+
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 }

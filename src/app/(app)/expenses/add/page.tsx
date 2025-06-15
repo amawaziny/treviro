@@ -6,14 +6,14 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  CardTitle } from
+"@/components/ui/card";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 
-export default function AddExpensePage() {
+export default function AddExpensePage() {const { t: t } = useLanguage();
   const { language } = useLanguage();
   const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
@@ -22,23 +22,21 @@ export default function AddExpensePage() {
       <Button variant="outline" size="sm" asChild className="mb-4">
         <Link href="/expenses">
           <BackArrowIcon
-            className={language === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"}
-          />
-          Back to Expenses
+            className={language === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />{t("back_to_expenses")}
+
+
         </Link>
       </Button>
       <Card>
         <CardHeader>
-          <CardTitle>Add New Expense Record</CardTitle>
-          <CardDescription>
-            Log your expenses like installments, credit card payments,
-            subscriptions, or other spending.
+          <CardTitle>{t("add_new_expense_record")}</CardTitle>
+          <CardDescription>{t("log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <AddExpenseForm />
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 }
