@@ -38,7 +38,6 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import { cn, formatNumberWithSuffix } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { MyRealEstateListItem } from "@/components/investments/real-estate/my-real-estate-list-item";
 
@@ -47,18 +46,16 @@ export default function MyRealEstatePage() {
   const {
     investments,
     isLoading: isLoadingInvestments,
-    removeRealEstateInvestment,
   } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
   const { language } = useLanguage();
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   const router = useRouter();
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(
-      (inv) => inv.type === t("real_estate"),
+      (inv) => inv.type === "Real Estate",
     ) as RealEstateInvestment[];
   }, [investments]);
 
