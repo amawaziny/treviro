@@ -39,14 +39,14 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { v4 as uuidv4 } from "uuid";
 
-interface InvestmentContextType {
+export interface InvestmentContextType {
   updateIncomeRecord: (
     incomeId: string,
     updatedFields: Partial<IncomeRecord>,
   ) => Promise<void>;
   investments: Investment[];
   addInvestment: (
-    investment: Omit<Investment, "createdAt" | "id">,
+    investmentData: Omit<Investment, "createdAt" | "id">,
     analysis?: CurrencyFluctuationAnalysisResult,
   ) => Promise<void>;
   getInvestmentsByType: (type: string) => Investment[];
@@ -102,6 +102,7 @@ interface InvestmentContextType {
       "id" | "createdAt" | "userId" | "updatedAt"
     >,
   ) => Promise<void>;
+  deleteFixedEstimate: (id: string) => Promise<void>;
   recalculateDashboardSummary: () => Promise<void>;
   updateRealEstateInvestment: (
     investmentId: string,
@@ -1158,6 +1159,30 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     [userId, firestoreInstance],
   );
 
+  const deleteFixedEstimate = useCallback(
+    async (id: string) => {
+      if (!firestoreInstance || !isAuthenticated || !userId) {
+        throw new Error("User not authenticated or Firestore not available.");
+      }
+      const estimateDocRef = doc(
+        firestoreInstance,
+        `users/${userId}/fixedEstimates`,
+        id,
+      );
+      await deleteDoc(estimateDocRef);
+
+      const estimate = fixedEstimates.find((est) => est.id === id);
+      if (estimate) {
+        const summaryUpdates: Partial<DashboardSummary> = {
+          totalInvestedAcrossAllAssets: -estimate.amount,
+          totalCashBalance: -estimate.amount,
+        };
+        await updateDashboardSummaryDoc(summaryUpdates);
+      }
+    },
+    [userId, isAuthenticated, firestoreInstance, fixedEstimates, updateDashboardSummaryDoc],
+  );
+
   return (
     <InvestmentContext.Provider
       value={{
@@ -1186,6 +1211,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         updateExpenseRecord,
         fixedEstimates,
         addFixedEstimate,
+        deleteFixedEstimate,
         recalculateDashboardSummary,
         appSettings,
         updateAppSettings,
