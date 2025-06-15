@@ -21,6 +21,7 @@ function getPasswordStrength(password: string) {
   if (/[A-Z]/.test(password)) score++;
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
+  console.log('Password:', password, 'Score:', score);
   return score;
 }
 
@@ -48,15 +49,15 @@ function getPasswordStrengthColor(score: number) {
   switch (score) {
     case 0:
     case 1:
-      return "bg-red-500";
+      return "#ef4444"; // Tailwind red-500
     case 2:
-      return "bg-yellow-500";
+      return "#f59e0b"; // Tailwind yellow-500
     case 3:
-      return "bg-blue-500";
+      return "#3b82f6"; // Tailwind blue-500
     case 4:
-      return "bg-green-500";
+      return "#22c55e"; // Tailwind green-500
     default:
-      return "bg-gray-200";
+      return "#e5e7eb"; // Tailwind gray-200
   }
 }
 
@@ -95,6 +96,11 @@ export function AuthForm() {
   if (mode === "forgot-password") {
     return <ForgotPasswordForm onBack={() => setMode("sign-in")} />;
   }
+
+  const calculatedWidth = `${getPasswordStrengthPercent(getPasswordStrength(password))}%`;
+  const calculatedBackgroundColor = getPasswordStrengthColor(getPasswordStrength(password));
+
+  console.log('Calculated Width:', calculatedWidth, 'Calculated Background Color:', calculatedBackgroundColor);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -157,8 +163,8 @@ export function AuthForm() {
                     <div
                       className="h-full transition-all duration-300"
                       style={{
-                        width: `${getPasswordStrength(password)}%`,
-                        backgroundColor: getPasswordStrengthColor(getPasswordStrength(password)),
+                        width: calculatedWidth,
+                        backgroundColor: calculatedBackgroundColor,
                       }}
                     />
                   </div>
