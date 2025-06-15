@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { InvestmentDistributionChart } from "@/components/dashboard/investment-distribution-chart";
 import { MonthlyInvestmentDistributionChart } from "@/components/dashboard/monthly-investment-distribution-chart";
@@ -43,10 +44,7 @@ import type {
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import {
-  formatNumberWithSuffix,
-  formatCurrencyWithCommas,
-} from "@/lib/utils";
+import { formatNumberWithSuffix, formatCurrencyWithCommas, formatMonthYear } from "@/lib/utils";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
@@ -54,24 +52,8 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 
-// Helper function to parse YYYY-MM-DD string to a local Date object
-const parseDateString = (dateStr?: string): Date | null => {
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-  const [year, month, day] = dateStr.split("-").map(Number);
-  if (
-    isNaN(year) ||
-    isNaN(month) ||
-    isNaN(day) ||
-    month < 1 ||
-    month > 12 ||
-    day < 1 ||
-    day > 31
-  )
-    return null;
-  return new Date(year, month - 1, day);
-};
-
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const {
     dashboardSummary,
     isLoading: isLoadingDashboardSummaryContext,
@@ -120,7 +102,6 @@ export default function DashboardPage() {
     totalStockInvestmentThisMonth,
     totalDebtInvestmentThisMonth,
     totalGoldInvestmentThisMonth,
-    totalInvestmentsOnly,
     netCashFlowThisMonth,
   } = calculateMonthlyCashFlowSummary({
     incomeRecords,
@@ -144,7 +125,7 @@ export default function DashboardPage() {
         if (inv.type === "Stocks") {
           const stockInv = inv as StockInvestment;
           const security = listedSecurities.find(
-            (ls) => ls.symbol === stockInv.tickerSymbol,
+            (ls) => ls.symbol === stockInv.tickerSymbol
           );
           if (security && security.price && stockInv.numberOfShares) {
             currentVal = security.price * stockInv.numberOfShares;
@@ -192,8 +173,6 @@ export default function DashboardPage() {
   const totalCurrentPortfolioPnL =
     totalCurrentPortfolioValue - totalPortfolioCostBasis;
 
-  const totalExpensesThisMonth =
-    totalItemizedExpensesThisMonth + totalInvestmentsThisMonth;
   return (
     <div className="space-y-8">
       <div>
@@ -201,7 +180,7 @@ export default function DashboardPage() {
           Dashboard
         </h1>
         <p className="text-muted-foreground text-sm">
-          Overview of your investment portfolio and monthly cash flow.
+          {t("overview_of_your_investment_portfolio_and_monthly_cash_flow")}
         </p>
       </div>
       <Separator />
@@ -213,19 +192,19 @@ export default function DashboardPage() {
           onClick={async () => {
             await recalculateDashboardSummary();
             toast({
-              title: "Summary recalculated!",
-              description: "Dashboard summary values have been updated.",
+              title: t("summary_recalculated"),
+              description: t("dashboard_summary_values_have_been_updated"),
             });
           }}
         >
-          Recalculate Summary
+          {t("recalculate_summary")}
         </Button>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Invested Amount
+              {t("total_invested_amount")}
             </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -240,14 +219,14 @@ export default function DashboardPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              Sum of all purchase costs.
+              {t("sum_of_all_purchase_costs")}
             </p>
           </CardContent>
         </Card>
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Realized P/L
+              {t("total_realized_pl")}
             </CardTitle>
             {totalRealizedPnL >= 0 ? (
               <TrendingUp className="h-4 w-4 text-accent" />
@@ -260,7 +239,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
-                className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
+                className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? t("textaccent") : t("textdestructive")}`}
               >
                 {isMobile
                   ? formatNumberWithSuffix(totalRealizedPnL)
@@ -268,14 +247,14 @@ export default function DashboardPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              Profit/Loss from all completed sales.
+              {t("profitloss_from_all_completed_sales")}
             </p>
           </CardContent>
         </Card>
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Current Portfolio P/L
+              {t("total_current_portfolio_pl")}
             </CardTitle>
             {totalCurrentPortfolioPnL >= 0 ? (
               <TrendingUp className="h-4 w-4 text-accent" />
@@ -288,7 +267,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
-                className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
+                className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? t("textaccent") : t("textdestructive")}`}
               >
                 {isMobile
                   ? formatNumberWithSuffix(totalCurrentPortfolioPnL)
@@ -296,14 +275,14 @@ export default function DashboardPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              Current market value vs. total cost.
+              {t("current_market_value_vs_total_cost")}
             </p>
           </CardContent>
         </Card>
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Cash Balance
+              {t("total_cash_balance")}
             </CardTitle>
             <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -318,7 +297,7 @@ export default function DashboardPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              Estimated available cash.
+              {t("estimated_available_cash")}
             </p>
           </CardContent>
         </Card>
@@ -328,15 +307,16 @@ export default function DashboardPage() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
-              <CardTitle>Monthly Cash Flow Summary</CardTitle>
+              <CardTitle>{t("monthly_cash_flow_summary")}</CardTitle>
               <CardDescription>
-                For {format(new Date(), "MMMM yyyy")}. Includes current month's
-                new investments.
+                For {formatMonthYear(new Date())}
+                {t("includes_current_months_new_investments")}
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link href="/cash-flow">
-                View Full Details <ArrowRight className="ml-2 h-4 w-4" />
+                {t("view_full_details")}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -347,7 +327,7 @@ export default function DashboardPage() {
             <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
-                  Total Income This Month
+                  {t("total_income_this_month")}
                 </CardTitle>
                 <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
               </CardHeader>
@@ -363,7 +343,7 @@ export default function DashboardPage() {
                 <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
                   {monthlySalary > 0 && (
                     <p>
-                      Monthly Salary (Fixed):{" "}
+                      {t("monthly_salary_fixed")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(monthlySalary)}
                       </span>
@@ -374,7 +354,7 @@ export default function DashboardPage() {
                   )}
                   {otherFixedIncomeMonthly > 0 && (
                     <p>
-                      Other Fixed Income:{" "}
+                      {t("other_fixed_income")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(otherFixedIncomeMonthly)}
                       </span>
@@ -385,11 +365,9 @@ export default function DashboardPage() {
                   )}
                   {totalManualIncomeThisMonth > 0 && (
                     <p>
-                      Other Logged Income (incl. Sales Profit):{" "}
+                      {t("other_logged_income_incl_sales_profit")}{" "}
                       <span className="md:hidden">
-                        {formatNumberWithSuffix(
-                          totalManualIncomeThisMonth,
-                        )}
+                        {formatNumberWithSuffix(totalManualIncomeThisMonth)}
                       </span>
                       <span className="hidden md:inline">
                         {formatCurrencyWithCommas(totalManualIncomeThisMonth)}
@@ -398,15 +376,15 @@ export default function DashboardPage() {
                   )}
                   {totalProjectedCertificateInterestThisMonth > 0 && (
                     <p>
-                      Projected Debt Interest:{" "}
+                      {t("projected_debt_interest")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(
-                          totalProjectedCertificateInterestThisMonth,
+                          totalProjectedCertificateInterestThisMonth
                         )}
                       </span>
                       <span className="hidden md:inline">
                         {formatCurrencyWithCommas(
-                          totalProjectedCertificateInterestThisMonth,
+                          totalProjectedCertificateInterestThisMonth
                         )}
                       </span>
                     </p>
@@ -418,7 +396,7 @@ export default function DashboardPage() {
             <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">
-                  Total Expenses This Month
+                  {t("total_expenses_this_month")}
                 </CardTitle>
                 <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
               </CardHeader>
@@ -434,20 +412,20 @@ export default function DashboardPage() {
                 <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
                   {totalItemizedExpensesThisMonth > 0 && (
                     <p>
-                      Itemized Logged Expenses:{" "}
+                      {t("itemized_logged_expenses")}{" "}
                       <span className="md:hidden">
-                        {formatNumberWithSuffix(
-                          totalItemizedExpensesThisMonth,
-                        )}
+                        {formatNumberWithSuffix(totalItemizedExpensesThisMonth)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(totalItemizedExpensesThisMonth)}
+                        {formatCurrencyWithCommas(
+                          totalItemizedExpensesThisMonth
+                        )}
                       </span>
                     </p>
                   )}
                   {zakatFixedMonthly > 0 && (
                     <p>
-                      Zakat (Fixed):{" "}
+                      {t("zakat_fixed")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(zakatFixedMonthly)}
                       </span>
@@ -458,7 +436,7 @@ export default function DashboardPage() {
                   )}
                   {charityFixedMonthly > 0 && (
                     <p>
-                      Charity (Fixed):{" "}
+                      {t("charity_fixed")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(charityFixedMonthly)}
                       </span>
@@ -469,7 +447,7 @@ export default function DashboardPage() {
                   )}
                   {livingExpensesMonthly > 0 && (
                     <p>
-                      Living Expenses:{" "}
+                      {t("living_expenses")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(livingExpensesMonthly)}
                       </span>
@@ -480,7 +458,7 @@ export default function DashboardPage() {
                   )}
                   {otherFixedExpensesMonthly > 0 && (
                     <p>
-                      Other Fixed Expenses:{" "}
+                      {t("other_fixed_expenses")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(otherFixedExpensesMonthly)}
                       </span>
@@ -491,14 +469,14 @@ export default function DashboardPage() {
                   )}
                   {realEstateInstallmentsMonthly > 0 && (
                     <p>
-                      Real Estate Installments:{" "}
+                      {t("real_estate_installments")}{" "}
                       <span className="md:hidden">
-                        {formatNumberWithSuffix(
-                          realEstateInstallmentsMonthly,
-                        )}
+                        {formatNumberWithSuffix(realEstateInstallmentsMonthly)}
                       </span>
                       <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(realEstateInstallmentsMonthly)}
+                        {formatCurrencyWithCommas(
+                          realEstateInstallmentsMonthly
+                        )}
                       </span>
                     </p>
                   )}
@@ -509,14 +487,14 @@ export default function DashboardPage() {
             <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  Total Investments This Month
+                  {t("total_investments_this_month")}
                 </CardTitle>
                 <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Stocks:
+                    {t("stocks")}
                   </span>
                   <span className="font-medium">
                     {formatNumberWithSuffix(totalStockInvestmentThisMonth)}
@@ -524,7 +502,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Real Estate:
+                    {t("real_estate")}
                   </span>
                   <span className="font-medium">
                     {formatNumberWithSuffix(realEstateInstallmentsMonthly)}
@@ -532,7 +510,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Debts:
+                    {t("debts")}
                   </span>
                   <span className="font-medium">
                     {formatNumberWithSuffix(totalDebtInvestmentThisMonth)}
@@ -540,7 +518,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Gold:
+                    {t("gold")}
                   </span>
                   <span className="font-medium">
                     {formatNumberWithSuffix(totalGoldInvestmentThisMonth)}
@@ -548,7 +526,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
                   <div className="flex justify-between items-center font-semibold">
-                    <span className="text-sm">Total:</span>
+                    <span className="text-sm">{t("total")}</span>
                     <span>
                       {formatNumberWithSuffix(totalInvestmentsThisMonth)}
                     </span>
@@ -560,7 +538,7 @@ export default function DashboardPage() {
             <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Remaining Cash After Expenses & Investments
+                  {t("remaining_cash_after_expenses_investments")}
                 </CardTitle>
                 <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
@@ -574,7 +552,7 @@ export default function DashboardPage() {
                   </span>
                 </p>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  Remaining = Total Income - Total Expenses - Total Investments
+                  {t("remaining_total_income_total_expenses_total_investments")}
                 </div>
               </CardContent>
             </Card>
