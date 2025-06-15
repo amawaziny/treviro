@@ -123,5 +123,6 @@
   "your_fixed_estimates": "Your Fixed Estimates",
   "zakat_fixed": "Zakat (Fixed):",
   "total_fixed_income": "Total Fixed Income",
-  "total_fixed_expenses": "Total Fixed Expenses"
+  "total_fixed_expenses": "Total Fixed Expenses",
+  "edit_fixed_estimate":"Edit Fixed Estimate"
 }
