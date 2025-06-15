@@ -5,10 +5,8 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import type {
-  Investment,
   GoldInvestment,
   StockInvestment,
-  ListedSecurity,
   GoldType,
   AggregatedGoldHolding,
 } from "@/lib/types";
@@ -16,7 +14,6 @@ import { formatCurrencyWithCommas, isGoldRelatedFund } from "@/lib/utils";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -24,7 +21,6 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Gem,
-  Coins,
   Plus,
   AlertCircle,
   TrendingUp,
@@ -39,6 +35,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { formatNumberWithSuffix, cn } from "@/lib/utils";
 
 export default function MyGoldPage() {
+  const { t } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
@@ -56,7 +53,7 @@ export default function MyGoldPage() {
     const holdings: AggregatedGoldHolding[] = [];
 
     const physicalGoldInvestments = investments.filter(
-      (inv) => inv.type === "Gold",
+      (inv) => inv.type === "Gold"
     ) as GoldInvestment[];
     const physicalAggregated: {
       [key in GoldType]?: {
@@ -102,7 +99,7 @@ export default function MyGoldPage() {
 
       holdings.push({
         id: `physical_${goldType}`,
-        displayName: `Physical Gold - ${goldType === "K24" ? "24 Karat" : goldType === "K21" ? "21 Karat" : goldType}`,
+        displayName: `Physical Gold - ${goldType === "K24" ? t("24_karat") : goldType === "K21" ? t("21_karat") : goldType}`,
         itemType: "physical",
         totalQuantity: data.totalQuantity,
         averagePurchasePrice: avgPrice,
@@ -114,11 +111,11 @@ export default function MyGoldPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
+      (inv) => inv.type === "Stocks"
     ) as StockInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol,
+        (ls) => ls.symbol === stockInv.tickerSymbol
       );
       if (
         security &&
@@ -127,7 +124,7 @@ export default function MyGoldPage() {
       ) {
         const existingFundHolding = holdings.find(
           (h) =>
-            h.itemType === "fund" && h.fundDetails?.symbol === security.symbol,
+            h.itemType === "fund" && h.fundDetails?.symbol === security.symbol
         );
         if (existingFundHolding) {
           existingFundHolding.totalQuantity += stockInv.numberOfShares || 0;
@@ -176,8 +173,8 @@ export default function MyGoldPage() {
                 investments.find(
                   (i) =>
                     i.type === "Stocks" &&
-                    (i as StockInvestment).tickerSymbol === symbol,
-                )?.id,
+                    (i as StockInvestment).tickerSymbol === symbol
+                )?.id
           );
           if (initialFundInvestment) {
             fundHolding.averagePurchasePrice =
@@ -269,14 +266,16 @@ export default function MyGoldPage() {
           Gold
         </h1>
         <p className="text-muted-foreground text-sm">
-          Overview of your direct gold and gold fund investments.
+          {t("overview_of_your_direct_gold_and_gold_fund_investments")}
         </p>
       </div>
       <Separator />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Gold P/L</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            {t("total_gold_pl")}
+          </CardTitle>
           {isTotalProfitable ? (
             <TrendingUp className="h-4 w-4 text-accent" />
           ) : (
@@ -287,7 +286,7 @@ export default function MyGoldPage() {
           <div
             className={cn(
               "text-2xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive",
+              isTotalProfitable ? "text-accent" : "text-destructive"
             )}
           >
             {isMobile
@@ -298,10 +297,11 @@ export default function MyGoldPage() {
             {totalProfitLossPercent === Infinity
               ? "∞"
               : totalProfitLossPercent.toFixed(2)}
-            % overall P/L
+            {t("overall_pl")}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Total Invested: {formatCurrencyWithCommas(totalCost)}
+            {t("total_invested")}
+            {formatCurrencyWithCommas(totalCost)}
           </p>
         </CardContent>
       </Card>
@@ -309,12 +309,11 @@ export default function MyGoldPage() {
       {goldPricesError && (
         <Alert variant="destructive" className="mt-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error Loading Gold Market Prices</AlertTitle>
+          <AlertTitle>{t("error_loading_gold_market_prices")}</AlertTitle>
           <AlertDescription>
-            Could not load current market prices for physical gold. P/L
-            calculations for physical gold may be unavailable or inaccurate.
-            Please ensure the 'goldMarketPrices/current' document is correctly
-            set up in Firestore.
+            {t(
+              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore"
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -330,22 +329,22 @@ export default function MyGoldPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Gem className="mr-2 h-4 w-4 text-primary" />
-              No Gold Holdings
+              {t("no_gold_holdings")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any gold investments yet.
+              {t("you_havent_added_any_gold_investments_yet")}
             </p>
           </CardContent>
         </Card>
       )}
 
       <Link href="/investments/add?type=Gold" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
           aria-label="Add new gold investment"
         >
           <Plus className="h-7 w-7" />
