@@ -33,7 +33,8 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       await sendPasswordResetEmail(email);
       toast({
         title: "Password Reset Email Sent",
-        description: "Please check your email for instructions to reset your password.",
+        description:
+          "Please check your email for instructions to reset your password.",
       });
       onBack();
     } catch (error: any) {
@@ -49,44 +50,53 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-background">
-      <Card className="w-full max-w-md shadow-xl">
+      <Card className="w-full max-w-md shadow-xl mx-4">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
-            Reset your password
+          <CardTitle className="text-3xl font-bold text-primary">
+            Treviro
           </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
-            Enter your email address and we'll send you a link to reset your password.
-          </CardDescription>
+          <CardDescription>Securely manage your investments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          <div className="space-y-6">
+            <div className="space-y-2 text-center">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Reset your password
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Enter your email address and we'll send you a link to reset your
+                password.
+              </p>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Reset Link
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={onBack}
-              disabled={isLoading}
-            >
-              Back to Sign In
-            </Button>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Send Reset Link
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={onBack}
+                disabled={isLoading}
+              >
+                Back to Sign In
+              </Button>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-} 
+}
