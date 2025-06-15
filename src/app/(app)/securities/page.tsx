@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function SecuritiesPage() {
+  const { t } = useLanguage();
   const { language } = useLanguage();
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
@@ -34,10 +35,10 @@ export default function SecuritiesPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Explore Securities
+          {t("explore_securities")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Discover stocks and funds from different markets.
+          {t("discover_stocks_and_funds_from_different_markets")}
         </p>
       </div>
       <Separator />

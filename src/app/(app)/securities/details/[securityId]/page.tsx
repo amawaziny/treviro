@@ -20,13 +20,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   ArrowRight,
-  LineChart,
   ShoppingCart,
   DollarSign,
-  TrendingUp,
-  TrendingDown,
   Loader2,
-  Briefcase,
   Edit3,
   Trash2,
   ChevronLeft,
@@ -39,14 +35,6 @@ import Link from "next/link";
 import { cn, formatCurrencyWithCommas, formatDateDisplay } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -58,10 +46,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
-import { format } from "date-fns";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function SecurityDetailPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -89,7 +77,6 @@ export default function SecurityDetailPage() {
       : "/securities";
 
   const [dividendSheetOpen, setDividendSheetOpen] = useState(false);
-  const [dividendLoading, setDividendLoading] = useState(false);
 
   const [security, setSecurity] = useState<ListedSecurity | null | undefined>(
     null,
@@ -121,7 +108,7 @@ export default function SecurityDetailPage() {
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery(t("minwidth_768px"));
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -165,7 +152,6 @@ export default function SecurityDetailPage() {
 
   // Add Dividend Handler
   const handleAddDividend = async (amount: number, date: string) => {
-    setDividendLoading(true);
     try {
       // Compose dividend transaction object
       const transactionId = crypto.randomUUID
@@ -190,7 +176,7 @@ export default function SecurityDetailPage() {
         "firebase/firestore"
       );
       if (!userId || !db)
-        throw new Error("User not authenticated or db unavailable");
+        throw new Error(t("user_not_authenticated_or_db_unavailable"));
       await setDoc(doc(db, `users/${userId}/transactions`, transactionId), {
         ...newDividendTx,
         createdAt: serverTimestamp(),
@@ -198,12 +184,10 @@ export default function SecurityDetailPage() {
       setDividendSheetOpen(false);
     } catch (err: any) {
       toast({
-        title: "Error",
-        description: err.message || "Failed to add dividend.",
+        title: t("error"),
+        description: err.message || t("failed_to_add_dividend"),
         variant: "destructive",
       });
-    } finally {
-      setDividendLoading(false);
     }
   };
 
@@ -286,8 +270,8 @@ export default function SecurityDetailPage() {
       setIsDeleteAlertOpen(true);
     } else {
       toast({
-        title: "Invalid Operation",
-        description: "This action is only available for sell transactions.",
+        title: t("invalid_operation"),
+        description: t("this_action_is_only_available_for_sell_transactions"),
         variant: "destructive",
       });
     }
@@ -298,13 +282,13 @@ export default function SecurityDetailPage() {
     try {
       await deleteSellTransaction(transactionToDelete);
       toast({
-        title: "Transaction Deleted",
-        description: `Sell transaction from ${transactionToDelete.date ? formatDateDisplay(transactionToDelete.date + "T00:00:00Z") : ""} has been deleted.`,
+        title: t("transaction_deleted"),
+        description: `${t("sell_transaction_from")} ${transactionToDelete.date ? formatDateDisplay(transactionToDelete.date + "T00:00:00Z") : ""} ${t("has_been_deleted")}.`,
       });
     } catch (error: any) {
       toast({
-        title: "Error Deleting Transaction",
-        description: error.message || "Could not delete the transaction.",
+        title: t("error_deleting_transaction"),
+        description: error.message || t("could_not_delete_the_transaction"),
         variant: "destructive",
       });
     } finally {
@@ -322,7 +306,7 @@ export default function SecurityDetailPage() {
       <div className="flex h-[calc(100vh-8rem)] w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
         <p className="ml-3 text-muted-foreground">
-          Loading security details...
+          {t("loading_security_details")}
         </p>
       </div>
     );
@@ -332,10 +316,10 @@ export default function SecurityDetailPage() {
     return (
       <div className="container mx-auto py-8 text-center">
         <h1 className="text-2xl font-bold text-destructive mb-4">
-          Security Not Found
+          {t("security_not_found")}
         </h1>
         <p className="text-muted-foreground mb-6">
-          The security you are looking for could not be found.
+          {t("the_security_you_are_looking_for_could_not_be_found")}
         </p>
         <Button onClick={() => router.push(backLinkHref)}>
           {language === "ar" ? (
@@ -343,7 +327,7 @@ export default function SecurityDetailPage() {
           ) : (
             <ArrowLeft className="mr-2 h-4 w-4" />
           )}
-          Go Back
+          {t("go_back")}
         </Button>
       </div>
     );
@@ -374,10 +358,11 @@ export default function SecurityDetailPage() {
                 alt={security.name}
                 data-ai-hint={
                   security.securityType === "Fund"
-                    ? "logo fund"
-                    : "logo company"
+                    ? t("logo_fund")
+                    : t("logo_company")
                 }
               />
+
               <AvatarFallback className="text-xs md:text-base">
                 {security.symbol.substring(0, 2)}
               </AvatarFallback>
@@ -426,7 +411,7 @@ export default function SecurityDetailPage() {
                 variant="secondary"
                 onClick={() => setDividendSheetOpen(true)}
               >
-                Add Dividend
+                {t("add_dividend")}
               </Button>
               <AddDividendSheet
                 open={dividendSheetOpen}
@@ -465,7 +450,7 @@ export default function SecurityDetailPage() {
                 className="flex-1 w-full"
                 onClick={() => setDividendSheetOpen(true)}
               >
-                Add Dividend
+                {t("add_dividend")}
               </Button>
               <AddDividendSheet
                 open={dividendSheetOpen}
@@ -488,29 +473,30 @@ export default function SecurityDetailPage() {
             value="performance"
             className="flex text-xs md:text-base"
           >
-            Performance
+            {t("performance")}
           </TabsTrigger>
           <TabsTrigger
             value="position"
             className="flex text-xs md:text-base"
             disabled={!hasPosition}
           >
-            My Position
+            {t("my_position")}
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
             className="flex text-xs md:text-base"
           >
-            Transactions
+            {t("transactions")}
           </TabsTrigger>
           {/* Add more TabsTrigger here for future tabs—they will scroll! */}
         </TabsList>
         <TabsContent value="performance" className="w-full max-w-full">
           <Card className="mb-16 md:mb-4">
             <CardHeader>
-              <CardTitle className="text-md">Price History</CardTitle>
+              <CardTitle className="text-md">{t("price_history")}</CardTitle>
               <CardDescription className="text-xs">
-                Historical price performance of {security.name}
+                {t("historical_price_performance_of")}
+                {security.name}
               </CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
@@ -525,9 +511,10 @@ export default function SecurityDetailPage() {
         <TabsContent value="position">
           <Card className="mb-16 md:mb-4">
             <CardHeader>
-              <CardTitle className="text-md">My Position</CardTitle>
+              <CardTitle className="text-md">{t("my_position")}</CardTitle>
               <CardDescription className="text-xs">
-                Your current investment in {security.name}
+                {t("your_current_investment_in")}
+                {security.name}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -536,14 +523,16 @@ export default function SecurityDetailPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs text-muted-foreground">
-                        Shares Owned
+                        {t("shares_owned")}
                       </p>
                       <p className="text-xs font-medium">
                         {totalSharesOwned.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Avg. Cost</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t("avg_cost")}
+                      </p>
                       <p className="text-xs font-medium">
                         {formatCurrencyWithCommas(
                           averagePurchasePrice,
@@ -553,7 +542,7 @@ export default function SecurityDetailPage() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">
-                        Total Cost
+                        {t("total_cost")}
                       </p>
                       <p className="text-xs font-medium">
                         {formatCurrencyWithCommas(
@@ -564,7 +553,7 @@ export default function SecurityDetailPage() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">
-                        Market Value
+                        {t("market_value")}
                       </p>
                       <p className="text-xs font-medium">
                         {formatCurrencyWithCommas(
@@ -577,7 +566,7 @@ export default function SecurityDetailPage() {
                   <Separator />
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <p className="text-sm font-medium">Total Return</p>
+                      <p className="text-sm font-medium">{t("total_return")}</p>
                       <div className="text-end">
                         <p
                           className={cn(
@@ -602,7 +591,7 @@ export default function SecurityDetailPage() {
                 </div>
               ) : (
                 <p className="text-muted-foreground text-center py-4">
-                  You don't have a position in this security yet.
+                  {t("you_dont_have_a_position_in_this_security_yet")}
                 </p>
               )}
             </CardContent>
@@ -612,9 +601,12 @@ export default function SecurityDetailPage() {
         <TabsContent value="transactions">
           <Card className="mb-16 md:mb-4">
             <CardHeader>
-              <CardTitle className="text-md">Transaction History</CardTitle>
+              <CardTitle className="text-md">
+                {t("transaction_history")}
+              </CardTitle>
               <CardDescription className="text-xs">
-                All buy, sell, and dividend records for {security.name}
+                {t("all_buy_sell_and_dividend_records_for")}
+                {security.name}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -655,7 +647,10 @@ export default function SecurityDetailPage() {
                                   }
                                   className={cn(
                                     isSell &&
-                                      "bg-destructive/10 text-destructive hover:bg-destructive/20",
+                                      t(
+                                        "bgdestructive10_textdestructive_hoverbgdestructive20",
+                                      ),
+
                                     "text-xs",
                                   )}
                                 >
@@ -677,7 +672,7 @@ export default function SecurityDetailPage() {
                                 className={cn(
                                   "text-xs font-medium",
                                   isBuy
-                                    ? "text-foreground"
+                                    ? t("textforeground")
                                     : isSell
                                       ? "text-destructive"
                                       : "text-accent",
@@ -705,7 +700,7 @@ export default function SecurityDetailPage() {
                             <div>
                               {!isDividend && (
                                 <span>
-                                  Fees:{" "}
+                                  {t("fees")}{" "}
                                   {formatCurrencyWithCommas(
                                     (tx as any).fees || 0,
                                     displayCurrency,
@@ -756,10 +751,10 @@ export default function SecurityDetailPage() {
               ) : (
                 <div className="py-8 text-center">
                   <p className="text-muted-foreground">
-                    No transactions recorded yet
+                    {t("no_transactions_recorded_yet")}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Add your first transaction to get started
+                    {t("add_your_first_transaction_to_get_started")}
                   </p>
                 </div>
               )}
@@ -777,7 +772,7 @@ export default function SecurityDetailPage() {
                     className="gap-1"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    <span>Previous</span>
+                    <span>{t("previous")}</span>
                   </Button>
                   <span className="text-sm text-muted-foreground">
                     Page {currentPage} of{" "}
@@ -800,7 +795,7 @@ export default function SecurityDetailPage() {
                     }
                     className="gap-1"
                   >
-                    <span>Next</span>
+                    <span>{t("next")}</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -814,10 +809,10 @@ export default function SecurityDetailPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Are you sure you want to delete this sell transaction?
+              {t("are_you_sure_you_want_to_delete_this_sell_transaction")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the record of selling{" "}
+              {t("this_will_remove_the_record_of_selling")}{" "}
               {("shares" in (transactionToDelete ?? {})
                 ? (transactionToDelete as any).shares
                 : (transactionToDelete?.numberOfShares ?? 0)
@@ -827,29 +822,28 @@ export default function SecurityDetailPage() {
               {transactionToDelete
                 ? formatDateDisplay(transactionToDelete.date)
                 : ""}
-              . This action will reverse its impact on your total realized P/L.
-              It will NOT automatically add the shares back to your holdings;
-              you may need to re-enter purchases or adjust existing ones if this
-              sale previously depleted them. This action cannot be undone.
+              {t(
+                "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>
-              Cancel
+              {t("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteSellTransaction}
               className={buttonVariants({ variant: "destructive" })}
             >
-              Delete Transaction
+              {t("delete_transaction")}
             </AlertDialogAction>
           </AlertDialogFooter>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Are you sure you want to delete this sell transaction?
+              {t("are_you_sure_you_want_to_delete_this_sell_transaction")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the record of selling{" "}
+              {t("this_will_remove_the_record_of_selling")}{" "}
               {("shares" in (transactionToDelete ?? {})
                 ? (transactionToDelete as any).shares
                 : (transactionToDelete?.numberOfShares ?? 0)
@@ -859,21 +853,20 @@ export default function SecurityDetailPage() {
               {transactionToDelete
                 ? formatDateDisplay(transactionToDelete.date)
                 : ""}
-              . This action will reverse its impact on your total realized P/L.
-              It will NOT automatically add the shares back to your holdings;
-              you may need to re-enter purchases or adjust existing ones if this
-              sale previously depleted them. This action cannot be undone.
+              {t(
+                "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>
-              Cancel
+              {t("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteSellTransaction}
               className={buttonVariants({ variant: "destructive" })}
             >
-              Delete Transaction
+              {t("delete_transaction")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
