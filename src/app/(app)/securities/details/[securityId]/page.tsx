@@ -490,20 +490,20 @@ export default function SecurityDetailPage() {
             value="performance"
             className="flex text-xs md:text-base"
           >
-            <LineChart className="mr-2 h-4 w-4" /> Performance
+            Performance
           </TabsTrigger>
           <TabsTrigger
             value="position"
             className="flex text-xs md:text-base"
             disabled={!hasPosition}
           >
-            <Briefcase className="mr-2 h-4 w-4" /> My Position
+            My Position
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
             className="flex text-xs md:text-base"
           >
-            <DollarSign className="mr-2 h-4 w-4" /> Transactions
+            Transactions
           </TabsTrigger>
           {/* Add more TabsTrigger here for future tabs—they will scroll! */}
         </TabsList>
