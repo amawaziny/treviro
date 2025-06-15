@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import React, { useEffect, useState } from "react";
 import { useInvestments } from "@/hooks/use-investments";
@@ -22,22 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import type { AppSettings } from "@/lib/types";
 
-const months = [
-  { value: 1, label: "January" },
-  { value: 2, label: "February" },
-  { value: 3, label: "March" },
-  { value: 4, label: "April" },
-  { value: 5, label: "May" },
-  { value: 6, label: "June" },
-  { value: 7, label: "July" },
-  { value: 8, label: "August" },
-  { value: 9, label: "September" },
-  { value: 10, label: "October" },
-  { value: 11, label: "November" },
-  { value: 12, label: "December" },
-];
-
 export default function SettingsPage() {
+  const { t, language } = useLanguage();
   const {
     appSettings,
     updateAppSettings,
@@ -48,6 +35,21 @@ export default function SettingsPage() {
     undefined,
   );
   const [isSaving, setIsSaving] = useState(false);
+
+  const months = [
+    { value: 1, label: t("January") },
+    { value: 2, label: t("February") },
+    { value: 3, label: t("March") },
+    { value: 4, label: t("April") },
+    { value: 5, label: t("May") },
+    { value: 6, label: t("June") },
+    { value: 7, label: t("July") },
+    { value: 8, label: t("August") },
+    { value: 9, label: t("September") },
+    { value: 10, label: t("October") },
+    { value: 11, label: t("November") },
+    { value: 12, label: t("December") },
+  ];
 
   useEffect(() => {
     if (appSettings?.financialYearStartMonth) {
@@ -60,8 +62,8 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     if (!selectedMonth) {
       toast({
-        title: "Error",
-        description: "Please select a financial year start month.",
+        title: t("error"),
+        description: t("please_select_a_financial_year_start_month"),
         variant: "destructive",
       });
       return;
@@ -73,13 +75,13 @@ export default function SettingsPage() {
       };
       await updateAppSettings(newSettings);
       toast({
-        title: "Settings Saved",
-        description: "Your financial settings have been updated.",
+        title: t("settings_saved"),
+        description: t("your_financial_settings_have_been_updated"),
       });
     } catch (error: any) {
       toast({
-        title: "Error Saving Settings",
-        description: error.message || "Could not save your settings.",
+        title: t("error_saving_settings"),
+        description: error.message || t("could_not_save_your_settings"),
         variant: "destructive",
       });
     } finally {
@@ -93,27 +95,28 @@ export default function SettingsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Settings
+          {t("settings")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Adjust your financial settings, such as your financial year start
-          month and other preferences.
+          {t(
+            "adjust_your_financial_settings_such_as_your_financial_year_start_month_and_other_preferences",
+          )}
         </p>
       </div>
       <Separator />
 
       <Card>
         <CardHeader>
-          <CardTitle>Financial Settings</CardTitle>
+          <CardTitle>{t("financial_settings")}</CardTitle>
           <CardDescription>
-            Configure your financial year preferences.
+            {t("configure_your_financial_year_preferences")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {isLoading ? (
             <div className="flex items-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading settings...</span>
+              <span>{t("loading_settings")}</span>
             </div>
           ) : (
             <div className="space-y-2">
@@ -121,7 +124,7 @@ export default function SettingsPage() {
                 htmlFor="financial-year-start-month"
                 className="text-sm font-medium"
               >
-                Financial Year Start Month
+                {t("financial_year_start_month")}
               </label>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger
@@ -139,14 +142,14 @@ export default function SettingsPage() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Choose the month your financial year begins.
+                {t("choose_the_month_your_financial_year_begins")}
               </p>
             </div>
           )}
 
           <Button onClick={handleSaveSettings} disabled={isSaving || isLoading}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Settings
+            {t("save_settings")}
           </Button>
         </CardContent>
       </Card>
