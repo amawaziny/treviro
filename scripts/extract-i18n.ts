@@ -32,7 +32,7 @@ const TARGET_SRC_DIR = join(
   "app",
   "(app)",
   "investments",
-  "sell-stock",
+  "stocks",
 ); // Targeting specific directory
 const LOCALES_DIR = join(PROJECT_ROOT, "public", "locales"); // Locales are in public
 const IGNORE_DIRS = [

@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -18,12 +19,13 @@ export default function EditStockInvestmentPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t: t } = useLanguage();
   const router = useRouter();
   const { id } = React.use(params);
   const { investments, updateStockInvestment, isLoading } = useInvestments();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t("loading")}</div>;
   }
 
   // Find the investment by id
@@ -42,7 +44,7 @@ export default function EditStockInvestmentPage({
       <CardHeader>
         <CardTitle>{pageTitle}</CardTitle>
         <CardDescription>
-          Modify the details of this stock purchase.
+          {t("modify_the_details_of_this_stock_purchase")}
         </CardDescription>
       </CardHeader>
       <CardContent>

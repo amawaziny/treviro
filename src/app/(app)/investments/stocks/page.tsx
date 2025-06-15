@@ -26,6 +26,7 @@ import { isStockRelatedFund } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MyStocksPage() {
+  const { t: t } = useLanguage();
   const { language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
@@ -116,10 +117,10 @@ export default function MyStocksPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          My Stocks & Equity Funds
+          {t("my_stocks_equity_funds")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Overview of your stock and equity fund investments.
+          {t("overview_of_your_stock_and_equity_fund_investments")}
         </p>
       </div>
       <Separator />
@@ -137,7 +138,7 @@ export default function MyStocksPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Stocks & Equity Funds P/L
+              {t("total_stocks_equity_funds_pl")}
             </CardTitle>
             {isTotalStockProfitable ? (
               <TrendingUp className="h-4 w-4 text-accent" />
@@ -160,10 +161,11 @@ export default function MyStocksPage() {
               {totalStockPnLPercent === Infinity
                 ? "∞"
                 : totalStockPnLPercent.toFixed(2)}
-              % overall P/L
+              {t("overall_pl")}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Total Invested: {formatCurrencyWithCommas(totalStockCost)}
+              {t("total_invested")}
+              {formatCurrencyWithCommas(totalStockCost)}
             </p>
           </CardContent>
         </Card>
