@@ -14,13 +14,24 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Settings, PiggyBank } from "lucide-react";
+import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
 import { cn, formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export default function FixedEstimatesPage() {
   const { t } = useLanguage();
-  const { fixedEstimates, isLoading } = useInvestments();
+  const { fixedEstimates, isLoading, deleteFixedEstimate } = useInvestments();
   const { language } = useLanguage();
 
   if (isLoading) {
@@ -142,14 +153,71 @@ export default function FixedEstimatesPage() {
                       </span>
                     </div>
                   </div>
-                  {/* Amount */}
-                  <div className="text-2xl font-bold">
-                    <span className="md:hidden">
-                      {formatNumberWithSuffix(record.amount)}
-                    </span>
-                    <span className="hidden md:inline">
-                      {formatCurrencyWithCommas(record.amount)}
-                    </span>
+                  {/* Amount and Actions Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                    {/* Amount */}
+                    <div className="text-2xl font-bold">
+                      <span className="md:hidden">
+                        {formatNumberWithSuffix(record.amount)}
+                      </span>
+                      <span className="hidden md:inline">
+                        {formatCurrencyWithCommas(record.amount)}
+                      </span>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/fixed-estimates/edit/${record.id}`}
+                        passHref
+                        legacyBehavior
+                      >
+                        <Button variant="ghost" size="icon" aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">
+                              Remove {record.name || record.type}
+                            </span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("are_you_sure")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t(
+                                "this_action_will_permanently_delete_this_fixed_estimate_record_this_cannot_be_undone"
+                              )}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={async () => {
+                                try {
+                                  await deleteFixedEstimate(record.id);
+                                } catch (e) {
+                                  // Optionally show toast or ignore
+                                }
+                              }}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
