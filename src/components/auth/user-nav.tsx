@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/language-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +18,7 @@ import Link from "next/link";
 
 export function UserNav() {
   const { isAuthenticated, user, logout, login, isLoading } = useAuth();
-
+  const { t } = useLanguage();
   if (isLoading) {
     return (
       <Button
@@ -37,7 +38,7 @@ export function UserNav() {
   if (!isAuthenticated) {
     return (
       <Button variant="ghost" onClick={login}>
-        Login
+        {t("login")}
       </Button>
     );
   }
@@ -78,14 +79,14 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/profile">
               <UserCircle className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>{t("profile")}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{t("log_out")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

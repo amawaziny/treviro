@@ -106,13 +106,6 @@ export function AuthForm() {
     getPasswordStrength(password),
   );
 
-  console.log(
-    "Calculated Width:",
-    calculatedWidth,
-    "Calculated Background Color:",
-    calculatedBackgroundColor,
-  );
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-background">
       <Card className="w-full max-w-md shadow-xl mx-4">

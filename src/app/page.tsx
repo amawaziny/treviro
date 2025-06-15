@@ -34,6 +34,5 @@ export default function LoginPage() {
     );
   }
 
-  // console.log(`LoginPage Render: Showing AuthForm. isLoading=${isLoading}, isAuthenticated=${isAuthenticated}`);
   return <AuthForm />;
 }
