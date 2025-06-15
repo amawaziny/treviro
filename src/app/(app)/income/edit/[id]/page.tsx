@@ -9,8 +9,8 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  CardTitle } from
+"@/components/ui/card";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
@@ -18,10 +18,9 @@ import { useForm } from "@/contexts/form-context";
 import { AddIncomeFormValues } from "@/lib/schemas";
 
 export default function EditIncomePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+  params
+}: {params: Promise<{id: string;}>;}) {
+  const { t } = useLanguage();
   const { incomeRecords, updateIncomeRecord } = useInvestments();
   const router = useRouter();
   const { id: incomeId } = React.use(params);
@@ -30,7 +29,7 @@ export default function EditIncomePage({
   // Find the income record by id
   const income = React.useMemo(
     () => incomeRecords.find((rec) => rec.id === incomeId),
-    [incomeRecords, incomeId],
+    [incomeRecords, incomeId]
   );
 
   if (!income) {
@@ -47,10 +46,10 @@ export default function EditIncomePage({
     setHeaderProps({
       showBackButton: true,
       showNavControls: false,
-      title: "Edit Income Record",
-      description: "Update your income details, such as salary, freelance, or other sources.",
-      backLabel: "Back to Income",
-      backHref: "/income",
+      title: t("edit_income_record"),
+      description: t("update_your_income_details_such_as_salary_freelance_or_other_sources"),
+      backLabel: t("back_to_income"),
+      backHref: "/income"
     });
 
     // Clean up when component unmounts
@@ -63,9 +62,9 @@ export default function EditIncomePage({
     <div className="container mx-auto py-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Income Record</CardTitle>
-          <CardDescription>
-            Update your income details, such as salary, freelance, or other sources.
+          <CardTitle>{t("edit_income_record")}</CardTitle>
+          <CardDescription>{t("update_your_income_details_such_as_salary_freelance_or_other_sources")}
+
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -78,19 +77,19 @@ export default function EditIncomePage({
               amount: income.amount?.toString() ?? "",
               date: income.date,
               isRecurring: income.isRecurring ?? false,
-              recurrencePeriod: income.recurrencePeriod ?? "",
+              recurrencePeriod: income.recurrencePeriod ?? ""
             }}
             onSubmit={async (values: AddIncomeFormValues) => {
               await updateIncomeRecord(incomeId, {
                 ...values,
-                amount: Number(values.amount),
+                amount: Number(values.amount)
               });
               router.push("/income");
             }}
-            isEditMode
-          />
+            isEditMode />
+
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 }

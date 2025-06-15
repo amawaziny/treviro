@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { AddIncomeForm } from "@/components/income/add-income-form";
 import {
@@ -12,6 +13,7 @@ import { useEffect } from "react";
 import { useForm } from "@/contexts/form-context";
 
 export default function AddIncomePage() {
+  const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
   useEffect(() => {
@@ -19,9 +21,9 @@ export default function AddIncomePage() {
     setHeaderProps({
       showBackButton: true,
       showNavControls: false,
-      title: "Add Income",
+      title: t("add_income"),
       backHref: "/income",
-      backLabel: "Back to Income Records",
+      backLabel: t("back_to_income_records"),
     });
     return () => {
       closeForm();
@@ -32,9 +34,9 @@ export default function AddIncomePage() {
     <div className="container mx-auto py-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Add New Income Record</CardTitle>
+          <CardTitle>{t("add_new_income_record")}</CardTitle>
           <CardDescription>
-            Log your salary, profit shares, or other cash inflows.
+            {t("log_your_salary_profit_shares_or_other_cash_inflows")}
           </CardDescription>
         </CardHeader>
         <CardContent>

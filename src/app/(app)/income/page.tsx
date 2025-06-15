@@ -3,7 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
-import { formatCurrencyWithCommas, formatDateDisplay, formatMonthYear } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  formatDateDisplay,
+  formatMonthYear,
+} from "@/lib/utils";
 import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
@@ -32,13 +36,16 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 export default function IncomePage() {
+  const { t } = useLanguage();
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
 
   const { incomeRecords, isLoading, deleteIncomeRecord } = useInvestments();
   if (!deleteIncomeRecord) {
     throw new Error(
-      "deleteIncomeRecord function is required but not provided by useInvestments",
+      t(
+        "deleteincomerecord_function_is_required_but_not_provided_by_useinvestments"
+      )
     );
   }
   const { language } = useLanguage();
@@ -59,7 +66,6 @@ export default function IncomePage() {
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [incomeRecords, showAll]);
-
 
   if (isLoading) {
     return (
@@ -85,11 +91,12 @@ export default function IncomePage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Income Management
+          {t("income_management")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Log and manage all your income sources, including salaries, gifts, and
-          other earnings.
+          {t(
+            "log_and_manage_all_your_income_sources_including_salaries_gifts_and_other_earnings"
+          )}
         </p>
       </div>
       <Separator />
@@ -102,7 +109,8 @@ export default function IncomePage() {
             onCheckedChange={setShowAll}
             id="show-all-switch"
           />
-          <span>Show All Income</span>
+
+          <span>{t("show_all_income")}</span>
         </label>
       </div>
 
@@ -113,17 +121,19 @@ export default function IncomePage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <PiggyBank className="mr-2 h-4 w-4 text-primary" />
-                {showAll ? "Total Income (All)" : "Total Income This Month"}
+                {showAll ? t("total_income_all") : t("total_income_this_month")}
               </CardTitle>
               <CardDescription>
                 {showAll
-                  ? "View and manage all your recorded income sources."
-                  : `See and manage all income received in ${format(new Date(), "MMMM yyyy")}.`}
+                  ? t("view_and_manage_all_your_recorded_income_sources")
+                  : `See and manage all income received in ${formatMonthYear(new Date())}.`}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <span className="text-xl font-bold text-foreground">
-                {formatCurrencyWithCommas(filteredIncome.reduce((sum, r) => sum + r.amount, 0))}
+                {formatCurrencyWithCommas(
+                  filteredIncome.reduce((sum, r) => sum + r.amount, 0)
+                )}
               </span>
             </CardContent>
           </Card>
@@ -131,7 +141,7 @@ export default function IncomePage() {
           <div className="grid gap-4 mt-8">
             {filteredIncome.map((record) => (
               <Card key={record.id} className="">
-                <CardContent className="flex flex-col md:flex-row md:items-start md:items-center justify-between gap-6 py-4">
+                <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
                   <div className="flex-1 min-w-0">
                     {/* Top Row: Title, Date */}
@@ -174,10 +184,13 @@ export default function IncomePage() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                {t("are_you_sure")}
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action will permanently delete this income
-                                record. This cannot be undone.
+                                {t(
+                                  "this_action_will_permanently_delete_this_income_record_this_cannot_be_undone"
+                                )}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -188,10 +201,7 @@ export default function IncomePage() {
                                   try {
                                     await deleteIncomeRecord(record.id);
                                   } catch (e) {
-                                    console.error(
-                                      "Error deleting income record:",
-                                      e,
-                                    );
+                                    console.error(t("error_deleting_income_record"), e);
                                   }
                                 }}
                               >
@@ -213,23 +223,24 @@ export default function IncomePage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <PiggyBank className="mr-2 h-4 w-4 text-primary" />
-              No Income Recorded This Month
+              {t("no_income_recorded_this_month")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any income records for{" "}
-              {formatMonthYear(new Date())} yet.
+              {t("you_havent_added_any_income_records_for")}{" "}
+              {formatMonthYear(new Date())}
+              {t("yet")}
             </p>
           </CardContent>
         </Card>
       )}
 
       <Link href="/income/add" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
           aria-label="Add new income record"
         >
           <Plus className="h-7 w-7" />
