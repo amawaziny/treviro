@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut, UserCircle } from "lucide-react";
+import Link from "next/link";
 
 export function UserNav() {
   const { isAuthenticated, user, logout, login, isLoading } = useAuth();
@@ -74,7 +75,12 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {/* Add other menu items here if needed, e.g., Profile, Settings */}
+          <DropdownMenuItem asChild>
+            <Link href="/profile">
+              <UserCircle className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
