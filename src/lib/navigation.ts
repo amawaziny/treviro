@@ -45,5 +45,6 @@ export const navItems: NavItem[] = [
   { title: "Cash Flow", href: "/cash-flow", icon: CashFlowIcon },
   { title: "Expenses", href: "/expenses", icon: TrendingDown },
   { title: "Income", href: "/income", icon: DollarSign },
+  { title: "Fixed Estimates", href: "/fixed-estimates", icon: PiggyBank },
   { title: "Settings", href: "/settings", icon: Settings },
 ];
