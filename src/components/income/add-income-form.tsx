@@ -201,7 +201,9 @@ export function AddIncomeForm({
                 <FormLabel>{t("description_optional")}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder={t("e.g., Q3 Profit Share, Freelance Project X")}
+                    placeholder={t(
+                      "e.g., Q3 Profit Share, Freelance Project X",
+                    )}
                     {...field}
                     value={field.value ?? ""}
                   />

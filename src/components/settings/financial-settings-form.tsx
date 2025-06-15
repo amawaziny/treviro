@@ -3,7 +3,7 @@
 // This component is no longer used for Salary, Zakat, Charity.
 // This functionality is moved to the new Fixed Estimates feature.
 // This file can be deleted or repurposed for other settings.
-
+import { useLanguage } from "@/contexts/language-context";
 import React from "react";
 import {
   Card,
@@ -14,17 +14,19 @@ import {
 } from "@/components/ui/card";
 
 export function FinancialSettingsForm() {
+  const { t: t } = useLanguage();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Financial Settings Placeholder</CardTitle>
+        <CardTitle>{t("financial_settings_placeholder")}</CardTitle>
         <CardDescription>
-          Management of Salary, Zakat, and Charity is now handled on the "Fixed
-          Estimates" page. This component is currently a placeholder.
+          {t(
+            "management_of_salary_zakat_and_charity_is_now_handled_on_the_fixed_estimates_page_this_component_is_currently_a_placeholder",
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground">No settings here.</p>
+        <p className="text-muted-foreground">{t("no_settings_here")}</p>
       </CardContent>
     </Card>
   );
