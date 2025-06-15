@@ -31,9 +31,14 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { MyCurrencyListItem } from "@/components/investments/currencies/my-currency-list-item";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { formatNumberWithSuffix, cn } from "@/lib/utils";
+import {
+  formatNumberWithSuffix,
+  cn,
+  formatCurrencyWithCommas,
+} from "@/lib/utils";
 
 export default function MyCurrenciesPage() {
+  const { t: t } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const {
     exchangeRates,
@@ -47,7 +52,7 @@ export default function MyCurrenciesPage() {
     if (isLoadingInvestments || !investments.length) return [];
 
     const currencyInvestments = investments.filter(
-      (inv) => inv.type === "Currencies",
+      (inv) => inv.type === "Currencies"
     ) as CurrencyInvestment[];
     const holdings: {
       [key: string]: {
@@ -128,17 +133,6 @@ export default function MyCurrenciesPage() {
 
   const isLoading = isLoadingInvestments || isLoadingRates;
 
-  const formatCurrencyWithCommas = (value: number | undefined) => {
-    if (value === undefined || value === null || isNaN(value))
-      return "EGP 0.00";
-    return new Intl.NumberFormat("en-EG", {
-      style: "currency",
-      currency: "EGP",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -176,7 +170,7 @@ export default function MyCurrenciesPage() {
           Currencies
         </h1>
         <p className="text-muted-foreground text-sm">
-          View your currency holdings and their performance against EGP.
+          {t("view_your_currency_holdings_and_their_performance_against_egp")}
         </p>
       </div>
       <Separator />
@@ -184,7 +178,7 @@ export default function MyCurrenciesPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Total Currencies P/L (vs EGP)
+            {t("total_currencies_pl_vs_egp")}
           </CardTitle>
           {isTotalProfitable ? (
             <TrendingUp className="h-4 w-4 text-accent" />
@@ -196,7 +190,7 @@ export default function MyCurrenciesPage() {
           <div
             className={cn(
               "text-2xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive",
+              isTotalProfitable ? "text-accent" : "text-destructive"
             )}
           >
             {isMobile
@@ -207,7 +201,7 @@ export default function MyCurrenciesPage() {
             {totalProfitLossPercent === Infinity
               ? "∞"
               : totalProfitLossPercent.toFixed(2)}
-            % overall P/L
+            {t("overall_pl")}
           </p>
         </CardContent>
       </Card>
@@ -215,11 +209,11 @@ export default function MyCurrenciesPage() {
       {ratesError && (
         <Alert variant="destructive" className="mt-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error Loading Exchange Rates</AlertTitle>
+          <AlertTitle>{t("error_loading_exchange_rates")}</AlertTitle>
           <AlertDescription>
-            Could not load current exchange rates. P/L calculations might be
-            unavailable or inaccurate. Please ensure the 'exchangeRates/current'
-            document is correctly set up in Firestore.
+            {t(
+              "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore"
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -235,23 +229,24 @@ export default function MyCurrenciesPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Coins className="mr-2 h-4 w-4 text-primary" />
-              No Currency Holdings
+              {t("no_currency_holdings")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any currency investments yet, or current
-              exchange rates are unavailable.
+              {t(
+                "you_havent_added_any_currency_investments_yet_or_current_exchange_rates_are_unavailable"
+              )}
             </p>
           </CardContent>
         </Card>
       )}
 
       <Link href="/investments/add?type=Currencies" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
           aria-label="Add new currency investment"
         >
           <Plus className="h-7 w-7" />
