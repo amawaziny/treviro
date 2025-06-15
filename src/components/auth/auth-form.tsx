@@ -98,7 +98,7 @@ export function AuthForm() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-background">
-      <Card className="w-full max-w-md shadow-xl">
+      <Card className="w-full max-w-md shadow-xl mx-4">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
             Treviro
