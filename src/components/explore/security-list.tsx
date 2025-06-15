@@ -155,7 +155,9 @@ export function SecurityList({
           <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ltr:left-3 rtl:right-3" />
           <Input
             type="text"
-            placeholder={t(`Search Securities by name, symbol, market, or type...`)}
+            placeholder={t(
+              `Search Securities by name, symbol, market, or type...`,
+            )}
             className="w-full ltr:pl-10 rtl:pr-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -189,7 +191,9 @@ export function SecurityList({
         <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ltr:left-3 rtl:right-3" />
         <Input
           type="text"
-          placeholder={t(`Search Securities by name, symbol, market, or type...`)}
+          placeholder={t(
+            `Search Securities by name, symbol, market, or type...`,
+          )}
           className="w-full ltr:pl-10 rtl:pr-10 text-xs sm:text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

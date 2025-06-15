@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -52,6 +53,7 @@ export function AddEditFixedEstimateForm({
   mode,
   estimate,
 }: AddEditFixedEstimateFormProps) {
+  const { t: t } = useLanguage();
   const { addFixedEstimate } = useInvestments(); // Add updateFixedEstimate later
   const { toast } = useToast();
   const router = useRouter();
@@ -114,23 +116,23 @@ export function AddEditFixedEstimateForm({
       if (mode === "add") {
         await addFixedEstimate(dataToSave);
         toast({
-          title: "Fixed Estimate Added",
-          description: `${dataToSave.name || dataToSave.type} estimate recorded successfully.`,
+          title: t("fixed_estimate_added"),
+          description: `${dataToSave.name || dataToSave.type} ${t("estimate recorded successfully")}.`,
         });
       } else if (mode === "edit" && estimate) {
         // await updateFixedEstimate(estimate.id, dataToSave); // To be implemented
         toast({
-          title: "Fixed Estimate Updated",
-          description: `${dataToSave.name || dataToSave.type} estimate updated successfully.`,
+          title: t("fixed_estimate_updated"),
+          description: `${dataToSave.name || dataToSave.type} ${t("estimate updated successfully")}.`,
         });
       }
       form.reset(initialFormValues);
       router.push("/fixed-estimates");
     } catch (error: any) {
-      console.error("Error saving fixed estimate:", error);
+      console.error(t("error_saving_fixed_estimate"), error);
       toast({
-        title: `Failed to ${mode === "add" ? "Add" : "Update"} Estimate`,
-        description: error.message || "Could not save the estimate.",
+        title: `${t("Failed to")} ${mode === "add" ? "Add" : "Update"} ${t("Estimate")}`,
+        description: error.message || t("could_not_save_the_estimate"),
         variant: "destructive",
       });
     }
@@ -145,7 +147,7 @@ export function AddEditFixedEstimateForm({
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estimate Type</FormLabel>
+                <FormLabel>{t("estimate_type")}</FormLabel>
                 <Select
                   onValueChange={(value) =>
                     field.onChange(value as FixedEstimateType)
@@ -154,7 +156,7 @@ export function AddEditFixedEstimateForm({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select estimate type" />
+                      <SelectValue placeholder={t("Select estimate type")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -169,12 +171,13 @@ export function AddEditFixedEstimateForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount (EGP)</FormLabel>
+                <FormLabel>{t("amount_egp")}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 15000"
@@ -194,10 +197,10 @@ export function AddEditFixedEstimateForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name for 'Other'</FormLabel>
+                  <FormLabel>{t("name_for_other")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Rental Income, Club Membership"
+                      placeholder={t("e.g., Rental Income, Club Membership")}
                       {...field}
                       value={field.value ?? ""}
                     />
@@ -249,10 +252,11 @@ export function AddEditFixedEstimateForm({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Is this an Expense?</FormLabel>
+                    <FormLabel>{t("is_this_an_expense")}</FormLabel>
                     <FormDescription>
-                      Check if this 'Other' item is an expense. Uncheck if it's
-                      income.
+                      {t(
+                        "check_if_this_other_item_is_an_expense_uncheck_if_its_income",
+                      )}
                     </FormDescription>
                   </div>
                   <FormMessage />
@@ -266,7 +270,7 @@ export function AddEditFixedEstimateForm({
           {form.formState.isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          {mode === "add" ? "Add Estimate" : "Save Changes"}
+          {mode === "add" ? t("add_estimate") : t("save_changes")}
         </Button>
       </form>
     </Form>
