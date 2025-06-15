@@ -1,16 +1,16 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updateProfile, updatePassword } from "firebase/auth";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { auth } from "@/lib/firebase"; // Make sure 'auth' is exported from your firebase config
 
 export default function ProfilePage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [name, setName] = useState("");
   const [image, setImage] = useState<string>("/default-avatar.png");
@@ -56,7 +56,7 @@ export default function ProfilePage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) {
-      setError("No file selected or user not authenticated.");
+      setError(t("no_file_selected_or_user_not_authenticated"));
       return;
     }
 
@@ -69,11 +69,13 @@ export default function ProfilePage() {
       const url = await getDownloadURL(storageRef);
       setImage(url);
       setSuccess(
-        "Image uploaded successfully. Click Save Changes to update your profile.",
+        t(
+          "image_uploaded_successfully_click_save_changes_to_update_your_profile",
+        ),
       );
     } catch (err: any) {
-      console.error("Error uploading image:", err);
-      setError(err.message || "Failed to upload image.");
+      console.error(t("error_uploading_image"), err);
+      setError(err.message || t("failed_to_upload_image"));
     } finally {
       setUploading(false);
     }
@@ -85,7 +87,7 @@ export default function ProfilePage() {
     setError("");
     setSuccess("");
     try {
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(t("not_authenticated"));
 
       // Update Firebase Auth profile
       await updateProfile(user, { displayName: name, photoURL: image }); // user is now FirebaseUser
@@ -100,21 +102,21 @@ export default function ProfilePage() {
         await updatePassword(user, password); // user is now FirebaseUser
       }
 
-      setSuccess("Profile updated successfully.");
+      setSuccess(t("profile_updated_successfully"));
     } catch (err: any) {
-      setError(err.message || "Failed to update profile");
+      setError(err.message || t("failed_to_update_profile"));
     } finally {
       setLoading(false);
     }
   };
 
-  if (!user) return <div className="p-8">Not logged in.</div>;
+  if (!user) return <div className="p-8">{t("not_logged_in")}</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold mb-6 text-center text-primary">
-          User Profile
+          {t("user_profile")}
         </h2>
         <div className="flex flex-col items-center mb-6">
           <Image
@@ -125,8 +127,9 @@ export default function ProfilePage() {
             className="w-24 h-24 rounded-full border-4 border-primary object-cover mb-2"
             loader={({ src, width, quality }) => src}
           />
+
           <span className="text-lg font-semibold text-foreground">
-            {name || "No Name"}
+            {name || t("no_name")}
           </span>
           <span className="text-sm text-muted-foreground">{user.email}</span>
         </div>
@@ -146,7 +149,7 @@ export default function ProfilePage() {
           {currentProviderId === "password" && (
             <div>
               <label className="block font-medium mb-1 text-foreground">
-                Upload Profile Image
+                {t("upload_profile_image")}
               </label>
               <input
                 type="file"
@@ -155,16 +158,17 @@ export default function ProfilePage() {
                 disabled={uploading}
                 className="w-full"
               />
+
               {uploading && (
                 <div className="text-sm text-muted-foreground">
-                  Uploading...
+                  {t("uploading")}
                 </div>
               )}
             </div>
           )}
           <div>
             <label className="block font-medium mb-1 text-foreground">
-              Profile Image URL
+              {t("profile_image_url")}
             </label>
             <input
               type="text"
@@ -177,7 +181,7 @@ export default function ProfilePage() {
           {currentProviderId === "password" && (
             <div>
               <label className="block font-medium mb-1 text-foreground">
-                New Password
+                {t("new_password")}
               </label>
               <input
                 type="password"
@@ -190,17 +194,15 @@ export default function ProfilePage() {
           )}
           {error && <div className="text-red-500 text-sm">{error}</div>}
           {success && <div className="text-green-600 text-sm">{success}</div>}
-          <button
-            type="submit"
-            className="w-full bg-primary text-white py-2 rounded font-semibold hover:bg-primary-dark transition"
-            disabled={loading || currentProviderId === "google.com"}
-          >
-            {loading
-              ? "Saving..."
-              : currentProviderId === "google.com"
-                ? "View Only"
-                : "Save Changes"}
-          </button>
+          {currentProviderId !== "google.com" && (
+            <button
+              type="submit"
+              className="w-full bg-primary text-white py-2 rounded font-semibold hover:bg-primary-dark transition"
+              disabled={loading || currentProviderId === "google.com"}
+            >
+              {loading ? t("saving") : t("save_changes")}
+            </button>
+          )}
         </form>
       </div>
     </div>
