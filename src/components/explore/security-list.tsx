@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { SecurityListItem } from "./security-list-item";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ export function SecurityList({
   title,
   currentTab,
 }: SecurityListProps) {
+  const { t: t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const { listedSecurities, isLoading, error } = useListedSecurities();
   const [offlineMode, setOfflineMode] = useState(!navigator.onLine);
@@ -124,7 +126,7 @@ export function SecurityList({
     return (
       <div className="flex justify-center items-center py-10">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="ml-2 text-muted-foreground">Loading securities...</p>
+        <p className="ml-2 text-muted-foreground">{t("loading_securities")}</p>
       </div>
     );
   }
@@ -133,10 +135,11 @@ export function SecurityList({
     return (
       <Alert variant="destructive" className="mt-4">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error Loading Securities</AlertTitle>
+        <AlertTitle>{t("error_loading_securities")}</AlertTitle>
         <AlertDescription>
-          There was a problem fetching the security data. Please try again
-          later.
+          {t(
+            "there_was_a_problem_fetching_the_security_data_please_try_again_later",
+          )}
         </AlertDescription>
       </Alert>
     );
@@ -152,7 +155,7 @@ export function SecurityList({
           <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ltr:left-3 rtl:right-3" />
           <Input
             type="text"
-            placeholder={`Search Securities by name, symbol, market, or type...`}
+            placeholder={t(`Search Securities by name, symbol, market, or type...`)}
             className="w-full ltr:pl-10 rtl:pr-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -161,8 +164,10 @@ export function SecurityList({
         </div>
         <p className="text-center text-muted-foreground py-10">
           {offlineMode
-            ? "No cached securities available for offline viewing."
-            : "No securities found. The 'listedStocks' collection in Firestore might be empty or not yet populated."}
+            ? t("no_cached_securities_available_for_offline_viewing")
+            : t(
+                "no_securities_found_the_listedstocks_collection_in_firestore_might_be_empty_or_not_yet_populated",
+              )}
         </p>
       </div>
     );
@@ -175,15 +180,16 @@ export function SecurityList({
       )}
       {offlineMode && usingCache && (
         <div className="text-xs text-yellow-600 bg-yellow-50 border border-yellow-200 rounded px-2 py-1 mb-2">
-          Offline mode: showing last cached securities. Some features may be
-          unavailable.
+          {t(
+            "offline_mode_showing_last_cached_securities_some_features_may_be_unavailable",
+          )}
         </div>
       )}
       <div className="relative">
         <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ltr:left-3 rtl:right-3" />
         <Input
           type="text"
-          placeholder={`Search Securities by name, symbol, market, or type...`}
+          placeholder={t(`Search Securities by name, symbol, market, or type...`)}
           className="w-full ltr:pl-10 rtl:pr-10 text-xs sm:text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -201,8 +207,8 @@ export function SecurityList({
       ) : (
         <p className="text-center text-muted-foreground py-10">
           {searchTerm
-            ? `No Securities found matching your search.`
-            : `No Securities available to display.`}
+            ? t(`No Securities found matching your search.`)
+            : t(`No Securities available to display.`)}
         </p>
       )}
     </div>

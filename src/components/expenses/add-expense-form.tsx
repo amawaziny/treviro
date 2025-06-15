@@ -78,7 +78,9 @@ export function AddExpenseForm({
     setHeaderProps({
       showBackButton: true,
       showNavControls: false,
-      title: isEditMode ? t("edit_expense_record") : t("add_new_expense_record"),
+      title: isEditMode
+        ? t("edit_expense_record")
+        : t("add_new_expense_record"),
       description: t(
         "log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending",
       ),
