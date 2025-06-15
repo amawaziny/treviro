@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     });
 
     await setDoc(doc(db, "exchangeRates", "current"), {
-      rates,
+      ...rates,
       lastUpdated: new Date().toISOString(),
     });
 
