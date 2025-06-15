@@ -12,6 +12,7 @@ import {
   type User as FirebaseUser,
   signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   createUserWithEmailAndPassword as firebaseCreateUserWithEmailAndPassword,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
 } from "firebase/auth";
 
 interface AuthContextType {
@@ -23,6 +24,7 @@ interface AuthContextType {
   signUpWithEmailAndPassword: (email: string, password: string) => Promise<void>;
   isLoading: boolean;
   isProcessingLogin: boolean;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -165,6 +167,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const sendPasswordResetEmail = async (email: string) => {
+    if (!firebaseAuthService) {
+      throw new Error("Firebase auth is not initialized");
+    }
+    await firebaseSendPasswordResetEmail(firebaseAuthService, email);
+  };
+
   const isAuthenticated = !!user;
 
   return (
@@ -178,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signUpWithEmailAndPassword,
         isLoading,
         isProcessingLogin,
+        sendPasswordResetEmail,
       }}
     >
       {children}
