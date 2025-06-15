@@ -1,0 +1,164 @@
+Feature,User Story,Acceptance Criteria,Priority,Status
+Authentication,"As a user, I want to securely log in and manage my profile so that I can access my financial data safely","1. User can log in using email/password
+2. User can view and edit their profile information
+3. User can update their profile picture
+4. User can change their password
+5. User's profile data persists across sessions
+6. User can log out securely
+7. User receives appropriate error messages for invalid login attempts
+8. User's session is maintained securely
+9. User can reset their password if forgotten",High,Implemented
+Financial Year Settings,"As a user, I want to configure my financial year settings so that my financial data is organized according to my business year","1. User can select the start month of their financial year
+2. Settings are saved and persisted in the database
+3. Default to January if no setting exists
+4. Loading state is shown while settings are being fetched
+5. Success/error messages are shown when saving settings
+6. Changes are reflected immediately in all financial calculations
+7. Settings are applied to all financial reports and summaries",High,Implemented
+Currency Management,"As a user, I want to track my currency holdings and their performance against EGP so that I can monitor my foreign currency investments","1. View total currency holdings with current values
+2. See profit/loss against EGP in both amount and percentage
+3. View individual currency holdings with:
+   - Current market rate
+   - Average purchase rate
+   - Profit/loss amount and percentage
+   - Total cost
+   - Current value
+4. Error handling for exchange rate loading issues
+5. Mobile-responsive display of currency information
+6. Real-time updates of exchange rates
+7. Historical tracking of currency values
+8. Support for multiple currency types",High,Implemented
+Investment Management,"As a user, I want to manage my various investments so that I can track their performance and make informed decisions","1. Add new investments with detailed information
+2. View investment details including:
+   - Purchase date
+   - Amount invested
+   - Current value
+   - Profit/loss
+   - Performance metrics
+3. Track investment performance over time
+4. Delete investments with confirmation
+5. View investment history with filters
+6. Calculate profit/loss for each investment
+7. Support for different investment types:
+   - Stocks
+   - Real Estate
+   - Gold
+   - Currencies
+   - Fixed Deposits
+8. Export investment data
+9. View investment analytics and trends",High,Implemented
+Real Estate Investment,"As a user, I want to manage my real estate investments so that I can track their value and payments","1. Add real estate investments with:
+   - Property details
+   - Purchase price
+   - Location
+   - Type
+2. Track installment payments with:
+   - Due dates
+   - Amount
+   - Status
+3. View payment history
+4. Add new payments
+5. View investment details
+6. Calculate total cost and current value
+7. Track property appreciation
+8. Manage multiple properties
+9. View payment schedules
+10. Generate payment reports",High,Implemented
+Stock Investment,"As a user, I want to manage my stock investments so that I can track their performance and make trading decisions","1. Buy stocks with:
+   - Stock selection
+   - Quantity
+   - Price
+   - Date
+2. Sell stocks with:
+   - Quantity
+   - Price
+   - Date
+3. View stock details including:
+   - Current price
+   - Historical performance
+   - Company information
+4. Track stock performance
+5. View transaction history
+6. Calculate profit/loss
+7. Support for different stock types:
+   - Common stocks
+   - Preferred stocks
+   - Funds
+8. View market trends
+9. Set price alerts",High,Implemented
+Dashboard Overview,"As a user, I want to see an overview of my financial status so that I can make informed decisions","1. View total invested amount across all assets
+2. See total realized profit/loss
+3. View cash balance
+4. Track monthly income and expenses
+5. View investment performance
+6. See currency exchange rates
+7. View gold market prices
+8. Track net worth
+9. View financial trends
+10. See upcoming payments
+11. View portfolio allocation
+12. Track financial goals",High,Implemented
+Expense Tracking,"As a user, I want to track my expenses so that I can manage my budget effectively","1. Add new expenses with:
+   - Amount
+   - Category
+   - Date
+   - Description
+2. Categorize expenses
+3. View expense history
+4. Track monthly expenses
+5. Calculate total expenses
+6. Support for recurring expenses
+7. Set expense budgets
+8. View expense trends
+9. Export expense reports
+10. Set expense alerts",Medium,Implemented
+Income Management,"As a user, I want to track my income so that I can monitor my earnings","1. Add income sources with:
+   - Amount
+   - Source
+   - Date
+   - Description
+2. Track monthly income
+3. View income history
+4. Calculate total income
+5. Support for different income types:
+   - Salary
+   - Investment returns
+   - Rental income
+   - Other income
+6. Track fixed income sources
+7. View income trends
+8. Export income reports
+9. Set income goals",Medium,Implemented
+Fixed Estimates,"As a user, I want to manage my fixed financial estimates so that I can plan my finances","1. Add fixed estimates with:
+   - Amount
+   - Type
+   - Date
+   - Description
+2. View estimate details
+3. Track estimate performance
+4. Delete estimates
+5. View estimate history
+6. Calculate total estimates
+7. Track estimate accuracy
+8. View estimate trends
+9. Export estimate reports",Medium,Implemented
+Multi-language Support,"As a user, I want to use the application in my preferred language so that I can use it comfortably","1. Support for multiple languages:
+   - English
+   - Arabic
+2. Language selection persists across sessions
+3. All text content is properly translated
+4. Right-to-left (RTL) support for Arabic
+5. Proper date and number formatting based on language
+6. Currency symbols based on language
+7. Error messages in selected language
+8. Help documentation in selected language",Medium,Implemented
+Mobile Responsiveness,"As a user, I want to use the application on any device so that I can access it anywhere","1. Responsive design for all screen sizes
+2. Mobile-optimized navigation
+3. Touch-friendly interface
+4. Bottom tab bar on mobile
+5. Sidebar on desktop
+6. Proper spacing and layout on all devices
+7. Optimized images and assets
+8. Fast loading on mobile networks
+9. Offline support for basic features
+10. Mobile-specific features when appropriate",High,Implemented 

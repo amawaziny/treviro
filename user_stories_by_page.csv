@@ -1,0 +1,425 @@
+Page,Component,Feature,User Story,Acceptance Criteria,Field Validation,Cross-Field Validation,Priority,Status
+Login Page,Login Form,Authentication,"As a user, I want to securely log in so that I can access my financial data safely","1. User can log in using email/password
+2. User receives appropriate error messages for invalid login attempts
+3. User's session is maintained securely
+4. User can reset their password if forgotten
+5. Loading state is shown during authentication
+6. Redirect to dashboard after successful login","1. Email validation:
+   - Must be a valid email format
+   - Required field
+   - Maximum length: 100 characters
+2. Password validation:
+   - Minimum length: 8 characters
+   - Must contain at least one number
+   - Must contain at least one special character
+   - Required field
+3. Form validation:
+   - All required fields must be filled
+   - Show validation errors inline
+   - Disable submit button until form is valid","1. Email and password combination:
+   - Validate against stored credentials
+   - Show specific error for invalid combination
+2. Password reset flow:
+   - Email must exist in system
+   - Reset token must be valid
+   - New password must be different from old password",High,Implemented
+Profile Page,Profile Form,Profile Management,"As a user, I want to manage my profile information so that I can keep my account up to date","1. User can view and edit their profile information
+2. User can update their profile picture
+3. User can change their password
+4. User's profile data persists across sessions
+5. User can log out securely
+6. Profile changes are saved successfully
+7. Error handling for failed profile updates","1. Name validation:
+   - Required field
+   - Minimum length: 2 characters
+   - Maximum length: 50 characters
+   - Only letters and spaces allowed
+2. Profile picture validation:
+   - Maximum file size: 5MB
+   - Allowed formats: JPG, PNG, GIF
+   - Maximum dimensions: 1024x1024
+3. Password change validation:
+   - Current password required
+   - New password must meet security requirements
+   - Password confirmation must match
+4. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Password change validation:
+   - New password must be different from current password
+   - Password confirmation must match new password
+   - Current password must be correct
+2. Profile picture validation:
+   - If new picture is uploaded, validate dimensions before saving
+   - If no new picture, keep existing picture
+3. Name validation:
+   - If name is changed, check for duplicate names in system
+   - If name is unchanged, skip duplicate check",High,Implemented
+Settings Page,Financial Year Form,Financial Year Settings,"As a user, I want to configure my financial year settings so that my financial data is organized according to my business year","1. User can select the start month of their financial year
+2. Settings are saved and persisted in the database
+3. Default to January if no setting exists
+4. Loading state is shown while settings are being fetched
+5. Success/error messages are shown when saving settings
+6. Changes are reflected immediately in all financial calculations
+7. Settings are applied to all financial reports and summaries","1. Month selection validation:
+   - Required field
+   - Must be a valid month (1-12)
+   - Must be a number
+2. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid",High,Implemented
+Currencies Page,Currency Form,Currency Management,"As a user, I want to track my currency holdings and their performance against EGP so that I can monitor my foreign currency investments","1. View total currency holdings with current values
+2. See profit/loss against EGP in both amount and percentage
+3. View individual currency holdings with:
+   - Current market rate
+   - Average purchase rate
+   - Profit/loss amount and percentage
+   - Total cost
+   - Current value
+4. Error handling for exchange rate loading issues
+5. Mobile-responsive display of currency information
+6. Real-time updates of exchange rates
+7. Historical tracking of currency values
+8. Support for multiple currency types","1. Currency selection validation:
+   - Required field
+   - Must be a valid currency code
+2. Amount validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+   - Maximum value: 1,000,000,000
+3. Date validation:
+   - Required field
+   - Must be a valid date
+   - Cannot be in the future
+4. Rate validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 4 decimal places
+5. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Currency and Rate validation:
+   - Rate must be valid for selected currency
+   - Rate must be within acceptable range for currency
+   - Rate must be updated within last 24 hours
+2. Amount and Rate validation:
+   - Total value (amount * rate) must not exceed maximum allowed
+   - Total value must be calculated in real-time
+3. Date and Rate validation:
+   - Rate must be valid for the selected date
+   - Historical rates must be available for past dates
+4. Currency and Amount validation:
+   - Amount must be within limits for selected currency
+   - Amount must be in correct denomination for currency",High,Implemented
+Investments Page,Investment Form,Investment Management,"As a user, I want to manage my various investments so that I can track their performance and make informed decisions","1. Add new investments with detailed information
+2. View investment details including:
+   - Purchase date
+   - Amount invested
+   - Current value
+   - Profit/loss
+   - Performance metrics
+3. Track investment performance over time
+4. Delete investments with confirmation
+5. View investment history with filters
+6. Calculate profit/loss for each investment
+7. Support for different investment types
+8. Export investment data
+9. View investment analytics and trends","1. Investment type validation:
+   - Required field
+   - Must be a valid investment type
+2. Amount validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+   - Maximum value: 1,000,000,000
+3. Date validation:
+   - Required field
+   - Must be a valid date
+   - Cannot be in the future
+4. Description validation:
+   - Optional field
+   - Maximum length: 500 characters
+5. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid",High,Implemented
+Real Estate Page,Real Estate Form,Real Estate Investment,"As a user, I want to manage my real estate investments so that I can track their value and payments","1. Add real estate investments with:
+   - Property details
+   - Purchase price
+   - Location
+   - Type
+2. Track installment payments
+3. View payment history
+4. Add new payments
+5. View investment details
+6. Calculate total cost and current value
+7. Track property appreciation
+8. Manage multiple properties
+9. View payment schedules
+10. Generate payment reports","1. Property details validation:
+   - Required field
+   - Maximum length: 200 characters
+2. Purchase price validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+3. Location validation:
+   - Required field
+   - Maximum length: 100 characters
+4. Property type validation:
+   - Required field
+   - Must be a valid property type
+5. Installment validation:
+   - Amount must be positive
+   - Due date must be valid
+   - Cannot be in the past
+6. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Purchase Price and Installments validation:
+   - Total installments must equal purchase price
+   - Installment amounts must be consistent
+   - Payment schedule must cover full purchase price
+2. Location and Property Type validation:
+   - Property type must be valid for location
+   - Location must support selected property type
+3. Date and Installment validation:
+   - Installment dates must be sequential
+   - No overlapping payment dates
+   - First installment date must be after purchase date
+4. Property Details and Type validation:
+   - Details must match property type requirements
+   - Required fields based on property type",High,Implemented
+Stocks Page,Stock Transaction Form,Stock Investment,"As a user, I want to manage my stock investments so that I can track their performance and make trading decisions","1. Buy stocks with:
+   - Stock selection
+   - Quantity
+   - Price
+   - Date
+2. Sell stocks with:
+   - Quantity
+   - Price
+   - Date
+3. View stock details
+4. Track stock performance
+5. View transaction history
+6. Calculate profit/loss
+7. Support for different stock types
+8. View market trends
+9. Set price alerts","1. Stock selection validation:
+   - Required field
+   - Must be a valid stock symbol
+2. Quantity validation:
+   - Required field
+   - Must be a positive integer
+   - Maximum value: 1,000,000
+3. Price validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+4. Date validation:
+   - Required field
+   - Must be a valid date
+   - Cannot be in the future
+5. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Stock and Price validation:
+   - Price must be within market range for stock
+   - Price must be valid for transaction date
+   - Price must be updated within last 5 minutes
+2. Quantity and Stock validation:
+   - Quantity must be within available shares
+   - Quantity must meet minimum lot size
+   - Quantity must be multiple of lot size
+3. Date and Price validation:
+   - Price must be valid for market hours
+   - Price must be valid for trading day
+   - Price must be within daily limit
+4. Transaction Type validation:
+   - Sell quantity cannot exceed owned shares
+   - Buy total must not exceed available funds
+   - Transaction must be within daily limits",High,Implemented
+Expenses Page,Expense Form,Expense Tracking,"As a user, I want to track my expenses so that I can manage my budget effectively","1. Add new expenses with:
+   - Amount
+   - Category
+   - Date
+   - Description
+2. Categorize expenses
+3. View expense history
+4. Track monthly expenses
+5. Calculate total expenses
+6. Support for recurring expenses
+7. Set expense budgets
+8. View expense trends
+9. Export expense reports
+10. Set expense alerts","1. Amount validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+2. Category validation:
+   - Required field
+   - Must be a valid category
+3. Date validation:
+   - Required field
+   - Must be a valid date
+   - Cannot be in the future
+4. Description validation:
+   - Optional field
+   - Maximum length: 200 characters
+5. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Amount and Category validation:
+   - Amount must be within category limits
+   - Amount must not exceed budget for category
+   - Amount must be within monthly limit
+2. Date and Category validation:
+   - Category must be active for date
+   - Date must be within budget period
+3. Recurring Expense validation:
+   - If recurring, validate frequency
+   - If recurring, validate end date
+   - If recurring, validate total amount
+4. Budget validation:
+   - Expense must not exceed remaining budget
+   - Expense must be within category allocation
+   - Expense must be within monthly limit",Medium,Implemented
+Income Page,Income Form,Income Management,"As a user, I want to track my income so that I can monitor my earnings","1. Add income sources with:
+   - Amount
+   - Source
+   - Date
+   - Description
+2. Track monthly income
+3. View income history
+4. Calculate total income
+5. Support for different income types
+6. Track fixed income sources
+7. View income trends
+8. Export income reports
+9. Set income goals","1. Amount validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+2. Source validation:
+   - Required field
+   - Maximum length: 100 characters
+3. Date validation:
+   - Required field
+   - Must be a valid date
+   - Cannot be in the future
+4. Description validation:
+   - Optional field
+   - Maximum length: 200 characters
+5. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Amount and Source validation:
+   - Amount must be within source limits
+   - Amount must be within expected range
+   - Amount must be within monthly limit
+2. Date and Source validation:
+   - Source must be active for date
+   - Date must be within payment period
+3. Recurring Income validation:
+   - If recurring, validate frequency
+   - If recurring, validate end date
+   - If recurring, validate total amount
+4. Income Type validation:
+   - Amount must be appropriate for income type
+   - Source must match income type
+   - Date must be valid for income type",Medium,Implemented
+Fixed Estimates Page,Fixed Estimate Form,Fixed Estimates Management,"As a user, I want to manage my fixed financial estimates so that I can plan my finances","1. Add fixed estimates with:
+   - Amount
+   - Type
+   - Date
+   - Description
+2. View estimate details
+3. Track estimate performance
+4. Delete estimates
+5. View estimate history
+6. Calculate total estimates
+7. Track estimate accuracy
+8. View estimate trends
+9. Export estimate reports","1. Amount validation:
+   - Required field
+   - Must be a positive number
+   - Maximum 2 decimal places
+2. Type validation:
+   - Required field
+   - Must be a valid estimate type
+3. Date validation:
+   - Required field
+   - Must be a valid date
+   - Cannot be in the future
+4. Description validation:
+   - Optional field
+   - Maximum length: 200 characters
+5. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Amount and Type validation:
+   - Amount must be within type limits
+   - Amount must be within expected range
+   - Amount must be within monthly limit
+2. Date and Type validation:
+   - Type must be active for date
+   - Date must be within estimate period
+3. Estimate Period validation:
+   - Start date must be before end date
+   - Period must be within allowed range
+   - Period must not overlap with existing estimates
+4. Estimate Type validation:
+   - Amount must be appropriate for type
+   - Description must match type requirements
+   - Date must be valid for type",Medium,Implemented
+Global Features,Language Selector,Multi-language Support,"As a user, I want to use the application in my preferred language so that I can use it comfortably","1. Support for multiple languages
+2. Language selection persists across sessions
+3. All text content is properly translated
+4. Right-to-left (RTL) support for Arabic
+5. Proper date and number formatting
+6. Currency symbols based on language
+7. Error messages in selected language
+8. Help documentation in selected language","1. Language selection validation:
+   - Required field
+   - Must be a valid language code
+2. Form validation:
+   - Show validation errors inline
+   - Disable save button until form is valid","1. Language and Content validation:
+   - All content must be available in selected language
+   - RTL layout must be applied for Arabic
+   - Date format must match language locale
+2. Language and Currency validation:
+   - Currency symbols must match language
+   - Number format must match language
+   - Decimal separator must match language
+3. Language and Error Messages validation:
+   - All error messages must be in selected language
+   - All validation messages must be in selected language
+   - All system messages must be in selected language",Medium,Implemented
+Global Features,Responsive Layout,Mobile Responsiveness,"As a user, I want to use the application on any device so that I can access it anywhere","1. Responsive design for all screen sizes
+2. Mobile-optimized navigation
+3. Touch-friendly interface
+4. Bottom tab bar on mobile
+5. Sidebar on desktop
+6. Proper spacing and layout
+7. Optimized images and assets
+8. Fast loading on mobile networks
+9. Offline support for basic features
+10. Mobile-specific features","1. Screen size validation:
+   - Minimum width: 320px
+   - Maximum width: 1920px
+2. Touch target validation:
+   - Minimum size: 44x44 pixels
+   - Minimum spacing: 8 pixels
+3. Image validation:
+   - Maximum file size: 500KB
+   - Must be responsive
+   - Must have alt text","1. Screen Size and Layout validation:
+   - Layout must adapt to screen size
+   - Components must resize appropriately
+   - Navigation must adjust to screen size
+2. Device Type and Features validation:
+   - Touch features must be available on touch devices
+   - Keyboard navigation must work on desktop
+   - Offline features must be available when offline
+3. Network and Performance validation:
+   - Image quality must adjust to network speed
+   - Content must load progressively
+   - Offline content must be available
+4. Orientation and Layout validation:
+   - Layout must adjust to orientation changes
+   - Content must be readable in both orientations
+   - Navigation must be accessible in both orientations",High,Implemented 

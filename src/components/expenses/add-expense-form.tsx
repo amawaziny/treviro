@@ -1,7 +1,9 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
+import { useForm } from "@/contexts/form-context";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm as useReactHookForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -33,10 +35,8 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import type { ExpenseRecord } from "@/lib/types";
-
-const getCurrentDate = () => {
-  return format(new Date(), "yyyy-MM-dd");
-};
+import { getCurrentDate } from "@/lib/utils";
+import { useEffect } from "react";
 
 const initialFormValues: AddExpenseFormValues = {
   category: "Other",
@@ -60,14 +60,37 @@ export function AddExpenseForm({
   onSubmit,
   isEditMode,
 }: AddExpenseFormProps) {
+  const { t: t } = useLanguage();
   const { addExpenseRecord } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
+  const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const form = useForm<AddExpenseFormValues>({
+  const form = useReactHookForm<AddExpenseFormValues>({
     resolver: zodResolver(AddExpenseSchema),
     defaultValues: initialValues ?? initialFormValues,
   });
+
+  useEffect(() => {
+    // Open form when component mounts
+    openForm();
+
+    setHeaderProps({
+      showBackButton: true,
+      showNavControls: false,
+      title: isEditMode ? t("edit_expense_record") : t("add_new_expense_record"),
+      description: t(
+        "log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending",
+      ),
+      backLabel: t("back_to_expenses"),
+      backHref: "/expenses",
+    });
+
+    // Clean up when component unmounts
+    return () => {
+      closeForm();
+    };
+  }, [setHeaderProps, closeForm, openForm, isEditMode, t]);
 
   const watchedCategory = form.watch("category");
   const watchedIsInstallment = form.watch("isInstallment");
@@ -99,16 +122,16 @@ export function AddExpenseForm({
 
       await addExpenseRecord(expenseDataToSave);
       toast({
-        title: "Expense Record Added",
-        description: `${values.category} expense of ${values.amount} EGP recorded successfully.`,
+        title: t("expense_record_added"),
+        description: `${values.category} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
       });
       form.reset(initialFormValues);
       router.push("/expenses");
     } catch (error: any) {
-      console.error("Error adding expense record:", error);
+      console.error(t("error_adding_expense_record"), error);
       toast({
-        title: "Failed to Add Expense",
-        description: error.message || "Could not save the expense record.",
+        title: t("failed_to_add_expense"),
+        description: error.message || t("could_not_save_the_expense_record"),
         variant: "destructive",
       });
     }
@@ -126,7 +149,7 @@ export function AddExpenseForm({
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Expense Category</FormLabel>
+                <FormLabel>{t("expense_category")}</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -140,7 +163,7 @@ export function AddExpenseForm({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select expense category" />
+                      <SelectValue placeholder={t("Select expense category")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -155,15 +178,18 @@ export function AddExpenseForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount (EGP)</FormLabel>
+                <FormLabel>{t("amount_egp")}</FormLabel>
                 <FormControl>
                   <NumericInput
-                    placeholder="e.g., 500.00 or 3000.00 for total installment"
+                    placeholder={t(
+                      "e.g., 500.00 or 3000.00 for total installment",
+                    )}
                     value={
                       field.value === undefined || field.value === null
                         ? ""
@@ -177,6 +203,7 @@ export function AddExpenseForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="date"
@@ -194,15 +221,18 @@ export function AddExpenseForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Description (Optional)</FormLabel>
+                <FormLabel>{t("description_optional")}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="e.g., Monthly electricity bill, New TV (installment)"
+                    placeholder={t(
+                      "e.g., Monthly electricity bill, New TV (installment)",
+                    )}
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -231,18 +261,19 @@ export function AddExpenseForm({
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Is this an installment plan?</FormLabel>
+                      <FormLabel>{t("is_this_an_installment_plan")}</FormLabel>
                     </div>
                   </FormItem>
                 )}
               />
+
               {watchedIsInstallment && (
                 <FormField
                   control={form.control}
                   name="numberOfInstallments"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Number of Months</FormLabel>
+                      <FormLabel>{t("number_of_months")}</FormLabel>
                       <FormControl>
                         <NumericInput
                           placeholder="e.g., 3, 6, 12"
@@ -268,7 +299,7 @@ export function AddExpenseForm({
           {form.formState.isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          {isEditMode ? "Update Expense Record" : "Add Expense Record"}
+          {isEditMode ? t("update_expense_record") : t("add_expense_record")}
         </Button>
       </form>
     </Form>

@@ -92,6 +92,9 @@ export const formatDateDisplay = (dateString?: string) => {
   }
 };
 
+export const getCurrentDate = () => {
+  return format(new Date(), "yyyy-MM-dd");
+};
 // Checks if a given date is in the current month
 export function isInCurrentMonth(date: Date | string): boolean {
   const d = typeof date === "string" ? new Date(date) : date;

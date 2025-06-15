@@ -20,14 +20,6 @@ export default function AddExpensePage() {
 
   return (
     <div className="container mx-auto py-4 space-y-6">
-      <Button variant="outline" size="sm" asChild className="mb-4">
-        <Link href="/expenses">
-          <BackArrowIcon
-            className={language === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"}
-          />
-          {t("back_to_expenses")}
-        </Link>
-      </Button>
       <Card>
         <CardHeader>
           <CardTitle>{t("add_new_expense_record")}</CardTitle>
