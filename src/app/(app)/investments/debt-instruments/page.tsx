@@ -6,7 +6,6 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
   DebtInstrumentInvestment,
   StockInvestment,
-  ListedSecurity,
   AggregatedDebtHolding,
 } from "@/lib/types";
 import { formatCurrencyWithCommas, isDebtRelatedFund } from "@/lib/utils";
@@ -35,10 +34,10 @@ import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MyDebtInstrumentsPage() {
+  const { t: t } = useLanguage();
   const {
     investments,
-    isLoading: isLoadingInvestments,
-    removeDirectDebtInvestment,
+    isLoading: isLoadingInvestments
   } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
@@ -48,7 +47,6 @@ export default function MyDebtInstrumentsPage() {
   const {
     directDebtHoldings,
     debtFundHoldings,
-    totalProjectedMonthlyInterest,
     totalProjectedAnnualInterest,
     totalDebtFundPnL,
     totalDebtFundCost,
@@ -75,7 +73,7 @@ export default function MyDebtInstrumentsPage() {
     let directDebtInvestedSum = 0;
 
     const directDebtInvestments = investments.filter(
-      (inv) => inv.type === "Debt Instruments",
+      (inv) => inv.type === 'Debt Instruments'
     ) as DebtInstrumentInvestment[];
     directDebtInvestments.forEach((debt) => {
       let maturityDay: string | undefined;
@@ -86,7 +84,9 @@ export default function MyDebtInstrumentsPage() {
 
       if (debt.maturityDate) {
         try {
-          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z");
+          const parsedMaturityDate = parseISO(
+            debt.maturityDate + 'T00:00:00Z'
+          );
           if (isValid(parsedMaturityDate)) {
             maturityDay = format(parsedMaturityDate, "dd");
             maturityMonth = format(parsedMaturityDate, "MM");
@@ -94,9 +94,10 @@ export default function MyDebtInstrumentsPage() {
           }
         } catch (e) {
           console.error(
-            "Error parsing maturity date for debt holding:",
+            t("error_parsing_maturity_date_for_debt_holding"),
+
             debt.id,
-            e,
+            e
           );
         }
       }
@@ -119,7 +120,7 @@ export default function MyDebtInstrumentsPage() {
         id: debt.id,
         itemType: "direct",
         displayName:
-          debt.name || `${debt.debtSubType} - ${debt.issuer || "N/A"}`,
+          debt.name || `${debt.debtSubType} - ${debt.issuer || t("na")}`,
         debtSubType: debt.debtSubType,
         issuer: debt.issuer,
         interestRate: debt.interestRate,
@@ -137,13 +138,13 @@ export default function MyDebtInstrumentsPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
+      (inv) => inv.type === "Stocks"
     ) as StockInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol,
+        (ls) => ls.symbol === stockInv.tickerSymbol
       );
       if (
         security &&
@@ -205,10 +206,10 @@ export default function MyDebtInstrumentsPage() {
 
     return {
       directDebtHoldings: directHoldings.sort((a, b) =>
-        (a.displayName || "").localeCompare(b.displayName || ""),
+        (a.displayName || "").localeCompare(b.displayName || "")
       ),
       debtFundHoldings: fundHoldingsAggregated.sort((a, b) =>
-        (a.displayName || "").localeCompare(b.displayName || ""),
+        (a.displayName || "").localeCompare(b.displayName || "")
       ),
       totalProjectedMonthlyInterest: monthlyInterestSum,
       totalProjectedAnnualInterest: annualInterestSum,
@@ -234,10 +235,9 @@ export default function MyDebtInstrumentsPage() {
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
-
   const formatCurrencyWithSuffix = (
     value: number | undefined,
-    currencyCode: string = "EGP",
+    currencyCode: string = "EGP"
   ) => {
     if (value === undefined || value === null || isNaN(value))
       return `${currencyCode} 0`;
@@ -279,10 +279,12 @@ export default function MyDebtInstrumentsPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Debt Instruments
+          {t("debt_instruments")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Track your direct debt instruments and debt-related fund investments.
+          {t(
+            "track_your_direct_debt_instruments_and_debtrelated_fund_investments"
+          )}
         </p>
       </div>
       <Separator />
@@ -290,7 +292,7 @@ export default function MyDebtInstrumentsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Total Debt Instruments P/L (Funds)
+            {t("total_debt_instruments_pl_funds")}
           </CardTitle>
           {isTotalFundProfitable ? (
             <TrendingUp className="h-4 w-4 text-accent" />
@@ -302,45 +304,56 @@ export default function MyDebtInstrumentsPage() {
           <div
             className={cn(
               "text-2xl font-bold",
-              isTotalFundProfitable ? "text-accent" : "text-destructive",
+              isTotalFundProfitable ? "text-accent" : "text-destructive"
             )}
           >
             {isMobile
               ? formatCurrencyWithSuffix(
                   totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency,
+                  debtFundHoldings[0]?.currency
                 )
               : formatCurrencyWithCommas(
                   totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency,
+                  debtFundHoldings[0]?.currency
                 )}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalDebtFundPnLPercent === Infinity
               ? "∞"
               : totalDebtFundPnLPercent.toFixed(2)}
-            % overall P/L from funds
+            {t("overall_pl_from_funds")}
           </p>
           <div className="mt-2 pt-2 border-t">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                Total Invested in Debt:
+                {t("total_invested_in_debt")}
               </span>
               <span className="font-semibold">
                 {isMobile
-                  ? formatCurrencyWithSuffix(totalInvestedInDebt, debtFundHoldings[0]?.currency)
-                  : formatCurrencyWithCommas(totalInvestedInDebt, debtFundHoldings[0]?.currency)}
+                  ? formatCurrencyWithSuffix(
+                      totalInvestedInDebt,
+                      debtFundHoldings[0]?.currency
+                    )
+                  : formatCurrencyWithCommas(
+                      totalInvestedInDebt,
+                      debtFundHoldings[0]?.currency
+                    )}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                (Direct: {formatCurrencyWithCommas(totalDirectDebtInvested, debtFundHoldings[0]?.currency)})
+                {t("direct")}
+                {formatCurrencyWithCommas(
+                  totalDirectDebtInvested,
+                  debtFundHoldings[0]?.currency
+                )}
+                )
               </span>
               <span>
-                (Funds:{" "}
+                {t("funds")}{" "}
                 {formatCurrencyWithCommas(
                   totalDebtFundCost,
-                  debtFundHoldings[0]?.currency,
+                  debtFundHoldings[0]?.currency
                 )}
                 )
               </span>
@@ -353,12 +366,14 @@ export default function MyDebtInstrumentsPage() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Landmark className="mr-2 h-4 w-4 text-primary" />
-            Direct Debt Instruments
+            {t("direct_debt_instruments")}
           </CardTitle>
           <CardDescription>
-            Bonds, Certificates, Treasury Bills you own directly. (Projected
-            Interest: {formatCurrencyWithCommas(totalProjectedAnnualInterest)}{" "}
-            annually)
+            {t(
+              "bonds_certificates_treasury_bills_you_own_directly_projected_interest"
+            )}
+            {formatCurrencyWithCommas(totalProjectedAnnualInterest)}{" "}
+            {t("annually")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -368,7 +383,7 @@ export default function MyDebtInstrumentsPage() {
             ))
           ) : (
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any direct debt investments yet.
+              {t("you_havent_added_any_direct_debt_investments_yet")}
             </p>
           )}
         </CardContent>
@@ -379,10 +394,10 @@ export default function MyDebtInstrumentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Building className="mr-2 h-4 w-4 text-primary" />
-              Debt Fund Investments
+              {t("debt_fund_investments")}
             </CardTitle>
             <CardDescription>
-              Funds primarily investing in debt instruments.
+              {t("funds_primarily_investing_in_debt_instruments")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -394,10 +409,10 @@ export default function MyDebtInstrumentsPage() {
       )}
 
       <Link href="/investments/add?type=Debt Instruments" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
           aria-label="Add new debt instrument"
         >
           <Plus className="h-7 w-7" />
