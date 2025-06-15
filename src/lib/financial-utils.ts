@@ -10,6 +10,7 @@ import type {
   RealEstateInvestment,
   CurrencyInvestment,
 } from "@/lib/types";
+import { parseDateString } from "./utils";
 
 export interface CashFlowSummaryArgs {
   incomeRecords: IncomeRecord[];
@@ -50,23 +51,6 @@ export function calculateMonthlyCashFlowSummary({
 }: CashFlowSummaryArgs): CashFlowSummaryResult {
   const currentMonthStart = startOfMonth(month);
   const currentMonthEnd = endOfMonth(month);
-
-  // Helper: parse YYYY-MM-DD to Date
-  const parseDateString = (dateStr?: string): Date | null => {
-    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-    const [year, month, day] = dateStr.split("-").map(Number);
-    if (
-      isNaN(year) ||
-      isNaN(month) ||
-      isNaN(day) ||
-      month < 1 ||
-      month > 12 ||
-      day < 1 ||
-      day > 31
-    )
-      return null;
-    return new Date(year, month - 1, day);
-  };
 
   // Fixed income breakdown
   let monthlySalary = 0,

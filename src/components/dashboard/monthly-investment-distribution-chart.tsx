@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import * as React from "react";
 import { useInvestments } from "@/hooks/use-investments";
@@ -7,24 +8,8 @@ import { startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";
 
-const INVESTMENT_TYPE_LABELS: Record<string, string> = {
-  "Real Estate": "Real Estate",
-  Gold: "Gold",
-  Stocks: "Stocks",
-  "Debt Instruments": "Debt instruments",
-  "Debt instruments": "Debt instruments",
-  Currencies: "Currencies",
-};
-
-const INVESTMENT_ORDER = [
-  "Real Estate",
-  "Gold",
-  "Stocks",
-  "Debt instruments",
-  "Currencies",
-];
-
 export function MonthlyInvestmentDistributionChart() {
+  const { t } = useLanguage();
   const { investments, isLoading } = useInvestments();
   const { resolvedTheme } = useTheme();
 
@@ -66,7 +51,7 @@ export function MonthlyInvestmentDistributionChart() {
     if (cashFlowSummary.totalStockInvestmentThisMonth > 0) {
       data.push({
         id: "Stocks",
-        label: "Stocks",
+        label: t("stocks"),
         value: cashFlowSummary.totalStockInvestmentThisMonth,
         color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
       });
@@ -74,7 +59,7 @@ export function MonthlyInvestmentDistributionChart() {
     if (cashFlowSummary.totalGoldInvestmentThisMonth > 0) {
       data.push({
         id: "Gold",
-        label: "Gold",
+        label: t("gold"),
         value: cashFlowSummary.totalGoldInvestmentThisMonth,
         color: "#e6b93e",
       });
@@ -82,7 +67,7 @@ export function MonthlyInvestmentDistributionChart() {
     if (cashFlowSummary.totalDebtInvestmentThisMonth > 0) {
       data.push({
         id: "Debt instruments",
-        label: "Debt instruments",
+        label: t("debt_instruments"),
         value: cashFlowSummary.totalDebtInvestmentThisMonth,
         color: resolvedTheme === "dark" ? "#b6d037" : "#5e9c1c",
       });
@@ -90,7 +75,7 @@ export function MonthlyInvestmentDistributionChart() {
     if (cashFlowSummary.totalCurrencyInvestmentThisMonth > 0) {
       data.push({
         id: "Currencies",
-        label: "Currencies",
+        label: t("currencies"),
         value: cashFlowSummary.totalCurrencyInvestmentThisMonth,
         color: resolvedTheme === "dark" ? "#45818e" : "#7bb661",
       });
@@ -98,7 +83,7 @@ export function MonthlyInvestmentDistributionChart() {
     if (realEstateInstallmentsMonthly > 0) {
       data.push({
         id: "Real Estate",
-        label: "Real Estate",
+        label: t("real_estate"),
         value: realEstateInstallmentsMonthly,
         color: resolvedTheme === "dark" ? "#7bb661" : "#b6d037",
       });
@@ -108,7 +93,7 @@ export function MonthlyInvestmentDistributionChart() {
 
   return (
     <InvestmentDistributionCard
-      title="Monthly Investment Distribution"
+      title={t("Monthly Investment Distribution")}
       chartData={chartData}
       total={chartData.reduce((total, item) => total + item.value, 0)}
     />

@@ -1,7 +1,8 @@
+import { useLanguage } from "@/contexts/language-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useInvestments } from "@/hooks/use-investments";
-import { formatNumberWithSuffix } from "@/lib/utils";
+import { formatNumberWithSuffix, parseDateString } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
@@ -14,49 +15,33 @@ import {
 import React from "react";
 
 const investmentTypeIcons = {
-  "Real Estate": Landmark,
+  ["Real Estate"]: Landmark,
   Gold: Coins,
   Stocks: LineChart,
-  "Debt instruments": FileText,
+  ["Debt Instruments"]: FileText,
   Currencies: CircleDollarSign,
 };
 
 const investmentTypeColors = {
-  "Real Estate": "#a6c037",
+  ["Real Estate"]: "#a6c037",
   Gold: "#e6b93e",
   Stocks: "#e05a47",
-  "Debt instruments": "#5e9c1c",
+  ["Debt Instruments"]: "#5e9c1c",
   Currencies: "#45818e",
 };
 
 import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
 export function InvestmentBreakdownCards() {
+  const { t } = useLanguage();
   const { investments } = useInvestments();
   if (!investments || investments.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        No investments found.
+        {t("no_investments_found")}
       </div>
     );
   }
-
-  // Helper: parse YYYY-MM-DD to Date
-  const parseDateString = (dateStr?: string): Date | null => {
-    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-    const [year, month, day] = dateStr.split("-").map(Number);
-    if (
-      isNaN(year) ||
-      isNaN(month) ||
-      isNaN(day) ||
-      month < 1 ||
-      month > 12 ||
-      day < 1 ||
-      day > 31
-    )
-      return null;
-    return new Date(year, month - 1, day);
-  };
 
   // Calculate invested amount for each type
   const now = new Date();
@@ -164,7 +149,7 @@ export function InvestmentBreakdownCards() {
               <div className="flex flex-wrap gap-4 items-end justify-between mt-2">
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
-                    Invested
+                    {t("invested")}
                   </div>
                   <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {formatNumberWithSuffix(invested)}
@@ -172,7 +157,7 @@ export function InvestmentBreakdownCards() {
                 </div>
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
-                    Current
+                    {t("current")}
                   </div>
                   <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {formatNumberWithSuffix(current)}
@@ -180,7 +165,7 @@ export function InvestmentBreakdownCards() {
                 </div>
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
-                    % of Portfolio
+                    {t("of_portfolio")}
                   </div>
                   <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {percent.toFixed(1)}%
@@ -188,7 +173,7 @@ export function InvestmentBreakdownCards() {
                 </div>
                 <div>
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
-                    P/L %
+                    {t("pl")}
                   </div>
                   <div
                     className={`font-bold text-lg md:text-xl ${

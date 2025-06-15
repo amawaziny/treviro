@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import * as React from "react";
 import { useInvestments } from "@/hooks/use-investments";
@@ -23,6 +24,7 @@ const INVESTMENT_ORDER = [
 ];
 
 export function InvestmentDistributionChart() {
+  const { t } = useLanguage();
   const { investments, isLoading } = useInvestments();
   const { resolvedTheme } = useTheme();
 
@@ -99,7 +101,7 @@ export function InvestmentDistributionChart() {
   if (hasNoInvestments) {
     return (
       <InvestmentDistributionCard
-        title="Investment Distribution"
+        title={t("Investment Distribution")}
         chartData={[]}
         allChartData={chartData}
         total={0}
@@ -112,7 +114,7 @@ export function InvestmentDistributionChart() {
 
   return (
     <InvestmentDistributionCard
-      title="Investment Distribution"
+      title={t("Investment Distribution")}
       chartData={filteredChartData}
       allChartData={chartData}
       total={totalValue}

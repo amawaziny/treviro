@@ -26,6 +26,7 @@ import {
   formatMonthYear,
   formatDateDisplay,
   formatCurrencyWithCommas,
+  parseDateString,
 } from "@/lib/utils";
 import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import {
@@ -38,23 +39,6 @@ import {
   GoldInvestment,
 } from "@/lib/types";
 import type { Installment } from "@/components/investments/real-estate/installment-table";
-
-// Helper function to parse YYYY-MM-DD string to a local Date object
-const parseDateString = (dateStr?: string): Date | null => {
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-  const [year, month, day] = dateStr.split("-").map(Number);
-  if (
-    isNaN(year) ||
-    isNaN(month) ||
-    isNaN(day) ||
-    month < 1 ||
-    month > 12 ||
-    day < 1 ||
-    day > 31
-  )
-    return null;
-  return new Date(year, month - 1, day);
-};
 
 export default function CashFlowPage() {
   const { t: t } = useLanguage();
@@ -89,7 +73,7 @@ export default function CashFlowPage() {
 
   const totalDebtInvestmentThisMonth = (investments || [])
     .filter((investment) => {
-      if (investment.type !== t("debt_instruments")) return false;
+      if (investment.type !== "Debt Instruments") return false;
       const debtInv = investment as DebtInstrumentInvestment;
       const purchaseDate = parseDateString(debtInv.purchaseDate);
       return (

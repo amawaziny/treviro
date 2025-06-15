@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import * as React from "react";
 import { ResponsivePie } from "@nivo/pie";
@@ -35,6 +36,7 @@ export function InvestmentDistributionCard({
   onCheckboxChange = () => {},
   isEmpty = false,
 }: InvestmentDistributionCardProps) {
+  const { t } = useLanguage();
   // Use allChartData for legend if provided, otherwise fall back to chartData
   const legendData = allChartData || chartData;
   const { resolvedTheme } = useTheme();
@@ -48,7 +50,7 @@ export function InvestmentDistributionCard({
   const skeletonData = [
     {
       id: "empty",
-      label: "No investments",
+      label: t("no_investments"),
       value: 1,
       color: isDark ? "#2d3748" : "#e2e8f0",
     },
@@ -165,7 +167,7 @@ export function InvestmentDistributionCard({
                         opacity: 0.7,
                       }}
                     >
-                      Total
+                      {t("total")}
                     </text>
                   </g>
                 );
