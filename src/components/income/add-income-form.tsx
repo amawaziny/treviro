@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/numeric-input";
@@ -31,12 +31,8 @@ import { useInvestments } from "@/hooks/use-investments"; // To access addIncome
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { format } from "date-fns";
 import type { IncomeRecord } from "@/lib/types";
-
-const getCurrentDate = () => {
-  return format(new Date(), "yyyy-MM-dd");
-};
+import { getCurrentDate } from "@/lib/utils";
 
 const initialFormValues: AddIncomeFormValues = {
   type: "Profit Share",
@@ -58,6 +54,7 @@ export function AddIncomeForm({
   onSubmit,
   isEditMode = false,
 }: AddIncomeFormProps) {
+  const { t } = useLanguage();
   const { addIncomeRecord } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -87,16 +84,16 @@ export function AddIncomeForm({
 
       await addIncomeRecord(incomeDataToSave);
       toast({
-        title: "Income Record Added",
-        description: `${values.type} of ${values.amount} EGP recorded successfully.`,
+        title: t("income_record_added"),
+        description: `${values.type} ${t("of")} ${values.amount} EGP ${t("recorded successfully")}.`,
       });
       form.reset(initialFormValues);
       router.push("/income");
     } catch (error: any) {
-      console.error("Error adding income record:", error);
+      console.error(t("error_adding_income_record"), error);
       toast({
-        title: "Failed to Add Income",
-        description: error.message || "Could not save the income record.",
+        title: t("failed_to_add_income"),
+        description: error.message || t("could_not_save_the_income_record"),
         variant: "destructive",
       });
     }
@@ -114,14 +111,14 @@ export function AddIncomeForm({
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Income Type</FormLabel>
+                <FormLabel>{t("income_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select income type" />
+                      <SelectValue placeholder={t("Select income type")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -140,15 +137,16 @@ export function AddIncomeForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="source"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Source (Optional)</FormLabel>
+                <FormLabel>{t("source_optional")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g., Company XYZ, Project ABC"
+                    placeholder={t("e.g., Company XYZ, Project ABC")}
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -157,12 +155,13 @@ export function AddIncomeForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount (EGP)</FormLabel>
+                <FormLabel>{t("amount_egp")}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5000.00"
@@ -175,12 +174,13 @@ export function AddIncomeForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date</FormLabel>
+                <FormLabel>{t("Date")}</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -192,15 +192,16 @@ export function AddIncomeForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Description (Optional)</FormLabel>
+                <FormLabel>{t("description_optional")}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="e.g., Q3 Profit Share, Freelance Project X"
+                    placeholder={t("e.g., Q3 Profit Share, Freelance Project X")}
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -215,7 +216,7 @@ export function AddIncomeForm({
           {form.formState.isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          {isEditMode ? "Update Income Record" : "Add Income Record"}
+          {isEditMode ? t("update_income_record") : t("add_income_record")}
         </Button>
       </form>
     </Form>
