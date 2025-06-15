@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import type { AggregatedCurrencyHolding } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +12,7 @@ interface MyCurrencyListItemProps {
 }
 
 export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
+  const { t: t } = useLanguage();
   const {
     currencyCode,
     totalForeignAmount,
@@ -27,7 +29,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
 
   const formatRate = (value: number | undefined) => {
     if (value === undefined || value === null || Number.isNaN(value))
-      return "N/A";
+      return t("na");
     return value.toFixed(4);
   };
 
@@ -37,7 +39,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
       ? "∞"
       : profitOrLossPercentage !== undefined
         ? profitOrLossPercentage.toFixed(2) + "%"
-        : "N/A";
+        : t("na");
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -50,7 +52,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             <div className="truncate">
               <p className="text-lg font-semibold truncate">{currencyCode}</p>
               <p className="text-xs text-muted-foreground truncate md:hidden">
-                Held:{" "}
+                {t("held")}{" "}
                 {formatNumberWithSuffix(totalForeignAmount || 0, currencyCode)}
               </p>
             </div>
@@ -97,24 +99,25 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
                 variant="outline"
                 className="text-xs flex items-center gap-1"
               >
-                <Info className="h-3 w-3" /> Market N/A
+                <Info className="h-3 w-3" />
+                {t("market_na")}
               </Badge>
             )}
           </div>
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
           <p>
-            Avg. Buy Rate:{" "}
+            {t("avg_buy_rate")}{" "}
             <span className="font-medium text-foreground">
               {formatRate(averagePurchaseRateToEGP)} EGP
             </span>
           </p>
           <p>
-            Market Rate:{" "}
+            {t("market_rate")}{" "}
             <span className="font-medium text-foreground">
               {hasMarketRate
                 ? formatRate(currentMarketRateToEGP) + " EGP"
-                : "N/A"}
+                : t("na")}
             </span>
           </p>
         </div>
