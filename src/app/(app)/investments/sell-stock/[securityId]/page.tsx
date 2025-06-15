@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { SellStockForm } from "@/components/investments/stocks/sell-stock-form";
 import {
@@ -6,7 +7,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ import { useForm } from "@/contexts/form-context";
 import type { ListedSecurity } from "@/lib/types";
 
 export default function SellSecurityPage() {
+  const { t: t } = useLanguage();
   const params = useParams();
   const securityId = params.securityId as string;
   const { listedSecurities, isLoading } = useListedSecurities();
@@ -27,13 +28,13 @@ export default function SellSecurityPage() {
     openForm();
 
     if (security) {
-      const pageTitle = `Sell: ${security.name} ${security.securityType === "Fund" ? `(${security.fundType})` : ""}`;
+      const pageTitle = `${t("Sell")}: ${security.name} ${security.securityType === "Fund" ? `(${security.fundType})` : ""}`;
 
       setHeaderProps({
         showBackButton: true,
         backHref: `/securities/details/${securityId}`,
-        backLabel: "Back to Security Details",
-        title: "Sell Order",
+        backLabel: t("back_to_security_details"),
+        title: pageTitle,
         showNavControls: false,
       });
     }

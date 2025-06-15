@@ -26,13 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Home,
-  Building,
-  Plus,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { Home, Building, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
@@ -43,10 +37,7 @@ import { MyRealEstateListItem } from "@/components/investments/real-estate/my-re
 
 export default function MyRealEstatePage() {
   const { t } = useLanguage();
-  const {
-    investments,
-    isLoading: isLoadingInvestments,
-  } = useInvestments();
+  const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
   const { language } = useLanguage();
@@ -292,9 +283,7 @@ export default function MyRealEstatePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead
-                    className={cn(
-                      language === "ar" ? "text-end" : "text-left",
-                    )}
+                    className={cn(language === "ar" ? "text-end" : "text-left")}
                   >
                     {t("fund_name_symbol")}
                   </TableHead>
