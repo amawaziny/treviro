@@ -27,6 +27,7 @@ import { cn, formatCurrencyWithCommas } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 
 export default function FixedEstimatesPage() {
+  const { t } = useLanguage();
   const { fixedEstimates, isLoading } = useInvestments();
   const { language } = useLanguage();
 
@@ -54,11 +55,12 @@ export default function FixedEstimatesPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Fixed Estimates
+          {t("fixed_estimates")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Manage your recurring income and expenses like salary, Zakat, and
-          charity.
+          {t(
+            "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity"
+          )}
         </p>
       </div>
       <Separator />
@@ -66,9 +68,9 @@ export default function FixedEstimatesPage() {
       {fixedEstimates.length > 0 ? (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Your Fixed Estimates</CardTitle>
+            <CardTitle>{t("your_fixed_estimates")}</CardTitle>
             <CardDescription>
-              A list of your set recurring financial estimates.
+              {t("a_list_of_your_set_recurring_financial_estimates")}
             </CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
@@ -76,23 +78,31 @@ export default function FixedEstimatesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead
-                    className={cn(language === "ar" ? "text-end" : "text-left")}
+                    className={cn(
+                      language === "ar" ? "text-end" : "text-left"
+                    )}
                   >
                     Type
                   </TableHead>
                   <TableHead
-                    className={cn(language === "ar" ? "text-end" : "text-left")}
+                    className={cn(
+                      language === "ar" ? "text-end" : "text-left"
+                    )}
                   >
                     Name
                   </TableHead>
                   <TableHead className="text-end">Amount</TableHead>
                   <TableHead
-                    className={cn(language === "ar" ? "text-end" : "text-left")}
+                    className={cn(
+                      language === "ar" ? "text-end" : "text-left"
+                    )}
                   >
                     Period
                   </TableHead>
                   <TableHead
-                    className={cn(language === "ar" ? "text-end" : "text-left")}
+                    className={cn(
+                      language === "ar" ? "text-end" : "text-left"
+                    )}
                   >
                     Nature
                   </TableHead>
@@ -104,42 +114,42 @@ export default function FixedEstimatesPage() {
                   <TableRow key={record.id}>
                     <TableCell
                       className={cn(
-                        language === "ar" ? "text-end" : "text-left",
+                        language === "ar" ? "text-end" : "text-left"
                       )}
                     >
                       {record.type}
                     </TableCell>
                     <TableCell
                       className={cn(
-                        language === "ar" ? "text-end" : "text-left",
+                        language === "ar" ? "text-end" : "text-left"
                       )}
                     >
-                      {record.name || "N/A"}
+                      {record.name || t("na")}
                     </TableCell>
                     <TableCell className="text-end">
                       {formatCurrencyWithCommas(record.amount)}
                     </TableCell>
                     <TableCell
                       className={cn(
-                        language === "ar" ? "text-end" : "text-left",
+                        language === "ar" ? "text-end" : "text-left"
                       )}
                     >
                       {record.period}
                     </TableCell>
                     <TableCell
                       className={cn(
-                        language === "ar" ? "text-end" : "text-left",
+                        language === "ar" ? "text-end" : "text-left"
                       )}
                     >
                       {record.isExpense ? "Expense" : "Income"}
                     </TableCell>
                     {/* Actions cell for edit/delete will be added in Phase 2 */}
                     {/* 
-                    <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-end')}>
-                      <Button variant="ghost" size="icon" disabled> <Edit className="h-4 w-4" /> </Button>
-                      <Button variant="ghost" size="icon" disabled> <Trash2 className="h-4 w-4 text-destructive" /> </Button>
-                    </TableCell> 
-                    */}
+                  <TableCell className={cn(language === 'ar' ? 'text-left' : 'text-end')}>
+                   <Button variant="ghost" size="icon" disabled> <Edit className="h-4 w-4" /> </Button>
+                   <Button variant="ghost" size="icon" disabled> <Trash2 className="h-4 w-4 text-destructive" /> </Button>
+                  </TableCell> 
+                  */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -151,22 +161,22 @@ export default function FixedEstimatesPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Settings className="mr-2 h-4 w-4 text-primary" />
-              No Fixed Estimates Set
+              {t("no_fixed_estimates_set")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any fixed estimates yet.
+              {t("you_havent_added_any_fixed_estimates_yet")}
             </p>
           </CardContent>
         </Card>
       )}
 
       <Link href="/fixed-estimates/add" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
           aria-label="Add new fixed estimate"
         >
           <Plus className="h-7 w-7" />
