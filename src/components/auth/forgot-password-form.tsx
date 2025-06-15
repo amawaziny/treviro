@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useLanguage } from "@/contexts/language-context";
 
 interface ForgotPasswordFormProps {
   onBack: () => void;
@@ -24,6 +25,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { sendPasswordResetEmail } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,15 +34,14 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
     try {
       await sendPasswordResetEmail(email);
       toast({
-        title: "Password Reset Email Sent",
-        description:
-          "Please check your email for instructions to reset your password.",
+        title: t("password_reset_email_sent"),
+        description: t("check_email_for_instructions"),
       });
       onBack();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to send password reset email.",
+        title: t("error"),
+        description: error.message || t("failed_to_send_reset_email"),
         variant: "destructive",
       });
     } finally {
@@ -53,24 +54,23 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       <Card className="w-full max-w-md shadow-xl mx-4">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
-            Treviro
+            {t("app_name")}
           </CardTitle>
-          <CardDescription>Securely manage your investments.</CardDescription>
+          <CardDescription>{t("securely_manage_investments")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-semibold tracking-tight">
-                Reset your password
+                {t("reset_your_password")}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Enter your email address and we'll send you a link to reset your
-                password.
+                {t("forgot_password_instruction")}
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -82,7 +82,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Reset Link
+                {t("send_reset_link")}
               </Button>
               <Button
                 type="button"
@@ -91,7 +91,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
                 onClick={onBack}
                 disabled={isLoading}
               >
-                Back to Sign In
+                {t("back_to_sign_in")}
               </Button>
             </form>
           </div>

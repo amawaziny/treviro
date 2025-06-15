@@ -14,6 +14,7 @@ import { useState } from "react";
 import { ForgotPasswordForm } from "./forgot-password-form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/contexts/language-context";
 
 function getPasswordStrength(password: string) {
   let score = 0;
@@ -75,6 +76,7 @@ export function AuthForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showSpinner, setShowSpinner] = useState(false);
+  const { t } = useLanguage();
 
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,25 +109,25 @@ export function AuthForm() {
       <Card className="w-full max-w-md shadow-xl mx-4">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
-            Treviro
+            {t("app_name")}
           </CardTitle>
-          <CardDescription>Securely manage your investments.</CardDescription>
+          <CardDescription>{t("securely_manage_investments")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-semibold tracking-tight">
-                {mode === "sign-in" ? "Welcome back" : "Create an account"}
+                {mode === "sign-in" ? t("welcome_back") : t("create_an_account")}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {mode === "sign-in"
-                  ? "Enter your email to sign in to your account"
-                  : "Enter your email to create your account"}
+                  ? t("enter_email_to_sign_in")
+                  : t("enter_email_to_create_account")}
               </p>
             </div>
             <form onSubmit={handleEmailAuth} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -137,7 +139,7 @@ export function AuthForm() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("password")}</Label>
                   {mode === "sign-in" && (
                     <Button
                       type="button"
@@ -145,7 +147,7 @@ export function AuthForm() {
                       className="px-0 font-normal"
                       onClick={() => setMode("forgot-password")}
                     >
-                      Forgot password?
+                      {t("forgot_password")}
                     </Button>
                   )}
                 </div>
@@ -169,14 +171,14 @@ export function AuthForm() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Password must be at least 6 characters long
+                    {t("password_must_be_at_least_6_chars")}
                   </p>
                 </>
               )}
               {error && <div className="text-red-500 text-sm">{error}</div>}
               <Button type="submit" className="w-full" disabled={showSpinner}>
                 {showSpinner && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "sign-in" ? "Sign In" : "Sign Up"}
+                {mode === "sign-in" ? t("sign_in") : t("sign_up")}
               </Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -184,7 +186,7 @@ export function AuthForm() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
+                    {t("or_continue_with")}
                   </span>
                 </div>
               </div>
@@ -213,32 +215,32 @@ export function AuthForm() {
                     fill="#EA4335"
                   />
                 </svg>
-                Google
+                {t("google")}
               </Button>
             </form>
             <div className="text-center text-sm">
               {mode === "sign-in" ? (
                 <p>
-                  Don't have an account?{" "}
+                  {t("dont_have_account")}{" "}
                   <Button
                     type="button"
                     variant="link"
                     className="px-0 font-normal"
                     onClick={() => setMode("sign-up")}
                   >
-                    Sign up
+                    {t("sign_up")}
                   </Button>
                 </p>
               ) : (
                 <p>
-                  Already have an account?{" "}
+                  {t("already_have_account")}{" "}
                   <Button
                     type="button"
                     variant="link"
                     className="px-0 font-normal"
                     onClick={() => setMode("sign-in")}
                   >
-                    Sign in
+                    {t("sign_in")}
                   </Button>
                 </p>
               )}

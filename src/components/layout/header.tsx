@@ -12,13 +12,13 @@ import { useForm } from "@/contexts/form-context";
 
 export function Header() {
   const isMobile = useIsMobile();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { headerProps } = useForm();
 
   const {
     showBackButton = false,
     backHref = "/dashboard",
-    backLabel = "Back",
+    backLabel = t("back"),
     title = "",
     showNavControls = true,
   } = headerProps;
@@ -40,7 +40,7 @@ export function Header() {
               >
                 <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
                   <BackArrowIcon className="h-4 w-4" />
-                  <span className="sr-only">{backLabel}</span>
+                  <span className="sr-only">{t("back_button_label")}</span>
                 </Button>
               </Link>
               {title && (
@@ -52,7 +52,7 @@ export function Header() {
           ) : (
             <Link href="/dashboard" className="flex items-center space-x-2">
               <Coins className="h-7 w-7 text-primary" />
-              <span className="text-2xl font-bold text-primary">Treviro</span>
+              <span className="text-2xl font-bold text-primary">{t("app_name")}</span>
             </Link>
           )}
         </div>
