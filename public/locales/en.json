@@ -94,6 +94,7 @@
   "textend": "text-end",
   "textleft": "text-left",
   "this_action_will_permanently_delete_this_expense_record_this_cannot_be_undone": "This action will permanently delete this expense\n                                record. This cannot be undone.",
+  "this_action_will_permanently_delete_this_fixed_estimate_record_this_cannot_be_undone":"This action will permanently delete this fixed estimate\n                                record. This cannot be undone.",
   "total": "Total:",
   "total_cash_balance": "Total Cash Balance",
   "total_current_portfolio_pl": "Total Current Portfolio P/L",
