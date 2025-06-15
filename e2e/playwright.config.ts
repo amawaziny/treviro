@@ -1,16 +1,23 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config({ path: './e2e/.env' });
 
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: Number(process.env.TEST_RETRIES) || (process.env.CI ? 2 : 0),
+  workers: Number(process.env.TEST_WORKERS) || (process.env.CI ? 1 : undefined),
+  timeout: Number(process.env.TEST_TIMEOUT) || 30000,
   reporter: 'html',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    headless: process.env.HEADLESS === 'true',
+    // slowMo: Number(process.env.SLOW_MO) || 0,
   },
   projects: [
     {

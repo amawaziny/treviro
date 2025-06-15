@@ -26,7 +26,7 @@ const __dirname = dirname(__filename);
 
 // Configuration
 const PROJECT_ROOT = process.cwd();
-const TARGET_SRC_DIR = join(PROJECT_ROOT, "src", "components", "investments", "currencies"); // Targeting specific directory
+const TARGET_SRC_DIR = join(PROJECT_ROOT, "src", "components", "investments", "debt"); // Targeting specific directory
 const LOCALES_DIR = join(PROJECT_ROOT, "public", "locales"); // Locales are in public
 const IGNORE_DIRS = [
   "node_modules",

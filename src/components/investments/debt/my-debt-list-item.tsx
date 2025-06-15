@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import Image from "next/image";
 import type { AggregatedDebtHolding } from "@/lib/types";
@@ -47,6 +48,7 @@ const buttonVariants = ({
 };
 
 export function MyDebtListItem({ holding }: MyDebtListItemProps) {
+  const { t: t } = useLanguage();
   const { removeStockInvestmentsBySymbol } = useInvestments();
   const { toast } = useToast();
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
@@ -57,7 +59,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     digitsOverride?: number,
   ) => {
     if (value === undefined || value === null || Number.isNaN(value))
-      return "N/A";
+      return t("na");
     const digits = digitsOverride ?? (curr === "EGP" ? 3 : 2);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -72,12 +74,12 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
       try {
         await removeStockInvestmentsBySymbol(fundDetails.symbol);
         toast({
-          title: "Debt Fund Removed",
+          title: t("debt_fund_removed"),
           description: `All investments in ${displayName} (${fundDetails.symbol}) have been removed.`,
         });
       } catch (error: any) {
         toast({
-          title: "Error Removing Fund",
+          title: t("error_removing_fund"),
           description: error.message || `Could not remove ${displayName}.`,
           variant: "destructive",
         });
@@ -128,7 +130,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                       )}
                     </span>
                   ) : (
-                    "Debt Item"
+                    t("debt_item")
                   )}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
@@ -146,22 +148,24 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                   )}
                 </p>
               ) : (
-                <p className="text-sm text-muted-foreground">N/A</p>
+                <p className="text-sm text-muted-foreground">{t("na")}</p>
               )}
             </div>
           </div>
           <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
             <p>
-              Interest Rate:{" "}
+              {t("interest_rate")}{" "}
               <span>
-                {holding.interestRate ? `${holding.interestRate}%` : "N/A"}
+                {holding.interestRate ? `${holding.interestRate}%` : t("na")}
               </span>
             </p>
             <p className="text-end">
-              Maturity: <span>{holding.maturityDate || "N/A"}</span>
+              {t("maturity")}
+              <span>{holding.maturityDate || t("na")}</span>
             </p>
             <p>
-              Monthly Interest:
+              {t("monthly_interest")}
+
               {typeof holding.projectedMonthlyInterest === "number" ? (
                 <span>
                   {formatNumberWithSuffix(
@@ -170,11 +174,12 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                   )}
                 </span>
               ) : (
-                "N/A"
+                t("na")
               )}
             </p>
             <p className="text-end">
-              Annual Interest:
+              {t("annual_interest")}
+
               {typeof holding.projectedAnnualInterest === "number" ? (
                 <span>
                   {formatNumberWithSuffix(
@@ -183,7 +188,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                   )}
                 </span>
               ) : (
-                "N/A"
+                t("na")
               )}
             </p>
           </div>
@@ -236,7 +241,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                         : displayName
                       : typeof holding.amountInvested === "number"
                         ? `${formatNumberWithSuffix(holding.amountInvested, holding.currency)}`
-                        : "Debt Item"}
+                        : t("debt_item")}
                   </p>
                 </Link>
               ) : (
@@ -246,16 +251,17 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 >
                   {typeof holding.amountInvested === "number"
                     ? `${formatNumberWithSuffix(holding.amountInvested, holding.currency)}`
-                    : "Debt Item"}
+                    : t("debt_item")}
                 </p>
               )}
               <p className="text-xs text-muted-foreground truncate">
-                {fundDetails?.symbol} - Units:
+                {fundDetails?.symbol}
+                {t("units")}
                 <span className="md:hidden">
-                  {totalUnits ? formatNumberWithSuffix(totalUnits) : "N/A"}
+                  {totalUnits ? formatNumberWithSuffix(totalUnits) : t("na")}
                 </span>
                 <span className="hidden md:inline">
-                  {totalUnits?.toLocaleString() ?? "N/A"}
+                  {totalUnits?.toLocaleString() ?? t("na")}
                 </span>
               </p>
             </div>
@@ -267,7 +273,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 <p
                   className={cn(
                     "text-lg font-bold",
-                    isProfitable ? "text-accent" : "text-destructive",
+                    isProfitable ? t("textaccent") : t("textdestructive"),
                   )}
                 >
                   <span className="md:hidden">
@@ -293,11 +299,11 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                   )}
                   {profitLossPercent === Infinity
                     ? "∞%"
-                    : (profitLossPercent?.toFixed(2) ?? "N/A") + "%"}
+                    : (profitLossPercent?.toFixed(2) ?? t("na")) + "%"}
                 </Badge>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">Market N/A</p>
+              <p className="text-sm text-muted-foreground">{t("market_na")}</p>
             )}
           </div>
           <AlertDialog
@@ -316,10 +322,14 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action will permanently remove all your investment
-                  records for {displayName}. This cannot be undone.
+                  {t(
+                    "this_action_will_permanently_remove_all_your_investment_records_for",
+                  )}
+
+                  {displayName}
+                  {t("this_cannot_be_undone")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -337,7 +347,8 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
 
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
           <p>
-            Avg. Cost:
+            {t("avg_cost")}
+
             <span className="md:hidden">
               {formatNumberWithSuffix(averagePurchasePrice || 0, currency)}
             </span>
@@ -346,7 +357,8 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             </span>
           </p>
           <p>
-            Current Value:
+            {t("current_value")}
+
             <span className="md:hidden">
               {formatNumberWithSuffix(currentMarketPrice || 0, currency)}
             </span>
