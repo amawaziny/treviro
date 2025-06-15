@@ -78,7 +78,7 @@ export function BottomTabBar() {
                 <li key={item.href + idx}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-3 block text-base font-medium"
+                    className="flex items-center gap-3 text-base font-medium"
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.icon ? <item.icon className="h-4 w-4" /> : null}
