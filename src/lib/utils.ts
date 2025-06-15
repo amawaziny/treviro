@@ -43,7 +43,10 @@ export function isDebtRelatedFund(fundType?: string): boolean {
   return debtKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
-export function formatNumberWithSuffix(num: number | undefined, currency: string = "EGP"): string {
+export function formatNumberWithSuffix(
+  num: number | undefined,
+  currency: string = "EGP",
+): string {
   if (num === undefined || num === null || isNaN(num))
     return `${currency} 0.00`;
   const absNum = Math.abs(num);
@@ -114,11 +117,11 @@ export function formatCurrencyWithCommas(
   if (isNaN(num)) return `${currency} 0.000`;
   // toFixed(3) ensures 3 digits after decimal
   return new Intl.NumberFormat("en-EG", {
-        style: "currency",
-        currency: currency,
-        minimumFractionDigits: digitsOverride ?? 3,
-        maximumFractionDigits: digitsOverride ?? 3,
-      }).format(num);
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: digitsOverride ?? 3,
+    maximumFractionDigits: digitsOverride ?? 3,
+  }).format(num);
 }
 
 // Helper function to identify stock-related funds

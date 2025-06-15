@@ -196,7 +196,7 @@ export default function ExpensesPage() {
         </h1>
         <p className="text-muted-foreground text-sm">
           {t(
-            "log_and_manage_all_your_itemized_expenses_including_credit_card_payments_and_utility_bills"
+            "log_and_manage_all_your_itemized_expenses_including_credit_card_payments_and_utility_bills",
           )}
         </p>
       </div>
@@ -238,7 +238,7 @@ export default function ExpensesPage() {
               <CardDescription>
                 {showAll
                   ? t(
-                      "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments"
+                      "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments",
                     )
                   : `${t("see_and_manage_all_expenses_required_for")} ${formatMonthYear(new Date())}, ${t("including_current_installments_and_one_time_payments")}`}
               </CardDescription>
@@ -248,8 +248,8 @@ export default function ExpensesPage() {
                 {formatCurrencyWithCommas(
                   filteredExpenses.reduce(
                     (sum, r) => sum + (r._requiredAmount || 0),
-                    0
-                  )
+                    0,
+                  ),
                 )}
               </span>
             </CardContent>
@@ -326,7 +326,7 @@ export default function ExpensesPage() {
                               </AlertDialogTitle>
                               <AlertDialogDescription>
                                 {t(
-                                  "this_action_will_permanently_delete_this_expense_record_this_cannot_be_undone"
+                                  "this_action_will_permanently_delete_this_expense_record_this_cannot_be_undone",
                                 )}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
@@ -356,7 +356,7 @@ export default function ExpensesPage() {
                         <div className="text-xs text-muted-foreground mt-1">
                           {t("installment_egp")}{" "}
                           {formatNumberWithSuffix(
-                            record.amount / record.numberOfInstallments
+                            record.amount / record.numberOfInstallments,
                           )}{" "}
                           x {record.numberOfInstallments} months
                         </div>

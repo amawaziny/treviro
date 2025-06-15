@@ -25,22 +25,27 @@ const INVESTMENT_ORDER = [
 export function InvestmentDistributionChart() {
   const { investments, isLoading } = useInvestments();
   const { resolvedTheme } = useTheme();
-  
-  const [checkedItems, setCheckedItems] = React.useState<Record<string, boolean>>(
-    INVESTMENT_ORDER.reduce((acc, type) => ({
-      ...acc,
-      [type]: true
-    }), {})
+
+  const [checkedItems, setCheckedItems] = React.useState<
+    Record<string, boolean>
+  >(
+    INVESTMENT_ORDER.reduce(
+      (acc, type) => ({
+        ...acc,
+        [type]: true,
+      }),
+      {},
+    ),
   );
-  
+
   const handleCheckboxChange = (type: string) => {
-    setCheckedItems(prev => ({
+    setCheckedItems((prev) => ({
       ...prev,
-      [type]: !prev[type]
+      [type]: !prev[type],
     }));
   };
-  
-  const allUnchecked = Object.values(checkedItems).every(checked => !checked);
+
+  const allUnchecked = Object.values(checkedItems).every((checked) => !checked);
 
   const chartData = React.useMemo(() => {
     if (isLoading || investments.length === 0) return [];
@@ -82,10 +87,13 @@ export function InvestmentDistributionChart() {
   // Filter chart data based on checked items
   const filteredChartData = React.useMemo(() => {
     if (allUnchecked) return [];
-    return chartData.filter(item => checkedItems[item.id] !== false);
+    return chartData.filter((item) => checkedItems[item.id] !== false);
   }, [chartData, checkedItems, allUnchecked]);
-  
-  const totalValue = filteredChartData.reduce((total, item) => total + item.value, 0);
+
+  const totalValue = filteredChartData.reduce(
+    (total, item) => total + item.value,
+    0,
+  );
   const hasNoInvestments = chartData.length === 0;
 
   if (hasNoInvestments) {

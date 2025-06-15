@@ -30,33 +30,20 @@ import {
   Home,
   Building,
   Plus,
-  Trash2,
   TrendingUp,
   TrendingDown,
-  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { cn, formatNumberWithSuffix } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { MyRealEstateListItem } from "@/components/investments/real-estate/my-real-estate-list-item";
 
 export default function MyRealEstatePage() {
+  const { t } = useLanguage();
   const {
     investments,
     isLoading: isLoadingInvestments,
@@ -71,7 +58,7 @@ export default function MyRealEstatePage() {
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(
-      (inv) => inv.type === "Real Estate",
+      (inv) => inv.type === t("real_estate"),
     ) as RealEstateInvestment[];
   }, [investments]);
 
@@ -197,10 +184,12 @@ export default function MyRealEstatePage() {
     <div className="space-y-8 relative min-h-[calc(100vh-56px)] pb-4">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Real Estate
+          {t("real_estate")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          Overview of your direct real estate and real estate fund investments.
+          {t(
+            "overview_of_your_direct_real_estate_and_real_estate_fund_investments",
+          )}
         </p>
       </div>
       <Separator />
@@ -208,7 +197,7 @@ export default function MyRealEstatePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Total Real Estate P/L (Funds)
+            {t("total_real_estate_pl_funds")}
           </CardTitle>
           {isTotalFundProfitable ? (
             <TrendingUp className="h-4 w-4 text-accent" />
@@ -237,12 +226,12 @@ export default function MyRealEstatePage() {
             {totalFundPnLPercent === Infinity
               ? "∞"
               : totalFundPnLPercent.toFixed(2)}
-            % overall P/L from funds
+            {t("overall_pl_from_funds")}
           </p>
           <div className="mt-2 pt-2 border-t">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                Total Invested in Real Estate:
+                {t("total_invested_in_real_estate")}
               </span>
               <span className="font-semibold">
                 {isMobile
@@ -252,10 +241,11 @@ export default function MyRealEstatePage() {
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                (Direct: {formatCurrencyWithCommas(totalDirectRealEstateInvested)})
+                {t("direct")}
+                {formatCurrencyWithCommas(totalDirectRealEstateInvested)})
               </span>
               <span>
-                (Funds:{" "}
+                {t("funds")}{" "}
                 {formatCurrencyWithCommas(
                   totalFundCost,
                   realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
@@ -278,12 +268,12 @@ export default function MyRealEstatePage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Home className="mr-2 h-4 w-4 text-primary" />
-              No Direct Real Estate Holdings
+              {t("no_direct_real_estate_holdings")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              You haven't added any direct real estate investments yet.
+              {t("you_havent_added_any_direct_real_estate_investments_yet")}
             </p>
           </CardContent>
         </Card>
@@ -293,10 +283,10 @@ export default function MyRealEstatePage() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Building className="mr-2 h-4 w-4 text-primary" />
-            Real Estate Fund Investments (REITs, etc.)
+            {t("real_estate_fund_investments_reits_etc")}
           </CardTitle>
           <CardDescription>
-            Funds primarily investing in real estate.
+            {t("funds_primarily_investing_in_real_estate")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -305,20 +295,26 @@ export default function MyRealEstatePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead
-                    className={cn(language === "ar" ? "text-end" : "text-left")}
+                    className={cn(
+                      language === "ar" ? "text-end" : "text-left",
+                    )}
                   >
-                    Fund Name (Symbol)
+                    {t("fund_name_symbol")}
                   </TableHead>
-                  <TableHead className="text-end">Units Held</TableHead>
+                  <TableHead className="text-end">{t("units_held")}</TableHead>
                   <TableHead className="text-end">
-                    Avg. Purchase Price
+                    {t("avg_purchase_price")}
                   </TableHead>
-                  <TableHead className="text-end">Total Invested</TableHead>
                   <TableHead className="text-end">
-                    Current Market Price
+                    {t("total_invested")}
                   </TableHead>
-                  <TableHead className="text-end">Current Value</TableHead>
-                  <TableHead className="text-end">P/L</TableHead>
+                  <TableHead className="text-end">
+                    {t("current_market_price")}
+                  </TableHead>
+                  <TableHead className="text-end">
+                    {t("current_value")}
+                  </TableHead>
+                  <TableHead className="text-end">{t("pl")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -342,7 +338,7 @@ export default function MyRealEstatePage() {
                         )
                       </TableCell>
                       <TableCell className="text-end">
-                        {fundInv.numberOfShares?.toLocaleString() || "N/A"}
+                        {fundInv.numberOfShares?.toLocaleString() || t("na")}
                       </TableCell>
                       <TableCell className="text-end">
                         {formatCurrencyWithCommas(
@@ -388,13 +384,13 @@ export default function MyRealEstatePage() {
             </Table>
           ) : (
             <p className="text-muted-foreground py-4 text-center">
-              No real estate-related fund investments found.
+              {t("no_real_estaterelated_fund_investments_found")}
             </p>
           )}
         </CardContent>
       </Card>
       <Link href="/investments/add?type=Real Estate" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}

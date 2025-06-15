@@ -44,8 +44,8 @@ export default function IncomePage() {
   if (!deleteIncomeRecord) {
     throw new Error(
       t(
-        "deleteincomerecord_function_is_required_but_not_provided_by_useinvestments"
-      )
+        "deleteincomerecord_function_is_required_but_not_provided_by_useinvestments",
+      ),
     );
   }
   const { language } = useLanguage();
@@ -95,7 +95,7 @@ export default function IncomePage() {
         </h1>
         <p className="text-muted-foreground text-sm">
           {t(
-            "log_and_manage_all_your_income_sources_including_salaries_gifts_and_other_earnings"
+            "log_and_manage_all_your_income_sources_including_salaries_gifts_and_other_earnings",
           )}
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function IncomePage() {
             <CardContent>
               <span className="text-xl font-bold text-foreground">
                 {formatCurrencyWithCommas(
-                  filteredIncome.reduce((sum, r) => sum + r.amount, 0)
+                  filteredIncome.reduce((sum, r) => sum + r.amount, 0),
                 )}
               </span>
             </CardContent>
@@ -189,7 +189,7 @@ export default function IncomePage() {
                               </AlertDialogTitle>
                               <AlertDialogDescription>
                                 {t(
-                                  "this_action_will_permanently_delete_this_income_record_this_cannot_be_undone"
+                                  "this_action_will_permanently_delete_this_income_record_this_cannot_be_undone",
                                 )}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
@@ -201,7 +201,10 @@ export default function IncomePage() {
                                   try {
                                     await deleteIncomeRecord(record.id);
                                   } catch (e) {
-                                    console.error(t("error_deleting_income_record"), e);
+                                    console.error(
+                                      t("error_deleting_income_record"),
+                                      e,
+                                    );
                                   }
                                 }}
                               >

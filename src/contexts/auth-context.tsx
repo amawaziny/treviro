@@ -20,8 +20,14 @@ interface AuthContextType {
   user: FirebaseUser | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-  signInWithEmailAndPassword: (email: string, password: string) => Promise<void>;
-  signUpWithEmailAndPassword: (email: string, password: string) => Promise<void>;
+  signInWithEmailAndPassword: (
+    email: string,
+    password: string,
+  ) => Promise<void>;
+  signUpWithEmailAndPassword: (
+    email: string,
+    password: string,
+  ) => Promise<void>;
   isLoading: boolean;
   isProcessingLogin: boolean;
   sendPasswordResetEmail: (email: string) => Promise<void>;
@@ -135,37 +141,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [router]);
 
-  const signInWithEmailAndPassword = useCallback(async (email: string, password: string) => {
-    if (!firebaseAuthService) {
-      console.error('AuthContext: Firebase Auth service not available for email sign-in.');
-      return;
-    }
-    setIsProcessingLogin(true);
-    try {
-      await firebaseSignInWithEmailAndPassword(firebaseAuthService, email, password);
-      console.log('AuthContext: Email sign-in successful.');
-    } catch (error: any) {
-      console.error('AuthContext: Error during email sign-in:', error.message);
-    } finally {
-      setIsProcessingLogin(false);
-    }
-  }, []);
+  const signInWithEmailAndPassword = useCallback(
+    async (email: string, password: string) => {
+      if (!firebaseAuthService) {
+        console.error(
+          "AuthContext: Firebase Auth service not available for email sign-in.",
+        );
+        return;
+      }
+      setIsProcessingLogin(true);
+      try {
+        await firebaseSignInWithEmailAndPassword(
+          firebaseAuthService,
+          email,
+          password,
+        );
+        console.log("AuthContext: Email sign-in successful.");
+      } catch (error: any) {
+        console.error(
+          "AuthContext: Error during email sign-in:",
+          error.message,
+        );
+      } finally {
+        setIsProcessingLogin(false);
+      }
+    },
+    [],
+  );
 
-  const signUpWithEmailAndPassword = useCallback(async (email: string, password: string) => {
-    if (!firebaseAuthService) {
-      console.error('AuthContext: Firebase Auth service not available for email sign-up.');
-      return;
-    }
-    setIsProcessingLogin(true);
-    try {
-      await firebaseCreateUserWithEmailAndPassword(firebaseAuthService, email, password);
-      console.log('AuthContext: Email sign-up successful.');
-    } catch (error: any) {
-      console.error('AuthContext: Error during email sign-up:', error.message);
-    } finally {
-      setIsProcessingLogin(false);
-    }
-  }, []);
+  const signUpWithEmailAndPassword = useCallback(
+    async (email: string, password: string) => {
+      if (!firebaseAuthService) {
+        console.error(
+          "AuthContext: Firebase Auth service not available for email sign-up.",
+        );
+        return;
+      }
+      setIsProcessingLogin(true);
+      try {
+        await firebaseCreateUserWithEmailAndPassword(
+          firebaseAuthService,
+          email,
+          password,
+        );
+        console.log("AuthContext: Email sign-up successful.");
+      } catch (error: any) {
+        console.error(
+          "AuthContext: Error during email sign-up:",
+          error.message,
+        );
+      } finally {
+        setIsProcessingLogin(false);
+      }
+    },
+    [],
+  );
 
   const sendPasswordResetEmail = async (email: string) => {
     if (!firebaseAuthService) {

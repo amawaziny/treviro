@@ -483,9 +483,7 @@ export default function SecurityDetailPage() {
         className="w-full max-w-full"
         dir={language === "ar" ? "rtl" : "ltr"}
       >
-        <TabsList
-          className="flex w-full gap-3 md:grid md:grid-cols-3 h-11 items-center px-1"
-        >
+        <TabsList className="flex w-full gap-3 md:grid md:grid-cols-3 h-11 items-center px-1">
           <TabsTrigger
             value="performance"
             className="flex text-xs md:text-base"
@@ -547,7 +545,10 @@ export default function SecurityDetailPage() {
                     <div>
                       <p className="text-xs text-muted-foreground">Avg. Cost</p>
                       <p className="text-xs font-medium">
-                        {formatCurrencyWithCommas(averagePurchasePrice, displayCurrency)}
+                        {formatCurrencyWithCommas(
+                          averagePurchasePrice,
+                          displayCurrency,
+                        )}
                       </p>
                     </div>
                     <div>
@@ -555,7 +556,10 @@ export default function SecurityDetailPage() {
                         Total Cost
                       </p>
                       <p className="text-xs font-medium">
-                        {formatCurrencyWithCommas(totalCostBasis, displayCurrency)}
+                        {formatCurrencyWithCommas(
+                          totalCostBasis,
+                          displayCurrency,
+                        )}
                       </p>
                     </div>
                     <div>
@@ -563,7 +567,10 @@ export default function SecurityDetailPage() {
                         Market Value
                       </p>
                       <p className="text-xs font-medium">
-                        {formatCurrencyWithCommas(totalInvestmentValue, displayCurrency)}
+                        {formatCurrencyWithCommas(
+                          totalInvestmentValue,
+                          displayCurrency,
+                        )}
                       </p>
                     </div>
                   </div>
@@ -628,9 +635,7 @@ export default function SecurityDetailPage() {
                       : (tx as any).totalAmount || 0;
 
                     return (
-                      <div
-                        key={tx.id}
-                      >
+                      <div key={tx.id}>
                         {/* Transaction content */}
                         <div
                           className={cn(
@@ -679,11 +684,18 @@ export default function SecurityDetailPage() {
                                 )}
                               >
                                 {isBuy ? "-" : ""}
-                                {formatCurrencyWithCommas(amount, displayCurrency)}
+                                {formatCurrencyWithCommas(
+                                  amount,
+                                  displayCurrency,
+                                )}
                               </div>
                               {!isDividend && (
                                 <div className="text-xs text-muted-foreground">
-                                  {formatCurrencyWithCommas(price, displayCurrency)} each
+                                  {formatCurrencyWithCommas(
+                                    price,
+                                    displayCurrency,
+                                  )}{" "}
+                                  each
                                 </div>
                               )}
                             </div>
@@ -693,7 +705,11 @@ export default function SecurityDetailPage() {
                             <div>
                               {!isDividend && (
                                 <span>
-                                  Fees: {formatCurrencyWithCommas((tx as any).fees || 0, displayCurrency)}
+                                  Fees:{" "}
+                                  {formatCurrencyWithCommas(
+                                    (tx as any).fees || 0,
+                                    displayCurrency,
+                                  )}
                                 </span>
                               )}
                             </div>

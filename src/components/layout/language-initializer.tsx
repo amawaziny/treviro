@@ -12,4 +12,4 @@ export function LanguageInitializer() {
   }, [language]);
 
   return null; // This component doesn't render anything visible
-} 
+}

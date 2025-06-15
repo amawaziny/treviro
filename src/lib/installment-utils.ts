@@ -31,16 +31,22 @@ export function generateInstallmentSchedule(
   paidInstallments: PaidInstallment[] = [],
   today: Date = new Date(),
 ): Installment[] {
-  if (!investment.installmentAmount ||
-      !investment.installmentFrequency ||
-      !investment.purchaseDate ||
-      !investment.installmentEndDate) {
+  if (
+    !investment.installmentAmount ||
+    !investment.installmentFrequency ||
+    !investment.purchaseDate ||
+    !investment.installmentEndDate
+  ) {
     return [];
   }
 
   const installments: Installment[] = [];
-  const endDate = investment.installmentEndDate ? parseISO(investment.installmentEndDate) : new Date();
-  const startDate = investment.purchaseDate ? parseISO(investment.purchaseDate) : new Date();
+  const endDate = investment.installmentEndDate
+    ? parseISO(investment.installmentEndDate)
+    : new Date();
+  const startDate = investment.purchaseDate
+    ? parseISO(investment.purchaseDate)
+    : new Date();
   let currentDate = startDate;
   let number = 1;
 
@@ -52,7 +58,7 @@ export function generateInstallmentSchedule(
       dueDate: currentDate.toISOString(),
       amount: investment.installmentAmount || 0,
       status: paid ? "Paid" : "Unpaid",
-      chequeNumber: paid?.chequeNumber || ""
+      chequeNumber: paid?.chequeNumber || "",
     } as Installment);
 
     // Move to next installment date
@@ -83,7 +89,8 @@ export function generateInstallmentSchedule(
   // Update regular installments with paid status
   const updatedInstallments = installments.map((inst: Installment) => {
     const paidInstallment = Array.from(paidInstallmentsMap.values()).find(
-      (paid) => paid.dueDate && safeDateCompare(paid.dueDate || '', inst.dueDate || ''),
+      (paid) =>
+        paid.dueDate && safeDateCompare(paid.dueDate || "", inst.dueDate || ""),
     );
 
     if (paidInstallment) {
@@ -98,52 +105,61 @@ export function generateInstallmentSchedule(
   });
 
   // Sort by due date and number
-  const sortedInstallments = updatedInstallments.sort((a: Installment, b: Installment) => {
-    const dateA = a.dueDate ? new Date(a.dueDate) : new Date();
-    const dateB = b.dueDate ? new Date(b.dueDate) : new Date();
-    
-    if (a.dueDate === b.dueDate) {
-      return a.number - b.number;
-    }
-    return dateA.getTime() - dateB.getTime();
-  });
+  const sortedInstallments = updatedInstallments.sort(
+    (a: Installment, b: Installment) => {
+      const dateA = a.dueDate ? new Date(a.dueDate) : new Date();
+      const dateB = b.dueDate ? new Date(b.dueDate) : new Date();
+
+      if (a.dueDate === b.dueDate) {
+        return a.number - b.number;
+      }
+      return dateA.getTime() - dateB.getTime();
+    },
+  );
 
   // Include any manual installments from the investment
-  const manualInstallments = (investment.installments || []).map((inst) => {
-    if (!inst || typeof inst !== "object" || !inst.dueDate || !inst.amount) {
-      return null;
-    }
-    return {
-      number: inst.number || 0,
-      displayNumber: inst.number || 0, // Use number as displayNumber if not provided
-      dueDate: inst.dueDate || '',
-      amount: inst.amount,
-      status: (inst.status?.toLowerCase() === "Paid" ? "Paid" : "Unpaid") as Installment["status"],
-      chequeNumber: inst.chequeNumber || ""
-    } as Installment;
-  }).filter(Boolean) as Installment[];
+  const manualInstallments = (investment.installments || [])
+    .map((inst) => {
+      if (!inst || typeof inst !== "object" || !inst.dueDate || !inst.amount) {
+        return null;
+      }
+      return {
+        number: inst.number || 0,
+        displayNumber: inst.number || 0, // Use number as displayNumber if not provided
+        dueDate: inst.dueDate || "",
+        amount: inst.amount,
+        status: (inst.status?.toLowerCase() === "Paid"
+          ? "Paid"
+          : "Unpaid") as Installment["status"],
+        chequeNumber: inst.chequeNumber || "",
+      } as Installment;
+    })
+    .filter(Boolean) as Installment[];
 
   // Add manual installments to the result if they don't already exist
-  const allInstallments = sortedInstallments.filter((inst) => {
-    return !manualInstallments.some(manualInst => 
-      manualInst.number === inst.number && 
-      safeDateCompare(manualInst.dueDate || '', inst.dueDate || '')
-    );
-  }).concat(manualInstallments);
+  const allInstallments = sortedInstallments
+    .filter((inst) => {
+      return !manualInstallments.some(
+        (manualInst) =>
+          manualInst.number === inst.number &&
+          safeDateCompare(manualInst.dueDate || "", inst.dueDate || ""),
+      );
+    })
+    .concat(manualInstallments);
 
   // Sort all installments by due date and number
-  return allInstallments.sort((a: Installment, b: Installment) => {
-    const dateA = a.dueDate ? parseISO(a.dueDate) : new Date('');
-    const dateB = b.dueDate ? parseISO(b.dueDate) : new Date('');
-    
-    if (a.dueDate === b.dueDate) {
-      return a.number - b.number;
-    }
-    return dateA.getTime() - dateB.getTime();
-  }).map((inst, index) => ({
-    ...inst,
-    displayNumber: index + 1
-  }));
+  return allInstallments
+    .sort((a: Installment, b: Installment) => {
+      const dateA = a.dueDate ? parseISO(a.dueDate) : new Date("");
+      const dateB = b.dueDate ? parseISO(b.dueDate) : new Date("");
+
+      if (a.dueDate === b.dueDate) {
+        return a.number - b.number;
+      }
+      return dateA.getTime() - dateB.getTime();
+    })
+    .map((inst, index) => ({
+      ...inst,
+      displayNumber: index + 1,
+    }));
 }
-
-

@@ -8,13 +8,14 @@ import { useSearchParams } from "next/navigation"; // Import hook
 import { useForm } from "@/contexts/form-context";
 
 // Define a simple loading fallback for the Suspense boundary
-function PageLoadingFallback() {const { t: t } = useLanguage();
+function PageLoadingFallback() {
+  const { t: t } = useLanguage();
   return (
     <div className="flex items-center justify-center py-10">
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("loading")}
-
-    </div>);
-
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      {t("loading")}
+    </div>
+  );
 }
 
 // Dynamically import AddInvestmentForm with ssr: false
@@ -28,8 +29,8 @@ const AddInvestmentForm = dynamic(
   {
     ssr: false, // Ensure this component is only rendered on the client
     // suspense: true,  // Removed, parent Suspense handles this
-    loading: () => <PageLoadingFallback /> // Use a loading component if needed within dynamic import
-  }
+    loading: () => <PageLoadingFallback />, // Use a loading component if needed within dynamic import
+  },
 );
 
 export default function AddInvestmentPage() {
@@ -57,40 +58,41 @@ function AddInvestmentPageContent() {
     const securityId = searchParams.get("securityId");
     // Get the investment type from URL parameters
     const investmentType =
-    searchParams.get("type") || (securityId ? t("buy_security") : "investment");
+      searchParams.get("type") ||
+      (securityId ? t("buy_security") : "investment");
 
     // Map investment types to their display configurations
     const typeConfigs = {
       funds: {
         title: t("buy_fund"),
         backHref: "/investments/funds",
-        backLabel: t("back_to_funds")
+        backLabel: t("back_to_funds"),
       },
       gold: {
         title: t("buy_gold"),
         backHref: "/investments/gold",
-        backLabel: t("back_to_gold")
+        backLabel: t("back_to_gold"),
       },
       [t("debtinstruments")]: {
         title: t("buy_debt_instrument"),
         backHref: "/investments/debt-instruments",
-        backLabel: t("back_to_debt_instruments")
+        backLabel: t("back_to_debt_instruments"),
       },
       [t("realestate")]: {
         title: t("add_real_estate"),
         backHref: "/investments/real-estate",
-        backLabel: t("back_to_real_estate")
+        backLabel: t("back_to_real_estate"),
       },
       currencies: {
         title: t("add_currency"),
         backHref: "/investments/currencies",
-        backLabel: t("back_to_currencies")
+        backLabel: t("back_to_currencies"),
       },
       [t("buysecurity")]: {
         title: `Buy ${securityId}`,
         backHref: `/securities/details/${securityId}`,
-        backLabel: t("back_to_buy_security")
-      }
+        backLabel: t("back_to_buy_security"),
+      },
     };
 
     // Get the config for the current type or use a default
@@ -98,7 +100,7 @@ function AddInvestmentPageContent() {
     const config = typeConfigs[normalizedType as keyof typeof typeConfigs] || {
       title: `Add ${investmentType}`,
       backHref: "/investments",
-      backLabel: t("back_to_investments")
+      backLabel: t("back_to_investments"),
     };
 
     // Update header with the current config
@@ -107,7 +109,7 @@ function AddInvestmentPageContent() {
       showNavControls: false,
       title: config.title,
       backHref: config.backHref,
-      backLabel: config.backLabel
+      backLabel: config.backLabel,
     });
 
     // Clean up when component unmounts
@@ -119,6 +121,6 @@ function AddInvestmentPageContent() {
   return (
     <div className="container mx-auto flex-1">
       <AddInvestmentForm />
-    </div>);
-
+    </div>
+  );
 }

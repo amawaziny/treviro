@@ -44,7 +44,11 @@ import type {
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { formatNumberWithSuffix, formatCurrencyWithCommas, formatMonthYear } from "@/lib/utils";
+import {
+  formatNumberWithSuffix,
+  formatCurrencyWithCommas,
+  formatMonthYear,
+} from "@/lib/utils";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
@@ -125,7 +129,7 @@ export default function DashboardPage() {
         if (inv.type === "Stocks") {
           const stockInv = inv as StockInvestment;
           const security = listedSecurities.find(
-            (ls) => ls.symbol === stockInv.tickerSymbol
+            (ls) => ls.symbol === stockInv.tickerSymbol,
           );
           if (security && security.price && stockInv.numberOfShares) {
             currentVal = security.price * stockInv.numberOfShares;
@@ -379,12 +383,12 @@ export default function DashboardPage() {
                       {t("projected_debt_interest")}{" "}
                       <span className="md:hidden">
                         {formatNumberWithSuffix(
-                          totalProjectedCertificateInterestThisMonth
+                          totalProjectedCertificateInterestThisMonth,
                         )}
                       </span>
                       <span className="hidden md:inline">
                         {formatCurrencyWithCommas(
-                          totalProjectedCertificateInterestThisMonth
+                          totalProjectedCertificateInterestThisMonth,
                         )}
                       </span>
                     </p>
@@ -418,7 +422,7 @@ export default function DashboardPage() {
                       </span>
                       <span className="hidden md:inline">
                         {formatCurrencyWithCommas(
-                          totalItemizedExpensesThisMonth
+                          totalItemizedExpensesThisMonth,
                         )}
                       </span>
                     </p>
@@ -475,7 +479,7 @@ export default function DashboardPage() {
                       </span>
                       <span className="hidden md:inline">
                         {formatCurrencyWithCommas(
-                          realEstateInstallmentsMonthly
+                          realEstateInstallmentsMonthly,
                         )}
                       </span>
                     </p>

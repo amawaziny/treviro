@@ -26,7 +26,14 @@ const __dirname = dirname(__filename);
 
 // Configuration
 const PROJECT_ROOT = process.cwd();
-const TARGET_SRC_DIR = join(PROJECT_ROOT, "src", "app", "(app)", "investments", "gold"); // Targeting specific directory
+const TARGET_SRC_DIR = join(
+  PROJECT_ROOT,
+  "src",
+  "app",
+  "(app)",
+  "investments",
+  "real-estate",
+); // Targeting specific directory
 const LOCALES_DIR = join(PROJECT_ROOT, "public", "locales"); // Locales are in public
 const IGNORE_DIRS = [
   "node_modules",
@@ -36,7 +43,7 @@ const IGNORE_DIRS = [
   "dist",
   "build",
   "scripts", // Ignore the scripts directory itself
-  "api" // Ignore API routes as they often contain non-translatable strings
+  "api", // Ignore API routes as they often contain non-translatable strings
 ];
 const FILE_EXTENSIONS = [".ts", ".tsx"];
 
@@ -135,7 +142,6 @@ function isReactComponent(name: string | null | undefined): boolean {
   return name.charAt(0) === name.charAt(0).toUpperCase();
 }
 
-
 // Process a single file
 async function processFile(filePath: string) {
   let code = readFileSync(filePath, "utf-8");
@@ -152,7 +158,9 @@ async function processFile(filePath: string) {
   }
 
   let fileNeedsUseLanguageImport = false;
-  const componentsNeedingTDeclaration = new Set<t.FunctionDeclaration | t.ArrowFunctionExpression>();
+  const componentsNeedingTDeclaration = new Set<
+    t.FunctionDeclaration | t.ArrowFunctionExpression
+  >();
 
   traverse(ast, {
     StringLiteral(path) {
@@ -166,7 +174,7 @@ async function processFile(filePath: string) {
           t.isTSTypeAliasDeclaration(p.node) ||
           t.isTSPropertySignature(p.node) ||
           t.isTSMethodSignature(p.node) ||
-          t.isTSLiteralType(p.node)
+          t.isTSLiteralType(p.node),
       );
 
       if (isTypeContext) {
@@ -174,67 +182,106 @@ async function processFile(filePath: string) {
       }
 
       // Skip if it's already a translation call (e.g., t("key"))
-      if (parentPath.isCallExpression() && t.isIdentifier(parentPath.node.callee) && parentPath.node.callee.name === 't') {
+      if (
+        parentPath.isCallExpression() &&
+        t.isIdentifier(parentPath.node.callee) &&
+        parentPath.node.callee.name === "t"
+      ) {
         return;
       }
 
       // Skip if it's a value of a `className` attribute
-      if (parentPath.isJSXAttribute() && t.isJSXIdentifier(parentPath.node.name) && parentPath.node.name.name === 'className') {
+      if (
+        parentPath.isJSXAttribute() &&
+        t.isJSXIdentifier(parentPath.node.name) &&
+        parentPath.node.name.name === "className"
+      ) {
         return;
       }
 
       // Skip if it's an argument of a `cn()` call (common for Tailwind class merging)
-      if (parentPath.isCallExpression() && t.isIdentifier(parentPath.node.callee) && parentPath.node.callee.name === 'cn') {
-          return;
+      if (
+        parentPath.isCallExpression() &&
+        t.isIdentifier(parentPath.node.callee) &&
+        parentPath.node.callee.name === "cn"
+      ) {
+        return;
       }
 
       // Skip if it's an attribute name (e.g., <div type="text">, "text" is not a string literal to translate)
-      if (parentPath.isJSXAttribute() && t.isJSXIdentifier(parentPath.node.name)) {
+      if (
+        parentPath.isJSXAttribute() &&
+        t.isJSXIdentifier(parentPath.node.name)
+      ) {
         return;
       }
 
       // Handle ObjectProperty keys that are string literals
       // If the current node (StringLiteral) is the key of an ObjectProperty
       // AND the ObjectProperty is not already computed
-      if (parentPath.isObjectProperty() && path.node === parentPath.node.key && !parentPath.node.computed) {
-          const key = generateKey(value);
-          if (!translations.en[key]) {
-              newStrings.set(key, value);
-          }
-          // Convert the ObjectProperty to a computed property with the t() call as its key
-          parentPath.node.computed = true;
-          parentPath.node.key = t.callExpression(t.identifier('t'), [t.stringLiteral(key)]);
-          fileNeedsUseLanguageImport = true;
-          path.skip(); // Skip further processing of this node
-          return;
+      if (
+        parentPath.isObjectProperty() &&
+        path.node === parentPath.node.key &&
+        !parentPath.node.computed
+      ) {
+        const key = generateKey(value);
+        if (!translations.en[key]) {
+          newStrings.set(key, value);
+        }
+        // Convert the ObjectProperty to a computed property with the t() call as its key
+        parentPath.node.computed = true;
+        parentPath.node.key = t.callExpression(t.identifier("t"), [
+          t.stringLiteral(key),
+        ]);
+        fileNeedsUseLanguageImport = true;
+        path.skip(); // Skip further processing of this node
+        return;
       }
 
       // Skip if it's a variable name or property key (e.g., const name = "John"; obj.prop = "value")
       if (t.isVariableDeclarator(parentPath.node)) {
-        if (t.isIdentifier(parentPath.node.id) && parentPath.node.id.name === node.value) {
+        if (
+          t.isIdentifier(parentPath.node.id) &&
+          parentPath.node.id.name === node.value
+        ) {
           return; // Don't translate variable names where value matches the identifier
         }
-      } else if (t.isObjectProperty(parentPath.node) || t.isProperty(parentPath.node)) {
-        if (t.isIdentifier(parentPath.node.key) && parentPath.node.key.name === node.value) {
+      } else if (
+        t.isObjectProperty(parentPath.node) ||
+        t.isProperty(parentPath.node)
+      ) {
+        if (
+          t.isIdentifier(parentPath.node.key) &&
+          parentPath.node.key.name === node.value
+        ) {
           return; // Don't translate property keys where value matches the key
         }
       }
-      
+
       // Skip imports/exports source
-      if (parentPath.isImportDeclaration() || parentPath.isExportDeclaration()) {
-          return;
+      if (
+        parentPath.isImportDeclaration() ||
+        parentPath.isExportDeclaration()
+      ) {
+        return;
       }
-      
+
       // Skip if it's the argument of a TSImportType (e.g., import("module-name"))
-      if (t.isTSImportType(parentPath.node) && path.node === parentPath.node.argument) {
-          return;
+      if (
+        t.isTSImportType(parentPath.node) &&
+        path.node === parentPath.node.argument
+      ) {
+        return;
       }
-      
+
       // Skip if it's a literal in a TSLiteralType (e.g., type Foo = "bar")
-      if (t.isTSLiteralType(parentPath.node) && path.node === parentPath.node.literal) {
-          return;
+      if (
+        t.isTSLiteralType(parentPath.node) &&
+        path.node === parentPath.node.literal
+      ) {
+        return;
       }
-      
+
       if (shouldSkipText(value)) {
         return;
       }
@@ -245,18 +292,30 @@ async function processFile(filePath: string) {
       }
 
       // Replace string literal with t("key") call
-      path.replaceWith(t.callExpression(t.identifier('t'), [t.stringLiteral(key)]));
+      path.replaceWith(
+        t.callExpression(t.identifier("t"), [t.stringLiteral(key)]),
+      );
       fileNeedsUseLanguageImport = true;
 
       // Mark the closest React component for 't' declaration
       const componentPath = path.findParent(
-          (p) =>
-              (p.isFunctionDeclaration() && isReactComponent(p.node.id?.name)) ||
-              (p.isVariableDeclarator() && t.isIdentifier(p.node.id) && isReactComponent(p.node.id.name) && p.node.init?.type === 'ArrowFunctionExpression')
+        (p) =>
+          (p.isFunctionDeclaration() && isReactComponent(p.node.id?.name)) ||
+          (p.isVariableDeclarator() &&
+            t.isIdentifier(p.node.id) &&
+            isReactComponent(p.node.id.name) &&
+            p.node.init?.type === "ArrowFunctionExpression"),
       );
 
-      if (componentPath && (componentPath.node as any).body?.type === 'BlockStatement') {
-        componentsNeedingTDeclaration.add(componentPath.node as t.FunctionDeclaration | t.ArrowFunctionExpression);
+      if (
+        componentPath &&
+        (componentPath.node as any).body?.type === "BlockStatement"
+      ) {
+        componentsNeedingTDeclaration.add(
+          componentPath.node as
+            | t.FunctionDeclaration
+            | t.ArrowFunctionExpression,
+        );
       }
       path.skip(); // Prevent re-processing of the newly inserted node
     },
@@ -272,7 +331,7 @@ async function processFile(filePath: string) {
           t.isTSTypeAliasDeclaration(p.node) ||
           t.isTSPropertySignature(p.node) ||
           t.isTSMethodSignature(p.node) ||
-          t.isTSLiteralType(p.node)
+          t.isTSLiteralType(p.node),
       );
 
       if (isTypeContext) {
@@ -290,19 +349,31 @@ async function processFile(filePath: string) {
 
       // Replace JSXText with JSXExpressionContainer containing t("key")
       path.replaceWith(
-          t.jsxExpressionContainer(t.callExpression(t.identifier('t'), [t.stringLiteral(key)]))
+        t.jsxExpressionContainer(
+          t.callExpression(t.identifier("t"), [t.stringLiteral(key)]),
+        ),
       );
       fileNeedsUseLanguageImport = true;
 
       // Mark the closest React component for 't' declaration
       const componentPath = path.findParent(
-          (p) =>
-              (p.isFunctionDeclaration() && isReactComponent(p.node.id?.name)) ||
-              (p.isVariableDeclarator() && t.isIdentifier(p.node.id) && isReactComponent(p.node.id.name) && p.node.init?.type === 'ArrowFunctionExpression')
+        (p) =>
+          (p.isFunctionDeclaration() && isReactComponent(p.node.id?.name)) ||
+          (p.isVariableDeclarator() &&
+            t.isIdentifier(p.node.id) &&
+            isReactComponent(p.node.id.name) &&
+            p.node.init?.type === "ArrowFunctionExpression"),
       );
 
-      if (componentPath && (componentPath.node as any).body?.type === 'BlockStatement') {
-        componentsNeedingTDeclaration.add(componentPath.node as t.FunctionDeclaration | t.ArrowFunctionExpression);
+      if (
+        componentPath &&
+        (componentPath.node as any).body?.type === "BlockStatement"
+      ) {
+        componentsNeedingTDeclaration.add(
+          componentPath.node as
+            | t.FunctionDeclaration
+            | t.ArrowFunctionExpression,
+        );
       }
       path.skip();
     },
@@ -312,18 +383,24 @@ async function processFile(filePath: string) {
         // Add import for useLanguage if needed
         if (fileNeedsUseLanguageImport) {
           const existingImport = path.node.body.find(
-              (node) =>
-                  t.isImportDeclaration(node) &&
-                  node.source.value === '@/contexts/language-context' &&
-                  node.specifiers.some(
-                      (specifier) =>
-                          t.isImportSpecifier(specifier) && specifier.local.name === 'useLanguage'
-                  )
+            (node) =>
+              t.isImportDeclaration(node) &&
+              node.source.value === "@/contexts/language-context" &&
+              node.specifiers.some(
+                (specifier) =>
+                  t.isImportSpecifier(specifier) &&
+                  specifier.local.name === "useLanguage",
+              ),
           );
           if (!existingImport) {
             const importDeclaration = t.importDeclaration(
-                [t.importSpecifier(t.identifier('useLanguage'), t.identifier('useLanguage'))],
-                t.stringLiteral('@/contexts/language-context')
+              [
+                t.importSpecifier(
+                  t.identifier("useLanguage"),
+                  t.identifier("useLanguage"),
+                ),
+              ],
+              t.stringLiteral("@/contexts/language-context"),
             );
             path.node.body.unshift(importDeclaration); // Add at the beginning of the file
           }
@@ -338,29 +415,31 @@ async function processFile(filePath: string) {
       if (componentsNeedingTDeclaration.has(path.node)) {
         const body = path.node.body.body;
         const hasTDeclaration = body.some(
-            (statement) =>
-                t.isVariableDeclaration(statement) &&
-                statement.declarations.some(
-                    (decl) =>
-                        t.isVariableDeclarator(decl) &&
-                        t.isObjectPattern(decl.id) &&
-                        decl.id.properties.some(
-                            (prop) =>
-                                t.isObjectProperty(prop) &&
-                                t.isIdentifier(prop.key, { name: 't' })
-                        ) &&
-                        t.isCallExpression(decl.init) &&
-                        t.isIdentifier(decl.init.callee, { name: 'useLanguage' })
-                )
+          (statement) =>
+            t.isVariableDeclaration(statement) &&
+            statement.declarations.some(
+              (decl) =>
+                t.isVariableDeclarator(decl) &&
+                t.isObjectPattern(decl.id) &&
+                decl.id.properties.some(
+                  (prop) =>
+                    t.isObjectProperty(prop) &&
+                    t.isIdentifier(prop.key, { name: "t" }),
+                ) &&
+                t.isCallExpression(decl.init) &&
+                t.isIdentifier(decl.init.callee, { name: "useLanguage" }),
+            ),
         );
         if (!hasTDeclaration) {
           body.unshift(
-              t.variableDeclaration('const', [
-                  t.variableDeclarator(
-                      t.objectPattern([t.objectProperty(t.identifier('t'), t.identifier('t'))]),
-                      t.callExpression(t.identifier('useLanguage'), [])
-                  ),
-              ])
+            t.variableDeclaration("const", [
+              t.variableDeclarator(
+                t.objectPattern([
+                  t.objectProperty(t.identifier("t"), t.identifier("t")),
+                ]),
+                t.callExpression(t.identifier("useLanguage"), []),
+              ),
+            ]),
           );
         }
       }
@@ -371,36 +450,37 @@ async function processFile(filePath: string) {
         if (t.isBlockStatement(path.node.body)) {
           const body = path.node.body.body;
           const hasTDeclaration = body.some(
-              (statement) =>
-                  t.isVariableDeclaration(statement) &&
-                  statement.declarations.some(
-                      (decl) =>
-                          t.isVariableDeclarator(decl) &&
-                          t.isObjectPattern(decl.id) &&
-                          decl.id.properties.some(
-                              (prop) =>
-                                  t.isObjectProperty(prop) &&
-                                  t.isIdentifier(prop.key, { name: 't' })
-                          ) &&
-                          t.isCallExpression(decl.init) &&
-                          t.isIdentifier(decl.init.callee, { name: 'useLanguage' })
-                  )
+            (statement) =>
+              t.isVariableDeclaration(statement) &&
+              statement.declarations.some(
+                (decl) =>
+                  t.isVariableDeclarator(decl) &&
+                  t.isObjectPattern(decl.id) &&
+                  decl.id.properties.some(
+                    (prop) =>
+                      t.isObjectProperty(prop) &&
+                      t.isIdentifier(prop.key, { name: "t" }),
+                  ) &&
+                  t.isCallExpression(decl.init) &&
+                  t.isIdentifier(decl.init.callee, { name: "useLanguage" }),
+              ),
           );
           if (!hasTDeclaration) {
             body.unshift(
-                t.variableDeclaration('const', [
-                    t.variableDeclarator(
-                        t.objectPattern([t.objectProperty(t.identifier('t'), t.identifier('t'))]),
-                        t.callExpression(t.identifier('useLanguage'), [])
-                    ),
-                ])
+              t.variableDeclaration("const", [
+                t.variableDeclarator(
+                  t.objectPattern([
+                    t.objectProperty(t.identifier("t"), t.identifier("t")),
+                  ]),
+                  t.callExpression(t.identifier("useLanguage"), []),
+                ),
+              ]),
             );
           }
         }
       }
-    }
+    },
   });
-
 
   const output = generate(ast, { retainLines: true, compact: false }, code);
   writeFileSync(filePath, output.code);
@@ -429,14 +509,18 @@ async function main() {
     });
 
     // Sort keys for consistent output
-    updatedEn = Object.keys(updatedEn).sort().reduce((obj: { [key: string]: string }, key) => {
-      obj[key] = updatedEn[key];
-      return obj;
-    }, {});
-    updatedAr = Object.keys(updatedAr).sort().reduce((obj: { [key: string]: string }, key) => {
-      obj[key] = updatedAr[key];
-      return obj;
-    }, {});
+    updatedEn = Object.keys(updatedEn)
+      .sort()
+      .reduce((obj: { [key: string]: string }, key) => {
+        obj[key] = updatedEn[key];
+        return obj;
+      }, {});
+    updatedAr = Object.keys(updatedAr)
+      .sort()
+      .reduce((obj: { [key: string]: string }, key) => {
+        obj[key] = updatedAr[key];
+        return obj;
+      }, {});
 
     writeFileSync(localeFiles.en, JSON.stringify(updatedEn, null, 2));
     writeFileSync(localeFiles.ar, JSON.stringify(updatedAr, null, 2));

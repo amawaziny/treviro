@@ -35,10 +35,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MyDebtInstrumentsPage() {
   const { t: t } = useLanguage();
-  const {
-    investments,
-    isLoading: isLoadingInvestments
-  } = useInvestments();
+  const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
   const { language } = useLanguage();
@@ -73,7 +70,7 @@ export default function MyDebtInstrumentsPage() {
     let directDebtInvestedSum = 0;
 
     const directDebtInvestments = investments.filter(
-      (inv) => inv.type === 'Debt Instruments'
+      (inv) => inv.type === "Debt Instruments",
     ) as DebtInstrumentInvestment[];
     directDebtInvestments.forEach((debt) => {
       let maturityDay: string | undefined;
@@ -84,9 +81,7 @@ export default function MyDebtInstrumentsPage() {
 
       if (debt.maturityDate) {
         try {
-          const parsedMaturityDate = parseISO(
-            debt.maturityDate + 'T00:00:00Z'
-          );
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z");
           if (isValid(parsedMaturityDate)) {
             maturityDay = format(parsedMaturityDate, "dd");
             maturityMonth = format(parsedMaturityDate, "MM");
@@ -97,7 +92,7 @@ export default function MyDebtInstrumentsPage() {
             t("error_parsing_maturity_date_for_debt_holding"),
 
             debt.id,
-            e
+            e,
           );
         }
       }
@@ -138,13 +133,13 @@ export default function MyDebtInstrumentsPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks"
+      (inv) => inv.type === "Stocks",
     ) as StockInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol
+        (ls) => ls.symbol === stockInv.tickerSymbol,
       );
       if (
         security &&
@@ -206,10 +201,10 @@ export default function MyDebtInstrumentsPage() {
 
     return {
       directDebtHoldings: directHoldings.sort((a, b) =>
-        (a.displayName || "").localeCompare(b.displayName || "")
+        (a.displayName || "").localeCompare(b.displayName || ""),
       ),
       debtFundHoldings: fundHoldingsAggregated.sort((a, b) =>
-        (a.displayName || "").localeCompare(b.displayName || "")
+        (a.displayName || "").localeCompare(b.displayName || ""),
       ),
       totalProjectedMonthlyInterest: monthlyInterestSum,
       totalProjectedAnnualInterest: annualInterestSum,
@@ -237,7 +232,7 @@ export default function MyDebtInstrumentsPage() {
 
   const formatCurrencyWithSuffix = (
     value: number | undefined,
-    currencyCode: string = "EGP"
+    currencyCode: string = "EGP",
   ) => {
     if (value === undefined || value === null || isNaN(value))
       return `${currencyCode} 0`;
@@ -283,7 +278,7 @@ export default function MyDebtInstrumentsPage() {
         </h1>
         <p className="text-muted-foreground text-sm">
           {t(
-            "track_your_direct_debt_instruments_and_debtrelated_fund_investments"
+            "track_your_direct_debt_instruments_and_debtrelated_fund_investments",
           )}
         </p>
       </div>
@@ -304,17 +299,17 @@ export default function MyDebtInstrumentsPage() {
           <div
             className={cn(
               "text-2xl font-bold",
-              isTotalFundProfitable ? "text-accent" : "text-destructive"
+              isTotalFundProfitable ? "text-accent" : "text-destructive",
             )}
           >
             {isMobile
               ? formatCurrencyWithSuffix(
                   totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency
+                  debtFundHoldings[0]?.currency,
                 )
               : formatCurrencyWithCommas(
                   totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency
+                  debtFundHoldings[0]?.currency,
                 )}
           </div>
           <p className="text-xs text-muted-foreground">
@@ -332,11 +327,11 @@ export default function MyDebtInstrumentsPage() {
                 {isMobile
                   ? formatCurrencyWithSuffix(
                       totalInvestedInDebt,
-                      debtFundHoldings[0]?.currency
+                      debtFundHoldings[0]?.currency,
                     )
                   : formatCurrencyWithCommas(
                       totalInvestedInDebt,
-                      debtFundHoldings[0]?.currency
+                      debtFundHoldings[0]?.currency,
                     )}
               </span>
             </div>
@@ -345,7 +340,7 @@ export default function MyDebtInstrumentsPage() {
                 {t("direct")}
                 {formatCurrencyWithCommas(
                   totalDirectDebtInvested,
-                  debtFundHoldings[0]?.currency
+                  debtFundHoldings[0]?.currency,
                 )}
                 )
               </span>
@@ -353,7 +348,7 @@ export default function MyDebtInstrumentsPage() {
                 {t("funds")}{" "}
                 {formatCurrencyWithCommas(
                   totalDebtFundCost,
-                  debtFundHoldings[0]?.currency
+                  debtFundHoldings[0]?.currency,
                 )}
                 )
               </span>
@@ -370,7 +365,7 @@ export default function MyDebtInstrumentsPage() {
           </CardTitle>
           <CardDescription>
             {t(
-              "bonds_certificates_treasury_bills_you_own_directly_projected_interest"
+              "bonds_certificates_treasury_bills_you_own_directly_projected_interest",
             )}
             {formatCurrencyWithCommas(totalProjectedAnnualInterest)}{" "}
             {t("annually")}

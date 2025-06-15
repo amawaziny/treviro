@@ -18,8 +18,11 @@ export const SecurityListItem = React.memo(function SecurityListItem({
   security,
   currentTab,
 }: SecurityListItemProps) {
-  
-  const formattedPrice = formatCurrencyWithCommas(security.price, security.currency, 3);
+  const formattedPrice = formatCurrencyWithCommas(
+    security.price,
+    security.currency,
+    3,
+  );
 
   const isPositiveChange = security.changePercent >= 0;
 
@@ -48,7 +51,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
               {security.securityType === "Fund" && (
                 <>
                   <span className="mx-1">•</span>
-                  <FundTypeIcon fundType={security.fundType} size={12}/>
+                  <FundTypeIcon fundType={security.fundType} size={12} />
                 </>
               )}
             </p>

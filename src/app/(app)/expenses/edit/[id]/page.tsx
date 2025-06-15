@@ -9,8 +9,8 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle } from
-"@/components/ui/card";
+  CardTitle,
+} from "@/components/ui/card";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
@@ -18,8 +18,10 @@ import { useForm } from "@/contexts/form-context";
 import { AddExpenseFormValues } from "@/lib/schemas";
 
 export default function EditExpensePage({
-  params
-}: {params: Promise<{id: string;}>;}) {
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { t } = useLanguage();
   const { expenseRecords, updateExpenseRecord } = useInvestments();
   const router = useRouter();
@@ -29,7 +31,7 @@ export default function EditExpensePage({
   // Find the expense record by id
   const expense = React.useMemo(
     () => expenseRecords.find((rec) => rec.id === expenseId),
-    [expenseRecords, expenseId]
+    [expenseRecords, expenseId],
   );
 
   if (!expense) {
@@ -47,10 +49,12 @@ export default function EditExpensePage({
       showBackButton: true,
       showNavControls: false,
       title: t("edit_expense_record"),
-      description: t("update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending"),
+      description: t(
+        "update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending",
+      ),
 
       backLabel: t("back_to_expenses"),
-      backHref: "/expenses"
+      backHref: "/expenses",
     });
 
     // Clean up when component unmounts
@@ -64,7 +68,10 @@ export default function EditExpensePage({
       <Card>
         <CardHeader>
           <CardTitle>{t("edit_expense_record")}</CardTitle>
-          <CardDescription>{t("update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending")}
+          <CardDescription>
+            {t(
+              "update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending",
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,24 +84,24 @@ export default function EditExpensePage({
               date: expense.date,
               isInstallment: expense.isInstallment ?? false,
               //@ts-expect-error
-              numberOfInstallments: expense.numberOfInstallments ?
-              expense.numberOfInstallments.toString() :
-              ""
+              numberOfInstallments: expense.numberOfInstallments
+                ? expense.numberOfInstallments.toString()
+                : "",
             }}
             onSubmit={async (values: AddExpenseFormValues) => {
               await updateExpenseRecord(expenseId, {
                 ...values,
                 amount: Number(values.amount),
-                numberOfInstallments: values.numberOfInstallments ?
-                Number(values.numberOfInstallments) :
-                undefined
+                numberOfInstallments: values.numberOfInstallments
+                  ? Number(values.numberOfInstallments)
+                  : undefined,
               });
               router.push("/expenses");
             }}
-            isEditMode />
-
+            isEditMode
+          />
         </CardContent>
       </Card>
-    </div>);
-
+    </div>
+  );
 }

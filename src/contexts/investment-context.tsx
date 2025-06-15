@@ -137,12 +137,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       throw new Error("Firestore instance or user ID is not initialized");
     }
     try {
-      const incomeDocRef = doc(firestoreInstance, `users/${userId}/income/${incomeId}`);
+      const incomeDocRef = doc(
+        firestoreInstance,
+        `users/${userId}/income/${incomeId}`,
+      );
       await setDoc(incomeDocRef, updatedFields, { merge: true });
       setIncomeRecords((prev) =>
         prev.map((rec) =>
-          rec.id === incomeId ? { ...rec, ...updatedFields } : rec
-        )
+          rec.id === incomeId ? { ...rec, ...updatedFields } : rec,
+        ),
       );
     } catch (error) {
       console.error("Error updating income record:", error);
@@ -1180,7 +1183,13 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         await updateDashboardSummaryDoc(summaryUpdates);
       }
     },
-    [userId, isAuthenticated, firestoreInstance, fixedEstimates, updateDashboardSummaryDoc],
+    [
+      userId,
+      isAuthenticated,
+      firestoreInstance,
+      fixedEstimates,
+      updateDashboardSummaryDoc,
+    ],
   );
 
   return (

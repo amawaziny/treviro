@@ -50,7 +50,8 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
             <div className="truncate">
               <p className="text-lg font-semibold truncate">{currencyCode}</p>
               <p className="text-xs text-muted-foreground truncate md:hidden">
-                Held: {formatNumberWithSuffix(totalForeignAmount || 0, currencyCode)}
+                Held:{" "}
+                {formatNumberWithSuffix(totalForeignAmount || 0, currencyCode)}
               </p>
             </div>
           </div>

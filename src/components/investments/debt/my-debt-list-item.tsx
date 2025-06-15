@@ -122,7 +122,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                     )
                   ) : typeof holding.amountInvested === "number" ? (
                     <span>
-                      {formatNumberWithSuffix(holding.amountInvested, holding.currency)}
+                      {formatNumberWithSuffix(
+                        holding.amountInvested,
+                        holding.currency,
+                      )}
                     </span>
                   ) : (
                     "Debt Item"
@@ -137,7 +140,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             <div className="text-end flex-shrink-0">
               {typeof holding.amountInvested === "number" ? (
                 <p className="text-lg font-bold">
-                  {formatNumberWithSuffix(holding.amountInvested, holding.currency)}
+                  {formatNumberWithSuffix(
+                    holding.amountInvested,
+                    holding.currency,
+                  )}
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">N/A</p>
@@ -158,7 +164,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
               Monthly Interest:
               {typeof holding.projectedMonthlyInterest === "number" ? (
                 <span>
-                  {formatNumberWithSuffix(holding.projectedMonthlyInterest, holding.currency)}
+                  {formatNumberWithSuffix(
+                    holding.projectedMonthlyInterest,
+                    holding.currency,
+                  )}
                 </span>
               ) : (
                 "N/A"
@@ -168,7 +177,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
               Annual Interest:
               {typeof holding.projectedAnnualInterest === "number" ? (
                 <span>
-                  {formatNumberWithSuffix(holding.projectedAnnualInterest, holding.currency)}
+                  {formatNumberWithSuffix(
+                    holding.projectedAnnualInterest,
+                    holding.currency,
+                  )}
                 </span>
               ) : (
                 "N/A"
@@ -327,10 +339,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
           <p>
             Avg. Cost:
             <span className="md:hidden">
-              {formatNumberWithSuffix(
-                averagePurchasePrice || 0,
-                currency,
-              )}
+              {formatNumberWithSuffix(averagePurchasePrice || 0, currency)}
             </span>
             <span className="hidden md:inline">
               {formatDisplayCurrency(averagePurchasePrice, currency)}
@@ -339,10 +348,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
           <p>
             Current Value:
             <span className="md:hidden">
-              {formatNumberWithSuffix(
-                currentMarketPrice || 0,
-                currency,
-              )}
+              {formatNumberWithSuffix(currentMarketPrice || 0, currency)}
             </span>
             <span className="hidden md:inline">
               {formatDisplayCurrency(currentMarketPrice, currency)}

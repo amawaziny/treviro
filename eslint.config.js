@@ -1,28 +1,28 @@
-import { defineConfig } from 'eslint-define-config';
+import { defineConfig } from "eslint-define-config";
 
 export default [
   {
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+      ecmaVersion: "latest",
+      sourceType: "module",
       ecmaFeatures: {
-        jsx: true
-      }
+        jsx: true,
+      },
     },
-    files: ['**/*.ts', '**/*.tsx'],
-    plugins: ['unused-imports'],
+    files: ["**/*.ts", "**/*.tsx"],
+    plugins: ["unused-imports"],
     rules: {
-      'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'warn',
+      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-vars": [
+        "warn",
         {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-          ignoreRestSiblings: false
-        }
-      ]
-    }
-  }
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          ignoreRestSiblings: false,
+        },
+      ],
+    },
+  },
 ];

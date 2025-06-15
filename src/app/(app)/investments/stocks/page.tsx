@@ -16,7 +16,11 @@ import React from "react"; // Added React for useMemo
 import { useInvestments } from "@/hooks/use-investments"; // To calculate total P/L
 import { useListedSecurities } from "@/hooks/use-listed-securities"; // For current prices
 import type { StockInvestment } from "@/lib/types";
-import { cn, formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils"; // For styling and formatting
+import {
+  cn,
+  formatCurrencyWithCommas,
+  formatNumberWithSuffix,
+} from "@/lib/utils"; // For styling and formatting
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isStockRelatedFund } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -168,7 +172,7 @@ export default function MyStocksPage() {
       <MyStockList />
 
       <Link href="/securities" passHref>
-      <Button
+        <Button
           variant="default"
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}

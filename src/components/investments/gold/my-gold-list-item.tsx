@@ -166,10 +166,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>
           Avg. Cost:
-          <span>
-            {" "}
-            {formatNumberWithSuffix(averagePurchasePrice, currency)}
-          </span>
+          <span> {formatNumberWithSuffix(averagePurchasePrice, currency)}</span>
         </p>
         <p className="text-end">
           Market Price:

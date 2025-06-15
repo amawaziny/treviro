@@ -12,7 +12,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
@@ -34,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RealEstateInvestment } from "@/lib/types";
 
 export default function RealEstateDetailPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const params = useParams();
   const { setHeaderProps, closeForm, openForm } = useForm();
@@ -162,7 +162,10 @@ export default function RealEstateDetailPage() {
           });
         } catch (error) {
           console.error(
-            "Failed to sync amountInvested based on paid purchase installments:",
+            t(
+              "failed_to_sync_amountinvested_based_on_paid_purchase_installments",
+            ),
+
             error,
           );
         }
@@ -185,7 +188,7 @@ export default function RealEstateDetailPage() {
       if (!investment) {
         toast({
           title: "Error",
-          description: "Investment not found",
+          description: t("investment_not_found"),
           variant: "destructive",
         });
         return;
@@ -202,12 +205,15 @@ export default function RealEstateDetailPage() {
         installments: cleanInstallments,
       });
       // setInstallments(updatedInstallments); // Local state will be updated by useEffect
-      toast({ title: "Success", description: "Payment deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting payment:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete payment",
+        title: t("success"),
+        description: t("payment_deleted_successfully"),
+      });
+    } catch (error) {
+      console.error(t("error_deleting_payment"), error);
+      toast({
+        title: t("error"),
+        description: t("failed_to_delete_payment"),
         variant: "destructive",
       });
     }
@@ -238,6 +244,7 @@ export default function RealEstateDetailPage() {
         ...(investment.installments || []),
         newPaymentObj,
       ];
+
       const cleanInstallments = updatedInstallments.map((inst) => {
         return { ...inst, isMaintenance: inst.isMaintenance || false }; // Ensure isMaintenance is boolean
       });
@@ -247,16 +254,16 @@ export default function RealEstateDetailPage() {
       });
 
       toast({
-        title: "Success",
-        description: `Payment #${nextNumber} has been added.`,
+        title: t("success"),
+        description: `${t("payment")} #${nextNumber} ${t("has_been_added")}.`,
       });
       setNewPayment({ dueDate: new Date(), amount: 0, description: "" });
       setShowAddPaymentDialog(false);
     } catch (error) {
-      console.error("Error adding payment:", error);
+      console.error(t("error_adding_payment"), error);
       toast({
-        title: "Error",
-        description: "Failed to add payment.",
+        title: t("error"),
+        description: t("failed_to_add_payment"),
         variant: "destructive",
       });
     } finally {
@@ -268,7 +275,7 @@ export default function RealEstateDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <Loader2 className="h-8 w-8 animate-spin mr-2" />
-        Loading investment...
+        {t("loading_investment")}
       </div>
     );
   }
@@ -277,11 +284,11 @@ export default function RealEstateDetailPage() {
     return (
       <Card className="w-full mt-10">
         <CardHeader>
-          <CardTitle>Real Estate Not Found</CardTitle>
+          <CardTitle>{t("real_estate_not_found")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            No real estate investment found for this ID.
+            {t("no_real_estate_investment_found_for_this_id")}
           </p>
           <Button
             variant="outline"
@@ -302,58 +309,63 @@ export default function RealEstateDetailPage() {
           <CardTitle className="text-2xl font-bold">
             {investment.name || investment.propertyAddress}
           </CardTitle>
-          <CardDescription>{investment.propertyType || "N/A"}</CardDescription>
+          <CardDescription>
+            {investment.propertyType || t("na")}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="font-medium text-muted-foreground">Address:</div>
-            <div>{investment.propertyAddress || "N/A"}</div>
             <div className="font-medium text-muted-foreground">
-              Paid Towards Purchase:
+              {t("address")}
+            </div>
+            <div>{investment.propertyAddress || t("na")}</div>
+            <div className="font-medium text-muted-foreground">
+              {t("paid_towards_purchase")}
             </div>
             <div>{formatNumberWithSuffix(investment.amountInvested)}</div>
             <div className="font-medium text-muted-foreground">
-              Installment Amount:
+              {t("installment_amount")}
             </div>
             <div>
               {investment.installmentAmount
                 ? formatNumberWithSuffix(investment.installmentAmount)
-                : "N/A"}
+                : t("na")}
             </div>
             <div className="font-medium text-muted-foreground">
-              Installment Frequency:
+              {t("installment_frequency")}
             </div>
-            <div>{investment.installmentFrequency || "N/A"}</div>
+            <div>{investment.installmentFrequency || t("na")}</div>
             <div className="font-medium text-muted-foreground">
-              Total Price at End:
+              {t("total_price_at_end")}
             </div>
             <div>
               {investment.totalInstallmentPrice
                 ? formatNumberWithSuffix(investment.totalInstallmentPrice)
-                : "N/A"}
+                : t("na")}
             </div>
             <div className="font-medium text-muted-foreground">
-              Installment End Date:
+              {t("installment_end_date")}
             </div>
             <div>{formatDateDisplay(investment.installmentEndDate)}</div>
             {investment.maintenanceAmount &&
               investment.maintenancePaymentDate && (
                 <>
                   <div className="font-medium text-muted-foreground">
-                    Maintenance Payment:
+                    {t("maintenance_payment")}
                   </div>
                   <div>
-                    {formatNumberWithSuffix(investment.maintenanceAmount)}{" "}
-                    on {formatDateDisplay(investment.maintenancePaymentDate)}
+                    {formatNumberWithSuffix(investment.maintenanceAmount)} on{" "}
+                    {formatDateDisplay(investment.maintenancePaymentDate)}
                   </div>
                 </>
               )}
           </div>
           <div className="mt-8">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold">Payment Schedule</h3>
+              <h3 className="text-lg font-semibold">{t("payment_schedule")}</h3>
               <Button onClick={() => setShowAddPaymentDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" /> Add Payment
+                <Plus className="mr-2 h-4 w-4" />
+                {t("add_payment")}
               </Button>
             </div>
             <div className="mt-4">
@@ -372,18 +384,19 @@ export default function RealEstateDetailPage() {
           >
             <SheetContent side="bottom" className="sm:max-w-[425px]">
               <SheetHeader>
-                <SheetTitle>Add Payment</SheetTitle>
+                <SheetTitle>{t("add_payment")}</SheetTitle>
                 <SheetDescription>
-                  Add a new future payment to the schedule.
+                  {t("add_a_new_future_payment_to_the_schedule")}
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="dueDate" className="text-end">
-                    Due Date
+                    {t("due_date")}
                   </Label>
                   <div className="col-span-3">
                     <Input
+                      id="dueDate"
                       type="date"
                       value={
                         newPayment.dueDate?.toISOString().split("T")[0] || ""
@@ -399,7 +412,7 @@ export default function RealEstateDetailPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="amount" className="text-end">
-                    Amount
+                    {t("amount")}
                   </Label>
                   <Input
                     id="amount"
@@ -416,7 +429,7 @@ export default function RealEstateDetailPage() {
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label htmlFor="description" className="text-end pt-2">
-                    Description
+                    {t("description")}
                   </Label>
                   <Textarea
                     id="description"
@@ -444,10 +457,10 @@ export default function RealEstateDetailPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Adding...
+                        {t("adding")}
                       </>
                     ) : (
-                      "Add Payment"
+                      t("add_payment")
                     )}
                   </Button>
                   <Button
@@ -455,7 +468,7 @@ export default function RealEstateDetailPage() {
                     onClick={() => setShowAddPaymentDialog(false)}
                     className="w-full justify-center"
                   >
-                    Cancel
+                    {t("cancel")}
                   </Button>
                 </div>
               </SheetFooter>

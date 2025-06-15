@@ -42,20 +42,19 @@ export function InvestmentDistributionCard({
   // When empty, show a skeleton pie chart with $0 total but keep all checkboxes visible
   const displayChartData = isEmpty ? [] : chartData;
   const displayTotal = isEmpty ? 0 : total;
-  const isDark = resolvedTheme === 'dark';
+  const isDark = resolvedTheme === "dark";
 
   // Create skeleton data for the empty state
   const skeletonData = [
     {
-      id: 'empty',
-      label: 'No investments',
+      id: "empty",
+      label: "No investments",
       value: 1,
-      color: isDark ? '#2d3748' : '#e2e8f0',
+      color: isDark ? "#2d3748" : "#e2e8f0",
     },
   ];
 
   const chartToRender = isEmpty ? skeletonData : chartData;
-
 
   return (
     <Card
@@ -178,9 +177,12 @@ export function InvestmentDistributionCard({
         <div className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 gap-y-2 mt-2 sm:mt-4 px-2">
           {legendData.map((d) => {
             const isChecked = checkedItems[d.id] !== false;
-            const dataPoint = chartData.find((item) => item.id === d.id) || { value: 0 };
+            const dataPoint = chartData.find((item) => item.id === d.id) || {
+              value: 0,
+            };
             const percentage = total > 0 ? (dataPoint.value / total) * 100 : 0;
-            const displayValue = isChecked && dataPoint.value > 0 ? percentage.toFixed(0) : '0';
+            const displayValue =
+              isChecked && dataPoint.value > 0 ? percentage.toFixed(0) : "0";
 
             return (
               <div
@@ -195,37 +197,41 @@ export function InvestmentDistributionCard({
                     onChange={() => {}}
                     onClick={(e) => e.stopPropagation()}
                     className={`h-3.5 w-3.5 sm:h-4 sm:w-4 rounded border-2 appearance-none transition-colors ${
-                      resolvedTheme === 'dark' ? 'border-gray-500' : 'border-gray-400'
+                      resolvedTheme === "dark"
+                        ? "border-gray-500"
+                        : "border-gray-400"
                     } ${
                       isChecked
-                        ? 'bg-blue-500 border-blue-500'
-                        : 'bg-transparent'
+                        ? "bg-blue-500 border-blue-500"
+                        : "bg-transparent"
                     }`}
                     style={{
-                      backgroundImage: isChecked 
-                        ? "url(" + (resolvedTheme === 'dark' 
-                          ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"
-                          : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") + ")"
-                        : 'none',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: 'contain',
+                      backgroundImage: isChecked
+                        ? "url(" +
+                          (resolvedTheme === "dark"
+                            ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"
+                            : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") +
+                          ")"
+                        : "none",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "contain",
                     }}
                   />
-                  <div 
+                  <div
                     className="absolute inset-0 rounded-sm"
-                    style={{ 
+                    style={{
                       backgroundColor: d.color,
                       opacity: isChecked ? 1 : 0.3,
-                      pointerEvents: 'none'
+                      pointerEvents: "none",
                     }}
                   />
                 </div>
                 <span
                   className={
                     resolvedTheme === "dark"
-                      ? `font-medium ${isChecked ? 'text-white' : 'text-gray-500'}`
-                      : `font-medium ${isChecked ? 'text-[#23255a]' : 'text-gray-400'} truncate max-w-[70px] sm:max-w-none`
+                      ? `font-medium ${isChecked ? "text-white" : "text-gray-500"}`
+                      : `font-medium ${isChecked ? "text-[#23255a]" : "text-gray-400"} truncate max-w-[70px] sm:max-w-none`
                   }
                 >
                   {d.label}:
@@ -233,8 +239,8 @@ export function InvestmentDistributionCard({
                 <span
                   className={
                     resolvedTheme === "dark"
-                      ? `font-medium ${isChecked ? 'text-white' : 'text-gray-500'}`
-                      : `font-medium ${isChecked ? 'text-[#23255a]' : 'text-gray-400'}`
+                      ? `font-medium ${isChecked ? "text-white" : "text-gray-500"}`
+                      : `font-medium ${isChecked ? "text-[#23255a]" : "text-gray-400"}`
                   }
                 >
                   {displayValue}%

@@ -26,7 +26,11 @@ export default function ProfilePage() {
     if (user) {
       setName(user.displayName || "");
       // Prioritize user.photoURL if it exists and is a valid URL/path
-      if (user.photoURL && typeof user.photoURL === 'string' && (user.photoURL.startsWith('http') || user.photoURL.startsWith('/'))) {
+      if (
+        user.photoURL &&
+        typeof user.photoURL === "string" &&
+        (user.photoURL.startsWith("http") || user.photoURL.startsWith("/"))
+      ) {
         setImage(user.photoURL);
       } else {
         setImage("/default-avatar.png"); // Fallback if photoURL is invalid or missing
@@ -36,7 +40,11 @@ export default function ProfilePage() {
         getDoc(doc(db, "users", user.uid)).then((docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.image && typeof data.image === 'string' && (data.image.startsWith('http') || data.image.startsWith('/'))) {
+            if (
+              data.image &&
+              typeof data.image === "string" &&
+              (data.image.startsWith("http") || data.image.startsWith("/"))
+            ) {
               setImage(data.image);
             }
           }
@@ -60,12 +68,13 @@ export default function ProfilePage() {
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       setImage(url);
-      setSuccess("Image uploaded successfully. Click Save Changes to update your profile.");
+      setSuccess(
+        "Image uploaded successfully. Click Save Changes to update your profile.",
+      );
     } catch (err: any) {
       console.error("Error uploading image:", err);
       setError(err.message || "Failed to upload image.");
-    }
-    finally {
+    } finally {
       setUploading(false);
     }
   };
@@ -104,7 +113,9 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-primary">User Profile</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-primary">
+          User Profile
+        </h2>
         <div className="flex flex-col items-center mb-6">
           <Image
             src={image}
@@ -114,23 +125,29 @@ export default function ProfilePage() {
             className="w-24 h-24 rounded-full border-4 border-primary object-cover mb-2"
             loader={({ src, width, quality }) => src}
           />
-          <span className="text-lg font-semibold text-foreground">{name || "No Name"}</span>
+          <span className="text-lg font-semibold text-foreground">
+            {name || "No Name"}
+          </span>
           <span className="text-sm text-muted-foreground">{user.email}</span>
         </div>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block font-medium mb-1 text-foreground">Name</label>
+            <label className="block font-medium mb-1 text-foreground">
+              Name
+            </label>
             <input
               type="text"
               className="w-full border rounded px-3 py-2 bg-background text-foreground"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               disabled={currentProviderId === "google.com"}
             />
           </div>
           {currentProviderId === "password" && (
             <div>
-              <label className="block font-medium mb-1 text-foreground">Upload Profile Image</label>
+              <label className="block font-medium mb-1 text-foreground">
+                Upload Profile Image
+              </label>
               <input
                 type="file"
                 accept="image/*"
@@ -138,27 +155,35 @@ export default function ProfilePage() {
                 disabled={uploading}
                 className="w-full"
               />
-              {uploading && <div className="text-sm text-muted-foreground">Uploading...</div>}
+              {uploading && (
+                <div className="text-sm text-muted-foreground">
+                  Uploading...
+                </div>
+              )}
             </div>
           )}
           <div>
-            <label className="block font-medium mb-1 text-foreground">Profile Image URL</label>
+            <label className="block font-medium mb-1 text-foreground">
+              Profile Image URL
+            </label>
             <input
               type="text"
               className="w-full border rounded px-3 py-2 bg-background text-foreground"
               value={image}
-              onChange={e => setImage(e.target.value)}
+              onChange={(e) => setImage(e.target.value)}
               disabled={currentProviderId === "google.com"}
             />
           </div>
           {currentProviderId === "password" && (
             <div>
-              <label className="block font-medium mb-1 text-foreground">New Password</label>
+              <label className="block font-medium mb-1 text-foreground">
+                New Password
+              </label>
               <input
                 type="password"
                 className="w-full border rounded px-3 py-2 bg-background text-foreground"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Leave blank to keep current password"
               />
             </div>
@@ -170,10 +195,14 @@ export default function ProfilePage() {
             className="w-full bg-primary text-white py-2 rounded font-semibold hover:bg-primary-dark transition"
             disabled={loading || currentProviderId === "google.com"}
           >
-            {loading ? "Saving..." : currentProviderId === "google.com" ? "View Only" : "Save Changes"}
+            {loading
+              ? "Saving..."
+              : currentProviderId === "google.com"
+                ? "View Only"
+                : "Save Changes"}
           </button>
         </form>
       </div>
     </div>
   );
-} 
+}

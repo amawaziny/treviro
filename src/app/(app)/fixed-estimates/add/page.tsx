@@ -21,7 +21,9 @@ export default function AddFixedEstimatePage() {
 
     setHeaderProps({
       title: t("add_new_fixed_estimate"),
-      description: t("log_your_recurring_income_or_expenses_like_salary_zakat_etc"),
+      description: t(
+        "log_your_recurring_income_or_expenses_like_salary_zakat_etc",
+      ),
       showBackButton: true,
       showNavControls: false,
       backHref: "/fixed-estimates",

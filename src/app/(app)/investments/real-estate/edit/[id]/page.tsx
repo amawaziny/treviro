@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function EditRealEstateInvestmentPage() {
-  const router = useRouter();
+  const { t } = useLanguage();
   const params = useParams();
   const { investments, isLoading } = useInvestments();
   const [investment, setInvestment] = useState<RealEstateInvestment | null>(
@@ -36,7 +36,7 @@ export default function EditRealEstateInvestmentPage() {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <Loader2 className="h-8 w-8 animate-spin mr-2" />
-        Loading investment...
+        {t("loading_investment")}
       </div>
     );
   }
@@ -45,11 +45,11 @@ export default function EditRealEstateInvestmentPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Investment Not Found</CardTitle>
+          <CardTitle>{t("investment_not_found")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-muted-foreground">
-            The requested real estate investment could not be found.
+            {t("the_requested_real_estate_investment_could_not_be_found")}
           </div>
         </CardContent>
       </Card>
@@ -64,7 +64,7 @@ export default function EditRealEstateInvestmentPage() {
             <BackArrowIcon
               className={language === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"}
             />
-            Back to Real Estate
+            {t("back_to_real_estate")}
           </Button>
         </Link>
       </div>

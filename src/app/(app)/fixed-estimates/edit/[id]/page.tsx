@@ -2,10 +2,7 @@
 
 import { useEffect } from "react";
 import { AddEditFixedEstimateForm } from "@/components/fixed-estimates/add-edit-fixed-estimate-form";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
 import { useInvestments } from "@/hooks/use-investments";
@@ -19,7 +16,7 @@ export default function EditFixedEstimatePage() {
   const params = useParams();
   const estimateId = params.id as string;
 
-  const estimate = fixedEstimates.find(e => e.id === estimateId);
+  const estimate = fixedEstimates.find((e) => e.id === estimateId);
 
   useEffect(() => {
     openForm();
@@ -73,4 +70,4 @@ export default function EditFixedEstimatePage() {
       </Card>
     </div>
   );
-} 
+}

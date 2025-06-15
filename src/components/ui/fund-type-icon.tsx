@@ -1,8 +1,26 @@
 import React from "react";
-import { Gem, Coins, Home, LineChart, Landmark, PiggyBank, Banknote } from "lucide-react";
+import {
+  Gem,
+  Coins,
+  Home,
+  LineChart,
+  Landmark,
+  PiggyBank,
+  Banknote,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type FundType = "Gold" | "Debt" | "Real Estate" | "Stock" | "Equity" | "REIT" | "Money Market" | "Mixed" | "Other" | string;
+export type FundType =
+  | "Gold"
+  | "Debt"
+  | "Real Estate"
+  | "Stock"
+  | "Equity"
+  | "REIT"
+  | "Money Market"
+  | "Mixed"
+  | "Other"
+  | string;
 
 interface FundTypeIconProps {
   fundType?: FundType;
@@ -16,7 +34,11 @@ interface FundTypeIconProps {
  * @param className - Optional extra className for styling
  * @param size - Optional icon size (default: 20)
  */
-export const FundTypeIcon: React.FC<FundTypeIconProps> = ({ fundType, className = "", size = 20 }) => {
+export const FundTypeIcon: React.FC<FundTypeIconProps> = ({
+  fundType,
+  className = "",
+  size = 20,
+}) => {
   // Always render inline and aligned with text unless user overrides
   // Use cn to combine default and custom className
   const baseClass = cn("inline align-text-top", className);

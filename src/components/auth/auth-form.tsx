@@ -22,7 +22,7 @@ function getPasswordStrength(password: string) {
   if (/[A-Z]/.test(password)) score++;
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
-  console.log('Password:', password, 'Score:', score);
+  console.log("Password:", password, "Score:", score);
   return score;
 }
 
@@ -71,9 +71,11 @@ export function AuthForm() {
     isProcessingLogin,
   } = useAuth();
 
-  const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot-password">("sign-in");
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot-password">(
+    "sign-in",
+  );
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [showSpinner, setShowSpinner] = useState(false);
   const { t } = useLanguage();
@@ -100,9 +102,16 @@ export function AuthForm() {
   }
 
   const calculatedWidth = `${getPasswordStrengthPercent(getPasswordStrength(password))}%`;
-  const calculatedBackgroundColor = getPasswordStrengthColor(getPasswordStrength(password));
+  const calculatedBackgroundColor = getPasswordStrengthColor(
+    getPasswordStrength(password),
+  );
 
-  console.log('Calculated Width:', calculatedWidth, 'Calculated Background Color:', calculatedBackgroundColor);
+  console.log(
+    "Calculated Width:",
+    calculatedWidth,
+    "Calculated Background Color:",
+    calculatedBackgroundColor,
+  );
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -117,7 +126,9 @@ export function AuthForm() {
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-semibold tracking-tight">
-                {mode === "sign-in" ? t("welcome_back") : t("create_an_account")}
+                {mode === "sign-in"
+                  ? t("welcome_back")
+                  : t("create_an_account")}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {mode === "sign-in"
@@ -133,7 +144,9 @@ export function AuthForm() {
                   type="email"
                   placeholder="name@example.com"
                   value={email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
+                  }
                   required
                 />
               </div>
@@ -155,11 +168,13 @@ export function AuthForm() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPassword(e.target.value)
+                  }
                   required
                 />
               </div>
-              {mode === 'sign-up' && (
+              {mode === "sign-up" && (
                 <>
                   <div className="w-full h-2 bg-gray-200 rounded mt-1 mb-1 overflow-hidden">
                     <div
@@ -177,7 +192,9 @@ export function AuthForm() {
               )}
               {error && <div className="text-red-500 text-sm">{error}</div>}
               <Button type="submit" className="w-full" disabled={showSpinner}>
-                {showSpinner && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {showSpinner && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {mode === "sign-in" ? t("sign_in") : t("sign_up")}
               </Button>
               <div className="relative">

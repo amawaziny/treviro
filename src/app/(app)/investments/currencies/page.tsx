@@ -52,7 +52,7 @@ export default function MyCurrenciesPage() {
     if (isLoadingInvestments || !investments.length) return [];
 
     const currencyInvestments = investments.filter(
-      (inv) => inv.type === "Currencies"
+      (inv) => inv.type === "Currencies",
     ) as CurrencyInvestment[];
     const holdings: {
       [key: string]: {
@@ -190,7 +190,7 @@ export default function MyCurrenciesPage() {
           <div
             className={cn(
               "text-2xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive"
+              isTotalProfitable ? "text-accent" : "text-destructive",
             )}
           >
             {isMobile
@@ -212,7 +212,7 @@ export default function MyCurrenciesPage() {
           <AlertTitle>{t("error_loading_exchange_rates")}</AlertTitle>
           <AlertDescription>
             {t(
-              "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore"
+              "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore",
             )}
           </AlertDescription>
         </Alert>
@@ -235,7 +235,7 @@ export default function MyCurrenciesPage() {
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
               {t(
-                "you_havent_added_any_currency_investments_yet_or_current_exchange_rates_are_unavailable"
+                "you_havent_added_any_currency_investments_yet_or_current_exchange_rates_are_unavailable",
               )}
             </p>
           </CardContent>

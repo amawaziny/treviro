@@ -15,7 +15,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
-import { cn, formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils";
+import {
+  cn,
+  formatCurrencyWithCommas,
+  formatNumberWithSuffix,
+} from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 import {
   AlertDialog,
@@ -56,11 +60,11 @@ export default function FixedEstimatesPage() {
 
   // Calculate total income and expenses
   const totalIncome = fixedEstimates
-    .filter(record => !record.isExpense)
+    .filter((record) => !record.isExpense)
     .reduce((sum, record) => sum + record.amount, 0);
-  
+
   const totalExpenses = fixedEstimates
-    .filter(record => record.isExpense)
+    .filter((record) => record.isExpense)
     .reduce((sum, record) => sum + record.amount, 0);
 
   return (
@@ -71,7 +75,7 @@ export default function FixedEstimatesPage() {
         </h1>
         <p className="text-muted-foreground text-sm">
           {t(
-            "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity"
+            "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity",
           )}
         </p>
       </div>
@@ -125,7 +129,9 @@ export default function FixedEstimatesPage() {
               <Card
                 key={record.id}
                 className={cn(
-                  record.isExpense ? "border-red-200 dark:border-red-700" : "border-green-200 dark:border-green-700"
+                  record.isExpense
+                    ? "border-red-200 dark:border-red-700"
+                    : "border-green-200 dark:border-green-700",
                 )}
               >
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
@@ -146,9 +152,13 @@ export default function FixedEstimatesPage() {
                     <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                       <span>{record.period}</span>
                       <span>•</span>
-                      <span className={cn(
-                        record.isExpense ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
-                      )}>
+                      <span
+                        className={cn(
+                          record.isExpense
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-green-600 dark:text-green-400",
+                        )}
+                      >
                         {record.isExpense ? t("expense") : t("income")}
                       </span>
                     </div>
@@ -196,7 +206,7 @@ export default function FixedEstimatesPage() {
                             </AlertDialogTitle>
                             <AlertDialogDescription>
                               {t(
-                                "this_action_will_permanently_delete_this_fixed_estimate_record_this_cannot_be_undone"
+                                "this_action_will_permanently_delete_this_fixed_estimate_record_this_cannot_be_undone",
                               )}
                             </AlertDialogDescription>
                           </AlertDialogHeader>

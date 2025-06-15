@@ -5,11 +5,7 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities"; // Import the hook
 import type { StockInvestment } from "@/lib/types"; // Import Investment type
 import { MyStockListItem } from "./my-stock-list-item";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LineChart } from "lucide-react";

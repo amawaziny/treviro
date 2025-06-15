@@ -11,21 +11,10 @@ import type {
   AggregatedGoldHolding,
 } from "@/lib/types";
 import { formatCurrencyWithCommas, isGoldRelatedFund } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Gem,
-  Plus,
-  AlertCircle,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { Gem, Plus, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MyGoldListItem } from "@/components/investments/gold/my-gold-list-item";
@@ -53,7 +42,7 @@ export default function MyGoldPage() {
     const holdings: AggregatedGoldHolding[] = [];
 
     const physicalGoldInvestments = investments.filter(
-      (inv) => inv.type === "Gold"
+      (inv) => inv.type === "Gold",
     ) as GoldInvestment[];
     const physicalAggregated: {
       [key in GoldType]?: {
@@ -111,11 +100,11 @@ export default function MyGoldPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks"
+      (inv) => inv.type === "Stocks",
     ) as StockInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol
+        (ls) => ls.symbol === stockInv.tickerSymbol,
       );
       if (
         security &&
@@ -124,7 +113,7 @@ export default function MyGoldPage() {
       ) {
         const existingFundHolding = holdings.find(
           (h) =>
-            h.itemType === "fund" && h.fundDetails?.symbol === security.symbol
+            h.itemType === "fund" && h.fundDetails?.symbol === security.symbol,
         );
         if (existingFundHolding) {
           existingFundHolding.totalQuantity += stockInv.numberOfShares || 0;
@@ -173,8 +162,8 @@ export default function MyGoldPage() {
                 investments.find(
                   (i) =>
                     i.type === "Stocks" &&
-                    (i as StockInvestment).tickerSymbol === symbol
-                )?.id
+                    (i as StockInvestment).tickerSymbol === symbol,
+                )?.id,
           );
           if (initialFundInvestment) {
             fundHolding.averagePurchasePrice =
@@ -286,7 +275,7 @@ export default function MyGoldPage() {
           <div
             className={cn(
               "text-2xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive"
+              isTotalProfitable ? "text-accent" : "text-destructive",
             )}
           >
             {isMobile
@@ -312,7 +301,7 @@ export default function MyGoldPage() {
           <AlertTitle>{t("error_loading_gold_market_prices")}</AlertTitle>
           <AlertDescription>
             {t(
-              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore"
+              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore",
             )}
           </AlertDescription>
         </Alert>

@@ -52,7 +52,9 @@ export function Header() {
           ) : (
             <Link href="/dashboard" className="flex items-center space-x-2">
               <Coins className="h-7 w-7 text-primary" />
-              <span className="text-2xl font-bold text-primary">{t("app_name")}</span>
+              <span className="text-2xl font-bold text-primary">
+                {t("app_name")}
+              </span>
             </Link>
           )}
         </div>
