@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useForm as useReactHookForm,
-  FormProvider,
   useFormContext as useReactHookFormContext,
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -56,15 +55,10 @@ import type {
   DebtInstrumentInvestment,
 } from "@/lib/types";
 import { useSearchParams, useRouter } from "next/navigation";
-import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { RealEstateForm } from "../real-estate/real-estate-form";
 import { useForm } from "@/contexts/form-context";
-
-const getCurrentDate = () => {
-  const date = new Date();
-  return format(date, "yyyy-MM-dd");
-};
+import { formatCurrencyWithCommas, getCurrentDate } from "@/lib/utils";
 
 // Initial values for each investment type
 const initialFormValuesByType: Record<InvestmentType, AddInvestmentFormValues> =
@@ -130,10 +124,11 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
   control,
   isDedicatedGoldMode,
 }) => {
+  const { t } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
-        Gold Investment Details
+        {t("gold_investment_details")}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {!isDedicatedGoldMode && (
@@ -142,10 +137,10 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
             name="name"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Name / Description (Optional)</FormLabel>
+                <FormLabel>{t("name_description_optional")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g., Gold Bar Q1 2024 or Wedding Gold"
+                    placeholder={t("e.g., Gold Bar Q1 2024 or Wedding Gold")}
                     {...field}
                     value={field.value || ""}
                   />
@@ -160,7 +155,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
           name="goldType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gold Type</FormLabel>
+              <FormLabel>{t("gold_type")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value || ""}
@@ -168,7 +163,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select gold type" />
+                    <SelectValue placeholder={t("Select gold type")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -186,12 +181,13 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="quantityInGrams"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Quantity / Units</FormLabel>
+              <FormLabel>{t("quantity_units")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 50 or 2"
@@ -203,18 +199,19 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
                 />
               </FormControl>
               <FormDescription>
-                Grams for K21/K24, units for Pound/Ounce.
+                {t("grams_for_k21k24_units_for_poundounce")}
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="amountInvested"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Total Amount Invested (Cost)</FormLabel>
+              <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 10000.50"
@@ -223,17 +220,20 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
                   allowDecimal={true}
                 />
               </FormControl>
-              <FormDescription>Total cost including any fees.</FormDescription>
+              <FormDescription>
+                {t("total_cost_including_any_fees")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="purchaseDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Purchase Date</FormLabel>
+              <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -259,10 +259,11 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
   control,
   isDedicatedCurrencyMode,
 }) => {
+  const { t } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
-        Currency Holding Details
+        {t("currency_holding_details")}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {!isDedicatedCurrencyMode && (
@@ -271,10 +272,10 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             name="name"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Name / Description (Optional)</FormLabel>
+                <FormLabel>{t("name_description_optional")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g., USD Savings or Trip to Europe Fund"
+                    placeholder={t("e.g., USD Savings or Trip to Europe Fund")}
                     {...field}
                     value={field.value || ""}
                   />
@@ -289,7 +290,7 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
           name="currencyCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Transaction Currency Code</FormLabel>
+              <FormLabel>{t("transaction_currency_code")}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g., USD, EUR"
@@ -301,12 +302,13 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="foreignCurrencyAmount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Foreign Currency Amount</FormLabel>
+              <FormLabel>{t("foreign_currency_amount")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 1000.50"
@@ -318,18 +320,19 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
                 />
               </FormControl>
               <FormDescription>
-                Amount of the foreign currency you bought.
+                {t("amount_of_the_foreign_currency_you_bought")}
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="exchangeRateAtPurchase"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Exchange Rate at Purchase (to EGP)</FormLabel>
+              <FormLabel>{t("exchange_rate_at_purchase_to_egp")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 30.85 (for USD to EGP)"
@@ -344,12 +347,13 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="purchaseDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Purchase Date</FormLabel>
+              <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -386,12 +390,13 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
   onSecuritySelect,
   isPreSelectedStockMode,
 }) => {
+  const { t } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
         {preSelectedSecurityDetails?.securityType === "Fund"
-          ? "Fund Purchase Details"
-          : "Stock Purchase Details"}
+          ? t("fund_purchase_details")
+          : t("stock_purchase_details")}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {!isPreSelectedStockMode && (
@@ -400,7 +405,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             name="selectedsecurityId"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Select Security (Stock or Fund)</FormLabel>
+                <FormLabel>{t("select_security_stock_or_fund")}</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -418,12 +423,12 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
                       <SelectValue
                         placeholder={
                           isLoadingListedSecurities
-                            ? "Loading securities..."
+                            ? t("loading_securities")
                             : listedSecuritiesError
-                              ? "Error loading securities"
+                              ? t("error_loading_securities")
                               : listedSecurities.length === 0
-                                ? "No securities available"
-                                : "Select a security from the list"
+                                ? t("no_securities_available")
+                                : t("select_a_security_from_the_list")
                         }
                       />
                     </SelectTrigger>
@@ -447,22 +452,19 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
         {preSelectedSecurityDetails && (
           <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
             <p className="text-sm font-medium">
-              Selected Security: {preSelectedSecurityDetails.name} (
+              {t("selected_security")}
+              {preSelectedSecurityDetails.name} (
               {preSelectedSecurityDetails.symbol})
             </p>
             <p className="text-xs text-muted-foreground">
-              Current Market Price:{" "}
-              {preSelectedSecurityDetails.price.toLocaleString(undefined, {
-                style: "currency",
-                currency: preSelectedSecurityDetails.currency || "USD",
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3,
-              })}
+              {t("current_market_price")}{" "}
+              {formatCurrencyWithCommas(preSelectedSecurityDetails.price)}
             </p>
             {preSelectedSecurityDetails.securityType === "Fund" &&
               preSelectedSecurityDetails.fundType && (
                 <p className="text-xs text-muted-foreground">
-                  Type: {preSelectedSecurityDetails.fundType}
+                  {t("type")}
+                  {preSelectedSecurityDetails.fundType}
                 </p>
               )}
           </div>
@@ -472,7 +474,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
           name="numberOfShares"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Number of Securities</FormLabel>
+              <FormLabel>{t("number_of_securities")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 100"
@@ -487,12 +489,13 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="purchasePricePerShare"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Purchase Price (per security)</FormLabel>
+              <FormLabel>{t("purchase_price_per_security")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 150.50"
@@ -507,12 +510,13 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="purchaseFees"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Purchase Fees (optional)</FormLabel>
+              <FormLabel>{t("purchase_fees_optional")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 5.00"
@@ -522,18 +526,19 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
                 />
               </FormControl>
               <FormDescription>
-                Brokerage or transaction fees for this purchase.
+                {t("brokerage_or_transaction_fees_for_this_purchase")}
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="purchaseDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Purchase Date</FormLabel>
+              <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -557,6 +562,7 @@ interface RenderDebtFieldsProps {
   watch: any;
 }
 const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
+  const { t } = useLanguage();
   const { control, setValue, watch } =
     useReactHookFormContext<AddInvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
@@ -572,7 +578,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
   return (
     <div className="space-y-6 mt-0 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
-        Debt Instrument Details
+        {t("debt_instrument_details")}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
@@ -580,7 +586,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
           name="debtSubType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Specific Debt Type</FormLabel>
+              <FormLabel>{t("specific_debt_type")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value || ""}
@@ -588,7 +594,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select the type of debt" />
+                    <SelectValue placeholder={t("Select the type of debt")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -603,15 +609,16 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="issuer"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Issuer / Institution</FormLabel>
+              <FormLabel>{t("issuer_institution")}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="e.g., US Treasury, XYZ Corp"
+                  placeholder={t("e.g., US Treasury, XYZ Corp")}
                   {...field}
                   value={field.value || ""}
                 />
@@ -620,6 +627,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="interestRate"
@@ -628,7 +636,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             const value = field.value !== undefined ? String(field.value) : "";
             return (
               <FormItem>
-                <FormLabel>Interest Rate (%)</FormLabel>
+                <FormLabel>{t("interest_rate")}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5.5"
@@ -645,12 +653,13 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             );
           }}
         />
+
         <FormField
           control={control}
           name="maturityDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Maturity Date</FormLabel>
+              <FormLabel>{t("maturity_date")}</FormLabel>
               <FormControl>
                 <Input type="date" {...field} value={field.value || ""} />
               </FormControl>
@@ -658,12 +667,13 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="amountInvested"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Total Amount Invested (Cost)</FormLabel>
+              <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
               <FormControl>
                 <NumericInput
                   placeholder="e.g., 10000.75"
@@ -672,11 +682,14 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                   allowDecimal={true}
                 />
               </FormControl>
-              <FormDescription>Total cost including any fees.</FormDescription>
+              <FormDescription>
+                {t("total_cost_including_any_fees")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         {/* Certificate Interest Frequency Dropdown */}
         {watchedDebtSubType === "Certificate" && (
           <FormField
@@ -684,7 +697,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             name="certificateInterestFrequency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Certificate Interest Frequency</FormLabel>
+                <FormLabel>{t("certificate_interest_frequency")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
@@ -701,7 +714,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  How often interest is paid. Default is Monthly.
+                  {t("how_often_interest_is_paid_default_is_monthly")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -715,7 +728,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             name="purchaseDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Purchase Date</FormLabel>
+                <FormLabel>{t("purchase_date")}</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -770,6 +783,7 @@ export function AddInvestmentForm({
   mode?: "add" | "edit";
   initialValues?: Partial<AddInvestmentFormValues>;
 }) {
+  const { t } = useLanguage();
   const { openForm, closeForm } = useForm();
 
   // Open form when component mounts
@@ -886,7 +900,6 @@ export function AddInvestmentForm({
         isMounted = false;
       };
     }
-    const currentFormValues = form.getValues();
 
     // Fix: resetFormWithType and form.reset must use correct type for discriminated union
     const resetFormWithType = (type: InvestmentType) => {
@@ -929,7 +942,7 @@ export function AddInvestmentForm({
         } else if (isMounted) {
           toast({
             title: "Error",
-            description: "Pre-selected security not found.",
+            description: t("preselected_security_not_found"),
             variant: "destructive",
           });
           router.replace("/investments/add");
@@ -961,8 +974,8 @@ export function AddInvestmentForm({
       Object.keys(form.formState.errors).length > 0
     ) {
       toast({
-        title: "Validation Error",
-        description: "Please check the form for errors.",
+        title: t("validation_error"),
+        description: t("please_check_the_form_for_errors"),
         variant: "destructive",
       });
       return;
@@ -981,8 +994,8 @@ export function AddInvestmentForm({
 
     if (!finalInvestmentType) {
       toast({
-        title: "Error",
-        description: "Investment type is missing.",
+        title: t("error"),
+        description: t("investment_type_is_missing"),
         variant: "destructive",
       });
       return;
@@ -1015,8 +1028,8 @@ export function AddInvestmentForm({
 
       if (!selectedSecurity) {
         toast({
-          title: "Error",
-          description: "Selected security details not found.",
+          title: t("error"),
+          description: t("selected_security_details_not_found"),
           variant: "destructive",
         });
         return;
@@ -1058,7 +1071,8 @@ export function AddInvestmentForm({
           values.certificateInterestFrequency || "Monthly",
       };
     } else if (finalInvestmentType === "Gold" && values.type === "Gold") {
-      investmentName = values.name || `Gold (${values.goldType || "N/A"})`;
+      investmentName =
+        values.name || `${t("gold")} (${values.goldType || t("na")})`;
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
@@ -1072,7 +1086,7 @@ export function AddInvestmentForm({
       values.type === "Currencies"
     ) {
       investmentName =
-        values.name || `Currency (${values.currencyCode || "N/A"})`;
+        values.name || `${t("currency")} (${values.currencyCode || t("na")})`;
       const calculatedCost =
         values.foreignCurrencyAmount * values.exchangeRateAtPurchase;
       newInvestment = {
@@ -1103,8 +1117,8 @@ export function AddInvestmentForm({
           setAiAnalysisResult(analysisResultFromAi);
         } catch (error) {
           toast({
-            title: "AI Analysis Failed",
-            description: "Could not perform currency fluctuation analysis.",
+            title: t("ai_analysis_failed"),
+            description: t("could_not_perform_currency_fluctuation_analysis"),
             variant: "destructive",
           });
         } finally {
@@ -1116,7 +1130,8 @@ export function AddInvestmentForm({
       values.type === "Real Estate"
     ) {
       investmentName =
-        values.name || `Real Estate (${values.propertyAddress || "N/A"})`;
+        values.name ||
+        `${t("real_estate")} (${values.propertyAddress || t("na")})`;
       newInvestment = removeUndefinedFieldsDeep({
         ...newInvestmentBase,
         name: investmentName,
@@ -1156,8 +1171,8 @@ export function AddInvestmentForm({
           removeUndefinedFieldsDeep(values),
         );
         toast({
-          title: "Investment Updated",
-          description: `${values.name || values.propertyAddress || "Real Estate"} has been updated successfully.`,
+          title: t("investment_updated"),
+          description: `${values.name || values.propertyAddress || t("real_estate")} ${t("has been successfully updated")}.`,
         });
         router.push("/investments/real-estate");
         return;
@@ -1166,8 +1181,8 @@ export function AddInvestmentForm({
     } else {
       await addInvestment(newInvestment, analysisResultFromAi);
       toast({
-        title: "Investment Added",
-        description: `${newInvestment.name} (${finalInvestmentType}) has been successfully added.`,
+        title: t("investment_added"),
+        description: `${newInvestment.name} (${finalInvestmentType}) ${t("has been successfully added")}.`,
       });
     }
 
@@ -1204,8 +1219,8 @@ export function AddInvestmentForm({
     }
   }
 
-  let pageTitle = "Add New Investment";
-  let submitButtonText = `Add Investment`;
+  let pageTitle = t("add_new_investment");
+  let submitButtonText = t("add_investment");
 
   // Custom: Edit Real Estate mode title and button
   if (
@@ -1214,25 +1229,38 @@ export function AddInvestmentForm({
     initialValues?.name
   ) {
     pageTitle = `Edit Real Estate: ${initialValues.name}`;
-    submitButtonText = "Save Changes";
+    submitButtonText = t("save_changes");
   } else if (mode === "edit" && effectiveSelectedType === "Real Estate") {
     pageTitle = `Edit Real Estate`;
-    submitButtonText = "Save Changes";
+    submitButtonText = t("save_changes");
   } else if (isDedicatedGoldMode) {
-    pageTitle = "Add Gold Investment";
-    submitButtonText = "Add Gold";
+    pageTitle = t("add_gold_investment");
+    submitButtonText = t("add_gold");
   } else if (isDedicatedDebtMode) {
-    pageTitle = "Buy Debt Instrument";
-    submitButtonText = "Buy Debt Instrument";
+    pageTitle = t("buy_debt_instrument");
+    submitButtonText = t("buy_debt_instrument");
   } else if (isDedicatedCurrencyMode) {
-    pageTitle = "Add Currency Holding";
-    submitButtonText = "Add Currency";
+    pageTitle = t("add_currency_holding");
+    submitButtonText = t("add_currency");
   } else if (isDedicatedRealEstateMode) {
-    pageTitle = "Add Real Estate";
-    submitButtonText = "Add Real Estate";
+    pageTitle = t("add_real_estate");
+    submitButtonText = t("add_real_estate");
   } else if (isPreSelectedStockMode && preSelectedSecurityDetails) {
-    pageTitle = `Buy: ${preSelectedSecurityDetails.name} (${preSelectedSecurityDetails.securityType === "Fund" ? preSelectedSecurityDetails.fundType || "Fund" : preSelectedSecurityDetails.symbol})`;
-    submitButtonText = `Buy ${preSelectedSecurityDetails.securityType === "Fund" ? "Units" : "Securities"}`;
+    pageTitle =
+      t("buy") +
+      ": " +
+      preSelectedSecurityDetails.name +
+      " (" +
+      (preSelectedSecurityDetails.securityType === "Fund"
+        ? preSelectedSecurityDetails.fundType || "Fund"
+        : preSelectedSecurityDetails.symbol) +
+      ")";
+    submitButtonText =
+      t("buy") +
+      " " +
+      (preSelectedSecurityDetails.securityType === "Fund"
+        ? t("units")
+        : t("securities"));
   } else if (
     preSelectedInvestmentTypeQueryParam &&
     !isDedicatedGoldMode &&
@@ -1241,8 +1269,8 @@ export function AddInvestmentForm({
     !isDedicatedRealEstateMode &&
     !isPreSelectedStockMode
   ) {
-    pageTitle = `Add New ${preSelectedInvestmentTypeQueryParam}`;
-    submitButtonText = `Add ${preSelectedInvestmentTypeQueryParam}`;
+    pageTitle = t("add_new") + " " + preSelectedInvestmentTypeQueryParam;
+    submitButtonText = t("add") + " " + preSelectedInvestmentTypeQueryParam;
   } else if (
     effectiveSelectedType &&
     !isDedicatedDebtMode &&
@@ -1251,7 +1279,7 @@ export function AddInvestmentForm({
     !isDedicatedRealEstateMode &&
     !isPreSelectedStockMode
   ) {
-    submitButtonText = `Add ${effectiveSelectedType}`;
+    submitButtonText = t("add") + " " + effectiveSelectedType;
   }
 
   const handleSecuritySelect = useCallback(
@@ -1265,11 +1293,6 @@ export function AddInvestmentForm({
     [listedSecurities, form, setPreSelectedSecurityDetails],
   );
 
-  const hideInvestmentTypeDropdown =
-    mode === "edit" && effectiveSelectedType === "Real Estate";
-  const hideGeneralFields =
-    mode === "edit" && effectiveSelectedType === "Real Estate";
-
   const RenderGeneralFields = React.memo(() => (
     <>
       {!isDedicatedDebtMode &&
@@ -1277,13 +1300,13 @@ export function AddInvestmentForm({
         !isDedicatedCurrencyMode &&
         !isDedicatedRealEstateMode &&
         !isPreSelectedStockMode &&
-        !(mode === "edit" && effectiveSelectedType === "Real Estate") && (
+        !(mode === "edit" && effectiveSelectedType === t("real_estate")) && (
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Investment Type</FormLabel>
+                <FormLabel>{t("investment_type")}</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -1300,7 +1323,9 @@ export function AddInvestmentForm({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select an investment type" />
+                      <SelectValue
+                        placeholder={t("select_an_investment_type")}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -1327,17 +1352,17 @@ export function AddInvestmentForm({
         !(mode === "edit" && effectiveSelectedType === "Real Estate") && (
           <div className="space-y-6 md:col-span-2 mt-6 p-6 border rounded-md">
             <h3 className="text-lg font-medium text-primary">
-              {effectiveSelectedType} Details
+              {effectiveSelectedType} {t("Details")}
             </h3>
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name / Description (Optional)</FormLabel>
+                  <FormLabel>{t("name_description_optional")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Savings Goal, Vacation Fund"
+                      placeholder={t("e.g., Savings Goal, Vacation Fund")}
                       {...field}
                       value={field.value || ""}
                     />
@@ -1346,12 +1371,13 @@ export function AddInvestmentForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="amountInvested"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Total Amount Invested (Cost)</FormLabel>
+                  <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
                   <FormControl>
                     <NumericInput
                       placeholder="e.g., 1000.00"
@@ -1372,12 +1398,13 @@ export function AddInvestmentForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="purchaseDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Purchase Date</FormLabel>
+                  <FormLabel>{t("purchase_date")}</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
@@ -1408,7 +1435,7 @@ export function AddInvestmentForm({
                   language === "ar" ? "ml-1 h-3.5 w-3.5" : "mr-1 h-3.5 w-3.5"
                 }
               />
-              Back to Real Estate
+              {t("back_to_real_estate")}
             </Button>
           </Link>
         </div>
@@ -1481,7 +1508,7 @@ export function AddInvestmentForm({
             {isLoadingAi && (
               <div className="flex items-center justify-center p-4 my-4 text-muted-foreground">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Performing currency analysis...
+                {t("performing_currency_analysis")}
               </div>
             )}
 
@@ -1511,7 +1538,7 @@ export function AddInvestmentForm({
             {effectiveSelectedType === "Real Estate" &&
               Object.keys(form.formState.errors).length > 0 && (
                 <div className="mt-2 text-red-500 text-sm">
-                  Please fix the errors above and try again.
+                  {t("please_fix_the_errors_above_and_try_again")}
                 </div>
               )}
           </form>
