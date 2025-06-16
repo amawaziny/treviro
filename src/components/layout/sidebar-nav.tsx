@@ -2,21 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
-import {
-  LayoutDashboard,
-  Briefcase,
-  Home,
-  Gem,
-  DollarSign,
-  Search,
-  PiggyBank,
-  TrendingDown,
-  LineChart as CashFlowIcon,
-  Settings,
-} from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import { navItems } from "@/lib/navigation";
 import {
   SidebarMenu,
@@ -24,10 +9,12 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useLanguage } from "@/contexts/language-context";
 
 export function SidebarNav() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const { t } = useLanguage();
 
   if (!navItems?.length) {
     return null;
@@ -79,10 +66,10 @@ export function SidebarNav() {
                 isActive={isActive}
                 disabled={item.disabled}
                 onClick={() => setOpenMobile(false)}
-                tooltip={{ children: item.title, side: "right" }}
+                tooltip={{ children: t(item.title), side: "right" }}
               >
                 <item.icon className="h-4 w-4" />
-                <span>{item.title}</span>
+                <span>{t(item.title)}</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>

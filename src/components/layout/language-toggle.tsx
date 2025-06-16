@@ -11,14 +11,14 @@ import { useLanguage } from "@/contexts/language-context";
 import { Globe } from "lucide-react";
 
 export function LanguageToggle() {
-  const { language, setLanguage } = useLanguage();
+  const { t, setLanguage } = useLanguage();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
           <Globe className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Toggle language</span>
+          <span className="sr-only">{t("toggle_language")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/language-context";
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -6,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { navItems } from "@/lib/navigation";
 
 export function BottomTabBar() {
+  const { t: t } = useLanguage();
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
@@ -39,7 +41,7 @@ export function BottomTabBar() {
             }`}
           >
             {item.icon ? <item.icon className="h-4 w-4 mb-1" /> : null}
-            <span>{item.mobileTitle || item.title}</span>
+            <span>{t(item.mobileTitle || item.title)}</span>
           </Link>
         ))}
         <button
@@ -71,7 +73,7 @@ export function BottomTabBar() {
               id="bottom-tab-bar-more-title"
               className="text-lg font-bold mb-4 dark:text-white text-[#23255a]"
             >
-              More Menu
+              {t("more_menu")}
             </h2>
             <ul className="space-y-4">
               {navItems.slice(4).map((item, idx) => (
