@@ -333,12 +333,12 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleRemoveFund}
                   className={buttonVariants({ variant: "destructive" })}
                 >
-                  Remove
+                  {t("remove")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
