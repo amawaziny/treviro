@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import Image from "next/image";
 import type { AggregatedGoldHolding } from "@/lib/types";
@@ -16,8 +17,7 @@ interface MyGoldListItemProps {
 }
 
 export function MyGoldListItem({ holding }: MyGoldListItemProps) {
-  const { removeGoldInvestments } = useInvestments();
-  const { toast } = useToast();
+  const { t: t } = useLanguage();
 
   const {
     id,
@@ -49,31 +49,6 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
     isProfitable = profitLoss >= 0;
   }
 
-  const formattedAvgPrice = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 4,
-    useGrouping: false,
-  }).format(averagePurchasePrice);
-
-  const formattedMarketPrice = currentMarketPrice
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(currentMarketPrice)
-    : "N/A";
-
-  const formattedProfitLoss = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency,
-    signDisplay: "always",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(profitLoss);
-
   const quantityLabel =
     itemType === "fund"
       ? "Units"
@@ -96,18 +71,20 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
             passHref
             className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2"
           >
-            {itemType === "fund" && logoUrl ? (
-              <Image
-                src={logoUrl}
-                alt={`${displayName} logo`}
-                width={40}
-                height={40}
-                className="rounded-full object-cover"
-                data-ai-hint="fund logo"
-              />
-            ) : (
-              <Gem className="h-10 w-10 text-amber-400" /> // Generic icon for physical gold
-            )}
+            {
+              itemType === "fund" && logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt={`${displayName} logo`}
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
+                  data-ai-hint="fund logo"
+                />
+              ) : (
+                <Gem className="h-10 w-10 text-amber-400" />
+              ) // Generic icon for physical gold
+            }
             <div className="truncate">
               <p className="text-base font-medium truncate">
                 {itemType === "fund"
@@ -159,17 +136,19 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
               </Badge>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Market N/A</p>
+            <p className="text-sm text-muted-foreground">{t("market_na")}</p>
           )}
         </div>
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>
-          Avg. Cost:
+          {t("avg_cost")}
+
           <span> {formatNumberWithSuffix(averagePurchasePrice, currency)}</span>
         </p>
         <p className="text-end">
-          Market Price:
+          {t("market_price")}
+
           <span>
             {" "}
             {formatNumberWithSuffix(currentMarketPrice || 0, currency)}

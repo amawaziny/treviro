@@ -238,6 +238,7 @@
   "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity": "Manage your recurring income and expenses like salary, Zakat, and\n          charity.",
   "management_of_salary_zakat_and_charity_is_now_handled_on_the_fixed_estimates_page_this_component_is_currently_a_placeholder": "Management of Salary, Zakat, and Charity is now handled on the \"Fixed\n          Estimates\" page. This component is currently a placeholder.",
   "market_na": "Market N/A",
+  "market_price": "Market Price:",
   "market_rate": "Market Rate:",
   "market_value": "Market Value",
   "maturity": "Maturity:",
@@ -318,6 +319,7 @@
   "recorded successfully": "recorded successfully",
   "remaining_cash_after_expenses_investments": "Remaining Cash After Expenses & Investments",
   "remaining_total_income_total_expenses_total_investments": "Remaining = Total Income - Total Expenses - Total Investments",
+  "remove": "Remove",
   "required_this_month": "Required This Month",
   "reset_your_password": "إعادة تعيين كلمة المرور الخاصة بك",
   "right8": "right-8",
@@ -442,6 +444,5 @@
   "your_financial_settings_have_been_updated": "Your financial settings have been updated.",
   "your_fixed_estimates": "Your Fixed Estimates",
   "yyyymmdd": "yyyy-MM-dd",
-  "zakat_fixed": "Zakat (Fixed):",
-  "remove":"Remove"
+  "zakat_fixed": "Zakat (Fixed):"
 }
