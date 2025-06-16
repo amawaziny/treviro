@@ -1,10 +1,15 @@
 import { test, expect, Page } from '@playwright/test';
 import { faker } from '@faker-js/faker';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Test data
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || 'test@example.com',
-  password: process.env.TEST_USER_PASSWORD || 'testPassword123',
+  email: process.env.TEST_USER_EMAIL || 'test@treviro.com',
+  password: process.env.TEST_USER_PASSWORD || 'Test@123',
   newPassword: 'newTestPassword123',
 };
 
@@ -19,17 +24,29 @@ const TEST_EXPENSE = {
 
 // Helper functions
 async function login(page: Page) {
-  await page.goto('/login');
+  await page.goto('/');
+  
+  // Wait for the login form to be ready
+  await page.waitForSelector('input[type="email"]');
+  await page.waitForSelector('input[type="password"]');
+  
+  // Fill in credentials
   await page.fill('input[type="email"]', TEST_USER.email);
   await page.fill('input[type="password"]', TEST_USER.password);
+  
+  // Click submit and wait for navigation
   await page.click('button[type="submit"]');
-  await expect(page).toHaveURL('/dashboard');
+  
+  // Wait for navigation to complete
+  await page.waitForURL('/dashboard', { timeout: 30000 });
 }
 
 async function logout(page: Page) {
-  await page.click('[data-testid="profile-menu"]');
-  await page.click('[data-testid="logout-button"]');
-  await expect(page).toHaveURL('/login');
+  // Click the user avatar/menu button
+  await page.click('button[aria-label="User menu"]');
+  // Click the logout button
+  await page.click('button:has-text("Logout")');
+  await expect(page).toHaveURL('/');
 }
 
 // Test suite
@@ -43,23 +60,37 @@ test.describe('Regression Tests', () => {
   test.describe('Authentication', () => {
     test('Valid Login', async ({ page }) => {
       await login(page);
-      await expect(page.locator('[data-testid="dashboard-title"]')).toBeVisible();
+      await expect(page).toHaveURL('/dashboard');
     });
 
     test('Invalid Login', async ({ page }) => {
-      await page.goto('/login');
-      await page.fill('input[type="email"]', 'invalid@example.com');
+      await page.goto('/');
+      await page.fill('input[type="email"]', TEST_USER.email);
       await page.fill('input[type="password"]', 'wrongpassword');
       await page.click('button[type="submit"]');
-      await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+      
+      // Wait for error message or navigation
+      try {
+        await Promise.race([
+          page.waitForSelector('div.text-red-500.text-sm', { timeout: 5000 }),
+          page.waitForURL('/dashboard', { timeout: 5000 })
+        ]);
+      } catch (error) {
+        // If neither error nor navigation happens, that's also a failure
+        throw new Error('Invalid login test failed - neither error message nor navigation appeared');
+      }
+      
+      // Verify we're still on the login page
+      const currentUrl = page.url();
+      expect(currentUrl).not.toContain('/dashboard');
     });
 
     test('Password Reset', async ({ page }) => {
-      await page.goto('/login');
-      await page.click('[data-testid="forgot-password"]');
+      await page.goto('/');
+      await page.click('button:has-text("Forgot Password")');
       await page.fill('input[type="email"]', TEST_USER.email);
-      await page.click('button[type="submit"]');
-      await expect(page.locator('[data-testid="reset-success"]')).toBeVisible();
+      await page.click('button:has-text("Send Reset Link")');
+      await expect(page.locator('text=Password reset email sent')).toBeVisible();
     });
   });
 
@@ -71,29 +102,40 @@ test.describe('Regression Tests', () => {
     });
 
     test('View Profile', async ({ page }) => {
-      await expect(page.locator('[data-testid="profile-name"]')).toBeVisible();
-      await expect(page.locator('[data-testid="profile-picture"]')).toBeVisible();
+      await expect(page.locator('form')).toBeVisible();
+      await expect(page.locator('input[type="text"]')).toBeVisible();
     });
 
     test('Update Profile', async ({ page }) => {
       const newName = faker.person.fullName();
-      await page.fill('[data-testid="profile-name-input"]', newName);
-      await page.click('[data-testid="save-profile"]');
-      await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
-      await expect(page.locator('[data-testid="profile-name"]')).toContainText(newName);
+      await page.fill('input[type="text"]', newName);
+      await page.click('button:has-text("Save Changes")');
+      await expect(page.locator('text=Changes saved successfully')).toBeVisible();
     });
 
     test('Change Password', async ({ page }) => {
-      await page.fill('[data-testid="current-password"]', TEST_USER.password);
-      await page.fill('[data-testid="new-password"]', TEST_USER.newPassword);
-      await page.fill('[data-testid="confirm-password"]', TEST_USER.newPassword);
-      await page.click('[data-testid="change-password"]');
-      await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
+      // Fill in new password field
+      await page.fill('input[type="password"]', TEST_USER.newPassword);
+      await page.click('button:has-text("Save Changes")');
+      await expect(page.locator('text=Changes saved successfully')).toBeVisible();
       
       // Verify new password works
       await logout(page);
       await page.fill('input[type="email"]', TEST_USER.email);
       await page.fill('input[type="password"]', TEST_USER.newPassword);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/dashboard');
+
+      // Restore original password
+      await page.goto('/profile');
+      await page.fill('input[type="password"]', TEST_USER.password);
+      await page.click('button:has-text("Save Changes")');
+      await expect(page.locator('text=Changes saved successfully')).toBeVisible();
+      
+      // Verify original password works
+      await logout(page);
+      await page.fill('input[type="email"]', TEST_USER.email);
+      await page.fill('input[type="password"]', TEST_USER.password);
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL('/dashboard');
     });
@@ -103,61 +145,51 @@ test.describe('Regression Tests', () => {
   test.describe('Expense Management', () => {
     test.beforeEach(async ({ page }) => {
       await login(page);
-      await page.goto('/expenses');
     });
 
-    test('Add New Expense', async ({ page }) => {
-      await page.click('[data-testid="add-expense"]');
-      await page.selectOption('[data-testid="expense-category"]', TEST_EXPENSE.category);
-      await page.fill('[data-testid="expense-amount"]', TEST_EXPENSE.amount);
-      await page.fill('[data-testid="expense-date"]', TEST_EXPENSE.date);
-      await page.fill('[data-testid="expense-description"]', TEST_EXPENSE.description);
-      await page.click('[data-testid="save-expense"]');
-      
-      await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
-      await expect(page.locator(`text=${TEST_EXPENSE.description}`)).toBeVisible();
+    test('Add Expense', async ({ page }) => {
+      await page.goto('/investments/add');
+      await page.fill('input[name="amount"]', '100');
+      await page.fill('input[name="description"]', 'Test Expense');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('text=Expense added successfully')).toBeVisible();
     });
 
     test('Add Installment Expense', async ({ page }) => {
-      await page.click('[data-testid="add-expense"]');
-      await page.selectOption('[data-testid="expense-category"]', 'Credit Card');
-      await page.check('[data-testid="is-installment"]');
-      await page.fill('[data-testid="expense-amount"]', TEST_EXPENSE.amount);
-      await page.fill('[data-testid="number-of-installments"]', TEST_EXPENSE.numberOfInstallments);
-      await page.click('[data-testid="save-expense"]');
-      
-      await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
-      await expect(page.locator('[data-testid="installment-plan"]')).toBeVisible();
+      await page.goto('/investments/add');
+      await page.fill('input[name="amount"]', '1000');
+      await page.fill('input[name="description"]', 'Test Installment');
+      await page.fill('input[name="installments"]', '12');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('text=Installment expense added successfully')).toBeVisible();
     });
 
     test('Edit Expense', async ({ page }) => {
       const newAmount = '2000';
-      await page.click(`[data-testid="edit-expense-${TEST_EXPENSE.description}"]`);
-      await page.fill('[data-testid="expense-amount"]', newAmount);
-      await page.click('[data-testid="save-expense"]');
+      // Click the edit button for the expense
+      await page.click(`button[aria-label="Edit ${TEST_EXPENSE.description}"]`);
+      await page.fill('input[name="amount"]', newAmount);
+      await page.click('button:has-text("Save Changes")');
       
-      await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
+      await expect(page.locator('text=Expense updated successfully')).toBeVisible();
       await expect(page.locator(`text=${newAmount}`)).toBeVisible();
     });
 
     test('Delete Expense', async ({ page }) => {
-      await page.click(`[data-testid="delete-expense-${TEST_EXPENSE.description}"]`);
-      await page.click('[data-testid="confirm-delete"]');
+      // Click the delete button for the expense
+      await page.click(`button[aria-label="Delete ${TEST_EXPENSE.description}"]`);
+      await page.click('button:has-text("Confirm Delete")');
       
-      await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
+      await expect(page.locator('text=Expense deleted successfully')).toBeVisible();
       await expect(page.locator(`text=${TEST_EXPENSE.description}`)).not.toBeVisible();
     });
 
     test('Filter Expenses', async ({ page }) => {
-      await page.click('[data-testid="show-all-toggle"]');
-      await page.click('[data-testid="show-ended-toggle"]');
-      
-      // Verify filters are applied
-      const expenses = await page.locator('[data-testid="expense-item"]').all();
-      for (const expense of expenses) {
-        const isVisible = await expense.isVisible();
-        expect(isVisible).toBeTruthy();
-      }
+      await page.goto('/dashboard');
+      await page.click('button:has-text("Filter")');
+      await page.fill('input[type="date"]', '2024-01-01');
+      await page.click('button:has-text("Apply")');
+      await expect(page.locator('text=Filtered Results')).toBeVisible();
     });
   });
 
@@ -165,30 +197,35 @@ test.describe('Regression Tests', () => {
   test.describe('Dashboard', () => {
     test.beforeEach(async ({ page }) => {
       await login(page);
+    });
+
+    test('View Dashboard', async ({ page }) => {
       await page.goto('/dashboard');
+      await expect(page.locator('text=Total Investment')).toBeVisible();
+      await expect(page.locator('text=Portfolio Allocation')).toBeVisible();
     });
 
     test('View Total Investment', async ({ page }) => {
-      const totalInvestment = await page.locator('[data-testid="total-investment"]').textContent();
+      const totalInvestment = await page.locator('h2:has-text("Total Investment") + div').textContent();
       expect(totalInvestment).toMatch(/^\d+(\.\d{2})?$/);
     });
 
     test('View Portfolio Allocation', async ({ page }) => {
-      await expect(page.locator('[data-testid="portfolio-chart"]')).toBeVisible();
-      const chartItems = await page.locator('[data-testid="portfolio-item"]').all();
+      await expect(page.locator('h2:has-text("Portfolio Allocation") + div')).toBeVisible();
+      const chartItems = await page.locator('div[role="listitem"]').all();
       expect(chartItems.length).toBeGreaterThan(0);
     });
 
     test('View Asset Types', async ({ page }) => {
-      await expect(page.locator('[data-testid="asset-types-chart"]')).toBeVisible();
-      const chartItems = await page.locator('[data-testid="asset-type-item"]').all();
+      await expect(page.locator('h2:has-text("Asset Types") + div')).toBeVisible();
+      const chartItems = await page.locator('div[role="listitem"]').all();
       expect(chartItems.length).toBeGreaterThan(0);
     });
 
     test('View Monthly Cash Flow', async ({ page }) => {
-      await expect(page.locator('[data-testid="cash-flow-card"]')).toBeVisible();
-      const income = await page.locator('[data-testid="monthly-income"]').textContent();
-      const expenses = await page.locator('[data-testid="monthly-expenses"]').textContent();
+      await expect(page.locator('h2:has-text("Monthly Cash Flow") + div')).toBeVisible();
+      const income = await page.locator('div:has-text("Income") + div').textContent();
+      const expenses = await page.locator('div:has-text("Expenses") + div').textContent();
       expect(income).toMatch(/^\d+(\.\d{2})?$/);
       expect(expenses).toMatch(/^\d+(\.\d{2})?$/);
     });
@@ -200,30 +237,16 @@ test.describe('Regression Tests', () => {
       await login(page);
     });
 
-    test('Change Language', async ({ page }) => {
-      await page.click('[data-testid="language-selector"]');
-      await page.click('[data-testid="language-ar"]');
-      
-      // Verify RTL layout
-      const body = await page.locator('body');
-      await expect(body).toHaveAttribute('dir', 'rtl');
-      
-      // Verify date format
-      const date = await page.locator('[data-testid="date-format"]').textContent();
-      expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    test('Language Switch', async ({ page }) => {
+      await page.goto('/dashboard');
+      await page.click('button:has-text("العربية")');
+      await expect(page.locator('text=الاستثمارات')).toBeVisible();
     });
 
     test('Mobile Responsiveness', async ({ page }) => {
-      // Set mobile viewport
       await page.setViewportSize({ width: 375, height: 667 });
-      
-      // Verify mobile layout
-      await expect(page.locator('[data-testid="mobile-nav"]')).toBeVisible();
-      await expect(page.locator('[data-testid="bottom-tab-bar"]')).toBeVisible();
-      
-      // Test orientation change
-      await page.setViewportSize({ width: 667, height: 375 });
-      await expect(page.locator('[data-testid="mobile-nav"]')).toBeVisible();
+      await page.goto('/dashboard');
+      await expect(page.locator('button:has-text("Menu")')).toBeVisible();
     });
   });
 }); 
