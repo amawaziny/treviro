@@ -1172,7 +1172,7 @@ export function AddInvestmentForm({
         );
         toast({
           title: t("investment_updated"),
-          description: `${values.name || values.propertyAddress || t("real_estate")} ${t("has been successfully updated")}.`,
+          description: `${values.name || values.propertyAddress || t("real_estate")} ${t("has_been_successfully_updated")}.`,
         });
         router.push("/investments/real-estate");
         return;
@@ -1182,7 +1182,7 @@ export function AddInvestmentForm({
       await addInvestment(newInvestment, analysisResultFromAi);
       toast({
         title: t("investment_added"),
-        description: `${newInvestment.name} (${finalInvestmentType}) ${t("has been successfully added")}.`,
+        description: `${newInvestment.name} (${finalInvestmentType}) ${t("has_been_successfully_added")}.`,
       });
     }
 

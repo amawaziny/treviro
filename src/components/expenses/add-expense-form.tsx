@@ -165,7 +165,7 @@ export function AddExpenseForm({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("Select expense category")} />
+                      <SelectValue placeholder={t("select_expense_category")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

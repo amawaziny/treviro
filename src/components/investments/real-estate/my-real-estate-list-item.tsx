@@ -40,7 +40,7 @@ export function MyRealEstateListItem({
       await removeRealEstateInvestment(investment.id);
       toast({
         title: t("real_estate_removed"),
-        description: `${investment.name || investment.propertyAddress} ${t("has been removed")}.`,
+        description: `${investment.name || investment.propertyAddress} ${t(has_been_removed)}.`,
       });
     } catch (error: any) {
       toast({
