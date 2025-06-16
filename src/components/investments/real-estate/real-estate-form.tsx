@@ -27,7 +27,7 @@ interface RealEstateFormProps {
 }
 
 export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
-  const {t} = useLanguage()
+  const { t } = useLanguage();
   return (
     <div className="space-y-6">
       {/* Unit Details Section */}

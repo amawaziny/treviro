@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export function MyStockListItem({
   totalShares,
   averagePurchasePrice,
 }: MyStockListItemProps) {
+  const { t: t } = useLanguage();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
 
@@ -59,7 +61,8 @@ export function MyStockListItem({
   );
   const formattedMarketPrice = currentMarketPrice
     ? formatNumberWithSuffix(currentMarketPrice, currency)
-    : "N/A";
+    : t("na");
+
   const formattedProfitLoss = formatNumberWithSuffix(profitLoss, currency);
 
   const sharesLabel = isFund ? "Units" : "Shares";
@@ -96,8 +99,9 @@ export function MyStockListItem({
                 width={32}
                 height={32}
                 className="rounded-full object-cover"
-                data-ai-hint={isFund ? "logo fund" : "logo company"}
+                data-ai-hint={isFund ? t("logo_fund") : t("logo_company")}
               />
+
               {renderStockInfo()}
             </Link>
           ) : (
@@ -108,8 +112,9 @@ export function MyStockListItem({
                 width={32}
                 height={32}
                 className="rounded-full object-cover"
-                data-ai-hint={isFund ? "logo fund" : "logo company"}
+                data-ai-hint={isFund ? t("logo_fund") : t("logo_company")}
               />
+
               {renderStockInfo()}
             </div>
           )}
@@ -117,16 +122,16 @@ export function MyStockListItem({
 
         <div className="text-end pl-2">
           {isLoadingListedSecurities && !currentMarketPrice ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-sm text-muted-foreground">{t("loading")}</p>
           ) : currentMarketPrice !== undefined ? (
             <>
               <p
-                className={`text-lg font-bold ${isProfitable ? "text-accent" : "text-destructive"} md:hidden`}
+                className={`text-lg font-bold ${isProfitable ? t("textaccent") : t("textdestructive")} md:hidden`}
               >
                 {formatNumberWithSuffix(profitLoss, currency)}
               </p>
               <p
-                className={`text-lg font-bold ${isProfitable ? "text-accent" : "text-destructive"} hidden md:block`}
+                className={`text-lg font-bold ${isProfitable ? t("textaccent") : t("textdestructive")} hidden md:block`}
               >
                 {formattedProfitLoss}
               </p>
@@ -134,8 +139,9 @@ export function MyStockListItem({
                 variant={isProfitable ? "default" : "destructive"}
                 className={cn(
                   isProfitable
-                    ? "bg-accent text-accent-foreground"
-                    : "bg-destructive text-destructive-foreground",
+                    ? t("bgaccent_textaccentforeground")
+                    : t("bgdestructive_textdestructiveforeground"),
+
                   "text-xs",
                 )}
               >
@@ -150,20 +156,22 @@ export function MyStockListItem({
               </Badge>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">Market N/A</p>
+            <p className="text-sm text-muted-foreground">{t("market_na")}</p>
           )}
         </div>
       </div>
       <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
         <p>
-          Avg. Purchase Price:
+          {t("avg_purchase_price")}
+
           <span className="md:hidden ml-1">
             {formatNumberWithSuffix(averagePurchasePrice, currency)}
           </span>
           <span className="hidden md:inline ml-1">{formattedAvgPrice}</span>
         </p>
         <p className="text-end">
-          Current Market Price:
+          {t("current_market_price")}
+
           {currentMarketPrice !== undefined ? (
             <>
               <span className="md:hidden ml-1">
@@ -174,7 +182,7 @@ export function MyStockListItem({
               </span>
             </>
           ) : (
-            <span className="ml-1">N/A</span>
+            <span className="ml-1">{t("na")}</span>
           )}
         </p>
       </div>

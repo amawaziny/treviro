@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import React, { useState } from "react";
 import {
@@ -27,6 +28,7 @@ export function AddDividendSheet({
   onSubmit,
   defaultDate,
 }: AddDividendSheetProps) {
+  const { t: t } = useLanguage();
   const [amount, setAmount] = useState<string>("");
   const [date, setDate] = useState<string>(
     defaultDate || new Date().toISOString().slice(0, 10),
@@ -38,8 +40,8 @@ export function AddDividendSheet({
     e.preventDefault();
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid dividend amount.",
+        title: t("invalid_amount"),
+        description: t("please_enter_a_valid_dividend_amount"),
         variant: "destructive",
       });
       return;
@@ -51,8 +53,8 @@ export function AddDividendSheet({
       setAmount("");
     } catch (err: any) {
       toast({
-        title: "Error",
-        description: err.message || "Failed to add dividend.",
+        title: t("error"),
+        description: err.message || t("failed_to_add_dividend"),
         variant: "destructive",
       });
     } finally {
@@ -68,10 +70,11 @@ export function AddDividendSheet({
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <SheetHeader>
-            <SheetTitle>Add Dividend</SheetTitle>
+            <SheetTitle>{t("add_dividend")}</SheetTitle>
             <SheetDescription>
-              Record a dividend payment for this stock. This will increase your
-              cash balance and be reflected in this month's income.
+              {t(
+                "record_a_dividend_payment_for_this_stock_this_will_increase_your_cash_balance_and_be_reflected_in_this_months_income",
+              )}
             </SheetDescription>
           </SheetHeader>
           <div className="flex flex-col gap-2">
@@ -83,7 +86,7 @@ export function AddDividendSheet({
               type="number"
               min="0"
               step="0.01"
-              placeholder="Enter dividend amount"
+              placeholder={t("Enter dividend amount")}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
@@ -104,11 +107,11 @@ export function AddDividendSheet({
           </div>
           <SheetFooter>
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Saving..." : "Add Dividend"}
+              {loading ? t("saving") : t("add_dividend")}
             </Button>
             <SheetClose asChild>
               <Button type="button" variant="ghost" className="w-full">
-                Cancel
+                {t("cancel")}
               </Button>
             </SheetClose>
           </SheetFooter>

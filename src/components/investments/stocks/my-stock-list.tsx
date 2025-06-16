@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
@@ -15,6 +16,7 @@ import { isStockRelatedFund } from "@/lib/utils"; // Import the utility function
 import { getAllOfflineInvestments } from "@/lib/offline-investment-storage";
 
 export function MyStockList() {
+  const { t: t } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
@@ -114,15 +116,16 @@ export function MyStockList() {
     return (
       <Alert>
         <LineChart className="h-4 w-4" />
-        <AlertTitle>No Stock Investments Yet!</AlertTitle>
+        <AlertTitle>{t("no_stock_investments_yet")}</AlertTitle>
         <AlertDescription>
-          You haven't added any stock investments to your portfolio.
+          {t("you_havent_added_any_stock_investments_to_your_portfolio")}
+
           <Button asChild variant="link" className="px-1">
             <Link href="/investments/add?type=Stocks">
-              Add your first stock
+              {t("add_your_first_stock")}
             </Link>
           </Button>
-          or browse available stocks via the "+" button.
+          {t("or_browse_available_stocks_via_the_button")}
         </AlertDescription>
       </Alert>
     );

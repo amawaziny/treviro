@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+
 import {
   LineChart,
   Line,
@@ -30,7 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
-import { formatDateDisplay } from "@/lib/utils";
+import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
 
 interface StockDetailChartProps {
   securityId: string;
@@ -56,39 +57,23 @@ export function StockDetailChart({
   securityId,
   currency,
 }: StockDetailChartProps) {
+  const { t: t } = useLanguage();
   const { language } = useLanguage();
   const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>("1W");
   const [chartData, setChartData] = useState<StockChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const displayCurrencySymbol = useMemo(() => {
-    try {
-      return (
-        new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: currency || "EGP",
-        })
-          .formatToParts(0)
-          .find((part) => part.type === "currency")?.value ||
-        currency ||
-        "EGP"
-      );
-    } catch (e) {
-      return currency || "EGP"; // Fallback if currency code is invalid for Intl
-    }
-  }, [currency]);
-
   useEffect(() => {
     if (!securityId) {
       setIsLoading(false);
-      setError("No security ID provided to fetch chart data.");
+      setError(t("no_security_id_provided_to_fetch_chart_data"));
       setChartData([]);
       return;
     }
     if (!db) {
       setIsLoading(false);
-      setError("Firestore is not available. Cannot fetch chart data.");
+      setError(t("firestore_is_not_available_cannot_fetch_chart_data"));
       setChartData([]);
       return;
     }
@@ -105,14 +90,14 @@ export function StockDetailChart({
           `listedStocks/${securityId}/priceHistory`,
         );
 
-        if (selectedRange === "1W" || selectedRange === "1M") {
+        if (selectedRange === t("1w") || selectedRange === t("1m")) {
           const today = new Date();
-          const daysToSubtract = selectedRange === "1W" ? 7 : 30;
+          const daysToSubtract = selectedRange === t("1w") ? 7 : 30;
           const startDate = new Date(today);
           startDate.setDate(today.getDate() - daysToSubtract);
           startDate.setHours(0, 0, 0, 0); // Start of the day
 
-          const startDateString = format(startDate, "yyyy-MM-dd");
+          const startDateString = format(startDate, t("yyyymmdd"));
 
           firestoreQuery = query(
             priceHistoryRef,
@@ -141,21 +126,21 @@ export function StockDetailChart({
         });
 
         const finalData =
-          selectedRange !== "1W" && selectedRange !== "1M"
+          selectedRange !== t("1w") && selectedRange !== t("1m")
             ? data.reverse()
             : data;
         setChartData(finalData);
       } catch (err: any) {
-        console.error("Error fetching price history:", err);
+        console.error(t("error_fetching_price_history"), err);
         if (
-          err.code === "failed-precondition" &&
+          err.code === t("failedprecondition") &&
           err.message.includes("index")
         ) {
           setError(
             `Firestore index missing for price history. Please create it in Firebase console. Details: ${err.message}`,
           );
         } else {
-          setError(err.message || "Failed to load chart data.");
+          setError(err.message || t("failed_to_load_chart_data"));
         }
         setChartData([]);
       } finally {
@@ -184,7 +169,8 @@ export function StockDetailChart({
         </div>
         <Skeleton className="h-[calc(100%-3.5rem)] w-full" />
         <p className="text-muted-foreground mt-2">
-          Loading chart data for {selectedRange}...
+          {t("loading_chart_data_for")}
+          {selectedRange}...
         </p>
       </div>
     );
@@ -194,7 +180,7 @@ export function StockDetailChart({
     return (
       <Alert variant="destructive" className="my-4">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Chart Error</AlertTitle>
+        <AlertTitle>{t("chart_error")}</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -217,8 +203,10 @@ export function StockDetailChart({
         </div>
         <div className="flex-grow flex items-center justify-center text-wrap">
           <p className="text-muted-foreground text-sm">
-            No price history data available for this security or selected range
-            ({selectedRange}).
+            {t(
+              "no_price_history_data_available_for_this_security_or_selected_range",
+            )}
+            {selectedRange}).
           </p>
         </div>
       </div>
@@ -226,12 +214,7 @@ export function StockDetailChart({
   }
 
   const yAxisTickFormatter = (value: number) => {
-    // Show more precision for smaller values, less for larger to keep it compact
-    if (Math.abs(value) < 10)
-      return `${displayCurrencySymbol}${value.toFixed(currency === "EGP" ? 3 : 2)}`;
-    if (Math.abs(value) < 1000)
-      return `${displayCurrencySymbol}${value.toFixed(0)}`;
-    return `${displayCurrencySymbol}${(value / 1000).toFixed(1)}K`; // Compact for thousands
+    return formatNumberWithSuffix(value);
   };
 
   return (
@@ -263,8 +246,8 @@ export function StockDetailChart({
             dataKey="date"
             tickFormatter={(tick) => {
               try {
-                const dateObj = new Date(tick + "T00:00:00Z"); // Assume UTC
-                return format(dateObj, "dd/MM/yy");
+                const dateObj = new Date(tick + t("t000000z")); // Assume UTC
+                return format(dateObj, t("ddmmyy"));
               } catch (e) {
                 return tick;
               }
@@ -273,10 +256,11 @@ export function StockDetailChart({
             fontSize={10}
             interval="preserveStartEnd"
             minTickGap={
-              selectedRange === "1W" || selectedRange === "1M" ? 20 : 50
+              selectedRange === t("1w") || selectedRange === t("1m") ? 20 : 50
             }
             reversed={language === "ar"}
           />
+
           <YAxis
             stroke="hsl(var(--muted-foreground))"
             fontSize={10}
@@ -285,18 +269,19 @@ export function StockDetailChart({
             orientation={language === "ar" ? "right" : "left"}
             yAxisId="priceAxis"
           />
+
           <Tooltip
             contentStyle={{
-              backgroundColor: "hsl(var(--background))",
-              borderColor: "hsl(var(--border))",
-              borderRadius: "var(--radius)",
+              backgroundColor: t("hslvarbackground"),
+              borderColor: t("hslvarborder"),
+              borderRadius: t("varradius"),
             }}
-            labelStyle={{ color: "hsl(var(--foreground))" }}
-            itemStyle={{ color: "hsl(var(--primary))" }}
+            labelStyle={{ color: t("hslvarforeground") }}
+            itemStyle={{ color: t("hslvarprimary") }}
             formatter={(value: number, name: string, props: any) => {
               const digits = currency === "EGP" ? 3 : 2;
               return [
-                new Intl.NumberFormat("en-US", {
+                new Intl.NumberFormat(t("enus"), {
                   style: "currency",
                   currency: currency,
                   minimumFractionDigits: digits,
@@ -307,12 +292,13 @@ export function StockDetailChart({
             }}
             labelFormatter={(label: string) => {
               try {
-                return formatDateDisplay(label + "T00:00:00Z");
+                return formatDateDisplay(label + t("t000000z"));
               } catch (e) {
                 return label;
               }
             }}
           />
+
           <Legend wrapperStyle={{ fontSize: "10px" }} />
           <Line
             yAxisId="priceAxis"

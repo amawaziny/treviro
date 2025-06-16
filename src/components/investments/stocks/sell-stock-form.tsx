@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -39,6 +40,7 @@ interface SellSecurityFormProps {
 export function SellStockForm({
   securityId: securityId,
 }: SellSecurityFormProps) {
+  const { t: t } = useLanguage();
   const {
     recordSellStockTransaction,
     investments,
@@ -108,8 +110,8 @@ export function SellStockForm({
   async function onSubmit(values: SellStockFormValues) {
     if (!securityBeingSold) {
       toast({
-        title: "Error",
-        description: "Security details not found.",
+        title: t("error"),
+        description: t("security_details_not_found"),
         variant: "destructive",
       });
       return;
@@ -135,16 +137,16 @@ export function SellStockForm({
         values.fees ?? 0, // Zod default ensures this is 0 if undefined
       );
       toast({
-        title: "Sale Recorded",
-        description: `Successfully recorded sale of ${values.numberOfSharesToSell} ${securityLabel} of ${securityBeingSold.name}.`,
+        title: t("sale_recorded"),
+        description: `${t("Successfully recorded sale of")} ${values.numberOfSharesToSell} ${securityLabel} ${t("of")} ${securityBeingSold.name}.`,
       });
       router.push(`/securities/details/${securityId}`);
     } catch (error: any) {
-      console.error("Error recording sale:", error);
+      console.error(t("error_recording_sale"), error);
       toast({
-        title: "Sale Recording Failed",
+        title: t("sale_recording_failed"),
         description:
-          error.message || "Could not record the sale. Please try again.",
+          error.message || t("could_not_record_the_sale_please_try_again"),
         variant: "destructive",
       });
     }
@@ -154,7 +156,7 @@ export function SellStockForm({
     return (
       <div className="flex items-center justify-center py-10">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading sale information...
+        {t("loading_sale_information")}
       </div>
     );
   }
@@ -163,9 +165,11 @@ export function SellStockForm({
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>
-          Could not load security details to sell. Please go back and try again.
+          {t(
+            "could_not_load_security_details_to_sell_please_go_back_and_try_again",
+          )}
         </AlertDescription>
       </Alert>
     );
@@ -178,10 +182,10 @@ export function SellStockForm({
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>No Holdings to Sell</AlertTitle>
+        <AlertTitle>{t("no_holdings_to_sell")}</AlertTitle>
         <AlertDescription>
-          You do not currently own any holdings of {securityBeingSold.name} (
-          {securityBeingSold.symbol}) to sell.
+          {t("you_do_not_currently_own_any_holdings_of")}
+          {securityBeingSold.name} ({securityBeingSold.symbol}){t("to_sell")}
         </AlertDescription>
       </Alert>
     );
@@ -192,14 +196,15 @@ export function SellStockForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="p-4 border rounded-md bg-muted/50">
           <h3 className="text-lg font-medium">
-            Selling: {securityBeingSold.name} ({securityBeingSold.symbol})
+            {t("selling")}
+            {securityBeingSold.name} ({securityBeingSold.symbol})
           </h3>
           <p className="text-sm text-muted-foreground">
-            You currently own: {maxSharesToSell.toLocaleString()}{" "}
-            {securityLabel}.
+            {t("you_currently_own")}
+            {maxSharesToSell.toLocaleString()} {securityLabel}.
           </p>
           <p className="text-sm text-muted-foreground">
-            Current Market Price:{" "}
+            {t("current_market_price")}{" "}
             {securityBeingSold.price.toLocaleString(undefined, {
               style: "currency",
               currency: securityBeingSold.currency,
@@ -213,7 +218,11 @@ export function SellStockForm({
             name="numberOfSharesToSell"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of {securityLabel} to Sell</FormLabel>
+                <FormLabel>
+                  {t("number_of")}
+                  {securityLabel}
+                  {t("to_sell")}
+                </FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder={`e.g., 50 or 10`}
@@ -222,18 +231,23 @@ export function SellStockForm({
                     allowDecimal={false}
                   />
                 </FormControl>
-                <FormDescription>Max: {maxSharesToSell}</FormDescription>
+                <FormDescription>
+                  {t("max")}
+                  {maxSharesToSell}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="sellPricePerShare"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Sell Price (per {securityLabel.slice(0, -1)})
+                  {t("sell_price_per")}
+                  {securityLabel.slice(0, -1)})
                 </FormLabel>
                 <FormControl>
                   <NumericInput
@@ -246,12 +260,13 @@ export function SellStockForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="sellDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sell Date</FormLabel>
+                <FormLabel>{t("sell_date")}</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -263,12 +278,13 @@ export function SellStockForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="fees"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fees (if any)</FormLabel>
+                <FormLabel>{t("fees_if_any")}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5.00"
@@ -277,7 +293,7 @@ export function SellStockForm({
                   />
                 </FormControl>
                 <FormDescription>
-                  Total fees for this transaction.
+                  {t("total_fees_for_this_transaction")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -292,7 +308,7 @@ export function SellStockForm({
           {form.formState.isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : null}
-          Record Sale
+          {t("record_sale")}
         </Button>
       </form>
     </Form>

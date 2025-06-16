@@ -61,7 +61,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   updateRealEstateInvestment,
   onDeleteInstallment,
 }) => {
-  const {t} = useLanguage()
+  const { t } = useLanguage();
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [selectedInstallment, setSelectedInstallment] =

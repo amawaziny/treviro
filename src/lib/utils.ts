@@ -117,7 +117,6 @@ export function formatCurrencyWithCommas(
   if (value === undefined || value === null || Number.isNaN(value))
     return `${currency} 0.000`;
   const num = typeof value === "number" ? value : parseFloat(value);
-  if (isNaN(num)) return `${currency} 0.000`;
   // toFixed(3) ensures 3 digits after decimal
   return new Intl.NumberFormat("en-EG", {
     style: "currency",

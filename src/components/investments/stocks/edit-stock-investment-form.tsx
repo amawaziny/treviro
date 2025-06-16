@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -39,6 +40,7 @@ interface EditStockInvestmentFormProps {
 export function EditStockInvestmentForm({
   investmentId,
 }: EditStockInvestmentFormProps) {
+  const { t: t } = useLanguage();
   const {
     investments,
     updateStockInvestment,
@@ -87,8 +89,8 @@ export function EditStockInvestmentForm({
       });
     } else if (!isLoadingContext) {
       toast({
-        title: "Error",
-        description: "Investment not found or not editable.",
+        title: t("error"),
+        description: t("investment_not_found_or_not_editable"),
         variant: "destructive",
       });
       router.back();
@@ -101,9 +103,11 @@ export function EditStockInvestmentForm({
   > = async (values) => {
     if (!investmentToEdit || oldAmountInvested === null) {
       toast({
-        title: "Error",
-        description:
-          "Cannot save, investment data missing or original amount not loaded.",
+        title: t("error"),
+        description: t(
+          "cannot_save_investment_data_missing_or_original_amount_not_loaded",
+        ),
+
         variant: "destructive",
       });
       return;
@@ -124,15 +128,15 @@ export function EditStockInvestmentForm({
       );
 
       toast({
-        title: "Investment Updated",
-        description: `${investmentToEdit.actualStockName || investmentToEdit.name} purchase details updated.`,
+        title: t("investment_updated"),
+        description: `${investmentToEdit.actualStockName || investmentToEdit.name} ${t("purchase details updated")}.`,
       });
       router.push(`/securities/details/${investmentToEdit.tickerSymbol}`);
     } catch (error: any) {
-      console.error("Error updating investment:", error);
+      console.error(t("error_updating_investment"), error);
       toast({
-        title: "Update Failed",
-        description: error.message || "Could not update investment details.",
+        title: t("update_failed"),
+        description: error.message || t("could_not_update_investment_details"),
         variant: "destructive",
       });
     }
@@ -142,7 +146,7 @@ export function EditStockInvestmentForm({
     return (
       <div className="flex items-center justify-center py-10">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading investment details...
+        {t("loading_investment_details")}
       </div>
     );
   }
@@ -151,22 +155,22 @@ export function EditStockInvestmentForm({
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>
-          Investment not found. It might have been removed.
+          {t("investment_not_found_it_might_have_been_removed")}
         </AlertDescription>
       </Alert>
     );
   }
 
-  const pageTitle = `Edit Purchase: ${investmentToEdit?.actualStockName || investmentToEdit?.name || "Stock"}`;
+  const pageTitle = `${t("Edit Purchase")}: ${investmentToEdit?.actualStockName || investmentToEdit?.name || t("Stock")}`;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{pageTitle}</CardTitle>
         <CardDescription>
-          Modify the details of this stock purchase.
+          {t("modify_the_details_of_this_stock_purchase")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -178,7 +182,7 @@ export function EditStockInvestmentForm({
                 name="purchaseDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Purchase Date</FormLabel>
+                    <FormLabel>{t("purchase_date")}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -186,12 +190,13 @@ export function EditStockInvestmentForm({
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="numberOfShares"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Number of Securities</FormLabel>
+                    <FormLabel>{t("number_of_securities")}</FormLabel>
                     <FormControl>
                       <NumericInput
                         placeholder="e.g., 100"
@@ -208,12 +213,13 @@ export function EditStockInvestmentForm({
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="purchasePricePerShare"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Purchase Price (per security)</FormLabel>
+                    <FormLabel>{t("purchase_price_per_security")}</FormLabel>
                     <FormControl>
                       <NumericInput
                         placeholder="e.g., 150.50"
@@ -229,12 +235,13 @@ export function EditStockInvestmentForm({
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="purchaseFees"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Purchase Fees (optional)</FormLabel>
+                    <FormLabel>{t("purchase_fees_optional")}</FormLabel>
                     <FormControl>
                       <NumericInput
                         placeholder="e.g., 5.00"
@@ -256,14 +263,14 @@ export function EditStockInvestmentForm({
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Save Changes
+                {t("save_changes")}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
               >
-                Cancel
+                {t("cancel")}
               </Button>
             </div>
           </form>
