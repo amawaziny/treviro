@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/language-context";
 import React, { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import {
@@ -60,6 +61,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   updateRealEstateInvestment,
   onDeleteInstallment,
 }) => {
+  const {t} = useLanguage()
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [selectedInstallment, setSelectedInstallment] =
@@ -172,7 +174,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       setChequeNumber("");
       setSelectedInstallment(null);
     } catch (error) {
-      setErrorMessage("Failed to update installment status");
+      setErrorMessage(t("failed_to_update_installment_status"));
       setShowErrorDialog(true);
     }
   };
@@ -183,17 +185,17 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
         <Card>
           <CardHeader className="pb-0">
             <CardTitle className="text-lg font-semibold">
-              Payment Summary
+              {t("payment_summary")}
             </CardTitle>
             <CardDescription className="text-sm">
-              (Purchase Installments)
+              {t("purchase_installments")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded">
                 <p className="text-sm text-muted-foreground dark:text-green-200">
-                  Total Paid (Purchase)
+                  {t("total_paid_purchase")}
                 </p>
                 <p className="text-2xl font-bold text-foreground">
                   EGP {totalPaidAmount.toLocaleString()}
@@ -201,7 +203,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
               </div>
               <div className="bg-yellow-50 dark:bg-gray-800/50 p-4 rounded">
                 <p className="text-sm text-muted-foreground dark:text-yellow-200">
-                  Remaining Amount
+                  {t("remaining_amount")}
                 </p>
                 <p className="text-2xl font-bold text-foreground">
                   EGP {remainingAmount.toLocaleString()}
@@ -209,7 +211,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
                 <p className="text-sm text-muted-foreground dark:text-blue-200">
-                  Total Amount
+                  {t("total_amount")}
                 </p>
                 <p className="text-2xl font-bold text-foreground">
                   EGP {totalAmount.toLocaleString()}
@@ -282,20 +284,24 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                 <SheetHeader>
                   <SheetTitle>
                     {selectedInstallment?.status === "Paid"
-                      ? "Mark as Unpaid"
-                      : "Mark as Paid"}
+                      ? t("mark_as_unpaid")
+                      : t("mark_as_paid")}
                   </SheetTitle>
                   <SheetDescription>
                     {selectedInstallment?.status === "Paid"
-                      ? "Are you sure you want to mark this installment as unpaid? This will remove the payment record."
-                      : "Enter the cheque number to mark this installment as paid."}
+                      ? t(
+                          "are_you_sure_you_want_to_mark_this_installment_as_unpaid_this_will_remove_the_payment_record",
+                        )
+                      : t(
+                          "enter_the_cheque_number_to_mark_this_installment_as_paid",
+                        )}
                   </SheetDescription>
                 </SheetHeader>
 
                 {selectedInstallment?.status !== "Paid" && (
                   <div className="py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="chequeNumber">Cheque Number</Label>
+                      <Label htmlFor="chequeNumber">{t("cheque_number")}</Label>
                       <Input
                         id="chequeNumber"
                         value={chequeNumber}
@@ -327,8 +333,8 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                       }}
                     >
                       {selectedInstallment?.status === "Paid"
-                        ? "Mark as Unpaid"
-                        : "Mark as Paid"}
+                        ? t("mark_as_unpaid")
+                        : t("mark_as_paid")}
                     </Button>
                   </div>
                 </SheetFooter>
@@ -342,9 +348,9 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
               >
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete installment #
+                      {t("this_will_permanently_delete_installment")}
                       {showDeleteDialog}.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -353,7 +359,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                     <AlertDialogAction
                       onClick={() => handleDeleteInstallment(showDeleteDialog)}
                     >
-                      Delete
+                      {t("delete")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -367,13 +373,13 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
               >
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Error</AlertDialogTitle>
+                    <AlertDialogTitle>{t("error")}</AlertDialogTitle>
                     <AlertDialogDescription>
                       {errorMessage}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>OK</AlertDialogCancel>
+                    <AlertDialogCancel>{t("OK")}</AlertDialogCancel>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

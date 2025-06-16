@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/contexts/language-context";
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +29,7 @@ interface MyRealEstateListItemProps {
 export function MyRealEstateListItem({
   investment,
 }: MyRealEstateListItemProps) {
+  const { t: t } = useLanguage();
   const { removeRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -37,15 +39,15 @@ export function MyRealEstateListItem({
     try {
       await removeRealEstateInvestment(investment.id);
       toast({
-        title: "Real Estate Removed",
-        description: `${investment.name || investment.propertyAddress} has been removed.`,
+        title: t("real_estate_removed"),
+        description: `${investment.name || investment.propertyAddress} ${t("has been removed")}.`,
       });
     } catch (error: any) {
       toast({
-        title: "Error Removing Real Estate",
+        title: t("error_removing_real_estate"),
         description:
           error.message ||
-          `Could not remove ${investment.name || investment.propertyAddress}.`,
+          `${t("Could not remove")} ${investment.name || investment.propertyAddress}.`,
         variant: "destructive",
       });
     }
@@ -77,7 +79,7 @@ export function MyRealEstateListItem({
                 {investment.name || investment.propertyAddress}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {investment.propertyType || "N/A"}
+                {investment.propertyType || t("na")}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {investment.propertyAddress}
@@ -120,20 +122,20 @@ export function MyRealEstateListItem({
               <AlertDialogTrigger asChild></AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action will permanently remove your record for{" "}
-                    {investment.name || investment.propertyAddress}. This cannot
-                    be undone.
+                    {t("this_action_will_permanently_remove_your_record_for")}{" "}
+                    {investment.name || investment.propertyAddress}
+                    {t("this_cannot_be_undone")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleRemove}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Remove
+                    {t("remove")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -142,19 +144,25 @@ export function MyRealEstateListItem({
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
           <p>
-            Installment:{" "}
+            {t("installment")}{" "}
             {investment.installmentAmount
               ? `${formatNumberWithSuffix(investment.installmentAmount)}`
-              : "N/A"}
+              : t("na")}
           </p>
-          <p>Frequency: {investment.installmentFrequency || "N/A"}</p>
           <p>
-            Total Price:{" "}
+            {t("frequency")}
+            {investment.installmentFrequency || t("na")}
+          </p>
+          <p>
+            {t("total_price")}{" "}
             {investment.totalInstallmentPrice
               ? `${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
-              : "N/A"}
+              : t("na")}
           </p>
-          <p>End Date: {investment.installmentEndDate || "N/A"}</p>
+          <p>
+            {t("end_date")}
+            {investment.installmentEndDate || t("na")}
+          </p>
         </div>
       </CardContent>
     </Card>

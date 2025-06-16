@@ -1,10 +1,6 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -22,32 +18,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { propertyTypes } from "@/lib/schemas";
-import { format } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
+import { getCurrentDate } from "@/lib/utils";
 // Removed Controller import from react-hook-form as FormField handles it
 
 interface RealEstateFormProps {
   control: any; // Control object from react-hook-form
 }
 
-const getCurrentDate = () => {
-  const date = new Date();
-  return format(date, "yyyy-MM-dd");
-};
-
 export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
+  const {t} = useLanguage()
   return (
     <div className="space-y-6">
       {/* Unit Details Section */}
       <div className="space-y-6 mt-6 p-6 border rounded-md">
-        <h3 className="text-lg font-medium text-primary">Unit Details</h3>
+        <h3 className="text-lg font-medium text-primary">
+          {t("unit_details")}
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={control}
             name="name"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Name / Description (Optional)</FormLabel>
+                <FormLabel>{t("name_description_optional")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Downtown Apartment or Beach House Plot"
@@ -59,12 +53,13 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="propertyAddress"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Property Address</FormLabel>
+                <FormLabel>{t("property_address")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., 123 Main St, Anytown"
@@ -76,41 +71,44 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="totalInstallmentPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Price at End</FormLabel>
+                <FormLabel>{t("total_price_at_end")}</FormLabel>
                 <FormControl>
                   <NumericInput
-                    placeholder="Enter total price at end"
+                    placeholder={t("Enter total price at end")}
                     value={field.value || ""}
                     onChange={field.onChange}
                     allowDecimal={true}
                   />
                 </FormControl>
                 <FormDescription>
-                  The total price of the property at the end of all
-                  installments.
+                  {t(
+                    "the_total_price_of_the_property_at_the_end_of_all_installments",
+                  )}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="propertyType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Property Type</FormLabel>
+                <FormLabel>{t("property_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select property type" />
+                      <SelectValue placeholder={t("Select property type")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -131,7 +129,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
       {/* Installment Details Section */}
       <div className="space-y-6 mt-6 p-6 border rounded-md">
         <h3 className="text-lg font-medium text-primary">
-          Installment Details
+          {t("installment_details")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
@@ -139,7 +137,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             name="purchaseDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Purchase Date</FormLabel>
+                <FormLabel>{t("purchase_date")}</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -151,12 +149,13 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="downPayment"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Down Payment (Optional)</FormLabel>
+                <FormLabel>{t("down_payment_optional")}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 50000.00"
@@ -174,7 +173,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                   />
                 </FormControl>
                 <FormDescription>
-                  Initial payment made at the start of the contract.
+                  {t("initial_payment_made_at_the_start_of_the_contract")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -186,7 +185,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             name="installmentAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Installment Amount</FormLabel>
+                <FormLabel>{t("installment_amount")}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 10000.00"
@@ -204,35 +203,36 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                   />
                 </FormControl>
                 <FormDescription>
-                  Amount of each installment payment.
+                  {t("amount_of_each_installment_payment")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="installmentFrequency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Installment Frequency</FormLabel>
+                <FormLabel>{t("installment_frequency")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder={t("Select frequency")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Monthly">Monthly</SelectItem>
-                    <SelectItem value="Quarterly">Quarterly</SelectItem>
-                    <SelectItem value="Yearly">Yearly</SelectItem>
+                    <SelectItem value="Monthly">{t("Monthly")}</SelectItem>
+                    <SelectItem value="Quarterly">{t("Quarterly")}</SelectItem>
+                    <SelectItem value="Yearly">{t("Yearly")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  How often do you pay the installment?
+                  {t("how_often_do_you_pay_the_installment")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -244,39 +244,43 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             name="installmentStartDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Installment Start Date</FormLabel>
+                <FormLabel>{t("installment_start_date")}</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormDescription>
-                  When do the installments start?
+                  {t("when_do_the_installments_start")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="installmentEndDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Installment End Date</FormLabel>
+                <FormLabel>{t("installment_end_date")}</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormDescription>
-                  When will the installments end?
+                  {t("when_will_the_installments_end")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="maintenanceAmount" // Name was maintenancePayment, changed to maintenanceAmount
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Maintenance Payment Amount (Optional)</FormLabel>
+                <FormLabel>
+                  {t("maintenance_payment_amount_optional")}
+                </FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 1000.00"
@@ -294,23 +298,24 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                   />
                 </FormControl>
                 <FormDescription>
-                  Maintenance fee for the property, if applicable.
+                  {t("maintenance_fee_for_the_property_if_applicable")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="maintenancePaymentDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Maintenance Payment Date (Optional)</FormLabel>
+                <FormLabel>{t("maintenance_payment_date_optional")}</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormDescription>
-                  Date when the maintenance payment is due, if applicable.
+                  {t("date_when_the_maintenance_payment_is_due_if_applicable")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
