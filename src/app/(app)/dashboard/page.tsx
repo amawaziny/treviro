@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
-                className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? t("textaccent") : t("textdestructive")}`}
+                className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {isMobile
                   ? formatNumberWithSuffix(totalRealizedPnL)
@@ -271,7 +271,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
-                className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? t("textaccent") : t("textdestructive")}`}
+                className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {isMobile
                   ? formatNumberWithSuffix(totalCurrentPortfolioPnL)

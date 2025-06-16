@@ -273,7 +273,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 <p
                   className={cn(
                     "text-lg font-bold",
-                    isProfitable ? t("textaccent") : t("textdestructive"),
+                    isProfitable ? "text-accent" : "text-destructive",
                   )}
                 >
                   <span className="md:hidden">

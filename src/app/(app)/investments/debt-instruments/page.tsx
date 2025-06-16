@@ -407,7 +407,7 @@ export default function MyDebtInstrumentsPage() {
         <Button
           variant="default"
           size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? t("left8") : t("right8")} bottom-[88px] md:bottom-8`}
+          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new debt instrument"
         >
           <Plus className="h-7 w-7" />

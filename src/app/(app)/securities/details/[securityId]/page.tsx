@@ -108,7 +108,7 @@ export default function SecurityDetailPage() {
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  const isDesktop = useMediaQuery(t("minwidth_768px"));
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -647,9 +647,7 @@ export default function SecurityDetailPage() {
                                   }
                                   className={cn(
                                     isSell &&
-                                      t(
-                                        "bgdestructive10_textdestructive_hoverbgdestructive20",
-                                      ),
+                                      "bg-destructive/10 text-destructive hover:bg-destructive/20",
 
                                     "text-xs",
                                   )}
@@ -672,7 +670,7 @@ export default function SecurityDetailPage() {
                                 className={cn(
                                   "text-xs font-medium",
                                   isBuy
-                                    ? t("textforeground")
+                                    ? "text-foreground"
                                     : isSell
                                       ? "text-destructive"
                                       : "text-accent",

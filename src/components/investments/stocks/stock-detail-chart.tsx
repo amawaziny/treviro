@@ -31,7 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
-import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
+import { formatCurrencyWithCommas, formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
 
 interface StockDetailChartProps {
   securityId: string;
@@ -90,14 +90,14 @@ export function StockDetailChart({
           `listedStocks/${securityId}/priceHistory`,
         );
 
-        if (selectedRange === t("1w") || selectedRange === t("1m")) {
+        if (selectedRange === "1W" || selectedRange === "1M") {
           const today = new Date();
-          const daysToSubtract = selectedRange === t("1w") ? 7 : 30;
+          const daysToSubtract = selectedRange === "1W" ? 7 : 30;
           const startDate = new Date(today);
           startDate.setDate(today.getDate() - daysToSubtract);
           startDate.setHours(0, 0, 0, 0); // Start of the day
 
-          const startDateString = format(startDate, t("yyyymmdd"));
+          const startDateString = format(startDate, "yyyy-MM-dd");
 
           firestoreQuery = query(
             priceHistoryRef,
@@ -126,7 +126,7 @@ export function StockDetailChart({
         });
 
         const finalData =
-          selectedRange !== t("1w") && selectedRange !== t("1m")
+          selectedRange !== "1W" && selectedRange !== "1M"
             ? data.reverse()
             : data;
         setChartData(finalData);
@@ -246,8 +246,8 @@ export function StockDetailChart({
             dataKey="date"
             tickFormatter={(tick) => {
               try {
-                const dateObj = new Date(tick + t("t000000z")); // Assume UTC
-                return format(dateObj, t("ddmmyy"));
+                const dateObj = new Date(tick + "T00:00:00Z"); // Assume UTC
+                return format(dateObj, "dd/MM/yy");
               } catch (e) {
                 return tick;
               }
@@ -256,7 +256,7 @@ export function StockDetailChart({
             fontSize={10}
             interval="preserveStartEnd"
             minTickGap={
-              selectedRange === t("1w") || selectedRange === t("1m") ? 20 : 50
+              selectedRange === "1W" || selectedRange === "1M" ? 20 : 50
             }
             reversed={language === "ar"}
           />
@@ -272,27 +272,18 @@ export function StockDetailChart({
 
           <Tooltip
             contentStyle={{
-              backgroundColor: t("hslvarbackground"),
-              borderColor: t("hslvarborder"),
-              borderRadius: t("varradius"),
+              backgroundColor: "hsl(var(--background))",
+              borderColor: "hsl(var(--border))",
+              borderRadius: "var(--radius)",
             }}
-            labelStyle={{ color: t("hslvarforeground") }}
-            itemStyle={{ color: t("hslvarprimary") }}
-            formatter={(value: number, name: string, props: any) => {
-              const digits = currency === "EGP" ? 3 : 2;
-              return [
-                new Intl.NumberFormat(t("enus"), {
-                  style: "currency",
-                  currency: currency,
-                  minimumFractionDigits: digits,
-                  maximumFractionDigits: digits,
-                }).format(value),
-                "Price",
-              ];
+            labelStyle={{ color: "hsl(var(--foreground))" }}
+            itemStyle={{ color: "hsl(var(--primary))" }}
+            formatter={(value: number) => {
+              return [formatCurrencyWithCommas(value, currency), "Price"];
             }}
             labelFormatter={(label: string) => {
               try {
-                return formatDateDisplay(label + t("t000000z"));
+                return formatDateDisplay(label + "T00:00:00Z");
               } catch (e) {
                 return label;
               }

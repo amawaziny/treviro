@@ -126,12 +126,12 @@ export function MyStockListItem({
           ) : currentMarketPrice !== undefined ? (
             <>
               <p
-                className={`text-lg font-bold ${isProfitable ? t("textaccent") : t("textdestructive")} md:hidden`}
+                className={`text-lg font-bold ${isProfitable ? "text-accent" : "text-destructive"} md:hidden`}
               >
                 {formatNumberWithSuffix(profitLoss, currency)}
               </p>
               <p
-                className={`text-lg font-bold ${isProfitable ? t("textaccent") : t("textdestructive")} hidden md:block`}
+                className={`text-lg font-bold ${isProfitable ? "text-accent" : "text-destructive"} hidden md:block`}
               >
                 {formattedProfitLoss}
               </p>
@@ -139,8 +139,8 @@ export function MyStockListItem({
                 variant={isProfitable ? "default" : "destructive"}
                 className={cn(
                   isProfitable
-                    ? t("bgaccent_textaccentforeground")
-                    : t("bgdestructive_textdestructiveforeground"),
+                    ? "bg-accent text-accent-foreground"
+                    : "bg-destructive text-destructive-foreground",
 
                   "text-xs",
                 )}

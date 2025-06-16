@@ -40,7 +40,7 @@ export function Header() {
               >
                 <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
                   <BackArrowIcon className="h-4 w-4" />
-                  <span className="sr-only">{t("back_button_label")}</span>
+                  <span className="sr-only">{backLabel}</span>
                 </Button>
               </Link>
               {title && (

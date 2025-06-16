@@ -37,7 +37,7 @@ export function CurrencyAnalysisDisplay({
 
   // Ensure proper text color on destructive variant
   const descriptionClass =
-    variant === "destructive" ? t("textdestructiveforeground") : "";
+    variant === "destructive" ? "text-destructive-foreground" : "";
 
   return (
     <Alert variant={variant} className="mt-6">
