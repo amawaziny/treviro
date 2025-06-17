@@ -1,4 +1,4 @@
-import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { startOfMonth, endOfMonth, isWithinInterval, isSameMonth } from "date-fns";
 import type {
   IncomeRecord,
   ExpenseRecord,
@@ -9,6 +9,7 @@ import type {
   GoldInvestment,
   RealEstateInvestment,
   CurrencyInvestment,
+  Transaction,
 } from "@/lib/types";
 import { parseDateString } from "./utils";
 
@@ -21,11 +22,15 @@ export interface CashFlowSummaryArgs {
 }
 
 export interface CashFlowSummaryResult {
+  // Income
   totalIncome: number;
   monthlySalary: number;
   otherFixedIncomeMonthly: number;
   totalManualIncomeThisMonth: number;
   totalProjectedCertificateInterestThisMonth: number;
+  currentMonthIncome: number;
+  
+  // Expenses
   totalExpensesOnly: number;
   livingExpensesMonthly: number;
   zakatFixedMonthly: number;
@@ -33,13 +38,124 @@ export interface CashFlowSummaryResult {
   otherFixedExpensesMonthly: number;
   realEstateInstallmentsMonthly: number;
   totalItemizedExpensesThisMonth: number;
+  
+  // Investments
   totalInvestmentsThisMonth: number;
   totalStockInvestmentThisMonth: number;
   totalDebtInvestmentThisMonth: number;
   totalGoldInvestmentThisMonth: number;
   totalCurrencyInvestmentThisMonth: number;
   totalInvestmentsOnly: number;
+  
+  // Summary
   netCashFlowThisMonth: number;
+  netCurrentMonthCashFlow: number;
+}
+
+export function calculateCashFlowDetails({
+  incomeRecords = [],
+  expenseRecords = [],
+  investments = [],
+  fixedEstimates = [],
+  transactions = [],
+  month = new Date(),
+}: CashFlowSummaryArgs & { transactions?: Transaction[] }): CashFlowSummaryResult {
+  const summary = calculateMonthlyCashFlowSummary({
+    incomeRecords,
+    expenseRecords,
+    investments,
+    fixedEstimates,
+    month,
+  });
+
+  const currentMonthStart = startOfMonth(month);
+  const currentMonthEnd = endOfMonth(month);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Calculate current month income based on payout dates
+  let currentMonthIncome = 0;
+
+  // Process manual income records
+  incomeRecords.forEach((income) => {
+    const incomeDate = parseDateString(income.date);
+    if (incomeDate) {
+      const isInCurrentMonth = isWithinInterval(incomeDate, {
+        start: currentMonthStart,
+        end: currentMonthEnd,
+      });
+
+      if (isInCurrentMonth && incomeDate <= today) {
+        currentMonthIncome += income.amount;
+      }
+    }
+  });
+
+  // Process dividend transactions
+  transactions.forEach((tx) => {
+    if (tx.type === 'dividend') {
+      const txDate = parseDateString(tx.date);
+      if (txDate) {
+        const isInCurrentMonth = isWithinInterval(txDate, {
+          start: currentMonthStart,
+          end: currentMonthEnd,
+        });
+        
+        if (isInCurrentMonth && txDate <= today) {
+          currentMonthIncome += tx.amount ?? tx.totalAmount ?? 0;
+        }
+      }
+    }
+  });
+
+  // Process fixed estimates (salary and other fixed income)
+  fixedEstimates.forEach((fe) => {
+    if (fe.type === 'Salary' || !fe.isExpense) {
+      let monthlyAmount = fe.amount;
+      if (fe.period === 'Yearly') monthlyAmount /= 12;
+      else if (fe.period === 'Quarterly') monthlyAmount /= 3;
+
+      // If we're in the current month, add fixed income to current month income
+      if (isSameMonth(today, month) && today.getDate() >= 1) {
+        currentMonthIncome += monthlyAmount;
+      }
+    }
+  });
+
+  // Process certificate interest for current month
+  const directDebtInvestments = investments.filter(
+    (inv) => inv.type === 'Debt Instruments',
+  ) as DebtInstrumentInvestment[];
+
+  directDebtInvestments.forEach((debt) => {
+    if (debt.interestRate && debt.amountInvested) {
+      const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
+      const monthlyInterest = annualInterest / 12;
+
+      // Add interest to current month income if it's past the payout date
+      if (debt.maturityDate) {
+        const paymentDate = new Date(debt.maturityDate);
+        if (paymentDate <= today && isSameMonth(paymentDate, month)) {
+          currentMonthIncome += monthlyInterest;
+        }
+      }
+    }
+  });
+
+  // Calculate net current month cash flow
+  const netCurrentMonthCashFlow = 
+    currentMonthIncome - 
+    (summary.livingExpensesMonthly +
+     summary.zakatFixedMonthly +
+     summary.charityFixedMonthly +
+     summary.otherFixedExpensesMonthly +
+     summary.totalItemizedExpensesThisMonth);
+
+  return {
+    ...summary,
+    currentMonthIncome,
+    netCurrentMonthCashFlow,
+  };
 }
 
 export function calculateMonthlyCashFlowSummary({
@@ -213,12 +329,19 @@ export function calculateMonthlyCashFlowSummary({
   const netCashFlowThisMonth =
     totalIncome - totalExpensesOnly - totalInvestmentsOnly;
 
+  // Calculate current month's income (sum of all income components)
+  const currentMonthIncome = monthlySalary + 
+    otherFixedIncomeMonthly + 
+    totalManualIncomeThisMonth + 
+    totalProjectedCertificateInterestThisMonth;
+    
   return {
     totalIncome,
     monthlySalary,
     otherFixedIncomeMonthly,
     totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
+    currentMonthIncome,
     totalExpensesOnly,
     livingExpensesMonthly,
     zakatFixedMonthly,
@@ -233,5 +356,6 @@ export function calculateMonthlyCashFlowSummary({
     totalCurrencyInvestmentThisMonth,
     totalInvestmentsOnly,
     netCashFlowThisMonth,
+    netCurrentMonthCashFlow: netCashFlowThisMonth, // Alias for consistency with interface
   };
 }

@@ -39,6 +39,7 @@ import {
   GoldInvestment,
 } from "@/lib/types";
 import type { Installment } from "@/components/investments/real-estate/installment-table";
+import { calculateCashFlowDetails } from "@/lib/financial-utils";
 
 export default function CashFlowPage() {
   const { t: t } = useLanguage();
@@ -54,56 +55,6 @@ export default function CashFlowPage() {
   const isLoading = isLoadingContext;
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
-
-  // Calculate total investments for the current month by type
-  const totalStockInvestmentThisMonth = (investments || [])
-    .filter((investment) => {
-      if (investment.type !== "Stocks") return false;
-      const stockInv = investment as StockInvestment;
-      const purchaseDate = parseDateString(stockInv.purchaseDate);
-      return (
-        purchaseDate &&
-        isWithinInterval(purchaseDate, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        })
-      );
-    })
-    .reduce((sum, inv) => sum + (inv as StockInvestment).amountInvested, 0);
-
-  const totalDebtInvestmentThisMonth = (investments || [])
-    .filter((investment) => {
-      if (investment.type !== "Debt Instruments") return false;
-      const debtInv = investment as DebtInstrumentInvestment;
-      const purchaseDate = parseDateString(debtInv.purchaseDate);
-      return (
-        purchaseDate &&
-        isWithinInterval(purchaseDate, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        })
-      );
-    })
-    .reduce(
-      (sum, inv) => sum + (inv as DebtInstrumentInvestment).amountInvested,
-      0,
-    );
-
-  const totalGoldInvestmentThisMonth = (investments || [])
-    .filter((investment) => {
-      if (investment.type !== "Gold") return false;
-      const goldInv = investment as GoldInvestment;
-      const purchaseDate = parseDateString(goldInv.purchaseDate);
-      return (
-        purchaseDate &&
-        isWithinInterval(purchaseDate, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        })
-      );
-    })
-    .reduce((sum, inv) => sum + (inv as GoldInvestment).amountInvested, 0);
-
   // Define the type for installments with property info
   type InstallmentWithProperty = Installment & {
     propertyName: string;
@@ -159,220 +110,48 @@ export default function CashFlowPage() {
   const realEstateInstallmentsThisMonth = realEstateInstallments.total;
 
   const {
+    // Income
     monthlySalary,
     otherFixedIncomeMonthly,
     totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
+    currentMonthIncome,
+    
+    // Expenses
     zakatFixedMonthly,
     charityFixedMonthly,
     livingExpensesMonthly,
     otherFixedExpensesMonthly,
     totalItemizedExpensesThisMonth,
-    investmentsMadeThisMonth,
-    currentMonthIncome, // New field for current month income based on payout dates
+    
+    // Investments
+    totalStockInvestmentThisMonth,
+    totalDebtInvestmentThisMonth,
+    totalGoldInvestmentThisMonth,
+    totalInvestmentsOnly: investmentsMadeThisMonth,
+    
+    // Summary
+    totalIncome,
+    netCurrentMonthCashFlow,
+    netCashFlowThisMonth: netCashFlow,
   } = useMemo(() => {
-    let salary = 0;
-    let otherFixedInc = 0;
-    let manualIncome = 0;
-    let certificateInterest = 0;
-
-    let zakat = 0;
-    let charity = 0;
-    let livingExpenses = 0;
-    let otherFixedExp = 0;
-    let itemizedExpensesSum = 0;
-    let currentMonthInvestments = 0;
-    let currentMonthIncome = 0; // Track income based on payout dates
-
-    const fixedEstimatesList = fixedEstimates || [];
-    const incomeRecordsList = incomeRecords || [];
-    const investmentsList = investments || [];
-    const expenseRecordsList = expenseRecords || [];
-
-    // Process Fixed Estimates
-    fixedEstimatesList.forEach((fe) => {
-      let monthlyAmount = fe.amount;
-      if (fe.period === "Yearly") {
-        monthlyAmount /= 12;
-      } else if (fe.period === "Quarterly") {
-        monthlyAmount /= 3;
-      }
-
-      // Add to current month income if it's a salary or income and payout date is today or earlier
-      if (fe.type === "Salary" || !fe.isExpense) {
-        currentMonthIncome += monthlyAmount;
-      }
-
-      if (fe.type === "Salary" && !fe.isExpense) {
-        salary += monthlyAmount;
-      } else if (fe.isExpense) {
-        if (fe.type === "Zakat") {
-          zakat += monthlyAmount;
-        } else if (fe.type === "Charity") {
-          charity += monthlyAmount;
-        } else if (fe.type === "Living Expenses") {
-          livingExpenses += monthlyAmount;
-        } else if (fe.type === "Other") {
-          otherFixedExp += monthlyAmount;
-        }
-      } else if (!fe.isExpense) {
-        otherFixedInc += monthlyAmount;
-      }
+    return calculateCashFlowDetails({
+      incomeRecords: incomeRecords || [],
+      expenseRecords: expenseRecords || [],
+      investments: investments || [],
+      fixedEstimates: fixedEstimates || [],
+      transactions: transactions || [],
     });
+  }, [incomeRecords, expenseRecords, investments, fixedEstimates, transactions]);
 
-    // Process Manual Income Records
-    incomeRecordsList.forEach((income) => {
-      const incomeDate = parseDateString(income.date);
-      if (incomeDate) {
-        const isInCurrentMonth = isWithinInterval(incomeDate, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        });
-
-        if (isInCurrentMonth) {
-          manualIncome += income.amount;
-
-          // Add to current month income if payout date is today or earlier
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          if (incomeDate <= today) {
-            currentMonthIncome += income.amount;
-          }
-        }
-      }
-    });
-
-    // Process Dividend Transactions as Income
-    if (transactions) {
-      transactions.forEach((tx) => {
-        if (tx.type === "dividend") {
-          const txDate = parseDateString(tx.date);
-          if (txDate) {
-            const isInCurrentMonth = isWithinInterval(txDate, {
-              start: currentMonthStart,
-              end: currentMonthEnd,
-            });
-            if (isInCurrentMonth) {
-              manualIncome += tx.amount ?? tx.totalAmount ?? 0;
-              
-              // Add to current month income if payout date is today or earlier
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              if (txDate <= today) {
-                currentMonthIncome += tx.amount ?? tx.totalAmount ?? 0;
-              }
-            }
-          }
-        }
-      });
-    }
-
-    // Process Certificate Interest (Direct Debt Interest)
-    const directDebtInvestments = investmentsList.filter(
-      (inv) => inv.type === "Debt Instruments",
-    ) as DebtInstrumentInvestment[];
-
-    directDebtInvestments.forEach((debt) => {
-      if (debt.interestRate && debt.amountInvested) {
-        const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
-        const monthlyInterest = annualInterest / 12;
-        certificateInterest += monthlyInterest;
-
-        // Add interest to current month income if it's past the payout date
-        if (debt.maturityDate) {
-          const paymentDate = new Date(debt.maturityDate);
-
-          if (paymentDate.getDate() <= new Date().getDate()) {
-            currentMonthIncome += monthlyInterest;
-          }
-        }
-      }
-    });
-
-    // Process Itemized Expenses
-    expenseRecordsList.forEach((expense) => {
-      const expenseDate = parseDateString(expense.date);
-      if (
-        expenseDate &&
-        isWithinInterval(expenseDate, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        })
-      ) {
-        if (
-          expense.category === "Credit Card" &&
-          expense.isInstallment &&
-          expense.numberOfInstallments &&
-          expense.numberOfInstallments > 0
-        ) {
-          itemizedExpensesSum += expense.amount / expense.numberOfInstallments;
-        } else {
-          itemizedExpensesSum += expense.amount;
-        }
-      }
-    });
-
-    // Process Investments Made This Month
-    investmentsList.forEach((inv: Investment) => {
-      if (inv.purchaseDate) {
-        const purchaseDateObj = parseDateString(inv.purchaseDate);
-        if (
-          purchaseDateObj &&
-          isWithinInterval(purchaseDateObj, {
-            start: currentMonthStart,
-            end: currentMonthEnd,
-          })
-        ) {
-          currentMonthInvestments += inv.amountInvested || 0;
-        }
-      }
-    });
-    // Add real estate installments as investments
-    currentMonthInvestments += realEstateInstallmentsThisMonth;
-
-    return {
-      monthlySalary: salary,
-      otherFixedIncomeMonthly: otherFixedInc,
-      totalManualIncomeThisMonth: manualIncome,
-      totalProjectedCertificateInterestThisMonth: certificateInterest,
-      zakatFixedMonthly: zakat,
-      charityFixedMonthly: charity,
-      livingExpensesMonthly: livingExpenses,
-      otherFixedExpensesMonthly: otherFixedExp,
-      totalItemizedExpensesThisMonth: itemizedExpensesSum,
-      investmentsMadeThisMonth: currentMonthInvestments,
-      currentMonthIncome, // Add current month income based on payout dates
-    };
-  }, [
-    fixedEstimates,
-    incomeRecords,
-    investments,
-    expenseRecords,
-    currentMonthStart,
-    currentMonthEnd,
-  ]);
-
-  // Total income for the current month (all expected income)
-  const totalIncome =
-    monthlySalary +
-    otherFixedIncomeMonthly +
-    totalManualIncomeThisMonth +
-    totalProjectedCertificateInterestThisMonth;
-
-  // Current month income based on payout dates (only what's paid out by today)
   const totalExpensesOnly =
     zakatFixedMonthly +
     charityFixedMonthly +
     livingExpensesMonthly +
     otherFixedExpensesMonthly +
-    totalItemizedExpensesThisMonth; // real estate installments are now only investments
-
-  // Current month's net cash flow based on actual payouts
-  const netCurrentMonthCashFlow = currentMonthIncome - totalExpensesOnly;
-  const totalInvestmentsOnly = investmentsMadeThisMonth; // Already includes real estate installments, no need to add again
-  const totalExpenses = totalExpensesOnly + totalInvestmentsOnly;
-  const netCashFlow = totalIncome - totalExpenses; // net cash flow remains the same, but now we show breakdowns
-  const netCashThisMonth = totalIncome - totalExpensesOnly;
+    totalItemizedExpensesThisMonth;
+    
+  const totalExpenses = totalExpensesOnly + investmentsMadeThisMonth;
 
   if (isLoading) {
     return (
@@ -635,7 +414,7 @@ export default function CashFlowPage() {
             <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
               <div className="flex justify-between items-center font-semibold">
                 <span className="text-sm">{t("total")}</span>
-                <span>{formatNumberWithSuffix(totalInvestmentsOnly)}</span>
+                <span>{formatNumberWithSuffix(investmentsMadeThisMonth)}</span>
               </div>
             </div>
           </CardContent>
@@ -1029,7 +808,7 @@ export default function CashFlowPage() {
             <hr className="my-2" />
             <div className="flex justify-between font-bold">
               <span>{t("total_investments")}</span>
-              <span>{formatNumberWithSuffix(totalInvestmentsOnly)}</span>
+              <span>{formatNumberWithSuffix(investmentsMadeThisMonth)}</span>
             </div>
           </CardContent>
         </Card>
