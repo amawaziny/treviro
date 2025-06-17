@@ -15,11 +15,13 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const [name, setName] = useState("");
   const [image, setImage] = useState<string>("/default-avatar.png");
+  const [displayImage, setDisplayImage] = useState<string>("/default-avatar.png");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [urlError, setUrlError] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const currentProviderId = user?.providerData[0]?.providerId || null;
@@ -31,11 +33,13 @@ export default function ProfilePage() {
       if (
         user.photoURL &&
         typeof user.photoURL === "string" &&
-        (user.photoURL.startsWith("http") || user.photoURL.startsWith("/"))
+        (user.photoURL.startsWith("http") || user.photoURL.startsWith("/") || user.photoURL.startsWith("data:image/"))
       ) {
         setImage(user.photoURL);
+        setDisplayImage(user.photoURL);
       } else {
-        setImage("/default-avatar.png"); // Fallback if photoURL is invalid or missing
+        setImage("/default-avatar.png");
+        setDisplayImage("/default-avatar.png"); // Fallback if photoURL is invalid or missing
       }
       // For email/password users, try to load image from Firestore if available
       if (currentProviderId === "password") {
@@ -70,6 +74,7 @@ export default function ProfilePage() {
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       setImage(url);
+      setDisplayImage(url);
       setSuccess(
         t(
           "image_uploaded_successfully_click_save_changes_to_update_your_profile",
@@ -83,11 +88,54 @@ export default function ProfilePage() {
     }
   };
 
+  const validateUrl = (url: string): boolean => {
+    try {
+      // Basic URL validation
+      if (!url) return true; // Allow empty URL (will use default)
+      
+      // Check if it's a data URL
+      if (url.startsWith('data:image/')) {
+        return true;
+      }
+      
+      // Check if it's a relative path
+      if (url.startsWith('/')) {
+        return true;
+      }
+      
+      // Check if it's a valid URL
+      new URL(url);
+      return url.match(/\.(jpeg|jpg|gif|png|svg|webp)$/) !== null;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const handleImageUrlChange = (url: string) => {
+    setImage(url);
+    if (url && !validateUrl(url)) {
+      setUrlError(t("invalid_image_url_format"));
+      // Keep the previous valid image if the new one is invalid
+      setDisplayImage(prev => prev || "/default-avatar.png");
+    } else {
+      setUrlError("");
+      setDisplayImage(url || "/default-avatar.png");
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate URL before saving
+    if (image && !validateUrl(image)) {
+      setUrlError(t("invalid_image_url_format"));
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setSuccess("");
+    setUrlError("");
     try {
       if (!user) throw new Error(t("not_authenticated"));
 
@@ -122,15 +170,21 @@ export default function ProfilePage() {
         </h2>
         <div className="flex flex-col items-center mb-6">
           <div data-testid="profile-image-container">
-            <Image
-              src={image}
-              alt="Profile"
-              width={96}
-              height={96}
-              className="w-24 h-24 rounded-full border-4 border-primary object-cover mb-2"
-              loader={({ src, width, quality }) => src}
-              data-testid="profile-image"
-            />
+            <div className="w-24 h-24 rounded-full border-4 border-primary overflow-hidden mb-2">
+              <Image
+                src={displayImage}
+                alt="Profile"
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
+                loader={({ src }) => src}
+                data-testid="profile-image"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/default-avatar.png';
+                }}
+              />
+            </div>
           </div>
           <span className="text-lg font-semibold text-foreground" data-testid="profile-name">
             {name || t("no_name")}
@@ -179,12 +233,19 @@ export default function ProfilePage() {
             </label>
             <input
               type="text"
-              className="w-full border rounded px-3 py-2 bg-background text-foreground"
               value={image}
-              onChange={(e) => setImage(e.target.value)}
+              onChange={(e) => handleImageUrlChange(e.target.value)}
               disabled={currentProviderId === "google.com"}
               data-testid="image-url-input"
+              className={`w-full border rounded px-3 py-2 bg-background text-foreground ${
+                urlError ? 'border-red-500' : ''
+              }`}
             />
+            {urlError && (
+              <p className="mt-1 text-sm text-red-500" data-testid="url-error-message">
+                {urlError}
+              </p>
+            )}
           </div>
           {currentProviderId === "password" && (
             <div>

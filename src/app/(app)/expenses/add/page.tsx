@@ -8,15 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 
 export default function AddExpensePage() {
   const { t: t } = useLanguage();
-  const { language } = useLanguage();
-  const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   return (
     <div className="container mx-auto py-4 space-y-6">
