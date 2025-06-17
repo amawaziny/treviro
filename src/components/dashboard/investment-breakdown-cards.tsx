@@ -11,6 +11,7 @@ import {
   LineChart,
   FileText,
   CircleDollarSign,
+  Plus,
 } from "lucide-react";
 import React from "react";
 
@@ -32,7 +33,21 @@ const investmentTypeColors = {
 
 import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
-export function InvestmentBreakdownCards() {
+interface InvestmentBreakdownCardsProps {
+  dashboardSummary?: {
+    totalCashBalance: number;
+    // Add other properties from dashboardSummary that you need
+  };
+  appSettings?: {
+    investmentTypePercentages: Record<string, number>;
+    // Add other settings you need
+  };
+}
+
+export function InvestmentBreakdownCards({ 
+  dashboardSummary, 
+  appSettings 
+}: InvestmentBreakdownCardsProps) {
   const { t } = useLanguage();
   const { investments } = useInvestments();
   if (!investments || investments.length === 0) {
@@ -43,12 +58,22 @@ export function InvestmentBreakdownCards() {
     );
   }
 
-  // Calculate invested amount for each type
+  // Calculate invested amount for each type for current month
   const now = new Date();
   const currentMonthStart = startOfMonth(now);
   const currentMonthEnd = endOfMonth(now);
 
-  // Group by type
+  // Calculate target and remaining investments for each type
+  const totalCashBalance = dashboardSummary?.totalCashBalance || 0;
+  const allocationPercentages = appSettings?.investmentTypePercentages || {
+    'Real Estate': 0,
+    'Gold': 0,
+    'Stocks': 0,
+    'Debt Instruments': 0,
+    'Currencies': 0,
+  };
+
+  // Group by type and calculate current month's investments
   const typeGroups = investments.reduce(
     (acc, inv) => {
       acc[inv.type] = acc[inv.type] || [];
@@ -169,6 +194,19 @@ export function InvestmentBreakdownCards() {
                   </div>
                   <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
                     {percent.toFixed(1)}%
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
+                    {t("to_invest")}
+                  </div>
+                  <div className="font-bold text-lg md:text-xl text-green-600 dark:text-green-400 truncate flex items-center">
+                    <Plus className="h-4 w-4 mr-1" />
+                    {formatNumberWithSuffix(
+                      Math.max(0, 
+                        (totalCashBalance * (allocationPercentages[type as keyof typeof allocationPercentages] || 0) / 100) - invested
+                      )
+                    )}
                   </div>
                 </div>
                 <div>

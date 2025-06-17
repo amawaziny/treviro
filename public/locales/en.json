@@ -584,5 +584,6 @@
   "total_must_equal_100_percent":"Total must equal 100%",
   "warning_total_percentage_less_than_100":"Warning: Total percentage less than 100%",
   "remaining":"Remaining",
+  "to_invest": "To Invest",
   "select_a_month":"Select a month"
 }
