@@ -116,20 +116,20 @@ export default function CashFlowPage() {
     totalManualIncomeThisMonth,
     totalProjectedCertificateInterestThisMonth,
     currentMonthIncome,
-    
+
     // Expenses
     zakatFixedMonthly,
     charityFixedMonthly,
     livingExpensesMonthly,
     otherFixedExpensesMonthly,
     totalItemizedExpensesThisMonth,
-    
+
     // Investments
     totalStockInvestmentThisMonth,
     totalDebtInvestmentThisMonth,
     totalGoldInvestmentThisMonth,
     totalInvestmentsOnly: investmentsMadeThisMonth,
-    
+
     // Summary
     totalIncome,
     netCurrentMonthCashFlow,
@@ -142,7 +142,13 @@ export default function CashFlowPage() {
       fixedEstimates: fixedEstimates || [],
       transactions: transactions || [],
     });
-  }, [incomeRecords, expenseRecords, investments, fixedEstimates, transactions]);
+  }, [
+    incomeRecords,
+    expenseRecords,
+    investments,
+    fixedEstimates,
+    transactions,
+  ]);
 
   const totalExpensesOnly =
     zakatFixedMonthly +
@@ -150,7 +156,7 @@ export default function CashFlowPage() {
     livingExpensesMonthly +
     otherFixedExpensesMonthly +
     totalItemizedExpensesThisMonth;
-    
+
   const totalExpenses = totalExpensesOnly + investmentsMadeThisMonth;
 
   if (isLoading) {

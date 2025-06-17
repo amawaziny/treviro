@@ -80,19 +80,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(firebaseAuthService!, provider);
-      
+
       // Track successful login
-      trackEvent('login', {
-        method: 'google',
+      trackEvent("login", {
+        method: "google",
         user_id: result.user.uid,
         email: result.user.email,
       });
-      
+
       router.push("/dashboard");
     } catch (error) {
       // Track login error
-      trackEvent('login_error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      trackEvent("login_error", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       console.error("Error during login:", error);
       throw error;
@@ -103,18 +103,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Track logout event before actually signing out
       if (user) {
-        trackEvent('logout', {
+        trackEvent("logout", {
           user_id: user.uid,
           email: user.email,
         });
       }
-      
+
       await firebaseSignOut(firebaseAuthService!);
       setUser(null);
       router.push("/");
     } catch (error) {
-      trackEvent('logout_error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      trackEvent("logout_error", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       console.error("Error during logout:", error);
       throw error;
@@ -129,21 +129,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email,
           password,
         );
-        
+
         // Track successful email/password login
-        trackEvent('login', {
-          method: 'email',
+        trackEvent("login", {
+          method: "email",
           user_id: userCredential.user.uid,
           email: userCredential.user.email,
         });
-        
+
         router.push("/dashboard");
       } catch (error) {
         // Track login error
-        trackEvent('login_error', {
-          method: 'email',
+        trackEvent("login_error", {
+          method: "email",
           email: email,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         });
         console.error("Error signing in with email/password:", error);
         throw error;
@@ -160,21 +160,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email,
           password,
         );
-        
+
         // Track successful signup
-        trackEvent('signup', {
-          method: 'email',
+        trackEvent("signup", {
+          method: "email",
           user_id: userCredential.user.uid,
           email: email,
         });
-        
+
         router.push("/dashboard");
       } catch (error) {
         // Track signup error
-        trackEvent('signup_error', {
-          method: 'email',
+        trackEvent("signup_error", {
+          method: "email",
           email: email,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         });
         console.error("Error signing up with email/password:", error);
         throw error;
@@ -192,20 +192,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     try {
       await firebaseSendPasswordResetEmail(firebaseAuthService!, email);
-      
+
       // Track password reset email sent
-      trackEvent('password_reset_email_sent', {
+      trackEvent("password_reset_email_sent", {
         email: email,
       });
-      
+
       console.log("AuthContext: Password reset email sent successfully.");
     } catch (error: any) {
       // Track password reset error
-      trackEvent('password_reset_error', {
+      trackEvent("password_reset_error", {
         email: email,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
-      
+
       console.error("AuthContext: Error sending password reset email:", error);
       throw error;
     }
@@ -235,7 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = (): AuthContextType => {
   const context = React.useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

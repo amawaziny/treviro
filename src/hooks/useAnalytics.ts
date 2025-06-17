@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useAuth } from '@/contexts/auth-context';
-import { setAnalyticsUserId, trackEvent } from '@/lib/analytics';
+import { useEffect } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { setAnalyticsUserId, trackEvent } from "@/lib/analytics";
 
 export function useAnalytics() {
   const { user } = useAuth();
@@ -10,14 +10,14 @@ export function useAnalytics() {
     if (user) {
       // Set user ID for analytics tracking
       setAnalyticsUserId(user.uid);
-      
+
       // Track login event
-      trackEvent('login', {
-        method: 'email', // or 'google', 'github', etc.
+      trackEvent("login", {
+        method: "email", // or 'google', 'github', etc.
       });
     } else {
       // Track logout event
-      trackEvent('logout');
+      trackEvent("logout");
     }
   }, [user]);
 
@@ -25,7 +25,7 @@ export function useAnalytics() {
   const track = (eventName: string, params?: Record<string, any>) => {
     trackEvent(eventName, {
       ...params,
-      userId: user?.uid || 'anonymous',
+      userId: user?.uid || "anonymous",
     });
   };
 

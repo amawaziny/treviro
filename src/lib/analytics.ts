@@ -4,18 +4,18 @@ import { analytics } from "./firebase";
 // Track page views
 export const trackPageView = (pageTitle: string, pagePath: string) => {
   if (typeof window !== "undefined" && analytics) {
-    logEvent(analytics, 'page_view', {
+    logEvent(analytics, "page_view", {
       page_title: pageTitle,
       page_path: pagePath,
-      page_location: window.location.href
+      page_location: window.location.href,
     });
   }
 };
 
 // Track custom events
 export const trackEvent = (
-  eventName: string, 
-  eventParams?: { [key: string]: any }
+  eventName: string,
+  eventParams?: { [key: string]: any },
 ) => {
   if (analytics) {
     logEvent(analytics, eventName, eventParams);
@@ -32,10 +32,10 @@ export const setAnalyticsUserId = (userId: string) => {
 // Track errors
 export const trackError = (error: Error, errorInfo?: any) => {
   if (analytics) {
-    logEvent(analytics, 'error', {
+    logEvent(analytics, "error", {
       error: error.message,
       errorInfo: JSON.stringify(errorInfo),
-      stack: error.stack
+      stack: error.stack,
     });
   }
 };

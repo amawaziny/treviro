@@ -1,4 +1,9 @@
-import { startOfMonth, endOfMonth, isWithinInterval, isSameMonth } from "date-fns";
+import {
+  startOfMonth,
+  endOfMonth,
+  isWithinInterval,
+  isSameMonth,
+} from "date-fns";
 import type {
   IncomeRecord,
   ExpenseRecord,
@@ -29,7 +34,7 @@ export interface CashFlowSummaryResult {
   totalManualIncomeThisMonth: number;
   totalProjectedCertificateInterestThisMonth: number;
   currentMonthIncome: number;
-  
+
   // Expenses
   totalExpensesOnly: number;
   livingExpensesMonthly: number;
@@ -38,7 +43,7 @@ export interface CashFlowSummaryResult {
   otherFixedExpensesMonthly: number;
   realEstateInstallmentsMonthly: number;
   totalItemizedExpensesThisMonth: number;
-  
+
   // Investments
   totalInvestmentsThisMonth: number;
   totalStockInvestmentThisMonth: number;
@@ -46,7 +51,7 @@ export interface CashFlowSummaryResult {
   totalGoldInvestmentThisMonth: number;
   totalCurrencyInvestmentThisMonth: number;
   totalInvestmentsOnly: number;
-  
+
   // Summary
   netCashFlowThisMonth: number;
   netCurrentMonthCashFlow: number;
@@ -59,7 +64,9 @@ export function calculateCashFlowDetails({
   fixedEstimates = [],
   transactions = [],
   month = new Date(),
-}: CashFlowSummaryArgs & { transactions?: Transaction[] }): CashFlowSummaryResult {
+}: CashFlowSummaryArgs & {
+  transactions?: Transaction[];
+}): CashFlowSummaryResult {
   const summary = calculateMonthlyCashFlowSummary({
     incomeRecords,
     expenseRecords,
@@ -93,14 +100,14 @@ export function calculateCashFlowDetails({
 
   // Process dividend transactions
   transactions.forEach((tx) => {
-    if (tx.type === 'dividend') {
+    if (tx.type === "dividend") {
       const txDate = parseDateString(tx.date);
       if (txDate) {
         const isInCurrentMonth = isWithinInterval(txDate, {
           start: currentMonthStart,
           end: currentMonthEnd,
         });
-        
+
         if (isInCurrentMonth && txDate <= today) {
           currentMonthIncome += tx.amount ?? tx.totalAmount ?? 0;
         }
@@ -110,10 +117,10 @@ export function calculateCashFlowDetails({
 
   // Process fixed estimates (salary and other fixed income)
   fixedEstimates.forEach((fe) => {
-    if (fe.type === 'Salary' || !fe.isExpense) {
+    if (fe.type === "Salary" || !fe.isExpense) {
       let monthlyAmount = fe.amount;
-      if (fe.period === 'Yearly') monthlyAmount /= 12;
-      else if (fe.period === 'Quarterly') monthlyAmount /= 3;
+      if (fe.period === "Yearly") monthlyAmount /= 12;
+      else if (fe.period === "Quarterly") monthlyAmount /= 3;
 
       // If we're in the current month, add fixed income to current month income
       if (isSameMonth(today, month) && today.getDate() >= 1) {
@@ -124,7 +131,7 @@ export function calculateCashFlowDetails({
 
   // Process certificate interest for current month
   const directDebtInvestments = investments.filter(
-    (inv) => inv.type === 'Debt Instruments',
+    (inv) => inv.type === "Debt Instruments",
   ) as DebtInstrumentInvestment[];
 
   directDebtInvestments.forEach((debt) => {
@@ -143,13 +150,13 @@ export function calculateCashFlowDetails({
   });
 
   // Calculate net current month cash flow
-  const netCurrentMonthCashFlow = 
-    currentMonthIncome - 
+  const netCurrentMonthCashFlow =
+    currentMonthIncome -
     (summary.livingExpensesMonthly +
-     summary.zakatFixedMonthly +
-     summary.charityFixedMonthly +
-     summary.otherFixedExpensesMonthly +
-     summary.totalItemizedExpensesThisMonth);
+      summary.zakatFixedMonthly +
+      summary.charityFixedMonthly +
+      summary.otherFixedExpensesMonthly +
+      summary.totalItemizedExpensesThisMonth);
 
   return {
     ...summary,
@@ -330,11 +337,12 @@ export function calculateMonthlyCashFlowSummary({
     totalIncome - totalExpensesOnly - totalInvestmentsOnly;
 
   // Calculate current month's income (sum of all income components)
-  const currentMonthIncome = monthlySalary + 
-    otherFixedIncomeMonthly + 
-    totalManualIncomeThisMonth + 
+  const currentMonthIncome =
+    monthlySalary +
+    otherFixedIncomeMonthly +
+    totalManualIncomeThisMonth +
     totalProjectedCertificateInterestThisMonth;
-    
+
   return {
     totalIncome,
     monthlySalary,
