@@ -139,7 +139,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     try {
       const incomeDocRef = doc(
         firestoreInstance,
-        `users/${userId}/income/${incomeId}`,
+        `users/${userId}/incomeRecords/${incomeId}`,
       );
       await setDoc(incomeDocRef, updatedFields, { merge: true });
       setIncomeRecords((prev) =>
@@ -1153,7 +1153,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
       try {
         await deleteDoc(
-          doc(firestoreInstance, `users/${userId}/income/${incomeId}`),
+          doc(firestoreInstance, `users/${userId}/incomeRecords/${incomeId}`),
         );
       } catch (error) {
         console.error("Error deleting income record:", error);
