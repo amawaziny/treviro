@@ -23,6 +23,7 @@ interface InvestmentDistributionCardProps {
   }>;
   total: number;
   checkedItems?: Record<string, boolean>;
+  defaultCheckedItems?: Record<string, boolean>;
   onCheckboxChange?: (type: string) => void;
   isEmpty?: boolean;
 }
@@ -32,19 +33,49 @@ export function InvestmentDistributionCard({
   chartData,
   allChartData,
   total,
-  checkedItems = {},
-  onCheckboxChange = () => {},
-  isEmpty = false,
+  checkedItems: controlledCheckedItems,
+  defaultCheckedItems = {},
+  onCheckboxChange: onControlledCheckboxChange,
+  isEmpty: controlledIsEmpty = false,
 }: InvestmentDistributionCardProps) {
   const { t } = useLanguage();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  
+  // Internal state for uncontrolled usage
+  const [uncontrolledCheckedItems, setUncontrolledCheckedItems] = React.useState<Record<string, boolean>>(defaultCheckedItems);
+  
+  // Determine if we're in controlled or uncontrolled mode
+  const isControlled = controlledCheckedItems !== undefined;
+  const checkedItems = isControlled ? controlledCheckedItems : uncontrolledCheckedItems;
+  
+  // Handle checkbox changes
+  const handleCheckboxChange = (type: string) => {
+    const newValue = !checkedItems[type];
+    
+    if (isControlled) {
+      onControlledCheckboxChange?.(type);
+    } else {
+      setUncontrolledCheckedItems(prev => ({
+        ...prev,
+        [type]: newValue,
+      }));
+    }
+  };
+
+  // Calculate if all items are unchecked
+  const allUnchecked = Object.values(checkedItems).every(checked => !checked);
+  const isEmpty = controlledIsEmpty || allUnchecked;
+  
+  // Filter chart data based on checked items
+  const filteredChartData = chartData.filter(item => checkedItems[item.id] !== false);
+  
   // Use allChartData for legend if provided, otherwise fall back to chartData
   const legendData = allChartData || chartData;
-  const { resolvedTheme } = useTheme();
-
-  // When empty, show a skeleton pie chart with $0 total but keep all checkboxes visible
-  const displayChartData = isEmpty ? [] : chartData;
-  const displayTotal = isEmpty ? 0 : total;
-  const isDark = resolvedTheme === "dark";
+  
+  // When empty, show a skeleton pie chart with $0 total
+  const displayChartData = isEmpty ? [] : filteredChartData;
+  const displayTotal = isEmpty ? 0 : filteredChartData.reduce((sum, item) => sum + item.value, 0);
 
   // Create skeleton data for the empty state
   const skeletonData = [
@@ -56,7 +87,8 @@ export function InvestmentDistributionCard({
     },
   ];
 
-  const chartToRender = isEmpty ? skeletonData : chartData;
+  // Use filtered data for the chart, or skeleton data when empty
+  const chartToRender = isEmpty ? skeletonData : displayChartData;
 
   return (
     <Card
@@ -190,7 +222,7 @@ export function InvestmentDistributionCard({
               <div
                 key={d.id}
                 className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm cursor-pointer"
-                onClick={() => onCheckboxChange(d.id)}
+                onClick={() => handleCheckboxChange(d.id)}
               >
                 <div className="relative flex items-center">
                   <input

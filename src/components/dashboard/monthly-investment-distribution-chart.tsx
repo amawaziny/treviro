@@ -7,7 +7,7 @@ import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";
 
-// Define the order and labels for the chart items
+// Define the order and default checked state for the chart items
 const CHART_ITEMS_ORDER = [
   'Stocks',
   'Gold',
@@ -17,31 +17,16 @@ const CHART_ITEMS_ORDER = [
   'Expenses'
 ];
 
+// Create default checked items object
+const DEFAULT_CHECKED_ITEMS = CHART_ITEMS_ORDER.reduce((acc, type) => ({
+  ...acc,
+  [type]: true,
+}), {});
+
 export function MonthlyInvestmentDistributionChart() {
   const { t } = useLanguage();
   const { investments, isLoading } = useInvestments();
   const { resolvedTheme } = useTheme();
-  
-  // State to track which items are checked
-  const [checkedItems, setCheckedItems] = React.useState<Record<string, boolean>>(
-    CHART_ITEMS_ORDER.reduce(
-      (acc, type) => ({
-        ...acc,
-        [type]: true,
-      }),
-      {},
-    ),
-  );
-  
-  const allUnchecked = Object.values(checkedItems).every(checked => !checked);
-  
-  // Handle checkbox toggle
-  const handleCheckboxChange = (type: string) => {
-    setCheckedItems(prev => ({
-      ...prev,
-      [type]: !prev[type],
-    }));
-  };
 
   // Filter investments for this month
   const now = new Date();
@@ -126,31 +111,14 @@ export function MonthlyInvestmentDistributionChart() {
     return data;
   }, [cashFlowSummary, resolvedTheme]);
 
-  // Filter chart data based on checked items
-  const filteredChartData = chartData.filter(item => checkedItems[item.id] !== false);
-  
-  if (isLoading || investments.length === 0) {
-    return (
-      <InvestmentDistributionCard
-        title={t("Monthly Cash Flow Distribution")}
-        chartData={[]}
-        total={0}
-        checkedItems={checkedItems}
-        onCheckboxChange={handleCheckboxChange}
-        isEmpty={true}
-      />
-    );
-  }
-
   return (
     <InvestmentDistributionCard
       title={t("Monthly Cash Flow Distribution")}
-      chartData={filteredChartData}
+      chartData={chartData}
       allChartData={chartData}
-      total={filteredChartData.reduce((total, item) => total + item.value, 0)}
-      checkedItems={checkedItems}
-      onCheckboxChange={handleCheckboxChange}
-      isEmpty={allUnchecked}
+      total={chartData.reduce((total, item) => total + item.value, 0)}
+      defaultCheckedItems={DEFAULT_CHECKED_ITEMS}
+      isEmpty={isLoading || investments.length === 0}
     />
   );
 }
