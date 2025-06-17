@@ -108,26 +108,37 @@ export function calculateMonthlyCashFlowSummary({
   let totalItemizedExpensesThisMonth = 0;
   (expenseRecords || []).forEach((record) => {
     const date = parseDateString(record.date);
-    
+
     // Check if this is a credit card installment
-    if (record.category === 'Credit Card' && record.isInstallment && record.numberOfInstallments) {
+    if (
+      record.category === "Credit Card" &&
+      record.isInstallment &&
+      record.numberOfInstallments
+    ) {
       const startDate = new Date(record.date);
       const startMonth = startDate.getMonth();
       const startYear = startDate.getFullYear();
       const currentMonth = currentMonthStart.getMonth();
       const currentYear = currentMonthStart.getFullYear();
-      
+
       // Calculate how many months have passed since the start date
-      const monthsSinceStart = (currentYear - startYear) * 12 + (currentMonth - startMonth);
-      
+      const monthsSinceStart =
+        (currentYear - startYear) * 12 + (currentMonth - startMonth);
+
       // If current month is within the installment period, include the monthly installment
-      if (monthsSinceStart >= 0 && monthsSinceStart < record.numberOfInstallments) {
+      if (
+        monthsSinceStart >= 0 &&
+        monthsSinceStart < record.numberOfInstallments
+      ) {
         const monthlyAmount = record.amount / record.numberOfInstallments;
         totalItemizedExpensesThisMonth += monthlyAmount;
       }
-    } 
+    }
     // For regular expenses, check if they occurred in the current month
-    else if (date && isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })) {
+    else if (
+      date &&
+      isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })
+    ) {
       totalItemizedExpensesThisMonth += record.amount;
     }
   });

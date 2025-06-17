@@ -168,7 +168,8 @@ export default function CashFlowPage() {
     livingExpensesMonthly,
     otherFixedExpensesMonthly,
     totalItemizedExpensesThisMonth,
-    investmentsMadeThisMonth, // Added this
+    investmentsMadeThisMonth,
+    currentMonthIncome, // New field for current month income based on payout dates
   } = useMemo(() => {
     let salary = 0;
     let otherFixedInc = 0;
@@ -180,7 +181,8 @@ export default function CashFlowPage() {
     let livingExpenses = 0;
     let otherFixedExp = 0;
     let itemizedExpensesSum = 0;
-    let currentMonthInvestments = 0; // Added this
+    let currentMonthInvestments = 0;
+    let currentMonthIncome = 0; // Track income based on payout dates
 
     const fixedEstimatesList = fixedEstimates || [];
     const incomeRecordsList = incomeRecords || [];
@@ -194,6 +196,11 @@ export default function CashFlowPage() {
         monthlyAmount /= 12;
       } else if (fe.period === "Quarterly") {
         monthlyAmount /= 3;
+      }
+
+      // Add to current month income if it's a salary or income and payout date is today or earlier
+      if (fe.type === "Salary" || !fe.isExpense) {
+        currentMonthIncome += monthlyAmount;
       }
 
       if (fe.type === "Salary" && !fe.isExpense) {
@@ -216,14 +223,22 @@ export default function CashFlowPage() {
     // Process Manual Income Records
     incomeRecordsList.forEach((income) => {
       const incomeDate = parseDateString(income.date);
-      if (
-        incomeDate &&
-        isWithinInterval(incomeDate, {
+      if (incomeDate) {
+        const isInCurrentMonth = isWithinInterval(incomeDate, {
           start: currentMonthStart,
           end: currentMonthEnd,
-        })
-      ) {
-        manualIncome += income.amount;
+        });
+
+        if (isInCurrentMonth) {
+          manualIncome += income.amount;
+
+          // Add to current month income if payout date is today or earlier
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (incomeDate <= today) {
+            currentMonthIncome += income.amount;
+          }
+        }
       }
     });
 
@@ -232,14 +247,21 @@ export default function CashFlowPage() {
       transactions.forEach((tx) => {
         if (tx.type === "dividend") {
           const txDate = parseDateString(tx.date);
-          if (
-            txDate &&
-            isWithinInterval(txDate, {
+          if (txDate) {
+            const isInCurrentMonth = isWithinInterval(txDate, {
               start: currentMonthStart,
               end: currentMonthEnd,
-            })
-          ) {
-            manualIncome += tx.amount ?? tx.totalAmount ?? 0;
+            });
+            if (isInCurrentMonth) {
+              manualIncome += tx.amount ?? tx.totalAmount ?? 0;
+              
+              // Add to current month income if payout date is today or earlier
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              if (txDate <= today) {
+                currentMonthIncome += tx.amount ?? tx.totalAmount ?? 0;
+              }
+            }
           }
         }
       });
@@ -247,12 +269,23 @@ export default function CashFlowPage() {
 
     // Process Certificate Interest (Direct Debt Interest)
     const directDebtInvestments = investmentsList.filter(
-      (inv) => inv.type === t("debt_instruments"),
+      (inv) => inv.type === "Debt Instruments",
     ) as DebtInstrumentInvestment[];
+
     directDebtInvestments.forEach((debt) => {
       if (debt.interestRate && debt.amountInvested) {
         const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
-        certificateInterest += annualInterest / 12;
+        const monthlyInterest = annualInterest / 12;
+        certificateInterest += monthlyInterest;
+
+        // Add interest to current month income if it's past the payout date
+        if (debt.maturityDate) {
+          const paymentDate = new Date(debt.maturityDate);
+
+          if (paymentDate.getDate() <= new Date().getDate()) {
+            currentMonthIncome += monthlyInterest;
+          }
+        }
       }
     });
 
@@ -267,7 +300,7 @@ export default function CashFlowPage() {
         })
       ) {
         if (
-          expense.category === t("credit_card") &&
+          expense.category === "Credit Card" &&
           expense.isInstallment &&
           expense.numberOfInstallments &&
           expense.numberOfInstallments > 0
@@ -307,7 +340,8 @@ export default function CashFlowPage() {
       livingExpensesMonthly: livingExpenses,
       otherFixedExpensesMonthly: otherFixedExp,
       totalItemizedExpensesThisMonth: itemizedExpensesSum,
-      investmentsMadeThisMonth: currentMonthInvestments, // Added this
+      investmentsMadeThisMonth: currentMonthInvestments,
+      currentMonthIncome, // Add current month income based on payout dates
     };
   }, [
     fixedEstimates,
@@ -318,17 +352,23 @@ export default function CashFlowPage() {
     currentMonthEnd,
   ]);
 
+  // Total income for the current month (all expected income)
   const totalIncome =
     monthlySalary +
     otherFixedIncomeMonthly +
     totalManualIncomeThisMonth +
     totalProjectedCertificateInterestThisMonth;
+
+  // Current month income based on payout dates (only what's paid out by today)
   const totalExpensesOnly =
     zakatFixedMonthly +
     charityFixedMonthly +
     livingExpensesMonthly +
     otherFixedExpensesMonthly +
     totalItemizedExpensesThisMonth; // real estate installments are now only investments
+
+  // Current month's net cash flow based on actual payouts
+  const netCurrentMonthCashFlow = currentMonthIncome - totalExpensesOnly;
   const totalInvestmentsOnly = investmentsMadeThisMonth; // Already includes real estate installments, no need to add again
   const totalExpenses = totalExpensesOnly + totalInvestmentsOnly;
   const netCashFlow = totalIncome - totalExpenses; // net cash flow remains the same, but now we show breakdowns
@@ -377,6 +417,27 @@ export default function CashFlowPage() {
         </div>
       </div>
       <div className="flex flex-col md:flex-row gap-4 mb-6 w-full items-stretch">
+        <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
+              {t("total_current_income_this_month")}
+            </CardTitle>
+            <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+              <span className="md:hidden">
+                {formatNumberWithSuffix(currentMonthIncome)}
+              </span>
+              <span className="hidden md:inline">
+                {formatCurrencyWithCommas(currentMonthIncome)}
+              </span>
+            </p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+              {t("income_paid_out_by_today")}
+            </p>
+          </CardContent>
+        </Card>
         <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">

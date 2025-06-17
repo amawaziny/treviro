@@ -44,9 +44,9 @@ interface InvestmentBreakdownCardsProps {
   };
 }
 
-export function InvestmentBreakdownCards({ 
-  dashboardSummary, 
-  appSettings 
+export function InvestmentBreakdownCards({
+  dashboardSummary,
+  appSettings,
 }: InvestmentBreakdownCardsProps) {
   const { t } = useLanguage();
   const { investments } = useInvestments();
@@ -66,11 +66,11 @@ export function InvestmentBreakdownCards({
   // Calculate target and remaining investments for each type
   const totalCashBalance = dashboardSummary?.totalCashBalance || 0;
   const allocationPercentages = appSettings?.investmentTypePercentages || {
-    'Real Estate': 0,
-    'Gold': 0,
-    'Stocks': 0,
-    'Debt Instruments': 0,
-    'Currencies': 0,
+    "Real Estate": 0,
+    Gold: 0,
+    Stocks: 0,
+    "Debt Instruments": 0,
+    Currencies: 0,
   };
 
   // Group by type and calculate current month's investments
@@ -203,9 +203,15 @@ export function InvestmentBreakdownCards({
                   <div className="font-bold text-lg md:text-xl text-green-600 dark:text-green-400 truncate flex items-center">
                     <Plus className="h-4 w-4 mr-1" />
                     {formatNumberWithSuffix(
-                      Math.max(0, 
-                        (totalCashBalance * (allocationPercentages[type as keyof typeof allocationPercentages] || 0) / 100) - invested
-                      )
+                      Math.max(
+                        0,
+                        (totalCashBalance *
+                          (allocationPercentages[
+                            type as keyof typeof allocationPercentages
+                          ] || 0)) /
+                          100 -
+                          invested,
+                      ),
                     )}
                   </div>
                 </div>

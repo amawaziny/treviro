@@ -24,10 +24,13 @@ const INVESTMENT_ORDER = [
 ];
 
 // Create default checked items object
-const DEFAULT_CHECKED_ITEMS = INVESTMENT_ORDER.reduce((acc, type) => ({
-  ...acc,
-  [type]: true,
-}), {});
+const DEFAULT_CHECKED_ITEMS = INVESTMENT_ORDER.reduce(
+  (acc, type) => ({
+    ...acc,
+    [type]: true,
+  }),
+  {},
+);
 
 export function InvestmentDistributionChart() {
   const { t } = useLanguage();

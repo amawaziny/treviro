@@ -41,22 +41,25 @@ export function InvestmentDistributionCard({
   const { t } = useLanguage();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
-  
+
   // Internal state for uncontrolled usage
-  const [uncontrolledCheckedItems, setUncontrolledCheckedItems] = React.useState<Record<string, boolean>>(defaultCheckedItems);
-  
+  const [uncontrolledCheckedItems, setUncontrolledCheckedItems] =
+    React.useState<Record<string, boolean>>(defaultCheckedItems);
+
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledCheckedItems !== undefined;
-  const checkedItems = isControlled ? controlledCheckedItems : uncontrolledCheckedItems;
-  
+  const checkedItems = isControlled
+    ? controlledCheckedItems
+    : uncontrolledCheckedItems;
+
   // Handle checkbox changes
   const handleCheckboxChange = (type: string) => {
     const newValue = !checkedItems[type];
-    
+
     if (isControlled) {
       onControlledCheckboxChange?.(type);
     } else {
-      setUncontrolledCheckedItems(prev => ({
+      setUncontrolledCheckedItems((prev) => ({
         ...prev,
         [type]: newValue,
       }));
@@ -64,18 +67,22 @@ export function InvestmentDistributionCard({
   };
 
   // Calculate if all items are unchecked
-  const allUnchecked = Object.values(checkedItems).every(checked => !checked);
+  const allUnchecked = Object.values(checkedItems).every((checked) => !checked);
   const isEmpty = controlledIsEmpty || allUnchecked;
-  
+
   // Filter chart data based on checked items
-  const filteredChartData = chartData.filter(item => checkedItems[item.id] !== false);
-  
+  const filteredChartData = chartData.filter(
+    (item) => checkedItems[item.id] !== false,
+  );
+
   // Use allChartData for legend if provided, otherwise fall back to chartData
   const legendData = allChartData || chartData;
-  
+
   // When empty, show a skeleton pie chart with $0 total
   const displayChartData = isEmpty ? [] : filteredChartData;
-  const displayTotal = isEmpty ? 0 : filteredChartData.reduce((sum, item) => sum + item.value, 0);
+  const displayTotal = isEmpty
+    ? 0
+    : filteredChartData.reduce((sum, item) => sum + item.value, 0);
 
   // Create skeleton data for the empty state
   const skeletonData = [

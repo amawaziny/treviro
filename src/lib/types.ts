@@ -187,7 +187,7 @@ export interface StockChartDataPoint {
 
 export type StockChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 
-export type TransactionType = "buy" | "sell" | "dividend";
+export type TransactionType = "buy" | "sell" | "dividend" | "interest";
 
 export interface Transaction {
   id: string;

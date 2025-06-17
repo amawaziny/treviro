@@ -31,7 +31,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
-import { formatCurrencyWithCommas, formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  formatDateDisplay,
+  formatNumberWithSuffix,
+} from "@/lib/utils";
 
 interface StockDetailChartProps {
   securityId: string;

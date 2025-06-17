@@ -570,16 +570,17 @@ export default function DashboardPage() {
       </div>
       <div className="lg:col-span-3">
         {dashboardSummary && (
-          <InvestmentBreakdownCards 
+          <InvestmentBreakdownCards
             dashboardSummary={dashboardSummary}
             appSettings={{
-              investmentTypePercentages: appSettings?.investmentTypePercentages || {
-                'Real Estate': 30,
-                'Stocks': 25,
-                'Debt Instruments': 20,
-                'Currencies': 10,
-                'Gold': 15,
-              }
+              investmentTypePercentages:
+                appSettings?.investmentTypePercentages || {
+                  "Real Estate": 30,
+                  Stocks: 25,
+                  "Debt Instruments": 20,
+                  Currencies: 10,
+                  Gold: 15,
+                },
             }}
           />
         )}

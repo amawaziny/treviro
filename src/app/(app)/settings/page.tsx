@@ -33,15 +33,18 @@ export default function SettingsPage() {
     isLoading: isLoadingContext,
   } = useInvestments();
   const { toast } = useToast();
-  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(undefined);
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
+    undefined,
+  );
   const [isSaving, setIsSaving] = useState(false);
-  const [investmentPercentages, setInvestmentPercentages] = useState<InvestmentPercentage>({
-    'Real Estate': 30,
-    'Stocks': 25,
-    'Debt Instruments': 20,
-    'Currencies': 10,
-    'Gold': 15,
-  });
+  const [investmentPercentages, setInvestmentPercentages] =
+    useState<InvestmentPercentage>({
+      "Real Estate": 30,
+      Stocks: 25,
+      "Debt Instruments": 20,
+      Currencies: 10,
+      Gold: 15,
+    });
   const [totalPercentage, setTotalPercentage] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
 
@@ -49,7 +52,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const total = Object.values(investmentPercentages).reduce(
       (sum, value) => sum + (Number(value) || 0),
-      0
+      0,
     );
     const roundedTotal = Math.round(total * 100) / 100;
     setTotalPercentage(roundedTotal);
@@ -59,7 +62,7 @@ export default function SettingsPage() {
   // Load saved investment percentages
   useEffect(() => {
     if (appSettings?.investmentTypePercentages) {
-      setInvestmentPercentages(prev => ({
+      setInvestmentPercentages((prev) => ({
         ...prev,
         ...appSettings.investmentTypePercentages,
       }));
@@ -113,14 +116,14 @@ export default function SettingsPage() {
       const newSettings: Partial<AppSettings> = {
         financialYearStartMonth: parseInt(selectedMonth, 10),
         investmentTypePercentages: {
-          'Real Estate': investmentPercentages['Real Estate'] || 0,
-          'Gold': investmentPercentages['Gold'] || 0,
-          'Stocks': investmentPercentages['Stocks'] || 0,
-          'Debt Instruments': investmentPercentages['Debt Instruments'] || 0,
-          'Currencies': investmentPercentages['Currencies'] || 0,
-        }
+          "Real Estate": investmentPercentages["Real Estate"] || 0,
+          Gold: investmentPercentages["Gold"] || 0,
+          Stocks: investmentPercentages["Stocks"] || 0,
+          "Debt Instruments": investmentPercentages["Debt Instruments"] || 0,
+          Currencies: investmentPercentages["Currencies"] || 0,
+        },
       };
-      
+
       await updateAppSettings(newSettings);
       toast({
         title: t("settings_saved"),
@@ -142,15 +145,18 @@ export default function SettingsPage() {
   const handlePercentageChange = (type: InvestmentType, value: number) => {
     // Allow any value between 0 and 100 for the specific field
     const newValue = Math.max(0, Math.min(100, value));
-    
-    setInvestmentPercentages(prev => ({
+
+    setInvestmentPercentages((prev) => ({
       ...prev,
-      [type]: newValue
+      [type]: newValue,
     }));
   };
 
   const getRemainingPercentage = () => {
-    const used = Object.values(investmentPercentages).reduce((sum, v) => sum + v, 0);
+    const used = Object.values(investmentPercentages).reduce(
+      (sum, v) => sum + v,
+      0,
+    );
     return Math.max(0, 100 - used);
   };
 
@@ -212,12 +218,14 @@ export default function SettingsPage() {
 
           <div className="space-y-6 pt-6">
             <div>
-              <h3 className="text-lg font-medium">{t('investment_allocation')}</h3>
+              <h3 className="text-lg font-medium">
+                {t("investment_allocation")}
+              </h3>
               <p className="text-sm text-muted-foreground">
-                {t('set_your_monthly_investment_allocation_percentages')}
+                {t("set_your_monthly_investment_allocation_percentages")}
               </p>
             </div>
-            
+
             <div className="space-y-6">
               {Object.entries(investmentPercentages).map(([type, value]) => (
                 <div key={type} className="space-y-2">
@@ -228,7 +236,10 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => {
                           const newValue = Math.max(0, value - 1);
-                          handlePercentageChange(type as InvestmentType, newValue);
+                          handlePercentageChange(
+                            type as InvestmentType,
+                            newValue,
+                          );
                         }}
                         disabled={value <= 0}
                         className="p-1 rounded-full hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
@@ -243,7 +254,10 @@ export default function SettingsPage() {
                         value={value}
                         onChange={(e) => {
                           const newValue = parseInt(e.target.value, 10) || 0;
-                          handlePercentageChange(type as InvestmentType, newValue);
+                          handlePercentageChange(
+                            type as InvestmentType,
+                            newValue,
+                          );
                         }}
                         className="w-16 px-2 py-1 text-sm border bg-transparent rounded text-center"
                         aria-label={`${type} percentage`}
@@ -252,7 +266,10 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => {
                           const newValue = value + 1;
-                          handlePercentageChange(type as InvestmentType, newValue);
+                          handlePercentageChange(
+                            type as InvestmentType,
+                            newValue,
+                          );
                         }}
                         disabled={getRemainingPercentage() <= 0}
                         className="p-1 rounded-full hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
@@ -264,7 +281,9 @@ export default function SettingsPage() {
                   </div>
                   <Slider
                     value={[value]}
-                    onValueChange={([val]) => handlePercentageChange(type as InvestmentType, val)}
+                    onValueChange={([val]) =>
+                      handlePercentageChange(type as InvestmentType, val)
+                    }
                     min={0}
                     max={100}
                     step={1}
@@ -272,49 +291,56 @@ export default function SettingsPage() {
                   />
                 </div>
               ))}
-              
+
               <div className="pt-2 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{t('total')}</span>
-                  <span className={`text-sm font-medium ${
-                    totalPercentage === 100 ? 'text-green-600' : 
-                    totalPercentage < 100 ? 'text-amber-600' : 'text-red-600'
-                  }`}>
+                  <span className="text-sm font-medium">{t("total")}</span>
+                  <span
+                    className={`text-sm font-medium ${
+                      totalPercentage === 100
+                        ? "text-green-600"
+                        : totalPercentage < 100
+                          ? "text-amber-600"
+                          : "text-red-600"
+                    }`}
+                  >
                     {totalPercentage}%
                   </span>
                 </div>
-                
+
                 {totalPercentage > 100 ? (
                   <div className="flex justify-between items-center mt-2">
                     <p className="text-sm text-red-600">
-                      {t('total_must_equal_100_percent')}
+                      {t("total_must_equal_100_percent")}
                     </p>
                     <span className="text-xs text-muted-foreground">
                       {getRemainingPercentage()}% {t("remaining")}
                     </span>
                   </div>
-                ) : totalPercentage < 100 && (
-                  <div className="flex justify-between items-center mt-2">
-                    <p className="text-sm text-amber-600">
-                      {t('warning_total_percentage_less_than_100')}
-                    </p>
-                    <span className="text-xs text-muted-foreground">
-                      {getRemainingPercentage()}% {t("remaining")}
-                    </span>
-                  </div>
+                ) : (
+                  totalPercentage < 100 && (
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-sm text-amber-600">
+                        {t("warning_total_percentage_less_than_100")}
+                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {getRemainingPercentage()}% {t("remaining")}
+                      </span>
+                    </div>
+                  )
                 )}
               </div>
             </div>
           </div>
-          
+
           <div className="mt-6 space-y-2">
             {totalPercentage > 100 && (
               <div className="text-red-600 text-sm">
                 {t("error_total_percentage_exceeds_100")} ({totalPercentage}%)
               </div>
             )}
-            <Button 
-              onClick={handleSaveSettings} 
+            <Button
+              onClick={handleSaveSettings}
               disabled={isSaving || isLoading || totalPercentage > 100}
               className="w-full sm:w-auto"
             >
