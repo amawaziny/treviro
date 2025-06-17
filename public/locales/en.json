@@ -578,5 +578,11 @@
   "Income":"Income",
   "Fixed Estimates":"Fixed Estimates",
   "Settings":"Settings",
-  "Monthly Cash Flow Distribution":"Monthly Cash Flow Distribution"
+  "Monthly Cash Flow Distribution":"Monthly Cash Flow Distribution",
+  "investment_allocation":"Investment Allocation",
+  "set_your_monthly_investment_allocation_percentages":"Set your monthly investment allocation percentages",
+  "total_must_equal_100_percent":"Total must equal 100%",
+  "warning_total_percentage_less_than_100":"Warning: Total percentage less than 100%",
+  "remaining":"Remaining",
+  "select_a_month":"Select a month"
 }

@@ -154,12 +154,6 @@ export default function SettingsPage() {
     return Math.max(0, 100 - used);
   };
 
-  const getPercentageColor = (value: number) => {
-    if (value === 0) return 'text-muted-foreground';
-    if (value > 0) return 'text-green-600';
-    return 'text-red-600';
-  };
-
   return (
     <div className="space-y-8">
       <div>
@@ -200,7 +194,7 @@ export default function SettingsPage() {
                   id="financial-year-start-month"
                   className="w-full md:w-[280px]"
                 >
-                  <SelectValue placeholder="Select a month" />
+                  <SelectValue placeholder={t("select_a_month")} />
                 </SelectTrigger>
                 <SelectContent>
                   {months.map((month) => (
@@ -228,7 +222,7 @@ export default function SettingsPage() {
               {Object.entries(investmentPercentages).map(([type, value]) => (
                 <div key={type} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">{type}</label>
+                    <label className="text-sm font-medium">{t(type)}</label>
                     <div className="flex items-center space-x-2">
                       <button
                         type="button"
@@ -283,19 +277,29 @@ export default function SettingsPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">{t('total')}</span>
                   <span className={`text-sm font-medium ${
-                    totalPercentage === 100 ? 'text-green-600' : 'text-red-600'
+                    totalPercentage === 100 ? 'text-green-600' : 
+                    totalPercentage < 100 ? 'text-amber-600' : 'text-red-600'
                   }`}>
                     {totalPercentage}%
                   </span>
                 </div>
                 
-                {totalPercentage !== 100 && (
+                {totalPercentage > 100 ? (
                   <div className="flex justify-between items-center mt-2">
                     <p className="text-sm text-red-600">
                       {t('total_must_equal_100_percent')}
                     </p>
                     <span className="text-xs text-muted-foreground">
-                      {getRemainingPercentage()}% remaining
+                      {getRemainingPercentage()}% {t("remaining")}
+                    </span>
+                  </div>
+                ) : totalPercentage < 100 && (
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-sm text-amber-600">
+                      {t('warning_total_percentage_less_than_100')}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {getRemainingPercentage()}% {t("remaining")}
                     </span>
                   </div>
                 )}
@@ -304,11 +308,6 @@ export default function SettingsPage() {
           </div>
           
           <div className="mt-6 space-y-2">
-            {showWarning && totalPercentage < 100 && (
-              <div className="text-amber-600 text-sm">
-                {t("warning_total_percentage_less_than_100")} ({totalPercentage}%)
-              </div>
-            )}
             {totalPercentage > 100 && (
               <div className="text-red-600 text-sm">
                 {t("error_total_percentage_exceeds_100")} ({totalPercentage}%)

@@ -578,5 +578,11 @@
   "Income": "الدخل",
   "Fixed Estimates": "التقديرات الثابتة",
   "Settings": "الإعدادات",
-  "Monthly Cash Flow Distribution": "توزيع أموال الشهر"
+  "Monthly Cash Flow Distribution": "توزيع أموال الشهر",
+  "investment_allocation":"تخصيص الاستثمار",
+  "set_your_monthly_investment_allocation_percentages":"تخصيص نسب الاستثمار الشهرية",
+  "total_must_equal_100_percent":"إجمالي النسب يجب أن يساوي 100%",
+  "warning_total_percentage_less_than_100":"تحذير: إجمالي النسب أقل من 100%",
+  "remaining":"الباقي",
+  "select_a_month":"اختر شهر"
 }
