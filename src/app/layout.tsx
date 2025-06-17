@@ -9,6 +9,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { FirebaseIntegrations } from "@/components/layout/firebase-integrations";
 import { LanguageProvider } from "@/contexts/language-context";
 import { LanguageInitializer } from "@/components/layout/language-initializer";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,6 +86,7 @@ export default function RootLayout({
             <InvestmentProvider>
               <LanguageProvider>
                 <LanguageInitializer />
+                <PageViewTracker />
                 <SidebarProvider defaultOpen={true}>
                   <FirebaseIntegrations>{children}</FirebaseIntegrations>
                 </SidebarProvider>

@@ -108,6 +108,7 @@ export default function DashboardPage() {
     totalDebtInvestmentThisMonth,
     totalGoldInvestmentThisMonth,
     netCashFlowThisMonth,
+    currentMonthIncome,
   } = calculateMonthlyCashFlowSummary({
     incomeRecords,
     expenseRecords,
@@ -327,7 +328,28 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="flex flex-col md:flex-row gap-4 mb-6 w-full items-stretch">
+            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
+                  {t("total_current_income_this_month")}
+                </CardTitle>
+                <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  <span className="md:hidden">
+                    {formatNumberWithSuffix(currentMonthIncome)}
+                  </span>
+                  <span className="hidden md:inline">
+                    {formatCurrencyWithCommas(currentMonthIncome)}
+                  </span>
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  {t("income_paid_out_by_today")}
+                </p>
+              </CardContent>
+            </Card>
             {/* Total Income Card */}
             <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">

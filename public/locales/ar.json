@@ -585,5 +585,7 @@
   "warning_total_percentage_less_than_100":"تحذير: إجمالي النسب أقل من 100%",
   "remaining":"الباقي",
   "to_invest": "للإستثمار",
-  "select_a_month":"اختر شهر"
+  "select_a_month":"اختر شهر",
+  "total_current_income_this_month":"إجمالي الدخل الحالي هذا الشهر",
+  "income_paid_out_by_today":"إجمالي الدخل المدفوع اليوم"
 }

@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { auth as firebaseAuthService } from "@/lib/firebase"; // Renamed import
+import { auth as firebaseAuthService } from "@/lib/firebase";
+import { trackEvent } from "@/lib/analytics";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -76,132 +77,138 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = useCallback(async () => {
-    if (!firebaseAuthService) {
-      console.error(
-        "AuthContext: Firebase Auth service not available for login.",
-      );
-      setIsProcessingLogin(false);
-      return;
-    }
-    console.log("AuthContext: login function called.");
-    setIsProcessingLogin(true);
-    const provider = new GoogleAuthProvider();
     try {
-      console.log("AuthContext: Attempting signInWithPopup...");
-      const result = await signInWithPopup(firebaseAuthService, provider);
-      // User object is set by onAuthStateChanged
-      console.log(
-        "AuthContext: signInWithPopup successful. User UID:",
-        result.user?.uid,
-      );
-      // Removed router.push('/dashboard'); to let useEffect in LoginPage handle it
-    } catch (error: any) {
-      if (error.code === "auth/popup-closed-by-user") {
-        console.warn(
-          "AuthContext: Google sign-in popup was closed by user or due to an interruption.",
-        );
-      } else if (error.code === "auth/cancelled-popup-request") {
-        console.warn(
-          "AuthContext: Google sign-in popup request cancelled (e.g., multiple popups).",
-        );
-      } else if (error.code === "auth/popup-blocked") {
-        console.warn(
-          "AuthContext: Google sign-in popup blocked by the browser. Consider notifying the user to enable popups.",
-        );
-        // You might want to show a toast or message to the user here.
-      } else {
-        console.error(
-          "AuthContext: An unexpected error occurred during Google sign-in. Code:",
-          error.code,
-          "Message:",
-          error.message,
-        );
-      }
-    } finally {
-      setIsProcessingLogin(false);
-      console.log("AuthContext: isProcessingLogin set to false.");
-    }
-  }, [router]); // Added router to dependency array as it's used in logout
-
-  const logout = useCallback(async () => {
-    if (!firebaseAuthService) {
-      console.error(
-        "AuthContext: Firebase Auth service not available for logout.",
-      );
-      return;
-    }
-    console.log("AuthContext: logout function called.");
-    try {
-      await firebaseSignOut(firebaseAuthService);
-      // setUser(null) will be handled by onAuthStateChanged
-      router.push("/");
-      console.log("AuthContext: Logout successful, navigated to /");
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(firebaseAuthService!, provider);
+      
+      // Track successful login
+      trackEvent('login', {
+        method: 'google',
+        user_id: result.user.uid,
+        email: result.user.email,
+      });
+      
+      router.push("/dashboard");
     } catch (error) {
-      console.error("AuthContext: Error during sign-out:", error);
+      // Track login error
+      trackEvent('login_error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      console.error("Error during login:", error);
+      throw error;
     }
   }, [router]);
 
+  const logout = useCallback(async () => {
+    try {
+      // Track logout event before actually signing out
+      if (user) {
+        trackEvent('logout', {
+          user_id: user.uid,
+          email: user.email,
+        });
+      }
+      
+      await firebaseSignOut(firebaseAuthService!);
+      setUser(null);
+      router.push("/");
+    } catch (error) {
+      trackEvent('logout_error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      console.error("Error during logout:", error);
+      throw error;
+    }
+  }, [router, user]);
+
   const signInWithEmailAndPassword = useCallback(
     async (email: string, password: string) => {
-      if (!firebaseAuthService) {
-        console.error(
-          "AuthContext: Firebase Auth service not available for email sign-in.",
-        );
-        return;
-      }
-      setIsProcessingLogin(true);
       try {
-        await firebaseSignInWithEmailAndPassword(
-          firebaseAuthService,
+        const userCredential = await firebaseSignInWithEmailAndPassword(
+          firebaseAuthService!,
           email,
           password,
         );
-        console.log("AuthContext: Email sign-in successful.");
-      } catch (error: any) {
-        console.error(
-          "AuthContext: Error during email sign-in:",
-          error.message,
-        );
-      } finally {
-        setIsProcessingLogin(false);
+        
+        // Track successful email/password login
+        trackEvent('login', {
+          method: 'email',
+          user_id: userCredential.user.uid,
+          email: userCredential.user.email,
+        });
+        
+        router.push("/dashboard");
+      } catch (error) {
+        // Track login error
+        trackEvent('login_error', {
+          method: 'email',
+          email: email,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        console.error("Error signing in with email/password:", error);
+        throw error;
       }
     },
-    [],
+    [router],
   );
 
   const signUpWithEmailAndPassword = useCallback(
     async (email: string, password: string) => {
-      if (!firebaseAuthService) {
-        console.error(
-          "AuthContext: Firebase Auth service not available for email sign-up.",
-        );
-        return;
-      }
-      setIsProcessingLogin(true);
       try {
-        await firebaseCreateUserWithEmailAndPassword(
-          firebaseAuthService,
+        const userCredential = await firebaseCreateUserWithEmailAndPassword(
+          firebaseAuthService!,
           email,
           password,
         );
-        console.log("AuthContext: Email sign-up successful.");
-      } catch (error: any) {
-        console.error(
-          "AuthContext: Error during email sign-up:",
-          error.message,
-        );
-      } finally {
-        setIsProcessingLogin(false);
+        
+        // Track successful signup
+        trackEvent('signup', {
+          method: 'email',
+          user_id: userCredential.user.uid,
+          email: email,
+        });
+        
+        router.push("/dashboard");
+      } catch (error) {
+        // Track signup error
+        trackEvent('signup_error', {
+          method: 'email',
+          email: email,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        console.error("Error signing up with email/password:", error);
+        throw error;
       }
     },
-    [],
+    [router],
   );
 
   const sendPasswordResetEmail = async (email: string) => {
     if (!firebaseAuthService) {
-      throw new Error("Firebase auth is not initialized");
+      console.error(
+        "AuthContext: Firebase Auth service not available for password reset.",
+      );
+      return;
     }
-    await firebaseSendPasswordResetEmail(firebaseAuthService, email);
+    try {
+      await firebaseSendPasswordResetEmail(firebaseAuthService!, email);
+      
+      // Track password reset email sent
+      trackEvent('password_reset_email_sent', {
+        email: email,
+      });
+      
+      console.log("AuthContext: Password reset email sent successfully.");
+    } catch (error: any) {
+      // Track password reset error
+      trackEvent('password_reset_error', {
+        email: email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      
+      console.error("AuthContext: Error sending password reset email:", error);
+      throw error;
+    }
   };
 
   const isAuthenticated = !!user;
@@ -223,4 +230,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = React.useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

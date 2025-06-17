@@ -585,5 +585,7 @@
   "warning_total_percentage_less_than_100":"Warning: Total percentage less than 100%",
   "remaining":"Remaining",
   "to_invest": "To Invest",
-  "select_a_month":"Select a month"
+  "select_a_month":"Select a month",
+  "total_current_income_this_month":"Total current income this month",
+  "income_paid_out_by_today":"Income paid out by today"
 }
