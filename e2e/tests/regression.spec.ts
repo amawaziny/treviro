@@ -27,15 +27,15 @@ async function login(page: Page) {
   await page.goto('/');
   
   // Wait for the login form to be ready
-  await page.waitForSelector('input[type="email"]');
-  await page.waitForSelector('input[type="password"]');
+  await page.waitForSelector('[data-testid="email-input"]');
+  await page.waitForSelector('[data-testid="password-input"]');
   
-  // Fill in credentials
-  await page.fill('input[type="email"]', TEST_USER.email);
-  await page.fill('input[type="password"]', TEST_USER.password);
+  // Fill in credentials using test IDs
+  await page.fill('[data-testid="email-input"]', TEST_USER.email);
+  await page.fill('[data-testid="password-input"]', TEST_USER.password);
   
-  // Click submit and wait for navigation
-  await page.click('button[type="submit"]');
+  // Click submit using test ID and wait for navigation
+  await page.click('[data-testid="sign-in-button"]');
   
   // Wait for navigation to complete
   await page.waitForURL('/dashboard', { timeout: 30000 });
@@ -65,32 +65,52 @@ test.describe('Regression Tests', () => {
 
     test('Invalid Login', async ({ page }) => {
       await page.goto('/');
-      await page.fill('input[type="email"]', TEST_USER.email);
-      await page.fill('input[type="password"]', 'wrongpassword');
-      await page.click('button[type="submit"]');
       
-      // Wait for error message or navigation
+      // Fill in form with invalid credentials using test IDs
+      await page.fill('[data-testid="email-input"]', TEST_USER.email);
+      await page.fill('[data-testid="password-input"]', 'wrongpassword');
+      await page.click('[data-testid="sign-in-button"]');
+      
+      // Wait for error message to appear
       try {
-        await Promise.race([
-          page.waitForSelector('div.text-red-500.text-sm', { timeout: 5000 }),
-          page.waitForURL('/dashboard', { timeout: 5000 })
-        ]);
+        await page.waitForSelector('[data-testid="error-message"]', { timeout: 5000 });
+        // Verify error message is visible
+        const errorMessage = await page.locator('[data-testid="error-message"]');
+        await expect(errorMessage).toBeVisible();
       } catch (error) {
-        // If neither error nor navigation happens, that's also a failure
-        throw new Error('Invalid login test failed - neither error message nor navigation appeared');
+        throw new Error('Invalid login test failed - error message did not appear');
       }
       
       // Verify we're still on the login page
-      const currentUrl = page.url();
-      expect(currentUrl).not.toContain('/dashboard');
+      await expect(page).not.toHaveURL(/\/dashboard/);
     });
 
-    test('Password Reset', async ({ page }) => {
+    test('Password Reset Flow', async ({ page }) => {
+      // Go to login page
       await page.goto('/');
-      await page.click('button:has-text("Forgot Password")');
-      await page.fill('input[type="email"]', TEST_USER.email);
-      await page.click('button:has-text("Send Reset Link")');
-      await expect(page.locator('text=Password reset email sent')).toBeVisible();
+      
+      // Click forgot password link using test ID
+      await page.click('[data-testid="forgot-password-button"]');
+      
+      // Verify we're on the forgot password page
+      await expect(page.locator('h1')).toContainText('Reset your password');
+      
+      // Fill in email using test ID
+      await page.fill('[data-testid="forgot-password-email"]', TEST_USER.email);
+      
+      // Click send reset link button using test ID
+      await page.click('[data-testid="send-reset-link-button"]');
+      
+      // Wait for success toast to appear
+      await page.waitForSelector('[data-testid="success-toast"]', { timeout: 5000 });
+      
+      // Verify success message is shown
+      const successToast = page.locator('[data-testid="success-toast"]');
+      await expect(successToast).toBeVisible();
+      await expect(successToast).toContainText('Password Reset Email Sent');
+      
+      // Verify we're back on the login page
+      await expect(page.locator('h1')).toContainText('Welcome back');
     });
   });
 

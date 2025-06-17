@@ -135,6 +135,7 @@ export function AuthForm() {
                 <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
+                  data-testid="email-input"
                   type="email"
                   placeholder="name@example.com"
                   value={email}
@@ -151,6 +152,7 @@ export function AuthForm() {
                     <Button
                       type="button"
                       variant="link"
+                      data-testid="forgot-password-button"
                       className="px-0 font-normal"
                       onClick={() => setMode("forgot-password")}
                     >
@@ -161,6 +163,7 @@ export function AuthForm() {
                 <div className="relative">
                   <Input
                     id="password"
+                    data-testid="password-input"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -171,6 +174,7 @@ export function AuthForm() {
                   />
                   <button
                     type="button"
+                    data-testid="toggle-password-visibility"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     tabIndex={-1}
@@ -194,15 +198,24 @@ export function AuthForm() {
                       }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground" data-testid="password-requirement-message">
                     {t("password_must_be_at_least_6_chars")}
                   </p>
                 </>
               )}
-              {error && <div className="text-red-500 text-sm">{error}</div>}
-              <Button type="submit" className="w-full" disabled={showSpinner}>
+              {error && (
+                <div className="text-red-500 text-sm" data-testid="error-message">
+                  {error}
+                </div>
+              )}
+              <Button 
+                type="submit" 
+                data-testid={mode === "sign-in" ? "sign-in-button" : "sign-up-button"}
+                className="w-full" 
+                disabled={showSpinner}
+              >
                 {showSpinner && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" data-testid="loading-spinner" />
                 )}
                 {mode === "sign-in" ? t("sign_in") : t("sign_up")}
               </Button>
@@ -211,7 +224,10 @@ export function AuthForm() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span 
+                    className="bg-background px-2 text-muted-foreground"
+                    data-testid="divider-text"
+                  >
                     {t("or_continue_with")}
                   </span>
                 </div>
@@ -219,6 +235,7 @@ export function AuthForm() {
               <Button
                 type="button"
                 variant="outline"
+                data-testid="google-signin-button"
                 className="w-full"
                 onClick={login}
                 disabled={showSpinner}
@@ -251,6 +268,7 @@ export function AuthForm() {
                   <Button
                     type="button"
                     variant="link"
+                    data-testid="switch-to-signup"
                     className="px-0 font-normal"
                     onClick={() => setMode("sign-up")}
                   >
@@ -263,6 +281,7 @@ export function AuthForm() {
                   <Button
                     type="button"
                     variant="link"
+                    data-testid="switch-to-signin"
                     className="px-0 font-normal"
                     onClick={() => setMode("sign-in")}
                   >

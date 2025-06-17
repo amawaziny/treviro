@@ -7,6 +7,19 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+// Define toast action element type
+type ToastActionElement = React.ReactElement<typeof ToastAction>;
+
+// Extend base toast props with our custom ones
+type ToastComponentProps = {
+  id: string;
+  title?: string;
+  description?: string;
+  action?: ToastActionElement;
+  testId?: string;
+  variant?: "default" | "destructive";
+};
+
 const ToastProvider = ToastPrimitives.Provider;
 
 const ToastViewport = React.forwardRef<
@@ -29,9 +42,8 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
-        destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
+        default: "border bg-background",
+        destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
     },
     defaultVariants: {
@@ -40,15 +52,21 @@ const toastVariants = cva(
   },
 );
 
+interface ToastRootProps extends 
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
+  VariantProps<typeof toastVariants> {
+  testId?: string;
+}
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+  ToastRootProps
+>(({ className, variant, testId, ...props }, ref) => {
   return (
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
+      data-testid={testId}
       {...props}
     />
   );
@@ -112,13 +130,11 @@ const ToastDescription = React.forwardRef<
 ));
 ToastDescription.displayName = ToastPrimitives.Description.displayName;
 
-type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>;
-
-type ToastActionElement = React.ReactElement<typeof ToastAction>;
+// Export types and components
+export type { ToastActionElement };
+export type { ToastComponentProps as ToastProps };
 
 export {
-  type ToastProps,
-  type ToastActionElement,
   ToastProvider,
   ToastViewport,
   Toast,
