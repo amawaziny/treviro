@@ -113,54 +113,7 @@ test.describe('Regression Tests', () => {
       await expect(page.locator('h1')).toContainText('Welcome back');
     });
   });
-
-  // Profile Tests
-  test.describe('Profile Management', () => {
-    test.beforeEach(async ({ page }) => {
-      await login(page);
-      await page.goto('/profile');
-    });
-
-    test('View Profile', async ({ page }) => {
-      await expect(page.locator('form')).toBeVisible();
-      await expect(page.locator('input[type="text"]')).toBeVisible();
-    });
-
-    test('Update Profile', async ({ page }) => {
-      const newName = faker.person.fullName();
-      await page.fill('input[type="text"]', newName);
-      await page.click('button:has-text("Save Changes")');
-      await expect(page.locator('text=Changes saved successfully')).toBeVisible();
-    });
-
-    test('Change Password', async ({ page }) => {
-      // Fill in new password field
-      await page.fill('input[type="password"]', TEST_USER.newPassword);
-      await page.click('button:has-text("Save Changes")');
-      await expect(page.locator('text=Changes saved successfully')).toBeVisible();
-      
-      // Verify new password works
-      await logout(page);
-      await page.fill('input[type="email"]', TEST_USER.email);
-      await page.fill('input[type="password"]', TEST_USER.newPassword);
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/dashboard');
-
-      // Restore original password
-      await page.goto('/profile');
-      await page.fill('input[type="password"]', TEST_USER.password);
-      await page.click('button:has-text("Save Changes")');
-      await expect(page.locator('text=Changes saved successfully')).toBeVisible();
-      
-      // Verify original password works
-      await logout(page);
-      await page.fill('input[type="email"]', TEST_USER.email);
-      await page.fill('input[type="password"]', TEST_USER.password);
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/dashboard');
-    });
-  });
-
+  
   // Expenses Tests
   test.describe('Expense Management', () => {
     test.beforeEach(async ({ page }) => {

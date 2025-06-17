@@ -115,29 +115,33 @@ export default function ProfilePage() {
   if (!user) return <div className="p-8">{t("not_logged_in")}</div>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background" data-testid="profile-page">
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-primary">
+        <h2 className="text-2xl font-bold mb-6 text-center text-primary" data-testid="profile-title">
           {t("user_profile")}
         </h2>
         <div className="flex flex-col items-center mb-6">
-          <Image
-            src={image}
-            alt="Profile"
-            width={96}
-            height={96}
-            className="w-24 h-24 rounded-full border-4 border-primary object-cover mb-2"
-            loader={({ src, width, quality }) => src}
-          />
-
-          <span className="text-lg font-semibold text-foreground">
+          <div data-testid="profile-image-container">
+            <Image
+              src={image}
+              alt="Profile"
+              width={96}
+              height={96}
+              className="w-24 h-24 rounded-full border-4 border-primary object-cover mb-2"
+              loader={({ src, width, quality }) => src}
+              data-testid="profile-image"
+            />
+          </div>
+          <span className="text-lg font-semibold text-foreground" data-testid="profile-name">
             {name || t("no_name")}
           </span>
-          <span className="text-sm text-muted-foreground">{user.email}</span>
+          <span className="text-sm text-muted-foreground" data-testid="profile-email">
+            {user.email}
+          </span>
         </div>
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSave} className="space-y-4" data-testid="profile-form">
           <div>
-            <label className="block font-medium mb-1 text-foreground">
+            <label className="block font-medium mb-1 text-foreground" data-testid="name-label">
               Name
             </label>
             <input
@@ -146,11 +150,12 @@ export default function ProfilePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={currentProviderId === "google.com"}
+              data-testid="name-input"
             />
           </div>
           {currentProviderId === "password" && (
             <div>
-              <label className="block font-medium mb-1 text-foreground">
+              <label className="block font-medium mb-1 text-foreground" data-testid="image-upload-label">
                 {t("upload_profile_image")}
               </label>
               <input
@@ -159,17 +164,17 @@ export default function ProfilePage() {
                 onChange={handleImageUpload}
                 disabled={uploading}
                 className="w-full"
+                data-testid="image-upload-input"
               />
-
               {uploading && (
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground" data-testid="uploading-message">
                   {t("uploading")}
                 </div>
               )}
             </div>
           )}
           <div>
-            <label className="block font-medium mb-1 text-foreground">
+            <label className="block font-medium mb-1 text-foreground" data-testid="image-url-label">
               {t("profile_image_url")}
             </label>
             <input
@@ -178,11 +183,12 @@ export default function ProfilePage() {
               value={image}
               onChange={(e) => setImage(e.target.value)}
               disabled={currentProviderId === "google.com"}
+              data-testid="image-url-input"
             />
           </div>
           {currentProviderId === "password" && (
             <div>
-              <label className="block font-medium mb-1 text-foreground">
+              <label className="block font-medium mb-1 text-foreground" data-testid="password-label">
                 {t("new_password")}
               </label>
               <div className="relative">
@@ -192,12 +198,14 @@ export default function ProfilePage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Leave blank to keep current password"
+                  data-testid="password-input"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   tabIndex={-1}
+                  data-testid="password-toggle-button"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -208,16 +216,25 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-          {error && <div className="text-red-500 text-sm">{error}</div>}
-          {success && <div className="text-green-600 text-sm">{success}</div>}
-          {currentProviderId !== "google.com" && (
-            <button
-              type="submit"
-              className="w-full bg-primary text-white py-2 rounded font-semibold hover:bg-primary-dark transition"
-              disabled={loading || currentProviderId === "google.com"}
-            >
-              {loading ? t("saving") : t("save_changes")}
-            </button>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            data-testid="save-button"
+          >
+            {loading ? t("saving") : t("save_changes")}
+          </button>
+          
+          {error && (
+            <div className="text-red-500 text-sm mt-2" data-testid="error-message">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="text-green-500 text-sm mt-2" data-testid="success-message">
+              {success}
+            </div>
           )}
         </form>
       </div>
