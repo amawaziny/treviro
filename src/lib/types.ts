@@ -288,6 +288,11 @@ export interface AggregatedDebtHolding {
   logoUrl?: string;
 }
 
+export interface InvestmentTypePercentages {
+  [key: string]: number; // Key is InvestmentType, value is percentage (0-100)
+}
+
 export interface AppSettings {
   financialYearStartMonth?: number;
+  investmentTypePercentages?: InvestmentTypePercentages;
 }

@@ -1,8 +1,10 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useInvestments } from "@/hooks/use-investments";
+import type { InvestmentType, AppSettings } from "@/lib/types";
+
+type InvestmentPercentage = Record<InvestmentType, number>;
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,9 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import type { AppSettings } from "@/lib/types";
+import { Loader2, Plus, Minus } from "lucide-react";
 
 export default function SettingsPage() {
   const { t, language } = useLanguage();
@@ -31,10 +33,35 @@ export default function SettingsPage() {
     isLoading: isLoadingContext,
   } = useInvestments();
   const { toast } = useToast();
-  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
-    undefined,
-  );
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
+  const [investmentPercentages, setInvestmentPercentages] = useState<InvestmentPercentage>({
+    'Real Estate': 30,
+    'Stocks': 25,
+    'Debt Instruments': 20,
+    'Currencies': 10,
+    'Gold': 15,
+  });
+  const [totalPercentage, setTotalPercentage] = useState(0);
+
+  // Calculate total percentage whenever investmentPercentages changes
+  useEffect(() => {
+    const total = Object.values(investmentPercentages).reduce(
+      (sum, value) => sum + (Number(value) || 0),
+      0
+    );
+    setTotalPercentage(Math.round(total * 100) / 100); // Round to 2 decimal places
+  }, [investmentPercentages]);
+
+  // Load saved investment percentages
+  useEffect(() => {
+    if (appSettings?.investmentTypePercentages) {
+      setInvestmentPercentages(prev => ({
+        ...prev,
+        ...appSettings.investmentTypePercentages,
+      }));
+    }
+  }, [appSettings?.investmentTypePercentages]);
 
   const months = [
     { value: 1, label: t("January") },
@@ -68,11 +95,29 @@ export default function SettingsPage() {
       });
       return;
     }
+
+    if (totalPercentage !== 100) {
+      toast({
+        title: t("error"),
+        description: t("total_investment_percentages_must_equal_100"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const newSettings: Partial<AppSettings> = {
         financialYearStartMonth: parseInt(selectedMonth, 10),
+        investmentTypePercentages: {
+          'Real Estate': investmentPercentages['Real Estate'] || 0,
+          'Gold': investmentPercentages['Gold'] || 0,
+          'Stocks': investmentPercentages['Stocks'] || 0,
+          'Debt Instruments': investmentPercentages['Debt Instruments'] || 0,
+          'Currencies': investmentPercentages['Currencies'] || 0,
+        }
       };
+      
       await updateAppSettings(newSettings);
       toast({
         title: t("settings_saved"),
@@ -90,6 +135,29 @@ export default function SettingsPage() {
   };
 
   const isLoading = isLoadingContext && selectedMonth === undefined;
+
+  const handlePercentageChange = (type: InvestmentType, value: number) => {
+    // Calculate the difference to distribute
+    const currentTotal = Object.values(investmentPercentages).reduce((sum, v) => sum + v, 0);
+    const remaining = 100 - (currentTotal - investmentPercentages[type]);
+    const newValue = Math.max(0, Math.min(remaining, value));
+    
+    setInvestmentPercentages(prev => ({
+      ...prev,
+      [type]: newValue
+    }));
+  };
+
+  const getRemainingPercentage = () => {
+    const used = Object.values(investmentPercentages).reduce((sum, v) => sum + v, 0);
+    return Math.max(0, 100 - used);
+  };
+
+  const getPercentageColor = (value: number) => {
+    if (value === 0) return 'text-muted-foreground';
+    if (value > 0) return 'text-green-600';
+    return 'text-red-600';
+  };
 
   return (
     <div className="space-y-8">
@@ -147,13 +215,103 @@ export default function SettingsPage() {
             </div>
           )}
 
-          <Button onClick={handleSaveSettings} disabled={isSaving || isLoading}>
+          <div className="space-y-6 pt-6">
+            <div>
+              <h3 className="text-lg font-medium">{t('investment_allocation')}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t('set_your_monthly_investment_allocation_percentages')}
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              {Object.entries(investmentPercentages).map(([type, value]) => (
+                <div key={type} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">{type}</label>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newValue = Math.max(0, value - 1);
+                          handlePercentageChange(type as InvestmentType, newValue);
+                        }}
+                        disabled={value <= 0}
+                        className="p-1 rounded-full hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={`Decrease ${type} percentage`}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={value}
+                        onChange={(e) => {
+                          const newValue = parseInt(e.target.value, 10) || 0;
+                          handlePercentageChange(type as InvestmentType, newValue);
+                        }}
+                        className="w-16 px-2 py-1 text-sm border rounded text-center"
+                        aria-label={`${type} percentage`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newValue = value + 1;
+                          handlePercentageChange(type as InvestmentType, newValue);
+                        }}
+                        disabled={getRemainingPercentage() <= 0}
+                        className="p-1 rounded-full hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={`Increase ${type} percentage`}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[value]}
+                    onValueChange={([val]) => handlePercentageChange(type as InvestmentType, val)}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="py-4"
+                  />
+                </div>
+              ))}
+              
+              <div className="pt-2 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">{t('total')}</span>
+                  <span className={`text-sm font-medium ${
+                    totalPercentage === 100 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {totalPercentage}%
+                  </span>
+                </div>
+                
+                {totalPercentage !== 100 && (
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-sm text-red-600">
+                      {t('total_must_equal_100_percent')}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {getRemainingPercentage()}% remaining
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <Button 
+            onClick={handleSaveSettings} 
+            disabled={isSaving || isLoading || totalPercentage !== 100}
+            className="mt-6"
+          >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t("save_settings")}
           </Button>
         </CardContent>
       </Card>
-      {/* Future settings sections can be added here */}
     </div>
   );
 }
