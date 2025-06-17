@@ -8,6 +8,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updateProfile, updatePassword } from "firebase/auth";
 import Image from "next/image";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ProfilePage() {
   const { t } = useLanguage();
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [image, setImage] = useState<string>("/default-avatar.png");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -183,13 +185,27 @@ export default function ProfilePage() {
               <label className="block font-medium mb-1 text-foreground">
                 {t("new_password")}
               </label>
-              <input
-                type="password"
-                className="w-full border rounded px-3 py-2 bg-background text-foreground"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Leave blank to keep current password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="w-full border rounded px-3 py-2 bg-background text-foreground pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Leave blank to keep current password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
           )}
           {error && <div className="text-red-500 text-sm">{error}</div>}
