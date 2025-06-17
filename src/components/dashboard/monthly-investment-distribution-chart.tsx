@@ -45,9 +45,11 @@ export function MonthlyInvestmentDistributionChart() {
     });
   }, [investments, isLoading, monthStart, monthEnd]);
 
-  // Use the cashFlowSummary for exact breakdown matching the cash flow card (now only actual paid real estate installments)
+  // Use the cashFlowSummary for exact breakdown matching the cash flow card
   const chartData = React.useMemo(() => {
     const data = [];
+    
+    // Add investment categories
     if (cashFlowSummary.totalStockInvestmentThisMonth > 0) {
       data.push({
         id: "Stocks",
@@ -88,12 +90,30 @@ export function MonthlyInvestmentDistributionChart() {
         color: resolvedTheme === "dark" ? "#7bb661" : "#b6d037",
       });
     }
+
+    // Add combined expenses
+    const totalExpenses = 
+      (cashFlowSummary.livingExpensesMonthly || 0) +
+      (cashFlowSummary.zakatFixedMonthly || 0) +
+      (cashFlowSummary.charityFixedMonthly || 0) +
+      (cashFlowSummary.otherFixedExpensesMonthly || 0) +
+      (cashFlowSummary.totalItemizedExpensesThisMonth || 0);
+      
+    if (totalExpenses > 0) {
+      data.push({
+        id: "Expenses",
+        label: t("expenses"),
+        value: totalExpenses,
+        color: resolvedTheme === "dark" ? "#9ca3af" : "#6b7280",
+      });
+    }
+    
     return data;
-  }, [cashFlowSummary, realEstateInstallmentsMonthly, resolvedTheme]);
+  }, [cashFlowSummary, realEstateInstallmentsMonthly, resolvedTheme, t]);
 
   return (
     <InvestmentDistributionCard
-      title={t("Monthly Investment Distribution")}
+      title={t("Monthly Cash Flow Distribution")}
       chartData={chartData}
       total={chartData.reduce((total, item) => total + item.value, 0)}
     />
