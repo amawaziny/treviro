@@ -43,6 +43,7 @@ export default function SettingsPage() {
     'Gold': 15,
   });
   const [totalPercentage, setTotalPercentage] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
 
   // Calculate total percentage whenever investmentPercentages changes
   useEffect(() => {
@@ -50,7 +51,9 @@ export default function SettingsPage() {
       (sum, value) => sum + (Number(value) || 0),
       0
     );
-    setTotalPercentage(Math.round(total * 100) / 100); // Round to 2 decimal places
+    const roundedTotal = Math.round(total * 100) / 100;
+    setTotalPercentage(roundedTotal);
+    setShowWarning(roundedTotal < 100);
   }, [investmentPercentages]);
 
   // Load saved investment percentages
@@ -96,10 +99,10 @@ export default function SettingsPage() {
       return;
     }
 
-    if (totalPercentage !== 100) {
+    if (totalPercentage > 100) {
       toast({
         title: t("error"),
-        description: t("total_investment_percentages_must_equal_100"),
+        description: t("total_investment_percentages_cannot_exceed_100"),
         variant: "destructive",
       });
       return;
@@ -137,10 +140,8 @@ export default function SettingsPage() {
   const isLoading = isLoadingContext && selectedMonth === undefined;
 
   const handlePercentageChange = (type: InvestmentType, value: number) => {
-    // Calculate the difference to distribute
-    const currentTotal = Object.values(investmentPercentages).reduce((sum, v) => sum + v, 0);
-    const remaining = 100 - (currentTotal - investmentPercentages[type]);
-    const newValue = Math.max(0, Math.min(remaining, value));
+    // Allow any value between 0 and 100 for the specific field
+    const newValue = Math.max(0, Math.min(100, value));
     
     setInvestmentPercentages(prev => ({
       ...prev,
@@ -250,7 +251,7 @@ export default function SettingsPage() {
                           const newValue = parseInt(e.target.value, 10) || 0;
                           handlePercentageChange(type as InvestmentType, newValue);
                         }}
-                        className="w-16 px-2 py-1 text-sm border rounded text-center"
+                        className="w-16 px-2 py-1 text-sm border bg-transparent rounded text-center"
                         aria-label={`${type} percentage`}
                       />
                       <button
@@ -302,14 +303,26 @@ export default function SettingsPage() {
             </div>
           </div>
           
-          <Button 
-            onClick={handleSaveSettings} 
-            disabled={isSaving || isLoading || totalPercentage !== 100}
-            className="mt-6"
-          >
-            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t("save_settings")}
-          </Button>
+          <div className="mt-6 space-y-2">
+            {showWarning && totalPercentage < 100 && (
+              <div className="text-amber-600 text-sm">
+                {t("warning_total_percentage_less_than_100")} ({totalPercentage}%)
+              </div>
+            )}
+            {totalPercentage > 100 && (
+              <div className="text-red-600 text-sm">
+                {t("error_total_percentage_exceeds_100")} ({totalPercentage}%)
+              </div>
+            )}
+            <Button 
+              onClick={handleSaveSettings} 
+              disabled={isSaving || isLoading || totalPercentage > 100}
+              className="w-full sm:w-auto"
+            >
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("save_settings")}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
