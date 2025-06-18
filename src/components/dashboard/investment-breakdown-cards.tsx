@@ -133,7 +133,7 @@ export function InvestmentBreakdownCards({
         return (
           <Card
             key={type}
-            className={`flex flex-col justify-between shadow-md bg-[#f8fafc] dark:bg-[#23255a] p-4 min-h-[160px] rounded-xl border-0 relative`}
+            className={`flex flex-col justify-between shadow-md bg-[#f8fafc] dark:bg-[#23255a] p-4 min-h-[150px] rounded-xl border-0 relative`}
             style={{
               borderLeft: `8px solid ${
                 investmentTypeColors[
