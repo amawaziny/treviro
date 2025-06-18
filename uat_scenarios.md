@@ -168,6 +168,137 @@
      - Net cash flow calculated
      - Updates in real-time
 
+## Expenses Management
+
+### Adding Expenses
+
+1. **Navigate to Add Expense Page**
+
+   - **Scenario**: User accesses the expense creation form
+   - **Steps**:
+     1. Go to expenses page
+     2. Click "Add Expense" button
+   - **Expected**: Add expense form is displayed
+   - **Validation**:
+     - URL updates to /expenses/add
+     - Form is visible with all required fields
+     - Form has correct test IDs for automation
+
+2. **Add New Expense**
+
+   - **Scenario**: User adds a regular expense
+   - **Steps**:
+     1. Open add expense form
+     2. Select category
+     3. Enter description
+     4. Input amount
+     5. Set date
+     6. Submit form
+   - **Expected**: Expense is saved successfully
+   - **Validation**:
+     - Success toast appears
+     - Form is submitted
+     - User is redirected to expenses list
+
+3. **Add Installment Expense**
+
+   - **Scenario**: User adds an installment-based expense
+   - **Steps**:
+     1. Open add expense form
+     2. Select "Credit Card" category
+     3. Toggle installment option
+     4. Enter number of installments
+     5. Fill other required fields
+     6. Submit form
+   - **Expected**: Installment expense is created
+   - **Validation**:
+     - Success message shown
+     - Installment plan is saved
+     - All installments are created
+
+### Form Validation
+
+1. **Required Fields Validation**
+
+   - **Scenario**: User submits empty form
+   - **Steps**:
+     1. Open add expense form
+     2. Click submit without filling fields
+   - **Expected**: Validation errors appear
+   - **Validation**:
+     - Error for amount field
+     - Form is not submitted
+
+2. **Invalid Amount Validation**
+
+   - **Scenario**: User enters invalid amount
+   - **Steps**:
+     1. Open add expense form
+     2. Enter "0" in amount field
+     3. Submit form
+   - **Expected**: Specific error message appears
+   - **Validation**:
+     - "Amount cannot be less than 1" error shown
+     - Form is not submitted
+
+3. **Missing Installment Details**
+
+   - **Scenario**: User selects installment without details
+   - **Steps**:
+     1. Open add expense form
+     2. Select "Credit Card" category
+     3. Check installment option
+     4. Don't enter installments
+     5. Submit form
+   - **Expected**: Installment validation error
+   - **Validation**:
+     - "Number of months is required" error shown
+     - Form is not submitted
+
+### Managing Expenses
+
+1. **Edit Existing Expense**
+
+   - **Scenario**: User modifies an expense
+   - **Steps**:
+     1. Go to expenses list
+     2. Find and click edit on an expense
+     3. Update description
+     4. Save changes
+   - **Expected**: Expense is updated
+   - **Validation**:
+     - Success message appears
+     - Changes are saved
+     - Updated info appears in list
+
+2. **Delete Expense**
+
+   - **Scenario**: User removes an expense
+   - **Steps**:
+     1. Go to expenses list
+     2. Click delete on an expense
+     3. Confirm deletion
+   - **Expected**: Expense is removed
+   - **Validation**:
+     - Confirmation dialog appears
+     - Success message shown
+     - Expense disappears from list
+
+### Filtering Expenses
+
+1. **Toggle Expense Filters**
+
+   - **Scenario**: User filters expense list
+   - **Steps**:
+     1. Go to expenses page
+     2. Toggle "Show All" switch
+     3. Toggle "Show Ended" switch
+   - **Expected**: List updates based on filters
+   - **Validation**:
+     - Toggle states change correctly
+     - List filters accordingly
+     - UI updates to reflect changes
+
 ## Global Features
 
 ### Multi-language Support
