@@ -58,16 +58,20 @@ test.describe("Expenses Management", () => {
     await page.waitForSelector('[data-testid="expense-form"]');
 
     // Fill out the form using test IDs
-    await page.getByTestId('category-select').click();
-    await page.getByRole('option', { name: TEST_EXPENSE.category, exact: true }).click();
+    await page.getByTestId("category-select").click();
+    await page
+      .getByRole("option", { name: TEST_EXPENSE.category, exact: true })
+      .click();
 
-    await page.getByTestId('description-input').fill(TEST_EXPENSE.description);
-    await page.getByTestId('amount-input').fill(TEST_EXPENSE.amount);
-    await page.getByTestId('date-input').fill(TEST_EXPENSE.date);
+    await page.getByTestId("description-input").fill(TEST_EXPENSE.description);
+    await page.getByTestId("amount-input").fill(TEST_EXPENSE.amount);
+    await page.getByTestId("date-input").fill(TEST_EXPENSE.date);
 
     // Toggle installment
-    await page.getByTestId('installment-checkbox').click();
-    await page.getByTestId('installments-input').fill(TEST_EXPENSE.numberOfInstallments);
+    await page.getByTestId("installment-checkbox").click();
+    await page
+      .getByTestId("installments-input")
+      .fill(TEST_EXPENSE.numberOfInstallments);
 
     // Submit the form
     await page.getByTestId("submit-button").click();
@@ -85,17 +89,19 @@ test.describe("Expenses Management", () => {
     await page.getByTestId("submit-button").click();
 
     // Verify validation errors
-    await expect(page.getByText('Must be a valid number')).toBeVisible();
+    await expect(page.getByText("Must be a valid number")).toBeVisible();
 
     // Fill with invalid data
-    await page.getByTestId('amount-input').fill("0");
-    await page.getByTestId('submit-button').click();
-    await expect(page.getByText('Amount cannot be less than 1')).toBeVisible();
+    await page.getByTestId("amount-input").fill("0");
+    await page.getByTestId("submit-button").click();
+    await expect(page.getByText("Amount cannot be less than 1")).toBeVisible();
 
     // Toggle installment but don't provide number of installments
-    await page.getByTestId('category-select').click();
-    await page.getByRole('option', { name: "Credit Card", exact: true }).click();
-    await page.getByTestId('installment-checkbox').click();
+    await page.getByTestId("category-select").click();
+    await page
+      .getByRole("option", { name: "Credit Card", exact: true })
+      .click();
+    await page.getByTestId("installment-checkbox").click();
     await page.getByTestId("submit-button").click();
     await expect(
       page.getByText("Number of months is required for installment plans"),
@@ -108,12 +114,14 @@ test.describe("Expenses Management", () => {
     await page.waitForSelector('[data-testid="expense-form"]');
 
     // Fill out and submit the form
-    await page.getByTestId('category-select').click();
-    await page.getByRole('option', { name: TEST_EXPENSE.category, exact: true }).click();
-    await page.getByTestId('description-input').fill(TEST_EXPENSE.description);
-    await page.getByTestId('amount-input').fill(TEST_EXPENSE.amount);
-    await page.getByTestId('date-input').fill(TEST_EXPENSE.date);
-    await page.getByTestId('submit-button').click();
+    await page.getByTestId("category-select").click();
+    await page
+      .getByRole("option", { name: TEST_EXPENSE.category, exact: true })
+      .click();
+    await page.getByTestId("description-input").fill(TEST_EXPENSE.description);
+    await page.getByTestId("amount-input").fill(TEST_EXPENSE.amount);
+    await page.getByTestId("date-input").fill(TEST_EXPENSE.date);
+    await page.getByTestId("submit-button").click();
 
     // Get the ID of the created expense
     await page.waitForURL(/.*\/expenses/);

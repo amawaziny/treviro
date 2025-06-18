@@ -1,8 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format } from "date-fns";
-import { ar } from 'date-fns/locale/ar';
-import { enUS } from 'date-fns/locale/en-US';
+import { ar } from "date-fns/locale/ar";
+import { enUS } from "date-fns/locale/en-US";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -73,10 +73,13 @@ export function formatNumberWithSuffix(
  * Formats a date as 'Month YYYY' (e.g., 'June 2025').
  * Accepts either a Date object or a date string.
  */
-export function formatMonthYear(date: Date | string, language: string = "en"): string {
+export function formatMonthYear(
+  date: Date | string,
+  language: string = "en",
+): string {
   const d = typeof date === "string" ? new Date(date) : date;
   if (isNaN(d.getTime())) return "";
-  return format(d, "MMMM yyyy", { locale: language == 'ar'? ar : enUS });
+  return format(d, "MMMM yyyy", { locale: language == "ar" ? ar : enUS });
 }
 
 export const formatDateDisplay = (dateString?: string) => {

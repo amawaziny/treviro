@@ -337,20 +337,16 @@ export default function MyDebtInstrumentsPage() {
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {t("direct")}
-                {formatCurrencyWithCommas(
+                {`${t("direct")}: ${formatCurrencyWithCommas(
                   totalDirectDebtInvested,
                   debtFundHoldings[0]?.currency,
-                )}
-                )
+                )}`}
               </span>
               <span>
-                {t("funds")}{" "}
-                {formatCurrencyWithCommas(
+                {`${t("funds")}: ${formatCurrencyWithCommas(
                   totalDebtFundCost,
                   debtFundHoldings[0]?.currency,
-                )}
-                )
+                )}`}
               </span>
             </div>
           </div>
@@ -360,15 +356,12 @@ export default function MyDebtInstrumentsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Landmark className="mr-2 h-4 w-4 text-primary" />
+            <Landmark className="me-2 h-4 w-4 text-primary" />
             {t("direct_debt_instruments")}
           </CardTitle>
           <CardDescription>
-            {t(
-              "bonds_certificates_treasury_bills_you_own_directly_projected_interest",
-            )}
-            {formatCurrencyWithCommas(totalProjectedAnnualInterest)}{" "}
-            {t("annually")}
+            <p>{`${t("bonds_certificates_treasury_bills_you_own_directly")}`}</p>
+            {`${t("projected_interest")}: ${formatCurrencyWithCommas(totalProjectedAnnualInterest)} ${t("annually")}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -51,7 +51,7 @@ export function BottomTabBar() {
           onClick={() => setMenuOpen(true)}
         >
           <span className="text-lg">☰</span>
-          Menu
+          {t("Menu")}
         </button>
       </nav>
       {/* Spacer to prevent content from being hidden behind the tab bar */}
