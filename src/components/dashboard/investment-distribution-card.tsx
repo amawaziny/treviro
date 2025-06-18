@@ -55,7 +55,7 @@ export function InvestmentDistributionCard({
   onCheckboxChange: onControlledCheckboxChange,
   isEmpty: controlledIsEmpty = false,
 }: InvestmentDistributionCardProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -137,8 +137,8 @@ export function InvestmentDistributionCard({
         <div className="relative mx-auto h-[300px] max-w-full overflow-hidden">
           <ResponsivePie
             data={chartToRender}
-            margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
-            innerRadius={0.5}
+            margin={{ top: 60, right: 60, bottom: 60, left: 60 }}
+            innerRadius={0.6}
             padAngle={4}
             cornerRadius={8}
             activeOuterRadiusOffset={3}
@@ -148,14 +148,14 @@ export function InvestmentDistributionCard({
             enableArcLinkLabels={!isEmpty}
             arcLinkLabelsTextColor={(d) => d.color}
             arcLinkLabelsSkipAngle={2}
-            arcLinkLabelsDiagonalLength={5}
-            arcLinkLabelsStraightLength={5}
-            arcLinkLabelsThickness={4}
+            arcLinkLabelsDiagonalLength={10}
+            arcLinkLabelsStraightLength={0}
+            arcLinkLabelsThickness={2}
             arcLinkLabelsColor={{ from: "color" }}
             arcLinkLabel={(d) =>
               `${d.label} ${((d.value / (isEmpty ? 1 : total)) * 100).toFixed(0)}%`
             }
-            arcLinkLabelsTextOffset={10}
+            arcLinkLabelsTextOffset={language == "ar" ? 60 : 2}
             tooltip={({ datum }) => (
               <div
                 className="text-xs sm:text-[11px]"

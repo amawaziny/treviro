@@ -52,7 +52,7 @@ export function Header() {
               )}
             </div>
           ) : (
-            <Link href="/dashboard" className="flex items-center space-x-2">
+            <Link href="/dashboard" className="flex items-center justify-start gap-2">
               <Coins className="h-7 w-7 text-primary" />
               <span className="text-2xl font-bold text-primary">
                 {t("app_name")}
@@ -61,8 +61,8 @@ export function Header() {
           )}
         </div>
         {showNavControls && (
-          <div className="flex flex-1 items-center justify-end space-x-4">
-            <nav className="flex items-center space-x-1">
+          <div className="flex flex-1 items-center justify-end">
+            <nav className="flex items-center gap-2">
               <LanguageToggle />
               <ThemeToggle />
               <UserNav />

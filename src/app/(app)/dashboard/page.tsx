@@ -22,6 +22,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Banknote,
+  Building
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
@@ -184,7 +185,7 @@ export default function DashboardPage() {
 
       <div className="flex justify-end mb-4">
         <Button
-          variant="secondary"
+          variant="outline"
           size="sm"
           onClick={async () => {
             await recalculateDashboardSummary();
@@ -194,6 +195,7 @@ export default function DashboardPage() {
             });
           }}
         >
+          <Building className="h-4 w-4" />
           {t("recalculate_summary")}
         </Button>
       </div>

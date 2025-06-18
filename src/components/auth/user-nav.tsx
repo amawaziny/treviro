@@ -76,16 +76,16 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/profile">
-              <UserCircle className="mr-2 h-4 w-4" />
+          <DropdownMenuItem asChild dir="auto">
+            <Link href="/profile" dir="auto">
+              <UserCircle className="me-2 h-4 w-4" />
               <span>{t("profile")}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          <LogOut className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={logout} dir="auto">
+          <LogOut className="me-2 h-4 w-4" />
           <span>{t("log_out")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
