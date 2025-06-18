@@ -45,132 +45,74 @@
      - Email received with reset link
      - Reset link works correctly
 
-## Profile Page
+## Profile Management
 
-### Profile Management
+### Profile Information
 
-1. **View Profile**
+1. **View Profile Information**
 
-   - **Scenario**: User views their profile information
+   - **Scenario**: User views their profile details
    - **Steps**:
      1. Navigate to profile page
-     2. View profile details
-   - **Expected**: All profile information displayed correctly
+     2. View profile section
+   - **Expected**: Profile information displayed correctly
    - **Validation**:
-     - Name displayed correctly
-     - Profile picture shown
-     - All fields populated
+     - Profile title is visible
+     - Profile image is displayed
+     - User name is shown
+     - Email matches logged-in user's email
+     - Name input field is visible
 
-2. **Update Profile**
+2. **Update Profile Name**
 
-   - **Scenario**: User updates profile information
+   - **Scenario**: User updates their display name
    - **Steps**:
      1. Navigate to profile page
-     2. Edit name
-     3. Update profile picture
-     4. Save changes
-   - **Expected**: Profile updated successfully
+     2. Enter new name in name input
+     3. Click save button
+   - **Expected**: Name updated successfully
    - **Validation**:
-     - Changes saved
-     - Success message shown
-     - New information displayed
+     - Success message appears
+     - New name persists after page refresh
+     - Profile header shows updated name
 
-3. **Change Password**
-   - **Scenario**: User changes their password
+3. **Toggle Password Visibility**
+
+   - **Scenario**: User toggles password visibility
+   - **Steps**:
+     1. Navigate to profile page (for password users)
+     2. Locate password field
+     3. Click visibility toggle
+   - **Expected**: Password visibility changes
+   - **Validation**:
+     - Password is hidden by default (type="password")
+     - Toggle shows password (type="text")
+     - Toggle hides password again
+
+4. **Profile Save Loading State**
+
+   - **Scenario**: User saves profile changes
    - **Steps**:
      1. Navigate to profile page
-     2. Enter current password
-     3. Enter new password
-     4. Confirm new password
-     5. Save changes
-   - **Expected**: Password changed successfully
+     2. Make a change
+     3. Click save button
+   - **Expected**: Proper loading state during save
    - **Validation**:
-     - Success message shown
-     - Can login with new password
-     - Cannot login with old password
+     - Save button is disabled during save
+     - Button re-enables after save completes
+     - No form interaction during save
 
-## Expenses Page
-
-### Expense Tracking
-
-1. **Add New Expense**
-
-   - **Scenario**: User adds a new expense
+5. **Profile Image Upload**
+   - **Scenario**: User uploads a new profile image
    - **Steps**:
-     1. Navigate to expenses page
-     2. Click "Add Expense"
-     3. Select category
-     4. Enter amount
-     5. Enter date
-     6. Add description (optional)
-     7. Submit form
-   - **Expected**: Expense added successfully
+     1. Navigate to profile page
+     2. Click to upload image
+     3. Select image file
+   - **Expected**: Image upload starts
    - **Validation**:
-     - Success message shown
-     - Expense appears in list
-     - Total expenses updated
-     - Category totals updated
-
-2. **Add Installment Expense**
-
-   - **Scenario**: User adds a credit card installment expense
-   - **Steps**:
-     1. Navigate to expenses page
-     2. Click "Add Expense"
-     3. Select "Credit Card" category
-     4. Check "Is Installment" checkbox
-     5. Enter total amount
-     6. Enter number of installments
-     7. Submit form
-   - **Expected**: Installment expense added
-   - **Validation**:
-     - Success message shown
-     - Installment plan created
-     - Monthly amounts calculated correctly
-     - Payment schedule displayed
-
-3. **Edit Expense**
-
-   - **Scenario**: User edits an existing expense
-   - **Steps**:
-     1. Navigate to expenses page
-     2. Find expense to edit
-     3. Click edit button
-     4. Modify details
-     5. Save changes
-   - **Expected**: Expense updated successfully
-   - **Validation**:
-     - Success message shown
-     - Changes reflected in list
-     - Totals recalculated
-     - History maintained
-
-4. **Delete Expense**
-
-   - **Scenario**: User deletes an expense
-   - **Steps**:
-     1. Navigate to expenses page
-     2. Find expense to delete
-     3. Click delete button
-     4. Confirm deletion
-   - **Expected**: Expense deleted successfully
-   - **Validation**:
-     - Success message shown
-     - Expense removed from list
-     - Totals recalculated
-     - History updated
-
-5. **Filter Expenses**
-   - **Scenario**: User filters expense list
-   - **Steps**:
-     1. Navigate to expenses page
-     2. Toggle "Show All" switch
-     3. Toggle "Show Ended" switch
-   - **Expected**: List filtered correctly
-   - **Validation**:
-     - Correct expenses shown
-     - Totals updated
-     - Filters persist
+     - Upload status message appears
+     - File input accepts images
+     - Progress feedback shown during upload
 
 ## Dashboard Page
 
