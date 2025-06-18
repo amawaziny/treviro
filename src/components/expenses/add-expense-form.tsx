@@ -166,8 +166,11 @@ export function AddExpenseForm({
                   // required // Zod schema handles required
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("select_expense_category")} />
+                    <SelectTrigger data-testid="category-select">
+                      <SelectValue
+                        placeholder={t("select_expense_category")}
+                        data-testid="category-value"
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -191,6 +194,7 @@ export function AddExpenseForm({
                 <FormLabel>{t("amount_egp")}</FormLabel>
                 <FormControl>
                   <NumericInput
+                    data-testid="amount-input"
                     placeholder={t(
                       "e.g., 500.00 or 3000.00 for total installment",
                     )}
@@ -201,6 +205,7 @@ export function AddExpenseForm({
                     } // ensure value is always a string
                     onChange={field.onChange} // RHF onChange expects string or number
                     allowDecimal={true}
+                    min={1}
                   />
                 </FormControl>
                 <FormMessage />
@@ -217,8 +222,10 @@ export function AddExpenseForm({
                 <FormControl>
                   <Input
                     type="date"
-                    {...field}
-                    value={field.value || getCurrentDate()}
+                    data-testid="date-input"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    max={getCurrentDate()}
                   />
                 </FormControl>
                 <FormMessage />
@@ -234,6 +241,7 @@ export function AddExpenseForm({
                 <FormLabel>{t("description_optional")}</FormLabel>
                 <FormControl>
                   <Textarea
+                    data-testid="description-input"
                     placeholder={t(
                       "e.g., Monthly electricity bill, New TV (installment)",
                     )}
@@ -255,13 +263,10 @@ export function AddExpenseForm({
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
                     <FormControl>
                       <Checkbox
+                        id="isInstallment"
+                        data-testid="installment-checkbox"
                         checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          if (!checked) {
-                            form.setValue("numberOfInstallments", 0);
-                          }
-                        }}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -283,12 +288,13 @@ export function AddExpenseForm({
                           data-testid="installments-input"
                           placeholder="e.g., 3, 6, 12"
                           value={
-                            field.value !== undefined
-                              ? field.value.toString()
-                              : ""
-                          } // always pass string to NumericInput
-                          onChange={field.onChange} // RHF onChange expects string or number
+                            field.value === undefined || field.value === null
+                              ? ""
+                              : String(field.value)
+                          }
+                          onChange={field.onChange}
                           allowDecimal={false}
+                          min={1}
                         />
                       </FormControl>
                       <FormMessage data-testid="installments-error" />

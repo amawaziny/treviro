@@ -42,7 +42,7 @@ const stringToRequiredNonNegativeNumberCoerced = z.preprocess(
   (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : val),
   z
     .number({ invalid_type_error: "Must be a valid number." })
-    .min(0, { message: "Amount cannot be negative." }),
+    .min(1, { message: "Amount cannot be less than 1." }),
 );
 
 // For optional fields that must be positive numbers if provided
@@ -298,6 +298,7 @@ export const AddExpenseSchema = z
             .positive({
               message: "Number of months must be a positive whole number.",
             })
+            .min(1, { message: "Number of months must be greater than 0." })
             .optional(),
         ),
     ),
