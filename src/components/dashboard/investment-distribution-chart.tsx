@@ -66,7 +66,7 @@ export function InvestmentDistributionChart() {
     });
 
     return data;
-  }, [investments, isLoading, resolvedTheme]);
+  }, [investments, isLoading, resolvedTheme, t]);
 
   return (
     <InvestmentDistributionCard

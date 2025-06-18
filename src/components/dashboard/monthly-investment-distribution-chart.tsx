@@ -97,7 +97,7 @@ export function MonthlyInvestmentDistributionChart() {
     }
 
     return data;
-  }, [cashFlowSummary, resolvedTheme]);
+  }, [cashFlowSummary, isLoading, resolvedTheme, t]);
 
   return (
     <InvestmentDistributionCard
