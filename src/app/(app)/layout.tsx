@@ -28,6 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { language } = useLanguage(); // Added to get current language
   const isMobile = useIsMobile();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -40,7 +41,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Coins className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading Treviro...</p>
+          <p className="text-muted-foreground">{t("loading")}</p>
         </div>
       </div>
     );
@@ -67,6 +68,7 @@ function FormAwareLayout({
   const { isFormOpen } = useForm();
   const { setOpenMobile } = useSidebar(); // This comes from @/components/ui/sidebar
   const isDetailsPage = useIsDetailsPage();
+  const { t } = useLanguage();
 
   // Close sidebar and bottom tabs when form is open or on details page
   React.useEffect(() => {
@@ -89,7 +91,7 @@ function FormAwareLayout({
             <Link href="/dashboard" className="flex items-center gap-2">
               <Coins className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">
-                Treviro
+                {t("Treviro")}
               </span>
             </Link>
           </SidebarHeader>

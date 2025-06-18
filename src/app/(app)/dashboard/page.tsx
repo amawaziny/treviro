@@ -329,7 +329,7 @@ export default function DashboardPage() {
                 <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                <p className="text-2xl font-medium text-green-700 dark:text-green-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(currentMonthIncome)}
                   </span>
