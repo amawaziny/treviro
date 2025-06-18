@@ -588,5 +588,6 @@
   "total_current_income_this_month": "إجمالي الدخل الحالي هذا الشهر",
   "income_paid_out_by_today": "إجمالي الدخل المدفوع اليوم",
   "invalid_image_url_format": "تنسيق عنوان الصورة غير صالح",
-  "currencies": "العملات"
+  "currencies": "العملات",
+  "For":"ل"
 }

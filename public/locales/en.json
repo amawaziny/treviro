@@ -588,5 +588,6 @@
   "total_current_income_this_month": "Total current income this month",
   "income_paid_out_by_today": "Income paid out by today",
   "invalid_image_url_format": "Invalid image URL format",
-  "currencies": "Currencies"
+  "currencies": "Currencies",
+  "For":"For"
 }

@@ -153,10 +153,10 @@ export function InvestmentBreakdownCards({
                       ] || "#a6c037",
                   }}
                 >
-                  <Icon className="h-7 w-7 text-[#23255a] dark:text-white" />
+                  <Icon className="h-4 w-4 text-[#23255a] dark:text-white" />
                 </span>
                 <span
-                  className="text-lg md:text-xl font-bold flex-1 text-[#23255a] dark:text-white truncate"
+                  className="text-md font-bold flex-1 text-[#23255a] dark:text-white truncate"
                   title={type}
                 >
                   {t(type)}
@@ -176,7 +176,7 @@ export function InvestmentBreakdownCards({
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
                     {t("invested")}
                   </div>
-                  <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
+                  <div className="font-bold text-md text-[#23255a] dark:text-white truncate">
                     {formatNumberWithSuffix(invested)}
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export function InvestmentBreakdownCards({
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
                     {t("current")}
                   </div>
-                  <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
+                  <div className="font-bold text-md text-[#23255a] dark:text-white truncate">
                     {formatNumberWithSuffix(current)}
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export function InvestmentBreakdownCards({
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
                     {t("of_portfolio")}
                   </div>
-                  <div className="font-bold text-lg md:text-xl text-[#23255a] dark:text-white truncate">
+                  <div className="font-bold text-md text-[#23255a] dark:text-white truncate">
                     {percent.toFixed(1)}%
                   </div>
                 </div>
@@ -200,7 +200,7 @@ export function InvestmentBreakdownCards({
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
                     {t("to_invest")}
                   </div>
-                  <div className="font-bold text-lg md:text-xl text-green-600 dark:text-green-400 truncate flex items-center">
+                  <div className="font-bold text-md text-green-600 dark:text-green-400 truncate flex items-center">
                     <Plus className="h-4 w-4 mr-1" />
                     {formatNumberWithSuffix(
                       Math.max(
@@ -220,7 +220,7 @@ export function InvestmentBreakdownCards({
                     {t("pl")}
                   </div>
                   <div
-                    className={`font-bold text-lg md:text-xl ${
+                    className={`font-bold text-lg ${
                       plAmount >= 0
                         ? "text-green-700 dark:text-green-400"
                         : "text-red-700 dark:text-red-400"

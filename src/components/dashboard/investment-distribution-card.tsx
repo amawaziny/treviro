@@ -176,7 +176,7 @@ export function InvestmentDistributionCard({
               labels: {
                 text: {
                   fontSize: 11,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fill: resolvedTheme === "dark" ? "#fff" : "#23255a",
                   textShadow:
                     resolvedTheme === "dark"
@@ -205,8 +205,8 @@ export function InvestmentDistributionCard({
                       textAnchor="middle"
                       dominantBaseline="central"
                       style={{
-                        fontSize: 24,
-                        fontWeight: 700,
+                        fontSize: 16,
+                        fontWeight: 600,
                         fill: resolvedTheme === "dark" ? "#fff" : "#23255a",
                         opacity: isEmpty ? 0.7 : 1,
                       }}

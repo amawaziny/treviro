@@ -306,8 +306,7 @@ export default function DashboardPage() {
             <div>
               <CardTitle>{t("monthly_cash_flow_summary")}</CardTitle>
               <CardDescription>
-                For {formatMonthYear(new Date())}
-                {t("includes_current_months_new_investments")}
+                {`${t("For")} ${formatMonthYear(new Date(), language)} ${t("includes_current_months_new_investments")}`}
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
