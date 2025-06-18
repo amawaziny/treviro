@@ -58,8 +58,7 @@ function AddInvestmentPageContent() {
     const securityId = searchParams.get("securityId");
     // Get the investment type from URL parameters
     const investmentType =
-      searchParams.get("type") ||
-      (securityId ? t("buy_security") : "investment");
+      searchParams.get("type") || (securityId ? "Buy Security" : "investment");
 
     // Map investment types to their display configurations
     const typeConfigs = {
@@ -73,22 +72,22 @@ function AddInvestmentPageContent() {
         backHref: "/investments/gold",
         backLabel: t("back_to_gold"),
       },
-      [t("debtinstruments")]: {
+      ["debt-instruments"]: {
         title: t("buy_debt_instrument"),
         backHref: "/investments/debt-instruments",
         backLabel: t("back_to_debt_instruments"),
       },
-      [t("realestate")]: {
+      ["real-estate"]: {
         title: t("add_real_estate"),
         backHref: "/investments/real-estate",
         backLabel: t("back_to_real_estate"),
       },
-      currencies: {
+      ["currencies"]: {
         title: t("add_currency"),
         backHref: "/investments/currencies",
         backLabel: t("back_to_currencies"),
       },
-      [t("buysecurity")]: {
+      ["buy-security"]: {
         title: `Buy ${securityId}`,
         backHref: `/securities/details/${securityId}`,
         backLabel: t("back_to_buy_security"),

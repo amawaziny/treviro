@@ -22,7 +22,7 @@ export function FirebaseIntegrations({
 
       logEvent(analytics, "page_view", {
         page_path: url,
-        page_title: document.title // You can also log the page title if desired
+        page_title: document.title, // You can also log the page title if desired
       });
       // console.log(`Logged page_view: ${url}`);
     }

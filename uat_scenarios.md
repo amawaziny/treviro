@@ -3,7 +3,9 @@
 ## Login Page
 
 ### Authentication
+
 1. **Valid Login**
+
    - **Scenario**: User logs in with valid credentials
    - **Steps**:
      1. Navigate to login page
@@ -17,6 +19,7 @@
      - Loading state appears during authentication
 
 2. **Invalid Login**
+
    - **Scenario**: User attempts login with invalid credentials
    - **Steps**:
      1. Navigate to login page
@@ -45,7 +48,9 @@
 ## Profile Page
 
 ### Profile Management
+
 1. **View Profile**
+
    - **Scenario**: User views their profile information
    - **Steps**:
      1. Navigate to profile page
@@ -57,6 +62,7 @@
      - All fields populated
 
 2. **Update Profile**
+
    - **Scenario**: User updates profile information
    - **Steps**:
      1. Navigate to profile page
@@ -86,7 +92,9 @@
 ## Expenses Page
 
 ### Expense Tracking
+
 1. **Add New Expense**
+
    - **Scenario**: User adds a new expense
    - **Steps**:
      1. Navigate to expenses page
@@ -104,6 +112,7 @@
      - Category totals updated
 
 2. **Add Installment Expense**
+
    - **Scenario**: User adds a credit card installment expense
    - **Steps**:
      1. Navigate to expenses page
@@ -121,6 +130,7 @@
      - Payment schedule displayed
 
 3. **Edit Expense**
+
    - **Scenario**: User edits an existing expense
    - **Steps**:
      1. Navigate to expenses page
@@ -136,6 +146,7 @@
      - History maintained
 
 4. **Delete Expense**
+
    - **Scenario**: User deletes an expense
    - **Steps**:
      1. Navigate to expenses page
@@ -164,7 +175,9 @@
 ## Dashboard Page
 
 ### Financial Overview
+
 1. **View Total Investment**
+
    - **Scenario**: User views total investment amount
    - **Steps**:
      1. Navigate to dashboard
@@ -176,6 +189,7 @@
      - Updates in real-time
 
 2. **View Portfolio Allocation**
+
    - **Scenario**: User views investment distribution
    - **Steps**:
      1. Navigate to dashboard
@@ -188,6 +202,7 @@
      - Updates in real-time
 
 3. **View Asset Types**
+
    - **Scenario**: User views asset type distribution
    - **Steps**:
      1. Navigate to dashboard
@@ -214,6 +229,7 @@
 ## Global Features
 
 ### Multi-language Support
+
 1. **Change Language**
    - **Scenario**: User changes application language
    - **Steps**:
@@ -227,7 +243,9 @@
      - Currency format updated
 
 ### Mobile Responsiveness
+
 1. **Mobile View**
+
    - **Scenario**: User accesses on mobile device
    - **Steps**:
      1. Open application on mobile
@@ -252,6 +270,7 @@
      - No layout breaks
 
 ## Test Environment Requirements
+
 - Test user account with known credentials
 - Test data for all investment types
 - Mobile device or emulator
@@ -260,6 +279,7 @@
 - Offline mode capability
 
 ## Test Data Requirements
+
 - Sample expenses in different categories
 - Installment plans
 - Different investment types
@@ -267,10 +287,11 @@
 - Various date ranges
 
 ## Notes
+
 - Run tests in both English and Arabic
 - Test on multiple devices and screen sizes
 - Verify all calculations
 - Check error handling
 - Validate data persistence
 - Test offline functionality
-- Verify real-time updates 
+- Verify real-time updates

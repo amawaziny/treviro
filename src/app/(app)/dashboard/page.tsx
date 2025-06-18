@@ -19,27 +19,16 @@ import {
   Wallet,
   Coins,
   Briefcase,
-  LineChart as LucideLineChart,
   ArrowRight,
+  ArrowLeft,
   Banknote,
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
-import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import type {
-  DebtInstrumentInvestment,
-  ExpenseRecord,
-  FixedEstimateRecord,
-  IncomeRecord,
-  Investment as InvestmentType,
-  Transaction,
-  ListedSecurity,
   StockInvestment,
   GoldInvestment,
   CurrencyInvestment,
-  RealEstateInvestment,
-  GoldMarketPrices,
-  ExchangeRates,
 } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -57,7 +46,9 @@ import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 
 export default function DashboardPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
+
   const {
     dashboardSummary,
     isLoading: isLoadingDashboardSummaryContext,
@@ -183,7 +174,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Dashboard
+          {t("Dashboard")}
         </h1>
         <p className="text-muted-foreground text-sm">
           {t("overview_of_your_investment_portfolio_and_monthly_cash_flow")}
@@ -322,7 +313,7 @@ export default function DashboardPage() {
             <Button variant="outline" size="sm" asChild>
               <Link href="/cash-flow">
                 {t("view_full_details")}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ForwardArrowIcon className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>

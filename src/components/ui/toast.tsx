@@ -43,7 +43,8 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "border bg-background",
-        destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        destructive:
+          "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
     },
     defaultVariants: {
@@ -52,9 +53,9 @@ const toastVariants = cva(
   },
 );
 
-interface ToastRootProps extends 
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
-  VariantProps<typeof toastVariants> {
+interface ToastRootProps
+  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
+    VariantProps<typeof toastVariants> {
   testId?: string;
 }
 

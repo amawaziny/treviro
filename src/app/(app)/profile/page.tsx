@@ -15,7 +15,9 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const [name, setName] = useState("");
   const [image, setImage] = useState<string>("/default-avatar.png");
-  const [displayImage, setDisplayImage] = useState<string>("/default-avatar.png");
+  const [displayImage, setDisplayImage] = useState<string>(
+    "/default-avatar.png",
+  );
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,9 @@ export default function ProfilePage() {
       if (
         user.photoURL &&
         typeof user.photoURL === "string" &&
-        (user.photoURL.startsWith("http") || user.photoURL.startsWith("/") || user.photoURL.startsWith("data:image/"))
+        (user.photoURL.startsWith("http") ||
+          user.photoURL.startsWith("/") ||
+          user.photoURL.startsWith("data:image/"))
       ) {
         setImage(user.photoURL);
         setDisplayImage(user.photoURL);
@@ -92,17 +96,17 @@ export default function ProfilePage() {
     try {
       // Basic URL validation
       if (!url) return true; // Allow empty URL (will use default)
-      
+
       // Check if it's a data URL
-      if (url.startsWith('data:image/')) {
+      if (url.startsWith("data:image/")) {
         return true;
       }
-      
+
       // Check if it's a relative path
-      if (url.startsWith('/')) {
+      if (url.startsWith("/")) {
         return true;
       }
-      
+
       // Check if it's a valid URL
       new URL(url);
       return url.match(/\.(jpeg|jpg|gif|png|svg|webp)$/) !== null;
@@ -116,7 +120,7 @@ export default function ProfilePage() {
     if (url && !validateUrl(url)) {
       setUrlError(t("invalid_image_url_format"));
       // Keep the previous valid image if the new one is invalid
-      setDisplayImage(prev => prev || "/default-avatar.png");
+      setDisplayImage((prev) => prev || "/default-avatar.png");
     } else {
       setUrlError("");
       setDisplayImage(url || "/default-avatar.png");
@@ -125,13 +129,13 @@ export default function ProfilePage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate URL before saving
     if (image && !validateUrl(image)) {
       setUrlError(t("invalid_image_url_format"));
       return;
     }
-    
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -163,9 +167,15 @@ export default function ProfilePage() {
   if (!user) return <div className="p-8">{t("not_logged_in")}</div>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background" data-testid="profile-page">
+    <div
+      className="min-h-screen flex items-center justify-center bg-background"
+      data-testid="profile-page"
+    >
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-primary" data-testid="profile-title">
+        <h2
+          className="text-2xl font-bold mb-6 text-center text-primary"
+          data-testid="profile-title"
+        >
           {t("user_profile")}
         </h2>
         <div className="flex flex-col items-center mb-6">
@@ -181,21 +191,34 @@ export default function ProfilePage() {
                 data-testid="profile-image"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = '/default-avatar.png';
+                  target.src = "/default-avatar.png";
                 }}
               />
             </div>
           </div>
-          <span className="text-lg font-semibold text-foreground" data-testid="profile-name">
+          <span
+            className="text-lg font-semibold text-foreground"
+            data-testid="profile-name"
+          >
             {name || t("no_name")}
           </span>
-          <span className="text-sm text-muted-foreground" data-testid="profile-email">
+          <span
+            className="text-sm text-muted-foreground"
+            data-testid="profile-email"
+          >
             {user.email}
           </span>
         </div>
-        <form onSubmit={handleSave} className="space-y-4" data-testid="profile-form">
+        <form
+          onSubmit={handleSave}
+          className="space-y-4"
+          data-testid="profile-form"
+        >
           <div>
-            <label className="block font-medium mb-1 text-foreground" data-testid="name-label">
+            <label
+              className="block font-medium mb-1 text-foreground"
+              data-testid="name-label"
+            >
               Name
             </label>
             <input
@@ -209,7 +232,10 @@ export default function ProfilePage() {
           </div>
           {currentProviderId === "password" && (
             <div>
-              <label className="block font-medium mb-1 text-foreground" data-testid="image-upload-label">
+              <label
+                className="block font-medium mb-1 text-foreground"
+                data-testid="image-upload-label"
+              >
                 {t("upload_profile_image")}
               </label>
               <input
@@ -221,14 +247,20 @@ export default function ProfilePage() {
                 data-testid="image-upload-input"
               />
               {uploading && (
-                <div className="text-sm text-muted-foreground" data-testid="uploading-message">
+                <div
+                  className="text-sm text-muted-foreground"
+                  data-testid="uploading-message"
+                >
                   {t("uploading")}
                 </div>
               )}
             </div>
           )}
           <div>
-            <label className="block font-medium mb-1 text-foreground" data-testid="image-url-label">
+            <label
+              className="block font-medium mb-1 text-foreground"
+              data-testid="image-url-label"
+            >
               {t("profile_image_url")}
             </label>
             <input
@@ -238,18 +270,24 @@ export default function ProfilePage() {
               disabled={currentProviderId === "google.com"}
               data-testid="image-url-input"
               className={`w-full border rounded px-3 py-2 bg-background text-foreground ${
-                urlError ? 'border-red-500' : ''
+                urlError ? "border-red-500" : ""
               }`}
             />
             {urlError && (
-              <p className="mt-1 text-sm text-red-500" data-testid="url-error-message">
+              <p
+                className="mt-1 text-sm text-red-500"
+                data-testid="url-error-message"
+              >
                 {urlError}
               </p>
             )}
           </div>
           {currentProviderId === "password" && (
             <div>
-              <label className="block font-medium mb-1 text-foreground" data-testid="password-label">
+              <label
+                className="block font-medium mb-1 text-foreground"
+                data-testid="password-label"
+              >
                 {t("new_password")}
               </label>
               <div className="relative">
@@ -277,7 +315,7 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-          
+
           <button
             type="submit"
             disabled={loading}
@@ -286,14 +324,20 @@ export default function ProfilePage() {
           >
             {loading ? t("saving") : t("save_changes")}
           </button>
-          
+
           {error && (
-            <div className="text-red-500 text-sm mt-2" data-testid="error-message">
+            <div
+              className="text-red-500 text-sm mt-2"
+              data-testid="error-message"
+            >
               {error}
             </div>
           )}
           {success && (
-            <div className="text-green-500 text-sm mt-2" data-testid="success-message">
+            <div
+              className="text-green-500 text-sm mt-2"
+              data-testid="success-message"
+            >
               {success}
             </div>
           )}

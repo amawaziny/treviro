@@ -36,8 +36,8 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       toast({
         title: t("password_reset_email_sent"),
         description: t("check_email_for_instructions"),
-        testId: 'success-toast',
-        variant: 'default'
+        testId: "success-toast",
+        variant: "default",
       });
       onBack();
     } catch (error: any) {
@@ -45,7 +45,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
         title: t("error"),
         description: error.message || t("failed_to_send_reset_email"),
         variant: "destructive",
-        testId: 'error-toast'
+        testId: "error-toast",
       });
     } finally {
       setIsLoading(false);
@@ -84,13 +84,18 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
                   required
                 />
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 data-testid="send-reset-link-button"
-                className="w-full" 
+                className="w-full"
                 disabled={isLoading}
               >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" data-testid="loading-spinner" />}
+                {isLoading && (
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    data-testid="loading-spinner"
+                  />
+                )}
                 {t("send_reset_link")}
               </Button>
               <Button

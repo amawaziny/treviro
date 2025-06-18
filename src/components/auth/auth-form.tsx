@@ -198,24 +198,35 @@ export function AuthForm() {
                       }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground" data-testid="password-requirement-message">
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-testid="password-requirement-message"
+                  >
                     {t("password_must_be_at_least_6_chars")}
                   </p>
                 </>
               )}
               {error && (
-                <div className="text-red-500 text-sm" data-testid="error-message">
+                <div
+                  className="text-red-500 text-sm"
+                  data-testid="error-message"
+                >
                   {error}
                 </div>
               )}
-              <Button 
-                type="submit" 
-                data-testid={mode === "sign-in" ? "sign-in-button" : "sign-up-button"}
-                className="w-full" 
+              <Button
+                type="submit"
+                data-testid={
+                  mode === "sign-in" ? "sign-in-button" : "sign-up-button"
+                }
+                className="w-full"
                 disabled={showSpinner}
               >
                 {showSpinner && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" data-testid="loading-spinner" />
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    data-testid="loading-spinner"
+                  />
                 )}
                 {mode === "sign-in" ? t("sign_in") : t("sign_up")}
               </Button>
@@ -224,7 +235,7 @@ export function AuthForm() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span 
+                  <span
                     className="bg-background px-2 text-muted-foreground"
                     data-testid="divider-text"
                   >

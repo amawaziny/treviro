@@ -7,6 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 import { formatNumberWithSuffix } from "@/lib/utils";
 
+const INVESTMENT_ORDER = [
+  "Real Estate",
+  "Gold",
+  "Stocks",
+  "Debt Instruments",
+  "Currencies",
+];
+
+// Create default checked items object
+const DEFAULT_CHECKED_ITEMS = INVESTMENT_ORDER.reduce(
+  (acc, type) => ({
+    ...acc,
+    [type]: true,
+  }),
+  {},
+);
+
 interface InvestmentDistributionCardProps {
   title: string;
   chartData: Array<{
@@ -34,7 +51,7 @@ export function InvestmentDistributionCard({
   allChartData,
   total,
   checkedItems: controlledCheckedItems,
-  defaultCheckedItems = {},
+  defaultCheckedItems = DEFAULT_CHECKED_ITEMS,
   onCheckboxChange: onControlledCheckboxChange,
   isEmpty: controlledIsEmpty = false,
 }: InvestmentDistributionCardProps) {

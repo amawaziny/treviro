@@ -33,7 +33,6 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { format } from "date-fns";
 import type { ExpenseRecord } from "@/lib/types";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
@@ -126,6 +125,7 @@ export function AddExpenseForm({
       toast({
         title: t("expense_record_added"),
         description: `${values.category} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
+        testId: "success-toast",
       });
       form.reset(initialFormValues);
       router.push("/expenses");
@@ -135,6 +135,7 @@ export function AddExpenseForm({
         title: t("failed_to_add_expense"),
         description: error.message || t("could_not_save_the_expense_record"),
         variant: "destructive",
+        testId: "error-toast",
       });
     }
   }
@@ -142,6 +143,7 @@ export function AddExpenseForm({
   return (
     <Form {...form}>
       <form
+        data-testid="expense-form"
         onSubmit={form.handleSubmit(onSubmit ? onSubmit : handleInternalSubmit)}
         className="space-y-8"
       >
@@ -278,6 +280,7 @@ export function AddExpenseForm({
                       <FormLabel>{t("number_of_months")}</FormLabel>
                       <FormControl>
                         <NumericInput
+                          data-testid="installments-input"
                           placeholder="e.g., 3, 6, 12"
                           value={
                             field.value !== undefined
@@ -288,7 +291,7 @@ export function AddExpenseForm({
                           allowDecimal={false}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage data-testid="installments-error" />
                     </FormItem>
                   )}
                 />
@@ -297,11 +300,21 @@ export function AddExpenseForm({
           )}
         </div>
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+          data-testid="submit-button"
+        >
           {form.formState.isSubmitting && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2
+              className="mr-2 h-4 w-4 animate-spin"
+              data-testid="loading-spinner"
+            />
           )}
-          {isEditMode ? t("update_expense_record") : t("add_expense_record")}
+          <span data-testid="submit-button-text">
+            {isEditMode ? t("update_expense") : t("add_expense")}
+          </span>
         </Button>
       </form>
     </Form>

@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
@@ -37,9 +36,6 @@ export default function EditIncomePage({
   if (!income) {
     return notFound();
   }
-
-  const { language } = useLanguage();
-  const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   React.useEffect(() => {
     // Open form when component mounts

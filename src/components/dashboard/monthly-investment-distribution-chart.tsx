@@ -7,25 +7,6 @@ import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";
 
-// Define the order and default checked state for the chart items
-const CHART_ITEMS_ORDER = [
-  "Stocks",
-  "Gold",
-  "Debt instruments",
-  "Currencies",
-  "Real Estate",
-  "Expenses",
-];
-
-// Create default checked items object
-const DEFAULT_CHECKED_ITEMS = CHART_ITEMS_ORDER.reduce(
-  (acc, type) => ({
-    ...acc,
-    [type]: true,
-  }),
-  {},
-);
-
 export function MonthlyInvestmentDistributionChart() {
   const { t } = useLanguage();
   const { investments, isLoading } = useInvestments();
@@ -49,7 +30,12 @@ export function MonthlyInvestmentDistributionChart() {
 
   // Use the cashFlowSummary for exact breakdown matching the cash flow card
   const chartData = React.useMemo(() => {
-    const data = [];
+    const data: Array<{
+      id: string;
+      label: string;
+      value: number;
+      color: string;
+    }> = [];
 
     // Add investment categories
     if (cashFlowSummary.totalStockInvestmentThisMonth > 0) {
@@ -119,7 +105,6 @@ export function MonthlyInvestmentDistributionChart() {
       chartData={chartData}
       allChartData={chartData}
       total={chartData.reduce((total, item) => total + item.value, 0)}
-      defaultCheckedItems={DEFAULT_CHECKED_ITEMS}
       isEmpty={isLoading || investments.length === 0}
     />
   );

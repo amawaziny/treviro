@@ -64,11 +64,16 @@ export default function EditExpensePage({
   }, [setHeaderProps, closeForm, openForm]);
 
   return (
-    <div className="container mx-auto py-4 space-y-6">
-      <Card>
+    <div
+      className="container mx-auto py-4 space-y-6"
+      data-testid="edit-expense-page"
+    >
+      <Card data-testid="expense-form-card">
         <CardHeader>
-          <CardTitle>{t("edit_expense_record")}</CardTitle>
-          <CardDescription>
+          <CardTitle data-testid="page-title">
+            {t("edit_expense_record")}
+          </CardTitle>
+          <CardDescription data-testid="page-description">
             {t(
               "update_your_expense_details_such_as_installments_credit_card_payments_subscriptions_or_other_spending",
             )}
@@ -98,7 +103,7 @@ export default function EditExpensePage({
               });
               router.push("/expenses");
             }}
-            isEditMode
+            isEditMode={true}
           />
         </CardContent>
       </Card>

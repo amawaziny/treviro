@@ -66,11 +66,11 @@ export function InvestmentBreakdownCards({
   // Calculate target and remaining investments for each type
   const totalCashBalance = dashboardSummary?.totalCashBalance || 0;
   const allocationPercentages = appSettings?.investmentTypePercentages || {
-    "Real Estate": 0,
-    Gold: 0,
-    Stocks: 0,
-    "Debt Instruments": 0,
-    Currencies: 0,
+    "Real Estate": 30,
+    Stocks: 25,
+    "Debt Instruments": 20,
+    Currencies: 10,
+    Gold: 15,
   };
 
   // Group by type and calculate current month's investments
@@ -159,7 +159,7 @@ export function InvestmentBreakdownCards({
                   className="text-lg md:text-xl font-bold flex-1 text-[#23255a] dark:text-white truncate"
                   title={type}
                 >
-                  {type}
+                  {t(type)}
                 </span>
                 <Badge className={`text-xs px-2 py-1 bg-green-600 text-white`}>
                   {plAmount >= 0 ? (

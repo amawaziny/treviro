@@ -189,12 +189,21 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+    <div
+      className="space-y-8 relative min-h-[calc(100vh-10rem)]"
+      data-testid="expenses-page"
+    >
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+        <h1
+          className="text-xl font-bold tracking-tight text-foreground"
+          data-testid="page-title"
+        >
           {t("expenses_management")}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p
+          className="text-muted-foreground text-sm"
+          data-testid="page-subtitle"
+        >
           {t(
             "log_and_manage_all_your_itemized_expenses_including_credit_card_payments_and_utility_bills",
           )}
@@ -209,6 +218,7 @@ export default function ExpensesPage() {
             checked={showAll}
             onCheckedChange={setShowAll}
             id="show-all-switch"
+            data-testid="show-all-toggle"
           />
 
           <span>{t("show_all_expenses")}</span>
@@ -218,6 +228,7 @@ export default function ExpensesPage() {
             checked={showEnded}
             onCheckedChange={setShowEnded}
             id="show-ended-switch"
+            data-testid="show-ended-toggle"
           />
 
           <span>{t("show_endedold_expenses")}</span>
@@ -255,13 +266,14 @@ export default function ExpensesPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 mt-8">
+          <div className="grid gap-4 mt-8" data-testid="expenses-list">
             {filteredExpenses.map((record) => (
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
                 className={
                   record._isRequiredThisMonth ? "border-yellow-300" : ""
                 }
+                data-testid={`expense-card-${record.id}`}
               >
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
@@ -391,6 +403,7 @@ export default function ExpensesPage() {
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new expense record"
+          data-testid="add-expense-button"
         >
           <Plus className="h-7 w-7" />
         </Button>
