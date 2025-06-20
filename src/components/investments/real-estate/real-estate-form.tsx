@@ -102,7 +102,8 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("property_type")}</FormLabel>
-                <Select dir={dir}
+                <Select
+                  dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
@@ -216,7 +217,8 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("installment_frequency")}</FormLabel>
-                <Select dir={dir}
+                <Select
+                  dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >

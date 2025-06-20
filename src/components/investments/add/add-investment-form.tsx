@@ -156,7 +156,8 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("gold_type")}</FormLabel>
-              <Select dir={dir}
+              <Select
+                dir={dir}
                 onValueChange={field.onChange}
                 value={field.value || ""}
                 required
@@ -235,7 +236,8 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
             <FormItem>
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
-                <Input dir={dir}
+                <Input
+                  dir={dir}
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -355,7 +357,8 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             <FormItem>
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
-                <Input dir={dir}
+                <Input
+                  dir={dir}
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -406,7 +409,8 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>{t("select_security_stock_or_fund")}</FormLabel>
-                <Select dir={dir}
+                <Select
+                  dir={dir}
                   onValueChange={(value) => {
                     field.onChange(value);
                     onSecuritySelect(value);
@@ -540,7 +544,8 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             <FormItem>
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
-                <Input dir={dir}
+                <Input
+                  dir={dir}
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -562,7 +567,7 @@ interface RenderDebtFieldsProps {
   watch: any;
 }
 const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
-  const { t, dir} = useLanguage();
+  const { t, dir } = useLanguage();
   const { control, setValue, watch } =
     useReactHookFormContext<AddInvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
@@ -587,7 +592,8 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("specific_debt_type")}</FormLabel>
-              <Select dir={dir}
+              <Select
+                dir={dir}
                 onValueChange={field.onChange}
                 value={field.value || ""}
                 required
@@ -661,7 +667,12 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             <FormItem>
               <FormLabel>{t("maturity_date")}</FormLabel>
               <FormControl>
-                <Input type="date" dir={dir} {...field} value={field.value || ""} />
+                <Input
+                  type="date"
+                  dir={dir}
+                  {...field}
+                  value={field.value || ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -698,7 +709,8 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("certificate_interest_frequency")}</FormLabel>
-                <Select dir={dir}
+                <Select
+                  dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
                 >
@@ -730,7 +742,8 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               <FormItem>
                 <FormLabel>{t("purchase_date")}</FormLabel>
                 <FormControl>
-                  <Input dir={dir}
+                  <Input
+                    dir={dir}
                     type="date"
                     {...field}
                     value={field.value || getCurrentDate()}
@@ -1294,134 +1307,140 @@ export function AddInvestmentForm({
   );
 
   const RenderGeneralFields = React.memo(() => {
-    const {dir} = useLanguage();
-  
-  return  <>
-      {!isDedicatedDebtMode &&
-        !isDedicatedGoldMode &&
-        !isDedicatedCurrencyMode &&
-        !isDedicatedRealEstateMode &&
-        !isPreSelectedStockMode &&
-        !(mode === "edit" && effectiveSelectedType === t("real_estate")) && (
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("investment_type")}</FormLabel>
-                <Select dir={dir}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    const currentValues = form.getValues();
-                    form.reset({
-                      ...initialFormValuesByType[value as InvestmentType],
-                      type: value as InvestmentType,
-                      purchaseDate:
-                        currentValues.purchaseDate || getCurrentDate(),
-                    } as AddInvestmentFormValues);
-                    setPreSelectedSecurityDetails(null);
-                  }}
-                  value={field.value || ""}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={t("select_an_investment_type")}
+    const { dir } = useLanguage();
+
+    return (
+      <>
+        {!isDedicatedDebtMode &&
+          !isDedicatedGoldMode &&
+          !isDedicatedCurrencyMode &&
+          !isDedicatedRealEstateMode &&
+          !isPreSelectedStockMode &&
+          !(mode === "edit" && effectiveSelectedType === t("real_estate")) && (
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("investment_type")}</FormLabel>
+                  <Select
+                    dir={dir}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      const currentValues = form.getValues();
+                      form.reset({
+                        ...initialFormValuesByType[value as InvestmentType],
+                        type: value as InvestmentType,
+                        purchaseDate:
+                          currentValues.purchaseDate || getCurrentDate(),
+                      } as AddInvestmentFormValues);
+                      setPreSelectedSecurityDetails(null);
+                    }}
+                    value={field.value || ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t("select_an_investment_type")}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {investmentTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+        {!isDedicatedDebtMode &&
+          !isDedicatedGoldMode &&
+          !isDedicatedCurrencyMode &&
+          !isDedicatedRealEstateMode &&
+          effectiveSelectedType &&
+          effectiveSelectedType !== "Stocks" &&
+          effectiveSelectedType !== "Debt Instruments" &&
+          !(mode === "edit" && effectiveSelectedType === "Real Estate") && (
+            <div className="space-y-6 md:col-span-2 mt-6 p-6 border rounded-md">
+              <h3 className="text-lg font-medium text-primary">
+                {effectiveSelectedType} {t("Details")}
+              </h3>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("name_description_optional")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("e.g., Savings Goal, Vacation Fund")}
+                        {...field}
+                        value={field.value || ""}
                       />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {investmentTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      {!isDedicatedDebtMode &&
-        !isDedicatedGoldMode &&
-        !isDedicatedCurrencyMode &&
-        !isDedicatedRealEstateMode &&
-        effectiveSelectedType &&
-        effectiveSelectedType !== "Stocks" &&
-        effectiveSelectedType !== "Debt Instruments" &&
-        !(mode === "edit" && effectiveSelectedType === "Real Estate") && (
-          <div className="space-y-6 md:col-span-2 mt-6 p-6 border rounded-md">
-            <h3 className="text-lg font-medium text-primary">
-              {effectiveSelectedType} {t("Details")}
-            </h3>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("name_description_optional")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("e.g., Savings Goal, Vacation Fund")}
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="amountInvested"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
+                    <FormControl>
+                      <NumericInput
+                        placeholder="e.g., 1000.00"
+                        value={
+                          field.value !== undefined && field.value !== null
+                            ? String(field.value)
+                            : ""
+                        }
+                        onChange={(val) =>
+                          field.onChange(
+                            val === undefined || val === null
+                              ? ""
+                              : String(val),
+                          )
+                        }
+                        allowDecimal={true}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="amountInvested"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
-                  <FormControl>
-                    <NumericInput
-                      placeholder="e.g., 1000.00"
-                      value={
-                        field.value !== undefined && field.value !== null
-                          ? String(field.value)
-                          : ""
-                      }
-                      onChange={(val) =>
-                        field.onChange(
-                          val === undefined || val === null ? "" : String(val),
-                        )
-                      }
-                      allowDecimal={true}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="purchaseDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("purchase_date")}</FormLabel>
-                  <FormControl>
-                    <Input dir={dir}
-                      type="date"
-                      {...field}
-                      value={field.value || getCurrentDate()}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-    </>
-});
+              <FormField
+                control={form.control}
+                name="purchaseDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("purchase_date")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        dir={dir}
+                        type="date"
+                        {...field}
+                        value={field.value || getCurrentDate()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+      </>
+    );
+  });
   RenderGeneralFields.displayName = "RenderGeneralFields";
 
   const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;

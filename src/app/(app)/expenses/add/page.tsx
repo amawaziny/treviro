@@ -56,7 +56,7 @@ export default function AddExpensePage() {
           </CardTitle>
           <CardDescription data-testid="page-description">
             {t(
-              "log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending"
+              "log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending",
             )}
           </CardDescription>
         </CardHeader>

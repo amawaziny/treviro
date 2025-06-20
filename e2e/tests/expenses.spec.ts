@@ -121,18 +121,20 @@ test.describe("Expenses Management", () => {
     await page.getByTestId("description-input").fill(TEST_EXPENSE.description);
     await page.getByTestId("amount-input").fill(TEST_EXPENSE.amount);
     await page.getByTestId("date-input").fill(TEST_EXPENSE.date);
-    
+
     // Wait for navigation after form submission
     await Promise.all([
       page.waitForURL(/.*\/expenses/),
-      page.getByTestId("submit-button").click()
+      page.getByTestId("submit-button").click(),
     ]);
 
     // Find and click the edit button on the expense card
-    const expenseCard = await page.locator('[data-testid^="expense-card-"]').first();
+    const expenseCard = await page
+      .locator('[data-testid^="expense-card-"]')
+      .first();
     const expenseId = (await expenseCard.getAttribute("data-testid"))?.replace(
       "expense-card-",
-      ""
+      "",
     );
 
     if (!expenseId) {
@@ -148,11 +150,11 @@ test.describe("Expenses Management", () => {
     // Update the expense
     const updatedDescription = "Updated test expense";
     await page.getByLabel(/description/i).fill(updatedDescription);
-    
+
     // Submit the form and wait for navigation
     await Promise.all([
       page.waitForURL(/.*\/expenses/),
-      page.getByTestId("submit-button").click()
+      page.getByTestId("submit-button").click(),
     ]);
 
     // Verify update

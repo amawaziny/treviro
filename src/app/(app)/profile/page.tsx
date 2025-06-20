@@ -167,10 +167,7 @@ export default function ProfilePage() {
   if (!user) return <div className="p-8">{t("not_logged_in")}</div>;
 
   return (
-    <div
-      className="min-h-screen flex bg-background"
-      data-testid="profile-page"
-    >
+    <div className="min-h-screen flex bg-background" data-testid="profile-page">
       <div className="w-full max-w-md bg-white mx-auto dark:bg-gray-900 rounded-xl shadow-lg p-8">
         <h2
           className="text-xl font-bold mb-6 text-center text-primary"

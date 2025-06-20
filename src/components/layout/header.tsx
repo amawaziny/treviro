@@ -52,7 +52,10 @@ export function Header() {
               )}
             </div>
           ) : (
-            <Link href="/dashboard" className="flex items-center justify-start gap-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center justify-start gap-2"
+            >
               <Coins className="h-7 w-7 text-primary" />
               <span className="text-2xl font-bold text-primary">
                 {t("app_name")}

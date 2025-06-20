@@ -22,7 +22,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Banknote,
-  Building
+  Building,
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
@@ -411,8 +411,8 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
+          </div>
+          <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
             {/* Total Expenses Card */}
             <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">

@@ -100,7 +100,7 @@ export function ExpenseForm({
       toast({
         title: t("expense_record_saved"),
         description: `${values.category} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
-        testId: "success-toast",
+        testId: isEditMode ? "edit-success-toast" : "success-toast",
       });
 
       form.reset(initialFormValues);
@@ -110,7 +110,7 @@ export function ExpenseForm({
         title: t("failed_to_save_expense"),
         description: error.message || t("could_not_save_the_expense_record"),
         variant: "destructive",
-        testId: "error-toast",
+        testId: isEditMode ? "edit-error-toast" : "error-toast",
       });
     }
   };
@@ -129,7 +129,8 @@ export function ExpenseForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("expense_category")}</FormLabel>
-                <Select dir={dir}
+                <Select
+                  dir={dir}
                   onValueChange={(value) => {
                     field.onChange(value);
                     if (value !== "Credit Card") {

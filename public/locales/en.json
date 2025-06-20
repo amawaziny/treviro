@@ -96,7 +96,7 @@
   "back_to_security_details": "Back to Security Details",
   "back_to_sign_in": "Back to Sign In",
   "bonds_certificates_treasury_bills_you_own_directly": "Bonds, Certificates, Treasury Bills you own directly.",
-  "projected_interest":"Projected Interest",
+  "projected_interest": "Projected Interest",
   "breakdown_of_expenses_for": "Breakdown of expenses for",
   "breakdown_of_income_for": "Breakdown of income for",
   "brokerage_or_transaction_fees_for_this_purchase": "Brokerage or transaction fees for this purchase.",
@@ -599,5 +599,5 @@
   "have_been_removed": "have been removed",
   "could_not_remove": "Could not remove",
   "error_total_percentage_exceeds_100": "Error: Total percentage exceeds 100%",
-  "ounce":"Ounce"
+  "ounce": "Ounce"
 }

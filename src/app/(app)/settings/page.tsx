@@ -195,7 +195,11 @@ export default function SettingsPage() {
               >
                 {t("financial_year_start_month")}
               </label>
-              <Select dir={dir} value={selectedMonth} onValueChange={setSelectedMonth}>
+              <Select
+                dir={dir}
+                value={selectedMonth}
+                onValueChange={setSelectedMonth}
+              >
                 <SelectTrigger
                   id="financial-year-start-month"
                   className="w-full md:w-[280px]"

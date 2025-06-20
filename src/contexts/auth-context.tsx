@@ -140,12 +140,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push("/dashboard");
       } catch (error) {
         // Track login error
-        const errorMessage = error instanceof Error ? 
-          (error.message.includes('auth/invalid-credential') ? 
-            'Invalid email or password. Please try again.' : 
-            error.message) : 
-          'An error occurred during sign in';
-          
+        const errorMessage =
+          error instanceof Error
+            ? error.message.includes("auth/invalid-credential")
+              ? "Invalid email or password. Please try again."
+              : error.message
+            : "An error occurred during sign in";
+
         trackEvent("login_error", {
           method: "email",
           email: email,
