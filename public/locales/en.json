@@ -597,5 +597,6 @@
   "Other": "Other",
   "all_investments_in": "All investments in",
   "have_been_removed": "have been removed",
-  "could_not_remove": "Could not remove"
+  "could_not_remove": "Could not remove",
+  "error_total_percentage_exceeds_100": "Error: Total percentage exceeds 100%"
 }
