@@ -266,7 +266,7 @@ export const AddIncomeSchema = z.object({
 
 export type AddIncomeFormValues = z.infer<typeof AddIncomeSchema>;
 
-export const AddExpenseSchema = z
+export const ExpenseFormSchema = z
   .object({
     category: z.enum(expenseCategories, {
       required_error: "Expense category is required.",
@@ -328,7 +328,7 @@ export const AddExpenseSchema = z
       });
     }
   });
-export type AddExpenseFormValues = z.infer<typeof AddExpenseSchema>;
+export type ExpenseFormValues = z.infer<typeof ExpenseFormSchema>;
 
 // New Schema for Fixed Estimates
 export const FixedEstimateSchema = z

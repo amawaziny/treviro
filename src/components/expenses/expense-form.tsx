@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  AddExpenseSchema,
-  type AddExpenseFormValues,
+  ExpenseFormSchema,
+  type ExpenseFormValues as ExpenseFormValues,
   expenseCategories,
 } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
@@ -35,7 +35,7 @@ import { Loader2 } from "lucide-react";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
 
-const initialFormValues: AddExpenseFormValues = {
+const initialFormValues: ExpenseFormValues = {
   category: "Other",
   description: "",
   //@ts-expect-error
@@ -46,24 +46,24 @@ const initialFormValues: AddExpenseFormValues = {
   numberOfInstallments: "",
 };
 
-export interface AddExpenseFormProps {
-  initialValues?: Partial<AddExpenseFormValues>;
-  onSubmit: (values: AddExpenseFormValues) => Promise<void>;
+export interface ExpenseFormProps {
+  initialValues?: Partial<ExpenseFormValues>;
+  onSubmit: (values: ExpenseFormValues) => Promise<void>;
   isEditMode?: boolean;
 }
 
-export function AddExpenseForm({
+export function ExpenseForm({
   initialValues,
   onSubmit,
   isEditMode,
-}: AddExpenseFormProps) {
+}: ExpenseFormProps) {
   const { t, dir } = useLanguage();
   const { toast } = useToast();
   const router = useRouter();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const form = useReactHookForm<AddExpenseFormValues>({
-    resolver: zodResolver(AddExpenseSchema),
+  const form = useReactHookForm<ExpenseFormValues>({
+    resolver: zodResolver(ExpenseFormSchema),
     defaultValues: initialValues ?? initialFormValues,
   });
 
@@ -93,7 +93,7 @@ export function AddExpenseForm({
   const watchedCategory = form.watch("category");
   const watchedIsInstallment = form.watch("isInstallment");
 
-  const handleInternalSubmit = async (values: AddExpenseFormValues) => {
+  const handleInternalSubmit = async (values: ExpenseFormValues) => {
     try {
       await onSubmit(values);
 

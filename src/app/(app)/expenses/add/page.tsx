@@ -1,6 +1,6 @@
 "use client";
 
-import { AddExpenseForm } from "@/components/expenses/add-expense-form";
+import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
   Card,
   CardContent,
@@ -10,16 +10,14 @@ import {
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { useInvestments } from "@/hooks/use-investments";
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { AddExpenseFormValues } from "@/lib/schemas";
+import { ExpenseFormValues } from "@/lib/schemas";
 import { ExpenseRecord } from "@/lib/types";
 
 export default function AddExpensePage() {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
   const { addExpenseRecord } = useInvestments();
 
-  async function onSubmit(values: AddExpenseFormValues) {
+  async function onSubmit(values: ExpenseFormValues) {
     // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
     // It also ensures numberOfInstallments is a positive int if isInstallment is true.
     const expenseDataToSave: Omit<
@@ -63,7 +61,7 @@ export default function AddExpensePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AddExpenseForm onSubmit={onSubmit} />
+          <ExpenseForm onSubmit={onSubmit} />
         </CardContent>
       </Card>
     </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
-import { AddExpenseForm } from "@/components/expenses/add-expense-form";
+import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import {
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
-import { AddExpenseFormValues } from "@/lib/schemas";
+import { ExpenseFormValues } from "@/lib/schemas";
 
 export default function EditExpensePage({
   params,
@@ -76,7 +76,7 @@ export default function EditExpensePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AddExpenseForm
+          <ExpenseForm
             initialValues={{
               category: expense.category,
               description: expense.description ?? "",
@@ -89,7 +89,7 @@ export default function EditExpensePage({
                 ? expense.numberOfInstallments.toString()
                 : "",
             }}
-            onSubmit={async (values: AddExpenseFormValues) => {
+            onSubmit={async (values: ExpenseFormValues) => {
               await updateExpenseRecord(expenseId, {
                 ...values,
                 amount: Number(values.amount),
