@@ -593,9 +593,21 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       const docSnap = await getDoc(expenseDocRef);
       if (docSnap.exists()) {
         const oldExpenseData = docSnap.data() as ExpenseRecord;
+        
+        // Create a clean update object
+        const updateData: any = {
+          ...updatedFields,
+          updatedAt: serverTimestamp()
+        };
+        
+        // Remove numberOfInstallments if it's undefined
+        if (updateData.numberOfInstallments === undefined) {
+          delete updateData.numberOfInstallments;
+        }
+        
         await setDoc(
           expenseDocRef,
-          { ...updatedFields, updatedAt: serverTimestamp() },
+          updateData,
           { merge: true },
         );
 
