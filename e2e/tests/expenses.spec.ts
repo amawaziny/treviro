@@ -15,7 +15,7 @@ const TEST_EXPENSE = {
   category: "Credit Card",
   description: "Test expense",
   amount: "1000",
-  date: "2025-01-15",
+  date: new Date().toISOString().split("T")[0],
   isInstallment: true,
   numberOfInstallments: "3",
 };
@@ -217,7 +217,7 @@ test.describe("Expenses Management", () => {
     for (const button of deleteButtons) {
       await button.click();
       await page.click('button:has-text("Delete")');
-      await page.waitForLoadState("networkidle");
+      // await page.waitForLoadState("networkidle");
     }
 
     // Verify empty state

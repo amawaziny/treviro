@@ -214,7 +214,7 @@ export default function ExpensesPage() {
       {/* Filter Controls */}
       <div className="flex flex-wrap gap-4 items-center mb-6">
         <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
+          <Switch dir="auto"
             checked={showAll}
             onCheckedChange={setShowAll}
             id="show-all-switch"
@@ -224,7 +224,7 @@ export default function ExpensesPage() {
           <span>{t("show_all_expenses")}</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
+          <Switch  dir="auto"
             checked={showEnded}
             onCheckedChange={setShowEnded}
             id="show-ended-switch"
