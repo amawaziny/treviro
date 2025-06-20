@@ -119,7 +119,7 @@ export function AuthForm() {
         <CardContent>
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <h1 className="text-xl font-semibold tracking-tight">
                 {mode === "sign-in"
                   ? t("welcome_back")
                   : t("create_an_account")}

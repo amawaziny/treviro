@@ -149,7 +149,7 @@ export default function MyStocksPage() {
           <CardContent>
             <div
               className={cn(
-                "text-2xl font-bold",
+                "text-xl font-bold",
                 isTotalStockProfitable ? "text-accent" : "text-destructive",
               )}
             >

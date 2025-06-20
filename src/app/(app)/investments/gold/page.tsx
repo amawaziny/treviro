@@ -274,7 +274,7 @@ export default function MyGoldPage() {
         <CardContent>
           <div
             className={cn(
-              "text-2xl font-bold",
+              "text-xl font-bold",
               isTotalProfitable ? "text-accent" : "text-destructive",
             )}
           >

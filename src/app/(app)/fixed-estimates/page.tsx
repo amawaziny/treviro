@@ -93,7 +93,7 @@ export default function FixedEstimatesPage() {
                 <PiggyBank className="h-4 w-4 text-green-600 dark:text-green-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                <p className="text-xl font-bold text-green-700 dark:text-green-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(totalIncome)}
                   </span>
@@ -112,7 +112,7 @@ export default function FixedEstimatesPage() {
                 <Settings className="h-4 w-4 text-red-600 dark:text-red-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                <p className="text-xl font-bold text-red-700 dark:text-red-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(totalExpenses)}
                   </span>
@@ -166,7 +166,7 @@ export default function FixedEstimatesPage() {
                   {/* Amount and Actions Row */}
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                     {/* Amount */}
-                    <div className="text-2xl font-bold">
+                    <div className="text-xl font-bold">
                       <span className="md:hidden">
                         {formatNumberWithSuffix(record.amount)}
                       </span>

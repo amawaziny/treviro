@@ -199,7 +199,7 @@ export default function DashboardPage() {
           {t("recalculate_summary")}
         </Button>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -211,7 +211,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p className="text-2xl font-medium">
+              <p className="text-xl font-medium">
                 {isMobile
                   ? formatNumberWithSuffix(totalInvested)
                   : formatCurrencyWithCommas(totalInvested)}
@@ -238,7 +238,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
-                className={`text-2xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
+                className={`text-xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {isMobile
                   ? formatNumberWithSuffix(totalRealizedPnL)
@@ -266,7 +266,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
-                className={`text-2xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
+                className={`text-xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {isMobile
                   ? formatNumberWithSuffix(totalCurrentPortfolioPnL)
@@ -289,7 +289,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p className="text-2xl font-medium">
+              <p className="text-xl font-medium">
                 {isMobile
                   ? formatNumberWithSuffix(totalCashBalance)
                   : formatCurrencyWithCommas(totalCashBalance)}
@@ -320,7 +320,7 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6 w-full items-stretch">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
             <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
@@ -329,7 +329,7 @@ export default function DashboardPage() {
                 <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-medium text-green-700 dark:text-green-300">
+                <p className="text-xl font-medium text-green-700 dark:text-green-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(currentMonthIncome)}
                   </span>
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                 <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-medium text-green-700 dark:text-green-300">
+                <p className="text-xl font-medium text-green-700 dark:text-green-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(totalIncome)}
                   </span>
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                 <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-medium text-red-700 dark:text-red-300">
+                <p className="text-xl font-medium text-red-700 dark:text-red-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(totalExpensesOnly)}
                   </span>
@@ -562,7 +562,7 @@ export default function DashboardPage() {
                 <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-medium text-gray-700 dark:text-gray-300">
+                <p className="text-xl font-medium text-gray-700 dark:text-gray-300">
                   <span className="md:hidden">
                     {formatNumberWithSuffix(netCashFlowThisMonth)}
                   </span>

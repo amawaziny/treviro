@@ -255,7 +255,7 @@ export default function ExpensesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-foreground">
+              <span className="text-xl font-bold text-foreground">
                 {formatCurrencyWithCommas(
                   filteredExpenses.reduce(
                     (sum, r) => sum + (r._requiredAmount || 0),
@@ -304,7 +304,7 @@ export default function ExpensesPage() {
                     </div>
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-                      <span className="text-2xl font-bold">
+                      <span className="text-xl font-bold">
                         {formatNumberWithSuffix(record._requiredAmount)}
                       </span>
                       <div className="flex items-center gap-2">

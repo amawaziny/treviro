@@ -210,7 +210,7 @@ export default function CashFlowPage() {
             <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+            <p className="text-xl font-bold text-green-700 dark:text-green-300">
               <span className="md:hidden">
                 {formatNumberWithSuffix(currentMonthIncome)}
               </span>
@@ -231,7 +231,7 @@ export default function CashFlowPage() {
             <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+            <p className="text-xl font-bold text-green-700 dark:text-green-300">
               <span className="md:hidden">
                 {formatNumberWithSuffix(totalIncome)}
               </span>
@@ -299,7 +299,7 @@ export default function CashFlowPage() {
             <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+            <p className="text-xl font-bold text-red-700 dark:text-red-300">
               <span className="md:hidden">
                 {formatNumberWithSuffix(totalExpensesOnly)}
               </span>
@@ -433,7 +433,7 @@ export default function CashFlowPage() {
             <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+            <p className="text-xl font-bold text-gray-700 dark:text-gray-300">
               <span className="md:hidden">
                 {formatNumberWithSuffix(totalIncome - totalExpenses)}
               </span>

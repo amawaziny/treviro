@@ -306,7 +306,7 @@ export default function RealEstateDetailPage() {
     <div className="w-full">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-xl font-bold">
             {investment.name || investment.propertyAddress}
           </CardTitle>
           <CardDescription>

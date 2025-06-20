@@ -173,7 +173,7 @@ export default function ProfilePage() {
     >
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
         <h2
-          className="text-2xl font-bold mb-6 text-center text-primary"
+          className="text-xl font-bold mb-6 text-center text-primary"
           data-testid="profile-title"
         >
           {t("user_profile")}

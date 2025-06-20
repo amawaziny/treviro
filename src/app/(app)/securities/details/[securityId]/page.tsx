@@ -315,7 +315,7 @@ export default function SecurityDetailPage() {
   if (!security) {
     return (
       <div className="container mx-auto py-8 text-center">
-        <h1 className="text-2xl font-bold text-destructive mb-4">
+        <h1 className="text-xl font-bold text-destructive mb-4">
           {t("security_not_found")}
         </h1>
         <p className="text-muted-foreground mb-6">

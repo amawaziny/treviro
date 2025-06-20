@@ -298,7 +298,7 @@ export default function MyDebtInstrumentsPage() {
         <CardContent>
           <div
             className={cn(
-              "text-2xl font-bold",
+              "text-xl font-bold",
               isTotalFundProfitable ? "text-accent" : "text-destructive",
             )}
           >

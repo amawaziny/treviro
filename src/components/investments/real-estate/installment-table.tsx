@@ -197,7 +197,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                 <p className="text-sm text-muted-foreground dark:text-green-200">
                   {t("total_paid_purchase")}
                 </p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xl font-bold text-foreground">
                   EGP {totalPaidAmount.toLocaleString()}
                 </p>
               </div>
@@ -205,7 +205,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                 <p className="text-sm text-muted-foreground dark:text-yellow-200">
                   {t("remaining_amount")}
                 </p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xl font-bold text-foreground">
                   EGP {remainingAmount.toLocaleString()}
                 </p>
               </div>
@@ -213,7 +213,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                 <p className="text-sm text-muted-foreground dark:text-blue-200">
                   {t("total_amount")}
                 </p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xl font-bold text-foreground">
                   EGP {totalAmount.toLocaleString()}
                 </p>
               </div>
