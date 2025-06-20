@@ -29,11 +29,9 @@ import {
   type AddExpenseFormValues,
   expenseCategories,
 } from "@/lib/schemas";
-import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import type { ExpenseRecord } from "@/lib/types";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
 
@@ -50,7 +48,7 @@ const initialFormValues: AddExpenseFormValues = {
 
 export interface AddExpenseFormProps {
   initialValues?: Partial<AddExpenseFormValues>;
-  onSubmit?: (values: AddExpenseFormValues) => Promise<void>;
+  onSubmit: (values: AddExpenseFormValues) => Promise<void>;
   isEditMode?: boolean;
 }
 
@@ -59,8 +57,7 @@ export function AddExpenseForm({
   onSubmit,
   isEditMode,
 }: AddExpenseFormProps) {
-  const { t, dir} = useLanguage();
-  const { addExpenseRecord } = useInvestments();
+  const { t, dir } = useLanguage();
   const { toast } = useToast();
   const router = useRouter();
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -96,55 +93,33 @@ export function AddExpenseForm({
   const watchedCategory = form.watch("category");
   const watchedIsInstallment = form.watch("isInstallment");
 
-  async function handleInternalSubmit(values: AddExpenseFormValues) {
+  const handleInternalSubmit = async (values: AddExpenseFormValues) => {
     try {
-      // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
-      // It also ensures numberOfInstallments is a positive int if isInstallment is true.
-      const expenseDataToSave: Omit<
-        ExpenseRecord,
-        "id" | "createdAt" | "userId"
-      > = {
-        category: values.category!,
-        amount: values.amount, // Zod has coerced this to number
-        date: values.date,
-      };
+      await onSubmit(values);
 
-      if (values.description && values.description.trim() !== "") {
-        expenseDataToSave.description = values.description;
-      }
-
-      if (values.category === "Credit Card") {
-        expenseDataToSave.isInstallment = values.isInstallment;
-        if (values.isInstallment && values.numberOfInstallments) {
-          // Zod ensures values.numberOfInstallments is a number here if isInstallment is true
-          expenseDataToSave.numberOfInstallments = values.numberOfInstallments;
-        }
-      }
-
-      await addExpenseRecord(expenseDataToSave);
       toast({
-        title: t("expense_record_added"),
+        title: t("expense_record_saved"),
         description: `${values.category} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
         testId: "success-toast",
       });
+
       form.reset(initialFormValues);
       router.push("/expenses");
     } catch (error: any) {
-      console.error(t("error_adding_expense_record"), error);
       toast({
-        title: t("failed_to_add_expense"),
+        title: t("failed_to_save_expense"),
         description: error.message || t("could_not_save_the_expense_record"),
         variant: "destructive",
         testId: "error-toast",
       });
     }
-  }
+  };
 
   return (
     <Form {...form}>
       <form
         data-testid="expense-form"
-        onSubmit={form.handleSubmit(onSubmit ? onSubmit : handleInternalSubmit)}
+        onSubmit={form.handleSubmit(handleInternalSubmit)}
         className="space-y-8"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

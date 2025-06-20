@@ -9,9 +9,42 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
+import { useInvestments } from "@/hooks/use-investments";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { AddExpenseFormValues } from "@/lib/schemas";
+import { ExpenseRecord } from "@/lib/types";
 
 export default function AddExpensePage() {
   const { t: t } = useLanguage();
+  const { addExpenseRecord } = useInvestments();
+
+  async function onSubmit(values: AddExpenseFormValues) {
+    // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
+    // It also ensures numberOfInstallments is a positive int if isInstallment is true.
+    const expenseDataToSave: Omit<
+      ExpenseRecord,
+      "id" | "createdAt" | "userId"
+    > = {
+      category: values.category!,
+      amount: values.amount, // Zod has coerced this to number
+      date: values.date,
+    };
+
+    if (values.description && values.description.trim() !== "") {
+      expenseDataToSave.description = values.description;
+    }
+
+    if (values.category === "Credit Card") {
+      expenseDataToSave.isInstallment = values.isInstallment;
+      if (values.isInstallment && values.numberOfInstallments) {
+        // Zod ensures values.numberOfInstallments is a number here if isInstallment is true
+        expenseDataToSave.numberOfInstallments = values.numberOfInstallments;
+      }
+    }
+
+    await addExpenseRecord(expenseDataToSave);
+  }
 
   return (
     <div
@@ -25,12 +58,12 @@ export default function AddExpensePage() {
           </CardTitle>
           <CardDescription data-testid="page-description">
             {t(
-              "log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending",
+              "log_your_expenses_like_installments_credit_card_payments_subscriptions_or_other_spending"
             )}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AddExpenseForm />
+          <AddExpenseForm onSubmit={onSubmit} />
         </CardContent>
       </Card>
     </div>
