@@ -168,10 +168,10 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-background"
+      className="min-h-screen flex bg-background"
       data-testid="profile-page"
     >
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8">
+      <div className="w-full max-w-md bg-white mx-auto dark:bg-gray-900 rounded-xl shadow-lg p-8">
         <h2
           className="text-xl font-bold mb-6 text-center text-primary"
           data-testid="profile-title"

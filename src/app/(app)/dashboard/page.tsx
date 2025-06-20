@@ -319,9 +319,9 @@ export default function DashboardPage() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
+        <CardContent className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
                   {t("total_current_income_this_month")}
@@ -343,7 +343,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
             {/* Total Income Card */}
-            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col h-[220px] flex-1">
+            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
                   {t("total_income_this_month")}
@@ -411,6 +411,8 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
             {/* Total Expenses Card */}
             <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
@@ -578,7 +580,7 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <InvestmentDistributionChart />
         <MonthlyInvestmentDistributionChart />
       </div>
