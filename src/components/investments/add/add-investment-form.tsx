@@ -124,7 +124,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
   control,
   isDedicatedGoldMode,
 }) => {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
@@ -156,7 +156,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("gold_type")}</FormLabel>
-              <Select
+              <Select dir={dir}
                 onValueChange={field.onChange}
                 value={field.value || ""}
                 required
@@ -169,10 +169,10 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
                 <SelectContent>
                   {goldTypes.map((gType) => (
                     <SelectItem key={gType} value={gType}>
-                      {gType === "K24" && "24 Karat"}
-                      {gType === "K21" && "21 Karat"}
-                      {gType === "Pound" && "Gold Pound"}
-                      {gType === "Ounce" && "Ounce"}
+                      {gType === "K24" && t("24_karat")}
+                      {gType === "K21" && t("21_karat")}
+                      {gType === "Pound" && t("gold_pound")}
+                      {gType === "Ounce" && t("ounce")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -235,7 +235,7 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
             <FormItem>
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
-                <Input
+                <Input dir={dir}
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -259,7 +259,7 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
   control,
   isDedicatedCurrencyMode,
 }) => {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
@@ -355,7 +355,7 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
             <FormItem>
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
-                <Input
+                <Input dir={dir}
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -390,7 +390,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
   onSecuritySelect,
   isPreSelectedStockMode,
 }) => {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
@@ -406,7 +406,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             render={({ field }) => (
               <FormItem className="md:col-span-2">
                 <FormLabel>{t("select_security_stock_or_fund")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={(value) => {
                     field.onChange(value);
                     onSecuritySelect(value);
@@ -540,7 +540,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             <FormItem>
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
-                <Input
+                <Input dir={dir}
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -562,7 +562,7 @@ interface RenderDebtFieldsProps {
   watch: any;
 }
 const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
-  const { t } = useLanguage();
+  const { t, dir} = useLanguage();
   const { control, setValue, watch } =
     useReactHookFormContext<AddInvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
@@ -587,7 +587,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("specific_debt_type")}</FormLabel>
-              <Select
+              <Select dir={dir}
                 onValueChange={field.onChange}
                 value={field.value || ""}
                 required
@@ -600,7 +600,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                 <SelectContent>
                   {debtSubTypes.map((dType) => (
                     <SelectItem key={dType} value={dType}>
-                      {dType}
+                      {t(dType)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -661,7 +661,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             <FormItem>
               <FormLabel>{t("maturity_date")}</FormLabel>
               <FormControl>
-                <Input type="date" {...field} value={field.value || ""} />
+                <Input type="date" dir={dir} {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -698,19 +698,19 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("certificate_interest_frequency")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder={t("Select frequency")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Monthly">Monthly</SelectItem>
-                    <SelectItem value="Quarterly">Quarterly</SelectItem>
-                    <SelectItem value="Yearly">Yearly</SelectItem>
+                    <SelectItem value="Monthly">{t("Monthly")}</SelectItem>
+                    <SelectItem value="Quarterly">{t("Quarterly")}</SelectItem>
+                    <SelectItem value="Yearly">{t("Yearly")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -730,7 +730,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               <FormItem>
                 <FormLabel>{t("purchase_date")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <Input dir={dir}
                     type="date"
                     {...field}
                     value={field.value || getCurrentDate()}
@@ -1293,8 +1293,10 @@ export function AddInvestmentForm({
     [listedSecurities, form, setPreSelectedSecurityDetails],
   );
 
-  const RenderGeneralFields = React.memo(() => (
-    <>
+  const RenderGeneralFields = React.memo(() => {
+    const {dir} = useLanguage();
+  
+  return  <>
       {!isDedicatedDebtMode &&
         !isDedicatedGoldMode &&
         !isDedicatedCurrencyMode &&
@@ -1307,7 +1309,7 @@ export function AddInvestmentForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("investment_type")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={(value) => {
                     field.onChange(value);
                     const currentValues = form.getValues();
@@ -1406,7 +1408,7 @@ export function AddInvestmentForm({
                 <FormItem>
                   <FormLabel>{t("purchase_date")}</FormLabel>
                   <FormControl>
-                    <Input
+                    <Input dir={dir}
                       type="date"
                       {...field}
                       value={field.value || getCurrentDate()}
@@ -1419,7 +1421,7 @@ export function AddInvestmentForm({
           </div>
         )}
     </>
-  ));
+});
   RenderGeneralFields.displayName = "RenderGeneralFields";
 
   const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;

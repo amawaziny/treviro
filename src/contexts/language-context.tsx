@@ -19,6 +19,7 @@ interface LanguageContextType {
   language: string;
   setLanguage: (lang: string) => void;
   t: (key: string) => string;
+  dir: 'rtl' | 'ltr';
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -75,8 +76,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     [translations],
   );
 
+  // Determine text direction based on language
+  const dir = language === 'ar' ? 'rtl' : 'ltr';
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, dir }}>
       {children}
     </LanguageContext.Provider>
   );

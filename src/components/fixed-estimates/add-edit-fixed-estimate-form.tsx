@@ -53,7 +53,7 @@ export function AddEditFixedEstimateForm({
   mode,
   estimate,
 }: AddEditFixedEstimateFormProps) {
-  const { t: t } = useLanguage();
+  const { t, dir} = useLanguage();
   const { addFixedEstimate } = useInvestments(); // Add updateFixedEstimate later
   const { toast } = useToast();
   const router = useRouter();
@@ -148,7 +148,7 @@ export function AddEditFixedEstimateForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("estimate_type")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={(value) =>
                     field.onChange(value as FixedEstimateType)
                   }
@@ -217,7 +217,7 @@ export function AddEditFixedEstimateForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Period</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
                 >

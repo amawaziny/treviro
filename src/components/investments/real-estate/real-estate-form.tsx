@@ -27,7 +27,7 @@ interface RealEstateFormProps {
 }
 
 export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   return (
     <div className="space-y-6">
       {/* Unit Details Section */}
@@ -102,7 +102,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("property_type")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
@@ -216,7 +216,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("installment_frequency")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >

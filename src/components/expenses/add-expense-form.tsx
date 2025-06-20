@@ -59,7 +59,7 @@ export function AddExpenseForm({
   onSubmit,
   isEditMode,
 }: AddExpenseFormProps) {
-  const { t: t } = useLanguage();
+  const { t, dir} = useLanguage();
   const { addExpenseRecord } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -154,7 +154,7 @@ export function AddExpenseForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("expense_category")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={(value) => {
                     field.onChange(value);
                     if (value !== "Credit Card") {
