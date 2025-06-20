@@ -602,5 +602,6 @@
   "have_been_removed": "تم حذفها",
   "could_not_remove": "لا يمكن حذف",
   "error_total_percentage_exceeds_100": "خطأ: إجمالي النسب يتجاوز 100%",
-  "ounce": "اﻷونصة"
+  "ounce": "اﻷونصة",
+  "months": "أشهر"
 }

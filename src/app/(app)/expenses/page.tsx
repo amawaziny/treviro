@@ -324,10 +324,11 @@ export default function ExpensesPage() {
                               size="icon"
                               className="text-muted-foreground hover:text-destructive"
                               aria-label="Delete"
+                              data-testid={`delete-expense-${record.id}`}
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                Remove {record.description || record.category}
+                                {t("Remove")} {record.description || record.category}
                               </span>
                             </Button>
                           </AlertDialogTrigger>
@@ -343,7 +344,7 @@ export default function ExpensesPage() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
@@ -354,7 +355,7 @@ export default function ExpensesPage() {
                                   }
                                 }}
                               >
-                                Delete
+                                {t("Delete")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -366,11 +367,9 @@ export default function ExpensesPage() {
                       record.numberOfInstallments &&
                       record.category === t("credit_card") && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          {t("installment_egp")}{" "}
-                          {formatNumberWithSuffix(
+                          {`${t("installment_egp")} ${formatNumberWithSuffix(
                             record.amount / record.numberOfInstallments,
-                          )}{" "}
-                          x {record.numberOfInstallments} months
+                          )} x ${record.numberOfInstallments} ${t("months")}`}
                         </div>
                       )}
                   </div>
@@ -388,10 +387,8 @@ export default function ExpensesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground py-4 text-center">
-              {t("you_havent_added_any_itemized_expenses_for")}{" "}
-              {formatMonthYear(new Date())}
-              {t("yet")}
+            <p data-testid="no-expenses-message" className="text-muted-foreground py-4 text-center">
+              {`${t("you_havent_added_any_itemized_expenses_for")} ${formatMonthYear(new Date())} ${t("yet")}`}
             </p>
           </CardContent>
         </Card>
