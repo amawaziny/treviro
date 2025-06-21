@@ -49,13 +49,11 @@ import { useLanguage } from "@/contexts/language-context";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function SecurityDetailPage() {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const securityId = params.securityId as string;
   const { toast } = useToast();
-  const { language } = useLanguage();
 
   const { getListedSecurityById, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
@@ -255,7 +253,6 @@ export default function SecurityDetailPage() {
     indexOfFirstItem,
     indexOfLastItem,
   );
-  const totalPages = Math.ceil(securityTransactions.length / itemsPerPage);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -300,7 +297,7 @@ export default function SecurityDetailPage() {
   if (
     isLoadingListedSecurities ||
     isLoadingInvestments ||
-    security === undefined
+    security === undefined || security == null
   ) {
     return (
       <div className="flex h-[calc(100vh-8rem)] w-full items-center justify-center">
@@ -312,26 +309,27 @@ export default function SecurityDetailPage() {
     );
   }
 
-  if (!security) {
-    return (
-      <div className="container mx-auto py-8 text-center">
-        <h1 className="text-xl font-bold text-destructive mb-4">
-          {t("security_not_found")}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {t("the_security_you_are_looking_for_could_not_be_found")}
-        </p>
-        <Button onClick={() => router.push(backLinkHref)}>
-          {language === "ar" ? (
-            <ArrowRight className="ml-2 h-4 w-4" />
-          ) : (
-            <ArrowLeft className="mr-2 h-4 w-4" />
-          )}
-          {t("go_back")}
-        </Button>
-      </div>
-    );
-  }
+  // if (!security) {
+  //   console.log("security not found")
+  //   return (
+  //     <div className="container mx-auto py-8 text-center">
+  //       <h1 className="text-xl font-bold text-destructive mb-4">
+  //         {t("security_not_found")}
+  //       </h1>
+  //       <p className="text-muted-foreground mb-6">
+  //         {t("the_security_you_are_looking_for_could_not_be_found")}
+  //       </p>
+  //       <Button onClick={() => router.push(backLinkHref)}>
+  //         {language === "ar" ? (
+  //           <ArrowRight className="ml-2 h-4 w-4" />
+  //         ) : (
+  //           <ArrowLeft className="mr-2 h-4 w-4" />
+  //         )}
+  //         {t("go_back")}
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   const currentMarketPrice = security.price;
   const totalInvestmentValue = totalSharesOwned * currentMarketPrice;
@@ -394,17 +392,17 @@ export default function SecurityDetailPage() {
           </div>
         </CardHeader>
         {/* Desktop Buttons */}
-        <CardContent className="hidden md:flex justify-end space-x-2 pb-4">
+        <CardContent className="hidden md:flex justify-end gap-2 pb-4">
           <Link href={`/investments/add?securityId=${security.id}`} passHref>
             <Button variant="default">
-              <ShoppingCart className="mr-2 h-4 w-4" /> {t("buy")}
+              <ShoppingCart className="h-4 w-4" /> {t("buy")}
             </Button>
           </Link>
           {hasPosition && (
             <>
               <Link href={`/investments/sell-stock/${security.id}`} passHref>
                 <Button variant="outline">
-                  <DollarSign className="mr-2 h-4 w-4" /> {t("sell")}
+                  <DollarSign className="h-4 w-4" /> {t("sell")}
                 </Button>
               </Link>
               <Button
@@ -431,7 +429,7 @@ export default function SecurityDetailPage() {
             className="flex-1"
           >
             <Button variant="default" className="w-full">
-              <ShoppingCart className="mr-2 h-4 w-4" /> {t("buy")}
+              <ShoppingCart className="h-4 w-4" /> {t("buy")}
             </Button>
           </Link>
           {hasPosition && (
@@ -442,7 +440,7 @@ export default function SecurityDetailPage() {
                 className="flex-1"
               >
                 <Button variant="outline" className="w-full">
-                  <DollarSign className="mr-2 h-4 w-4" /> {t("sell")}
+                  <DollarSign className="h-4 w-4" /> {t("sell")}
                 </Button>
               </Link>
               <Button
@@ -466,7 +464,7 @@ export default function SecurityDetailPage() {
       <Tabs
         defaultValue="performance"
         className="w-full max-w-full"
-        dir={language === "ar" ? "rtl" : "ltr"}
+        dir={dir}
       >
         <TabsList className="flex w-full gap-3 md:grid md:grid-cols-3 h-11 items-center px-1">
           <TabsTrigger
@@ -652,17 +650,14 @@ export default function SecurityDetailPage() {
                                     "text-xs",
                                   )}
                                 >
-                                  {tx.type}
+                                  {t(tx.type)}
                                 </Badge>
                                 <span className="text-sm text-muted-foreground">
                                   {formatDateDisplay(tx.date ?? "")}
                                 </span>
                               </div>
                               <div className="text-sm font-medium">
-                                {shares.toLocaleString()}{" "}
-                                {security.securityType === "Fund"
-                                  ? "Units"
-                                  : "Shares"}
+                                {`${shares.toLocaleString()} ${security.securityType === "Fund" ? t("units") : t("shares")}`}
                               </div>
                             </div>
                             <div className="text-end">
@@ -687,8 +682,7 @@ export default function SecurityDetailPage() {
                                   {formatCurrencyWithCommas(
                                     price,
                                     displayCurrency,
-                                  )}{" "}
-                                  each
+                                  )}
                                 </div>
                               )}
                             </div>

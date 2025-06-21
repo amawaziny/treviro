@@ -522,7 +522,7 @@
   "transactions": "Transactions",
   "type": "Type:",
   "unit_details": "Unit Details",
-  "units": "- Units:",
+  "units": "Units:",
   "units_held": "Units Held",
   "unnamed_debt": "Unnamed Debt",
   "unnamed_gold": "Unnamed Gold",
@@ -606,5 +606,8 @@
   "1M":"1M",
   "6M":"6M",
   "1Y":"1Y",
-  "5Y":"5Y"
+  "5Y":"5Y",
+  "shares":"Shares",
+  "Buy":"Buy",
+  "Sell":"Sell"
 }

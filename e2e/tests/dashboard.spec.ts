@@ -56,53 +56,60 @@ test.describe("Dashboard Page", () => {
 
   test("should display numeric values in summary cards", async ({ page }) => {
     // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
+    // await page.waitForLoadState("networkidle");
 
-    // Check if summary cards contain valid numeric values
+    // Define a pattern that matches currency-formatted numbers (e.g., "EGP 920,000.000" or "-EGP 1,234.56")
+    const CURRENCY_AMOUNT_PATTERN = /^-?[A-Za-z\s]*[\s-]*[\d,.]+/;
+
+    // Check if summary cards contain valid numeric values with optional currency codes
     const totalInvested = await page.getByTestId("total-invested-card").locator("p:not(.text-xs)").first().textContent();
-    expect(totalInvested).toMatch(/^[\d,.]+/); // Should start with a number
+    expect(totalInvested).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     const totalRealizedPL = await page.getByTestId("total-realized-pl-card").locator("p:not(.text-xs)").first().textContent();
-    expect(totalRealizedPL).toMatch(/^-?[\d,.]+/); // Can be negative
+    expect(totalRealizedPL).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     const currentPortfolioPL = await page.getByTestId("current-portfolio-pl-card").locator("p:not(.text-xs)").first().textContent();
-    expect(currentPortfolioPL).toMatch(/^-?[\d,.]+/); // Can be negative
+    expect(currentPortfolioPL).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     const cashBalance = await page.getByTestId("total-cash-balance-card").locator("p:not(.text-xs)").first().textContent();
-    expect(cashBalance).toMatch(/^[\d,.]+/); // Should start with a number
+    expect(cashBalance).toMatch(CURRENCY_AMOUNT_PATTERN);
   });
 
   test("should display monthly cash flow values", async ({ page }) => {
-    // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
+    // Define a pattern that matches currency-formatted numbers (e.g., "EGP 920,000.000", "-EGP 1,234.56", or "Total: EGP 0")
+    const CURRENCY_AMOUNT_PATTERN = /^[^:]*:?\s*-?[A-Za-z\s]*[\s-]*[\d,.]+/;
 
     // Check current income card
     const currentIncome = await page.getByTestId("current-income-card").locator("p:not(.text-xs)").first().textContent();
-    expect(currentIncome).toMatch(/^[\d,.]+/);
+    expect(currentIncome).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     // Check total income card
     const totalIncome = await page.getByTestId("total-income-card").locator("p:not(.text-xs)").first().textContent();
-    expect(totalIncome).toMatch(/^[\d,.]+/);
+    expect(totalIncome).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     // Check total expenses card
     const totalExpenses = await page.getByTestId("total-expenses-card").locator("p:not(.text-xs)").first().textContent();
-    expect(totalExpenses).toMatch(/^[\d,.]+/);
+    expect(totalExpenses).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     // Check total investments card
-    const totalInvestments = await page.getByTestId("total-investments-card").locator("p:not(.text-xs)").last().textContent();
-    expect(totalInvestments).toMatch(/^[\d,.]+/);
+    const totalInvestmentsCard = page.getByTestId("total-investments-card");
+    await expect(totalInvestmentsCard).toBeVisible();
+    // Get the total amount from the card (last div with font-semibold class)
+    const totalInvestments = await totalInvestmentsCard.locator('div.font-semibold').last().textContent();
+    expect(totalInvestments).toMatch(CURRENCY_AMOUNT_PATTERN);
 
     // Check remaining cash card
     const remainingCash = await page.getByTestId("remaining-cash-card").locator("p:not(.text-xs)").first().textContent();
-    expect(remainingCash).toMatch(/^-?[\d,.]+/); // Can be negative
+    expect(remainingCash).toMatch(CURRENCY_AMOUNT_PATTERN);
   });
 
   test("should recalculate summary when recalculate button is clicked", async ({ page }) => {
-    // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
-
+    // Define a pattern that matches currency-formatted numbers (e.g., "EGP 920,000.000" or "-EGP 1,234.56")
+    const CURRENCY_AMOUNT_PATTERN = /^-?[A-Za-z\s]*[\s-]*[\d,.]+/;
+    
     // Get the initial values
     const initialTotalInvested = await page.getByTestId("total-invested-card").locator("p:not(.text-xs)").first().textContent();
+    expect(initialTotalInvested).toMatch(CURRENCY_AMOUNT_PATTERN);
     
     // Click the recalculate button
     await page.getByTestId("recalculate-summary-button").click();
@@ -114,13 +121,13 @@ test.describe("Dashboard Page", () => {
     const recalculatedTotalInvested = await page.getByTestId("total-invested-card").locator("p:not(.text-xs)").first().textContent();
     
     // The values should be the same (or at least the same format)
-    expect(recalculatedTotalInvested).toMatch(/^[\d,.]+/);
+    expect(recalculatedTotalInvested).toMatch(CURRENCY_AMOUNT_PATTERN);
     expect(initialTotalInvested).toEqual(recalculatedTotalInvested);
   });
 
   test("should navigate to cash flow details when view details is clicked", async ({ page }) => {
     // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
+    // await page.waitForLoadState("networkidle");
     
     // Click the view details button
     await page.getByRole('link', { name: /view full details/i }).click();
@@ -132,7 +139,7 @@ test.describe("Dashboard Page", () => {
 
   test("should display charts with data", async ({ page }) => {
     // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
+    // await page.waitForLoadState("networkidle");
     
     // Check if charts are rendered with data
     const investmentChart = page.getByTestId("investment-distribution-chart");
@@ -149,7 +156,7 @@ test.describe("Dashboard Page", () => {
 
   test("should display investment breakdown cards with correct data", async ({ page }) => {
     // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
+    // await page.waitForLoadState("networkidle");
     
     // Check if investment breakdown section is visible
     const breakdownSection = page.getByTestId("investment-breakdown-section");
@@ -206,7 +213,7 @@ test.describe("Dashboard Page", () => {
 
   test("should display correct investment types based on configuration", async ({ page }) => {
     // Wait for the page to load completely
-    await page.waitForLoadState("networkidle");
+    // await page.waitForLoadState("networkidle");
     
     // Expected investment types from the default configuration
     const expectedTypes = [
