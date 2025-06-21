@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
                 price,
               });
               // Also update priceHistory subcollection
-              const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+              const today = new Date().toISOString()
               const {
                 setDoc,
                 collection: coll,

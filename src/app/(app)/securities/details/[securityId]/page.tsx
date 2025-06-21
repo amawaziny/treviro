@@ -397,14 +397,14 @@ export default function SecurityDetailPage() {
         <CardContent className="hidden md:flex justify-end space-x-2 pb-4">
           <Link href={`/investments/add?securityId=${security.id}`} passHref>
             <Button variant="default">
-              <ShoppingCart className="mr-2 h-4 w-4" /> Buy
+              <ShoppingCart className="mr-2 h-4 w-4" /> {t("buy")}
             </Button>
           </Link>
           {hasPosition && (
             <>
               <Link href={`/investments/sell-stock/${security.id}`} passHref>
                 <Button variant="outline">
-                  <DollarSign className="mr-2 h-4 w-4" /> Sell
+                  <DollarSign className="mr-2 h-4 w-4" /> {t("sell")}
                 </Button>
               </Link>
               <Button
@@ -431,7 +431,7 @@ export default function SecurityDetailPage() {
             className="flex-1"
           >
             <Button variant="default" className="w-full">
-              <ShoppingCart className="mr-2 h-4 w-4" /> Buy
+              <ShoppingCart className="mr-2 h-4 w-4" /> {t("buy")}
             </Button>
           </Link>
           {hasPosition && (
@@ -442,7 +442,7 @@ export default function SecurityDetailPage() {
                 className="flex-1"
               >
                 <Button variant="outline" className="w-full">
-                  <DollarSign className="mr-2 h-4 w-4" /> Sell
+                  <DollarSign className="mr-2 h-4 w-4" /> {t("sell")}
                 </Button>
               </Link>
               <Button

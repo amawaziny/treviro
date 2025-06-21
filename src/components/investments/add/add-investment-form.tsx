@@ -456,19 +456,15 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
         {preSelectedSecurityDetails && (
           <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
             <p className="text-sm font-medium">
-              {t("selected_security")}
-              {preSelectedSecurityDetails.name} (
-              {preSelectedSecurityDetails.symbol})
+              {`${t("selected_security")}: ${preSelectedSecurityDetails.name} (${preSelectedSecurityDetails.symbol})`}
             </p>
             <p className="text-xs text-muted-foreground">
-              {t("current_market_price")}{" "}
-              {formatCurrencyWithCommas(preSelectedSecurityDetails.price)}
+              {`${t("current_market_price")}: ${formatCurrencyWithCommas(preSelectedSecurityDetails.price)}`}
             </p>
             {preSelectedSecurityDetails.securityType === "Fund" &&
               preSelectedSecurityDetails.fundType && (
                 <p className="text-xs text-muted-foreground">
-                  {t("type")}
-                  {preSelectedSecurityDetails.fundType}
+                  {`${t("type")}: ${preSelectedSecurityDetails.fundType}`}
                 </p>
               )}
           </div>
@@ -995,7 +991,7 @@ export function AddInvestmentForm({
     }
 
     // Close the form when submitting
-    closeForm();
+    // closeForm();
 
     setIsLoadingAi(false);
     setAiAnalysisResult(null);
@@ -1066,7 +1062,7 @@ export function AddInvestmentForm({
       finalInvestmentType === "Debt Instruments" &&
       values.type === "Debt Instruments"
     ) {
-      investmentName = `${values.debtSubType} - ${values.issuer}`;
+      investmentName = `${t(values.debtSubType)} - ${values.issuer}`;
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
@@ -1076,10 +1072,6 @@ export function AddInvestmentForm({
         maturityDate: values.maturityDate!,
         debtSubType: values.debtSubType!,
         type: "Debt Instruments",
-        purchaseDate:
-          values.debtSubType === "Certificate"
-            ? undefined
-            : values.purchaseDate,
         certificateInterestFrequency:
           values.certificateInterestFrequency || "Monthly",
       };
@@ -1268,12 +1260,7 @@ export function AddInvestmentForm({
         ? preSelectedSecurityDetails.fundType || "Fund"
         : preSelectedSecurityDetails.symbol) +
       ")";
-    submitButtonText =
-      t("buy") +
-      " " +
-      (preSelectedSecurityDetails.securityType === "Fund"
-        ? t("units")
-        : t("securities"));
+    submitButtonText = t("buy");
   } else if (
     preSelectedInvestmentTypeQueryParam &&
     !isDedicatedGoldMode &&

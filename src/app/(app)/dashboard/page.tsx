@@ -172,7 +172,7 @@ export default function DashboardPage() {
     totalCurrentPortfolioValue - totalPortfolioCostBasis;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-testid="dashboard-page">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t("Dashboard")}
@@ -187,6 +187,7 @@ export default function DashboardPage() {
         <Button
           variant="outline"
           size="sm"
+          data-testid="recalculate-summary-button"
           onClick={async () => {
             await recalculateDashboardSummary();
             toast({
@@ -200,12 +201,15 @@ export default function DashboardPage() {
         </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="lg:col-span-1">
+        <Card 
+          className="lg:col-span-1"
+          data-testid="total-invested-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {t("total_invested_amount")}
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-muted-foreground" data-testid="total-invested-icon" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -222,7 +226,10 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-1">
+        <Card 
+          className="lg:col-span-1"
+          data-testid="total-realized-pl-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {t("total_realized_pl")}
@@ -250,7 +257,10 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-1">
+        <Card 
+          className="lg:col-span-1"
+          data-testid="current-portfolio-pl-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {t("total_current_portfolio_pl")}
@@ -278,12 +288,15 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-1">
+        <Card 
+          className="lg:col-span-1"
+          data-testid="total-cash-balance-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {t("total_cash_balance")}
             </CardTitle>
-            <Banknote className="h-4 w-4 text-muted-foreground" />
+            <Banknote className="h-4 w-4 text-muted-foreground" data-testid="cash-balance-icon" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -302,8 +315,8 @@ export default function DashboardPage() {
         </Card>
       </div>
       {/* Monthly Cash Flow Summary */}
-      <Card className="mb-8">
-        <CardHeader>
+      <Card className="mb-8" data-testid="monthly-cash-flow-section">
+        <CardHeader data-testid="monthly-cash-flow-header">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <CardTitle>{t("monthly_cash_flow_summary")}</CardTitle>
@@ -321,12 +334,15 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1">
+            <Card 
+              className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1"
+              data-testid="current-income-card"
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
                   {t("total_current_income_this_month")}
                 </CardTitle>
-                <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <Coins className="h-4 w-4 text-green-600 dark:text-green-400" data-testid="current-income-icon" />
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-green-700 dark:text-green-300">
@@ -343,12 +359,15 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
             {/* Total Income Card */}
-            <Card className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1">
+            <Card 
+              className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1"
+              data-testid="total-income-card"
+            >
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
                   {t("total_income_this_month")}
                 </CardTitle>
-                <Coins className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <Coins className="h-4 w-4 text-green-600 dark:text-green-400" data-testid="total-income-icon" />
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-green-700 dark:text-green-300">
@@ -414,12 +433,15 @@ export default function DashboardPage() {
           </div>
           <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
             {/* Total Expenses Card */}
-            <Card className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex flex-col h-[220px] flex-1">
+            <Card 
+              className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex-col h-[220px] flex-1"
+              data-testid="total-expenses-card"
+            >
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">
                   {t("total_expenses_this_month")}
                 </CardTitle>
-                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" data-testid="expenses-icon" />
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-red-700 dark:text-red-300">
@@ -505,12 +527,15 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
             {/* Total Investments Card */}
-            <Card className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex flex-col h-[220px] flex-1">
+            <Card 
+              className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 flex-col h-[220px] flex-1"
+              data-testid="total-investments-card"
+            >
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">
                   {t("total_investments_this_month")}
                 </CardTitle>
-                <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" data-testid="investments-icon" />
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -556,12 +581,15 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
             {/* Remaining Cash Card */}
-            <Card className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex flex-col h-[220px] flex-1">
+            <Card 
+              className="bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 flex-col h-[220px] flex-1"
+              data-testid="remaining-cash-card"
+            >
               <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {t("remaining_cash_after_expenses_investments")}
                 </CardTitle>
-                <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" data-testid="wallet-icon" />
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-gray-700 dark:text-gray-300">
@@ -581,10 +609,14 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <InvestmentDistributionChart />
-        <MonthlyInvestmentDistributionChart />
+        <div data-testid="investment-distribution-chart">
+          <InvestmentDistributionChart />
+        </div>
+        <div data-testid="monthly-investment-distribution-chart">
+          <MonthlyInvestmentDistributionChart />
+        </div>
       </div>
-      <div className="lg:col-span-3">
+      <div className="lg:col-span-3" data-testid="investment-breakdown-section">
         {dashboardSummary && (
           <InvestmentBreakdownCards
             dashboardSummary={dashboardSummary}

@@ -33,7 +33,7 @@ import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import {
   formatCurrencyWithCommas,
-  formatDateDisplay,
+  formatDateTimeDisplay,
   formatNumberWithSuffix,
 } from "@/lib/utils";
 
@@ -61,8 +61,7 @@ export function StockDetailChart({
   securityId,
   currency,
 }: StockDetailChartProps) {
-  const { t: t } = useLanguage();
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>("1W");
   const [chartData, setChartData] = useState<StockChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -158,7 +157,7 @@ export function StockDetailChart({
   if (isLoading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <div className="flex justify-center space-x-1 mb-4">
+        <div className="flex justify-center gap-2 mb-4">
           {timeRanges.map((range) => (
             <Button
               key={range}
@@ -167,14 +166,14 @@ export function StockDetailChart({
               onClick={() => setSelectedRange(range)}
               disabled
             >
-              {range}
+              {t(range)}
             </Button>
           ))}
         </div>
         <Skeleton className="h-[calc(100%-3.5rem)] w-full" />
         <p className="text-muted-foreground mt-2">
           {t("loading_chart_data_for")}
-          {selectedRange}...
+          {t(selectedRange)}...
         </p>
       </div>
     );
@@ -193,7 +192,7 @@ export function StockDetailChart({
   if (chartData.length === 0 && !isLoading) {
     return (
       <div className="w-full h-full flex flex-col">
-        <div className="flex justify-center space-x-1 mb-4">
+        <div className="flex justify-center gap-2 mb-4">
           {timeRanges.map((range) => (
             <Button
               key={range}
@@ -201,16 +200,15 @@ export function StockDetailChart({
               size="sm"
               onClick={() => setSelectedRange(range)}
             >
-              {range}
+              {t(range)}
             </Button>
           ))}
         </div>
         <div className="flex-grow flex items-center justify-center text-wrap">
           <p className="text-muted-foreground text-sm">
-            {t(
+            {`${t(
               "no_price_history_data_available_for_this_security_or_selected_range",
-            )}
-            {selectedRange}).
+            )} (${selectedRange})`}
           </p>
         </div>
       </div>
@@ -223,7 +221,7 @@ export function StockDetailChart({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex justify-center space-x-1 mb-4">
+      <div className="flex justify-center gap-2 mb-4">
         {timeRanges.map((range) => (
           <Button
             key={range}
@@ -231,7 +229,7 @@ export function StockDetailChart({
             size="sm"
             onClick={() => setSelectedRange(range)}
           >
-            {range}
+            {t(range)}
           </Button>
         ))}
       </div>
@@ -250,7 +248,7 @@ export function StockDetailChart({
             dataKey="date"
             tickFormatter={(tick) => {
               try {
-                const dateObj = new Date(tick + "T00:00:00Z"); // Assume UTC
+                const dateObj = new Date(tick.length < 12 ? tick + "T00:00:00Z" : tick); // Assume UTC
                 return format(dateObj, "dd/MM/yy");
               } catch (e) {
                 return tick;
@@ -267,7 +265,9 @@ export function StockDetailChart({
 
           <YAxis
             stroke="hsl(var(--muted-foreground))"
+            strokeDasharray="3 3"
             fontSize={10}
+            tickMargin={language === "ar" ? 30 : 5}
             tickFormatter={yAxisTickFormatter}
             domain={["auto", "auto"]}
             orientation={language === "ar" ? "right" : "left"}
@@ -279,15 +279,17 @@ export function StockDetailChart({
               backgroundColor: "hsl(var(--background))",
               borderColor: "hsl(var(--border))",
               borderRadius: "var(--radius)",
+              fontSize: "10px",
             }}
             labelStyle={{ color: "hsl(var(--foreground))" }}
             itemStyle={{ color: "hsl(var(--primary))" }}
             formatter={(value: number) => {
-              return [formatCurrencyWithCommas(value, currency), "Price"];
+              return [formatCurrencyWithCommas(value, currency)];
             }}
             labelFormatter={(label: string) => {
               try {
-                return formatDateDisplay(label + "T00:00:00Z");
+                const dateObj = label.length < 12 ? label + "T00:00:00Z" : label;
+                return formatDateTimeDisplay(dateObj)
               } catch (e) {
                 return label;
               }
@@ -302,7 +304,8 @@ export function StockDetailChart({
             stroke="hsl(var(--primary))"
             strokeWidth={2}
             dot={chartData.length < 60}
-            name="Price"
+            arabicForm="medial"
+            name={t("Price")}
           />
         </LineChart>
       </ResponsiveContainer>

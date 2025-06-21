@@ -88,7 +88,7 @@ function AddInvestmentPageContent() {
         backLabel: t("back_to_currencies"),
       },
       ["buy-security"]: {
-        title: `Buy ${securityId}`,
+        title: `${t("buy")} ${securityId}`,
         backHref: `/securities/details/${securityId}`,
         backLabel: t("back_to_buy_security"),
       },

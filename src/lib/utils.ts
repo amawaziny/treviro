@@ -97,6 +97,21 @@ export const formatDateDisplay = (dateString?: string) => {
   }
 };
 
+export const formatDateTimeDisplay = (dateString?: string) => {
+  if (!dateString) return "N/A";
+  try {
+    const date = new Date(dateString);
+    // Handle potential "Invalid Date" if dateString is not a valid ISO format
+    // Firestore serverTimestamp might initially be null before server populates it,
+    // or client-set dates could be in various formats.
+    // For robustness, ensure it's a valid date.
+    if (isNaN(date.getTime())) return dateString; // Or 'Invalid Date'
+    return format(date, "dd-MM-yyyy hh:mm:ss a");
+  } catch (e) {
+    return dateString; // Or 'Error formatting date'
+  }
+};
+
 export const getCurrentDate = () => {
   return format(new Date(), "yyyy-MM-dd");
 };
