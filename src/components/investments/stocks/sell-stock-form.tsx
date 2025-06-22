@@ -122,7 +122,7 @@ export function SellStockForm({
     if (numberOfSharesToSellNum > maxSharesToSell) {
       form.setError("numberOfSharesToSell", {
         type: "manual",
-        message: `You only own ${maxSharesToSell} ${securityLabel}.`,
+        message: `${t("you_only_own")} ${maxSharesToSell} ${securityLabel}.`,
       });
       return;
     }
@@ -176,7 +176,7 @@ export function SellStockForm({
   }
 
   const securityLabel =
-    securityBeingSold.securityType === "Fund" ? "units" : "shares";
+    securityBeingSold.securityType === "Fund" ? [t("units"), t("unit")] : [t("shares"), t("share")];
 
   if (maxSharesToSell === 0 && !isLoading) {
     return (
@@ -196,19 +196,16 @@ export function SellStockForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="p-4 border rounded-md bg-muted/50">
           <h3 className="text-lg font-medium">
-            {t("selling")}
-            {securityBeingSold.name} ({securityBeingSold.symbol})
+            {`${t("selling")} ${securityBeingSold.name} (${securityBeingSold.symbol})`}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {t("you_currently_own")}
-            {maxSharesToSell.toLocaleString()} {securityLabel}.
+            {`${t("you_currently_own")} ${maxSharesToSell} ${securityLabel[0]}.`}
           </p>
           <p className="text-sm text-muted-foreground">
-            {t("current_market_price")}{" "}
-            {securityBeingSold.price.toLocaleString(undefined, {
+            {`${t("current_market_price")} ${securityBeingSold.price.toLocaleString(undefined, {
               style: "currency",
               currency: securityBeingSold.currency,
-            })}
+            })}`}
           </p>
         </div>
 
@@ -219,9 +216,7 @@ export function SellStockForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {t("number_of")}
-                  {securityLabel}
-                  {t("to_sell")}
+                  {`${t("number_of")} ${securityLabel[0]} ${t("to_sell")}`}
                 </FormLabel>
                 <FormControl>
                   <NumericInput
@@ -246,8 +241,7 @@ export function SellStockForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {t("sell_price_per")}
-                  {securityLabel.slice(0, -1)})
+                  {`${t("sell_price_per")} ${securityLabel[1]}`}
                 </FormLabel>
                 <FormControl>
                   <NumericInput

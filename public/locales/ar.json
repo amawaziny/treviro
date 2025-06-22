@@ -444,7 +444,7 @@
   "sell": "بيع",
   "sell_date": "تاريخ البيع",
   "sell_order": "أمر البيع",
-  "sell_price_per": "سعر البيع (لكل",
+  "sell_price_per": "سعر البيع لكل",
   "sell_transaction_from": "معاملة بيع من",
   "selling": "جاري البيع",
   "send_reset_link": "إرسال رابط إعادة التعيين",
@@ -612,5 +612,8 @@
   "5Y": "5 س",
   "shares": "اﻷسهم",
   "Buy":"شراء",
-  "Sell":"بيع"
+  "Sell":"بيع",
+  "you_only_own":"أنت فقط تملك",
+  "unit": "وحدة",
+  "share": "سهم"
 }

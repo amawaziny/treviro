@@ -114,8 +114,8 @@ test.describe("Dashboard Page", () => {
     // Click the recalculate button
     await page.getByTestId("recalculate-summary-button").click();
     
-    // Wait for the toast notification
-    await expect(page.getByText(/summary recalculated/i)).toBeVisible();
+    // Wait for the toast notification to appear
+    await expect(page.getByTestId('toast-summary-recalculated')).toBeVisible();
     
     // Get the values after recalculation
     const recalculatedTotalInvested = await page.getByTestId("total-invested-card").locator("p:not(.text-xs)").first().textContent();

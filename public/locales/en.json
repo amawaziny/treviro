@@ -440,7 +440,7 @@
   "sell": "Sell",
   "sell_date": "Sell Date",
   "sell_order": "Sell Order",
-  "sell_price_per": "Sell Price (per",
+  "sell_price_per": "Sell Price per",
   "sell_transaction_from": "Sell transaction from",
   "selling": "Selling:",
   "send_reset_link": "Send Reset Link",
@@ -609,5 +609,6 @@
   "5Y":"5Y",
   "shares":"Shares",
   "Buy":"Buy",
-  "Sell":"Sell"
+  "Sell":"Sell",
+  "you_only_own":"You only own"
 }
