@@ -193,6 +193,7 @@ export default function DashboardPage() {
             toast({
               title: t("summary_recalculated"),
               description: t("dashboard_summary_values_have_been_updated"),
+              testId: "toast-summary-recalculated"
             });
           }}
         >

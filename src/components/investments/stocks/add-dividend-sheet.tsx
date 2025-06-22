@@ -28,7 +28,7 @@ export function AddDividendSheet({
   onSubmit,
   defaultDate,
 }: AddDividendSheetProps) {
-  const { t: t } = useLanguage();
+  const { t, dir } = useLanguage();
   const [amount, setAmount] = useState<string>("");
   const [date, setDate] = useState<string>(
     defaultDate || new Date().toISOString().slice(0, 10),
@@ -69,7 +69,7 @@ export function AddDividendSheet({
         className="max-w-full w-full sm:w-[400px] mx-auto rounded-t-lg"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <SheetHeader>
+          <SheetHeader className="sm:text-center">
             <SheetTitle>{t("add_dividend")}</SheetTitle>
             <SheetDescription>
               {t(
@@ -79,7 +79,7 @@ export function AddDividendSheet({
           </SheetHeader>
           <div className="flex flex-col gap-2">
             <label htmlFor="dividend-amount" className="font-medium">
-              Amount
+              {t("amount")}
             </label>
             <Input
               id="dividend-amount"
@@ -95,7 +95,7 @@ export function AddDividendSheet({
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="dividend-date" className="font-medium">
-              Date
+              {t("Date")}
             </label>
             <Input
               id="dividend-date"
@@ -105,15 +105,15 @@ export function AddDividendSheet({
               required
             />
           </div>
-          <SheetFooter>
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? t("saving") : t("add_dividend")}
-            </Button>
+          <SheetFooter className="gap-2">
             <SheetClose asChild>
               <Button type="button" variant="ghost" className="w-full">
                 {t("cancel")}
               </Button>
             </SheetClose>
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? t("saving") : t("add_dividend")}
+            </Button>
           </SheetFooter>
         </form>
       </SheetContent>
