@@ -129,9 +129,26 @@ test.describe("Regression Tests", () => {
     });
 
     test("Language Switch", async ({ page }) => {
+      // Navigate to dashboard and wait for sidebar to be visible
       await page.goto("/dashboard");
-      await page.click('button:has-text("العربية")');
-      await expect(page.locator("text=الاستثمارات")).toBeVisible();
+      const sidebar = page.locator('[data-sidebar="sidebar"]');
+      await expect(sidebar).toBeVisible();
+
+      // Switch to Arabic
+      await page.getByTestId("language-toggle-button").click();
+      await page.getByTestId("language-option-ar").click();
+      
+      // Verify Arabic text in the sidebar
+      const arabicStocks = sidebar.getByRole('button', { name: 'اﻷسهم' }).first();
+      await expect(arabicStocks).toBeVisible();
+
+      // Switch back to English
+      await page.getByTestId("language-toggle-button").click();
+      await page.getByTestId("language-option-en").click();
+      
+      // Verify English text in the sidebar
+      const englishStocks = sidebar.getByRole('button', { name: 'Stocks' }).first();
+      await expect(englishStocks).toBeVisible();
     });
 
     test("Mobile Responsiveness", async ({ page }) => {

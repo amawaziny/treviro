@@ -14,7 +14,7 @@ export const debtSubTypes = [
   "Bond",
   "Other",
 ] as const;
-export const propertyTypes = ["Residential", "Commercial", "Land"] as const;
+export const propertyTypes = ["Residential", "Touristic", "Commercial", "Land"] as const;
 export const incomeTypes = [
   "Profit Share",
   "Bonus",

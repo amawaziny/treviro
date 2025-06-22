@@ -229,16 +229,16 @@ export default function MyRealEstatePage() {
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {t("direct")}
-                {formatCurrencyWithCommas(totalDirectRealEstateInvested)})
+                {`${t("direct")} ${formatCurrencyWithCommas(
+                  totalDirectRealEstateInvested,
+                  realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
+                )}`}
               </span>
               <span>
-                {t("funds")}{" "}
-                {formatCurrencyWithCommas(
+                {`${t("funds")} ${formatCurrencyWithCommas(
                   totalFundCost,
                   realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
-                )}
-                )
+                )}`}
               </span>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function MyRealEstatePage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Home className="mr-2 h-4 w-4 text-primary" />
+              <Home className="me-2 h-4 w-4 text-primary" />
               {t("no_direct_real_estate_holdings")}
             </CardTitle>
           </CardHeader>
@@ -270,7 +270,7 @@ export default function MyRealEstatePage() {
       <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Building className="mr-2 h-4 w-4 text-primary" />
+            <Building className="me-2 h-4 w-4 text-primary" />
             {t("real_estate_fund_investments_reits_etc")}
           </CardTitle>
           <CardDescription>

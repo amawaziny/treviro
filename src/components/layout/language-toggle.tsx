@@ -16,16 +16,22 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" data-testid="language-toggle-button">
           <Globe className="h-[1.2rem] w-[1.2rem]" />
           <span className="sr-only">{t("toggle_language")}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setLanguage("en")}>
+      <DropdownMenuContent align="end" data-testid="language-menu">
+        <DropdownMenuItem 
+          onClick={() => setLanguage("en")}
+          data-testid="language-option-en"
+        >
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage("ar")}>
+        <DropdownMenuItem 
+          onClick={() => setLanguage("ar")}
+          data-testid="language-option-ar"
+        >
           العربية
         </DropdownMenuItem>
       </DropdownMenuContent>

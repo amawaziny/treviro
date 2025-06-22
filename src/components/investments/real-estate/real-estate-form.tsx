@@ -44,7 +44,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormLabel>{t("name_description_optional")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g., Downtown Apartment or Beach House Plot"
+                    placeholder={t("e.g., Downtown Apartment or Beach House Plot")}
                     {...field}
                     value={field.value || ""}
                   />
@@ -62,7 +62,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormLabel>{t("property_address")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g., 123 Main St, Anytown"
+                    placeholder={t("e.g., 123 Main St, Anytown")}
                     {...field}
                     value={field.value || ""}
                   />
@@ -115,7 +115,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                   <SelectContent>
                     {propertyTypes.map((pType) => (
                       <SelectItem key={pType} value={pType}>
-                        {pType}
+                        {t(pType)}
                       </SelectItem>
                     ))}
                   </SelectContent>
