@@ -297,7 +297,8 @@ export default function SecurityDetailPage() {
   if (
     isLoadingListedSecurities ||
     isLoadingInvestments ||
-    security === undefined || security == null
+    security === undefined ||
+    security == null
   ) {
     return (
       <div className="flex h-[calc(100vh-8rem)] w-full items-center justify-center">
@@ -461,11 +462,7 @@ export default function SecurityDetailPage() {
         </div>
       </Card>
 
-      <Tabs
-        defaultValue="performance"
-        className="w-full max-w-full"
-        dir={dir}
-      >
+      <Tabs defaultValue="performance" className="w-full max-w-full" dir={dir}>
         <TabsList className="flex w-full gap-3 md:grid md:grid-cols-3 h-11 items-center px-1">
           <TabsTrigger
             value="performance"

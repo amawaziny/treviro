@@ -176,7 +176,9 @@ export function SellStockForm({
   }
 
   const securityLabel =
-    securityBeingSold.securityType === "Fund" ? [t("units"), t("unit")] : [t("shares"), t("share")];
+    securityBeingSold.securityType === "Fund"
+      ? [t("units"), t("unit")]
+      : [t("shares"), t("share")];
 
   if (maxSharesToSell === 0 && !isLoading) {
     return (
@@ -202,10 +204,13 @@ export function SellStockForm({
             {`${t("you_currently_own")} ${maxSharesToSell} ${securityLabel[0]}.`}
           </p>
           <p className="text-sm text-muted-foreground">
-            {`${t("current_market_price")} ${securityBeingSold.price.toLocaleString(undefined, {
-              style: "currency",
-              currency: securityBeingSold.currency,
-            })}`}
+            {`${t("current_market_price")} ${securityBeingSold.price.toLocaleString(
+              undefined,
+              {
+                style: "currency",
+                currency: securityBeingSold.currency,
+              },
+            )}`}
           </p>
         </div>
 

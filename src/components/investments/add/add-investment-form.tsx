@@ -1187,7 +1187,7 @@ export function AddInvestmentForm({
       await addInvestment(newInvestment, analysisResultFromAi);
       toast({
         title: t("investment_added"),
-        description: `${newInvestment.name} (${finalInvestmentType}) ${t("has_been_successfully_added")}.`,
+        description: `${newInvestment.name} (${t(finalInvestmentType)}) ${t("has_been_successfully_added")}.`,
       });
     }
 

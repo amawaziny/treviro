@@ -17,7 +17,7 @@ interface MyGoldListItemProps {
 }
 
 export function MyGoldListItem({ holding }: MyGoldListItemProps) {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
 
   const {
     id,
@@ -67,7 +67,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
       <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
         <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
           <Link
-            href={detailPageLink}
+            href={itemType === "fund" ? detailPageLink : "#"}
             passHref
             className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2"
           >
@@ -89,14 +89,16 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
               <p className="text-base font-medium truncate">
                 {itemType === "fund"
                   ? fundDetails?.symbol || displayName
-                  : physicalGoldType || displayName}
+                  : t(physicalGoldType || "") || displayName}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {quantityLabel}:{" "}
-                {totalQuantity.toLocaleString(undefined, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })}
+                {`${t(quantityLabel)}: ${totalQuantity.toLocaleString(
+                  undefined,
+                  {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
+                  },
+                )}`}
               </p>
             </div>
           </Link>

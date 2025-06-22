@@ -248,7 +248,9 @@ export function StockDetailChart({
             dataKey="date"
             tickFormatter={(tick) => {
               try {
-                const dateObj = new Date(tick.length < 12 ? tick + "T00:00:00Z" : tick); // Assume UTC
+                const dateObj = new Date(
+                  tick.length < 12 ? tick + "T00:00:00Z" : tick,
+                ); // Assume UTC
                 return format(dateObj, "dd/MM/yy");
               } catch (e) {
                 return tick;
@@ -288,8 +290,9 @@ export function StockDetailChart({
             }}
             labelFormatter={(label: string) => {
               try {
-                const dateObj = label.length < 12 ? label + "T00:00:00Z" : label;
-                return formatDateTimeDisplay(dateObj)
+                const dateObj =
+                  label.length < 12 ? label + "T00:00:00Z" : label;
+                return formatDateTimeDisplay(dateObj);
               } catch (e) {
                 return label;
               }

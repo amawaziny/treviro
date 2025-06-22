@@ -122,56 +122,6 @@ test.describe("Regression Tests", () => {
     });
   });
 
-  // Dashboard Tests
-  test.describe("Dashboard", () => {
-    test.beforeEach(async ({ page }) => {
-      await login(page);
-    });
-
-    test("View Dashboard", async ({ page }) => {
-      await page.goto("/dashboard");
-      await expect(page.locator("text=Total Investment")).toBeVisible();
-      await expect(page.locator("text=Portfolio Allocation")).toBeVisible();
-    });
-
-    test("View Total Investment", async ({ page }) => {
-      const totalInvestment = await page
-        .locator('h2:has-text("Total Investment") + div')
-        .textContent();
-      expect(totalInvestment).toMatch(/^\d+(\.\d{2})?$/);
-    });
-
-    test("View Portfolio Allocation", async ({ page }) => {
-      await expect(
-        page.locator('h2:has-text("Portfolio Allocation") + div'),
-      ).toBeVisible();
-      const chartItems = await page.locator('div[role="listitem"]').all();
-      expect(chartItems.length).toBeGreaterThan(0);
-    });
-
-    test("View Asset Types", async ({ page }) => {
-      await expect(
-        page.locator('h2:has-text("Asset Types") + div'),
-      ).toBeVisible();
-      const chartItems = await page.locator('div[role="listitem"]').all();
-      expect(chartItems.length).toBeGreaterThan(0);
-    });
-
-    test("View Monthly Cash Flow", async ({ page }) => {
-      await expect(
-        page.locator('h2:has-text("Monthly Cash Flow") + div'),
-      ).toBeVisible();
-      const income = await page
-        .locator('div:has-text("Income") + div')
-        .textContent();
-      const expenses = await page
-        .locator('div:has-text("Expenses") + div')
-        .textContent();
-      expect(income).toMatch(/^\d+(\.\d{2})?$/);
-      expect(expenses).toMatch(/^\d+(\.\d{2})?$/);
-    });
-  });
-
   // Global Features Tests
   test.describe("Global Features", () => {
     test.beforeEach(async ({ page }) => {

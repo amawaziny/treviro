@@ -252,7 +252,7 @@ export default function MyGoldPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-56px)] pb-4">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Gold
+          {t("gold")}
         </h1>
         <p className="text-muted-foreground text-sm">
           {t("overview_of_your_direct_gold_and_gold_fund_investments")}
@@ -283,14 +283,14 @@ export default function MyGoldPage() {
               : formatCurrencyWithCommas(totalProfitLoss)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {totalProfitLossPercent === Infinity
-              ? "∞"
-              : totalProfitLossPercent.toFixed(2)}
-            {t("overall_pl")}
+            {`${
+              totalProfitLossPercent === Infinity
+                ? "∞"
+                : totalProfitLossPercent.toFixed(2)
+            } ${t("overall_pl")}`}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {t("total_invested")}
-            {formatCurrencyWithCommas(totalCost)}
+            {`${t("total_invested")} ${formatCurrencyWithCommas(totalCost)}`}
           </p>
         </CardContent>
       </Card>
@@ -317,7 +317,7 @@ export default function MyGoldPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Gem className="mr-2 h-4 w-4 text-primary" />
+              <Gem className="me-2 h-4 w-4 text-primary" />
               {t("no_gold_holdings")}
             </CardTitle>
           </CardHeader>

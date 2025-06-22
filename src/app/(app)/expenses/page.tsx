@@ -214,7 +214,8 @@ export default function ExpensesPage() {
       {/* Filter Controls */}
       <div className="flex flex-wrap gap-4 items-center mb-6">
         <label className="flex items-center gap-2 cursor-pointer">
-          <Switch dir="auto"
+          <Switch
+            dir="auto"
             checked={showAll}
             onCheckedChange={setShowAll}
             id="show-all-switch"
@@ -224,7 +225,8 @@ export default function ExpensesPage() {
           <span>{t("show_all_expenses")}</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
-          <Switch  dir="auto"
+          <Switch
+            dir="auto"
             checked={showEnded}
             onCheckedChange={setShowEnded}
             id="show-ended-switch"
@@ -328,7 +330,8 @@ export default function ExpensesPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                {t("Remove")} {record.description || record.category}
+                                {t("Remove")}{" "}
+                                {record.description || record.category}
                               </span>
                             </Button>
                           </AlertDialogTrigger>
@@ -344,7 +347,9 @@ export default function ExpensesPage() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                              <AlertDialogCancel>
+                                {t("Cancel")}
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
@@ -387,7 +392,10 @@ export default function ExpensesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p data-testid="no-expenses-message" className="text-muted-foreground py-4 text-center">
+            <p
+              data-testid="no-expenses-message"
+              className="text-muted-foreground py-4 text-center"
+            >
               {`${t("you_havent_added_any_itemized_expenses_for")} ${formatMonthYear(new Date())} ${t("yet")}`}
             </p>
           </CardContent>
