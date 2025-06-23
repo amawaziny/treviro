@@ -9,6 +9,7 @@ import { Building, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import {
   cn,
   formatCurrencyWithCommas,
+  formatNumberForMobile,
   formatNumberWithSuffix,
 } from "@/lib/utils";
 import Link from "next/link";
@@ -129,7 +130,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
             <div className="text-end flex-shrink-0">
               {typeof amountInvested === "number" ? (
                 <p className="text-md font-bold">
-                  {`${isMobile ? formatNumberWithSuffix(amountInvested, currency) : formatCurrencyWithCommas(amountInvested, currency)}`}
+                  {formatNumberForMobile(isMobile, amountInvested, currency)}
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">{t("na")}</p>
@@ -144,10 +145,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
               {`${t("maturity")}: ${maturityDate || t("na")}`}
             </p>
             <p>
-              {`${t("monthly_interest")}: ${isMobile ? formatNumberWithSuffix(projectedMonthlyInterest, currency) : formatCurrencyWithCommas(projectedMonthlyInterest, currency)}`}
+              {`${t("monthly_interest")}: ${formatNumberForMobile(isMobile, projectedMonthlyInterest, currency)}`}
             </p>
             <p className="text-end">
-              {`${t("annual_interest")}: ${isMobile ? formatNumberWithSuffix(projectedAnnualInterest, currency) : formatCurrencyWithCommas(projectedAnnualInterest, currency)}`}
+              {`${t("annual_interest")}: ${formatNumberForMobile(isMobile, projectedAnnualInterest, currency)}`}
             </p>
           </div>
         </CardContent>
@@ -201,7 +202,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                 </p>
               </Link>
               <p className="text-xs text-muted-foreground truncate">
-                {`${fundDetails?.symbol} ${t("units")} ${isMobile ? formatNumberWithSuffix(totalUnits) : totalUnits?.toLocaleString()}`}
+                {`${fundDetails?.symbol} ${t("units")} ${totalUnits?.toLocaleString()}`}
               </p>
             </div>
           </div>
@@ -215,9 +216,7 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
                     isProfitable ? "text-accent" : "text-destructive",
                   )}
                 >
-                  {isMobile
-                    ? formatNumberWithSuffix(profitLoss, currency)
-                    : formatCurrencyWithCommas(profitLoss, currency)}
+                  {formatNumberForMobile(isMobile, profitLoss, currency)}
                 </p>
                 <Badge
                   variant={isProfitable ? "default" : "destructive"}
@@ -285,24 +284,10 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
 
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
           <p>
-            {t("avg_cost")}
-
-            <span className="md:hidden">
-              {formatNumberWithSuffix(averagePurchasePrice || 0, currency)}
-            </span>
-            <span className="hidden md:inline">
-              {formatCurrencyWithCommas(averagePurchasePrice, currency)}
-            </span>
+            {`${t("avg_cost")}: ${formatNumberForMobile(isMobile, averagePurchasePrice || 0, currency)}`}
           </p>
           <p>
-            {t("current_value")}
-
-            <span className="md:hidden">
-              {formatNumberWithSuffix(currentMarketPrice || 0, currency)}
-            </span>
-            <span className="hidden md:inline">
-              {formatCurrencyWithCommas(currentMarketPrice, currency)}
-            </span>
+            {`${t("current_value")}: ${formatNumberForMobile(isMobile, currentMarketPrice || 0, currency)}`}
           </p>
         </div>
       </CardContent>

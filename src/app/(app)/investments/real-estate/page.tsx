@@ -8,7 +8,7 @@ import type {
   StockInvestment,
   ListedSecurity,
 } from "@/lib/types";
-import { formatCurrencyWithCommas, isRealEstateRelatedFund } from "@/lib/utils";
+import { formatCurrencyWithCommas, formatNumberForMobile, isRealEstateRelatedFund } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -32,17 +32,14 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import { cn, formatNumberWithSuffix } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useRouter } from "next/navigation";
 import { MyRealEstateListItem } from "@/components/investments/real-estate/my-real-estate-list-item";
 
 export default function MyRealEstatePage() {
-  const { t } = useLanguage();
+  const { t , language} = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
-  const { language } = useLanguage();
   const isMobile = useIsMobile();
-  const router = useRouter();
 
   const directRealEstateHoldings = React.useMemo(() => {
     return investments.filter(
@@ -200,15 +197,7 @@ export default function MyRealEstatePage() {
               isTotalFundProfitable ? "text-accent" : "text-destructive",
             )}
           >
-            {isMobile
-              ? formatNumberWithSuffix(
-                  totalFundPnL,
-                  realEstateFundHoldings[0]?.fundDetails.currency,
-                )
-              : formatCurrencyWithCommas(
-                  totalFundPnL,
-                  realEstateFundHoldings[0]?.fundDetails.currency,
-                )}
+            {formatNumberForMobile(isMobile, totalFundPnL, realEstateFundHoldings[0]?.fundDetails.currency)}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalFundPnLPercent === Infinity
@@ -222,23 +211,15 @@ export default function MyRealEstatePage() {
                 {t("total_invested_in_real_estate")}
               </span>
               <span className="font-semibold">
-                {isMobile
-                  ? formatNumberWithSuffix(totalInvestedInRealEstate)
-                  : formatCurrencyWithCommas(totalInvestedInRealEstate)}
+                {formatNumberForMobile(isMobile, totalInvestedInRealEstate, realEstateFundHoldings[0]?.fundDetails.currency)}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {`${t("direct")} ${formatCurrencyWithCommas(
-                  totalDirectRealEstateInvested,
-                  realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
-                )}`}
+                {`${t("direct")} ${formatNumberForMobile(isMobile, totalDirectRealEstateInvested, realEstateFundHoldings[0]?.fundDetails.currency)}`}
               </span>
               <span>
-                {`${t("funds")} ${formatCurrencyWithCommas(
-                  totalFundCost,
-                  realEstateFundHoldings[0]?.fundDetails.currency || "EGP",
-                )}`}
+                {`${t("funds")} ${formatNumberForMobile(isMobile, totalFundCost, realEstateFundHoldings[0]?.fundDetails.currency)}`}
               </span>
             </div>
           </div>
@@ -327,28 +308,16 @@ export default function MyRealEstatePage() {
                         {fundInv.numberOfShares?.toLocaleString() || t("na")}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatCurrencyWithCommas(
-                          avgPurchasePrice,
-                          displayCurrency,
-                        )}
+                        {formatNumberForMobile(isMobile, avgPurchasePrice, displayCurrency)}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatCurrencyWithCommas(
-                          fundInv.totalCost,
-                          displayCurrency,
-                        )}
+                        {formatNumberForMobile(isMobile, fundInv.totalCost, displayCurrency)}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatCurrencyWithCommas(
-                          fundInv.fundDetails.price || 0,
-                          displayCurrency,
-                        )}
+                        {formatNumberForMobile(isMobile, fundInv.fundDetails.price || 0, displayCurrency)}
                       </TableCell>
                       <TableCell className="text-end">
-                        {formatCurrencyWithCommas(
-                          fundInv.currentValue,
-                          displayCurrency,
-                        )}
+                        {formatNumberForMobile(isMobile, fundInv.currentValue, displayCurrency)}
                       </TableCell>
                       <TableCell
                         className={cn(
@@ -358,10 +327,7 @@ export default function MyRealEstatePage() {
                             : "text-destructive",
                         )}
                       >
-                        {formatCurrencyWithCommas(
-                          fundInv.profitLoss,
-                          displayCurrency,
-                        )}
+                        {formatNumberForMobile(isMobile, fundInv.profitLoss, displayCurrency)}
                       </TableCell>
                     </TableRow>
                   );

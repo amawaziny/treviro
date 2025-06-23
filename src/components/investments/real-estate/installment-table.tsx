@@ -68,15 +68,10 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     useState<Installment | null>(null);
 
   const [chequeNumber, setChequeNumber] = useState("");
-  const [localInstallments, setLocalInstallments] = useState<Installment[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    setLocalInstallments(installments);
-  }, [installments]);
 
   const handleRowClick = (installment: Installment) => {
     setSelectedNumber(installment.number);
@@ -109,21 +104,9 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     return totalAmount - totalPaidAmount;
   }, [totalAmount, totalPaidAmount]);
 
-  const displayInstallments = useMemo(() => {
-    return sortedInstallments.map((installment, index) => ({
-      ...installment,
-      isMaintenance: installment.description
-        ?.toLowerCase()
-        .includes("maintenance"),
-    }));
-  }, [sortedInstallments]);
-
   const handleDeleteInstallment = async (installmentNumber: number) => {
     if (onDeleteInstallment) {
       await onDeleteInstallment(installmentNumber);
-      setLocalInstallments((prev) =>
-        prev.filter((inst) => inst.number !== installmentNumber),
-      );
       setShowDeleteDialog(null);
     }
   };
@@ -133,42 +116,27 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       return;
     }
 
-    const installmentToUpdate = localInstallments.find(
-      (inst) => inst.number === selectedNumber,
-    );
-    if (!installmentToUpdate) {
-      return;
-    }
-
     const newStatus = markAsPaid ? "Paid" : "Unpaid";
     let newAmountInvested = investment.amountInvested || 0;
 
-    if (!installmentToUpdate.isMaintenance) {
+    if(selectedInstallment){
       const amountChange = markAsPaid
-        ? installmentToUpdate.amount
-        : -installmentToUpdate.amount;
+        ? selectedInstallment.amount
+        : -selectedInstallment.amount;
       newAmountInvested += amountChange;
     }
 
     try {
-      const updatedInstallments = localInstallments.map((inst) => {
+      const updatedInstallments = installments.map((inst) => {
         const isMatchingInstallment = inst.number === selectedNumber;
-
-        const baseInstClean: any = {
-          number: inst.number,
-          dueDate: inst.dueDate,
-          amount: inst.amount,
-          status: isMatchingInstallment ? newStatus : inst.status,
-          isMaintenance: inst.isMaintenance || false, // Ensure flag is preserved
-        };
-        return baseInstClean;
+        return {...inst, status: isMatchingInstallment ? newStatus : inst.status};
       });
 
       await updateRealEstateInvestment(investmentId, {
         installments: updatedInstallments,
+        amountInvested: newAmountInvested
       });
 
-      setLocalInstallments(updatedInstallments);
       setShowSheet(false);
       setSelectedNumber(null);
       setChequeNumber("");
@@ -220,7 +188,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
             </div>
 
             <div className="space-y-4">
-              {displayInstallments.map((installment, index) => (
+              {sortedInstallments.map((installment, index) => (
                 <Card
                   key={installment.number}
                   className="border-b border-gray-200 dark:border-gray-800"
@@ -321,17 +289,9 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                         setSelectedNumber(null);
                       }}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </Button>
-                    <Button
-                      onClick={() => {
-                        if (selectedInstallment?.status === "Paid") {
-                          handleStatusChange(false);
-                        } else {
-                          handleStatusChange(true);
-                        }
-                      }}
-                    >
+                    <Button onClick={() => handleStatusChange(selectedInstallment?.status !== "Paid")}>
                       {selectedInstallment?.status === "Paid"
                         ? t("mark_as_unpaid")
                         : t("mark_as_paid")}
@@ -355,7 +315,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => handleDeleteInstallment(showDeleteDialog)}
                     >

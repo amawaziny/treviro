@@ -110,6 +110,7 @@
   "buy_security": "شراء ورقة مالية",
   "buysecurity": "شراء-ورقة-مالية",
   "cancel": "إلغاء",
+  "Cancel": "إلغاء",
   "cannot_save_investment_data_missing_or_original_amount_not_loaded": "ﻻ يمكن الحفظ، بيانات اﻻستثمار مفقودة أو المبلغ اﻷصلي غير محمل.",
   "certificate_interest_frequency": "تكرار فائدة الشهادة",
   "charity_fixed": "صدقة (ثابتة)",
@@ -626,5 +627,6 @@
   "Touristic": "سياحي",
   "Land": "ارض",
   "e.g., Downtown Apartment or Beach House Plot": "مثال: قطعة أرض لشقة في وسط المدينة أو منزل على الشاطئ",
-  "e.g., 123 Main St, Anytown":"مثال: 123 الشارع الرئيسي، أي مدينة"
+  "e.g., 123 Main St, Anytown": "مثال: 123 الشارع الرئيسي، أي مدينة",
+  "Optional: e.g., Q4 payment, Final finishing payment, Maintenance": "اختياري: مثال: دفعة Q4، دفعة انتهاء المشروع، الصيانة"
 }

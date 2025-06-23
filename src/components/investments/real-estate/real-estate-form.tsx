@@ -44,7 +44,9 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
                 <FormLabel>{t("name_description_optional")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={t("e.g., Downtown Apartment or Beach House Plot")}
+                    placeholder={t(
+                      "e.g., Downtown Apartment or Beach House Plot",
+                    )}
                     {...field}
                     value={field.value || ""}
                   />

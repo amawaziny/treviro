@@ -7,7 +7,7 @@ import { Home, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils";
+import { formatCurrencyWithCommas, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -93,12 +93,7 @@ export function MyRealEstateListItem({
             onClick={(e) => e.stopPropagation()}
           >
             <span className="font-bold text-lg">
-              {isMobile
-                ? formatNumberWithSuffix(investment.amountInvested)
-                : formatCurrencyWithCommas(
-                    investment.amountInvested,
-                    investment.currency,
-                  )}
+              {formatNumberForMobile(isMobile, investment.amountInvested, investment.currency)}
             </span>
             <Button
               variant="ghost"
@@ -128,7 +123,9 @@ export function MyRealEstateListItem({
               <AlertDialogTrigger asChild></AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="sm:text-center">{t("are_you_sure")}</AlertDialogTitle>
+                  <AlertDialogTitle className="sm:text-center">
+                    {t("are_you_sure")}
+                  </AlertDialogTitle>
                   <AlertDialogDescription className="sm:text-center">
                     {`${t("this_action_will_permanently_remove_your_record_for")} ${investment.name || investment.propertyAddress} ${t("this_cannot_be_undone")}`}
                   </AlertDialogDescription>
@@ -148,17 +145,21 @@ export function MyRealEstateListItem({
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
           <p>
-            {`${t("installment")}: ${investment.installmentAmount
-              ? `${isMobile ? formatNumberWithSuffix(investment.installmentAmount) : formatCurrencyWithCommas(investment.installmentAmount, investment.currency)}`
-              : t("na")}`}
+            {`${t("installment")}: ${
+              investment.installmentAmount
+                ? `${formatNumberForMobile(isMobile, investment.installmentAmount, investment.currency)}`
+                : t("na")
+            }`}
           </p>
           <p className="text-end">
             {`${t("frequency")}: ${t(investment.installmentFrequency) || t("na")}`}
           </p>
           <p>
-            {`${t("total_price")}: ${investment.totalInstallmentPrice
-              ? `${isMobile ? formatNumberWithSuffix(investment.totalInstallmentPrice) : formatCurrencyWithCommas(investment.totalInstallmentPrice, investment.currency)}`
-              : t("na")}`}
+            {`${t("total_price")}: ${
+              investment.totalInstallmentPrice
+                ? `${formatNumberForMobile(isMobile, investment.totalInstallmentPrice, investment.currency)}`
+                : t("na")
+            }`}
           </p>
           <p className="text-end">
             {`${t("end_date")}: ${investment.installmentEndDate || t("na")}`}

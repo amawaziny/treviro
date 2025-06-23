@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
+import { formatCurrencyWithCommas, formatDateDisplay, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
 import { generateInstallmentSchedule } from "@/lib/installment-utils";
@@ -31,9 +31,11 @@ import {
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { RealEstateInvestment } from "@/lib/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function RealEstateDetailPage() {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const router = useRouter();
   const params = useParams();
   const { setHeaderProps, closeForm, openForm } = useForm();
@@ -75,113 +77,13 @@ export default function RealEstateDetailPage() {
     };
   }, [investment, setHeaderProps, openForm, closeForm]);
 
-  const today = useMemo(() => new Date(), []);
   const [installments, setInstallments] = useState<Installment[]>([]);
 
   useEffect(() => {
     if (!investment) return;
 
-    let currentInstallments: Installment[] = [];
-
-    if (investment.installments && investment.installments.length > 0) {
-      currentInstallments = investment.installments.map((inst) => ({
-        ...inst,
-        description: inst.description || "",
-        isMaintenance:
-          inst.isMaintenance ||
-          (inst.description === "Maintenance" &&
-            inst.dueDate === investment.maintenancePaymentDate),
-      }));
-    } else if (investment.paidInstallments) {
-      // Legacy or auto-generation path
-      const generatedInstallments = generateInstallmentSchedule(
-        investment,
-        investment.paidInstallments,
-        today,
-      );
-      currentInstallments = generatedInstallments.map((inst) => ({
-        ...inst,
-        description: inst.description || "",
-        isMaintenance: false,
-      }));
-    }
-
-    // Check for and add the main maintenance payment if defined on the investment
-    if (
-      investment.maintenanceAmount &&
-      investment.maintenanceAmount > 0 &&
-      investment.maintenancePaymentDate
-    ) {
-      const maintenanceDateStr = investment.maintenancePaymentDate;
-      // Check if a maintenance payment for this specific date and amount (and description) already exists
-      const alreadyHasThisMaintenance = currentInstallments.some(
-        (inst) =>
-          inst.isMaintenance &&
-          inst.dueDate === maintenanceDateStr &&
-          inst.amount === investment.maintenanceAmount,
-      );
-
-      if (!alreadyHasThisMaintenance) {
-        const maxNumber =
-          currentInstallments.length > 0
-            ? Math.max(...currentInstallments.map((i) => i.number), 0)
-            : 0;
-
-        currentInstallments.push({
-          number: maxNumber + 1,
-          dueDate: maintenanceDateStr,
-          amount: investment.maintenanceAmount,
-          status: "Unpaid",
-          description: "Maintenance",
-          isMaintenance: true,
-        });
-      }
-    }
-
-    currentInstallments.sort(
-      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
-    );
-    setInstallments(currentInstallments);
-
-    const totalPaidPurchaseInstallments = currentInstallments
-      .filter((inst) => inst.status === "Paid" && !inst.isMaintenance)
-      .reduce((sum, inst) => sum + (inst.amount || 0), 0);
-
-    const currentAmountInvested = investment.amountInvested || 0;
-    const hasMeaningfulDifference =
-      Math.abs(totalPaidPurchaseInstallments - currentAmountInvested) > 0.01;
-
-    if (
-      hasMeaningfulDifference &&
-      currentInstallments.some((inst) => !inst.isMaintenance)
-    ) {
-      const syncAmountInvested = async () => {
-        try {
-          await updateRealEstateInvestment(investment.id, {
-            amountInvested: totalPaidPurchaseInstallments,
-          });
-        } catch (error) {
-          console.error(
-            t(
-              "failed_to_sync_amountinvested_based_on_paid_purchase_installments",
-            ),
-
-            error,
-          );
-        }
-      };
-      syncAmountInvested();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    investment?.id,
-    JSON.stringify(investment?.installments),
-    JSON.stringify(investment?.paidInstallments),
-    investment?.amountInvested,
-    investment?.maintenanceAmount,
-    investment?.maintenancePaymentDate,
-    today,
-  ]);
+    setInstallments(investment.installments || []);
+  }, [investment]);
 
   const handleDeleteInstallment = async (installmentNumber: number) => {
     try {
@@ -197,12 +99,9 @@ export default function RealEstateDetailPage() {
       const updatedInstallments = installments.filter(
         (inst) => inst.number !== installmentNumber,
       );
-      const cleanInstallments = updatedInstallments.map((inst) => {
-        return { ...inst, isMaintenance: inst.isMaintenance || false };
-      });
 
       await updateRealEstateInvestment(investment.id, {
-        installments: cleanInstallments,
+        installments: updatedInstallments,
       });
       // setInstallments(updatedInstallments); // Local state will be updated by useEffect
       toast({
@@ -245,12 +144,8 @@ export default function RealEstateDetailPage() {
         newPaymentObj,
       ];
 
-      const cleanInstallments = updatedInstallments.map((inst) => {
-        return { ...inst, isMaintenance: inst.isMaintenance || false }; // Ensure isMaintenance is boolean
-      });
-
       await updateRealEstateInvestment(investment.id, {
-        installments: cleanInstallments,
+        installments: updatedInstallments,
       });
 
       toast({
@@ -295,7 +190,7 @@ export default function RealEstateDetailPage() {
             className="mt-4"
             onClick={() => router.back()}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("back")}
           </Button>
         </CardContent>
       </Card>
@@ -322,25 +217,25 @@ export default function RealEstateDetailPage() {
             <div className="font-medium text-muted-foreground">
               {t("paid_towards_purchase")}
             </div>
-            <div>{formatNumberWithSuffix(investment.amountInvested)}</div>
+            <div>{formatNumberForMobile(isMobile, investment.amountInvested)}</div>
             <div className="font-medium text-muted-foreground">
               {t("installment_amount")}
             </div>
             <div>
               {investment.installmentAmount
-                ? formatNumberWithSuffix(investment.installmentAmount)
+                ? formatNumberForMobile(isMobile, investment.installmentAmount)
                 : t("na")}
             </div>
             <div className="font-medium text-muted-foreground">
               {t("installment_frequency")}
             </div>
-            <div>{investment.installmentFrequency || t("na")}</div>
+            <div>{t(investment.installmentFrequency || "na")}</div>
             <div className="font-medium text-muted-foreground">
               {t("total_price_at_end")}
             </div>
             <div>
               {investment.totalInstallmentPrice
-                ? formatNumberWithSuffix(investment.totalInstallmentPrice)
+                ? formatNumberForMobile(isMobile, investment.totalInstallmentPrice)
                 : t("na")}
             </div>
             <div className="font-medium text-muted-foreground">
@@ -354,8 +249,7 @@ export default function RealEstateDetailPage() {
                     {t("maintenance_payment")}
                   </div>
                   <div>
-                    {formatNumberWithSuffix(investment.maintenanceAmount)} on{" "}
-                    {formatDateDisplay(investment.maintenancePaymentDate)}
+                    {`${formatNumberForMobile(isMobile, investment.maintenanceAmount)} - ${formatDateDisplay(investment.maintenancePaymentDate)}`}
                   </div>
                 </>
               )}
@@ -364,7 +258,7 @@ export default function RealEstateDetailPage() {
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-semibold">{t("payment_schedule")}</h3>
               <Button onClick={() => setShowAddPaymentDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4" />
                 {t("add_payment")}
               </Button>
             </div>
@@ -382,19 +276,18 @@ export default function RealEstateDetailPage() {
             open={showAddPaymentDialog}
             onOpenChange={setShowAddPaymentDialog}
           >
-            <SheetContent side="bottom" className="sm:max-w-[425px]">
+            <SheetContent side="bottom">
               <SheetHeader>
                 <SheetTitle>{t("add_payment")}</SheetTitle>
                 <SheetDescription>
                   {t("add_a_new_future_payment_to_the_schedule")}
                 </SheetDescription>
               </SheetHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dueDate" className="text-end">
+              <div className="grid gap-2 py-4">
+                  <Label htmlFor="dueDate">
                     {t("due_date")}
                   </Label>
-                  <div className="col-span-3">
+                  <div className="col-span-1">
                     <Input
                       id="dueDate"
                       type="date"
@@ -409,15 +302,12 @@ export default function RealEstateDetailPage() {
                       }}
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="amount" className="text-end">
+                  <Label htmlFor="amount">
                     {t("amount")}
                   </Label>
                   <Input
                     id="amount"
                     type="number"
-                    className="col-span-3"
                     value={newPayment.amount || ""}
                     onChange={(e) =>
                       setNewPayment({
@@ -426,15 +316,12 @@ export default function RealEstateDetailPage() {
                       })
                     }
                   />
-                </div>
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <Label htmlFor="description" className="text-end pt-2">
+                  <Label htmlFor="description" className="pt-2">
                     {t("description")}
                   </Label>
                   <Textarea
                     id="description"
-                    className="col-span-3"
-                    placeholder="Optional: e.g., Q4 payment, Final finishing payment, Maintenance"
+                    placeholder={t("Optional: e.g., Q4 payment, Final finishing payment, Maintenance")}
                     value={newPayment.description}
                     onChange={(e) =>
                       setNewPayment({
@@ -443,16 +330,20 @@ export default function RealEstateDetailPage() {
                       })
                     }
                   />
-                </div>
               </div>
               <SheetFooter>
-                <div className="space-y-2">
+                <div className="flex flex-row-reverse gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAddPaymentDialog(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
                   <Button
                     disabled={
                       isSubmitting || !newPayment.amount || !newPayment.dueDate
                     }
                     onClick={handleAddPayment}
-                    className="w-full justify-center"
                   >
                     {isSubmitting ? (
                       <>
@@ -462,13 +353,6 @@ export default function RealEstateDetailPage() {
                     ) : (
                       t("add_payment")
                     )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAddPaymentDialog(false)}
-                    className="w-full justify-center"
-                  >
-                    {t("cancel")}
                   </Button>
                 </div>
               </SheetFooter>

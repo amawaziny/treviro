@@ -24,31 +24,43 @@ interface PaidInstallment {
   chequeNumber?: string;
   amount?: number;
   dueDate?: string;
+  isDownPayment?: boolean;
+  isMaintenance?: boolean;
 }
 
 export function generateInstallmentSchedule(
   investment: RealEstateInvestment,
   paidInstallments: PaidInstallment[] = [],
-  today: Date = new Date(),
 ): Installment[] {
   if (
     !investment.installmentAmount ||
     !investment.installmentFrequency ||
-    !investment.purchaseDate ||
+    !investment.installmentStartDate ||
     !investment.installmentEndDate
   ) {
     return [];
   }
 
   const installments: Installment[] = [];
-  const endDate = investment.installmentEndDate
-    ? parseISO(investment.installmentEndDate)
-    : new Date();
-  const startDate = investment.purchaseDate
-    ? parseISO(investment.purchaseDate)
-    : new Date();
+  let number = 0;
+  // Add downpayment as the first installment if it exists
+  if (investment.downPayment && investment.downPayment > 0) {
+    const downPaymentPaid = paidInstallments.some((p) => p.isDownPayment);
+    installments.push({
+      number,
+      displayNumber: number,
+      dueDate: investment.purchaseDate,
+      amount: investment.downPayment,
+      status: downPaymentPaid ? "Paid" : "Unpaid",
+      description: "Down Payment",
+      isDownPayment: true,
+    } as Installment);
+    number++;
+  }
+
+  const endDate = parseISO(investment.installmentEndDate);
+  const startDate = parseISO(investment.installmentStartDate);
   let currentDate = startDate;
-  let number = 1;
 
   while (isBefore(currentDate, addDays(endDate, 1))) {
     const paid = paidInstallments.find((p) => p.number === number);
@@ -76,6 +88,19 @@ export function generateInstallmentSchedule(
         return [];
     }
     number++;
+  }
+
+  if (investment.maintenanceAmount && investment.maintenanceAmount > 0) {
+    const maintenancePaid = paidInstallments.some((p) => p.isMaintenance);
+    installments.push({
+      number,
+      displayNumber: number,
+      dueDate: investment.maintenancePaymentDate,
+      amount: investment.maintenanceAmount,
+      status: maintenancePaid ? "Paid" : "Unpaid",
+      description: "Maintenance",
+      isMaintenance: true,
+    } as Installment);
   }
 
   // Create a map of all paid installments by their due date for quick lookup

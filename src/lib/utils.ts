@@ -44,7 +44,13 @@ export function isDebtRelatedFund(fundType?: string): boolean {
   ];
   return debtKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
-
+export function formatNumberForMobile(isMobile: boolean = false, num: number | undefined,
+  currency: string = "EGP"){
+  if(isMobile){
+    return formatNumberWithSuffix(num, currency)
+  }
+  return formatCurrencyWithCommas(num, currency)
+}
 export function formatNumberWithSuffix(
   num: number | undefined,
   currency: string = "EGP",

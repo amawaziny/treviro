@@ -10,8 +10,10 @@ test.describe("Fixed Estimates", () => {
   test("should display fixed estimates list", async ({ page }) => {
     // Verify page title and description
     await expect(page.getByTestId("page-title")).toHaveText("Fixed Estimates");
-    await expect(page.getByTestId("page-description")).toContainText("Manage your recurring income and expenses");
-    
+    await expect(page.getByTestId("page-description")).toContainText(
+      "Manage your recurring income and expenses",
+    );
+
     // Verify add button is visible
     await expect(page.getByTestId("add-fixed-estimate-button")).toBeVisible();
   });
@@ -19,10 +21,12 @@ test.describe("Fixed Estimates", () => {
   test("should navigate to add fixed estimate page", async ({ page }) => {
     // Click add button
     await page.getByTestId("add-fixed-estimate-button").click();
-    
+
     // Verify navigation to add page
     await expect(page).toHaveURL("/fixed-estimates/add");
-    await expect(page.getByTestId("page-title")).toHaveText("Add New Fixed Estimate");
+    await expect(page.getByTestId("page-title")).toHaveText(
+      "Add New Fixed Estimate",
+    );
   });
 
   test.describe("Add Fixed Estimate Form", () => {
@@ -33,7 +37,7 @@ test.describe("Fixed Estimates", () => {
     test("should validate required fields", async ({ page }) => {
       // Submit form without filling any fields
       await page.getByTestId("submit-button").click();
-      
+
       // Verify validation messages
       await expect(page.getByTestId("type-error")).toBeVisible();
       await expect(page.getByTestId("amount-error")).toBeVisible();
@@ -45,24 +49,28 @@ test.describe("Fixed Estimates", () => {
       // Select type
       await page.getByTestId("type-select").click();
       await page.getByTestId("type-option-Salary").click();
-      
+
       // Fill amount
       await page.getByTestId("amount-input").fill("1000");
-      
+
       // Select period
       await page.getByTestId("period-select").click();
       await page.getByTestId("period-option-Monthly").click();
-      
+
       // Submit form
       await page.getByTestId("submit-button").click();
-      
+
       // Verify success message and redirection
       await expect(page).toHaveURL("/fixed-estimates");
       await expect(page.getByTestId("success-toast")).toBeVisible();
-      
+
       // Verify the new estimate is in the list
-      await expect(page.getByTestId("fixed-estimate-item").first()).toContainText("Salary");
-      await expect(page.getByTestId("fixed-estimate-item").first()).toContainText("1,000");
+      await expect(
+        page.getByTestId("fixed-estimate-item").first(),
+      ).toContainText("Salary");
+      await expect(
+        page.getByTestId("fixed-estimate-item").first(),
+      ).toContainText("1,000");
     });
   });
 
@@ -76,26 +84,28 @@ test.describe("Fixed Estimates", () => {
     test("should update an existing fixed estimate", async ({ page }) => {
       // Update amount
       await page.getByTestId("amount-input").fill("1500");
-      
+
       // Submit form
       await page.getByTestId("submit-button").click();
-      
+
       // Verify success message and redirection
       await expect(page).toHaveURL("/fixed-estimates");
       await expect(page.getByTestId("success-toast")).toBeVisible();
-      
+
       // Verify the updated amount
-      await expect(page.getByTestId("fixed-estimate-item").first()).toContainText("1,500");
+      await expect(
+        page.getByTestId("fixed-estimate-item").first(),
+      ).toContainText("1,500");
     });
   });
 
   test("should delete a fixed estimate", async ({ page }) => {
     // Click delete button on first estimate
     await page.getByTestId("delete-button").first().click();
-    
+
     // Confirm deletion in dialog
     await page.getByTestId("confirm-delete-button").click();
-    
+
     // Verify success message
     await expect(page.getByTestId("success-toast")).toBeVisible();
   });

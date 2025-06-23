@@ -19,6 +19,7 @@ import type { StockInvestment } from "@/lib/types";
 import {
   cn,
   formatCurrencyWithCommas,
+  formatNumberForMobile,
   formatNumberWithSuffix,
 } from "@/lib/utils"; // For styling and formatting
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -153,9 +154,7 @@ export default function MyStocksPage() {
                 isTotalStockProfitable ? "text-accent" : "text-destructive",
               )}
             >
-              {isMobile
-                ? formatNumberWithSuffix(totalStockPnL)
-                : formatCurrencyWithCommas(totalStockPnL)}
+              {formatNumberForMobile(isMobile, totalStockPnL)}
             </div>
             <p className="text-xs text-muted-foreground">
               {totalStockPnLPercent === Infinity
@@ -165,7 +164,7 @@ export default function MyStocksPage() {
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {t("total_invested")}
-              {formatCurrencyWithCommas(totalStockCost)}
+              {formatNumberForMobile(isMobile, totalStockCost)}
             </p>
           </CardContent>
         </Card>

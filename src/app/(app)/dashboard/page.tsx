@@ -38,6 +38,7 @@ import {
   formatNumberWithSuffix,
   formatCurrencyWithCommas,
   formatMonthYear,
+  formatNumberForMobile,
 } from "@/lib/utils";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
@@ -217,9 +218,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p className="text-xl font-medium">
-                {isMobile
-                  ? formatNumberWithSuffix(totalInvested)
-                  : formatCurrencyWithCommas(totalInvested)}
+                {formatNumberForMobile(isMobile, totalInvested)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -245,9 +244,7 @@ export default function DashboardPage() {
               <p
                 className={`text-xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
-                {isMobile
-                  ? formatNumberWithSuffix(totalRealizedPnL)
-                  : formatCurrencyWithCommas(totalRealizedPnL)}
+                {formatNumberForMobile(isMobile, totalRealizedPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -273,9 +270,7 @@ export default function DashboardPage() {
               <p
                 className={`text-xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
-                {isMobile
-                  ? formatNumberWithSuffix(totalCurrentPortfolioPnL)
-                  : formatCurrencyWithCommas(totalCurrentPortfolioPnL)}
+                {formatNumberForMobile(isMobile, totalCurrentPortfolioPnL)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -298,9 +293,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p className="text-xl font-medium">
-                {isMobile
-                  ? formatNumberWithSuffix(totalCashBalance)
-                  : formatCurrencyWithCommas(totalCashBalance)}
+                {formatNumberForMobile(isMobile, totalCashBalance)}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -344,12 +337,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-green-700 dark:text-green-300">
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(currentMonthIncome)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {formatCurrencyWithCommas(currentMonthIncome)}
-                  </span>
+                  {formatNumberForMobile(isMobile, currentMonthIncome)}
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                   {t("income_paid_out_by_today")}
@@ -372,60 +360,31 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-green-700 dark:text-green-300">
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(totalIncome)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {formatCurrencyWithCommas(totalIncome)}
-                  </span>
+                  {formatNumberForMobile(isMobile, totalIncome)}
                 </p>
                 <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
                   {monthlySalary > 0 && (
                     <p>
                       {t("monthly_salary_fixed")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(monthlySalary)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(monthlySalary)}
-                      </span>
+                      {formatNumberForMobile(isMobile, monthlySalary)}
                     </p>
                   )}
                   {otherFixedIncomeMonthly > 0 && (
                     <p>
                       {t("other_fixed_income")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(otherFixedIncomeMonthly)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(otherFixedIncomeMonthly)}
-                      </span>
+                      {formatNumberForMobile(isMobile, otherFixedIncomeMonthly)}
                     </p>
                   )}
                   {totalManualIncomeThisMonth > 0 && (
                     <p>
                       {t("other_logged_income_incl_sales_profit")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(totalManualIncomeThisMonth)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(totalManualIncomeThisMonth)}
-                      </span>
+                      {formatNumberForMobile(isMobile, totalManualIncomeThisMonth)}
                     </p>
                   )}
                   {totalProjectedCertificateInterestThisMonth > 0 && (
                     <p>
                       {t("projected_debt_interest")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(
-                          totalProjectedCertificateInterestThisMonth,
-                        )}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(
-                          totalProjectedCertificateInterestThisMonth,
-                        )}
-                      </span>
+                      {formatNumberForMobile(isMobile, totalProjectedCertificateInterestThisMonth)}
                     </p>
                   )}
                 </div>
@@ -449,82 +408,37 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-red-700 dark:text-red-300">
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(totalExpensesOnly)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {formatCurrencyWithCommas(totalExpensesOnly)}
-                  </span>
+                  {formatNumberForMobile(isMobile, totalExpensesOnly)}
                 </p>
                 <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
                   {totalItemizedExpensesThisMonth > 0 && (
                     <p>
-                      {t("itemized_logged_expenses")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(totalItemizedExpensesThisMonth)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(
-                          totalItemizedExpensesThisMonth,
-                        )}
-                      </span>
+                      {`${t("itemized_logged_expenses")} ${formatNumberForMobile(isMobile, totalItemizedExpensesThisMonth)}}`}
                     </p>
                   )}
                   {zakatFixedMonthly > 0 && (
                     <p>
-                      {t("zakat_fixed")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(zakatFixedMonthly)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(zakatFixedMonthly)}
-                      </span>
+                      {`${t("zakat_fixed")} ${formatNumberForMobile(isMobile, zakatFixedMonthly)}`}
                     </p>
                   )}
                   {charityFixedMonthly > 0 && (
                     <p>
-                      {t("charity_fixed")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(charityFixedMonthly)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(charityFixedMonthly)}
-                      </span>
+                      {`${t("charity_fixed")} ${formatNumberForMobile(isMobile, charityFixedMonthly)}`}
                     </p>
                   )}
                   {livingExpensesMonthly > 0 && (
                     <p>
-                      {t("living_expenses")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(livingExpensesMonthly)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(livingExpensesMonthly)}
-                      </span>
+                      {`${t("living_expenses")} ${formatNumberForMobile(isMobile, livingExpensesMonthly)}`}
                     </p>
                   )}
                   {otherFixedExpensesMonthly > 0 && (
                     <p>
-                      {t("other_fixed_expenses")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(otherFixedExpensesMonthly)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(otherFixedExpensesMonthly)}
-                      </span>
+                      {`${t("other_fixed_expenses")} ${formatNumberForMobile(isMobile, otherFixedExpensesMonthly)}`}
                     </p>
                   )}
                   {realEstateInstallmentsMonthly > 0 && (
                     <p>
-                      {t("real_estate_installments")}{" "}
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(realEstateInstallmentsMonthly)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(
-                          realEstateInstallmentsMonthly,
-                        )}
-                      </span>
+                      {`${t("real_estate_installments")} ${formatNumberForMobile(isMobile, realEstateInstallmentsMonthly)}`}
                     </p>
                   )}
                 </div>
@@ -550,7 +464,7 @@ export default function DashboardPage() {
                     {t("stocks")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberWithSuffix(totalStockInvestmentThisMonth)}
+                    {formatNumberForMobile(isMobile, totalStockInvestmentThisMonth)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -558,7 +472,7 @@ export default function DashboardPage() {
                     {t("real_estate")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberWithSuffix(realEstateInstallmentsMonthly)}
+                    {formatNumberForMobile(isMobile, realEstateInstallmentsMonthly)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -566,7 +480,7 @@ export default function DashboardPage() {
                     {t("debts")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberWithSuffix(totalDebtInvestmentThisMonth)}
+                    {formatNumberForMobile(isMobile, totalDebtInvestmentThisMonth)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -574,14 +488,14 @@ export default function DashboardPage() {
                     {t("gold")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberWithSuffix(totalGoldInvestmentThisMonth)}
+                    {formatNumberForMobile(isMobile, totalGoldInvestmentThisMonth)}
                   </span>
                 </div>
                 <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
                   <div className="flex justify-between items-center font-semibold">
                     <span className="text-sm">{t("total")}</span>
                     <span>
-                      {formatNumberWithSuffix(totalInvestmentsThisMonth)}
+                      {formatNumberForMobile(isMobile, totalInvestmentsThisMonth)}
                     </span>
                   </div>
                 </div>
@@ -603,12 +517,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-medium text-gray-700 dark:text-gray-300">
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(netCashFlowThisMonth)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {formatCurrencyWithCommas(netCashFlowThisMonth)}
-                  </span>
+                  {formatNumberForMobile(isMobile, netCashFlowThisMonth)}
                 </p>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                   {t("remaining_total_income_total_expenses_total_investments")}

@@ -35,6 +35,7 @@ import {
   formatNumberWithSuffix,
   cn,
   formatCurrencyWithCommas,
+  formatNumberForMobile,
 } from "@/lib/utils";
 
 export default function MyCurrenciesPage() {
@@ -193,9 +194,7 @@ export default function MyCurrenciesPage() {
               isTotalProfitable ? "text-accent" : "text-destructive",
             )}
           >
-            {isMobile
-              ? formatNumberWithSuffix(totalProfitLossEGP)
-              : formatCurrencyWithCommas(totalProfitLossEGP)}
+            {formatNumberForMobile(isMobile, totalProfitLossEGP, "EGP")}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalProfitLossPercent === Infinity

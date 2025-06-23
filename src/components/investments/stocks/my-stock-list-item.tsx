@@ -34,7 +34,7 @@ export function MyStockListItem({
     (ls) => ls.symbol === symbol,
   );
   const currentMarketPrice = correspondingListedSecurity?.price;
-  const currency = correspondingListedSecurity?.currency || "USD";
+  const currency = correspondingListedSecurity?.currency || "EGP";
   const isFund = correspondingListedSecurity?.securityType === "Fund";
   const fundType = correspondingListedSecurity?.fundType;
 

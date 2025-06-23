@@ -8,7 +8,7 @@ import type {
   StockInvestment,
   AggregatedDebtHolding,
 } from "@/lib/types";
-import { formatCurrencyWithCommas, isDebtRelatedFund } from "@/lib/utils";
+import { formatCurrencyWithCommas, formatNumberForMobile, isDebtRelatedFund } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -302,15 +302,7 @@ export default function MyDebtInstrumentsPage() {
               isTotalFundProfitable ? "text-accent" : "text-destructive",
             )}
           >
-            {isMobile
-              ? formatCurrencyWithSuffix(
-                  totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency,
-                )
-              : formatCurrencyWithCommas(
-                  totalDebtFundPnL,
-                  debtFundHoldings[0]?.currency,
-                )}
+            {formatNumberForMobile(isMobile, totalDebtFundPnL, debtFundHoldings[0]?.currency)}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalDebtFundPnLPercent === Infinity
@@ -324,27 +316,17 @@ export default function MyDebtInstrumentsPage() {
                 {t("total_invested_in_debt")}
               </span>
               <span className="font-semibold">
-                {isMobile
-                  ? formatCurrencyWithSuffix(
-                      totalInvestedInDebt,
-                      debtFundHoldings[0]?.currency,
-                    )
-                  : formatCurrencyWithCommas(
-                      totalInvestedInDebt,
-                      debtFundHoldings[0]?.currency,
-                    )}
+                {formatNumberForMobile(isMobile, totalInvestedInDebt, debtFundHoldings[0]?.currency)}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {`${t("direct")}: ${formatCurrencyWithCommas(
-                  totalDirectDebtInvested,
+                {`${t("direct")}: ${formatNumberForMobile(isMobile, totalDirectDebtInvested,
                   debtFundHoldings[0]?.currency,
                 )}`}
               </span>
               <span>
-                {`${t("funds")}: ${formatCurrencyWithCommas(
-                  totalDebtFundCost,
+                {`${t("funds")}: ${formatNumberForMobile(isMobile, totalDebtFundCost,
                   debtFundHoldings[0]?.currency,
                 )}`}
               </span>
@@ -361,7 +343,7 @@ export default function MyDebtInstrumentsPage() {
           </CardTitle>
           <CardDescription>
             <p>{`${t("bonds_certificates_treasury_bills_you_own_directly")}`}</p>
-            {`${t("projected_interest")}: ${formatCurrencyWithCommas(totalProjectedAnnualInterest)} ${t("annually")}`}
+            {`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedAnnualInterest, debtFundHoldings[0]?.currency)} ${t("annually")}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

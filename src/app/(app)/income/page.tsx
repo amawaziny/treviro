@@ -194,7 +194,7 @@ export default function IncomePage() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
@@ -208,7 +208,7 @@ export default function IncomePage() {
                                   }
                                 }}
                               >
-                                Delete
+                                {t("Delete")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

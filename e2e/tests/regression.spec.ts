@@ -137,17 +137,21 @@ test.describe("Regression Tests", () => {
       // Switch to Arabic
       await page.getByTestId("language-toggle-button").click();
       await page.getByTestId("language-option-ar").click();
-      
+
       // Verify Arabic text in the sidebar
-      const arabicStocks = sidebar.getByRole('button', { name: 'اﻷسهم' }).first();
+      const arabicStocks = sidebar
+        .getByRole("button", { name: "اﻷسهم" })
+        .first();
       await expect(arabicStocks).toBeVisible();
 
       // Switch back to English
       await page.getByTestId("language-toggle-button").click();
       await page.getByTestId("language-option-en").click();
-      
+
       // Verify English text in the sidebar
-      const englishStocks = sidebar.getByRole('button', { name: 'Stocks' }).first();
+      const englishStocks = sidebar
+        .getByRole("button", { name: "Stocks" })
+        .first();
       await expect(englishStocks).toBeVisible();
     });
 

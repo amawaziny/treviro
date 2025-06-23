@@ -495,7 +495,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     ) => {
       if (!firestoreInstance || !isAuthenticated || !userId)
         throw new Error("User not authenticated or Firestore not available.");
-      
+
       const investmentId = uuidv4();
       let investmentWithTimestamp: any = {
         ...investmentData,
@@ -520,10 +520,9 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
               userId,
               createdAt: new Date().toISOString(),
             } as RealEstateInvestment,
-            [], // No paid installments initially
-            new Date()
+            [],
           );
-          
+
           if (installments.length > 0) {
             investmentWithTimestamp = {
               ...investmentWithTimestamp,
@@ -1092,11 +1091,11 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Check if we need to generate installments
-      const shouldGenerateInstallments = 
+      const shouldGenerateInstallments =
         (dataToUpdate.installmentAmount !== undefined ||
-         dataToUpdate.installmentFrequency !== undefined ||
-         dataToUpdate.purchaseDate !== undefined ||
-         dataToUpdate.installmentEndDate !== undefined) &&
+          dataToUpdate.installmentFrequency !== undefined ||
+          dataToUpdate.purchaseDate !== undefined ||
+          dataToUpdate.installmentEndDate !== undefined) &&
         dataToUpdate.installmentAmount !== undefined &&
         dataToUpdate.installmentFrequency !== undefined &&
         dataToUpdate.purchaseDate !== undefined &&
@@ -1112,8 +1111,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             ...dataToUpdate,
             amountInvested: newAmountInvested,
           } as RealEstateInvestment,
-          [], // No paid installments initially
-          new Date()
+          [],
         );
       }
 

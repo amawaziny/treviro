@@ -195,7 +195,7 @@ export default function FixedEstimatesPage() {
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">
-                              Remove {record.name || record.type}
+                              {t("Remove")} {record.name || record.type}
                             </span>
                           </Button>
                         </AlertDialogTrigger>
@@ -211,7 +211,7 @@ export default function FixedEstimatesPage() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               onClick={async () => {
@@ -222,7 +222,7 @@ export default function FixedEstimatesPage() {
                                 }
                               }}
                             >
-                              Delete
+                              {t("Delete")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

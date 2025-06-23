@@ -60,6 +60,7 @@ export interface Installment {
   status: "Paid" | "Unpaid";
   description?: string;
   isMaintenance?: boolean;
+  isDownPayment?: boolean;
 }
 
 export interface RealEstateInvestment extends BaseInvestment {
@@ -82,15 +83,7 @@ export interface RealEstateInvestment extends BaseInvestment {
     chequeNumber?: string;
     description?: string;
     isMaintenance?: boolean; // Added
-  }>;
-  paidInstallments?: Array<{
-    // This is likely legacy, but keep for now if generateInstallmentSchedule uses it
-    number: number;
-    dueDate?: string;
-    amount?: number;
-    chequeNumber?: string;
-    description?: string;
-    isMaintenance?: boolean; // Added
+    isDownPayment?: boolean;
   }>;
 }
 
