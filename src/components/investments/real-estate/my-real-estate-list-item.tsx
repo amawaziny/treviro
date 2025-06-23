@@ -93,62 +93,64 @@ export function MyRealEstateListItem({
             </div>
           </div>
           <div
-            className="text-end flex flex-row items-center gap-2"
+            className="text-end items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="font-bold text-lg">
+            <div className="font-bold text-lg flex flex-row items-center">
               {formatNumberForMobile(
                 isMobile,
                 investment.amountInvested,
                 investment.currency,
               )}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Edit"
-              onClick={() =>
-                router.push(`/investments/real-estate/edit/${investment.id}`)
-              }
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="ms-2 text-muted-foreground hover:text-destructive"
-              onClick={() => setIsAlertDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">
-                {t("remove")} {investment.name || investment.propertyAddress}
-              </span>
-            </Button>
-            <AlertDialog
-              open={isAlertDialogOpen}
-              onOpenChange={setIsAlertDialogOpen}
-            >
-              <AlertDialogTrigger asChild></AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="sm:text-center">
-                    {t("are_you_sure")}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="sm:text-center">
-                    {`${t("this_action_will_permanently_remove_your_record_for")} ${investment.name || investment.propertyAddress} ${t("this_cannot_be_undone")}`}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="gap-2">
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleRemove}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {t("remove")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            </div>
+            <div className="flex flex-row justify-end items-end">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Edit"
+                onClick={() =>
+                  router.push(`/investments/real-estate/edit/${investment.id}`)
+                }
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ms-2 text-muted-foreground hover:text-destructive"
+                onClick={() => setIsAlertDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">
+                  {t("remove")} {investment.name || investment.propertyAddress}
+                </span>
+              </Button>
+              <AlertDialog
+                open={isAlertDialogOpen}
+                onOpenChange={setIsAlertDialogOpen}
+              >
+                <AlertDialogTrigger asChild></AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="sm:text-center">
+                      {t("are_you_sure")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="sm:text-center">
+                      {`${t("this_action_will_permanently_remove_your_record_for")} ${investment.name || investment.propertyAddress} ${t("this_cannot_be_undone")}`}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleRemove}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t("remove")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
