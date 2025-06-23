@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { AddInvestmentForm } from "@/components/investments/add/add-investment-form";
+import { InvestmentForm } from "@/components/investments/investment-form";
 import type { RealEstateInvestment } from "@/lib/types";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
@@ -14,7 +14,7 @@ export default function EditRealEstateInvestmentPage() {
   const { t } = useLanguage();
   const params = useParams();
   const { investments, isLoading } = useInvestments();
-  const {setHeaderProps} = useForm()
+  const {setHeaderProps, openForm, closeForm} = useForm()
   const [investment, setInvestment] = useState<RealEstateInvestment | null>(
     null,
   );
@@ -31,6 +31,8 @@ export default function EditRealEstateInvestmentPage() {
 
 
   useEffect(() => {  
+    openForm();
+    
     if (investment) {
       const title = `${t("edit_real_estate")}: ${investment.name}`;
       setHeaderProps({
@@ -40,6 +42,8 @@ export default function EditRealEstateInvestmentPage() {
         showNavControls: false,
       });
     }
+
+    return () => closeForm();
   }, [investment, setHeaderProps]);
 
   if (isLoading) {
@@ -68,7 +72,7 @@ export default function EditRealEstateInvestmentPage() {
 
   return (
     <div className="container mx-auto">
-      <AddInvestmentForm mode="edit" initialValues={investment} />
+      <InvestmentForm mode="edit" initialValues={investment} />
     </div>
   );
 }

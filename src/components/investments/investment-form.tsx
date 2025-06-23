@@ -25,8 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AddInvestmentSchema,
-  type AddInvestmentFormValues,
+  InvestmentSchema,
+  type InvestmentFormValues,
   investmentTypes,
   goldTypes,
   debtSubTypes,
@@ -36,7 +36,7 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from "uuid";
 import React, { useState, useEffect, useCallback } from "react";
-import { CurrencyAnalysisDisplay } from "../currencies/currency-analysis-display";
+import { CurrencyAnalysisDisplay } from "./currencies/currency-analysis-display";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
@@ -50,12 +50,12 @@ import type {
 } from "@/lib/types";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
-import { RealEstateForm } from "../real-estate/real-estate-form";
+import { RealEstateForm } from "./real-estate/real-estate-form";
 import { useForm } from "@/contexts/form-context";
 import { formatCurrencyWithCommas, getCurrentDate } from "@/lib/utils";
 
 // Initial values for each investment type
-const initialFormValuesByType: Record<InvestmentType, AddInvestmentFormValues> =
+const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> =
   {
     Stocks: {
       type: "Stocks",
@@ -106,7 +106,7 @@ const initialFormValuesByType: Record<InvestmentType, AddInvestmentFormValues> =
   };
 
 // Helper to get initial values for a type
-function getInitialFormValues(type: InvestmentType): AddInvestmentFormValues {
+function getInitialFormValues(type: InvestmentType): InvestmentFormValues {
   return { ...initialFormValuesByType[type] };
 }
 
@@ -558,7 +558,7 @@ interface RenderDebtFieldsProps {
 const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
   const { t, dir } = useLanguage();
   const { control, setValue, watch } =
-    useReactHookFormContext<AddInvestmentFormValues>();
+    useReactHookFormContext<InvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
 
   useEffect(() => {
@@ -777,29 +777,22 @@ function removeUndefinedFieldsDeep(obj: any): any {
   return obj;
 }
 
-export function AddInvestmentForm({
+export function InvestmentForm({
   mode = "add",
   initialValues,
 }: {
   mode?: "add" | "edit";
-  initialValues?: Partial<AddInvestmentFormValues>;
+  initialValues?: Partial<InvestmentFormValues>;
 }) {
   const { t } = useLanguage();
-  const { openForm, closeForm } = useForm();
-
-  // Open form when component mounts
-  useEffect(() => {
-    openForm();
-    return () => closeForm();
-  }, [openForm, closeForm]);
 
   // Use a state to track the current type for initial values
   const [currentType, setCurrentType] = useState<InvestmentType>(
     (initialValues?.type as InvestmentType) || "Stocks",
   );
 
-  const form = useReactHookForm<AddInvestmentFormValues>({
-    resolver: zodResolver(AddInvestmentSchema),
+  const form = useReactHookForm<InvestmentFormValues>({
+    resolver: zodResolver(InvestmentSchema),
     defaultValues:
       mode === "edit" && initialValues
         ? {
@@ -890,7 +883,7 @@ export function AddInvestmentForm({
       form.reset({
         ...initialFormValuesByType[type],
         type,
-      } as AddInvestmentFormValues);
+      } as InvestmentFormValues);
       setPreSelectedSecurityDetails(null);
     };
 
@@ -937,7 +930,7 @@ export function AddInvestmentForm({
     router
   ]);
 
-  async function onSubmit(values: AddInvestmentFormValues) {
+  async function onSubmit(values: InvestmentFormValues) {
     if (
       form.formState.errors &&
       Object.keys(form.formState.errors).length > 0
@@ -1128,7 +1121,7 @@ export function AddInvestmentForm({
               : "Stocks"; // fallback to Stocks if undefined
 
     // Fix: Only use a single type for reset values, never a union or undefined
-    const resetValues: AddInvestmentFormValues =
+    const resetValues: InvestmentFormValues =
       initialFormValuesByType[resetTargetType as InvestmentType];
     form.reset(resetValues);
 

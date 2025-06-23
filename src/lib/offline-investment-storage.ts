@@ -1,5 +1,5 @@
 // Offline Investment Storage Utility for Listing
-import { AddInvestmentFormValues } from "./schemas";
+import { InvestmentFormValues } from "./schemas";
 
 const DB_NAME = "TreviroOfflineDB";
 const STORE_NAME = "pendingInvestments";
@@ -20,7 +20,7 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 export async function getAllOfflineInvestments(): Promise<
-  (AddInvestmentFormValues & { id: string })[]
+  (InvestmentFormValues & { id: string })[]
 > {
   const db = await openDB();
   return new Promise((resolve, reject) => {

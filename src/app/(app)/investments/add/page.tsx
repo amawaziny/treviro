@@ -23,8 +23,8 @@ function PageLoadingFallback() {
 // We can remove the suspense: true here if the parent handles suspense
 const AddInvestmentForm = dynamic(
   () =>
-    import("@/components/investments/add/add-investment-form").then(
-      (mod) => mod.AddInvestmentForm,
+    import("@/components/investments/investment-form").then(
+      (mod) => mod.InvestmentForm,
     ),
   {
     ssr: false, // Ensure this component is only rendered on the client

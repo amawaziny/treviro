@@ -1,5 +1,5 @@
 // Offline Investment Queue Utility (IndexedDB-based)
-import { AddInvestmentFormValues } from "./schemas";
+import { InvestmentFormValues } from "./schemas";
 
 const DB_NAME = "TreviroOfflineDB";
 const STORE_NAME = "pendingInvestments";
@@ -20,7 +20,7 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 export async function addPendingInvestment(
-  investment: AddInvestmentFormValues & { id: string },
+  investment: InvestmentFormValues & { id: string },
 ) {
   const db = await openDB();
   return new Promise<void>((resolve, reject) => {
@@ -32,7 +32,7 @@ export async function addPendingInvestment(
 }
 
 export async function getAllPendingInvestments(): Promise<
-  (AddInvestmentFormValues & { id: string })[]
+  (InvestmentFormValues & { id: string })[]
 > {
   const db = await openDB();
   return new Promise((resolve, reject) => {

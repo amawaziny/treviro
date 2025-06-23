@@ -220,7 +220,7 @@ const DebtInstrumentInvestmentSchema = z.object({
     ),
 });
 
-export const AddInvestmentSchema = z.discriminatedUnion("type", [
+export const InvestmentSchema = z.discriminatedUnion("type", [
   StockInvestmentSchema,
   GoldInvestmentSchema,
   CurrencyInvestmentSchema,
@@ -228,7 +228,7 @@ export const AddInvestmentSchema = z.discriminatedUnion("type", [
   DebtInstrumentInvestmentSchema,
 ]);
 
-export type AddInvestmentFormValues = z.infer<typeof AddInvestmentSchema>;
+export type InvestmentFormValues = z.infer<typeof InvestmentSchema>;
 
 export const SellStockSchema = z.object({
   securityId: z.string(),
