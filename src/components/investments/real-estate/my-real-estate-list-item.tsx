@@ -29,7 +29,7 @@ interface MyRealEstateListItemProps {
 export function MyRealEstateListItem({
   investment,
 }: MyRealEstateListItemProps) {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
   const { removeRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -40,7 +40,7 @@ export function MyRealEstateListItem({
       await removeRealEstateInvestment(investment.id);
       toast({
         title: t("real_estate_removed"),
-        description: `${investment.name || investment.propertyAddress} ${t(has_been_removed)}.`,
+        description: `${investment.name || investment.propertyAddress} ${t("has_been_removed")}.`,
       });
     } catch (error: any) {
       toast({
@@ -65,7 +65,7 @@ export function MyRealEstateListItem({
     >
       <CardContent className="pt-4">
         <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
-          <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
+          <div className="flex gap-3 flex-grow min-w-0 w-0">
             <Button
               variant="ghost"
               size="icon"
@@ -87,7 +87,7 @@ export function MyRealEstateListItem({
             </div>
           </div>
           <div
-            className="text-end pl-2 flex flex-col items-end gap-2"
+            className="text-end flex flex-row items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
             <span className="font-bold text-lg">
@@ -96,7 +96,6 @@ export function MyRealEstateListItem({
             <Button
               variant="ghost"
               size="icon"
-              className="mb-1"
               aria-label="Edit"
               onClick={() =>
                 router.push(`/investments/real-estate/edit/${investment.id}`)
@@ -107,12 +106,12 @@ export function MyRealEstateListItem({
             <Button
               variant="ghost"
               size="icon"
-              className="ml-2 text-muted-foreground hover:text-destructive"
+              className="ms-2 text-muted-foreground hover:text-destructive"
               onClick={() => setIsAlertDialogOpen(true)}
             >
               <Trash2 className="h-4 w-4" />
               <span className="sr-only">
-                Remove {investment.name || investment.propertyAddress}
+                {t("remove")} {investment.name || investment.propertyAddress}
               </span>
             </Button>
             <AlertDialog
@@ -144,24 +143,20 @@ export function MyRealEstateListItem({
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
           <p>
-            {t("installment")}{" "}
-            {investment.installmentAmount
+            {`${t("installment")}: ${investment.installmentAmount
               ? `${formatNumberWithSuffix(investment.installmentAmount)}`
-              : t("na")}
+              : t("na")}`}
           </p>
           <p>
-            {t("frequency")}
-            {investment.installmentFrequency || t("na")}
+            {`${t("frequency")}: ${investment.installmentFrequency || t("na")}`}
           </p>
           <p>
-            {t("total_price")}{" "}
-            {investment.totalInstallmentPrice
+            {`${t("total_price")}: ${investment.totalInstallmentPrice
               ? `${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
-              : t("na")}
+              : t("na")}`}
           </p>
           <p>
-            {t("end_date")}
-            {investment.installmentEndDate || t("na")}
+            {`${t("end_date")}: ${investment.installmentEndDate || t("na")}`}
           </p>
         </div>
       </CardContent>

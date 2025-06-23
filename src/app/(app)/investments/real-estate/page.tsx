@@ -254,7 +254,7 @@ export default function MyRealEstatePage() {
       ) : (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="flex items-center">
+            <CardTitle className="flex">
               <Home className="me-2 h-4 w-4 text-primary" />
               {t("no_direct_real_estate_holdings")}
             </CardTitle>
@@ -269,7 +269,7 @@ export default function MyRealEstatePage() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex">
             <Building className="me-2 h-4 w-4 text-primary" />
             {t("real_estate_fund_investments_reits_etc")}
           </CardTitle>
