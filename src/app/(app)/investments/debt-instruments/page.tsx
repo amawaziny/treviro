@@ -8,7 +8,11 @@ import type {
   StockInvestment,
   AggregatedDebtHolding,
 } from "@/lib/types";
-import { formatCurrencyWithCommas, formatNumberForMobile, isDebtRelatedFund } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  formatNumberForMobile,
+  isDebtRelatedFund,
+} from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -302,7 +306,11 @@ export default function MyDebtInstrumentsPage() {
               isTotalFundProfitable ? "text-accent" : "text-destructive",
             )}
           >
-            {formatNumberForMobile(isMobile, totalDebtFundPnL, debtFundHoldings[0]?.currency)}
+            {formatNumberForMobile(
+              isMobile,
+              totalDebtFundPnL,
+              debtFundHoldings[0]?.currency,
+            )}
           </div>
           <p className="text-xs text-muted-foreground">
             {totalDebtFundPnLPercent === Infinity
@@ -316,17 +324,25 @@ export default function MyDebtInstrumentsPage() {
                 {t("total_invested_in_debt")}
               </span>
               <span className="font-semibold">
-                {formatNumberForMobile(isMobile, totalInvestedInDebt, debtFundHoldings[0]?.currency)}
+                {formatNumberForMobile(
+                  isMobile,
+                  totalInvestedInDebt,
+                  debtFundHoldings[0]?.currency,
+                )}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {`${t("direct")}: ${formatNumberForMobile(isMobile, totalDirectDebtInvested,
+                {`${t("direct")}: ${formatNumberForMobile(
+                  isMobile,
+                  totalDirectDebtInvested,
                   debtFundHoldings[0]?.currency,
                 )}`}
               </span>
               <span>
-                {`${t("funds")}: ${formatNumberForMobile(isMobile, totalDebtFundCost,
+                {`${t("funds")}: ${formatNumberForMobile(
+                  isMobile,
+                  totalDebtFundCost,
                   debtFundHoldings[0]?.currency,
                 )}`}
               </span>

@@ -7,7 +7,11 @@ import { Home, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrencyWithCommas, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  formatNumberForMobile,
+  formatNumberWithSuffix,
+} from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -93,7 +97,11 @@ export function MyRealEstateListItem({
             onClick={(e) => e.stopPropagation()}
           >
             <span className="font-bold text-lg">
-              {formatNumberForMobile(isMobile, investment.amountInvested, investment.currency)}
+              {formatNumberForMobile(
+                isMobile,
+                investment.amountInvested,
+                investment.currency,
+              )}
             </span>
             <Button
               variant="ghost"

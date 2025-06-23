@@ -14,7 +14,7 @@ export default function EditRealEstateInvestmentPage() {
   const { t } = useLanguage();
   const params = useParams();
   const { investments, isLoading } = useInvestments();
-  const {setHeaderProps, openForm, closeForm} = useForm()
+  const { setHeaderProps, openForm, closeForm } = useForm();
   const [investment, setInvestment] = useState<RealEstateInvestment | null>(
     null,
   );
@@ -29,10 +29,9 @@ export default function EditRealEstateInvestmentPage() {
     }
   }, [params?.id, investments]);
 
-
-  useEffect(() => {  
+  useEffect(() => {
     openForm();
-    
+
     if (investment) {
       const title = `${t("edit_real_estate")}: ${investment.name}`;
       setHeaderProps({

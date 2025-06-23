@@ -55,55 +55,54 @@ import { useForm } from "@/contexts/form-context";
 import { formatCurrencyWithCommas, getCurrentDate } from "@/lib/utils";
 
 // Initial values for each investment type
-const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> =
-  {
-    Stocks: {
-      type: "Stocks",
-      selectedSecurityId: "",
-      numberOfShares: 1, // must be number for Zod transform result
-      purchasePricePerShare: 0,
-      purchaseFees: 0,
-      purchaseDate: getCurrentDate(),
-      name: "",
-    },
-    Gold: {
-      type: "Gold",
-      goldType: goldTypes[0],
-      quantityInGrams: 1,
-      amountInvested: 0,
-      purchaseDate: getCurrentDate(),
-      name: "",
-    },
-    Currencies: {
-      type: "Currencies",
-      currencyCode: "",
-      foreignCurrencyAmount: 1,
-      exchangeRateAtPurchase: 1,
-      purchaseDate: getCurrentDate(),
-      name: "",
-    },
-    "Real Estate": {
-      type: "Real Estate",
-      propertyAddress: "",
-      propertyType: propertyTypes[0],
-      amountInvested: 0,
-      installmentFrequency: "Monthly",
-      installmentAmount: 0,
-      purchaseDate: getCurrentDate(),
-      name: "",
-    },
-    "Debt Instruments": {
-      type: "Debt Instruments",
-      debtSubType: debtSubTypes[0],
-      issuer: "",
-      interestRate: 1,
-      maturityDate: getCurrentDate(),
-      certificateInterestFrequency: "Monthly",
-      amountInvested: 0,
-      purchaseDate: getCurrentDate(),
-      name: "",
-    },
-  };
+const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
+  Stocks: {
+    type: "Stocks",
+    selectedSecurityId: "",
+    numberOfShares: 1, // must be number for Zod transform result
+    purchasePricePerShare: 0,
+    purchaseFees: 0,
+    purchaseDate: getCurrentDate(),
+    name: "",
+  },
+  Gold: {
+    type: "Gold",
+    goldType: goldTypes[0],
+    quantityInGrams: 1,
+    amountInvested: 0,
+    purchaseDate: getCurrentDate(),
+    name: "",
+  },
+  Currencies: {
+    type: "Currencies",
+    currencyCode: "",
+    foreignCurrencyAmount: 1,
+    exchangeRateAtPurchase: 1,
+    purchaseDate: getCurrentDate(),
+    name: "",
+  },
+  "Real Estate": {
+    type: "Real Estate",
+    propertyAddress: "",
+    propertyType: propertyTypes[0],
+    amountInvested: 0,
+    installmentFrequency: "Monthly",
+    installmentAmount: 0,
+    purchaseDate: getCurrentDate(),
+    name: "",
+  },
+  "Debt Instruments": {
+    type: "Debt Instruments",
+    debtSubType: debtSubTypes[0],
+    issuer: "",
+    interestRate: 1,
+    maturityDate: getCurrentDate(),
+    certificateInterestFrequency: "Monthly",
+    amountInvested: 0,
+    purchaseDate: getCurrentDate(),
+    name: "",
+  },
+};
 
 // Helper to get initial values for a type
 function getInitialFormValues(type: InvestmentType): InvestmentFormValues {
@@ -808,9 +807,8 @@ export function InvestmentForm({
   const searchParams = useSearchParams();
 
   const preSelectedSecurityId = searchParams.get("securityId");
-  const preSelectedInvestmentType = searchParams.get(
-    "type",
-  ) as InvestmentType | null || currentType;
+  const preSelectedInvestmentType =
+    (searchParams.get("type") as InvestmentType | null) || currentType;
 
   const {
     listedSecurities,
@@ -824,14 +822,11 @@ export function InvestmentForm({
   const isDedicatedGoldMode =
     preSelectedInvestmentType === "Gold" && !preSelectedSecurityId;
   const isDedicatedDebtMode =
-    preSelectedInvestmentType === "Debt Instruments" &&
-    !preSelectedSecurityId;
+    preSelectedInvestmentType === "Debt Instruments" && !preSelectedSecurityId;
   const isDedicatedCurrencyMode =
-    preSelectedInvestmentType === "Currencies" &&
-    !preSelectedSecurityId;
+    preSelectedInvestmentType === "Currencies" && !preSelectedSecurityId;
   const isDedicatedRealEstateMode =
-    preSelectedInvestmentType === "Real Estate" &&
-    !preSelectedSecurityId;
+    preSelectedInvestmentType === "Real Estate" && !preSelectedSecurityId;
   const isPreSelectedStockMode = !!preSelectedSecurityId;
 
   useEffect(() => {
@@ -927,7 +922,7 @@ export function InvestmentForm({
     form,
     getListedSecurityById,
     toast,
-    router
+    router,
   ]);
 
   async function onSubmit(values: InvestmentFormValues) {
@@ -1166,7 +1161,7 @@ export function InvestmentForm({
     !isPreSelectedStockMode
   ) {
     submitButtonText = t("add") + " " + preSelectedInvestmentType;
-  } 
+  }
 
   const handleSecuritySelect = useCallback(
     (selectedValue: string) => {
@@ -1213,7 +1208,7 @@ export function InvestmentForm({
                 isPreSelectedStockMode={true}
               />
             ) : (
-             <div>Cannot determine investment type</div>
+              <div>Cannot determine investment type</div>
             )}
 
             <Button
@@ -1236,10 +1231,10 @@ export function InvestmentForm({
               {submitButtonText}
             </Button>
             {Object.keys(form.formState.errors).length > 0 && (
-                <div className="mt-2 text-red-500 text-sm">
-                  {t("please_fix_the_errors_above_and_try_again")}
-                </div>
-              )}
+              <div className="mt-2 text-red-500 text-sm">
+                {t("please_fix_the_errors_above_and_try_again")}
+              </div>
+            )}
           </form>
         </Form>
       </div>

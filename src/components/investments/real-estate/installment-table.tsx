@@ -119,7 +119,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     const newStatus = markAsPaid ? "Paid" : "Unpaid";
     let newAmountInvested = investment.amountInvested || 0;
 
-    if(selectedInstallment){
+    if (selectedInstallment) {
       const amountChange = markAsPaid
         ? selectedInstallment.amount
         : -selectedInstallment.amount;
@@ -129,12 +129,15 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     try {
       const updatedInstallments = installments.map((inst) => {
         const isMatchingInstallment = inst.number === selectedNumber;
-        return {...inst, status: isMatchingInstallment ? newStatus : inst.status};
+        return {
+          ...inst,
+          status: isMatchingInstallment ? newStatus : inst.status,
+        };
       });
 
       await updateRealEstateInvestment(investmentId, {
         installments: updatedInstallments,
-        amountInvested: newAmountInvested
+        amountInvested: newAmountInvested,
       });
 
       setShowSheet(false);
@@ -291,7 +294,13 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                     >
                       {t("Cancel")}
                     </Button>
-                    <Button onClick={() => handleStatusChange(selectedInstallment?.status !== "Paid")}>
+                    <Button
+                      onClick={() =>
+                        handleStatusChange(
+                          selectedInstallment?.status !== "Paid",
+                        )
+                      }
+                    >
                       {selectedInstallment?.status === "Paid"
                         ? t("mark_as_unpaid")
                         : t("mark_as_paid")}

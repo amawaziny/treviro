@@ -10,7 +10,11 @@ import type {
   GoldType,
   AggregatedGoldHolding,
 } from "@/lib/types";
-import { formatCurrencyWithCommas, formatNumberForMobile, isGoldRelatedFund } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  formatNumberForMobile,
+  isGoldRelatedFund,
+} from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";

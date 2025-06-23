@@ -140,7 +140,11 @@ export function AddEditFixedEstimateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" data-testid="fixed-estimate-form">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+        data-testid="fixed-estimate-form"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -273,8 +277,8 @@ export function AddEditFixedEstimateForm({
           )}
         </div>
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={form.formState.isSubmitting}
           data-testid="submit-button"
         >

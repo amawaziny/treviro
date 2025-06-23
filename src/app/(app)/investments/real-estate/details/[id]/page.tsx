@@ -13,7 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import { formatDateDisplay, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
+import {
+  formatDateDisplay,
+  formatNumberForMobile,
+  formatNumberWithSuffix,
+} from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
 import type { Installment } from "@/components/investments/real-estate/installment-table";
@@ -216,7 +220,9 @@ export default function RealEstateDetailPage() {
             <div className="font-medium text-muted-foreground">
               {t("paid_towards_purchase")}
             </div>
-            <div>{formatNumberForMobile(isMobile, investment.amountInvested)}</div>
+            <div>
+              {formatNumberForMobile(isMobile, investment.amountInvested)}
+            </div>
             <div className="font-medium text-muted-foreground">
               {t("installment_amount")}
             </div>
@@ -234,7 +240,10 @@ export default function RealEstateDetailPage() {
             </div>
             <div>
               {investment.totalInstallmentPrice
-                ? formatNumberForMobile(isMobile, investment.totalInstallmentPrice)
+                ? formatNumberForMobile(
+                    isMobile,
+                    investment.totalInstallmentPrice,
+                  )
                 : t("na")}
             </div>
             <div className="font-medium text-muted-foreground">
@@ -283,52 +292,50 @@ export default function RealEstateDetailPage() {
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-2 py-4">
-                  <Label htmlFor="dueDate">
-                    {t("due_date")}
-                  </Label>
-                  <div className="col-span-1">
-                    <Input
-                      id="dueDate"
-                      type="date"
-                      value={
-                        newPayment.dueDate?.toISOString().split("T")[0] || ""
-                      }
-                      onChange={(e) => {
-                        const date = e.target.value
-                          ? new Date(e.target.value)
-                          : undefined;
-                        setNewPayment({ ...newPayment, dueDate: date });
-                      }}
-                    />
-                  </div>
-                  <Label htmlFor="amount">
-                    {t("amount")}
-                  </Label>
+                <Label htmlFor="dueDate">{t("due_date")}</Label>
+                <div className="col-span-1">
                   <Input
-                    id="amount"
-                    type="number"
-                    value={newPayment.amount || ""}
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        amount: parseFloat(e.target.value) || 0,
-                      })
+                    id="dueDate"
+                    type="date"
+                    value={
+                      newPayment.dueDate?.toISOString().split("T")[0] || ""
                     }
+                    onChange={(e) => {
+                      const date = e.target.value
+                        ? new Date(e.target.value)
+                        : undefined;
+                      setNewPayment({ ...newPayment, dueDate: date });
+                    }}
                   />
-                  <Label htmlFor="description" className="pt-2">
-                    {t("description")}
-                  </Label>
-                  <Textarea
-                    id="description"
-                    placeholder={t("Optional: e.g., Q4 payment, Final finishing payment, Maintenance")}
-                    value={newPayment.description}
-                    onChange={(e) =>
-                      setNewPayment({
-                        ...newPayment,
-                        description: e.target.value,
-                      })
-                    }
-                  />
+                </div>
+                <Label htmlFor="amount">{t("amount")}</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={newPayment.amount || ""}
+                  onChange={(e) =>
+                    setNewPayment({
+                      ...newPayment,
+                      amount: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+                <Label htmlFor="description" className="pt-2">
+                  {t("description")}
+                </Label>
+                <Textarea
+                  id="description"
+                  placeholder={t(
+                    "Optional: e.g., Q4 payment, Final finishing payment, Maintenance",
+                  )}
+                  value={newPayment.description}
+                  onChange={(e) =>
+                    setNewPayment({
+                      ...newPayment,
+                      description: e.target.value,
+                    })
+                  }
+                />
               </div>
               <SheetFooter>
                 <div className="flex flex-row-reverse gap-2">

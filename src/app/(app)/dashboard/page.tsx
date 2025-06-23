@@ -378,13 +378,19 @@ export default function DashboardPage() {
                   {totalManualIncomeThisMonth > 0 && (
                     <p>
                       {t("other_logged_income_incl_sales_profit")}{" "}
-                      {formatNumberForMobile(isMobile, totalManualIncomeThisMonth)}
+                      {formatNumberForMobile(
+                        isMobile,
+                        totalManualIncomeThisMonth,
+                      )}
                     </p>
                   )}
                   {totalProjectedCertificateInterestThisMonth > 0 && (
                     <p>
                       {t("projected_debt_interest")}{" "}
-                      {formatNumberForMobile(isMobile, totalProjectedCertificateInterestThisMonth)}
+                      {formatNumberForMobile(
+                        isMobile,
+                        totalProjectedCertificateInterestThisMonth,
+                      )}
                     </p>
                   )}
                 </div>
@@ -464,7 +470,10 @@ export default function DashboardPage() {
                     {t("stocks")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberForMobile(isMobile, totalStockInvestmentThisMonth)}
+                    {formatNumberForMobile(
+                      isMobile,
+                      totalStockInvestmentThisMonth,
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -472,7 +481,10 @@ export default function DashboardPage() {
                     {t("real_estate")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberForMobile(isMobile, realEstateInstallmentsMonthly)}
+                    {formatNumberForMobile(
+                      isMobile,
+                      realEstateInstallmentsMonthly,
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -480,7 +492,10 @@ export default function DashboardPage() {
                     {t("debts")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberForMobile(isMobile, totalDebtInvestmentThisMonth)}
+                    {formatNumberForMobile(
+                      isMobile,
+                      totalDebtInvestmentThisMonth,
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -488,14 +503,20 @@ export default function DashboardPage() {
                     {t("gold")}
                   </span>
                   <span className="font-medium">
-                    {formatNumberForMobile(isMobile, totalGoldInvestmentThisMonth)}
+                    {formatNumberForMobile(
+                      isMobile,
+                      totalGoldInvestmentThisMonth,
+                    )}
                   </span>
                 </div>
                 <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
                   <div className="flex justify-between items-center font-semibold">
                     <span className="text-sm">{t("total")}</span>
                     <span>
-                      {formatNumberForMobile(isMobile, totalInvestmentsThisMonth)}
+                      {formatNumberForMobile(
+                        isMobile,
+                        totalInvestmentsThisMonth,
+                      )}
                     </span>
                   </div>
                 </div>
