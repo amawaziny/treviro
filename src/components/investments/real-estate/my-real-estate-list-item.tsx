@@ -7,7 +7,7 @@ import { Home, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
-import { formatNumberWithSuffix } from "@/lib/utils";
+import { formatCurrencyWithCommas, formatNumberWithSuffix } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -21,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MyRealEstateListItemProps {
   investment: any;
@@ -30,6 +31,7 @@ export function MyRealEstateListItem({
   investment,
 }: MyRealEstateListItemProps) {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const { removeRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
@@ -91,7 +93,12 @@ export function MyRealEstateListItem({
             onClick={(e) => e.stopPropagation()}
           >
             <span className="font-bold text-lg">
-              {formatNumberWithSuffix(investment.amountInvested)}
+              {isMobile
+                ? formatNumberWithSuffix(investment.amountInvested)
+                : formatCurrencyWithCommas(
+                    investment.amountInvested,
+                    investment.currency,
+                  )}
             </span>
             <Button
               variant="ghost"
@@ -121,14 +128,12 @@ export function MyRealEstateListItem({
               <AlertDialogTrigger asChild></AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("this_action_will_permanently_remove_your_record_for")}{" "}
-                    {investment.name || investment.propertyAddress}
-                    {t("this_cannot_be_undone")}
+                  <AlertDialogTitle className="sm:text-center">{t("are_you_sure")}</AlertDialogTitle>
+                  <AlertDialogDescription className="sm:text-center">
+                    {`${t("this_action_will_permanently_remove_your_record_for")} ${investment.name || investment.propertyAddress} ${t("this_cannot_be_undone")}`}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
+                <AlertDialogFooter className="gap-2">
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleRemove}
@@ -144,18 +149,18 @@ export function MyRealEstateListItem({
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
           <p>
             {`${t("installment")}: ${investment.installmentAmount
-              ? `${formatNumberWithSuffix(investment.installmentAmount)}`
+              ? `${isMobile ? formatNumberWithSuffix(investment.installmentAmount) : formatCurrencyWithCommas(investment.installmentAmount, investment.currency)}`
               : t("na")}`}
           </p>
-          <p>
-            {`${t("frequency")}: ${investment.installmentFrequency || t("na")}`}
+          <p className="text-end">
+            {`${t("frequency")}: ${t(investment.installmentFrequency) || t("na")}`}
           </p>
           <p>
             {`${t("total_price")}: ${investment.totalInstallmentPrice
-              ? `${formatNumberWithSuffix(investment.totalInstallmentPrice)}`
+              ? `${isMobile ? formatNumberWithSuffix(investment.totalInstallmentPrice) : formatCurrencyWithCommas(investment.totalInstallmentPrice, investment.currency)}`
               : t("na")}`}
           </p>
-          <p>
+          <p className="text-end">
             {`${t("end_date")}: ${investment.installmentEndDate || t("na")}`}
           </p>
         </div>

@@ -38,6 +38,8 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
 import { v4 as uuidv4 } from "uuid";
+import { generateInstallmentSchedule } from "@/lib/installment-utils";
+import { Installment } from "@/lib/types";
 
 export interface InvestmentContextType {
   updateIncomeRecord: (
@@ -493,13 +495,44 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     ) => {
       if (!firestoreInstance || !isAuthenticated || !userId)
         throw new Error("User not authenticated or Firestore not available.");
+      
       const investmentId = uuidv4();
-      const investmentWithTimestamp = {
+      let investmentWithTimestamp: any = {
         ...investmentData,
         id: investmentId,
         userId,
         createdAt: serverTimestamp(),
       };
+
+      // Generate installments for new real estate investments with installment details
+      if (investmentData.type === "Real Estate") {
+        const realEstateData = investmentData as RealEstateInvestment;
+        if (
+          realEstateData.installmentAmount &&
+          realEstateData.installmentFrequency &&
+          realEstateData.purchaseDate &&
+          realEstateData.installmentEndDate
+        ) {
+          const installments = generateInstallmentSchedule(
+            {
+              ...realEstateData,
+              id: investmentId,
+              userId,
+              createdAt: new Date().toISOString(),
+            } as RealEstateInvestment,
+            [], // No paid installments initially
+            new Date()
+          );
+          
+          if (installments.length > 0) {
+            investmentWithTimestamp = {
+              ...investmentWithTimestamp,
+              installments,
+            };
+          }
+        }
+      }
+
       await setDoc(
         doc(firestoreInstance, `users/${userId}/investments`, investmentId),
         investmentWithTimestamp,
@@ -1058,11 +1091,39 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Invalid amountInvested provided for update.");
       }
 
+      // Check if we need to generate installments
+      const shouldGenerateInstallments = 
+        (dataToUpdate.installmentAmount !== undefined ||
+         dataToUpdate.installmentFrequency !== undefined ||
+         dataToUpdate.purchaseDate !== undefined ||
+         dataToUpdate.installmentEndDate !== undefined) &&
+        dataToUpdate.installmentAmount !== undefined &&
+        dataToUpdate.installmentFrequency !== undefined &&
+        dataToUpdate.purchaseDate !== undefined &&
+        dataToUpdate.installmentEndDate !== undefined;
+
+      // If we're updating installment-related fields, generate the schedule
+      let installments: Installment[] = [];
+      if (shouldGenerateInstallments) {
+        // Use the generateInstallmentSchedule function to create installments
+        installments = generateInstallmentSchedule(
+          {
+            ...oldData,
+            ...dataToUpdate,
+            amountInvested: newAmountInvested,
+          } as RealEstateInvestment,
+          [], // No paid installments initially
+          new Date()
+        );
+      }
+
       const updatedInvestmentData = {
         ...dataToUpdate,
         amountInvested: newAmountInvested,
+        ...(installments.length > 0 ? { installments } : {}), // Only update installments if we generated them
         updatedAt: serverTimestamp(),
       };
+
       await setDoc(investmentDocRef, updatedInvestmentData, { merge: true });
 
       const amountInvestedDelta = newAmountInvested - oldAmountInvested;

@@ -92,7 +92,7 @@ const initialFormValuesByType: Record<InvestmentType, AddInvestmentFormValues> =
       type: "Real Estate",
       propertyAddress: "",
       propertyType: propertyTypes[0],
-      amountInvested: 0,
+      amountInvested: 1,
       installmentFrequency: "Monthly",
       installmentAmount: 0,
       purchaseDate: getCurrentDate(),
