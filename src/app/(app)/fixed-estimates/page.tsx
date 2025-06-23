@@ -128,6 +128,7 @@ export default function FixedEstimatesPage() {
             {fixedEstimates.map((record: FixedEstimateRecord) => (
               <Card
                 key={record.id}
+                data-testid="fixed-estimate-item"
                 className={cn(
                   record.isExpense
                     ? "border-red-200 dark:border-red-700"
@@ -256,6 +257,7 @@ export default function FixedEstimatesPage() {
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new fixed estimate"
+          data-testid="add-fixed-estimate-button"
         >
           <Plus className="h-7 w-7" />
         </Button>

@@ -140,7 +140,7 @@ export function AddEditFixedEstimateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" data-testid="fixed-estimate-form">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -154,6 +154,7 @@ export function AddEditFixedEstimateForm({
                     field.onChange(value as FixedEstimateType)
                   }
                   value={field.value || ""}
+                  data-testid="type-select"
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -185,6 +186,7 @@ export function AddEditFixedEstimateForm({
                     value={field.value}
                     onChange={field.onChange}
                     allowDecimal={true}
+                    data-testid="amount-input"
                   />
                 </FormControl>
                 <FormMessage />
@@ -204,6 +206,7 @@ export function AddEditFixedEstimateForm({
                       placeholder={t("e.g., Rental Income, Club Membership")}
                       {...field}
                       value={field.value ?? ""}
+                      data-testid="name-input"
                     />
                   </FormControl>
                   <FormMessage />
@@ -222,6 +225,7 @@ export function AddEditFixedEstimateForm({
                   dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
+                  data-testid="period-select"
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -251,6 +255,7 @@ export function AddEditFixedEstimateForm({
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      data-testid="is-expense-checkbox"
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -268,7 +273,11 @@ export function AddEditFixedEstimateForm({
           )}
         </div>
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button 
+          type="submit" 
+          disabled={form.formState.isSubmitting}
+          data-testid="submit-button"
+        >
           {form.formState.isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}

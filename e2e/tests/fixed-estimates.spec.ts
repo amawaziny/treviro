@@ -1,9 +1,31 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
+import * as dotenv from "dotenv";
+import * as path from "path";
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+// Test data
+const TEST_USER = {
+  email: process.env.TEST_USER_EMAIL || "test@treviro.com",
+  password: process.env.TEST_USER_PASSWORD || "Test@123",
+};
+
+// Helper functions
+async function login(page: Page) {
+  await page.goto("/");
+  await page.waitForSelector('[data-testid="email-input"]');
+  await page.fill('[data-testid="email-input"]', TEST_USER.email);
+  await page.fill('[data-testid="password-input"]', TEST_USER.password);
+  await page.click('[data-testid="sign-in-button"]');
+  await page.waitForURL("**/dashboard");
+}
 
 test.describe("Fixed Estimates", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    // Add login logic here if needed
+    // Clear cookies and storage before each test
+    await page.context().clearCookies();
+    await login(page);
     await page.goto("/fixed-estimates");
   });
 

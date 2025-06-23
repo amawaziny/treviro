@@ -4,23 +4,20 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { AddInvestmentForm } from "@/components/investments/add/add-investment-form";
 import type { RealEstateInvestment } from "@/lib/types";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
+import { useForm } from "@/contexts/form-context";
 
 export default function EditRealEstateInvestmentPage() {
   const { t } = useLanguage();
   const params = useParams();
   const { investments, isLoading } = useInvestments();
+  const {setHeaderProps} = useForm()
   const [investment, setInvestment] = useState<RealEstateInvestment | null>(
     null,
   );
-  const { language } = useLanguage();
-
-  const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   useEffect(() => {
     if (!params?.id) return;
@@ -31,6 +28,19 @@ export default function EditRealEstateInvestmentPage() {
       setInvestment(found);
     }
   }, [params?.id, investments]);
+
+
+  useEffect(() => {  
+    if (investment) {
+      const title = `${t("edit_real_estate")}: ${investment.name}`;
+      setHeaderProps({
+        showBackButton: true,
+        backHref: "/investments/real-estate",
+        title: title,
+        showNavControls: false,
+      });
+    }
+  }, [investment, setHeaderProps]);
 
   if (isLoading) {
     return (
@@ -57,17 +67,7 @@ export default function EditRealEstateInvestmentPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <Link href="/investments/real-estate" passHref>
-          <Button variant="outline" size="sm">
-            <BackArrowIcon
-              className={language === "ar" ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"}
-            />
-            {t("back_to_real_estate")}
-          </Button>
-        </Link>
-      </div>
+    <div className="container mx-auto">
       <AddInvestmentForm mode="edit" initialValues={investment} />
     </div>
   );
