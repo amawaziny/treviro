@@ -85,7 +85,7 @@ export function MyRealEstateListItem({
                 {investment.name || investment.propertyAddress}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {investment.propertyType || t("na")}
+                {t(investment.propertyType || "na")}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {investment.propertyAddress}

@@ -30,18 +30,10 @@ import {
 import { CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { formatDateDisplay, formatNumberWithSuffix } from "@/lib/utils";
-import { RealEstateInvestment } from "@/lib/types";
-
-export interface Installment {
-  number: number;
-  dueDate: string;
-  amount: number;
-  status: "Paid" | "Unpaid";
-  chequeNumber?: string;
-  description?: string;
-  isMaintenance?: boolean;
-}
+import { cn, formatDateDisplay, formatNumberForMobile } from "@/lib/utils";
+import { Installment, RealEstateInvestment } from "@/lib/types";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Badge } from "@/components/ui/badge";
 
 interface InstallmentTableProps {
   installments: Installment[];
@@ -62,6 +54,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   onDeleteInstallment,
 }) => {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const [showSheet, setShowSheet] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [selectedInstallment, setSelectedInstallment] =
@@ -205,12 +198,29 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                         <span className="text-sm font-medium">
                           #{installment.number}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {formatDateDisplay(installment.dueDate)}
+                        <span className="text-xs flex items-center gap-2">
+                          {(installment.isDownPayment ||
+                            installment.isMaintenance) && (
+                            <Badge variant="default">
+                              {t(
+                                installment.isDownPayment
+                                  ? "down_payment"
+                                  : "maintenance",
+                              )}
+                            </Badge>
+                          )}
+                          <span className="text-muted-foreground">
+                            {formatDateDisplay(installment.dueDate)}
+                          </span>
                         </span>
                       </div>
                       <div className="text-sm font-medium mt-1">
-                        {formatNumberWithSuffix(installment.amount)}
+                        <p>
+                          {formatNumberForMobile(isMobile, installment.amount)}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {installment.description}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

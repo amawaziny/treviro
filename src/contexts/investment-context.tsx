@@ -489,10 +489,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const addInvestment = useCallback(
-    async (
-      investmentData: Omit<Investment, "createdAt" | "id">,
-      analysis?: CurrencyFluctuationAnalysisResult,
-    ) => {
+    async (investmentData: Omit<Investment, "createdAt" | "id">) => {
       if (!firestoreInstance || !isAuthenticated || !userId)
         throw new Error("User not authenticated or Firestore not available.");
 
@@ -544,15 +541,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           totalCashBalance: -amountInvestedValue, // Decrease cash balance by investment amount
         });
       }
-      if (analysis && investmentData.type === "Currencies")
-        await setDoc(
-          doc(
-            firestoreInstance,
-            `users/${userId}/currencyAnalyses`,
-            investmentId,
-          ),
-          analysis,
-        );
     },
     [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance],
   );

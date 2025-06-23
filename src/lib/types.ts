@@ -56,7 +56,6 @@ export interface Installment {
   chequeNumber?: string;
   amount: number;
   dueDate: string;
-  displayNumber: number;
   status: "Paid" | "Unpaid";
   description?: string;
   isMaintenance?: boolean;
@@ -75,16 +74,7 @@ export interface RealEstateInvestment extends BaseInvestment {
   downPayment?: number; // NEW FIELD
   maintenanceAmount?: number; // NEW FIELD
   maintenancePaymentDate?: string; // NEW FIELD
-  installments?: Array<{
-    number: number;
-    dueDate: string;
-    amount: number;
-    status: "Paid" | "Unpaid";
-    chequeNumber?: string;
-    description?: string;
-    isMaintenance?: boolean; // Added
-    isDownPayment?: boolean;
-  }>;
+  installments?: Array<Installment>;
 }
 
 export type DebtSubType = "Certificate" | "Treasury Bill" | "Bond" | "Other";

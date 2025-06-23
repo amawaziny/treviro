@@ -20,7 +20,6 @@ import {
 } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
-import type { Installment } from "@/components/investments/real-estate/installment-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +32,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { RealEstateInvestment } from "@/lib/types";
+import { Installment, RealEstateInvestment } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function RealEstateDetailPage() {
@@ -140,6 +139,7 @@ export default function RealEstateDetailPage() {
         isMaintenance: newPayment.description
           .toLowerCase()
           .includes("maintenance"), // Basic heuristic
+        isDownPayment: newPayment.description.toLowerCase().includes("down"),
       };
 
       const updatedInstallments = [
@@ -208,7 +208,7 @@ export default function RealEstateDetailPage() {
             {investment.name || investment.propertyAddress}
           </CardTitle>
           <CardDescription>
-            {investment.propertyType || t("na")}
+            {t(investment.propertyType || "na")}
           </CardDescription>
         </CardHeader>
         <CardContent>
