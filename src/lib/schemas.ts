@@ -37,12 +37,20 @@ export const fixedEstimatePeriods = ["Monthly", "Quarterly", "Yearly"] as const;
 
 // Coercion helpers for numeric string inputs
 
+// For required fields that must be non-negative numbers (including zero)
+const stringToRequiredGreaterThanOne = z.preprocess(
+  (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : val),
+  z
+    .number({ invalid_type_error: "Must be a valid number." })
+    .min(1, { message: "Amount cannot be less than 1." }),
+);
+
 // For required fields that must be positive numbers
 const stringToRequiredNonNegativeNumberCoerced = z.preprocess(
   (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : val),
   z
     .number({ invalid_type_error: "Must be a valid number." })
-    .min(1, { message: "Amount cannot be less than 1." }),
+    .min(0, { message: "Amount cannot be negative." }),
 );
 
 // For optional fields that must be positive numbers if provided
@@ -194,7 +202,7 @@ const DebtInstrumentInvestmentSchema = z.object({
     .enum(["Monthly", "Quarterly", "Yearly"])
     .default("Monthly")
     .optional(),
-  amountInvested: stringToRequiredNonNegativeNumberCoerced,
+  amountInvested: stringToRequiredGreaterThanOne,
   purchaseDate: z
     .string()
     .optional()
