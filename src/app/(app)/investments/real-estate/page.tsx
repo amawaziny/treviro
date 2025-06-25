@@ -3,6 +3,7 @@
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
+import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 import type {
   RealEstateInvestment,
   StockInvestment,
@@ -272,100 +273,17 @@ export default function MyRealEstatePage() {
         </CardHeader>
         <CardContent>
           {realEstateFundHoldings.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    className={cn(language === "ar" ? "text-end" : "text-left")}
-                  >
-                    {t("fund_name_symbol")}
-                  </TableHead>
-                  <TableHead className="text-end">{t("units_held")}</TableHead>
-                  <TableHead className="text-end">
-                    {t("avg_purchase_price")}
-                  </TableHead>
-                  <TableHead className="text-end">
-                    {t("total_invested")}
-                  </TableHead>
-                  <TableHead className="text-end">
-                    {t("current_market_price")}
-                  </TableHead>
-                  <TableHead className="text-end">
-                    {t("current_value")}
-                  </TableHead>
-                  <TableHead className="text-end">{t("pl")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {realEstateFundHoldings.map((fundInv) => {
-                  const displayCurrency = fundInv.fundDetails.currency || "EGP";
-                  const avgPurchasePrice =
-                    fundInv.numberOfShares &&
-                    fundInv.numberOfShares > 0 &&
-                    fundInv.totalCost
-                      ? fundInv.totalCost / fundInv.numberOfShares
-                      : 0;
-
-                  return (
-                    <TableRow key={fundInv.id}>
-                      <TableCell
-                        className={cn(
-                          language === "ar" ? "text-end" : "text-left",
-                        )}
-                      >
-                        {fundInv.fundDetails.name} ({fundInv.fundDetails.symbol}
-                        )
-                      </TableCell>
-                      <TableCell className="text-end">
-                        {fundInv.numberOfShares?.toLocaleString() || t("na")}
-                      </TableCell>
-                      <TableCell className="text-end">
-                        {formatNumberForMobile(
-                          isMobile,
-                          avgPurchasePrice,
-                          displayCurrency,
-                        )}
-                      </TableCell>
-                      <TableCell className="text-end">
-                        {formatNumberForMobile(
-                          isMobile,
-                          fundInv.totalCost,
-                          displayCurrency,
-                        )}
-                      </TableCell>
-                      <TableCell className="text-end">
-                        {formatNumberForMobile(
-                          isMobile,
-                          fundInv.fundDetails.price || 0,
-                          displayCurrency,
-                        )}
-                      </TableCell>
-                      <TableCell className="text-end">
-                        {formatNumberForMobile(
-                          isMobile,
-                          fundInv.currentValue,
-                          displayCurrency,
-                        )}
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          "text-end font-semibold",
-                          fundInv.profitLoss >= 0
-                            ? "text-accent"
-                            : "text-destructive",
-                        )}
-                      >
-                        {formatNumberForMobile(
-                          isMobile,
-                          fundInv.profitLoss,
-                          displayCurrency,
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {realEstateFundHoldings.map((fundInv) => {
+                return (
+                  <InvestmentSecurityCard
+                    key={fundInv.id}
+                    security={fundInv.fundDetails}
+                    investment={fundInv}
+                  />
+                );
+              })}
+            </div>
           ) : (
             <p className="text-muted-foreground py-4 text-center">
               {t("no_real_estaterelated_fund_investments_found")}
