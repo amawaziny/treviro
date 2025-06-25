@@ -8,8 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function SecuritiesPage() {
-  const { t } = useLanguage();
-  const { language } = useLanguage();
+  const { t , dir} = useLanguage();
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
 
@@ -46,14 +45,14 @@ export default function SecuritiesPage() {
         value={activeTab}
         onValueChange={handleTabChange}
         className="w-full"
-        dir={language === "ar" ? "rtl" : "ltr"}
+        dir={dir}
       >
         <TabsList className="grid w-full grid-cols-2 md:w-[300px] max-w-full">
           <TabsTrigger value="stocks" className="w-full text-xs sm:text-sm">
-            Stocks
+            {t("stocks")}
           </TabsTrigger>
           <TabsTrigger value="funds" className="w-full text-xs sm:text-sm">
-            Funds
+            {t("funds")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="stocks">

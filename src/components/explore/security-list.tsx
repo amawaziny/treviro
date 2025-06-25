@@ -13,6 +13,7 @@ import {
   cacheSecurities,
   getCachedSecurities,
 } from "@/lib/offline-securities-storage";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 interface SecurityListProps {
   filterType?: "Stock" | "Fund";
@@ -28,27 +29,15 @@ export function SecurityList({
   const { t: t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const { listedSecurities, isLoading, error } = useListedSecurities();
-  const [offlineMode, setOfflineMode] = useState(!navigator.onLine);
+  const isOffline = useOnlineStatus();
   const [cachedSecurities, setCachedSecurities] = useState<ListedSecurity[]>(
     [],
   );
   const [usingCache, setUsingCache] = useState(false);
 
-  // Listen for online/offline events
-  useEffect(() => {
-    const handleOnline = () => setOfflineMode(false);
-    const handleOffline = () => setOfflineMode(true);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
   // Cache securities when online and loaded
   useEffect(() => {
-    if (!offlineMode && listedSecurities.length > 0) {
+    if (!isOffline && listedSecurities.length > 0) {
       // Map ListedSecurity to OfflineSecurity (type: 'stock' | 'fund')
       cacheSecurities(
         listedSecurities.map((sec) => ({
@@ -66,11 +55,11 @@ export function SecurityList({
         })),
       );
     }
-  }, [offlineMode, listedSecurities]);
+  }, [isOffline, listedSecurities]);
 
   // Load from cache when offline
   useEffect(() => {
-    if (offlineMode) {
+    if (isOffline) {
       getCachedSecurities(
         filterType ? (filterType === "Fund" ? "fund" : "stock") : undefined,
       ).then((secs) => {
@@ -95,10 +84,10 @@ export function SecurityList({
       setCachedSecurities([]);
       setUsingCache(false);
     }
-  }, [offlineMode, filterType]);
+  }, [isOffline, filterType]);
 
   // Use cached or live data
-  const securitiesToShow = offlineMode ? cachedSecurities : listedSecurities;
+  const securitiesToShow = isOffline ? cachedSecurities : listedSecurities;
 
   const filteredAndTypedSecurities = useMemo(() => {
     let securitiesToFilter = securitiesToShow;
@@ -122,7 +111,7 @@ export function SecurityList({
     );
   }, [searchTerm, securitiesToShow, filterType]);
 
-  if (isLoading && !offlineMode) {
+  if (isLoading && !isOffline) {
     return (
       <div className="flex justify-center items-center py-10">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -131,7 +120,7 @@ export function SecurityList({
     );
   }
 
-  if (error && !offlineMode) {
+  if (error && !isOffline) {
     return (
       <Alert variant="destructive" className="mt-4">
         <AlertCircle className="h-4 w-4" />
@@ -161,11 +150,11 @@ export function SecurityList({
             className="w-full ltr:pl-10 rtl:pr-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            disabled={offlineMode && usingCache}
+            disabled={isOffline && usingCache}
           />
         </div>
         <p className="text-center text-muted-foreground py-10">
-          {offlineMode
+          {isOffline
             ? t("no_cached_securities_available_for_offline_viewing")
             : t(
                 "no_securities_found_the_listedstocks_collection_in_firestore_might_be_empty_or_not_yet_populated",
@@ -180,7 +169,7 @@ export function SecurityList({
       {title && (
         <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       )}
-      {offlineMode && usingCache && (
+      {isOffline && usingCache && (
         <div className="text-xs text-yellow-600 bg-yellow-50 border border-yellow-200 rounded px-2 py-1 mb-2">
           {t(
             "offline_mode_showing_last_cached_securities_some_features_may_be_unavailable",
@@ -197,7 +186,7 @@ export function SecurityList({
           className="w-full ltr:pl-10 rtl:pr-10 text-xs sm:text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          disabled={offlineMode && usingCache && securitiesToShow.length === 0}
+          disabled={isOffline && usingCache && securitiesToShow.length === 0}
         />
       </div>
       {filteredAndTypedSecurities.length > 0 ? (
