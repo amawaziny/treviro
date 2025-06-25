@@ -25,7 +25,7 @@ import { MyGoldListItem } from "@/components/investments/gold/my-gold-list-item"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { formatNumberWithSuffix, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export default function MyGoldPage() {
   const { t } = useLanguage();
@@ -115,33 +115,19 @@ export default function MyGoldPage() {
         security.securityType === "Fund" &&
         isGoldRelatedFund(security.fundType)
       ) {
-        const existingFundHolding = holdings.find(
-          (h) =>
-            h.itemType === "fund" && h.fundDetails?.symbol === security.symbol,
-        );
-        if (existingFundHolding) {
-          existingFundHolding.totalQuantity += stockInv.numberOfShares || 0;
-          existingFundHolding.totalCost += stockInv.amountInvested || 0;
-          if (existingFundHolding.totalQuantity > 0) {
-            existingFundHolding.averagePurchasePrice =
-              existingFundHolding.totalCost / existingFundHolding.totalQuantity;
-          }
-          existingFundHolding.fundInvestment = stockInv;
-        } else {
-          holdings.push({
-            id: `fund_${security.id}`,
-            displayName: security.name,
-            itemType: "fund",
-            logoUrl: security.logoUrl,
-            totalQuantity: stockInv.numberOfShares || 0,
-            averagePurchasePrice: stockInv.purchasePricePerShare || 0,
-            totalCost: stockInv.amountInvested || 0,
-            currentMarketPrice: security.price,
-            currency: security.currency,
-            fundDetails: security,
-            fundInvestment: stockInv,
-          });
-        }
+        holdings.push({
+          id: security.id,
+          displayName: security.name,
+          itemType: "fund",
+          logoUrl: security.logoUrl,
+          totalQuantity: stockInv.numberOfShares || 0,
+          averagePurchasePrice: stockInv.purchasePricePerShare || 0,
+          totalCost: stockInv.amountInvested || 0,
+          currentMarketPrice: security.price,
+          currency: security.currency,
+          fundDetails: security,
+          fundInvestment: stockInv,
+        });
       }
     });
 

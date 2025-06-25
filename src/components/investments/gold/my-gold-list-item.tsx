@@ -9,6 +9,7 @@ import { cn, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { InvestmentSecurityCard } from "../investment-security-card";
+import { calcProfit } from "@/lib/financial-utils";
 
 interface MyGoldListItemProps {
   holding: AggregatedGoldHolding;
@@ -23,35 +24,31 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
     itemType,
     totalQuantity,
     averagePurchasePrice,
-    totalCost,
     currentMarketPrice,
     currency,
     fundDetails, // present if itemType is 'fund'
     physicalGoldType, // present if itemType is 'physical'
   } = holding;
 
-  let profitLoss = 0;
-  let profitLossPercent = 0;
-  let isProfitable = false;
-  let totalCurrentValue = 0;
-
-  if (currentMarketPrice && totalQuantity > 0) {
-    totalCurrentValue = currentMarketPrice * totalQuantity;
-    profitLoss = totalCurrentValue - totalCost;
-    if (totalCost > 0) {
-      profitLossPercent = (profitLoss / totalCost) * 100;
-    } else if (totalCurrentValue > 0) {
-      profitLossPercent = Infinity; // All profit if cost was 0
-    }
-    isProfitable = profitLoss >= 0;
-  }
+   // Calculate profit/loss
+    const {
+      isProfitable,
+      profitLoss,
+      totalCost,
+      profitLossPercent,
+      totalCurrentValue,
+    } = calcProfit(
+      totalQuantity,
+      averagePurchasePrice,
+      currentMarketPrice!,
+    );
 
   const quantityLabel =
     physicalGoldType === "Pound" || physicalGoldType === "Ounce"
       ? "Units"
       : "Grams";
 
-  const PhysicalGoldCard = (
+  const PhysicalGoldCard = () => (
     <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
       <CardContent className="pt-4">
         <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">

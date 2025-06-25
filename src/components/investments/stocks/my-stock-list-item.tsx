@@ -45,7 +45,7 @@ export function MyStockListItem({
   if (currentMarketPrice && totalShares > 0 && averagePurchasePrice > 0) {
     const totalCurrentValue = currentMarketPrice * totalShares;
     const totalCost = averagePurchasePrice * totalShares;
-    profitLoss = totalCurrentValue - totalCost;
+    profitLoss = totalCurrentValue - totalCost;isFund
     profitLossPercent =
       totalCost > 0
         ? (profitLoss / totalCost) * 100
@@ -89,7 +89,7 @@ export function MyStockListItem({
         <div className="flex items-center gap-3 flex-grow min-w-0">
           {correspondingListedSecurity ? (
             <Link
-              href={`/securities/details/${correspondingListedSecurity.id}?fromMyStocks=true`}
+              href={`/securities/details/${correspondingListedSecurity.id}`}
               passHref
               className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md -ml-2"
             >
