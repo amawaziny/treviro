@@ -12,6 +12,20 @@ export type IncomeType =
   | "Freelance"
   | "Other";
 export type ExpenseCategory = "Credit Card" | "Other";
+export type FundType =
+  | "Gold"
+  | "Debt"
+  | "Real Estate"
+  | "Stock"
+  | "Equity"
+  | "REIT"
+  | "Money Market"
+  | "Mixed"
+  | "Other"
+  | "Cash"
+  | "Balanced"
+  | "Fixed Income"
+  | string;
 
 export interface BaseInvestment {
   id: string;
@@ -228,6 +242,7 @@ export type AggregatedGoldHolding = {
   currentMarketPrice?: number;
   currency: string;
   fundDetails?: ListedSecurity;
+  fundInvestment?: StockInvestment;
   physicalGoldType?: GoldType;
 };
 

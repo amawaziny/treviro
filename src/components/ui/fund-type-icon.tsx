@@ -9,18 +9,7 @@ import {
   Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export type FundType =
-  | "Gold"
-  | "Debt"
-  | "Real Estate"
-  | "Stock"
-  | "Equity"
-  | "REIT"
-  | "Money Market"
-  | "Mixed"
-  | "Other"
-  | string;
+import { FundType } from "@/lib/types";
 
 interface FundTypeIconProps {
   fundType?: FundType;

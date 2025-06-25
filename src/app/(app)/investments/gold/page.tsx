@@ -126,6 +126,7 @@ export default function MyGoldPage() {
             existingFundHolding.averagePurchasePrice =
               existingFundHolding.totalCost / existingFundHolding.totalQuantity;
           }
+          existingFundHolding.fundInvestment = stockInv;
         } else {
           holdings.push({
             id: `fund_${security.id}`,
@@ -138,6 +139,7 @@ export default function MyGoldPage() {
             currentMarketPrice: security.price,
             currency: security.currency,
             fundDetails: security,
+            fundInvestment: stockInv,
           });
         }
       }
