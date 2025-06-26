@@ -61,7 +61,7 @@ export interface CurrencyInvestment extends BaseInvestment {
   exchangeRateAtPurchase: number;
 }
 
-export type PropertyType = "Residential" | "Commercial" | "Land";
+export type PropertyType = "Residential" | "Touristic" | "Commercial" | "Land";
 
 export type InstallmentFrequency = "Monthly" | "Quarterly" | "Yearly";
 

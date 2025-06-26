@@ -8,26 +8,23 @@ import { Gem, TrendingUp, TrendingDown } from "lucide-react";
 import { cn, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { InvestmentSecurityCard } from "../investment-security-card";
 import { calcProfit } from "@/lib/financial-utils";
 
-interface MyGoldListItemProps {
+interface PhysicalGoldListItemProps {
   holding: AggregatedGoldHolding;
 }
 
-export function MyGoldListItem({ holding }: MyGoldListItemProps) {
+export function PhysicalGoldListItem({ holding }: PhysicalGoldListItemProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
 
   const {
     displayName,
-    itemType,
     totalQuantity,
     averagePurchasePrice,
     currentMarketPrice,
     currency,
-    fundDetails, // present if itemType is 'fund'
-    physicalGoldType, // present if itemType is 'physical'
+    physicalGoldType,
   } = holding;
 
   // Calculate profit/loss
@@ -44,7 +41,7 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
       ? "Units"
       : "Grams";
 
-  const PhysicalGoldCard = () => (
+  return (
     <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
       <CardContent className="pt-4">
         <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
@@ -117,15 +114,6 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
       </CardContent>
     </Card>
   );
-
-  return itemType === "fund" ? (
-    <InvestmentSecurityCard
-      security={fundDetails!}
-      investment={holding.fundInvestment!}
-    />
-  ) : (
-    <PhysicalGoldCard />
-  );
 }
 
-MyGoldListItem.displayName = "MyGoldListItem";
+PhysicalGoldListItem.displayName = "MyGoldListItem";

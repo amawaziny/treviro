@@ -632,5 +632,11 @@
   "Purchase": "شراء",
   "edit_real_estate": "تعديل العقار",
   "down_payment": "الدفعة المقدمة",
-  "maintenance": "الصيانة"
+  "maintenance": "الصيانة",
+  "physical_gold_holdings": "إستثمارات الذهب المباشرة",
+  "k24_k21_pound_ounce_you_own_physically": "24 قيراط، 21 قيراط، جنيه ذهب، اﻷونصة التي تمتلكها مباشرة",
+  "funds_invested_in_gold": "إستثمارات في صناديق الذهب",
+  "gold_fund_holdings": "إستثمارات الذهب الغير مباشرة",
+  "direct_real_estate_holdings": "ممتلكات عقارية مباشرة",
+  "residential_touristic_commercial_land_you_own_directly": "سكني، سياحي، تجاري، ارض، تمتلكها بشكل مباشر"
 }

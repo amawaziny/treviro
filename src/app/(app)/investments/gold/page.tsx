@@ -15,17 +15,18 @@ import {
   formatNumberForMobile,
   isGoldRelatedFund,
 } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Gem, Plus, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { MyGoldListItem } from "@/components/investments/gold/my-gold-list-item";
+import { PhysicalGoldListItem } from "@/components/investments/gold/my-gold-list-item";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
 export default function MyGoldPage() {
   const { t } = useLanguage();
@@ -46,7 +47,7 @@ export default function MyGoldPage() {
     const holdings: AggregatedGoldHolding[] = [];
 
     const physicalGoldInvestments = investments.filter(
-      (inv) => inv.type === "Gold",
+      (inv) => inv.type === "Gold"
     ) as GoldInvestment[];
     const physicalAggregated: {
       [key in GoldType]?: {
@@ -104,11 +105,11 @@ export default function MyGoldPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
+      (inv) => inv.type === "Stocks"
     ) as StockInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol,
+        (ls) => ls.symbol === stockInv.tickerSymbol
       );
       if (
         security &&
@@ -154,8 +155,8 @@ export default function MyGoldPage() {
                 investments.find(
                   (i) =>
                     i.type === "Stocks" &&
-                    (i as StockInvestment).tickerSymbol === symbol,
-                )?.id,
+                    (i as StockInvestment).tickerSymbol === symbol
+                )?.id
           );
           if (initialFundInvestment) {
             fundHolding.averagePurchasePrice =
@@ -267,7 +268,7 @@ export default function MyGoldPage() {
           <div
             className={cn(
               "text-xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive",
+              isTotalProfitable ? "text-accent" : "text-destructive"
             )}
           >
             {formatNumberForMobile(isMobile, totalProfitLoss)}
@@ -291,33 +292,69 @@ export default function MyGoldPage() {
           <AlertTitle>{t("error_loading_gold_market_prices")}</AlertTitle>
           <AlertDescription>
             {t(
-              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore",
+              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore"
             )}
           </AlertDescription>
         </Alert>
       )}
 
-      {aggregatedGoldHoldings.length > 0 ? (
-        <div className="space-y-4 mt-6">
-          {aggregatedGoldHoldings.map((holding) => (
-            <MyGoldListItem key={holding.id} holding={holding} />
-          ))}
-        </div>
-      ) : (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Gem className="me-2 h-4 w-4 text-primary" />
-              {t("no_gold_holdings")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Gem className="me-2 h-4 w-4 text-primary" />
+            {t("physical_gold_holdings")}
+          </CardTitle>
+          <CardDescription>
+            <p>{`${t("k24_k21_pound_ounce_you_own_physically")}`}</p>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {aggregatedGoldHoldings.length > 0 ? (
+            <div className="space-y-4">
+              {aggregatedGoldHoldings
+                .filter((h) => h.itemType === "physical")
+                .map((holding) => (
+                  <PhysicalGoldListItem key={holding.id} holding={holding} />
+                ))}
+            </div>
+          ) : (
             <p className="text-muted-foreground py-4 text-center">
               {t("you_havent_added_any_gold_investments_yet")}
             </p>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Gem className="me-2 h-4 w-4 text-primary" />
+            {t("gold_fund_holdings")}
+          </CardTitle>
+          <CardDescription>
+            <p>{`${t("funds_invested_in_gold")}`}</p>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {aggregatedGoldHoldings.length > 0 ? (
+            <div className="space-y-4">
+              {aggregatedGoldHoldings
+                .filter((h) => h.itemType === "fund")
+                .map((holding) => (
+                  <InvestmentSecurityCard
+                    key={holding.id}
+                    security={holding.fundDetails!}
+                    investment={holding.fundInvestment!}
+                  />
+                ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground py-4 text-center">
+              {t("you_havent_added_any_gold_investments_yet")}
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Link href="/investments/add?type=Gold" passHref>
         <Button
