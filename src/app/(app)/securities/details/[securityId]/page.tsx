@@ -726,7 +726,9 @@ export default function SecurityDetailPage() {
                                     }
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">{t("Delete")}</span>
+                                    <span className="sr-only">
+                                      {t("Delete")}
+                                    </span>
                                   </Button>
                                 )}
                             </div>
