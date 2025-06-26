@@ -321,6 +321,7 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent className="grid gap-4">
+          {/* Income Cards */}
           <div className="grid gap-4 md:grid-cols-2">
             <Card
               className="bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 flex flex-col flex-1"
@@ -397,8 +398,8 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+          {/* Expenses */}
           <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
-            {/* Total Expenses Card */}
             <Card
               className="bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 flex-col h-[220px] flex-1"
               data-testid="total-expenses-card"
