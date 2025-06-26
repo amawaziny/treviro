@@ -466,20 +466,20 @@ export default function SecurityDetailPage() {
         <TabsList className="flex w-full gap-3 md:grid md:grid-cols-3 h-11 items-center px-1">
           <TabsTrigger
             value="performance"
-            className="flex text-xs md:text-base"
+            className="flex text-xs md:text-base w-full"
           >
             {t("performance")}
           </TabsTrigger>
           <TabsTrigger
             value="position"
-            className="flex text-xs md:text-base"
+            className="flex text-xs md:text-base w-full"
             disabled={!hasPosition}
           >
             {t("my_position")}
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
-            className="flex text-xs md:text-base"
+            className="flex text-xs md:text-base w-full"
           >
             {t("transactions")}
           </TabsTrigger>
@@ -689,11 +689,10 @@ export default function SecurityDetailPage() {
                             <div>
                               {!isDividend && (
                                 <span>
-                                  {t("fees")}{" "}
-                                  {formatCurrencyWithCommas(
+                                  {`${t("fees")}: ${formatCurrencyWithCommas(
                                     (tx as any).fees || 0,
                                     displayCurrency,
-                                  )}
+                                  )}`}
                                 </span>
                               )}
                             </div>
@@ -709,7 +708,7 @@ export default function SecurityDetailPage() {
                                     href={`/investments/stocks/edit/${tx.id}`}
                                   >
                                     <Edit3 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">Edit</span>
+                                    <span className="sr-only">{t("Edit")}</span>
                                   </Link>
                                 </Button>
                               )}
@@ -727,7 +726,7 @@ export default function SecurityDetailPage() {
                                     }
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">Delete</span>
+                                    <span className="sr-only">{t("Delete")}</span>
                                   </Button>
                                 )}
                             </div>

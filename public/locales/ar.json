@@ -153,6 +153,7 @@
   "debts": "أدوات الدين",
   "Debts": "أدوات الدين",
   "delete": "حذف",
+  "Delete": "حذف",
   "delete_transaction": "حذف المعاملة",
   "deleteincomerecord_function_is_required_but_not_provided_by_useinvestments": "دالة deleteIncomeRecord مطلوبة ولكن لم يتم توفيرها من قبل useInvestments",
   "description": "الوصف",
@@ -640,5 +641,6 @@
   "direct_real_estate_holdings": "ممتلكات عقارية مباشرة",
   "residential_touristic_commercial_land_you_own_directly": "سكني، سياحي، تجاري، ارض، تمتلكها بشكل مباشر",
   "you_havent_added_any_debt_fund_investments_yet": "لم تضيف أي استثمارات صناديق أدوات الدين",
-  "Close": "إغلاق"
+  "Close": "إغلاق",
+  "Edit": "تعديل"
 }
