@@ -15,7 +15,13 @@ import {
   formatNumberForMobile,
   isGoldRelatedFund,
 } from "@/lib/utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Gem, Plus, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
@@ -47,7 +53,7 @@ export default function MyGoldPage() {
     const holdings: AggregatedGoldHolding[] = [];
 
     const physicalGoldInvestments = investments.filter(
-      (inv) => inv.type === "Gold"
+      (inv) => inv.type === "Gold",
     ) as GoldInvestment[];
     const physicalAggregated: {
       [key in GoldType]?: {
@@ -105,11 +111,11 @@ export default function MyGoldPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks"
+      (inv) => inv.type === "Stocks",
     ) as StockInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol
+        (ls) => ls.symbol === stockInv.tickerSymbol,
       );
       if (
         security &&
@@ -155,8 +161,8 @@ export default function MyGoldPage() {
                 investments.find(
                   (i) =>
                     i.type === "Stocks" &&
-                    (i as StockInvestment).tickerSymbol === symbol
-                )?.id
+                    (i as StockInvestment).tickerSymbol === symbol,
+                )?.id,
           );
           if (initialFundInvestment) {
             fundHolding.averagePurchasePrice =
@@ -268,7 +274,7 @@ export default function MyGoldPage() {
           <div
             className={cn(
               "text-xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive"
+              isTotalProfitable ? "text-accent" : "text-destructive",
             )}
           >
             {formatNumberForMobile(isMobile, totalProfitLoss)}
@@ -292,7 +298,7 @@ export default function MyGoldPage() {
           <AlertTitle>{t("error_loading_gold_market_prices")}</AlertTitle>
           <AlertDescription>
             {t(
-              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore"
+              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore",
             )}
           </AlertDescription>
         </Alert>

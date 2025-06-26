@@ -239,30 +239,33 @@ export default function MyRealEstatePage() {
         </CardContent>
       </Card>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex">
-              <Home className="me-2 h-4 w-4 text-primary" />
-              {t("direct_real_estate_holdings")}
-            </CardTitle>
-            <CardDescription>
-              {t("residential_touristic_commercial_land_you_own_directly")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-      {directRealEstateHoldings.length > 0 ? (
-        <div className="space-y-4">
-          {directRealEstateHoldings.map((investment) => (
-            <MyRealEstateListItem key={investment.id} investment={investment} />
-          ))}
-        </div>
-      ) : (
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex">
+            <Home className="me-2 h-4 w-4 text-primary" />
+            {t("direct_real_estate_holdings")}
+          </CardTitle>
+          <CardDescription>
+            {t("residential_touristic_commercial_land_you_own_directly")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {directRealEstateHoldings.length > 0 ? (
+            <div className="space-y-4">
+              {directRealEstateHoldings.map((investment) => (
+                <MyRealEstateListItem
+                  key={investment.id}
+                  investment={investment}
+                />
+              ))}
+            </div>
+          ) : (
             <p className="text-muted-foreground py-4 text-center">
               {t("you_havent_added_any_direct_real_estate_investments_yet")}
             </p>
-      )}
-          </CardContent>
-        </Card>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="mt-6">
         <CardHeader>
