@@ -8,11 +8,11 @@ import { formatNumberForMobile } from "@/lib/utils";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface MyDebtListItemProps {
+interface DirectDebtListItemProps {
   holding: AggregatedDebtHolding;
 }
 
-export function MyDebtListItem({ holding }: MyDebtListItemProps) {
+export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
 
@@ -81,4 +81,4 @@ export function MyDebtListItem({ holding }: MyDebtListItemProps) {
     </Card>
   );
 }
-MyDebtListItem.displayName = "MyDebtListItem";
+DirectDebtListItem.displayName = "MyDebtListItem";

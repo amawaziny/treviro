@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { MyDebtListItem } from "@/components/investments/debt/my-debt-list-item";
+import { DirectDebtListItem } from "@/components/investments/debt/my-debt-list-item";
 import { cn, formatNumberWithSuffix } from "@/lib/utils";
 import { format, parseISO, isValid } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
@@ -363,7 +363,7 @@ export default function MyDebtInstrumentsPage() {
         <CardContent className="space-y-4">
           {directDebtHoldings.length > 0 ? (
             directDebtHoldings.map((debt) => (
-              <MyDebtListItem key={debt.id} holding={debt} />
+              <DirectDebtListItem key={debt.id} holding={debt} />
             ))
           ) : (
             <p className="text-muted-foreground py-4 text-center">
