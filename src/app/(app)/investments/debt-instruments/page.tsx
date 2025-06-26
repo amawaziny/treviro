@@ -372,12 +372,10 @@ export default function MyDebtInstrumentsPage() {
           )}
         </CardContent>
       </Card>
-
-      {debtFundHoldings.length > 0 && (
-        <Card className="mt-6">
+ <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Building className="mr-2 h-4 w-4 text-primary" />
+              <Building className="me-2 h-4 w-4 text-primary" />
               {t("debt_fund_investments")}
             </CardTitle>
             <CardDescription>
@@ -385,7 +383,9 @@ export default function MyDebtInstrumentsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {debtFundHoldings.map((holding) => {
+      {debtFundHoldings.length > 0 ? (
+       
+            debtFundHoldings.map((holding) => {
               return (
                 <InvestmentSecurityCard
                   key={holding.id}
@@ -393,10 +393,14 @@ export default function MyDebtInstrumentsPage() {
                   investment={holding.fundInvestment!}
                 />
               );
-            })}
+            })
+      ) : (
+        <p className="text-muted-foreground py-4 text-center">
+          {t("you_havent_added_any_debt_fund_investments_yet")}
+        </p>
+      )}
           </CardContent>
         </Card>
-      )}
 
       <Link href="/investments/add?type=Debt Instruments" passHref>
         <Button

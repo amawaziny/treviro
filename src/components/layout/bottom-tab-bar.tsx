@@ -45,9 +45,7 @@ export function BottomTabBar() {
           </Link>
         ))}
         <button
-          className={`flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors ${
-            resolvedTheme === "dark" ? "text-white" : "text-[#23255a]"
-          }`}
+          className={`flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors text-muted-foreground`}
           onClick={() => setMenuOpen(true)}
         >
           <span className="text-lg">☰</span>
@@ -84,7 +82,7 @@ export function BottomTabBar() {
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.icon ? <item.icon className="h-4 w-4" /> : null}
-                    <span>{item.mobileTitle || item.title}</span>
+                    <span>{t(item.mobileTitle || item.title)}</span>
                   </Link>
                 </li>
               ))}
@@ -93,7 +91,7 @@ export function BottomTabBar() {
               className="mt-6 w-full py-2 rounded bg-gray-200 dark:bg-[#23255a] text-[#23255a] dark:text-white font-semibold"
               onClick={() => setMenuOpen(false)}
             >
-              Close
+              {t("Close")}
             </button>
           </div>
         </div>
