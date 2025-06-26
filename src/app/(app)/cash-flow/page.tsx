@@ -41,7 +41,7 @@ import { calculateCashFlowDetails } from "@/lib/financial-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function CashFlowPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isMobile = useIsMobile();
   const {
     incomeRecords,
@@ -196,8 +196,7 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("income_details")}</CardTitle>
             <CardDescription>
-              {t("breakdown_of_income_for")}
-              {formatMonthYear(currentMonthStart)}.
+              {`${t("breakdown_of_income_for")}${formatMonthYear(currentMonthStart, language)}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -218,8 +217,8 @@ export default function CashFlowPage() {
                   className="flex justify-between text-xs"
                 >
                   <span>
-                    {formatDateDisplay(income.date)}{" "}
-                    {income.description ? `- ${income.description}` : ""}
+                    {`${formatDateDisplay(income.date)}
+                    ${income.description ? `- ${income.description}` : ""}`}
                   </span>
                   <span>{formatNumberForMobile(isMobile, income.amount)}</span>
                 </div>
@@ -243,9 +242,7 @@ export default function CashFlowPage() {
                     className="flex justify-between text-xs"
                   >
                     <span>
-                      {formatDateDisplay(tx.date)}
-                      {t("dividend")}{" "}
-                      {tx.tickerSymbol ? `(${tx.tickerSymbol})` : ""}
+                      {`${formatDateDisplay(tx.date)} ${t("dividend")} ${tx.tickerSymbol ? `(${tx.tickerSymbol})` : ""}`}
                     </span>
                     <span>
                       {formatNumberForMobile(
@@ -276,7 +273,7 @@ export default function CashFlowPage() {
               </div>
             )}
             <hr className="my-2" />
-            <div className="flex justify-between font-bold">
+            <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_projected_income")}</span>
               <span>{formatNumberForMobile(isMobile, totalIncome)}</span>
             </div>
@@ -287,13 +284,12 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("expense_details")}</CardTitle>
             <CardDescription>
-              {t("breakdown_of_expenses_for")}
-              {formatMonthYear(currentMonthStart)}.
+              {`${t("breakdown_of_expenses_for")}${formatMonthYear(currentMonthStart, language)}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {zakatFixedMonthly > 0 && (
-              <div className="flex justify-between items-center text-red-500 font-semibold">
+              <div className="flex justify-between items-center text-red-500 text-xs">
                 <span className="flex items-center gap-1">
                   <Gift className="h-4 w-4" />
                   {t("zakat_fixed")}
@@ -304,7 +300,7 @@ export default function CashFlowPage() {
               </div>
             )}
             {charityFixedMonthly > 0 && (
-              <div className="flex justify-between items-center text-red-500 font-semibold">
+              <div className="flex justify-between items-center text-red-500 text-xs">
                 <span className="flex items-center gap-1">
                   <HandHeart className="h-4 w-4" />
                   {t("charity_fixed")}
@@ -315,7 +311,7 @@ export default function CashFlowPage() {
               </div>
             )}
             {livingExpensesMonthly > 0 && (
-              <div className="flex justify-between items-center text-red-500 font-semibold">
+              <div className="flex justify-between items-center text-red-500 text-xs">
                 <span className="flex items-center gap-1">
                   <TrendingDown className="h-4 w-4" />
                   {t("living_expenses")}
@@ -326,7 +322,7 @@ export default function CashFlowPage() {
               </div>
             )}
             {otherFixedExpensesMonthly > 0 && (
-              <div className="flex justify-between items-center text-red-500 font-semibold">
+              <div className="flex justify-between items-center text-red-500 text-xs">
                 <span className="flex items-center gap-1">
                   {t("other_fixed_expenses")}
                 </span>
@@ -336,7 +332,7 @@ export default function CashFlowPage() {
               </div>
             )}
             {totalItemizedExpensesThisMonth > 0 && (
-              <div className="flex justify-between items-center text-red-500 font-semibold">
+              <div className="flex justify-between items-center text-red-500 text-xs">
                 {t("itemized_logged_expenses")}{" "}
                 <span>
                   {formatNumberForMobile(
@@ -348,7 +344,7 @@ export default function CashFlowPage() {
             )}
 
             <hr className="my-2" />
-            <div className="flex justify-between font-bold">
+            <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_projected_expenses")}</span>
               <span>{formatNumberForMobile(isMobile, totalExpensesOnly)}</span>
             </div>
@@ -359,14 +355,13 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("investments_details")}</CardTitle>
             <CardDescription>
-              {t("new_investments_made_in")}
-              {formatMonthYear(currentMonthStart)}.
+              {`${t("new_investments_made_in")} ${formatMonthYear(currentMonthStart, language)}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div>
               {/* Total Stock Investment */}
-              <div className="flex justify-between items-center text-blue-600 font-semibold mb-2">
+              <div className="flex justify-between items-center text-blue-600 font-semibold text-xs mb-2">
                 <span className="flex items-center gap-2">
                   {t("total_stock")}
                 </span>
@@ -391,7 +386,7 @@ export default function CashFlowPage() {
                   );
                 }).length > 0 && (
                   <div className="mb-2">
-                    <div className="font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2"></div>
+                    <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2"></div>
                     <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
                       {investments
                         .filter((inv) => {
@@ -411,7 +406,7 @@ export default function CashFlowPage() {
                           return (
                             <li
                               key={stock.id}
-                              className="flex justify-between items-center text-sm"
+                              className="flex justify-between items-center text-xs"
                             >
                               <span>
                                 {stock.tickerSymbol ||
@@ -433,7 +428,7 @@ export default function CashFlowPage() {
               {/* Debt Instruments */}
               {investments &&
                 investments.filter((inv) => {
-                  if (inv.type !== t("debt_instruments") || !inv.purchaseDate)
+                  if (inv.type !== "Debt Instruments" || !inv.purchaseDate)
                     return false;
                   const parsed = parseDateString(inv.purchaseDate);
                   return (
@@ -445,7 +440,7 @@ export default function CashFlowPage() {
                   );
                 }).length > 0 && (
                   <div className="mb-2">
-                    <div className="font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                    <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
                       <Wallet className="h-4 w-4" />
                       {t("debt_instruments_purchased")}
                     </div>
@@ -453,7 +448,7 @@ export default function CashFlowPage() {
                       {investments
                         .filter((inv) => {
                           if (
-                            inv.type !== t("debt_instruments") ||
+                            inv.type !== "Debt Instruments" ||
                             !inv.purchaseDate
                           )
                             return false;
@@ -469,7 +464,7 @@ export default function CashFlowPage() {
                         .map((debt) => (
                           <li
                             key={debt.id}
-                            className="flex justify-between items-center text-sm"
+                            className="flex justify-between items-center text-xs"
                           >
                             <span>{debt.name || t("unnamed_debt")}</span>
                             <span>
@@ -497,7 +492,7 @@ export default function CashFlowPage() {
                   );
                 }).length > 0 && (
                   <div className="mb-2">
-                    <div className="font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                    <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
                       <Coins className="h-4 w-4" />
                       {t("gold_purchased")}
                     </div>
@@ -518,7 +513,7 @@ export default function CashFlowPage() {
                         .map((gold) => (
                           <li
                             key={gold.id}
-                            className="flex justify-between items-center text-sm"
+                            className="flex justify-between items-center text-xs"
                           >
                             <span>{gold.name || t("unnamed_gold")}</span>
                             <span>
@@ -536,7 +531,7 @@ export default function CashFlowPage() {
 
             {realEstateInstallments.installments.length > 0 && (
               <div className="mt-2">
-                <div className="flex justify-between text-blue-700 pt-2 border-t border-blue-100 dark:border-blue-900 mt-2 font-bold">
+                <div className="flex justify-between text-blue-700 pt-2 border-t border-blue-100 dark:border-blue-900 mt-2 font-semibold text-sm">
                   <span>{t("total_real_estate")}</span>
                   <span>
                     {formatNumberForMobile(
@@ -549,15 +544,15 @@ export default function CashFlowPage() {
                   {realEstateInstallments.installments.map((installment) => (
                     <li
                       key={`invest-${installment.propertyId}-${installment.number}`}
-                      className="flex justify-between items-center"
+                      className="flex justify-between items-center text-xs"
                     >
-                      <span className="flex items-center gap-2 text-sm">
+                      <span className="flex items-center gap-2 text-xs">
                         <Landmark className="h-4 w-4 text-blue-500" />
                         <span className="whitespace-pre-line">
                           {installment.propertyName} (#{installment.number})
                         </span>
                       </span>
-                      <span className="font-medium text-end">
+                      <span className="text-end text-xs">
                         {formatNumberForMobile(
                           isMobile,
                           installment.amount || 0,
@@ -570,7 +565,7 @@ export default function CashFlowPage() {
             )}
 
             <hr className="my-2" />
-            <div className="flex justify-between font-bold">
+            <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_investments")}</span>
               <span>
                 {formatNumberForMobile(isMobile, totalInvestmentsThisMonth)}
