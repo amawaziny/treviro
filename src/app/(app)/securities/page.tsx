@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function SecuritiesPage() {
-  const { t , dir} = useLanguage();
+  const { t, dir } = useLanguage();
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
 

@@ -50,8 +50,8 @@ export function InvestmentSecurityCard({
         <Image
           src={security.logoUrl}
           alt={`${security.name} logo`}
-          width={40}
-          height={40}
+          width={32}
+          height={32}
           className="rounded-full object-cover"
         />
       );
@@ -71,13 +71,23 @@ export function InvestmentSecurityCard({
               <div className="flex-shrink-0">{getIcon()}</div>
               <div className="truncate">
                 <div className="flex items-baseline gap-2">
-                  <p className="text-base font-medium truncate">
-                    {security.name}
+                  <p className="font-semibold text-sm text-foreground truncate">
+                    {security.symbol}
                   </p>
                   {security.fundType && (
-                    <FundTypeIcon fundType={security.fundType} size={12} />
+                    <>
+                      <span>•</span>
+                      <FundTypeIcon fundType={security.fundType} size={12} />
+                    </>
                   )}
                 </div>
+                <p className="text-xs text-muted-foreground truncate">
+                  {security.name.length > 15
+                    ? `${security.name.substring(0, 15)}...`
+                    : security.name}
+                  <span className="mx-1">•</span>
+                  {security.market.toUpperCase()}
+                </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {`${t(getQuantityLabel())}: ${investment.numberOfShares!.toLocaleString(
                     undefined,

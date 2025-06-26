@@ -3,22 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Plus,
-  TrendingUp,
-  TrendingDown,
-  LineChart,
-} from "lucide-react"; // Added icons
+import { Plus, TrendingUp, TrendingDown, LineChart } from "lucide-react"; // Added icons
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import React from "react"; // Added React for useMemo
 import { useInvestments } from "@/hooks/use-investments"; // To calculate total P/L
 import { useListedSecurities } from "@/hooks/use-listed-securities"; // For current prices
 import type { StockInvestment } from "@/lib/types";
-import {
-  cn,
-  formatNumberForMobile,
-} from "@/lib/utils"; // For styling and formatting
+import { cn, formatNumberForMobile } from "@/lib/utils"; // For styling and formatting
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isStockRelatedFund } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,74 +19,74 @@ import { getAllOfflineInvestments } from "@/lib/offline-investment-storage";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
 export default function MyStocksPage() {
-  const { t, language} = useLanguage();
+  const { t, language } = useLanguage();
   const isMobile = useIsMobile();
 
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
-    const { listedSecurities, isLoading: isLoadingListedSecurities } =
-      useListedSecurities();
-    const [offlineInvestments, setOfflineInvestments] = React.useState<
-      StockInvestment[]
-    >([]);
-    const isOffline = useOnlineStatus();
-  
-    React.useEffect(() => {
-      if (isOffline) {
-        getAllOfflineInvestments().then((pending) => {
-          setOfflineInvestments(
-            pending.filter(
-              (inv) =>
-                inv.type === "Stocks" &&
-                typeof inv.numberOfShares === "number" &&
-                typeof inv.purchaseFees === "number",
-            ) as StockInvestment[],
-          );
-        });
-      } else {
-        setOfflineInvestments([]);
-      }
-    }, [isOffline]);
-  
-    const allInvestments = React.useMemo(() => {
-      return isOffline ? [...investments, ...offlineInvestments] : investments;
-    }, [investments, offlineInvestments, isOffline]);
-  
-    const stockInvestments = React.useMemo(() => {
-      if (isLoadingInvestments || isLoadingListedSecurities) return [];
-  
-      return allInvestments.filter((inv): inv is StockInvestment => {
-        // Only process investments that have a tickerSymbol (i.e., StockInvestment)
-        if (!("tickerSymbol" in inv) || typeof inv.tickerSymbol !== "string") {
-          return false;
-        }
-  
-        // Find the corresponding listed security for the investment
-        const listedSecurity = listedSecurities.find(
-          (ls) => ls.symbol === inv.tickerSymbol,
+  const { listedSecurities, isLoading: isLoadingListedSecurities } =
+    useListedSecurities();
+  const [offlineInvestments, setOfflineInvestments] = React.useState<
+    StockInvestment[]
+  >([]);
+  const isOffline = useOnlineStatus();
+
+  React.useEffect(() => {
+    if (isOffline) {
+      getAllOfflineInvestments().then((pending) => {
+        setOfflineInvestments(
+          pending.filter(
+            (inv) =>
+              inv.type === "Stocks" &&
+              typeof inv.numberOfShares === "number" &&
+              typeof inv.purchaseFees === "number",
+          ) as StockInvestment[],
         );
-  
-        if (!listedSecurity) {
-          // If no listed security is found, exclude the investment
-          return false;
-        }
-  
-        // Apply the filter condition based on the listed security's type and fundType
-        const isStock = listedSecurity.securityType === "Stock";
-        const isStockFund =
-          listedSecurity.securityType === "Fund" &&
-          isStockRelatedFund(listedSecurity.fundType);
-  
-        return isStock || isStockFund;
       });
-    }, [
-      allInvestments,
-      listedSecurities,
-      isLoadingInvestments,
-      isLoadingListedSecurities,
-    ]); // Add dependencies
-  
-    // Update loading state to consider both hooks
-    const isLoading = isLoadingInvestments || isLoadingListedSecurities;
+    } else {
+      setOfflineInvestments([]);
+    }
+  }, [isOffline]);
+
+  const allInvestments = React.useMemo(() => {
+    return isOffline ? [...investments, ...offlineInvestments] : investments;
+  }, [investments, offlineInvestments, isOffline]);
+
+  const stockInvestments = React.useMemo(() => {
+    if (isLoadingInvestments || isLoadingListedSecurities) return [];
+
+    return allInvestments.filter((inv): inv is StockInvestment => {
+      // Only process investments that have a tickerSymbol (i.e., StockInvestment)
+      if (!("tickerSymbol" in inv) || typeof inv.tickerSymbol !== "string") {
+        return false;
+      }
+
+      // Find the corresponding listed security for the investment
+      const listedSecurity = listedSecurities.find(
+        (ls) => ls.symbol === inv.tickerSymbol,
+      );
+
+      if (!listedSecurity) {
+        // If no listed security is found, exclude the investment
+        return false;
+      }
+
+      // Apply the filter condition based on the listed security's type and fundType
+      const isStock = listedSecurity.securityType === "Stock";
+      const isStockFund =
+        listedSecurity.securityType === "Fund" &&
+        isStockRelatedFund(listedSecurity.fundType);
+
+      return isStock || isStockFund;
+    });
+  }, [
+    allInvestments,
+    listedSecurities,
+    isLoadingInvestments,
+    isLoadingListedSecurities,
+  ]); // Add dependencies
+
+  // Update loading state to consider both hooks
+  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   const { totalStockPnL, totalStockCost, totalStockValue } =
     React.useMemo(() => {
@@ -182,7 +174,7 @@ export default function MyStocksPage() {
             <Skeleton className="h-10 w-1/2" />
           </CardContent>
         </Card>
-      ) :  (
+      ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -217,41 +209,41 @@ export default function MyStocksPage() {
         </Card>
       )}
 
-{isLoading ? (
-           <div className="space-y-4">
-             {[...Array(3)].map((_, i) => (
-               <Card key={i}>
-                 <CardHeader>
-                   <Skeleton className="h-6 w-3/4" />
-                   <Skeleton className="h-4 w-1/2" />
-                 </CardHeader>
-                 <CardContent>
-                   <Skeleton className="h-10 w-full" />
-                 </CardContent>
-               </Card>
-             ))}
-           </div>
-         ) : (
-         <div className="space-y-4">
-           {stockInvestments.map((investment) => {
-             if (!investment.tickerSymbol) return null;
-             
-             const listedSecurity = listedSecurities.find(
-               (ls) => ls.symbol === investment.tickerSymbol
-             );
-     
-             if (!listedSecurity) return null;
-     
-             return (
-               <InvestmentSecurityCard
-                 key={`${investment.id}-${investment.tickerSymbol}`}
-                 security={listedSecurity}
-                 investment={investment}
-               />
-             );
-           })}
-         </div>
-       )}
+      {isLoading ? (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {stockInvestments.map((investment) => {
+            if (!investment.tickerSymbol) return null;
+
+            const listedSecurity = listedSecurities.find(
+              (ls) => ls.symbol === investment.tickerSymbol,
+            );
+
+            if (!listedSecurity) return null;
+
+            return (
+              <InvestmentSecurityCard
+                key={`${investment.id}-${investment.tickerSymbol}`}
+                security={listedSecurity}
+                investment={investment}
+              />
+            );
+          })}
+        </div>
+      )}
 
       <Link href="/securities" passHref>
         <Button

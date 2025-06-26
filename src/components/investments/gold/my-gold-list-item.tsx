@@ -30,18 +30,14 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
     physicalGoldType, // present if itemType is 'physical'
   } = holding;
 
-   // Calculate profit/loss
-    const {
-      isProfitable,
-      profitLoss,
-      totalCost,
-      profitLossPercent,
-      totalCurrentValue,
-    } = calcProfit(
-      totalQuantity,
-      averagePurchasePrice,
-      currentMarketPrice!,
-    );
+  // Calculate profit/loss
+  const {
+    isProfitable,
+    profitLoss,
+    totalCost,
+    profitLossPercent,
+    totalCurrentValue,
+  } = calcProfit(totalQuantity, averagePurchasePrice, currentMarketPrice!);
 
   const quantityLabel =
     physicalGoldType === "Pound" || physicalGoldType === "Ounce"
@@ -53,10 +49,10 @@ export function MyGoldListItem({ holding }: MyGoldListItemProps) {
       <CardContent className="pt-4">
         <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
           <div className="flex items-center gap-3 flex-grow min-w-0 w-0">
-            <div className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20 p-2 rounded-md">
-              <Gem className="h-10 w-10 text-amber-400" />
+            <div className="flex items-center gap-3 flex-grow min-w-0 hover:bg-muted/20rounded-md">
+              <Gem className="h-8 w-8 text-amber-400" />
               <div className="truncate">
-                <p className="text-base font-medium truncate">
+                <p className="font-semibold text-sm text-foreground truncate">
                   {t(physicalGoldType || "") || displayName}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">

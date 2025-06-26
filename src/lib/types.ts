@@ -274,7 +274,6 @@ export interface AggregatedDebtHolding {
   projectedMonthlyInterest?: number;
   projectedAnnualInterest?: number;
 
-  fundDetails?: ListedSecurity;
   totalUnits?: number;
   averagePurchasePrice?: number;
   totalCost?: number;
@@ -284,6 +283,9 @@ export interface AggregatedDebtHolding {
   profitLossPercent?: number;
   currency?: string;
   logoUrl?: string;
+
+  fundDetails?: ListedSecurity;
+  fundInvestment?: StockInvestment;
 }
 
 export interface InvestmentTypePercentages {

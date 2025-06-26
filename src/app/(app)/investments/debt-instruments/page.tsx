@@ -36,6 +36,7 @@ import { cn, formatNumberWithSuffix } from "@/lib/utils";
 import { format, parseISO, isValid } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
 export default function MyDebtInstrumentsPage() {
   const { t: t } = useLanguage();
@@ -155,20 +156,17 @@ export default function MyDebtInstrumentsPage() {
         const unitsOfThisLot = stockInv.numberOfShares || 0;
 
         if (debtFundAggregationMap.has(symbol)) {
-          const existing = debtFundAggregationMap.get(symbol)!;
-          existing.totalUnits = (existing.totalUnits || 0) + unitsOfThisLot;
-          existing.totalCost = (existing.totalCost || 0) + costOfThisLot;
-        } else {
           debtFundAggregationMap.set(symbol, {
             id: security.id,
             itemType: "fund",
             displayName: security.name,
-            fundDetails: security,
             totalUnits: unitsOfThisLot,
             totalCost: costOfThisLot,
             currentMarketPrice: security.price,
             currency: security.currency,
             logoUrl: security.logoUrl,
+            fundDetails: security,
+            fundInvestment: stockInv,
           });
         }
       }
@@ -387,9 +385,15 @@ export default function MyDebtInstrumentsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {debtFundHoldings.map((holding) => (
-              <MyDebtListItem key={holding.id} holding={holding} />
-            ))}
+            {debtFundHoldings.map((holding) => {
+              return (
+                <InvestmentSecurityCard
+                  key={holding.id}
+                  security={holding.fundDetails!}
+                  investment={holding.fundInvestment!}
+                />
+              );
+            })}
           </CardContent>
         </Card>
       )}
