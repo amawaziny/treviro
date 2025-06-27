@@ -105,7 +105,7 @@ export function InvestmentSecurityCard({
               <div className="flex flex-col items-end">
                 <p
                   className={cn(
-                    "font-bold text-base",
+                    "font-bold text-sm",
                     isProfitable ? "text-accent" : "text-destructive",
                   )}
                 >
@@ -121,9 +121,9 @@ export function InvestmentSecurityCard({
                   )}
                 >
                   {isProfitable ? (
-                    <TrendingUp className="mr-1 h-3 w-3" />
+                    <TrendingUp className="me-1 h-3 w-3" />
                   ) : (
-                    <TrendingDown className="mr-1 h-3 w-3" />
+                    <TrendingDown className="me-1 h-3 w-3" />
                   )}
                   {totalCost > 0
                     ? profitLossPercent.toFixed(2) + "%"
@@ -138,14 +138,18 @@ export function InvestmentSecurityCard({
           {/* Bottom row - Prices */}
           <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
             <p>
-              {`${t("avg_cost")}: ${formatNumberForMobile(isMobile, investment.purchasePricePerShare)}`}
+              {`${t("avg_cost")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(isMobile, investment.purchasePricePerShare)}
+              </span>
             </p>
             <p className="text-end">
-              {`${t("market_price")}: ${
-                security.price !== undefined
+              {`${t("market_price")}: `}
+              <span className="font-medium text-foreground">
+                {security.price !== undefined
                   ? formatNumberForMobile(isMobile, security.price)
-                  : t("na")
-              }`}
+                  : t("na")}
+              </span>
             </p>
           </div>
         </CardContent>

@@ -5,14 +5,16 @@ import type { AggregatedCurrencyHolding } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Info } from "lucide-react"; // Using DollarSign as a generic currency icon
-import { cn, formatCurrencyWithCommas } from "@/lib/utils";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 import { formatNumberWithSuffix } from "@/lib/utils"; // Import the utility function
+import { useIsMobile } from "@/hooks/use-mobile";
 interface MyCurrencyListItemProps {
   holding: AggregatedCurrencyHolding;
 }
 
 export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const {
     currencyCode,
     totalForeignAmount,
@@ -33,7 +35,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
     return value.toFixed(4);
   };
 
-  const formattedProfitLoss = formatCurrencyWithCommas(profitOrLossInEGP);
+  const formattedProfitLoss = formatNumberForMobile(isMobile, profitOrLossInEGP);
   const displayProfitLossPercent =
     profitOrLossPercentage === Infinity
       ? "∞"
@@ -46,14 +48,13 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-grow min-w-0">
-            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary">
+            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-primary">
               <DollarSign className="h-4 w-4" />
             </div>
             <div className="truncate">
-              <p className="text-lg font-semibold truncate">{currencyCode}</p>
-              <p className="text-xs text-muted-foreground truncate md:hidden">
-                {t("held")}{" "}
-                {formatNumberWithSuffix(totalForeignAmount || 0, currencyCode)}
+              <p className="text-sm font-semibold truncate">{currencyCode}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {`${t("held")}: ${formatNumberForMobile(isMobile, totalForeignAmount || 0, currencyCode)}`}
               </p>
             </div>
           </div>
@@ -63,7 +64,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
               <>
                 <p
                   className={cn(
-                    "text-lg font-bold",
+                    "text-sm font-bold",
                     isProfitable ? "text-accent" : "text-destructive",
                   )}
                 >
@@ -87,9 +88,9 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
                   )}
                 >
                   {isProfitable ? (
-                    <TrendingUp className="mr-1 h-3 w-3" />
+                    <TrendingUp className="me-1 h-3 w-3" />
                   ) : (
-                    <TrendingDown className="mr-1 h-3 w-3" />
+                    <TrendingDown className="me-1 h-3 w-3" />
                   )}
                   {displayProfitLossPercent}
                 </Badge>
@@ -106,17 +107,17 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
           </div>
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
-          <p>
-            {t("avg_buy_rate")}{" "}
+          <p className="text-start">
+            {`${t("avg_buy_rate")}: `}
             <span className="font-medium text-foreground">
-              {formatRate(averagePurchaseRateToEGP)} EGP
+              {`${formatRate(averagePurchaseRateToEGP)} EGP`}
             </span>
           </p>
-          <p>
-            {t("market_rate")}{" "}
+          <p className="text-end">
+            {`${t("market_rate")}: `}
             <span className="font-medium text-foreground">
               {hasMarketRate
-                ? formatRate(currentMarketRateToEGP) + " EGP"
+                ? `${formatRate(currentMarketRateToEGP)} EGP`
                 : t("na")}
             </span>
           </p>

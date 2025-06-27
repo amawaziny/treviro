@@ -36,8 +36,7 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from "uuid";
 import React, { useState, useEffect, useCallback } from "react";
-import { CurrencyAnalysisDisplay } from "./currencies/currency-analysis-display";
-import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
   ListedSecurity,
@@ -51,7 +50,6 @@ import type {
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
 import { RealEstateForm } from "./real-estate/real-estate-form";
-import { useForm } from "@/contexts/form-context";
 import { formatCurrencyWithCommas, getCurrentDate } from "@/lib/utils";
 
 // Initial values for each investment type
@@ -1096,9 +1094,10 @@ export function InvestmentForm({
       // Add more types here if you want to support editing other investment types
     } else {
       await addInvestment(newInvestment);
+      console.log(`${newInvestment.name} (${t(preSelectedInvestmentType)}) ${t("has_been_successfully_added")}.`)
       toast({
         title: t("investment_added"),
-        description: `${newInvestment.name} (${t(preSelectedInvestmentType)}) ${t("has_been_successfully_added")}.`,
+        description: `${t(preSelectedInvestmentType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
       });
     }
 

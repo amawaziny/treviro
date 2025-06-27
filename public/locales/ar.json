@@ -45,6 +45,7 @@
   "add": "إضافة",
   "add_a_new_future_payment_to_the_schedule": "إضافة دفعة مستقبلية جديدة إلى الجدول الزمني.",
   "add_currency": "إضافة عملة",
+  "currency":"عملة",
   "add_currency_holding": "إضافة احتياطي عملة",
   "add_dividend": "إضافة أرباح",
   "add_estimate": "إضافة تقدير",
@@ -642,5 +643,6 @@
   "residential_touristic_commercial_land_you_own_directly": "سكني، سياحي، تجاري، ارض، تمتلكها بشكل مباشر",
   "you_havent_added_any_debt_fund_investments_yet": "لم تضيف أي استثمارات صناديق أدوات الدين",
   "Close": "إغلاق",
-  "Edit": "تعديل"
+  "Edit": "تعديل",
+  "Shares":"اﻷسهم"
 }

@@ -32,9 +32,7 @@ import { MyCurrencyListItem } from "@/components/investments/currencies/my-curre
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  formatNumberWithSuffix,
   cn,
-  formatCurrencyWithCommas,
   formatNumberForMobile,
 } from "@/lib/utils";
 
@@ -168,7 +166,7 @@ export default function MyCurrenciesPage() {
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Currencies
+          {t("Currencies")}
         </h1>
         <p className="text-muted-foreground text-sm">
           {t("view_your_currency_holdings_and_their_performance_against_egp")}
@@ -218,7 +216,7 @@ export default function MyCurrenciesPage() {
       )}
 
       {aggregatedCurrencyHoldings.length > 0 ? (
-        <div className="space-y-4 mt-6">
+        <div className="space-y-4">
           {aggregatedCurrencyHoldings.map((holding) => (
             <MyCurrencyListItem key={holding.currencyCode} holding={holding} />
           ))}
@@ -227,7 +225,7 @@ export default function MyCurrenciesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Coins className="mr-2 h-4 w-4 text-primary" />
+              <Coins className="me-2 h-4 w-4 text-primary" />
               {t("no_currency_holdings")}
             </CardTitle>
           </CardHeader>
