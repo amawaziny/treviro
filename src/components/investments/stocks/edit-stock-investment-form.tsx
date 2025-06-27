@@ -41,10 +41,8 @@ export function EditStockInvestmentForm({
   investment,
 }: EditStockInvestmentFormProps) {
   const { t } = useLanguage();
-  const {
-    updateStockInvestment,
-    isLoading: isLoadingContext,
-  } = useInvestments();
+  const { updateStockInvestment, isLoading: isLoadingContext } =
+    useInvestments();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -74,9 +72,7 @@ export function EditStockInvestmentForm({
         //@ts-expect-error
         numberOfShares: String(investment?.numberOfShares ?? ""),
         //@ts-expect-error
-        purchasePricePerShare: String(
-          investment?.purchasePricePerShare ?? "",
-        ),
+        purchasePricePerShare: String(investment?.purchasePricePerShare ?? ""),
         //@ts-expect-error
         purchaseFees: String(investment?.purchaseFees ?? "0"),
       });

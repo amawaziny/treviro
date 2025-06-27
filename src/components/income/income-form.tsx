@@ -59,10 +59,7 @@ export function IncomeForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -70,7 +67,8 @@ export function IncomeForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("income_type")}</FormLabel>
-                <Select dir={dir}
+                <Select
+                  dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
@@ -81,11 +79,10 @@ export function IncomeForm({
                   </FormControl>
                   <SelectContent>
                     {incomeTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {t(type)}
-                        </SelectItem>
-                      ),
-                    )}
+                      <SelectItem key={type} value={type}>
+                        {t(type)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

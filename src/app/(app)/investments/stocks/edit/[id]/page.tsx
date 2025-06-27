@@ -31,7 +31,7 @@ export default function EditStockInvestmentPage({
     return notFound();
   }
 
- const { setHeaderProps, openForm, closeForm } = useForm();
+  const { setHeaderProps, openForm, closeForm } = useForm();
 
   // Set up header props when component mounts and when security is loaded
   useEffect(() => {
@@ -53,8 +53,5 @@ export default function EditStockInvestmentPage({
     };
   }, [security, id, setHeaderProps, openForm, closeForm, router]);
 
-
-  return (
-    <EditStockInvestmentForm investment={security} />
-  );
+  return <EditStockInvestmentForm investment={security} />;
 }

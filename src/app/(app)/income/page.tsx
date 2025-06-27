@@ -38,7 +38,7 @@ import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function IncomePage() {
-  const { t , language} = useLanguage();
+  const { t, language } = useLanguage();
   const isMobile = useIsMobile();
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
@@ -106,7 +106,8 @@ export default function IncomePage() {
       {/* Filter Controls */}
       <div className="flex flex-wrap gap-4 items-center mb-6">
         <label className="flex items-center gap-2 cursor-pointer">
-          <Switch dir="auto"
+          <Switch
+            dir="auto"
             checked={showAll}
             onCheckedChange={setShowAll}
             id="show-all-switch"
@@ -133,7 +134,8 @@ export default function IncomePage() {
             </CardHeader>
             <CardContent>
               <span className="text-xl font-bold text-foreground">
-                {formatNumberForMobile(isMobile,
+                {formatNumberForMobile(
+                  isMobile,
                   filteredIncome.reduce((sum, r) => sum + r.amount, 0),
                 )}
               </span>
@@ -158,9 +160,7 @@ export default function IncomePage() {
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-xl font-bold">
-                        {formatNumberForMobile(isMobile,
-                          record.amount,
-                        )}
+                        {formatNumberForMobile(isMobile, record.amount)}
                       </span>
                       <div className="flex justify-end gap-2">
                         <Link
@@ -182,7 +182,8 @@ export default function IncomePage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                {t("Remove")} {record.description || t(record.type)}
+                                {t("Remove")}{" "}
+                                {record.description || t(record.type)}
                               </span>
                             </Button>
                           </AlertDialogTrigger>

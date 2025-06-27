@@ -111,7 +111,7 @@ export default function FixedEstimatesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-bold text-red-700 dark:text-red-300">
-                    {formatNumberForMobile(isMobile, totalExpenses)}
+                  {formatNumberForMobile(isMobile, totalExpenses)}
                 </p>
               </CardContent>
             </Card>
@@ -125,7 +125,8 @@ export default function FixedEstimatesPage() {
                 className={cn(
                   record.isExpense
                     ? "border-red-200 dark:border-red-700"
-                    : "border-green-200 dark:border-green-700","last:mb-24"
+                    : "border-green-200 dark:border-green-700",
+                  "last:mb-24",
                 )}
               >
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">

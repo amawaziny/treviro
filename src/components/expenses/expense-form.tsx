@@ -238,7 +238,8 @@ export function ExpenseForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
                     <FormControl>
-                      <Checkbox dir={dir}
+                      <Checkbox
+                        dir={dir}
                         id="isInstallment"
                         data-testid="installment-checkbox"
                         checked={field.value}

@@ -41,7 +41,7 @@
   "Yearly": "Yearly",
   "a_list_of_your_set_recurring_financial_estimates": "A list of your set recurring financial estimates.",
   "add": "Add",
-  "update":"Update",
+  "update": "Update",
   "add_a_new_future_payment_to_the_schedule": "Add a new future payment to the schedule.",
   "add_currency": "Add Currency",
   "currency": "Currency",
@@ -648,8 +648,8 @@
   "residential_touristic_commercial_land_you_own_directly": "Residential, Touristic, Commercial, Land you own directly",
   "Shares": "Shares",
   "Credit Card": "Credit Card",
-  "add_expense":"Add Expense",
-  "update_expense":"Edit Expense",
+  "add_expense": "Add Expense",
+  "update_expense": "Edit Expense",
   "Profit Share": "Profit Share",
   "Bonus": "Bonus",
   "Gift": "Gift",
@@ -659,8 +659,8 @@
   "Zakat": "Zakat",
   "Charity": "Charity",
   "Living Expenses": "Living Expenses",
-  "period":"Period",
-  "income":"Income",
-  "expense":"Expense",
-  "Name":"Name"
+  "period": "Period",
+  "income": "Income",
+  "expense": "Expense",
+  "Name": "Name"
 }

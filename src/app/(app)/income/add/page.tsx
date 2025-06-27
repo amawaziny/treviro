@@ -12,7 +12,7 @@ import {
 import { useEffect } from "react";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
-import {  useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { IncomeRecord } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
@@ -69,7 +69,6 @@ export default function AddIncomePage() {
     }
   }
 
-
   useEffect(() => {
     openForm();
     setHeaderProps({
@@ -94,7 +93,7 @@ export default function AddIncomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <IncomeForm onSubmit={onSubmit} initialValues={initialFormValues}/>
+          <IncomeForm onSubmit={onSubmit} initialValues={initialFormValues} />
         </CardContent>
       </Card>
     </div>

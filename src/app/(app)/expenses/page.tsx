@@ -257,7 +257,8 @@ export default function ExpensesPage() {
             </CardHeader>
             <CardContent>
               <span className="text-xl font-bold text-foreground">
-                {formatNumberForMobile(isMobile,
+                {formatNumberForMobile(
+                  isMobile,
                   filteredExpenses.reduce(
                     (sum, r) => sum + (r._requiredAmount || 0),
                     0,
@@ -271,9 +272,11 @@ export default function ExpensesPage() {
             {filteredExpenses.map((record) => (
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
-                className={
-                  cn(record._isRequiredThisMonth ? "border-yellow-300" : "", record._isEnded ? "opacity-50" : "", "last:mb-24")
-                }
+                className={cn(
+                  record._isRequiredThisMonth ? "border-yellow-300" : "",
+                  record._isEnded ? "opacity-50" : "",
+                  "last:mb-24",
+                )}
                 data-testid={`expense-card-${record.id}`}
               >
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
@@ -305,7 +308,10 @@ export default function ExpensesPage() {
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-xl font-bold">
-                        {formatNumberForMobile(isMobile, record._requiredAmount)}
+                        {formatNumberForMobile(
+                          isMobile,
+                          record._requiredAmount,
+                        )}
                       </span>
                       <div className="flex items-center gap-2">
                         <Link
@@ -369,7 +375,8 @@ export default function ExpensesPage() {
                       record.numberOfInstallments &&
                       record.category === t("credit_card") && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          {`${t("installment_egp")} ${formatNumberForMobile(isMobile,
+                          {`${t("installment_egp")} ${formatNumberForMobile(
+                            isMobile,
                             record.amount / record.numberOfInstallments,
                           )} x ${record.numberOfInstallments} ${t("months")}`}
                         </div>
