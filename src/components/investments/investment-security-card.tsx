@@ -140,7 +140,10 @@ export function InvestmentSecurityCard({
             <p>
               {`${t("avg_cost")}: `}
               <span className="font-medium text-foreground">
-                {formatNumberForMobile(isMobile, investment.purchasePricePerShare)}
+                {formatNumberForMobile(
+                  isMobile,
+                  investment.purchasePricePerShare,
+                )}
               </span>
             </p>
             <p className="text-end">

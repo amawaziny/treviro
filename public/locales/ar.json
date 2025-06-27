@@ -45,7 +45,7 @@
   "add": "إضافة",
   "add_a_new_future_payment_to_the_schedule": "إضافة دفعة مستقبلية جديدة إلى الجدول الزمني.",
   "add_currency": "إضافة عملة",
-  "currency":"عملة",
+  "currency": "عملة",
   "add_currency_holding": "إضافة احتياطي عملة",
   "add_dividend": "إضافة أرباح",
   "add_estimate": "إضافة تقدير",
@@ -644,5 +644,6 @@
   "you_havent_added_any_debt_fund_investments_yet": "لم تضيف أي استثمارات صناديق أدوات الدين",
   "Close": "إغلاق",
   "Edit": "تعديل",
-  "Shares":"اﻷسهم"
+  "Shares": "اﻷسهم",
+  "failed_to_save_expense": "فشل حفظ المصروف"
 }

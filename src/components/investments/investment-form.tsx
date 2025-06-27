@@ -1094,7 +1094,6 @@ export function InvestmentForm({
       // Add more types here if you want to support editing other investment types
     } else {
       await addInvestment(newInvestment);
-      console.log(`${newInvestment.name} (${t(preSelectedInvestmentType)}) ${t("has_been_successfully_added")}.`)
       toast({
         title: t("investment_added"),
         description: `${t(preSelectedInvestmentType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,

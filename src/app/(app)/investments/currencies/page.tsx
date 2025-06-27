@@ -31,10 +31,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { MyCurrencyListItem } from "@/components/investments/currencies/my-currency-list-item";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  cn,
-  formatNumberForMobile,
-} from "@/lib/utils";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 
 export default function MyCurrenciesPage() {
   const { t: t } = useLanguage();

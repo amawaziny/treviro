@@ -35,7 +35,10 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
     return value.toFixed(4);
   };
 
-  const formattedProfitLoss = formatNumberForMobile(isMobile, profitOrLossInEGP);
+  const formattedProfitLoss = formatNumberForMobile(
+    isMobile,
+    profitOrLossInEGP,
+  );
   const displayProfitLossPercent =
     profitOrLossPercentage === Infinity
       ? "∞"
