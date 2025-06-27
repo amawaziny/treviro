@@ -244,7 +244,8 @@ export default function MyStocksPage() {
           })}
         </div>
       )}
-
+      
+      <div style={{ marginBottom: "96px" }}></div>
       <Link href="/securities" passHref>
         <Button
           variant="default"

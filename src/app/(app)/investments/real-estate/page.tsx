@@ -297,6 +297,7 @@ export default function MyRealEstatePage() {
           )}
         </CardContent>
       </Card>
+      <div style={{ marginBottom: "96px" }}></div>
       <Link href="/investments/add?type=Real Estate" passHref>
         <Button
           variant="default"

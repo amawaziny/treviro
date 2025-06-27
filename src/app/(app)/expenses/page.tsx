@@ -31,32 +31,31 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
 import {
   cn,
-  formatCurrencyWithCommas,
   formatDateDisplay,
   formatMonthYear,
-  formatNumberWithSuffix,
+  formatNumberForMobile,
 } from "@/lib/utils";
 import type { ExpenseRecord } from "@/lib/types";
-// Removed FinancialSettingsForm import as its functionality is moved
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ExpensesPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isMobile = useIsMobile();
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
   const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
 
   const { expenseRecords, isLoading, deleteExpenseRecord } = useInvestments(); // Removed monthlySettings
-  const { language } = useLanguage();
 
-  const currentMonthStart = startOfMonth(new Date());
-  const currentMonthEnd = endOfMonth(new Date());
+  const now = new Date();
+  const currentMonthStart = startOfMonth(now);
+  const currentMonthEnd = endOfMonth(now);
 
   // Filtering logic for expenses
   const filteredExpenses = React.useMemo(() => {
     const recordsToFilter = expenseRecords || [];
     const currentMonth = currentMonthStart.getMonth();
     const currentYear = currentMonthStart.getFullYear();
-    const now = new Date();
 
     // Helper: is record ended?
     function isEnded(record: ExpenseRecord) {
@@ -72,7 +71,7 @@ export default function ExpensesPage() {
     // Helper: is record required this month?
     function isRequiredThisMonth(record: ExpenseRecord) {
       if (
-        record.category === t("credit_card") &&
+        record.category === "Credit Card" &&
         record.isInstallment &&
         record.numberOfInstallments &&
         record.date
@@ -105,7 +104,7 @@ export default function ExpensesPage() {
     return filtered
       .flatMap((record) => {
         if (
-          record.category === t("credit_card") &&
+          record.category === "Credit Card" &&
           record.isInstallment &&
           record.numberOfInstallments &&
           record.date
@@ -245,7 +244,7 @@ export default function ExpensesPage() {
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <TrendingDown className="mr-2 h-4 w-4 text-primary" />
+                <TrendingDown className="me-2 h-4 w-4 text-primary" />
                 {showAll ? t("total_spent_all") : t("total_spent_this_month")}
               </CardTitle>
               <CardDescription>
@@ -253,12 +252,12 @@ export default function ExpensesPage() {
                   ? t(
                       "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments",
                     )
-                  : `${t("see_and_manage_all_expenses_required_for")} ${formatMonthYear(new Date())}, ${t("including_current_installments_and_one_time_payments")}`}
+                  : `${t("see_and_manage_all_expenses_required_for")} ${formatMonthYear(now, language)}, ${t("including_current_installments_and_one_time_payments")}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <span className="text-xl font-bold text-foreground">
-                {formatCurrencyWithCommas(
+                {formatNumberForMobile(isMobile,
                   filteredExpenses.reduce(
                     (sum, r) => sum + (r._requiredAmount || 0),
                     0,
@@ -273,7 +272,7 @@ export default function ExpensesPage() {
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
                 className={
-                  record._isRequiredThisMonth ? "border-yellow-300" : ""
+                  cn(record._isRequiredThisMonth ? "border-yellow-300" : "", record._isEnded ? "opacity-50" : "", "last:mb-24")
                 }
                 data-testid={`expense-card-${record.id}`}
               >
@@ -290,11 +289,10 @@ export default function ExpensesPage() {
                       </span>
                       {record.isInstallment &&
                         record.numberOfInstallments &&
-                        record.category === t("credit_card") && (
+                        record.category === "Credit Card" && (
                           <div className="flex items-center gap-2">
                             <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
-                              Installment {record.installmentMonthIndex}/
-                              {record.numberOfInstallments}
+                              {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
                             </span>
                             {record._isRequiredThisMonth && (
                               <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
@@ -307,7 +305,7 @@ export default function ExpensesPage() {
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-xl font-bold">
-                        {formatNumberWithSuffix(record._requiredAmount)}
+                        {formatNumberForMobile(isMobile, record._requiredAmount)}
                       </span>
                       <div className="flex items-center gap-2">
                         <Link
@@ -330,8 +328,7 @@ export default function ExpensesPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                {t("Remove")}{" "}
-                                {record.description || record.category}
+                                {`${t("Remove")} ${record.description || record.category}`}
                               </span>
                             </Button>
                           </AlertDialogTrigger>
@@ -372,7 +369,7 @@ export default function ExpensesPage() {
                       record.numberOfInstallments &&
                       record.category === t("credit_card") && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          {`${t("installment_egp")} ${formatNumberWithSuffix(
+                          {`${t("installment_egp")} ${formatNumberForMobile(isMobile,
                             record.amount / record.numberOfInstallments,
                           )} x ${record.numberOfInstallments} ${t("months")}`}
                         </div>
@@ -396,7 +393,7 @@ export default function ExpensesPage() {
               data-testid="no-expenses-message"
               className="text-muted-foreground py-4 text-center"
             >
-              {`${t("you_havent_added_any_itemized_expenses_for")} ${formatMonthYear(new Date())} ${t("yet")}`}
+              {`${t("you_havent_added_any_itemized_expenses_for")} ${formatMonthYear(now, language)} ${t("yet")}`}
             </p>
           </CardContent>
         </Card>

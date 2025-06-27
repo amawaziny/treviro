@@ -152,7 +152,7 @@ export function ExpenseForm({
                   <SelectContent>
                     {expenseCategories.map((category) => (
                       <SelectItem key={category} value={category}>
-                        {category}
+                        {t(category)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -194,7 +194,7 @@ export function ExpenseForm({
             name="date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date</FormLabel>
+                <FormLabel>{t("Date")}</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -238,14 +238,14 @@ export function ExpenseForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
                     <FormControl>
-                      <Checkbox
+                      <Checkbox dir={dir}
                         id="isInstallment"
                         data-testid="installment-checkbox"
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
+                    <div className="space-y-1 leading-none me-2">
                       <FormLabel>{t("is_this_an_installment_plan")}</FormLabel>
                     </div>
                   </FormItem>
@@ -284,7 +284,6 @@ export function ExpenseForm({
 
         <Button
           type="submit"
-          className="w-full"
           disabled={form.formState.isSubmitting}
           data-testid="submit-button"
         >

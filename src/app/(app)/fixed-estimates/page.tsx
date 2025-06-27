@@ -132,7 +132,7 @@ export default function FixedEstimatesPage() {
                 className={cn(
                   record.isExpense
                     ? "border-red-200 dark:border-red-700"
-                    : "border-green-200 dark:border-green-700",
+                    : "border-green-200 dark:border-green-700","last:mb-24"
                 )}
               >
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">

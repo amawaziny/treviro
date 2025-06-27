@@ -645,5 +645,8 @@
   "you_havent_added_any_debt_fund_investments_yet": "You haven't added any debt fund investments yet",
   "direct_real_estate_holdings": "Direct Real Estate Holdings",
   "residential_touristic_commercial_land_you_own_directly": "Residential, Touristic, Commercial, Land you own directly",
-  "Shares": "Shares"
+  "Shares": "Shares",
+  "Credit Card": "Credit Card",
+  "add_expense":"Add Expense",
+  "update_expense":"Edit Expense"
 }

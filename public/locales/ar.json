@@ -645,5 +645,8 @@
   "Close": "إغلاق",
   "Edit": "تعديل",
   "Shares": "اﻷسهم",
-  "failed_to_save_expense": "فشل حفظ المصروف"
+  "failed_to_save_expense": "فشل حفظ المصروف",
+  "Credit Card": "بطاقة اﻻئتمان",
+  "add_expense":"إضافة مصروف جديد",
+  "update_expense":"تحديث مصروف"
 }

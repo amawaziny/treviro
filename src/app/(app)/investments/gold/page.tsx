@@ -331,7 +331,7 @@ export default function MyGoldPage() {
         </CardContent>
       </Card>
 
-      <Card className="mt-6">
+      <Card className="mt-6" style={{ marginBottom: "96px" }}>
         <CardHeader>
           <CardTitle className="flex items-center">
             <Gem className="me-2 h-4 w-4 text-primary" />

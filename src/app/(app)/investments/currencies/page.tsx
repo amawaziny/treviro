@@ -213,7 +213,7 @@ export default function MyCurrenciesPage() {
       )}
 
       {aggregatedCurrencyHoldings.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-4" style={{ marginBottom: "96px" }}>
           {aggregatedCurrencyHoldings.map((holding) => (
             <MyCurrencyListItem key={holding.currencyCode} holding={holding} />
           ))}
