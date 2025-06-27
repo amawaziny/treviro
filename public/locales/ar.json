@@ -648,5 +648,10 @@
   "failed_to_save_expense": "فشل حفظ المصروف",
   "Credit Card": "بطاقة اﻻئتمان",
   "add_expense":"إضافة مصروف جديد",
-  "update_expense":"تحديث مصروف"
+  "update_expense":"تحديث مصروف",
+  "Profit Share": "الربح",
+  "Bonus": "مكافأة",
+  "Gift": "الهداية",
+  "Rental Income": "الإيجار",
+  "Freelance": "العمل الحر"
 }

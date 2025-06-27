@@ -264,7 +264,7 @@ export type EditStockInvestmentFormValues = z.infer<
   typeof EditStockInvestmentSchema
 >;
 
-export const AddIncomeSchema = z.object({
+export const IncomeSchema = z.object({
   type: z.enum(incomeTypes, { required_error: "Income type is required." }),
   source: z.string().optional(),
   amount: stringToRequiredNonNegativeNumberCoerced,
@@ -277,7 +277,7 @@ export const AddIncomeSchema = z.object({
   description: z.string().optional(),
 });
 
-export type AddIncomeFormValues = z.infer<typeof AddIncomeSchema>;
+export type IncomeFormValues = z.infer<typeof IncomeSchema>;
 
 export const ExpenseFormSchema = z
   .object({

@@ -23,18 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AddIncomeSchema,
-  type AddIncomeFormValues,
+  IncomeSchema,
+  type IncomeFormValues,
   incomeTypes,
 } from "@/lib/schemas";
-import { useInvestments } from "@/hooks/use-investments"; // To access addIncomeRecord
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import type { IncomeRecord } from "@/lib/types";
 import { getCurrentDate } from "@/lib/utils";
 
-const initialFormValues: AddIncomeFormValues = {
+const initialFormValues: IncomeFormValues = {
   type: "Profit Share",
   source: "",
   //@ts-expect-error
@@ -43,66 +39,28 @@ const initialFormValues: AddIncomeFormValues = {
   description: "",
 };
 
-type AddIncomeFormProps = {
-  initialValues?: Partial<AddIncomeFormValues>;
-  onSubmit?: (values: AddIncomeFormValues) => void | Promise<void>;
+type IncomeFormProps = {
+  initialValues?: Partial<IncomeFormValues>;
+  onSubmit: (values: IncomeFormValues) => void | Promise<void>;
   isEditMode?: boolean;
 };
 
-export function AddIncomeForm({
+export function IncomeForm({
   initialValues,
   onSubmit,
   isEditMode = false,
-}: AddIncomeFormProps) {
-  const { t } = useLanguage();
-  const { addIncomeRecord } = useInvestments();
-  const { toast } = useToast();
-  const router = useRouter();
+}: IncomeFormProps) {
+  const { t, dir } = useLanguage();
 
-  const form = useForm<AddIncomeFormValues>({
-    resolver: zodResolver(AddIncomeSchema),
+  const form = useForm<IncomeFormValues>({
+    resolver: zodResolver(IncomeSchema),
     defaultValues: initialValues ?? initialFormValues,
   });
-
-  async function internalOnSubmit(values: AddIncomeFormValues) {
-    try {
-      const incomeDataToSave: Omit<
-        IncomeRecord,
-        "id" | "createdAt" | "userId"
-      > = {
-        type: values.type!, // Zod ensures type is valid and present
-        amount: values.amount, // Zod has coerced this to number
-        date: values.date, // Zod ensures date is valid
-      };
-
-      if (values.source && values.source.trim() !== "") {
-        incomeDataToSave.source = values.source;
-      }
-      if (values.description && values.description.trim() !== "") {
-        incomeDataToSave.description = values.description;
-      }
-
-      await addIncomeRecord(incomeDataToSave);
-      toast({
-        title: t("income_record_added"),
-        description: `${values.type} ${t("of")} ${values.amount} EGP ${t("recorded successfully")}.`,
-      });
-      form.reset(initialFormValues);
-      router.push("/income");
-    } catch (error: any) {
-      console.error(t("error_adding_income_record"), error);
-      toast({
-        title: t("failed_to_add_income"),
-        description: error.message || t("could_not_save_the_income_record"),
-        variant: "destructive",
-      });
-    }
-  }
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit ? onSubmit : internalOnSubmit)}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -112,7 +70,7 @@ export function AddIncomeForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("income_type")}</FormLabel>
-                <Select
+                <Select dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || ""}
                 >
@@ -122,12 +80,9 @@ export function AddIncomeForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {incomeTypes.map(
-                      (
-                        type, // incomeTypes from schema no longer contains 'Salary'
-                      ) => (
+                    {incomeTypes.map((type) => (
                         <SelectItem key={type} value={type}>
-                          {type}
+                          {t(type)}
                         </SelectItem>
                       ),
                     )}

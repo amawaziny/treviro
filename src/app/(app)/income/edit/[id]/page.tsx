@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
-import { AddIncomeForm } from "@/components/income/add-income-form";
+import { IncomeForm } from "@/components/income/income-form";
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import {
 import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
-import { AddIncomeFormValues } from "@/lib/schemas";
+import { IncomeFormValues } from "@/lib/schemas";
 
 export default function EditIncomePage({
   params,
@@ -70,7 +70,7 @@ export default function EditIncomePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AddIncomeForm
+          <IncomeForm
             initialValues={{
               type: income.type,
               source: income.source,
@@ -81,7 +81,7 @@ export default function EditIncomePage({
               isRecurring: income.isRecurring ?? false,
               recurrencePeriod: income.recurrencePeriod ?? "",
             }}
-            onSubmit={async (values: AddIncomeFormValues) => {
+            onSubmit={async (values: IncomeFormValues) => {
               await updateIncomeRecord(incomeId, {
                 ...values,
                 amount: Number(values.amount),

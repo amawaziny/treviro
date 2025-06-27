@@ -648,5 +648,10 @@
   "Shares": "Shares",
   "Credit Card": "Credit Card",
   "add_expense":"Add Expense",
-  "update_expense":"Edit Expense"
+  "update_expense":"Edit Expense",
+  "Profit Share": "Profit Share",
+  "Bonus": "Bonus",
+  "Gift": "Gift",
+  "Rental Income": "Rental Income",
+  "Freelance": "Freelance"
 }

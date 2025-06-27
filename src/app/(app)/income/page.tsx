@@ -7,6 +7,7 @@ import {
   formatCurrencyWithCommas,
   formatDateDisplay,
   formatMonthYear,
+  formatNumberForMobile,
 } from "@/lib/utils";
 import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
@@ -34,9 +35,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function IncomePage() {
-  const { t } = useLanguage();
+  const { t , language} = useLanguage();
+  const isMobile = useIsMobile();
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
 
@@ -48,7 +51,6 @@ export default function IncomePage() {
       ),
     );
   }
-  const { language } = useLanguage();
 
   // Filtering logic for income
   const filteredIncome = React.useMemo(() => {
@@ -104,7 +106,7 @@ export default function IncomePage() {
       {/* Filter Controls */}
       <div className="flex flex-wrap gap-4 items-center mb-6">
         <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
+          <Switch dir="auto"
             checked={showAll}
             onCheckedChange={setShowAll}
             id="show-all-switch"
@@ -120,7 +122,7 @@ export default function IncomePage() {
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <PiggyBank className="mr-2 h-4 w-4 text-primary" />
+                <PiggyBank className="me-2 h-4 w-4 text-primary" />
                 {showAll ? t("total_income_all") : t("total_income_this_month")}
               </CardTitle>
               <CardDescription>
@@ -131,7 +133,7 @@ export default function IncomePage() {
             </CardHeader>
             <CardContent>
               <span className="text-xl font-bold text-foreground">
-                {formatCurrencyWithCommas(
+                {formatNumberForMobile(isMobile,
                   filteredIncome.reduce((sum, r) => sum + r.amount, 0),
                 )}
               </span>
@@ -140,25 +142,27 @@ export default function IncomePage() {
 
           <div className="grid gap-4 mt-8">
             {filteredIncome.map((record) => (
-              <Card key={record.id} className="">
+              <Card key={record.id} className="last:mb-24">
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
                   <div className="flex-1 min-w-0">
                     {/* Top Row: Title, Date */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="font-semibold truncate text-base">
-                        {record.description || record.type}
+                        {record.description || t(record.type)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDateDisplay(record.date)}
                       </span>
                     </div>
                     {/* Amount and Actions */}
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-xl font-bold">
-                        {formatCurrencyWithCommas(record.amount)}
+                        {formatNumberForMobile(isMobile,
+                          record.amount,
+                        )}
                       </span>
-                      <div className="ml-auto flex items-center gap-2">
+                      <div className="flex justify-end gap-2">
                         <Link
                           href={`/income/edit/${record.id}`}
                           passHref
@@ -178,7 +182,7 @@ export default function IncomePage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                Remove {record.description || record.type}
+                                {t("Remove")} {record.description || t(record.type)}
                               </span>
                             </Button>
                           </AlertDialogTrigger>
@@ -227,15 +231,13 @@ export default function IncomePage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <PiggyBank className="mr-2 h-4 w-4 text-primary" />
+              <PiggyBank className="me-2 h-4 w-4 text-primary" />
               {t("no_income_recorded_this_month")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground py-4 text-center">
-              {t("you_havent_added_any_income_records_for")}{" "}
-              {formatMonthYear(new Date())}
-              {t("yet")}
+              {`${t("you_havent_added_any_income_records_for")} ${formatMonthYear(new Date(), language)} ${t("yet")}`}
             </p>
           </CardContent>
         </Card>
