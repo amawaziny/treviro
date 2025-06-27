@@ -52,26 +52,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
       return;
     }
-    console.log("AuthContext: Setting up onAuthStateChanged listener.");
     const unsubscribe = onAuthStateChanged(
       firebaseAuthService,
       (firebaseUser: FirebaseUser | null) => {
-        console.log(
-          "AuthContext: onAuthStateChanged triggered. Firebase user present:",
-          !!firebaseUser,
-        );
         if (firebaseUser) {
           setUser(firebaseUser);
         } else {
           setUser(null);
         }
         setIsLoading(false);
-        console.log("AuthContext: isLoading set to false.");
       },
     );
 
     return () => {
-      console.log("AuthContext: Cleaning up onAuthStateChanged listener.");
       unsubscribe();
     };
   }, []);
@@ -204,8 +197,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       trackEvent("password_reset_email_sent", {
         email: email,
       });
-
-      console.log("AuthContext: Password reset email sent successfully.");
     } catch (error: any) {
       // Track password reset error
       trackEvent("password_reset_error", {

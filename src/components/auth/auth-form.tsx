@@ -22,7 +22,6 @@ function getPasswordStrength(password: string) {
   if (/[A-Z]/.test(password)) score++;
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
-  console.log("Password:", password, "Score:", score);
   return score;
 }
 

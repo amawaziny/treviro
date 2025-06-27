@@ -24,7 +24,6 @@ export function FirebaseIntegrations({
         page_path: url,
         page_title: document.title, // You can also log the page title if desired
       });
-      // console.log(`Logged page_view: ${url}`);
     }
   }, [pathname, analytics]); // Ensure effect re-runs if analytics instance becomes available later
 
