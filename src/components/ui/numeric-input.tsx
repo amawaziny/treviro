@@ -1,140 +1,117 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+
+// Format number with thousand separators
 const formatNumber = (value: string): string => {
   if (!value) return "";
   
-  // Check if the value is ending with a dot (user is typing a decimal)
-  const isTypingDecimal = value.endsWith('.');
-  
-  // Remove all non-digit and non-dot characters, but keep at most one dot
-  let numericValue = '';
-  let hasDot = false;
-  
-  for (const char of value) {
-    if (/^\d$/.test(char)) {
-      numericValue += char;
-    } else if (char === '.' && !hasDot) {
-      numericValue += char;
-      hasDot = true;
-    }
-  }
+  // Remove all non-numeric characters except decimal point
+  const numericValue = value.replace(/[^0-9.]/g, '');
   
   // Split into integer and decimal parts
   const parts = numericValue.split('.');
-  let integerPart = parts[0] || '';
-  let decimalPart = parts.length > 1 ? parts[1].slice(0, 3) : ''; // Limit to 3 decimal places
+  let integerPart = parts[0] || '0';
   
-  // Add thousands separators to integer part
-  if (integerPart) {
-    integerPart = parseInt(integerPart, 10).toLocaleString('en-US');
+  // Add thousand separators to integer part
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  // Handle decimal part if present
+  if (parts.length > 1) {
+    const decimalPart = parts[1].slice(0, 3); // Limit to 3 decimal places
+    return `${formattedInteger}.${decimalPart}`;
   }
   
-  // If user is typing a decimal or we have decimal part
-  if (isTypingDecimal || decimalPart) {
-    return `${integerPart}.${decimalPart}`;
-  }
-  
-  return integerPart || '';
+  return formattedInteger;
 };
 
-// Helper to get the cursor position after formatting
-const getAdjustedCursorPosition = (oldValue: string, newValue: string, cursorPos: number): number => {
-  if (!oldValue || !newValue) return cursorPos;
-  
-  const oldNumeric = oldValue.replace(/[^0-9.]/g, '');
-  const newNumeric = newValue.replace(/[^0-9.]/g, '');
-  
-  // Count how many non-numeric characters were added before the cursor
-  const addedBeforeCursor = newValue.slice(0, cursorPos).replace(/[0-9.]/g, '').length;
-  
-  return cursorPos + addedBeforeCursor;
+// Convert display value back to raw number string
+const parseNumber = (displayValue: string): string => {
+  if (!displayValue) return "";
+  // Remove thousand separators and return as string
+  return displayValue.replace(/,/g, '');
 };
 
-interface CustomInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
-
-interface NumericInputProps
-  extends Omit<CustomInputProps, "value" | "onChange" | "type"> {
-  value: string | undefined; // react-hook-form field.value will be string | undefined
-  onChange: (value: string) => void; // react-hook-form field.onChange, expects a string
+interface NumericInputProps extends Omit<InputProps, 'onChange' | 'value' | 'defaultValue' | 'min' | 'max'> {
+  value?: string | number;
+  onChange?: (value: string) => void;
   allowDecimal?: boolean;
+  min?: number;
+  max?: number;
 }
 
 const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
-  ({ value, onChange, className, allowDecimal = true, ...props }, ref) => {
-    const inputRef = useRef<HTMLInputElement | null>(null);
-  const previousValue = useRef(value || '');
-  const previousCursorPosition = useRef(0);
+  ({ value, onChange, className, allowDecimal = true, min, max, ...props }, ref) => {
+    // Use the forwarded ref directly
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    React.useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
 
-  // Update the internal ref when the value changes
-  useEffect(() => {
-    previousValue.current = formatNumber(value || '');
-  }, [value]);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const input = e.target;
+      const displayValue = input.value;
+      
+      // Convert display value to raw numeric string
+      let numericString = parseNumber(displayValue);
+      let numericValue = numericString ? parseFloat(numericString) : 0;
+      
+      // Apply min/max constraints
+      if (min !== undefined && numericValue < min) {
+        numericValue = min;
+        numericString = numericValue.toString();
+      }
+      if (max !== undefined && numericValue > max) {
+        numericValue = max;
+        numericString = numericValue.toString();
+      }
+      
+      // Call the parent's onChange with the constrained numeric string if provided
+      if (onChange) {
+        onChange(numericString);
+      }
+      
+      // Format the display value
+      const formattedValue = formatNumber(numericString);
+      
+      // Update the input value with formatted display
+      if (inputRef.current) {
+        const cursorPosition = input.selectionStart || 0;
+        inputRef.current.value = formattedValue;
+        
+        // Try to maintain cursor position
+        setTimeout(() => {
+          if (inputRef.current) {
+            let newPosition = cursorPosition + (formattedValue.length - displayValue.length);
+            newPosition = Math.max(0, Math.min(newPosition, formattedValue.length));
+            inputRef.current.setSelectionRange(newPosition, newPosition);
+          }
+        }, 0);
+      }
+    };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const input = event.target;
-    const rawStringValue = input.value;
-    const cursorPosition = input.selectionStart || 0;
-    
-    // Store the cursor position before formatting
-    previousCursorPosition.current = cursorPosition;
-    
-    // Format the value
-    const formattedValue = formatNumber(rawStringValue);
-    
-    // Update the input value
-    if (inputRef.current) {
-      inputRef.current.value = formattedValue;
-      
-      // Calculate and set the new cursor position
-      const newCursorPosition = getAdjustedCursorPosition(
-        previousValue.current,
-        formattedValue,
-        cursorPosition
-      );
-      
-      // Set the cursor position after the state update
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.selectionStart = newCursorPosition;
-          inputRef.current.selectionEnd = newCursorPosition;
-        }
-      }, 0);
-    }
-    
-    // Update the parent component with the raw numeric value
-    const numericValue = rawStringValue.replace(/[^0-9.]/g, '');
-    onChange(numericValue || '');
-    previousValue.current = formattedValue;
-  };
+    // Format the initial display value
+    const displayValue = React.useMemo(() => {
+      if (value === undefined || value === null) return "";
+      return formatNumber(String(value));
+    }, [value]);
 
     return (
       <Input
-        ref={(node) => {
-          // Merge refs to support both forwarded ref and our internal ref
-          inputRef.current = node;
-          if (node) {
-            if (typeof ref === 'function') {
-              ref(node);
-            } else if (ref) {
-              (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
-            }
-          }
-        }}
+        ref={inputRef}
         type="text"
         inputMode={allowDecimal ? "decimal" : "numeric"}
-        value={formatNumber(value ?? "")} // Format the value for display
+        value={displayValue}
         onChange={handleChange}
-        className={cn(className)}
+        className={cn("text-right", className)}
         {...props}
       />
     );
-  },
+  }
 );
-NumericInput.displayName = "NumericInput";
+
+NumericInput.displayName = 'NumericInput';
 
 export { NumericInput };
