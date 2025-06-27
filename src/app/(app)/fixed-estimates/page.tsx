@@ -18,6 +18,7 @@ import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
 import {
   cn,
   formatCurrencyWithCommas,
+  formatNumberForMobile,
   formatNumberWithSuffix,
 } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
@@ -32,11 +33,13 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function FixedEstimatesPage() {
   const { t } = useLanguage();
   const { fixedEstimates, isLoading, deleteFixedEstimate } = useInvestments();
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
@@ -94,12 +97,7 @@ export default function FixedEstimatesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-bold text-green-700 dark:text-green-300">
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(totalIncome)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {formatCurrencyWithCommas(totalIncome)}
-                  </span>
+                  {formatNumberForMobile(isMobile, totalIncome)}
                 </p>
               </CardContent>
             </Card>
@@ -113,12 +111,7 @@ export default function FixedEstimatesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-bold text-red-700 dark:text-red-300">
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(totalExpenses)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {formatCurrencyWithCommas(totalExpenses)}
-                  </span>
+                    {formatNumberForMobile(isMobile, totalExpenses)}
                 </p>
               </CardContent>
             </Card>
@@ -141,17 +134,17 @@ export default function FixedEstimatesPage() {
                     {/* Top Row: Type and Name */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="font-semibold truncate text-base">
-                        {record.type}
+                        {t(record.type)}
                       </span>
                       {record.name && (
                         <span className="text-sm text-muted-foreground">
-                          ({record.name})
+                          ({t(record.name)})
                         </span>
                       )}
                     </div>
                     {/* Period and Nature */}
                     <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                      <span>{record.period}</span>
+                      <span>{t(record.period)}</span>
                       <span>•</span>
                       <span
                         className={cn(
@@ -168,12 +161,7 @@ export default function FixedEstimatesPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                     {/* Amount */}
                     <div className="text-xl font-bold">
-                      <span className="md:hidden">
-                        {formatNumberWithSuffix(record.amount)}
-                      </span>
-                      <span className="hidden md:inline">
-                        {formatCurrencyWithCommas(record.amount)}
-                      </span>
+                      {formatNumberForMobile(isMobile, record.amount)}
                     </div>
                     {/* Actions */}
                     <div className="flex items-center justify-end gap-2">
@@ -196,7 +184,7 @@ export default function FixedEstimatesPage() {
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">
-                              {t("Remove")} {record.name || record.type}
+                              {t("Remove")} {record.name || t(record.type)}
                             </span>
                           </Button>
                         </AlertDialogTrigger>
@@ -239,7 +227,7 @@ export default function FixedEstimatesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Settings className="mr-2 h-4 w-4 text-primary" />
+              <Settings className="me-2 h-4 w-4 text-primary" />
               {t("no_fixed_estimates_set")}
             </CardTitle>
           </CardHeader>

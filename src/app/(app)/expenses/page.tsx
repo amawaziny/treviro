@@ -282,7 +282,7 @@ export default function ExpensesPage() {
                     {/* Top Row: Title, Date, Installment Badge */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="font-semibold truncate text-base">
-                        {record.description || record.category}
+                        {record.description || t(record.category)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDateDisplay(record.date)}
@@ -328,7 +328,7 @@ export default function ExpensesPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                {`${t("Remove")} ${record.description || record.category}`}
+                                {`${t("Remove")} ${record.description || t(record.category)}`}
                               </span>
                             </Button>
                           </AlertDialogTrigger>

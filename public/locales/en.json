@@ -40,7 +40,8 @@
   "Successfully recorded sale of": "Successfully recorded sale of",
   "Yearly": "Yearly",
   "a_list_of_your_set_recurring_financial_estimates": "A list of your set recurring financial estimates.",
-  "add": "add",
+  "add": "Add",
+  "update":"Update",
   "add_a_new_future_payment_to_the_schedule": "Add a new future payment to the schedule.",
   "add_currency": "Add Currency",
   "currency": "Currency",
@@ -653,5 +654,13 @@
   "Bonus": "Bonus",
   "Gift": "Gift",
   "Rental Income": "Rental Income",
-  "Freelance": "Freelance"
+  "Freelance": "Freelance",
+  "Salary": "Salary",
+  "Zakat": "Zakat",
+  "Charity": "Charity",
+  "Living Expenses": "Living Expenses",
+  "period":"Period",
+  "income":"Income",
+  "expense":"Expense",
+  "Name":"Name"
 }

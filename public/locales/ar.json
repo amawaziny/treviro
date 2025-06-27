@@ -43,6 +43,7 @@
   "Yearly": "سنوياً",
   "a_list_of_your_set_recurring_financial_estimates": "قائمة بتقديراتك المالية المتكررة المحددة.",
   "add": "إضافة",
+  "update":"تحديث",
   "add_a_new_future_payment_to_the_schedule": "إضافة دفعة مستقبلية جديدة إلى الجدول الزمني.",
   "add_currency": "إضافة عملة",
   "currency": "عملة",
@@ -653,5 +654,13 @@
   "Bonus": "مكافأة",
   "Gift": "الهداية",
   "Rental Income": "الإيجار",
-  "Freelance": "العمل الحر"
+  "Freelance": "العمل الحر",
+  "Salary": "الراتب",
+  "Zakat": "الزكاة",
+  "Charity": "الصدقة",
+  "Living Expenses": "الإيجار",
+  "period":"فترة",
+  "income":"دخل",
+  "expense":"مصروف",
+  "Name":"اﻹسم"
 }

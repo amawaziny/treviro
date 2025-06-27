@@ -216,7 +216,7 @@ export default function ProfilePage() {
               className="block font-medium mb-1 text-foreground"
               data-testid="name-label"
             >
-              Name
+              {t("Name")}
             </label>
             <input
               type="text"
