@@ -8,7 +8,7 @@ import React, {
 
 interface HeaderProps {
   showBackButton?: boolean;
-  backHref?: string;
+  backHref?: string | (() => void);
   backLabel?: string;
   title?: string;
   description?: string;

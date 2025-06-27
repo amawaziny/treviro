@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import type {
   Investment,
-  CurrencyFluctuationAnalysisResult,
   StockInvestment,
   Transaction,
   DashboardSummary,
@@ -49,11 +48,9 @@ export interface InvestmentContextType {
   investments: Investment[];
   addInvestment: (
     investmentData: Omit<Investment, "createdAt" | "id">,
-    analysis?: CurrencyFluctuationAnalysisResult,
   ) => Promise<void>;
   getInvestmentsByType: (type: string) => Investment[];
   isLoading: boolean;
-  currencyAnalyses: Record<string, CurrencyFluctuationAnalysisResult>;
   recordSellStockTransaction: (
     listedsecurityId: string,
     tickerSymbol: string,
@@ -162,9 +159,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const [fixedEstimates, setFixedEstimates] = useState<FixedEstimateRecord[]>(
     [],
   );
-  const [currencyAnalyses, setCurrencyAnalyses] = useState<
-    Record<string, CurrencyFluctuationAnalysisResult>
-  >({});
   const [dashboardSummary, setDashboardSummary] =
     useState<DashboardSummary | null>(defaultDashboardSummary);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(
@@ -252,7 +246,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       setIncomeRecords([]);
       setExpenseRecords([]);
       setFixedEstimates([]);
-      setCurrencyAnalyses({});
       setDashboardSummary(defaultDashboardSummary);
       setAppSettings(defaultAppSettings);
       setIsLoading(false);
@@ -339,31 +332,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       collectionsPaths.fixedEstimates,
       setFixedEstimates,
       "type",
-    );
-
-    const qAnalyses = query(
-      collection(firestoreInstance, collectionsPaths.currencyAnalyses),
-    );
-    dataFetchPromises.push(getDocs(qAnalyses).catch(() => null));
-    unsubscribers.push(
-      onSnapshot(
-        qAnalyses,
-        (querySnapshot) => {
-          const fetchedAnalyses: Record<
-            string,
-            CurrencyFluctuationAnalysisResult
-          > = {};
-          querySnapshot.forEach((doc) => {
-            fetchedAnalyses[doc.id] =
-              doc.data() as CurrencyFluctuationAnalysisResult;
-          });
-          setCurrencyAnalyses(fetchedAnalyses);
-        },
-        (error) => {
-          console.error("Error fetching currency analyses:", error);
-          setCurrencyAnalyses({});
-        },
-      ),
     );
 
     const summaryDocRef = getDashboardSummaryDocRef();
@@ -1254,7 +1222,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         addInvestment,
         getInvestmentsByType,
         isLoading,
-        currencyAnalyses,
         recordSellStockTransaction,
         transactions,
         removeStockInvestmentsBySymbol,

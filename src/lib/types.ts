@@ -157,12 +157,6 @@ export interface FixedEstimateRecord {
   updatedAt?: string;
 }
 
-export interface CurrencyFluctuationAnalysisResult {
-  significantDeviation: boolean;
-  deviationPercentage: number;
-  analysisSummary: string;
-}
-
 export interface ListedSecurity {
   id: string;
   name: string;

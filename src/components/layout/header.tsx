@@ -35,7 +35,8 @@ export function Header() {
           {showBackButton && !showNavControls ? (
             <div className="flex items-center gap-4">
               <Link
-                href={backHref}
+                href={typeof backHref === "string" ? backHref : "#"}
+                onClick={typeof backHref === "function" ? backHref : undefined}
                 className="flex items-center hover:opacity-80 transition-opacity"
               >
                 <Button variant="ghost" size="icon" className="h-9 w-9 p-0">

@@ -21,7 +21,7 @@ import {
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import type { StockInvestment } from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
@@ -34,22 +34,19 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface EditStockInvestmentFormProps {
-  investmentId: string;
+  investment: StockInvestment;
 }
 
 export function EditStockInvestmentForm({
-  investmentId,
+  investment,
 }: EditStockInvestmentFormProps) {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
   const {
-    investments,
     updateStockInvestment,
     isLoading: isLoadingContext,
   } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
-  const [investmentToEdit, setInvestmentToEdit] =
-    useState<StockInvestment | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [oldAmountInvested, setOldAmountInvested] = useState<number | null>(
     null,
@@ -70,22 +67,18 @@ export function EditStockInvestmentForm({
 
   useEffect(() => {
     setIsLoadingData(true);
-    const foundInvestment = investments.find(
-      (inv) => inv.id === investmentId && inv.type === "Stocks",
-    ) as StockInvestment | undefined;
-    if (foundInvestment) {
-      setInvestmentToEdit(foundInvestment);
-      setOldAmountInvested(foundInvestment.amountInvested);
+    if (investment) {
+      setOldAmountInvested(investment.amountInvested);
       form.reset({
-        purchaseDate: foundInvestment?.purchaseDate?.split("T")[0] ?? "",
+        purchaseDate: investment?.purchaseDate?.split("T")[0] ?? "",
         //@ts-expect-error
-        numberOfShares: String(foundInvestment?.numberOfShares ?? ""),
+        numberOfShares: String(investment?.numberOfShares ?? ""),
         //@ts-expect-error
         purchasePricePerShare: String(
-          foundInvestment?.purchasePricePerShare ?? "",
+          investment?.purchasePricePerShare ?? "",
         ),
         //@ts-expect-error
-        purchaseFees: String(foundInvestment?.purchaseFees ?? "0"),
+        purchaseFees: String(investment?.purchaseFees ?? "0"),
       });
     } else if (!isLoadingContext) {
       toast({
@@ -96,12 +89,12 @@ export function EditStockInvestmentForm({
       router.back();
     }
     setIsLoadingData(false);
-  }, [investmentId, investments, form, toast, router, isLoadingContext]);
+  }, [investment, form, toast, router, isLoadingContext]);
 
   const onSubmit: import("react-hook-form").SubmitHandler<
     EditStockInvestmentFormValues
   > = async (values) => {
-    if (!investmentToEdit || oldAmountInvested === null) {
+    if (!investment || oldAmountInvested === null) {
       toast({
         title: t("error"),
         description: t(
@@ -122,16 +115,16 @@ export function EditStockInvestmentForm({
       };
 
       await updateStockInvestment(
-        investmentId,
+        investment.id,
         dataToUpdate,
         oldAmountInvested,
       );
 
       toast({
         title: t("investment_updated"),
-        description: `${investmentToEdit.actualStockName || investmentToEdit.name} ${t("purchase details updated")}.`,
+        description: `${investment.tickerSymbol} ${t("purchase details updated")}.`,
       });
-      router.push(`/securities/details/${investmentToEdit.tickerSymbol}`);
+      router.push(`/securities/details/${investment.tickerSymbol}`);
     } catch (error: any) {
       console.error(t("error_updating_investment"), error);
       toast({
@@ -151,7 +144,7 @@ export function EditStockInvestmentForm({
     );
   }
 
-  if (!investmentToEdit && !isLoadingData) {
+  if (!investment && !isLoadingData) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
@@ -163,12 +156,10 @@ export function EditStockInvestmentForm({
     );
   }
 
-  const pageTitle = `${t("Edit Purchase")}: ${investmentToEdit?.actualStockName || investmentToEdit?.name || t("Stock")}`;
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{pageTitle}</CardTitle>
+        <CardTitle>{`${t("Edit Purchase")}: ${investment?.tickerSymbol}`}</CardTitle>
         <CardDescription>
           {t("modify_the_details_of_this_stock_purchase")}
         </CardDescription>
@@ -264,13 +255,6 @@ export function EditStockInvestmentForm({
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 {t("save_changes")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
-                {t("cancel")}
               </Button>
             </div>
           </form>
