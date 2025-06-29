@@ -144,13 +144,13 @@ export function formatCurrencyWithCommas(
   digitsOverride?: number,
 ): string {
   if (value === undefined || value === null || Number.isNaN(value))
-    return `${currency} 0.000`;
+    return `${currency} 0`;
   const num = typeof value === "number" ? value : parseFloat(value);
   // toFixed(3) ensures 3 digits after decimal
   return new Intl.NumberFormat("en-EG", {
     style: "currency",
     currency: currency,
-    minimumFractionDigits: digitsOverride ?? 3,
+    minimumFractionDigits: digitsOverride ?? 0,
     maximumFractionDigits: digitsOverride ?? 3,
   }).format(num);
 }
