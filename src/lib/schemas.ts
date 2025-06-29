@@ -196,7 +196,13 @@ const DebtInstrumentInvestmentSchema = z.object({
     required_error: "Specific debt type is required.",
   }),
   issuer: z.string().min(1, { message: "Issuer is required." }),
-  interestRate: stringToRequiredNonNegativeNumberCoerced,
+  interestRate: z.preprocess(
+    (val) => (typeof val === 'string' && val.trim() !== '' ? Number(val) : val),
+    z
+      .number({ invalid_type_error: "Must be a valid number." })
+      .min(0, { message: "Interest rate cannot be negative." })
+      .max(100, { message: "Interest rate cannot exceed 100%." })
+  ),
   maturityDate: z
     .string()
     .min(1, { message: "Maturity date is required." })
