@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Info } from "lucide-react"; // Using DollarSign as a generic currency icon
 import { cn, formatNumberForMobile } from "@/lib/utils";
-import { formatNumberWithSuffix } from "@/lib/utils"; // Import the utility function
 import { useIsMobile } from "@/hooks/use-mobile";
 interface MyCurrencyListItemProps {
   holding: AggregatedCurrencyHolding;
@@ -71,14 +70,11 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
                     isProfitable ? "text-accent" : "text-destructive",
                   )}
                 >
-                  <span className="md:hidden">
-                    {formatNumberWithSuffix(profitOrLossInEGP)}
-                  </span>
                   <span
                     className="hidden md:inline"
                     data-ai-hint="Display profit/loss for larger screens"
                   >
-                    {formattedProfitLoss}
+                    {formatNumberForMobile(isMobile, profitOrLossInEGP)}
                   </span>
                 </p>
                 <Badge

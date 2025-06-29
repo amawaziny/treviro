@@ -16,7 +16,6 @@ import { useLanguage } from "@/contexts/language-context";
 import {
   formatDateDisplay,
   formatNumberForMobile,
-  formatNumberWithSuffix,
 } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";

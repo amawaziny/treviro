@@ -35,7 +35,7 @@ import { Home, Building, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import { cn, formatNumberWithSuffix } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MyRealEstateListItem } from "@/components/investments/real-estate/my-real-estate-list-item";
 

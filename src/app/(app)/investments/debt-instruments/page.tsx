@@ -32,7 +32,7 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DirectDebtListItem } from "@/components/investments/debt/my-debt-list-item";
-import { cn, formatNumberWithSuffix } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { format, parseISO, isValid } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -231,16 +231,6 @@ export default function MyDebtInstrumentsPage() {
   const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
-
-  const formatCurrencyWithSuffix = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0`;
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `${currencyCode} ${formattedNumber}`;
-  };
 
   if (isLoading) {
     return (

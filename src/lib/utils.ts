@@ -50,7 +50,7 @@ export function formatNumberForMobile(
   currency: string = "EGP",
 ) {
   if (isMobile) {
-    return formatNumberWithSuffix(num, currency);
+    return formatCurrencyWithCommas(num, currency);
   }
   return formatCurrencyWithCommas(num, currency);
 }
