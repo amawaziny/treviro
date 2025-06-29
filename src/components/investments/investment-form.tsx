@@ -692,19 +692,27 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                     placeholder="e.g., 5.5"
                     value={value}
                     onChange={(val) => {
-                      // Limit to 3 characters (including decimal point)
-                      if (val !== "" && val.length > 3) {
-                        return; // Don't update if it would exceed max length
+                      // Allow empty string or just a decimal point
+                      if (val === "" || val === ".") {
+                        field.onChange(val);
+                        return;
                       }
-                      // Convert to number and check if it's within range
-                      const numVal = val === "" ? undefined : Number(val);
-                      if (numVal !== undefined && numVal > 100) {
-                        return; // Don't update if value exceeds 100
+                      
+                      // If it's a valid number
+                      const numVal = Number(val);
+                      if (!isNaN(numVal)) {
+                        // Check if the integer part is within 3 digits
+                        const [integerPart] = val.split('.');
+                        if (integerPart.length > 3) return;
+                        
+                        // Check max value
+                        if (numVal > 100) return;
+                        
+                        field.onChange(val); // Keep as string to allow decimal input
                       }
-                      field.onChange(numVal);
                     }}
                     allowDecimal={true}
-                    maxLength={3}
+                    maxLength={5} // Allow for decimal point and one decimal place
                   />
                 </FormControl>
                 <FormMessage />

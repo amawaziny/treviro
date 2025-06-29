@@ -662,5 +662,6 @@
   "period": "فترة",
   "income": "دخل",
   "expense": "مصروف",
-  "Name": "اﻹسم"
+  "Name": "اﻹسم",
+  "Issuer is required.": "بنك الاصدار مطلوب."
 }
