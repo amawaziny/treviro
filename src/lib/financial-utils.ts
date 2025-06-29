@@ -208,21 +208,29 @@ export function calculateMonthlyCashFlowSummary({
     }
   });
 
-  // Projected certificate interest (from investments)
+  // Projected certificate interest (from all debt instruments)
   let totalProjectedCertificateInterestThisMonth = 0;
   (investments || []).forEach((inv) => {
     if (inv.type === "Debt Instruments") {
       const debtInv = inv as DebtInstrumentInvestment;
-      const date = parseDateString(debtInv.purchaseDate);
-      if (
-        date &&
-        isWithinInterval(date, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        })
-      ) {
-        totalProjectedCertificateInterestThisMonth +=
-          debtInv.interestAmount || 0;
+      
+      // Calculate monthly interest based on amount and rate
+      if (debtInv.interestRate && debtInv.amountInvested && debtInv.purchaseDate) {
+        const purchaseDate = parseDateString(debtInv.purchaseDate);
+        const maturityDate = debtInv.maturityDate ? parseDateString(debtInv.maturityDate) : null;
+        
+        if (purchaseDate && maturityDate) {
+          // Only include interest if current month is between purchase and maturity dates
+          const currentMonthStart = startOfMonth(month);
+          const currentMonthEnd = endOfMonth(month);
+          
+          // Check if current month overlaps with the investment period
+          if (currentMonthStart <= maturityDate && currentMonthEnd >= purchaseDate) {
+            const annualInterest = (debtInv.amountInvested * debtInv.interestRate) / 100;
+            const monthlyInterest = annualInterest / 12;
+            totalProjectedCertificateInterestThisMonth += monthlyInterest;
+          }
+        }
       }
     }
   });
