@@ -50,6 +50,7 @@ export default function MyDebtInstrumentsPage() {
     directDebtHoldings,
     debtFundHoldings,
     totalProjectedAnnualInterest,
+    totalProjectedMonthlyInterest,
     totalDebtFundPnL,
     totalDebtFundCost,
     totalDirectDebtInvested,
@@ -347,7 +348,8 @@ export default function MyDebtInstrumentsPage() {
           </CardTitle>
           <CardDescription>
             <p>{`${t("bonds_certificates_treasury_bills_you_own_directly")}`}</p>
-            {`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedAnnualInterest, debtFundHoldings[0]?.currency)} ${t("annually")}`}
+            <p>{`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedMonthlyInterest, debtFundHoldings[0]?.currency)} ${t("monthly")}`}</p>
+            <p>{`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedAnnualInterest, debtFundHoldings[0]?.currency)} ${t("annually")}`}</p>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
