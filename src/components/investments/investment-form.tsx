@@ -559,9 +559,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
   const watchedDebtSubType = watch("debtSubType");
 
   useEffect(() => {
-    if (watchedDebtSubType === "Certificate") {
-      setValue("purchaseDate", "");
-    } else if (watchedDebtSubType && !watch("purchaseDate")) {
+    if (watchedDebtSubType && !watch("purchaseDate")) {
       setValue("purchaseDate", getCurrentDate());
     }
   }, [watchedDebtSubType, setValue, watch]);
@@ -622,28 +620,21 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
 
         <FormField
           control={control}
-          name="interestRate"
-          render={({ field }) => {
-            // Convert value to string for the NumericInput component
-            const value = field.value !== undefined ? String(field.value) : "";
-            return (
-              <FormItem>
-                <FormLabel>{t("interest_rate")}</FormLabel>
-                <FormControl>
-                  <NumericInput
-                    placeholder="e.g., 5.5"
-                    value={value}
-                    onChange={(val) => {
-                      // Convert back to number when updating the form
-                      field.onChange(val === "" ? undefined : Number(val));
-                    }}
-                    allowDecimal={true}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          name="purchaseDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("purchase_date")}</FormLabel>
+              <FormControl>
+                <Input
+                  dir={dir}
+                  type="date"
+                  {...field}
+                  value={field.value || getCurrentDate()}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
@@ -687,6 +678,32 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
           )}
         />
 
+        <FormField
+          control={control}
+          name="interestRate"
+          render={({ field }) => {
+            // Convert value to string for the NumericInput component
+            const value = field.value !== undefined ? String(field.value) : "";
+            return (
+              <FormItem>
+                <FormLabel>{t("interest_rate")}</FormLabel>
+                <FormControl>
+                  <NumericInput
+                    placeholder="e.g., 5.5"
+                    value={value}
+                    onChange={(val) => {
+                      // Convert back to number when updating the form
+                      field.onChange(val === "" ? undefined : Number(val));
+                    }}
+                    allowDecimal={true}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
         {/* Certificate Interest Frequency Dropdown */}
         {watchedDebtSubType === "Certificate" && (
           <FormField
@@ -714,27 +731,6 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                 <FormDescription>
                   {t("how_often_interest_is_paid_default_is_monthly")}
                 </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        {/* Only show purchase date for non-certificate debt types */}
-        {watchedDebtSubType !== "Certificate" && (
-          <FormField
-            control={control}
-            name="purchaseDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("purchase_date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    dir={dir}
-                    type="date"
-                    {...field}
-                    value={field.value || getCurrentDate()}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
