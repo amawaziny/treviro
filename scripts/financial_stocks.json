@@ -1,0 +1,202 @@
+[
+  {
+    "name": "القطاع المالي",
+    "symbol": "القطاع المالي",
+    "price": 995.05,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/القطاع المالي.svg"
+  },
+  {
+    "name": "الصناعات التحويلية",
+    "symbol": "الصناعات التحويلية",
+    "price": 245.26,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/الصناعات التحويلية.svg"
+  },
+  {
+    "name": "الصناعات الموجهة للمنتجين",
+    "symbol": "الصناعات الموجهة للمنتجين",
+    "price": 193.01,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/الصناعات الموجهة للمنتجين.svg"
+  },
+  {
+    "name": "مستهلك - غير معمرة",
+    "symbol": "مستهلك - غير معمرة",
+    "price": 167.26,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/مستهلك - غير معمرة.svg"
+  },
+  {
+    "name": "المعادن الأخرى - غير مصادر الطاقة",
+    "symbol": "المعادن الأخرى - غير مصادر الطاقة",
+    "price": 163.08,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/المعادن الأخرى - غير مصادر الطاقة.svg"
+  },
+  {
+    "name": "خدمات التكنولوجيا",
+    "symbol": "خدمات التكنولوجيا",
+    "price": 98.09,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/خدمات التكنولوجيا.svg"
+  },
+  {
+    "name": "الخدمات الصناعية",
+    "symbol": "الخدمات الصناعية",
+    "price": 84.95,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/الخدمات الصناعية.svg"
+  },
+  {
+    "name": "وسائل النقل",
+    "symbol": "وسائل النقل",
+    "price": 81.3,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/وسائل النقل.svg"
+  },
+  {
+    "name": "الاتصالات",
+    "symbol": "الاتصالات",
+    "price": 70.25,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/الاتصالات.svg"
+  },
+  {
+    "name": "خدمات المستهلك",
+    "symbol": "خدمات المستهلك",
+    "price": 56.41,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/خدمات المستهلك.svg"
+  },
+  {
+    "name": "السلع الاستهلاكية المُعمرة",
+    "symbol": "السلع الاستهلاكية المُعمرة",
+    "price": 54.44,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/السلع الاستهلاكية المُعمرة.svg"
+  },
+  {
+    "name": "خدمات التوزيع",
+    "symbol": "خدمات التوزيع",
+    "price": 51.79,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/خدمات التوزيع.svg"
+  },
+  {
+    "name": "تكنولوجيا الصحة",
+    "symbol": "تكنولوجيا الصحة",
+    "price": 32.53,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/تكنولوجيا الصحة.svg"
+  },
+  {
+    "name": "خدمات",
+    "symbol": "خدمات",
+    "price": 30.54,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/خدمات.svg"
+  },
+  {
+    "name": "الخدمات الصحية",
+    "symbol": "الخدمات الصحية",
+    "price": 17.52,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/الخدمات الصحية.svg"
+  },
+  {
+    "name": "الخدمات التجارية",
+    "symbol": "الخدمات التجارية",
+    "price": 16.19,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/الخدمات التجارية.svg"
+  },
+  {
+    "name": "تجارة التجزئة",
+    "symbol": "تجارة التجزئة",
+    "price": 11.63,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/تجارة التجزئة.svg"
+  },
+  {
+    "name": "معادن الطاقة",
+    "symbol": "معادن الطاقة",
+    "price": 9.74,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/معادن الطاقة.svg"
+  },
+  {
+    "name": "التكنولوجيا الإلكترونية",
+    "symbol": "التكنولوجيا الإلكترونية",
+    "price": 373.15,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/التكنولوجيا الإلكترونية.svg"
+  },
+  {
+    "name": "متفرقات",
+    "symbol": "متفرقات",
+    "price": 167.61,
+    "changePercent": 0,
+    "currency": "EGP",
+    "market": "EGX",
+    "securityType": "Stock",
+    "logoUrl": "https://s3-symbol-logo.tradingview.com/متفرقات.svg"
+  }
+]
