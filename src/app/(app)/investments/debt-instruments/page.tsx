@@ -354,9 +354,17 @@ export default function MyDebtInstrumentsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {directDebtHoldings.length > 0 ? (
-            directDebtHoldings.map((debt) => (
-              <DirectDebtListItem key={debt.id} holding={debt} />
-            ))
+            [...directDebtHoldings]
+              .sort((a, b) => {
+                // Sort by day of the month, then by name if days are equal
+                const dayA = a.maturityDay ? parseInt(a.maturityDay, 10) : 0;
+                const dayB = b.maturityDay ? parseInt(b.maturityDay, 10) : 0;
+                if (dayA !== dayB) return dayA - dayB;
+                return (a.displayName || '').localeCompare(b.displayName || '');
+              })
+              .map((debt) => (
+                <DirectDebtListItem key={debt.id} holding={debt} />
+              ))
           ) : (
             <p className="text-muted-foreground py-4 text-center">
               {t("you_havent_added_any_direct_debt_investments_yet")}
