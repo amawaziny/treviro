@@ -117,12 +117,7 @@ export default function CashFlowPage() {
       fixedEstimates: fixedEstimates || [],
       transactions: transactions || [],
     });
-  }, [
-    incomeRecords,
-    expenseRecords,
-    investments,
-    fixedEstimates,
-  ]);
+  }, [incomeRecords, expenseRecords, investments, fixedEstimates]);
 
   const {
     totalManualIncomeThisMonth,

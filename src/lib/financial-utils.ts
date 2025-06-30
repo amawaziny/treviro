@@ -23,7 +23,7 @@ export interface CashFlowSummaryArgs {
   expenseRecords: ExpenseRecord[];
   investments: Investment[];
   fixedEstimates: FixedEstimateRecord[];
-  transactions: Transaction[]
+  transactions: Transaction[];
   month?: Date; // Defaults to current month if not provided
 }
 
@@ -161,7 +161,7 @@ export function calculateMonthlyCashFlowSummary({
 }: CashFlowSummaryArgs): CashFlowSummaryResult {
   const currentMonthStart = startOfMonth(month);
   const currentMonthEnd = endOfMonth(month);
-  const today = new Date()
+  const today = new Date();
 
   // Fixed income breakdown
   let monthlySalary = 0,

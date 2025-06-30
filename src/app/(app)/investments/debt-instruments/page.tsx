@@ -232,40 +232,52 @@ export default function MyDebtInstrumentsPage() {
   const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
 
   // Calculate certificates expiring within a year
-  const { expiringCertificatesSum, expiringCertificatesPercentage } = React.useMemo(() => {
-    if (isLoadingInvestments) {
-      return { expiringCertificatesSum: 0, expiringCertificatesPercentage: 0 };
-    }
-
-    const now = new Date();
-    const oneYearFromNow = addYears(now, 1);
-    
-    let expiringSum = 0;
-    let totalCertificatesSum = 0;
-
-    directDebtHoldings.forEach(debt => {
-      if (debt.debtSubType === 'Certificate' && debt.maturityDate && debt.amountInvested) {
-        totalCertificatesSum += debt.amountInvested;
-        try {
-          const maturityDate = parseISO(debt.maturityDate);
-          if (isValid(maturityDate) && isBefore(maturityDate, oneYearFromNow)) {
-            expiringSum += debt.amountInvested;
-          }
-        } catch (e) {
-          console.error('Error processing maturity date:', e);
-        }
+  const { expiringCertificatesSum, expiringCertificatesPercentage } =
+    React.useMemo(() => {
+      if (isLoadingInvestments) {
+        return {
+          expiringCertificatesSum: 0,
+          expiringCertificatesPercentage: 0,
+        };
       }
-    });
 
-    const percentage = totalCertificatesSum > 0 
-      ? (expiringSum / totalCertificatesSum) * 100 
-      : 0;
+      const now = new Date();
+      const oneYearFromNow = addYears(now, 1);
 
-    return {
-      expiringCertificatesSum: expiringSum,
-      expiringCertificatesPercentage: percentage
-    };
-  }, [directDebtHoldings, isLoadingInvestments]);
+      let expiringSum = 0;
+      let totalCertificatesSum = 0;
+
+      directDebtHoldings.forEach((debt) => {
+        if (
+          debt.debtSubType === "Certificate" &&
+          debt.maturityDate &&
+          debt.amountInvested
+        ) {
+          totalCertificatesSum += debt.amountInvested;
+          try {
+            const maturityDate = parseISO(debt.maturityDate);
+            if (
+              isValid(maturityDate) &&
+              isBefore(maturityDate, oneYearFromNow)
+            ) {
+              expiringSum += debt.amountInvested;
+            }
+          } catch (e) {
+            console.error("Error processing maturity date:", e);
+          }
+        }
+      });
+
+      const percentage =
+        totalCertificatesSum > 0
+          ? (expiringSum / totalCertificatesSum) * 100
+          : 0;
+
+      return {
+        expiringCertificatesSum: expiringSum,
+        expiringCertificatesPercentage: percentage,
+      };
+    }, [directDebtHoldings, isLoadingInvestments]);
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 

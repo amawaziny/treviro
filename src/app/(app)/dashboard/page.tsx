@@ -80,20 +80,15 @@ export default function DashboardPage() {
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
 
- const cashFlowSummary = useMemo(() => {
+  const cashFlowSummary = useMemo(() => {
     return calculateMonthlyCashFlowSummary({
       incomeRecords: incomeRecords || [],
       expenseRecords: expenseRecords || [],
       investments: investments || [],
       fixedEstimates: fixedEstimates || [],
-      transactions: transactions || []
+      transactions: transactions || [],
     });
-  }, [
-    incomeRecords,
-    expenseRecords,
-    investments,
-    fixedEstimates,
-  ]);
+  }, [incomeRecords, expenseRecords, investments, fixedEstimates]);
 
   const { totalCurrentPortfolioValue, totalPortfolioCostBasis } =
     useMemo(() => {

@@ -139,7 +139,9 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("this_action_will_permanently_delete_this_debt_record_this_cannot_be_undone")}
+              {t(
+                "this_action_will_permanently_delete_this_debt_record_this_cannot_be_undone",
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
