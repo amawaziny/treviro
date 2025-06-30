@@ -23,6 +23,7 @@ export interface CashFlowSummaryArgs {
   expenseRecords: ExpenseRecord[];
   investments: Investment[];
   fixedEstimates: FixedEstimateRecord[];
+  transactions: Transaction[]
   month?: Date; // Defaults to current month if not provided
 }
 
@@ -51,6 +52,7 @@ export interface CashFlowSummaryResult {
   totalGoldInvestmentThisMonth: number;
   totalCurrencyInvestmentThisMonth: number;
   totalInvestmentsOnly: number;
+  stockDividendThisMonth: number;
 
   // Summary
   netCashFlowThisMonth: number;
@@ -72,6 +74,7 @@ export function calculateCashFlowDetails({
     expenseRecords,
     investments,
     fixedEstimates,
+    transactions,
     month,
   });
 
@@ -94,23 +97,6 @@ export function calculateCashFlowDetails({
 
       if (isInCurrentMonth && incomeDate <= today) {
         currentMonthIncome += income.amount;
-      }
-    }
-  });
-
-  // Process dividend transactions
-  transactions.forEach((tx) => {
-    if (tx.type === "dividend") {
-      const txDate = parseDateString(tx.date);
-      if (txDate) {
-        const isInCurrentMonth = isWithinInterval(txDate, {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        });
-
-        if (isInCurrentMonth && txDate <= today) {
-          currentMonthIncome += tx.amount ?? tx.totalAmount ?? 0;
-        }
       }
     }
   });
@@ -170,10 +156,12 @@ export function calculateMonthlyCashFlowSummary({
   expenseRecords = [],
   investments = [],
   fixedEstimates = [],
+  transactions = [],
   month = new Date(),
 }: CashFlowSummaryArgs): CashFlowSummaryResult {
   const currentMonthStart = startOfMonth(month);
   const currentMonthEnd = endOfMonth(month);
+  const today = new Date()
 
   // Fixed income breakdown
   let monthlySalary = 0,
@@ -333,12 +321,31 @@ export function calculateMonthlyCashFlowSummary({
     }
   });
 
+  // Process dividend transactions
+  let stockDividendThisMonth = 0;
+  transactions.forEach((tx) => {
+    if (tx.type === "dividend") {
+      const txDate = parseDateString(tx.date);
+      if (txDate) {
+        const isInCurrentMonth = isWithinInterval(txDate, {
+          start: currentMonthStart,
+          end: currentMonthEnd,
+        });
+
+        if (isInCurrentMonth && txDate <= today) {
+          stockDividendThisMonth += tx.amount ?? tx.totalAmount ?? 0;
+        }
+      }
+    }
+  });
+
   // Totals
   const totalIncome =
     monthlySalary +
     otherFixedIncomeMonthly +
     totalManualIncomeThisMonth +
-    totalProjectedCertificateInterestThisMonth;
+    totalProjectedCertificateInterestThisMonth +
+    stockDividendThisMonth;
   const totalExpensesOnly =
     zakatFixedMonthly +
     charityFixedMonthly +
@@ -382,6 +389,7 @@ export function calculateMonthlyCashFlowSummary({
     totalCurrencyInvestmentThisMonth,
     totalInvestmentsOnly,
     netCashFlowThisMonth,
+    stockDividendThisMonth,
     netCurrentMonthCashFlow: netCashFlowThisMonth, // Alias for consistency with interface
   };
 }

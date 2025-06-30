@@ -54,6 +54,7 @@ export default function DashboardPage() {
     expenseRecords,
     fixedEstimates,
     investments,
+    transactions,
     isLoading: isLoadingContext,
     recalculateDashboardSummary,
     appSettings,
@@ -79,12 +80,20 @@ export default function DashboardPage() {
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
 
-  const cashFlowSummary = calculateMonthlyCashFlowSummary({
+ const cashFlowSummary = useMemo(() => {
+    return calculateMonthlyCashFlowSummary({
+      incomeRecords: incomeRecords || [],
+      expenseRecords: expenseRecords || [],
+      investments: investments || [],
+      fixedEstimates: fixedEstimates || [],
+      transactions: transactions || []
+    });
+  }, [
     incomeRecords,
     expenseRecords,
     investments,
     fixedEstimates,
-  });
+  ]);
 
   const { totalCurrentPortfolioValue, totalPortfolioCostBasis } =
     useMemo(() => {
