@@ -33,7 +33,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DirectDebtListItem } from "@/components/investments/debt/my-debt-list-item";
 import { cn } from "@/lib/utils";
-import { format, parseISO, isValid } from "date-fns";
+import { format, parseISO, isValid, addYears, isBefore } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
@@ -231,6 +231,42 @@ export default function MyDebtInstrumentsPage() {
   const isTotalFundProfitable = totalDebtFundPnL >= 0;
   const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
 
+  // Calculate certificates expiring within a year
+  const { expiringCertificatesSum, expiringCertificatesPercentage } = React.useMemo(() => {
+    if (isLoadingInvestments) {
+      return { expiringCertificatesSum: 0, expiringCertificatesPercentage: 0 };
+    }
+
+    const now = new Date();
+    const oneYearFromNow = addYears(now, 1);
+    
+    let expiringSum = 0;
+    let totalCertificatesSum = 0;
+
+    directDebtHoldings.forEach(debt => {
+      if (debt.debtSubType === 'Certificate' && debt.maturityDate && debt.amountInvested) {
+        totalCertificatesSum += debt.amountInvested;
+        try {
+          const maturityDate = parseISO(debt.maturityDate);
+          if (isValid(maturityDate) && isBefore(maturityDate, oneYearFromNow)) {
+            expiringSum += debt.amountInvested;
+          }
+        } catch (e) {
+          console.error('Error processing maturity date:', e);
+        }
+      }
+    });
+
+    const percentage = totalCertificatesSum > 0 
+      ? (expiringSum / totalCertificatesSum) * 100 
+      : 0;
+
+    return {
+      expiringCertificatesSum: expiringSum,
+      expiringCertificatesPercentage: percentage
+    };
+  }, [directDebtHoldings, isLoadingInvestments]);
+
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   if (isLoading) {
@@ -350,6 +386,7 @@ export default function MyDebtInstrumentsPage() {
             <p>{`${t("bonds_certificates_treasury_bills_you_own_directly")}`}</p>
             <p>{`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedMonthlyInterest, debtFundHoldings[0]?.currency)} ${t("monthly")}`}</p>
             <p>{`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedAnnualInterest, debtFundHoldings[0]?.currency)} ${t("annually")}`}</p>
+            <p>{`${t("certificates_expiring_soon")}: ${formatNumberForMobile(isMobile, expiringCertificatesSum, debtFundHoldings[0]?.currency)} - ${expiringCertificatesPercentage.toFixed(2)}%`}</p>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

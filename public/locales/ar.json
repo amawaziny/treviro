@@ -699,5 +699,6 @@
   "Name": "اﻹسم",
   "edit_debt_instrument": "تعديل أدوات الدين",
   "the_requested_debt_instrument_could_not_be_found": "تعذر العثور على أدوات الدين المطلوبة.",
-  "this_action_will_permanently_delete_this_debt_record_this_cannot_be_undone": "سيؤدي هذا الإجراء إلى حذف سجل أداة الدين هذا بشكل دائم. ﻻ يمكن التراجع عن هذا الإجراء."
+  "this_action_will_permanently_delete_this_debt_record_this_cannot_be_undone": "سيؤدي هذا الإجراء إلى حذف سجل أداة الدين هذا بشكل دائم. ﻻ يمكن التراجع عن هذا الإجراء.",
+  "certificates_expiring_soon":"شهادات تنتهي في عام"
 }
