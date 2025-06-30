@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { navItems } from "@/lib/navigation";
+import { Menu } from "lucide-react";
 
 export function BottomTabBar() {
   const { t: t } = useLanguage();
@@ -48,7 +49,7 @@ export function BottomTabBar() {
           className={`flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors text-muted-foreground`}
           onClick={() => setMenuOpen(true)}
         >
-          <span className="text-lg">☰</span>
+          <Menu className="h-4 w-4 mb-1" />
           {t("Menu")}
         </button>
       </nav>

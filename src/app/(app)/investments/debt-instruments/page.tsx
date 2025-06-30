@@ -360,7 +360,7 @@ export default function MyDebtInstrumentsPage() {
                 const dayA = a.maturityDay ? parseInt(a.maturityDay, 10) : 0;
                 const dayB = b.maturityDay ? parseInt(b.maturityDay, 10) : 0;
                 if (dayA !== dayB) return dayA - dayB;
-                return (a.displayName || '').localeCompare(b.displayName || '');
+                return (a.displayName || "").localeCompare(b.displayName || "");
               })
               .map((debt) => (
                 <DirectDebtListItem key={debt.id} holding={debt} />

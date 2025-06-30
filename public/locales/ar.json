@@ -696,5 +696,7 @@
   "period": "فترة",
   "income": "دخل",
   "expense": "مصروف",
-  "Name": "اﻹسم"
+  "Name": "اﻹسم",
+  "edit_debt_instrument": "تعديل أدوات الدين",
+  "the_requested_debt_instrument_could_not_be_found": "تعذر العثور على أدوات الدين المطلوبة."
 }

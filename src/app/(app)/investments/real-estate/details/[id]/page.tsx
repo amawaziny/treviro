@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import {
-  formatDateDisplay,
-  formatNumberForMobile,
-} from "@/lib/utils";
+import { formatDateDisplay, formatNumberForMobile } from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
 import { Input } from "@/components/ui/input";

@@ -204,7 +204,9 @@ export function InvestmentBreakdownCards({
                   </div>
                   <div className="font-bold text-md text-green-600 dark:text-green-400 truncate flex items-center">
                     <Plus className="h-4 w-4 mr-1" />
-                    {formatNumberForMobile(isMobile, Math.max(
+                    {formatNumberForMobile(
+                      isMobile,
+                      Math.max(
                         0,
                         (totalCashBalance *
                           (allocationPercentages[

@@ -551,8 +551,11 @@ interface RenderDebtFieldsProps {
   control: any;
   setValue: any;
   watch: any;
+  isEditMode: boolean;
 }
-const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
+const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
+  isEditMode,
+}) => {
   const { t, dir } = useLanguage();
   const { control, setValue, watch } =
     useReactHookFormContext<InvestmentFormValues>();
@@ -577,6 +580,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             <FormItem>
               <FormLabel>{t("specific_debt_type")}</FormLabel>
               <Select
+                disabled={isEditMode}
                 dir={dir}
                 onValueChange={field.onChange}
                 value={field.value || ""}
@@ -697,17 +701,17 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                         field.onChange(val);
                         return;
                       }
-                      
+
                       // If it's a valid number
                       const numVal = Number(val);
                       if (!isNaN(numVal)) {
                         // Check if the integer part is within 3 digits
-                        const [integerPart] = val.split('.');
+                        const [integerPart] = val.split(".");
                         if (integerPart.length > 3) return;
-                        
+
                         // Check max value
                         if (numVal > 100) return;
-                        
+
                         field.onChange(val); // Keep as string to allow decimal input
                       }
                     }}
@@ -812,7 +816,11 @@ export function InvestmentForm({
         : getInitialFormValues(currentType),
   });
 
-  const { addInvestment, updateRealEstateInvestment } = useInvestments();
+  const {
+    addInvestment,
+    updateRealEstateInvestment,
+    updateDebtInstrumentInvestment,
+  } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1103,6 +1111,17 @@ export function InvestmentForm({
         });
         router.push("/investments/real-estate");
         return;
+      } else if (values.type === "Debt Instruments") {
+        await updateDebtInstrumentInvestment(
+          initialValues["id"] as string,
+          removeUndefinedFieldsDeep(values),
+        );
+        toast({
+          title: t("investment_updated"),
+          description: `${t(values.debtSubType)} - ${values.issuer} ${t("has_been_successfully_updated")}.`,
+        });
+        router.push("/investments/debt-instruments");
+        return;
       }
       // Add more types here if you want to support editing other investment types
     } else {
@@ -1153,6 +1172,8 @@ export function InvestmentForm({
     submitButtonText = t("save_changes");
   } else if (mode === "edit" && preSelectedInvestmentType === "Real Estate") {
     submitButtonText = t("save_changes");
+  } else if (mode === "edit" && isDedicatedDebtMode) {
+    submitButtonText = t("save_changes");
   } else if (isDedicatedGoldMode) {
     submitButtonText = t("add_gold");
   } else if (isDedicatedDebtMode) {
@@ -1192,6 +1213,7 @@ export function InvestmentForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {isDedicatedDebtMode ? (
               <MemoizedRenderDebtFields
+                isEditMode={mode === "edit"}
                 control={form.control}
                 setValue={form.setValue}
                 watch={form.watch}

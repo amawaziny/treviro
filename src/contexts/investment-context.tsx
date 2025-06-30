@@ -94,6 +94,7 @@ export interface InvestmentContextType {
     expenseId: string,
     updatedFields: Partial<ExpenseRecord>,
   ) => Promise<void>;
+  getInvestmentById: (investmentId: string) => Promise<Investment | undefined>;
   fixedEstimates: FixedEstimateRecord[];
   addFixedEstimate: (
     estimateData: Omit<
@@ -106,6 +107,10 @@ export interface InvestmentContextType {
   updateRealEstateInvestment: (
     investmentId: string,
     dataToUpdate: Partial<RealEstateInvestment>,
+  ) => Promise<void>;
+  updateDebtInstrumentInvestment: (
+    investmentId: string,
+    dataToUpdate: Partial<DebtInstrumentInvestment>,
   ) => Promise<void>;
   appSettings: AppSettings | null;
   updateAppSettings: (settings: Partial<AppSettings>) => Promise<void>;
@@ -1095,6 +1100,59 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance],
   );
 
+  const updateDebtInstrumentInvestment = useCallback(
+    async (
+      investmentId: string,
+      dataToUpdate: Partial<DebtInstrumentInvestment>,
+    ) => {
+      if (!firestoreInstance || !userId) {
+        throw new Error("Firestore instance or user ID is not initialized");
+      }
+      try {
+        const investmentDocRef = doc(
+          firestoreInstance,
+          `users/${userId}/investments/${investmentId}`,
+        );
+        const docSnap = await getDoc(investmentDocRef);
+        if (!docSnap.exists()) throw new Error("Investment not found.");
+        const oldData = docSnap.data() as DebtInstrumentInvestment;
+        if (oldData.type !== "Debt Instruments")
+          throw new Error("Not a debt instrument investment.");
+
+        const oldAmountInvested = oldData.amountInvested || 0;
+        // `dataToUpdate.amountInvested` could be string from form, so coerce to number
+        const newAmountInvested =
+          typeof dataToUpdate.amountInvested === "string"
+            ? parseFloat(dataToUpdate.amountInvested)
+            : typeof dataToUpdate.amountInvested === "number"
+              ? dataToUpdate.amountInvested
+              : oldAmountInvested;
+
+        if (isNaN(newAmountInvested)) {
+          throw new Error("Invalid amountInvested provided for update.");
+        }
+
+        await setDoc(investmentDocRef, dataToUpdate, { merge: true });
+
+        const amountInvestedDelta = newAmountInvested - oldAmountInvested;
+        const cashBalanceDelta = -amountInvestedDelta; // If investment cost increases, cash decreases
+
+        const summaryUpdates: Partial<DashboardSummary> = {};
+        if (!isNaN(amountInvestedDelta) && amountInvestedDelta !== 0)
+          summaryUpdates.totalInvestedAcrossAllAssets = amountInvestedDelta;
+        if (!isNaN(cashBalanceDelta) && cashBalanceDelta !== 0)
+          summaryUpdates.totalCashBalance = cashBalanceDelta;
+
+        if (Object.keys(summaryUpdates).length > 0)
+          await updateDashboardSummaryDoc(summaryUpdates);
+      } catch (error) {
+        console.error("Error updating debt instrument investment:", error);
+        throw error;
+      }
+    },
+    [userId, isAuthenticated, firestoreInstance],
+  );
+
   const recalculateDashboardSummary = useCallback(async () => {
     if (!userId || !firestoreInstance) return;
 
@@ -1143,6 +1201,32 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     expenseRecords,
     getDashboardSummaryDocRef,
   ]);
+
+  const getInvestmentById = useCallback(
+    async (investmentId: string): Promise<Investment | undefined> => {
+      if (!userId || !firestoreInstance) return undefined;
+
+      try {
+        const investmentRef = doc(
+          firestoreInstance,
+          `users/${userId}/investments/${investmentId}`,
+        );
+        const investmentDoc = await getDoc(investmentRef);
+
+        if (investmentDoc.exists()) {
+          return {
+            id: investmentDoc.id,
+            ...investmentDoc.data(),
+          } as Investment;
+        }
+        return undefined;
+      } catch (error) {
+        console.error("Error fetching investment:", error);
+        return undefined;
+      }
+    },
+    [userId, firestoreInstance],
+  );
 
   const updateAppSettings = useCallback(
     async (settings: Partial<AppSettings>) => {
@@ -1246,6 +1330,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         recalculateDashboardSummary,
         appSettings,
         updateAppSettings,
+        getInvestmentById,
+        updateDebtInstrumentInvestment,
       }}
     >
       {children}

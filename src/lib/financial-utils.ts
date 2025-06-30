@@ -213,20 +213,30 @@ export function calculateMonthlyCashFlowSummary({
   (investments || []).forEach((inv) => {
     if (inv.type === "Debt Instruments") {
       const debtInv = inv as DebtInstrumentInvestment;
-      
+
       // Calculate monthly interest based on amount and rate
-      if (debtInv.interestRate && debtInv.amountInvested && debtInv.purchaseDate) {
+      if (
+        debtInv.interestRate &&
+        debtInv.amountInvested &&
+        debtInv.purchaseDate
+      ) {
         const purchaseDate = parseDateString(debtInv.purchaseDate);
-        const maturityDate = debtInv.maturityDate ? parseDateString(debtInv.maturityDate) : null;
-        
+        const maturityDate = debtInv.maturityDate
+          ? parseDateString(debtInv.maturityDate)
+          : null;
+
         if (purchaseDate && maturityDate) {
           // Only include interest if current month is between purchase and maturity dates
           const currentMonthStart = startOfMonth(month);
           const currentMonthEnd = endOfMonth(month);
-          
+
           // Check if current month overlaps with the investment period
-          if (currentMonthStart <= maturityDate && currentMonthEnd >= purchaseDate) {
-            const annualInterest = (debtInv.amountInvested * debtInv.interestRate) / 100;
+          if (
+            currentMonthStart <= maturityDate &&
+            currentMonthEnd >= purchaseDate
+          ) {
+            const annualInterest =
+              (debtInv.amountInvested * debtInv.interestRate) / 100;
             const monthlyInterest = annualInterest / 12;
             totalProjectedCertificateInterestThisMonth += monthlyInterest;
           }

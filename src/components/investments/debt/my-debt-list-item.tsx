@@ -1,11 +1,12 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
+import { useRouter } from "next/navigation";
 
 import type { AggregatedDebtHolding } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building } from "lucide-react";
 import { formatNumberForMobile } from "@/lib/utils";
-import React from "react";
+import React, { useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DirectDebtListItemProps {
@@ -15,6 +16,11 @@ interface DirectDebtListItemProps {
 export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const router = useRouter();
+
+  const handleClick = useCallback(() => {
+    router.push(`/investments/debt-instruments/edit/${holding.id}`);
+  }, [holding.id, router]);
 
   const {
     displayName,
@@ -30,7 +36,10 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
 
   // Render direct debt instrument (bonds, certificates, etc.)
   return (
-    <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
+    <Card
+      className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden cursor-pointer"
+      onClick={handleClick}
+    >
       <CardContent className="pt-6">
         <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
           <div className="flex items-center gap-2 flex-grow min-w-0 w-0">

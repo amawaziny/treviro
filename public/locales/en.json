@@ -662,5 +662,7 @@
   "period": "Period",
   "income": "Income",
   "expense": "Expense",
-  "Name": "Name"
+  "Name": "Name",
+  "edit_debt_instrument": "Edit Debt Instrument",
+  "the_requested_debt_instrument_could_not_be_found": "The requested debt instrument could not be found."
 }
