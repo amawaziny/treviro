@@ -1,6 +1,8 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
+import { format } from "date-fns";
+import { DateInput } from "@/components/ui/date-input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm as useReactHookForm } from "react-hook-form";
@@ -31,7 +33,8 @@ import {
 } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
 
@@ -192,21 +195,25 @@ export function ExpenseForm({
           <FormField
             control={form.control}
             name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("Date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    data-testid="date-input"
-                    value={field.value || ""}
+            render={({ field }) => {
+              // Convert YYYY-MM-DD to DD-MM-YYYY for display
+              return (
+                <FormItem className="flex flex-col">
+                  <FormLabel>{t("Date")}</FormLabel>
+                  <DateInput
+                    value={field.value}
                     onChange={field.onChange}
-                    max={getCurrentDate()}
+                    placeholder="Select a date"
+                    dir={dir}
+                    dateFormat="dd-MM-yyyy"
+                    disabled={form.formState.isSubmitting}
+                    disableFuture={true}
+                    className="w-full"
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
