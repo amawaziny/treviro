@@ -19,6 +19,7 @@ interface DateInputBaseProps {
   toYear?: number;
   disableFuture?: boolean;
   dateFormat?: string; // Format to display the date (e.g., 'PPP' for 'MMM dd, yyyy')
+  language?: string;
   dir?: 'ltr' | 'rtl';
 }
 
@@ -35,10 +36,10 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     disableFuture = true,
     dateFormat = 'PPP',
     dir = 'ltr',
+    language = 'en',
     className,
     ...props
   }, ref) => {
-    const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
     const date = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
     const inputRef = React.useRef<HTMLInputElement>(null);
@@ -68,79 +69,25 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       }
     }, [value, dateFormat]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setInputValue(newValue);
-      
-      // Try to parse the input value according to the dateFormat
-      try {
-        const parsedDate = parse(newValue, dateFormat, new Date());
-        if (isValid(parsedDate)) {
-          const formattedDate = format(parsedDate, 'yyyy-MM-dd');
-          onChange?.(formattedDate);
-        } else {
-          // If not a valid date, clear the value
-          onChange?.('');
-        }
-      } catch (error) {
-        onChange?.('');
-      }
-    };
-
-    const handleSelect = (selectedDate: Date | undefined) => {
+    const handleSelect = (selectedDate: any | undefined) => {
       if (selectedDate) {
-        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+        const jsDate = selectedDate ? selectedDate.toDate?.() || selectedDate : null;
+        const formattedDate = format(jsDate, 'yyyy-MM-dd');
         onChange?.(formattedDate);
-        setOpen(false);
       }
     };
 
     return (
       <div className={cn("w-full relative", className)} {...props}>
         <div className="relative">
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={handleInputChange}
-            placeholder={placeholder}
-            disabled={disabled}
-            className={cn("pr-10 w-full", !inputValue && "text-muted-foreground")}
-          />
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setOpen(!open);
-                }}
-                disabled={disabled}
-              >
-                <CalendarIcon className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={handleSelect}
-              disabled={(date: Date) => 
-                (disableFuture && date > new Date()) || 
-                date < new Date(`${fromYear}-01-01`) || 
-                date > new Date(`${toYear}-12-31`)
-              }
-              initialFocus
-              fromYear={fromYear}
-              toYear={toYear}
-              captionLayout="dropdown"
-              className="rounded-md border"
+          <Calendar
+              onChange={handleSelect}
+              value={date}
+              locale={language}
               dir={dir}
+              disableFuture={disableFuture}
+              dateFormat={dateFormat}
             />
-          </PopoverContent>
-        </Popover>
         </div>
       </div>
     );

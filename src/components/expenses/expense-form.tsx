@@ -60,7 +60,7 @@ export function ExpenseForm({
   onSubmit,
   isEditMode,
 }: ExpenseFormProps) {
-  const { t, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const { toast } = useToast();
   const router = useRouter();
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -102,7 +102,7 @@ export function ExpenseForm({
 
       toast({
         title: t("expense_record_saved"),
-        description: `${values.category} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
+        description: `${t(values.category)} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
         testId: isEditMode ? "edit-success-toast" : "success-toast",
       });
 
@@ -203,8 +203,9 @@ export function ExpenseForm({
                   <DateInput
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder="Select a date"
+                    placeholder={t("Select a date")}
                     dir={dir}
+                    language={language}
                     dateFormat="dd-MM-yyyy"
                     disabled={form.formState.isSubmitting}
                     disableFuture={true}
