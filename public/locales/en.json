@@ -664,5 +664,6 @@
   "expense": "Expense",
   "Name": "Name",
   "edit_debt_instrument": "Edit Debt Instrument",
-  "the_requested_debt_instrument_could_not_be_found": "The requested debt instrument could not be found."
+  "the_requested_debt_instrument_could_not_be_found": "The requested debt instrument could not be found.",
+  "certificates_expiring_soon":"Certificates expiring in a year"
 }
