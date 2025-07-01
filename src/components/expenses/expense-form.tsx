@@ -41,6 +41,7 @@ import {
 } from "@radix-ui/react-popover";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const initialFormValues: ExpenseFormValues = {
   category: "Other",
@@ -66,6 +67,7 @@ export function ExpenseForm({
 }: ExpenseFormProps) {
   const { t, language, dir } = useLanguage();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const router = useRouter();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
@@ -213,6 +215,8 @@ export function ExpenseForm({
                     dateFormat="dd-MM-yyyy"
                     disabled={form.formState.isSubmitting}
                     disableFuture={true}
+                    mobile={isMobile}
+                    data-testid="date-input"
                     className="w-full"
                   />
                   <FormMessage />

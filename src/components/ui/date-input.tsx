@@ -17,6 +17,7 @@ interface DateInputBaseProps {
   dateFormat?: string; // Format to display the date (e.g., 'PPP' for 'MMM dd, yyyy')
   language?: string;
   dir?: "ltr" | "rtl";
+  mobile?: boolean; // Whether to use mobile styles
 }
 
 type DateInputProps = DateInputBaseProps &
@@ -36,6 +37,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       dir = "ltr",
       language = "en",
       className,
+      mobile = false,
       ...props
     },
     ref,
@@ -95,6 +97,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             dir={dir}
             disableFuture={disableFuture}
             dateFormat={dateFormat}
+            mobile={mobile}
           />
         </div>
       </div>
