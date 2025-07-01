@@ -25,7 +25,10 @@ export function Header() {
   const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" dir={dir}>
+    <header
+      className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      dir={dir}
+    >
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex items-center gap-4">
           {!isMobile && !showBackButton && (

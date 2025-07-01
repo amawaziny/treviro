@@ -37,7 +37,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" dir={dir}>
+      <div
+        className="flex h-screen w-screen items-center justify-center"
+        dir={dir}
+      >
         <div className="flex flex-col items-center gap-4">
           <Coins className="h-12 w-12 animate-spin text-primary" />
           <p className="text-muted-foreground">{t("loading")}</p>
