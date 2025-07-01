@@ -8,7 +8,7 @@ import { navItems } from "@/lib/navigation";
 import { Menu } from "lucide-react";
 
 export function BottomTabBar() {
-  const { t: t } = useLanguage();
+  const { t, dir } = useLanguage();
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
@@ -22,6 +22,7 @@ export function BottomTabBar() {
   return (
     <>
       <nav
+        dir={dir}
         className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-14 border-t bg-white dark:bg-[#181c2a] shadow-md max-w-full overflow-x-auto"
         style={{
           borderTop:
@@ -58,6 +59,7 @@ export function BottomTabBar() {
       {/* Modal for the rest of the menu */}
       {menuOpen && (
         <div
+          dir={dir}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
           onClick={() => setMenuOpen(false)}
         >
