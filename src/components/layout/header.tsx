@@ -12,7 +12,7 @@ import { useForm } from "@/contexts/form-context";
 
 export function Header() {
   const isMobile = useIsMobile();
-  const { language, t } = useLanguage();
+  const { language, t, dir } = useLanguage();
   const { headerProps } = useForm();
 
   const {
@@ -25,7 +25,7 @@ export function Header() {
   const BackArrowIcon = language === "ar" ? ArrowRight : ArrowLeft;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" dir={dir}>
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex items-center gap-4">
           {!isMobile && !showBackButton && (
@@ -65,8 +65,8 @@ export function Header() {
           )}
         </div>
         {showNavControls && (
-          <div className="flex flex-1 items-center justify-end">
-            <nav className="flex items-center gap-2">
+          <div className="flex flex-1 items-center justify-end" dir={dir}>
+            <nav className="flex items-center gap-2" dir={dir}>
               <LanguageToggle />
               <ThemeToggle />
               <UserNav />

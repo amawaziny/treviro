@@ -44,7 +44,7 @@ import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 
 export default function DashboardPage() {
-  const { t, language, dir } = useLanguage();
+  const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
 
   const {
@@ -154,7 +154,7 @@ export default function DashboardPage() {
     totalCurrentPortfolioValue - totalPortfolioCostBasis;
 
   return (
-    <div dir={dir} className="space-y-8" data-testid="dashboard-page">
+    <div className="space-y-8" data-testid="dashboard-page">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t("Dashboard")}
