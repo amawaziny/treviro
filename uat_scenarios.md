@@ -168,6 +168,34 @@
      - Net cash flow calculated
      - Updates in real-time
 
+## Debt Management
+
+### Certificate Creation and Projection
+
+1. **Create Debt Certificate and Validate Projection**
+
+   - **Scenario**: User creates a new Direct Debt Certificate and verifies the projection in Debts and Dashboard
+   - **Precondition**: User is logged into the Trivero mobile app
+   - **Steps**:
+     1. Navigate to the "Debts" screen
+     2. Tap "Add New Debt Certificate"
+     3. Enter the following details:
+        - Total Cost: 100,000
+        - Issuer: Ahly Bank
+        - Expiry Date: 12-1-2026
+        - Interest Rate: 10%
+     4. Save the certificate
+   - **Expected Results**:
+     - ✅ The certificate is successfully saved and appears in the Direct Debt List on the Debts screen
+     - ✅ The projection amount based on the 10% interest rate appears in the "Income" section of the Dashboard
+     - ✅ If today's date is the 12th of the month, the projection amount also appears in the "Current Income" section of the Dashboard
+     - ✅ The same projection amount appears in the Summary section of the Debts screen
+   - **Validation**:
+     - Verify certificate details match the input values
+     - Confirm projection calculations are accurate
+     - Check that the projection updates correctly on the 12th of each month
+     - Ensure data consistency between Debts and Dashboard views
+
 ## Expenses Management
 
 ### Adding Expenses
