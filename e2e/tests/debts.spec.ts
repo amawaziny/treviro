@@ -49,8 +49,8 @@ test.describe("Debt Certificate Management", () => {
       const initialMonthlyText = await page.locator('p:has-text("Projected Interest:")').first().textContent();
       const initialMonthly = parseFloat(initialMonthlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
       console.log("initialMonthly", initialMonthly);
-      // const initialYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
-      // const initialYearly = parseFloat(initialYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
+      const initialYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
+      const initialYearly = parseFloat(initialYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
 
       // Click add new debt certificate button
       await page.click('[data-testid="add-debt-certificate-button"]');
@@ -89,24 +89,17 @@ test.describe("Debt Certificate Management", () => {
       const expectedMonthlyProjection = expectedYearlyProjection / 12;
       console.log("expectedMonthlyProjection", expectedMonthlyProjection);
 
-      // Navigate back to debt instruments page to verify updated summary
-      await page.goto("/investments/debt-instruments");
-      await page.waitForSelector('[data-testid="debts-page"]');
-      
-      // Wait for projections to update
-      await page.waitForTimeout(1000);
-
       // Get updated projected interest values
       const updatedMonthlyText = await page.locator('p:has-text("Projected Interest:")').first().textContent();
       console.log("updatedMonthlyText", updatedMonthlyText)
       const updatedMonthly = parseFloat(updatedMonthlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
       console.log("updatedMonthly", updatedMonthly);
-      // const updatedYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
-      // const updatedYearly = parseFloat(updatedYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
+      const updatedYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
+      const updatedYearly = parseFloat(updatedYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
 
       // Verify the projections increased by the expected amounts
       expect(updatedMonthly).toBeCloseTo(initialMonthly + expectedMonthlyProjection, 0);
-      // expect(updatedYearly).toBeCloseTo(initialYearly + expectedYearlyProjection, 0);
+      expect(updatedYearly).toBeCloseTo(initialYearly + expectedYearlyProjection, 0);
 
       // Get current date to check if it's the 12th of the month
       const today = new Date();
@@ -120,9 +113,7 @@ test.describe("Debt Certificate Management", () => {
       if (certificateId) {
         try {
           console.log('Cleaning up test certificate...');
-          await page.goto("/investments/debt-instruments");
-          await page.waitForSelector('[data-testid="debts-page"]');
-          
+
           // Find the certificate card by issuer name
           const certificateCard = page.locator('[data-testid="certificate-card"]')
             .filter({ hasText: TEST_CERTIFICATE.issuer })
