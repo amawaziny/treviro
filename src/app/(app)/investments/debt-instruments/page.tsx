@@ -321,7 +321,7 @@ export default function MyDebtInstrumentsPage() {
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]" data-testid="debts-page">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t("debt_instruments")}
@@ -465,8 +465,9 @@ export default function MyDebtInstrumentsPage() {
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new debt instrument"
+          data-testid="add-debt-certificate-button"
         >
-          <Plus className="h-7 w-7" />
+          <Plus className="h-7 w-7" data-testid="plus-icon" />
         </Button>
       </Link>
     </div>

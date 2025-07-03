@@ -39,7 +39,7 @@ test.describe("Debt Certificate Management", () => {
 
   test("should create a new debt certificate and validate projection", async ({ page }) => {
     // Navigate to debts page
-    await page.goto("/debts");
+    await page.goto("/investments/debt-instruments");
     await page.waitForSelector('[data-testid="debts-page"]');
 
     // Click add new debt certificate button
@@ -62,16 +62,23 @@ test.describe("Debt Certificate Management", () => {
     const expectedYearlyProjection = 10000;
     const expectedMonthlyProjection = (expectedYearlyProjection / 12).toFixed(2);
 
+    // Navigate back to debt instruments page to verify summary
+    await page.goto("/investments/debt-instruments");
+    await page.waitForSelector('[data-testid="debts-page"]');
+
+    // Verify the certificate is in the list
+    await expect(page.locator(`text=${TEST_CERTIFICATE.issuer}`).first()).toBeVisible();
+
     // Verify projection in Debts screen summary
-    const summaryProjection = await page.locator('[data-testid="debt-summary-projection"]').textContent();
-    expect(summaryProjection).toContain(expectedMonthlyProjection);
+    const monthlyProjectionText = await page.locator('text=Projected Monthly Interest').locator('xpath=following-sibling::div').textContent();
+    expect(monthlyProjectionText).toContain(expectedMonthlyProjection);
 
     // Navigate to Dashboard to verify income projection
     await page.goto("/dashboard");
     await page.waitForSelector('[data-testid="dashboard-page"]');
 
     // Verify projection in Income section
-    const incomeProjection = await page.locator('[data-testid="income-projection"]').textContent();
+    const incomeProjection = await page.locator('text=Projected Monthly Income').locator('xpath=following-sibling::div').textContent();
     expect(incomeProjection).toContain(expectedMonthlyProjection);
 
     // Get current date to check if it's the 12th of the month

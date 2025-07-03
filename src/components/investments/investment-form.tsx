@@ -585,6 +585,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
                 onValueChange={field.onChange}
                 value={field.value || ""}
                 required
+                data-testid="debt-type-select"
               >
                 <FormControl>
                   <SelectTrigger>
@@ -612,6 +613,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
               <FormLabel>{t("issuer_institution")}</FormLabel>
               <FormControl>
                 <Input
+                  data-testid="issuer-input"
                   placeholder={t("e.g., US Treasury, XYZ Corp")}
                   {...field}
                   value={field.value || ""}
@@ -630,6 +632,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
               <FormLabel>{t("purchase_date")}</FormLabel>
               <FormControl>
                 <Input
+                  data-testid="purchase-date-input"
                   dir={dir}
                   type="date"
                   {...field}
@@ -649,6 +652,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
               <FormLabel>{t("maturity_date")}</FormLabel>
               <FormControl>
                 <Input
+                  data-testid="expiry-date-input"
                   type="date"
                   dir={dir}
                   {...field}
@@ -668,6 +672,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
               <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
               <FormControl>
                 <NumericInput
+                  data-testid="total-cost-input"
                   placeholder="e.g., 10000.75"
                   value={field.value}
                   onChange={field.onChange}
@@ -693,6 +698,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
                 <FormLabel>{t("interest_rate")}</FormLabel>
                 <FormControl>
                   <NumericInput
+                    data-testid="interest-rate-input"
                     placeholder="e.g., 5.5"
                     value={value}
                     onChange={(val) => {
@@ -734,6 +740,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
               <FormItem>
                 <FormLabel>{t("certificate_interest_frequency")}</FormLabel>
                 <Select
+                  data-testid="interest-frequency-select"
                   dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
@@ -1248,6 +1255,7 @@ export function InvestmentForm({
             <Button
               type="submit"
               className="w-full md:w-auto"
+              data-testid="save-certificate-button"
               disabled={
                 form.formState.isSubmitting ||
                 (preSelectedInvestmentType === "Stocks" &&
