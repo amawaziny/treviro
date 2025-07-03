@@ -1137,6 +1137,7 @@ export function InvestmentForm({
       toast({
         title: t("investment_added"),
         description: `${t(preSelectedInvestmentType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
+        testId: "investment-added-toast",
       });
     }
 

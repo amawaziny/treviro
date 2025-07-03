@@ -62,14 +62,17 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
   // Render direct debt instrument (bonds, certificates, etc.)
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden relative">
+      <Card 
+        data-testid="certificate-card"
+        className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden relative"
+      >
         <CardContent className="pt-6">
           <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
             <div className="flex items-center gap-2 flex-grow min-w-0 w-0">
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-primary flex-shrink-0">
                 <Building className="h-4 w-4" />
               </div>
-              <div>
+              <div data-testid="certificate-details">
                 <p
                   className="text-sm font-semibold sm:truncate"
                   title={displayName}
@@ -102,10 +105,10 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
             <p className="text-end">
               {`${t("maturity")}: ${maturityDate || t("na")}`}
             </p>
-            <p>
+            <p data-testid="monthly-interest">
               {`${t("monthly_interest")}: ${formatNumberForMobile(isMobile, projectedMonthlyInterest, currency)}`}
             </p>
-            <p className="text-end">
+            <p className="text-end" data-testid="annual-interest">
               {`${t("annual_interest")}: ${formatNumberForMobile(isMobile, projectedAnnualInterest, currency)}`}
             </p>
             <p className="flex gap-2 col-span-2 justify-end items-end">
@@ -114,8 +117,10 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
                 passHref
                 legacyBehavior
               >
-                <Button variant="ghost" size="icon" aria-label="Edit">
+                <Button variant="ghost" size="icon" 
+                data-testid={`edit-debt-${holding.id}`} aria-label="Edit">
                   <Pencil className="h-4 w-4" />
+                  <span className="sr-only">{t("edit")}</span>
                 </Button>
               </Link>
               <Button
@@ -128,6 +133,7 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
                 disabled={isDeleting}
               >
                 <Trash2 className="h-4 w-4" />
+                <span className="sr-only">{t("delete")}</span>
               </Button>
             </p>
           </div>
@@ -152,6 +158,7 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
+              data-testid="confirm-delete-button"
             >
               {isDeleting ? t("deleting") + "..." : t("delete")}
             </AlertDialogAction>

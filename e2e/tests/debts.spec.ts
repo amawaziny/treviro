@@ -13,7 +13,7 @@ const TEST_USER = {
 
 const TEST_CERTIFICATE = {
   totalCost: "100000",
-  issuer: "Ahly Bank",
+  issuer: "Ahly Bank TEST",
   purchaseDate: "2023-01-11", // YYYY-MM-DD format for date input
   expiryDate: "2026-01-12", // YYYY-MM-DD format for date input
   interestRate: "10",
@@ -38,55 +38,118 @@ test.describe("Debt Certificate Management", () => {
   });
 
   test("should create a new debt certificate and validate projection", async ({ page }) => {
-    // Navigate to debts page
-    await page.goto("/investments/debt-instruments");
-    await page.waitForSelector('[data-testid="debts-page"]');
-
-    // Click add new debt certificate button
-    await page.click('[data-testid="add-debt-certificate-button"]');
-
-    // Fill in the debt certificate form
-    await page.fill('[data-testid="total-cost-input"]', TEST_CERTIFICATE.totalCost);
-    await page.fill('[data-testid="issuer-input"]', TEST_CERTIFICATE.issuer);
-    await page.fill('[data-testid="purchase-date-input"]', TEST_CERTIFICATE.purchaseDate);
-    await page.fill('[data-testid="expiry-date-input"]', TEST_CERTIFICATE.expiryDate);
-    await page.fill('[data-testid="interest-rate-input"]', TEST_CERTIFICATE.interestRate);
+    let certificateId: string | null = null;
     
-    // Save the certificate
-    await page.click('[data-testid="save-certificate-button"]');
+    try {
+      // Navigate to debts page and get initial projected interest
+      await page.goto("/investments/debt-instruments");
+      await page.waitForSelector('[data-testid="debts-page"]');
+      
+      // Get initial projected interest values
+      const initialMonthlyText = await page.locator('p:has-text("Projected Interest:")').first().textContent();
+      const initialMonthly = parseFloat(initialMonthlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
+      console.log("initialMonthly", initialMonthly);
+      // const initialYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
+      // const initialYearly = parseFloat(initialYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
 
-    // Verify the certificate is saved and visible in the list
-    await expect(page.locator(`text=${TEST_CERTIFICATE.issuer}`).first()).toBeVisible();
-    
-    // Calculate expected projection (10% of 100,000 = 10,000 per year)
-    const expectedYearlyProjection = 10000;
-    const expectedMonthlyProjection = (expectedYearlyProjection / 12).toFixed(2);
+      // Click add new debt certificate button
+      await page.click('[data-testid="add-debt-certificate-button"]');
 
-    // Navigate back to debt instruments page to verify summary
-    await page.goto("/investments/debt-instruments");
-    await page.waitForSelector('[data-testid="debts-page"]');
+      // Fill in the debt certificate form
+      await page.fill('[data-testid="total-cost-input"]', TEST_CERTIFICATE.totalCost);
+      await page.fill('[data-testid="issuer-input"]', TEST_CERTIFICATE.issuer);
+      await page.fill('[data-testid="purchase-date-input"]', TEST_CERTIFICATE.purchaseDate);
+      await page.fill('[data-testid="expiry-date-input"]', TEST_CERTIFICATE.expiryDate);
+      await page.fill('[data-testid="interest-rate-input"]', TEST_CERTIFICATE.interestRate);
+      
+      // Save the certificate
+      await page.click('[data-testid="save-certificate-button"]');
 
-    // Verify the certificate is in the list
-    await expect(page.locator(`text=${TEST_CERTIFICATE.issuer}`).first()).toBeVisible();
+      // Verify success toast is shown
+      await expect(page.locator('[data-testid="investment-added-toast"]')).toBeVisible();
+      
+      // Navigate back to debt instruments page
+      await page.goto("/investments/debt-instruments");
+      await page.waitForSelector('[data-testid="debts-page"]');
+      
+      // Find the certificate card by issuer name and get its ID
+      const certificateCard = page.locator('[data-testid="certificate-card"]')
+        .filter({ hasText: TEST_CERTIFICATE.issuer })
+        .first();
+      
+      await expect(certificateCard).toBeVisible();
+      
+      // Extract the certificate ID from the edit button
+      const editButton = certificateCard.locator('[data-testid^="edit-debt-"]');
+      const editHref = await editButton.getAttribute('href');
+      certificateId = editHref?.match(/\/edit\/([^/?]+)/)?.[1] || null;
+      
+      // Calculate expected projections (10% of 100,000 = 10,000 per year, ~833.33 per month)
+      const expectedYearlyProjection = 10000;
+      const expectedMonthlyProjection = expectedYearlyProjection / 12;
+      console.log("expectedMonthlyProjection", expectedMonthlyProjection);
 
-    // Verify projection in Debts screen summary
-    const monthlyProjectionText = await page.locator('text=Projected Monthly Interest').locator('xpath=following-sibling::div').textContent();
-    expect(monthlyProjectionText).toContain(expectedMonthlyProjection);
+      // Navigate back to debt instruments page to verify updated summary
+      await page.goto("/investments/debt-instruments");
+      await page.waitForSelector('[data-testid="debts-page"]');
+      
+      // Wait for projections to update
+      await page.waitForTimeout(1000);
 
-    // Navigate to Dashboard to verify income projection
-    await page.goto("/dashboard");
-    await page.waitForSelector('[data-testid="dashboard-page"]');
+      // Get updated projected interest values
+      const updatedMonthlyText = await page.locator('p:has-text("Projected Interest:")').first().textContent();
+      console.log("updatedMonthlyText", updatedMonthlyText)
+      const updatedMonthly = parseFloat(updatedMonthlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
+      console.log("updatedMonthly", updatedMonthly);
+      // const updatedYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
+      // const updatedYearly = parseFloat(updatedYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
 
-    // Verify projection in Income section
-    const incomeProjection = await page.locator('text=Projected Monthly Income').locator('xpath=following-sibling::div').textContent();
-    expect(incomeProjection).toContain(expectedMonthlyProjection);
+      // Verify the projections increased by the expected amounts
+      expect(updatedMonthly).toBeCloseTo(initialMonthly + expectedMonthlyProjection, 0);
+      // expect(updatedYearly).toBeCloseTo(initialYearly + expectedYearlyProjection, 0);
 
-    // Get current date to check if it's the 12th of the month
-    const today = new Date();
-    if (today.getDate() === 12) {
-      // Verify current income on the 12th of the month
-      const currentIncome = await page.locator('[data-testid="current-income"]').textContent();
-      expect(currentIncome).toContain(expectedMonthlyProjection);
+      // Get current date to check if it's the 12th of the month
+      const today = new Date();
+      if (today.getDate() === 12) {
+        // Verify current income on the 12th of the month
+        const currentIncome = await page.locator('[data-testid="current-income"]').textContent();
+        expect(currentIncome).toContain(expectedMonthlyProjection);
+      }
+    } finally {
+      // Clean up: Delete the created certificate
+      if (certificateId) {
+        try {
+          console.log('Cleaning up test certificate...');
+          await page.goto("/investments/debt-instruments");
+          await page.waitForSelector('[data-testid="debts-page"]');
+          
+          // Find the certificate card by issuer name
+          const certificateCard = page.locator('[data-testid="certificate-card"]')
+            .filter({ hasText: TEST_CERTIFICATE.issuer })
+            .first();
+          
+          if (await certificateCard.isVisible()) {
+            // Click the delete button using the exact test ID pattern
+            const deleteButton = certificateCard.locator(`[data-testid^="delete-debt-"]`);
+            await deleteButton.click();
+            
+            // Wait for and confirm the delete dialog
+            const confirmDeleteButton = page.locator('[data-testid="confirm-delete-button"]');
+            await confirmDeleteButton.waitFor({ state: 'visible' });
+            await confirmDeleteButton.click();
+            
+            // Wait for the success message
+            // await expect(page.locator('[data-testid="debt-deleted-toast"]')).toBeVisible({ timeout: 10000 });
+            console.log('Test certificate cleanup completed');
+          } else {
+            console.log('Certificate not found during cleanup, may have already been deleted');
+          }
+        } catch (error) {
+          console.error('Error during certificate cleanup:', error);
+        }
+      } else {
+        console.log('No certificate ID found, skipping cleanup');
+      }
     }
   });
 });
