@@ -25,6 +25,7 @@ export type FundType =
   | "Cash"
   | "Balanced"
   | "Fixed Income"
+  | "MM"
   | string;
 
 export interface BaseInvestment {
@@ -35,15 +36,16 @@ export interface BaseInvestment {
   purchaseDate?: string;
   currentValue?: number;
   createdAt?: string;
+  securityId?: string;
+  fundType?: string;
 }
 
-export interface StockInvestment extends BaseInvestment {
-  type: "Stocks";
+export interface SecurityInvestment extends BaseInvestment {
+  type: InvestmentType | "Stocks";
   actualStockName?: string;
   tickerSymbol?: string;
   numberOfShares?: number;
   purchasePricePerShare?: number;
-  stockLogoUrl?: string;
   purchaseFees?: number;
 }
 
@@ -103,7 +105,7 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
 }
 
 export type Investment =
-  | StockInvestment
+  | SecurityInvestment
   | GoldInvestment
   | CurrencyInvestment
   | RealEstateInvestment
@@ -236,7 +238,7 @@ export type AggregatedGoldHolding = {
   currentMarketPrice?: number;
   currency: string;
   fundDetails?: ListedSecurity;
-  fundInvestment?: StockInvestment;
+  fundInvestment?: SecurityInvestment;
   physicalGoldType?: GoldType;
 };
 
@@ -279,7 +281,7 @@ export interface AggregatedDebtHolding {
   logoUrl?: string;
 
   fundDetails?: ListedSecurity;
-  fundInvestment?: StockInvestment;
+  fundInvestment?: SecurityInvestment;
 }
 
 export interface InvestmentTypePercentages {

@@ -6,7 +6,7 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import type {
   GoldInvestment,
-  StockInvestment,
+  SecurityInvestment,
   GoldType,
   AggregatedGoldHolding,
 } from "@/lib/types";
@@ -112,7 +112,7 @@ export default function MyGoldPage() {
 
     const stockInvestments = investments.filter(
       (inv) => inv.type === "Stocks",
-    ) as StockInvestment[];
+    ) as SecurityInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
         (ls) => ls.symbol === stockInv.tickerSymbol,
@@ -161,7 +161,7 @@ export default function MyGoldPage() {
                 investments.find(
                   (i) =>
                     i.type === "Stocks" &&
-                    (i as StockInvestment).tickerSymbol === symbol,
+                    (i as SecurityInvestment).tickerSymbol === symbol,
                 )?.id,
           );
           if (initialFundInvestment) {

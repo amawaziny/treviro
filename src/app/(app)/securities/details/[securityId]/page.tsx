@@ -3,7 +3,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import React, { useEffect, useState } from "react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
-import type { ListedSecurity, StockInvestment, Transaction } from "@/lib/types";
+import type { ListedSecurity, SecurityInvestment, Transaction } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "@/contexts/form-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -123,7 +123,7 @@ export default function SecurityDetailPage() {
     () =>
       investments.filter(
         (inv) => inv.type === "Stocks" && inv.tickerSymbol === security?.symbol,
-      ) as StockInvestment[],
+      ) as SecurityInvestment[],
     [investments, security],
   );
 
@@ -200,9 +200,9 @@ export default function SecurityDetailPage() {
         id: inv.id,
         date: inv.purchaseDate,
         type: "Buy" as "Buy" | "Sell",
-        shares: (inv as StockInvestment).numberOfShares || 0,
-        price: (inv as StockInvestment).purchasePricePerShare || 0,
-        fees: (inv as StockInvestment).purchaseFees || 0,
+        shares: (inv as SecurityInvestment).numberOfShares || 0,
+        price: (inv as SecurityInvestment).purchasePricePerShare || 0,
+        fees: (inv as SecurityInvestment).purchaseFees || 0,
         totalAmount: inv.amountInvested,
         isInvestmentRecord: true,
         tickerSymbol: security.symbol,

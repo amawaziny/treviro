@@ -8,13 +8,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ListedSecurity, StockInvestment } from "@/lib/types";
+import { ListedSecurity, SecurityInvestment } from "@/lib/types";
 import FundTypeIcon from "../ui/fund-type-icon";
 import { calcProfit } from "@/lib/financial-utils";
 
 export type InvestmentSecurityCardProps = {
   security: ListedSecurity;
-  investment: StockInvestment;
+  investment: SecurityInvestment;
 };
 
 export function InvestmentSecurityCard({

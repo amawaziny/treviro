@@ -21,7 +21,7 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import type { ListedSecurity, StockInvestment } from "@/lib/types";
+import type { ListedSecurity, SecurityInvestment } from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -78,7 +78,7 @@ export function SellStockForm({
           (inv) =>
             inv.type === "Stocks" &&
             inv.tickerSymbol === listedSecurityData.symbol,
-        ) as StockInvestment[];
+        ) as SecurityInvestment[];
 
         const totalOwned = userOwnedForThisSymbol.reduce(
           (sum, inv) => sum + (inv.numberOfShares || 0),

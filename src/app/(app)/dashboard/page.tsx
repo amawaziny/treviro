@@ -27,7 +27,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
 import type {
-  StockInvestment,
+  SecurityInvestment,
   GoldInvestment,
   CurrencyInvestment,
 } from "@/lib/types";
@@ -103,7 +103,7 @@ export default function DashboardPage() {
         let currentVal = inv.amountInvested || 0; // Default to cost if no market price
 
         if (inv.type === "Stocks") {
-          const stockInv = inv as StockInvestment;
+          const stockInv = inv as SecurityInvestment;
           const security = listedSecurities.find(
             (ls) => ls.symbol === stockInv.tickerSymbol,
           );

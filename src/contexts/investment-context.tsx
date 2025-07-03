@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import type {
   Investment,
-  StockInvestment,
+  SecurityInvestment,
   Transaction,
   DashboardSummary,
   GoldInvestment,
@@ -64,7 +64,7 @@ export interface InvestmentContextType {
   updateStockInvestment: (
     investmentId: string,
     dataToUpdate: Pick<
-      StockInvestment,
+      SecurityInvestment,
       | "numberOfShares"
       | "purchasePricePerShare"
       | "purchaseDate"
@@ -658,7 +658,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       }
       const userStockInvestments = investments.filter(
         (inv) => inv.type === "Stocks" && inv.tickerSymbol === tickerSymbol,
-      ) as StockInvestment[];
+      ) as SecurityInvestment[];
       userStockInvestments.sort(
         (a, b) =>
           new Date(a.purchaseDate || 0).getTime() -
@@ -800,7 +800,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     async (
       investmentId: string,
       dataToUpdate: Pick<
-        StockInvestment,
+        SecurityInvestment,
         | "numberOfShares"
         | "purchasePricePerShare"
         | "purchaseDate"
@@ -892,7 +892,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       const batch = writeBatch(firestoreInstance);
       let totalAmountInvestedRemoved = 0;
       querySnapshot.forEach((docSnapshot) => {
-        const investmentData = docSnapshot.data() as StockInvestment;
+        const investmentData = docSnapshot.data() as SecurityInvestment;
         totalAmountInvestedRemoved += investmentData.amountInvested || 0;
         batch.delete(docSnapshot.ref);
       });

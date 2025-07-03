@@ -5,7 +5,7 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
   DebtInstrumentInvestment,
-  StockInvestment,
+  SecurityInvestment,
   AggregatedDebtHolding,
 } from "@/lib/types";
 import {
@@ -76,7 +76,7 @@ export default function MyDebtInstrumentsPage() {
     let directDebtInvestedSum = 0;
 
     const directDebtInvestments = investments.filter(
-      (inv) => inv.type === "Debt Instruments",
+      (inv) => inv.type === "Debt Instruments" && !inv.fundType,
     ) as DebtInstrumentInvestment[];
     directDebtInvestments.forEach((debt) => {
       let maturityDay: string | undefined;
@@ -138,25 +138,34 @@ export default function MyDebtInstrumentsPage() {
       });
     });
 
-    const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
-    ) as StockInvestment[];
+    const debtInvestments = investments.filter(
+      (inv) => inv.type === "Debt Instruments" && isDebtRelatedFund(inv.fundType),
+    ) as SecurityInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
-    stockInvestments.forEach((stockInv) => {
+    debtInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol,
+        (ls) => ls.id === stockInv.securityId,
       );
-      if (
-        security &&
-        security.securityType === "Fund" &&
-        isDebtRelatedFund(security.fundType)
-      ) {
+      if (security) {
         const symbol = security.symbol;
         const costOfThisLot = stockInv.amountInvested || 0;
         const unitsOfThisLot = stockInv.numberOfShares || 0;
 
         if (debtFundAggregationMap.has(symbol)) {
+          debtFundAggregationMap.set(symbol, {
+            id: security.id,
+            itemType: "fund",
+            displayName: security.name,
+            totalUnits: unitsOfThisLot,
+            totalCost: costOfThisLot,
+            currentMarketPrice: security.price,
+            currency: security.currency,
+            logoUrl: security.logoUrl,
+            fundDetails: security,
+            fundInvestment: stockInv,
+          });
+        }else{
           debtFundAggregationMap.set(symbol, {
             id: security.id,
             itemType: "fund",

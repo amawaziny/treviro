@@ -22,7 +22,7 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import type { StockInvestment } from "@/lib/types";
+import type { SecurityInvestment } from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
   Card,
@@ -34,7 +34,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface EditStockInvestmentFormProps {
-  investment: StockInvestment;
+  investment: SecurityInvestment;
 }
 
 export function EditStockInvestmentForm({

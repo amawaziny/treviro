@@ -10,7 +10,7 @@ import type {
   Investment,
   FixedEstimateRecord,
   DebtInstrumentInvestment,
-  StockInvestment,
+  SecurityInvestment,
   GoldInvestment,
   RealEstateInvestment,
   CurrencyInvestment,
@@ -308,7 +308,7 @@ export function calculateMonthlyCashFlowSummary({
     ) {
       if (inv.type === "Stocks")
         totalStockInvestmentThisMonth +=
-          (inv as StockInvestment).amountInvested || 0;
+          (inv as SecurityInvestment).amountInvested || 0;
       else if (inv.type === "Debt Instruments")
         totalDebtInvestmentThisMonth +=
           (inv as DebtInstrumentInvestment).amountInvested || 0;

@@ -3,9 +3,26 @@ import { twMerge } from "tailwind-merge";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale/ar";
 import { enUS } from "date-fns/locale/en-US";
+import { InvestmentType } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/**
+ * Determines the investment type based on the fund type
+ * @param fundType - The fund type to evaluate
+ * @returns The corresponding investment type ("Gold" | "Real Estate" | "Debt" | "Stock" | "Other")
+ */
+export function getInvestmentType(fundType?: string): InvestmentType {
+  if (!fundType) return "Stocks";
+  
+  if (isGoldRelatedFund(fundType)) return "Gold";
+  if (isRealEstateRelatedFund(fundType)) return "Real Estate";
+  if (isDebtRelatedFund(fundType)) return "Debt Instruments";
+  if (isStockRelatedFund(fundType)) return "Stocks";
+  
+  return "Stocks";
 }
 
 // Helper function to identify gold-related funds
@@ -38,6 +55,7 @@ export function isDebtRelatedFund(fundType?: string): boolean {
     "bond",
     "fixed income",
     "money market",
+    "mmf",
     "cash management",
     "treasury",
     "certificate", // For funds that might invest in CDs

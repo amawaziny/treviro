@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/language-context";
 import React from "react"; // Added React for useMemo
 import { useInvestments } from "@/hooks/use-investments"; // To calculate total P/L
 import { useListedSecurities } from "@/hooks/use-listed-securities"; // For current prices
-import type { StockInvestment } from "@/lib/types";
+import type { SecurityInvestment } from "@/lib/types";
 import { cn, formatNumberForMobile } from "@/lib/utils"; // For styling and formatting
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isStockRelatedFund } from "@/lib/utils";
@@ -26,7 +26,7 @@ export default function MyStocksPage() {
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
   const [offlineInvestments, setOfflineInvestments] = React.useState<
-    StockInvestment[]
+    SecurityInvestment[]
   >([]);
   const isOffline = useOnlineStatus();
 
@@ -39,7 +39,7 @@ export default function MyStocksPage() {
               inv.type === "Stocks" &&
               typeof inv.numberOfShares === "number" &&
               typeof inv.purchaseFees === "number",
-          ) as StockInvestment[],
+          ) as SecurityInvestment[],
         );
       });
     } else {
@@ -54,7 +54,7 @@ export default function MyStocksPage() {
   const stockInvestments = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
-    return allInvestments.filter((inv): inv is StockInvestment => {
+    return allInvestments.filter((inv): inv is SecurityInvestment => {
       // Only process investments that have a tickerSymbol (i.e., StockInvestment)
       if (!("tickerSymbol" in inv) || typeof inv.tickerSymbol !== "string") {
         return false;

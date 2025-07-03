@@ -41,7 +41,7 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
   ListedSecurity,
   InvestmentType,
-  StockInvestment,
+  SecurityInvestment,
   GoldInvestment,
   CurrencyInvestment,
   RealEstateInvestment,
@@ -50,7 +50,7 @@ import type {
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
 import { RealEstateForm } from "./real-estate/real-estate-form";
-import { formatCurrencyWithCommas, getCurrentDate } from "@/lib/utils";
+import { formatCurrencyWithCommas, getCurrentDate, getInvestmentType } from "@/lib/utils";
 
 // Initial values for each investment type
 const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
@@ -979,7 +979,7 @@ export function InvestmentForm({
 
     let newInvestment:
       | DebtInstrumentInvestment
-      | StockInvestment
+      | SecurityInvestment
       | GoldInvestment
       | CurrencyInvestment
       | RealEstateInvestment;
@@ -1009,11 +1009,12 @@ export function InvestmentForm({
         name: investmentName,
         amountInvested: calculatedAmountInvested,
         tickerSymbol: selectedSecurity.symbol as string,
-        stockLogoUrl: selectedSecurity.logoUrl,
+        securityId: selectedSecurity.id,
         numberOfShares: values.numberOfShares,
         purchasePricePerShare: values.purchasePricePerShare,
         purchaseFees: values.purchaseFees,
-        type: "Stocks",
+        type: getInvestmentType(selectedSecurity.fundType),
+        fundType: selectedSecurity.fundType,
       };
     } else if (
       preSelectedInvestmentType === "Debt Instruments" &&

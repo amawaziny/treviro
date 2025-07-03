@@ -34,7 +34,7 @@ import {
   IncomeRecord,
   Transaction,
   RealEstateInvestment,
-  StockInvestment,
+  SecurityInvestment,
   Installment,
 } from "@/lib/types";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
@@ -396,7 +396,7 @@ export default function CashFlowPage() {
                           );
                         })
                         .map((investment) => {
-                          const stock = investment as StockInvestment;
+                          const stock = investment as SecurityInvestment;
                           return (
                             <li
                               key={stock.id}
