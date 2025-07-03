@@ -37,109 +37,167 @@ test.describe("Debt Certificate Management", () => {
     await login(page);
   });
 
-  test("should create a new debt certificate and validate projection", async ({ page }) => {
+  test("should create a new debt certificate and validate projection", async ({
+    page,
+  }) => {
     let certificateId: string | null = null;
-    
+
     try {
       // Navigate to debts page and get initial projected interest
       await page.goto("/investments/debt-instruments");
       await page.waitForSelector('[data-testid="debts-page"]');
-      
+
       // Get initial projected interest values
-      const initialMonthlyText = await page.locator('p:has-text("Projected Interest:")').first().textContent();
-      const initialMonthly = parseFloat(initialMonthlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
-      console.log("initialMonthly", initialMonthly);
-      const initialYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
-      const initialYearly = parseFloat(initialYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
+      const initialMonthlyText = await page
+        .locator('p:has-text("Projected Interest:")')
+        .first()
+        .textContent();
+      const initialMonthly = parseFloat(
+        initialMonthlyText
+          ?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1]
+          .replace(/,/g, "") || "0",
+      );
+
+      const initialYearlyText = await page
+        .locator('p:has-text("Projected Interest:")')
+        .nth(1)
+        .textContent();
+      const initialYearly = parseFloat(
+        initialYearlyText
+          ?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1]
+          .replace(/,/g, "") || "0",
+      );
 
       // Click add new debt certificate button
       await page.click('[data-testid="add-debt-certificate-button"]');
 
       // Fill in the debt certificate form
-      await page.fill('[data-testid="total-cost-input"]', TEST_CERTIFICATE.totalCost);
+      await page.fill(
+        '[data-testid="total-cost-input"]',
+        TEST_CERTIFICATE.totalCost,
+      );
       await page.fill('[data-testid="issuer-input"]', TEST_CERTIFICATE.issuer);
-      await page.fill('[data-testid="purchase-date-input"]', TEST_CERTIFICATE.purchaseDate);
-      await page.fill('[data-testid="expiry-date-input"]', TEST_CERTIFICATE.expiryDate);
-      await page.fill('[data-testid="interest-rate-input"]', TEST_CERTIFICATE.interestRate);
-      
+      await page.fill(
+        '[data-testid="purchase-date-input"]',
+        TEST_CERTIFICATE.purchaseDate,
+      );
+      await page.fill(
+        '[data-testid="expiry-date-input"]',
+        TEST_CERTIFICATE.expiryDate,
+      );
+      await page.fill(
+        '[data-testid="interest-rate-input"]',
+        TEST_CERTIFICATE.interestRate,
+      );
+
       // Save the certificate
       await page.click('[data-testid="save-certificate-button"]');
 
       // Verify success toast is shown
-      await expect(page.locator('[data-testid="investment-added-toast"]')).toBeVisible();
-      
+      await expect(
+        page.locator('[data-testid="investment-added-toast"]'),
+      ).toBeVisible();
+
       // Navigate back to debt instruments page
       await page.goto("/investments/debt-instruments");
       await page.waitForSelector('[data-testid="debts-page"]');
-      
+
       // Find the certificate card by issuer name and get its ID
-      const certificateCard = page.locator('[data-testid="certificate-card"]')
+      const certificateCard = page
+        .locator('[data-testid="certificate-card"]')
         .filter({ hasText: TEST_CERTIFICATE.issuer })
         .first();
-      
+
       await expect(certificateCard).toBeVisible();
-      
+
       // Extract the certificate ID from the edit button
       const editButton = certificateCard.locator('[data-testid^="edit-debt-"]');
-      const editHref = await editButton.getAttribute('href');
+      const editHref = await editButton.getAttribute("href");
       certificateId = editHref?.match(/\/edit\/([^/?]+)/)?.[1] || null;
-      
+
       // Calculate expected projections (10% of 100,000 = 10,000 per year, ~833.33 per month)
       const expectedYearlyProjection = 10000;
       const expectedMonthlyProjection = expectedYearlyProjection / 12;
-      console.log("expectedMonthlyProjection", expectedMonthlyProjection);
 
       // Get updated projected interest values
-      const updatedMonthlyText = await page.locator('p:has-text("Projected Interest:")').first().textContent();
-      console.log("updatedMonthlyText", updatedMonthlyText)
-      const updatedMonthly = parseFloat(updatedMonthlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
-      console.log("updatedMonthly", updatedMonthly);
-      const updatedYearlyText = await page.locator('p:has-text("Projected Interest:")').nth(1).textContent();
-      const updatedYearly = parseFloat(updatedYearlyText?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1].replace(/,/g, '') || '0');
+      const updatedMonthlyText = await page
+        .locator('p:has-text("Projected Interest:")')
+        .first()
+        .textContent();
+      const updatedMonthly = parseFloat(
+        updatedMonthlyText
+          ?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1]
+          .replace(/,/g, "") || "0",
+      );
+
+      const updatedYearlyText = await page
+        .locator('p:has-text("Projected Interest:")')
+        .nth(1)
+        .textContent();
+      const updatedYearly = parseFloat(
+        updatedYearlyText
+          ?.match(/EGP\s([\d,]+(?:\.\d+)?)/)?.[1]
+          .replace(/,/g, "") || "0",
+      );
 
       // Verify the projections increased by the expected amounts
-      expect(updatedMonthly).toBeCloseTo(initialMonthly + expectedMonthlyProjection, 0);
-      expect(updatedYearly).toBeCloseTo(initialYearly + expectedYearlyProjection, 0);
+      expect(updatedMonthly).toBeCloseTo(
+        initialMonthly + expectedMonthlyProjection,
+        0,
+      );
+      expect(updatedYearly).toBeCloseTo(
+        initialYearly + expectedYearlyProjection,
+        0,
+      );
 
       // Get current date to check if it's the 12th of the month
       const today = new Date();
       if (today.getDate() === 12) {
         // Verify current income on the 12th of the month
-        const currentIncome = await page.locator('[data-testid="current-income"]').textContent();
+        const currentIncome = await page
+          .locator('[data-testid="current-income"]')
+          .textContent();
         expect(currentIncome).toContain(expectedMonthlyProjection);
       }
     } finally {
       // Clean up: Delete the created certificate
       if (certificateId) {
         try {
-          console.log('Cleaning up test certificate...');
+          console.log("Cleaning up test certificate...");
 
           // Find the certificate card by issuer name
-          const certificateCard = page.locator('[data-testid="certificate-card"]')
+          const certificateCard = page
+            .locator('[data-testid="certificate-card"]')
             .filter({ hasText: TEST_CERTIFICATE.issuer })
             .first();
-          
+
           if (await certificateCard.isVisible()) {
             // Click the delete button using the exact test ID pattern
-            const deleteButton = certificateCard.locator(`[data-testid^="delete-debt-"]`);
+            const deleteButton = certificateCard.locator(
+              `[data-testid^="delete-debt-"]`,
+            );
             await deleteButton.click();
-            
+
             // Wait for and confirm the delete dialog
-            const confirmDeleteButton = page.locator('[data-testid="confirm-delete-button"]');
-            await confirmDeleteButton.waitFor({ state: 'visible' });
+            const confirmDeleteButton = page.locator(
+              '[data-testid="confirm-delete-button"]',
+            );
+            await confirmDeleteButton.waitFor({ state: "visible" });
             await confirmDeleteButton.click();
-            
+
             // Wait for the success message
             // await expect(page.locator('[data-testid="debt-deleted-toast"]')).toBeVisible({ timeout: 10000 });
-            console.log('Test certificate cleanup completed');
+            console.log("Test certificate cleanup completed");
           } else {
-            console.log('Certificate not found during cleanup, may have already been deleted');
+            console.log(
+              "Certificate not found during cleanup, may have already been deleted",
+            );
           }
         } catch (error) {
-          console.error('Error during certificate cleanup:', error);
+          console.error("Error during certificate cleanup:", error);
         }
       } else {
-        console.log('No certificate ID found, skipping cleanup');
+        console.log("No certificate ID found, skipping cleanup");
       }
     }
   });

@@ -3,7 +3,11 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import React, { useEffect, useState } from "react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
-import type { ListedSecurity, SecurityInvestment, Transaction } from "@/lib/types";
+import type {
+  ListedSecurity,
+  SecurityInvestment,
+  Transaction,
+} from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "@/contexts/form-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

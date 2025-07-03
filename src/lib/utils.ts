@@ -16,12 +16,12 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function getInvestmentType(fundType?: string): InvestmentType {
   if (!fundType) return "Stocks";
-  
+
   if (isGoldRelatedFund(fundType)) return "Gold";
   if (isRealEstateRelatedFund(fundType)) return "Real Estate";
   if (isDebtRelatedFund(fundType)) return "Debt Instruments";
   if (isStockRelatedFund(fundType)) return "Stocks";
-  
+
   return "Stocks";
 }
 

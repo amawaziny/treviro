@@ -139,7 +139,8 @@ export default function MyDebtInstrumentsPage() {
     });
 
     const debtInvestments = investments.filter(
-      (inv) => inv.type === "Debt Instruments" && isDebtRelatedFund(inv.fundType),
+      (inv) =>
+        inv.type === "Debt Instruments" && isDebtRelatedFund(inv.fundType),
     ) as SecurityInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
@@ -165,7 +166,7 @@ export default function MyDebtInstrumentsPage() {
             fundDetails: security,
             fundInvestment: stockInv,
           });
-        }else{
+        } else {
           debtFundAggregationMap.set(symbol, {
             id: security.id,
             itemType: "fund",
@@ -321,7 +322,10 @@ export default function MyDebtInstrumentsPage() {
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]" data-testid="debts-page">
+    <div
+      className="space-y-8 relative min-h-[calc(100vh-10rem)]"
+      data-testid="debts-page"
+    >
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t("debt_instruments")}

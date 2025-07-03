@@ -62,7 +62,7 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
   // Render direct debt instrument (bonds, certificates, etc.)
   return (
     <>
-      <Card 
+      <Card
         data-testid="certificate-card"
         className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden relative"
       >
@@ -117,8 +117,12 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
                 passHref
                 legacyBehavior
               >
-                <Button variant="ghost" size="icon" 
-                data-testid={`edit-debt-${holding.id}`} aria-label="Edit">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-testid={`edit-debt-${holding.id}`}
+                  aria-label="Edit"
+                >
                   <Pencil className="h-4 w-4" />
                   <span className="sr-only">{t("edit")}</span>
                 </Button>

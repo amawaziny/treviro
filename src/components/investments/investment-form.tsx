@@ -50,7 +50,11 @@ import type {
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
 import { RealEstateForm } from "./real-estate/real-estate-form";
-import { formatCurrencyWithCommas, getCurrentDate, getInvestmentType } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  getCurrentDate,
+  getInvestmentType,
+} from "@/lib/utils";
 
 // Initial values for each investment type
 const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
