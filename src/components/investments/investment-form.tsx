@@ -387,7 +387,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
   onSecuritySelect,
   isPreSelectedStockMode,
 }) => {
-  const { t, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
@@ -434,7 +434,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
                   <SelectContent>
                     {listedSecurities.map((security) => (
                       <SelectItem key={security.id} value={security.id}>
-                        {security.name} ({security.symbol}) -{" "}
+                        {security[language === "ar" ? "name_ar" : "name"]} ({security.symbol}) -{" "}
                         {security.securityType === "Fund"
                           ? security.fundType
                           : security.market}
@@ -450,7 +450,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
         {preSelectedSecurityDetails && (
           <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
             <p className="text-sm font-medium">
-              {`${t("selected_security")}: ${preSelectedSecurityDetails.name} (${preSelectedSecurityDetails.symbol})`}
+              {`${t("selected_security")}: ${preSelectedSecurityDetails[language === "ar" ? "name_ar" : "name"]} (${preSelectedSecurityDetails.symbol})`}
             </p>
             <p className="text-xs text-muted-foreground">
               {`${t("current_market_price")}: ${formatCurrencyWithCommas(preSelectedSecurityDetails.price)}`}
@@ -809,7 +809,7 @@ export function InvestmentForm({
   mode?: "add" | "edit";
   initialValues?: Partial<InvestmentFormValues>;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Use a state to track the current type for initial values
   const [currentType, setCurrentType] = useState<InvestmentType>(
@@ -1014,7 +1014,7 @@ export function InvestmentForm({
       const calculatedAmountInvested =
         values.numberOfShares * values.purchasePricePerShare +
         values.purchaseFees;
-      investmentName = `${selectedSecurity.name} ${t("Purchase")}`;
+      investmentName = `${selectedSecurity[language === "ar" ? "name_ar" : "name"]} ${t("Purchase")}`;
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,

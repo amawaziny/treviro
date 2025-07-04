@@ -21,7 +21,7 @@ export function InvestmentSecurityCard({
   security,
   investment,
 }: InvestmentSecurityCardProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isMobile = useIsMobile();
 
   // Calculate profit/loss
@@ -37,6 +37,8 @@ export function InvestmentSecurityCard({
     security.price!,
   );
 
+  const securityName = security[language === "ar" ? "name_ar" : "name"];
+
   // Determine quantity label
   const getQuantityLabel = () => {
     if (security.fundType) return "Units";
@@ -49,7 +51,7 @@ export function InvestmentSecurityCard({
       return (
         <Image
           src={security.logoUrl}
-          alt={`${security.name} logo`}
+          alt={`${securityName} logo`}
           width={32}
           height={32}
           className="rounded-full object-cover"
@@ -82,9 +84,9 @@ export function InvestmentSecurityCard({
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate">
-                  {security.name.length > 15
-                    ? `${security.name.substring(0, 15)}...`
-                    : security.name}
+                  {isMobile && securityName.length > 15
+                    ? `${securityName.substring(0, 15)}...`
+                    : securityName}
                   <span className="mx-1">•</span>
                   {security.market.toUpperCase()}
                 </p>

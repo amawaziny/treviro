@@ -40,7 +40,7 @@ interface SellSecurityFormProps {
 export function SellStockForm({
   securityId: securityId,
 }: SellSecurityFormProps) {
-  const { t: t } = useLanguage();
+  const { t, language } = useLanguage();
   const {
     recordSellStockTransaction,
     investments,
@@ -138,7 +138,7 @@ export function SellStockForm({
       );
       toast({
         title: t("sale_recorded"),
-        description: `${t("Successfully recorded sale of")} ${values.numberOfSharesToSell} ${securityLabel} ${t("of")} ${securityBeingSold.name}.`,
+        description: `${t("Successfully recorded sale of")} ${values.numberOfSharesToSell} ${securityLabel} ${t("of")} ${securityBeingSold[language === "ar" ? "name_ar" : "name"]}.`,
       });
       router.push(`/securities/details/${securityId}`);
     } catch (error: any) {

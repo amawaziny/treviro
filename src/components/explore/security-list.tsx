@@ -43,6 +43,7 @@ export function SecurityList({
         listedSecurities.map((sec) => ({
           id: sec.id,
           name: sec.name,
+          name_ar: sec.name_ar,
           symbol: sec.symbol,
           type: sec.securityType === "Fund" ? "fund" : "stock",
           logoUrl: sec.logoUrl,
@@ -68,6 +69,7 @@ export function SecurityList({
           secs.map((sec) => ({
             id: sec.id,
             name: sec.name,
+            name_ar: sec.name_ar,
             symbol: sec.symbol,
             logoUrl: sec.logoUrl,
             price: sec.price,
@@ -104,6 +106,7 @@ export function SecurityList({
     return securitiesToFilter.filter(
       (sec) =>
         sec.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (sec.name_ar && sec.name_ar.includes(searchTerm.toLowerCase())) ||
         sec.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sec.market.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (sec.fundType &&

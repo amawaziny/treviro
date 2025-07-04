@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
 export default function MyGoldPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
@@ -44,7 +44,6 @@ export default function MyGoldPage() {
     isLoading: isLoadingGoldPrices,
     error: goldPricesError,
   } = useGoldMarketPrices();
-  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
   const aggregatedGoldHoldings = React.useMemo(() => {
@@ -124,7 +123,7 @@ export default function MyGoldPage() {
       ) {
         holdings.push({
           id: security.id,
-          displayName: security.name,
+          displayName: security[language === "ar" ? "name_ar" : "name"],
           itemType: "fund",
           logoUrl: security.logoUrl,
           totalQuantity: stockInv.numberOfShares || 0,

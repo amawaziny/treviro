@@ -39,11 +39,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
 export default function MyDebtInstrumentsPage() {
-  const { t: t } = useLanguage();
+  const { t, language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
-  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
   const {
@@ -157,7 +156,7 @@ export default function MyDebtInstrumentsPage() {
           debtFundAggregationMap.set(symbol, {
             id: security.id,
             itemType: "fund",
-            displayName: security.name,
+            displayName: security[language === "ar" ? "name_ar" : "name"],
             totalUnits: unitsOfThisLot,
             totalCost: costOfThisLot,
             currentMarketPrice: security.price,
@@ -170,7 +169,7 @@ export default function MyDebtInstrumentsPage() {
           debtFundAggregationMap.set(symbol, {
             id: security.id,
             itemType: "fund",
-            displayName: security.name,
+            displayName: security[language === "ar" ? "name_ar" : "name"],
             totalUnits: unitsOfThisLot,
             totalCost: costOfThisLot,
             currentMarketPrice: security.price,

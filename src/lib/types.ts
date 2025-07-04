@@ -162,6 +162,7 @@ export interface FixedEstimateRecord {
 export interface ListedSecurity {
   id: string;
   name: string;
+  name_ar: string;
   symbol: string;
   logoUrl: string;
   price: number;
