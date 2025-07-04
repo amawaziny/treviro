@@ -1,10 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
+import path from "path";
 
 // Load environment variables from .env file
 dotenv.config({ path: "./e2e/.env" });
 
 export default defineConfig({
+  globalSetup: require.resolve("./global-setup"),
+  globalTeardown: require.resolve("./global-teardown"),
   testDir: "./tests",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -32,13 +35,13 @@ export default defineConfig({
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    {
+      name: "Mobile Chrome",
+      use: { ...devices["Pixel 5"] },
+    },
+    {
+      name: "Mobile Safari",
+      use: { ...devices["iPhone 12"] },
+    },
   ],
 });

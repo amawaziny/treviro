@@ -1,6 +1,7 @@
 import { test, expect, Page } from "@playwright/test";
 import * as dotenv from "dotenv";
 import * as path from "path";
+import { addYears, subYears } from "date-fns";
 
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -11,11 +12,13 @@ const TEST_USER = {
   password: process.env.TEST_USER_PASSWORD || "Test@123",
 };
 
+const nextYearDate = addYears(new Date(), 1);
+
 const TEST_CERTIFICATE = {
   totalCost: "100000",
   issuer: "Ahly Bank TEST",
-  purchaseDate: "2023-01-11", // YYYY-MM-DD format for date input
-  expiryDate: "2026-01-12", // YYYY-MM-DD format for date input
+  purchaseDate: subYears(nextYearDate, 3).getFullYear() + "-01-11", // YYYY-MM-DD format for date input
+  expiryDate: nextYearDate.getFullYear() + "-01-12", // YYYY-MM-DD format for date input
   interestRate: "10",
 };
 

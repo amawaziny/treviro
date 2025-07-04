@@ -73,7 +73,9 @@ export default function CashFlowPage() {
     const installmentsList = investments
       .filter(
         (inv): inv is RealEstateInvestment =>
-          inv.type === "Real Estate" && inv.installments !== undefined,
+          inv.type === "Real Estate" &&
+          "installments" in inv &&
+          inv.installments !== undefined,
       )
       .flatMap((inv: RealEstateInvestment) => {
         return (inv.installments || []).map((installment: Installment) => ({
