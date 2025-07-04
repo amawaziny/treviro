@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only access their own user document
+    match /users/{userId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && 
+                    request.auth.uid == userId && 
+                    request.resource.data.userId == userId;
+      
+      // User's transactions subcollection
+      match /transactions/{transactionId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's income records
+      match /incomeRecords/{recordId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's expense records
+      match /expenseRecords/{recordId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's fixed estimates
+      match /fixedEstimates/{estimateId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's investments
+      match /investments/{investmentId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Public read-only data (like listed securities)
+    match /listedSecurities/{document=**} {
+      allow read: if true;  // Anyone can read
+      allow write: if false;  // Only admin can write (handled via Firebase Admin SDK)
+    }
+
+    // Gold market prices (public read-only)
+    match /goldMarketPrices/current {
+      allow read: if true;  // Anyone can read current gold prices
+      allow write: if false;  // Only admin can update
+    }
+
+    // Exchange rates (public read-only)
+    match /exchangeRates/{document=**} {
+      allow read: if true;  // Anyone can read exchange rates
+      allow write: if false;  // Only admin can update
+    }
+
+    // Default deny all other requests
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

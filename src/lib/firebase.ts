@@ -1,11 +1,8 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getAuth, type Auth } from "firebase/auth";
-import {
-  getAnalytics,
-  isSupported as isAnalyticsSupported,
-  type Analytics,
-} from "firebase/analytics";
+import { getAnalytics, isSupported as isAnalyticsSupported, type Analytics } from "firebase/analytics";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,11 +16,13 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 let db: Firestore;
+let storage: FirebaseStorage;
 
 // Ensure Firebase is initialized
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  storage = getStorage(app);
 } else {
   app = getApp();
   db = getFirestore(app);
@@ -85,4 +84,4 @@ if (
   );
 }
 
-export { app, db, auth, analytics };
+export { app, db, auth, analytics, storage };

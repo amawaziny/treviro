@@ -7,7 +7,8 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updateProfile, updatePassword } from "firebase/auth";
 import Image from "next/image";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function ProfilePage() {
@@ -73,7 +74,6 @@ export default function ProfilePage() {
     setUploading(true);
     setError("");
     try {
-      const storage = getStorage();
       const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
