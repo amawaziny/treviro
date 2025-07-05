@@ -13,7 +13,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: Number(process.env.TEST_RETRIES) || (process.env.CI ? 2 : 0),
   workers: Number(process.env.TEST_WORKERS) || (process.env.CI ? 1 : undefined),
-  timeout: Number(process.env.TEST_TIMEOUT) || 300000,
+  timeout: Number(process.env.TEST_TIMEOUT) || 30000,
   reporter: "html",
   use: {
     baseURL: process.env.BASE_URL || "http://localhost:9002",

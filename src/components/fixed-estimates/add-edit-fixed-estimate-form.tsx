@@ -193,7 +193,7 @@ export function AddEditFixedEstimateForm({
                     data-testid="amount-input"
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="amount-error"/>
               </FormItem>
             )}
           />

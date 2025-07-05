@@ -73,10 +73,10 @@ export default function FixedEstimatesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+        <h1 data-testid="page-title" className="text-xl font-bold tracking-tight text-foreground">
           {t("fixed_estimates")}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p data-testid="page-description" className="text-muted-foreground text-sm">
           {t(
             "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity",
           )}

@@ -48,7 +48,7 @@ export function Header() {
                 </Button>
               </Link>
               {title && (
-                <h1 className="text-md font-semibold text-foreground">
+                <h1 data-testid="page-title" className="text-md font-semibold text-foreground">
                   {isMobile && title.length > 20
                     ? `${title.substring(0, 20)}...`
                     : title}
