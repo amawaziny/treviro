@@ -198,7 +198,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p className="text-xl font-medium">
+              <p className="text-xl font-medium" data-testid="total-invested-amount">
                 {formatNumberForMobile(isMobile, totalInvested)}
               </p>
             )}

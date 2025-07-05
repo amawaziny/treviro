@@ -46,6 +46,16 @@ test.describe("Debt Certificate Management", () => {
     let certificateId: string | null = null;
 
     try {
+      // Navigate to dashboard to get initial total invested amount
+      await page.goto("/dashboard");
+      await page.waitForSelector('[data-testid="total-invested-amount"]');
+      const initialTotalInvestedText = await page
+        .locator('[data-testid="total-invested-amount"]')
+        .textContent();
+      const initialTotalInvested = parseFloat(
+        initialTotalInvestedText?.replace(/[^0-9.-]+/g, '') || "0"
+      );
+
       // Navigate to debts page and get initial projected interest
       await page.goto("/investments/debt-instruments");
       await page.waitForSelector('[data-testid="debts-page"]');
@@ -151,6 +161,22 @@ test.describe("Debt Certificate Management", () => {
       expect(updatedYearly).toBeCloseTo(
         initialYearly + expectedYearlyProjection,
         0,
+      );
+
+      // Navigate back to dashboard and verify total invested amount increased
+      await page.goto("/dashboard");
+      await page.waitForSelector('[data-testid="total-invested-amount"]');
+      const updatedTotalInvestedText = await page
+        .locator('[data-testid="total-invested-amount"]')
+        .textContent();
+      const updatedTotalInvested = parseFloat(
+        updatedTotalInvestedText?.replace(/[^0-9.-]+/g, '') || "0"
+      );
+
+      // Verify the total invested amount increased by the certificate amount
+      expect(updatedTotalInvested).toBeCloseTo(
+        initialTotalInvested + parseFloat(TEST_CERTIFICATE.totalCost),
+        0
       );
 
       // Get current date to check if it's the 12th of the month
