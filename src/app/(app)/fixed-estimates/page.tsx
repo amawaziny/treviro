@@ -187,6 +187,7 @@ export default function FixedEstimatesPage() {
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             aria-label="Delete"
+                            data-testid="delete-button"
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">
@@ -209,6 +210,7 @@ export default function FixedEstimatesPage() {
                             <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              data-testid="confirm-delete-button"
                               onClick={async () => {
                                 try {
                                   await deleteFixedEstimate(record.id);
