@@ -171,7 +171,12 @@ export default function FixedEstimatesPage() {
                         passHref
                         legacyBehavior
                       >
-                        <Button variant="ghost" size="icon" aria-label="Edit">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          aria-label="Edit"
+                          data-testid="edit-button"
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
                       </Link>

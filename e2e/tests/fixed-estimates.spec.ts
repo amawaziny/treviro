@@ -112,7 +112,7 @@ test.describe("Fixed Estimates", () => {
 
       // Verify success message and redirection
       await expect(page).toHaveURL("/fixed-estimates");
-      await expect(page.getByTestId("success-toast")).toBeVisible();
+      await expect(page.getByTestId("edit-success-toast")).toBeVisible();
 
       // Verify the updated amount
       await expect(
