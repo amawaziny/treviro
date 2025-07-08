@@ -5,15 +5,20 @@ import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { auth as firebaseAuthService } from "@/lib/firebase";
 import { trackEvent } from "@/lib/analytics";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User as FirebaseUser,
   signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   createUserWithEmailAndPassword as firebaseCreateUserWithEmailAndPassword,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  browserLocalPersistence,
+  setPersistence,
 } from "firebase/auth";
 
 interface AuthContextType {
@@ -43,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessingLogin, setIsProcessingLogin] = useState(false);
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!firebaseAuthService) {
@@ -52,43 +58,86 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(
-      firebaseAuthService,
-      (firebaseUser: FirebaseUser | null) => {
-        if (firebaseUser) {
-          setUser(firebaseUser);
-        } else {
-          setUser(null);
+
+    // Set persistence
+    const initAuth = async () => {
+      if (!firebaseAuthService) return;
+      
+      try {
+        await setPersistence(firebaseAuthService, browserLocalPersistence);
+      } catch (error) {
+        console.error("Error setting auth persistence:", error);
+      }
+
+      // Handle the redirect result if we're coming back from a redirect
+      try {
+        const result = await getRedirectResult(firebaseAuthService);
+        if (result?.user) {
+          trackEvent("login", {
+            method: "google",
+            user_id: result.user.uid,
+            email: result.user.email,
+          });
         }
-        setIsLoading(false);
-      },
-    );
+      } catch (error) {
+        trackEvent("login_error", {
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+        console.error("Error handling redirect result:", error);
+      }
+    };
+
+    initAuth();
+
+    const handleAuthStateChanged = async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        // Get the stored URL or default to dashboard
+        const redirectUrl = sessionStorage.getItem('preAuthRoute') || '/dashboard';
+        sessionStorage.removeItem('preAuthRoute'); // Clean up
+        await router.push(redirectUrl);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    };
+
+    const unsubscribe = onAuthStateChanged(firebaseAuthService, handleAuthStateChanged);
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const login = useCallback(async () => {
     try {
+      setIsProcessingLogin(true);
       const provider = new GoogleAuthProvider();
+      
+      // For mobile, use redirect instead of popup
+      if (isMobile) {
+        // Store the current URL to redirect back after login
+        sessionStorage.setItem('preAuthRoute', window.location.pathname);
+        await signInWithRedirect(firebaseAuthService!, provider);
+        return; // The rest will be handled by the onAuthStateChanged listener
+      }
+      
+      // Desktop flow
       const result = await signInWithPopup(firebaseAuthService!, provider);
-
-      // Track successful login
       trackEvent("login", {
         method: "google",
         user_id: result.user.uid,
         email: result.user.email,
       });
-
       router.push("/dashboard");
     } catch (error) {
-      // Track login error
       trackEvent("login_error", {
         error: error instanceof Error ? error.message : "Unknown error",
       });
       console.error("Error during login:", error);
       throw error;
+    } finally {
+      setIsProcessingLogin(false);
     }
   }, [router]);
 
