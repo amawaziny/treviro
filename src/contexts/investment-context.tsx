@@ -104,7 +104,9 @@ export interface InvestmentContextType {
   ) => Promise<void>;
   updateFixedEstimate: (
     estimateId: string,
-    updatedFields: Partial<Omit<FixedEstimateRecord, "id" | "createdAt" | "userId" | "updatedAt">>,
+    updatedFields: Partial<
+      Omit<FixedEstimateRecord, "id" | "createdAt" | "userId" | "updatedAt">
+    >,
   ) => Promise<void>;
   deleteFixedEstimate: (id: string) => Promise<void>;
   recalculateDashboardSummary: () => Promise<void>;
@@ -646,14 +648,20 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   const updateFixedEstimate = useCallback(
     async (
       estimateId: string,
-      updatedFields: Partial<Omit<FixedEstimateRecord, "id" | "createdAt" | "userId" | "updatedAt">>,
+      updatedFields: Partial<
+        Omit<FixedEstimateRecord, "id" | "createdAt" | "userId" | "updatedAt">
+      >,
     ) => {
       if (!firestoreInstance || !isAuthenticated || !userId) {
         throw new Error("User not authenticated or Firestore not available.");
       }
 
-      const estimateRef = doc(firestoreInstance, `users/${userId}/fixedEstimates`, estimateId);
-      
+      const estimateRef = doc(
+        firestoreInstance,
+        `users/${userId}/fixedEstimates`,
+        estimateId,
+      );
+
       // Update the document with the new fields and update the updatedAt timestamp
       await setDoc(
         estimateRef,
@@ -661,10 +669,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           ...updatedFields,
           updatedAt: serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
     },
-    [userId, isAuthenticated, firestoreInstance]
+    [userId, isAuthenticated, firestoreInstance],
   );
 
   const getInvestmentsByType = useCallback(

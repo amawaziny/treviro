@@ -434,7 +434,8 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
                   <SelectContent>
                     {listedSecurities.map((security) => (
                       <SelectItem key={security.id} value={security.id}>
-                        {security[language === "ar" ? "name_ar" : "name"]} ({security.symbol}) -{" "}
+                        {security[language === "ar" ? "name_ar" : "name"]} (
+                        {security.symbol}) -{" "}
                         {security.securityType === "Fund"
                           ? security.fundType
                           : security.market}

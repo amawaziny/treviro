@@ -136,7 +136,7 @@ export function AddEditFixedEstimateForm({
         title: `${t("Failed to")} ${mode === "add" ? t("add") : t("Update")} ${t("Estimate")}`,
         description: error.message || t("could_not_save_the_estimate"),
         variant: "destructive",
-        testId:"error-toast"
+        testId: "error-toast",
       });
     }
   }
@@ -169,7 +169,11 @@ export function AddEditFixedEstimateForm({
                   </FormControl>
                   <SelectContent>
                     {fixedEstimateTypes.map((type) => (
-                      <SelectItem data-testid={`type-option-${type}`} key={type} value={type}>
+                      <SelectItem
+                        data-testid={`type-option-${type}`}
+                        key={type}
+                        value={type}
+                      >
                         {t(type)}
                       </SelectItem>
                     ))}
@@ -195,7 +199,7 @@ export function AddEditFixedEstimateForm({
                     data-testid="amount-input"
                   />
                 </FormControl>
-                <FormMessage data-testid="amount-error"/>
+                <FormMessage data-testid="amount-error" />
               </FormItem>
             )}
           />
@@ -230,7 +234,7 @@ export function AddEditFixedEstimateForm({
                 <Select
                   dir={dir}
                   onValueChange={field.onChange}
-                  value={field.value || "Monthly"}                  
+                  value={field.value || "Monthly"}
                 >
                   <FormControl>
                     <SelectTrigger data-testid="period-select">
@@ -239,7 +243,11 @@ export function AddEditFixedEstimateForm({
                   </FormControl>
                   <SelectContent>
                     {fixedEstimatePeriods.map((period) => (
-                      <SelectItem data-testid={`period-option-${period}`} key={period} value={period}>
+                      <SelectItem
+                        data-testid={`period-option-${period}`}
+                        key={period}
+                        value={period}
+                      >
                         {t(period)}
                       </SelectItem>
                     ))}

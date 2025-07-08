@@ -62,7 +62,9 @@ export const SecurityListItem = React.memo(function SecurityListItem({
               )}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              {isMobile && securityName.length > 15 ? `${securityName.substring(0, 15)}...` : securityName}
+              {isMobile && securityName.length > 15
+                ? `${securityName.substring(0, 15)}...`
+                : securityName}
               <span className="mx-1">•</span>
               {security.market.toUpperCase()}
             </p>

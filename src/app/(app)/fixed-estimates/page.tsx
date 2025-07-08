@@ -73,10 +73,16 @@ export default function FixedEstimatesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 data-testid="page-title" className="text-xl font-bold tracking-tight text-foreground">
+        <h1
+          data-testid="page-title"
+          className="text-xl font-bold tracking-tight text-foreground"
+        >
           {t("fixed_estimates")}
         </h1>
-        <p data-testid="page-description" className="text-muted-foreground text-sm">
+        <p
+          data-testid="page-description"
+          className="text-muted-foreground text-sm"
+        >
           {t(
             "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity",
           )}
@@ -171,9 +177,9 @@ export default function FixedEstimatesPage() {
                         passHref
                         legacyBehavior
                       >
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           aria-label="Edit"
                           data-testid="edit-button"
                         >

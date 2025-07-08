@@ -53,7 +53,7 @@ test.describe("Debt Certificate Management", () => {
         .locator('[data-testid="total-invested-amount"]')
         .textContent();
       const initialTotalInvested = parseFloat(
-        initialTotalInvestedText?.replace(/[^0-9.-]+/g, '') || "0"
+        initialTotalInvestedText?.replace(/[^0-9.-]+/g, "") || "0",
       );
 
       // Navigate to debts page and get initial projected interest
@@ -170,13 +170,13 @@ test.describe("Debt Certificate Management", () => {
         .locator('[data-testid="total-invested-amount"]')
         .textContent();
       const updatedTotalInvested = parseFloat(
-        updatedTotalInvestedText?.replace(/[^0-9.-]+/g, '') || "0"
+        updatedTotalInvestedText?.replace(/[^0-9.-]+/g, "") || "0",
       );
 
       // Verify the total invested amount increased by the certificate amount
       expect(updatedTotalInvested).toBeCloseTo(
         initialTotalInvested + parseFloat(TEST_CERTIFICATE.totalCost),
-        0
+        0,
       );
 
       // Get current date to check if it's the 12th of the month

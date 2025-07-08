@@ -202,7 +202,10 @@ export function ExpenseForm({
             render={({ field }) => {
               // Convert YYYY-MM-DD to DD-MM-YYYY for display
               return (
-                <FormItem className="flex flex-col" data-testid="date-form-item">
+                <FormItem
+                  className="flex flex-col"
+                  data-testid="date-form-item"
+                >
                   <FormLabel>{t("Date")}</FormLabel>
                   <DateInput
                     value={field.value}
@@ -212,7 +215,7 @@ export function ExpenseForm({
                     language={language}
                     dateFormat="dd-MM-yyyy"
                     disabled={form.formState.isSubmitting}
-                    disableFuture={true}                    
+                    disableFuture={true}
                     mobile={isMobile}
                     data-testid="date-input"
                     className="w-full"
@@ -227,7 +230,10 @@ export function ExpenseForm({
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="md:col-span-2" data-testid="description-form-item">
+              <FormItem
+                className="md:col-span-2"
+                data-testid="description-form-item"
+              >
                 <FormLabel>{t("description_optional")}</FormLabel>
                 <FormControl>
                   <Textarea
@@ -250,7 +256,10 @@ export function ExpenseForm({
                 control={form.control}
                 name="isInstallment"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2" data-testid="installment-form-item">
+                  <FormItem
+                    className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"
+                    data-testid="installment-form-item"
+                  >
                     <FormControl>
                       <Checkbox
                         dir={dir}
@@ -273,7 +282,9 @@ export function ExpenseForm({
                   name="numberOfInstallments"
                   render={({ field }) => (
                     <FormItem data-testid="installments-form-item">
-                      <FormLabel data-testid="installments-label">{t("number_of_months")}</FormLabel>
+                      <FormLabel data-testid="installments-label">
+                        {t("number_of_months")}
+                      </FormLabel>
                       <FormControl>
                         <NumericInput
                           data-testid="installments-input"

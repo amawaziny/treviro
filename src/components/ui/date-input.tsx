@@ -18,7 +18,7 @@ interface DateInputBaseProps {
   language?: string;
   dir?: "ltr" | "rtl";
   mobile?: boolean; // Whether to use mobile styles
-  'data-testid'?: string;
+  "data-testid"?: string;
 }
 
 type DateInputProps = DateInputBaseProps &
@@ -92,7 +92,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       <div className={cn("w-full relative", className)}>
         <div className="relative">
           <Calendar
-            data-testid={props['data-testid']}
+            data-testid={props["data-testid"]}
             onChange={handleSelect}
             value={date}
             locale={language}

@@ -290,29 +290,26 @@ test.describe("Dashboard Page", () => {
   }) => {
     // Wait for the dashboard to be fully loaded
     await expect(page.getByTestId("dashboard-page")).toBeVisible();
-  
+
     // Wait for the investment section to be visible
     const breakdownSection = page.getByTestId("investment-breakdown-section");
     await expect(breakdownSection).toBeVisible({ timeout: 15000 });
-  
+
     // Find investment types by their exact text content
-    const typeElements = page.locator('text="Debt Instruments"').or(
-      page.locator('text="Real Estate"')
-    ).or(
-      page.locator('text="Stocks"')
-    ).or(
-      page.locator('text="Currencies"')
-    ).or(
-      page.locator('text="Gold"')
-    );
-    
+    const typeElements = page
+      .locator('text="Debt Instruments"')
+      .or(page.locator('text="Real Estate"'))
+      .or(page.locator('text="Stocks"'))
+      .or(page.locator('text="Currencies"'))
+      .or(page.locator('text="Gold"'));
+
     // Wait for at least one type to be visible
     await expect(typeElements.first()).toBeVisible({ timeout: 10000 });
-    
+
     // Get all investment type names from the page
     const typeCount = await typeElements.count();
     expect(typeCount).toBeGreaterThan(0);
-    
+
     // Expected investment types from the default configuration
     const expectedTypes = [
       "Real Estate",
@@ -321,12 +318,12 @@ test.describe("Dashboard Page", () => {
       "Currencies",
       "Gold",
     ];
-    
+
     // Wait for all elements to be visible
     for (let i = 0; i < typeCount; i++) {
       await expect(typeElements.nth(i)).toBeVisible();
     }
-  
+
     // Collect all displayed types
     const displayedTypes = [];
     for (let i = 0; i < typeCount; i++) {
@@ -335,7 +332,7 @@ test.describe("Dashboard Page", () => {
         displayedTypes.push(typeName.trim());
       }
     }
-  
+
     // Check if all displayed types are in the expected types
     for (const displayedType of displayedTypes) {
       expect(expectedTypes).toContain(displayedType);

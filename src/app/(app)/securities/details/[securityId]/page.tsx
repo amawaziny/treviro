@@ -812,9 +812,11 @@ export default function SecurityDetailPage() {
                 ? (transactionToDelete as any).shares
                 : (transactionToDelete?.numberOfShares ?? 0)
               ).toLocaleString()}{" "}
-              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${transactionToDelete
-                ? formatDateDisplay(transactionToDelete.date)
-                : ""}`}
+              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${
+                transactionToDelete
+                  ? formatDateDisplay(transactionToDelete.date)
+                  : ""
+              }`}
               {t(
                 "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
               )}
@@ -841,9 +843,11 @@ export default function SecurityDetailPage() {
                 ? (transactionToDelete as any).shares
                 : (transactionToDelete?.numberOfShares ?? 0)
               ).toLocaleString()}{" "}
-              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${transactionToDelete
-                ? formatDateDisplay(transactionToDelete.date)
-                : ""}`}
+              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${
+                transactionToDelete
+                  ? formatDateDisplay(transactionToDelete.date)
+                  : ""
+              }`}
               {t(
                 "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
               )}

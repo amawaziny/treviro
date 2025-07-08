@@ -101,19 +101,35 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
           <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
             <p>
               {`${t("interest_rate")}: `}
-              <span className="font-medium text-foreground">{interestRate ? `${interestRate}%` : t("na")}</span>
+              <span className="font-medium text-foreground">
+                {interestRate ? `${interestRate}%` : t("na")}
+              </span>
             </p>
             <p className="text-end">
               {`${t("maturity")}: `}
-              <span className="font-medium text-foreground">{maturityDate || t("na")}</span>
+              <span className="font-medium text-foreground">
+                {maturityDate || t("na")}
+              </span>
             </p>
             <p data-testid="monthly-interest">
               {`${t("monthly_interest")}: `}
-              <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, projectedMonthlyInterest, currency)}</span>
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  projectedMonthlyInterest,
+                  currency,
+                )}
+              </span>
             </p>
             <p className="text-end" data-testid="annual-interest">
               {`${t("annual_interest")}: `}
-              <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, projectedAnnualInterest, currency)}</span>
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  projectedAnnualInterest,
+                  currency,
+                )}
+              </span>
             </p>
             <p className="flex gap-2 col-span-2 justify-end items-end">
               <Link

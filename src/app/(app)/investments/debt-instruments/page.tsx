@@ -383,11 +383,23 @@ export default function MyDebtInstrumentsPage() {
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
                 {`${t("direct")}: `}
-                <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalDirectDebtInvested, debtFundHoldings[0]?.currency)}</span>
+                <span className="font-medium text-foreground">
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalDirectDebtInvested,
+                    debtFundHoldings[0]?.currency,
+                  )}
+                </span>
               </span>
               <span>
                 {`${t("funds")}: `}
-                <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalDebtFundCost, debtFundHoldings[0]?.currency)}</span>
+                <span className="font-medium text-foreground">
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalDebtFundCost,
+                    debtFundHoldings[0]?.currency,
+                  )}
+                </span>
               </span>
             </div>
           </div>
@@ -402,14 +414,38 @@ export default function MyDebtInstrumentsPage() {
           </CardTitle>
           <CardDescription>
             <p>{`${t("bonds_certificates_treasury_bills_you_own_directly")}`}</p>
-            <p>{`${t("projected_interest")}: `}
-            <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalProjectedMonthlyInterest, debtFundHoldings[0]?.currency)} ${t("monthly")}</span>
+            <p>
+              {`${t("projected_interest")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  totalProjectedMonthlyInterest,
+                  debtFundHoldings[0]?.currency,
+                )}{" "}
+                ${t("monthly")}
+              </span>
             </p>
-            <p>{`${t("projected_interest")}: `}
-            <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalProjectedAnnualInterest, debtFundHoldings[0]?.currency)} ${t("annually")}</span>
+            <p>
+              {`${t("projected_interest")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  totalProjectedAnnualInterest,
+                  debtFundHoldings[0]?.currency,
+                )}{" "}
+                ${t("annually")}
+              </span>
             </p>
-            <p>{`${t("certificates_expiring_soon")}: `}
-            <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, expiringCertificatesSum, debtFundHoldings[0]?.currency)} - ${expiringCertificatesPercentage.toFixed(2)}%</span>
+            <p>
+              {`${t("certificates_expiring_soon")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  expiringCertificatesSum,
+                  debtFundHoldings[0]?.currency,
+                )}{" "}
+                - ${expiringCertificatesPercentage.toFixed(2)}%
+              </span>
             </p>
           </CardDescription>
         </CardHeader>

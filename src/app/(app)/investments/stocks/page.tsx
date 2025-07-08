@@ -193,7 +193,9 @@ export default function MyStocksPage() {
                 isTotalStockProfitable ? "text-accent" : "text-destructive",
               )}
             >
-              <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalStockPnL)}</span>
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(isMobile, totalStockPnL)}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground">
               <span>{`${t("overall_pl")}: `}</span>
@@ -203,7 +205,9 @@ export default function MyStocksPage() {
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {`${t("total_invested")}: `}
-              <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalStockCost)}</span>
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(isMobile, totalStockCost)}
+              </span>
             </p>
           </CardContent>
         </Card>
