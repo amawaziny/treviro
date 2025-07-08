@@ -1,5 +1,107 @@
 # User Acceptance Testing Scenarios
 
+## Stocks & Equity Funds Investment Page
+
+### Viewing Investment Portfolio
+
+1. **View Investment Summary**
+   - **Scenario**: User views their stocks and equity funds portfolio
+   - **Steps**:
+     1. Navigate to "My Stocks & Equity Funds" page
+     2. View the portfolio summary section
+   - **Expected**:
+     - Total profit/loss amount is displayed
+     - Overall P/L percentage is shown
+     - Total invested amount is visible
+     - Appropriate trend icon (up/down) is displayed based on performance
+   - **Validation**:
+     - Numbers are properly formatted for mobile view
+     - Negative values are shown in red with downward trend icon
+     - Positive values are shown in green with upward trend icon
+
+2. **View Investment List**
+   - **Scenario**: User views their list of stock and equity fund investments
+   - **Steps**:
+     1. Navigate to "My Stocks & Equity Funds" page
+     2. Scroll through the list of investments
+   - **Expected**:
+     - Each investment shows company/fund name and symbol
+     - Current market value is displayed
+     - Profit/Loss amount and percentage are shown
+     - Quantity (shares/units) is displayed
+     - Average cost and current market price are visible
+   - **Validation**:
+     - Company/fund names are displayed in the correct language (AR/EN)
+     - Market data is up-to-date
+     - Values are properly formatted for the user's locale
+
+### Navigation
+
+1. **Browse Securities**
+   - **Scenario**: User wants to add a new investment
+   - **Steps**:
+     1. Click the "+" floating action button
+     2. User is redirected to the securities page
+   - **Expected**:
+     - Button is fixed at the bottom right of the screen
+     - Navigation is smooth and responsive
+     - User can browse and select from available securities
+
+2. **View Security Details**
+   - **Scenario**: User wants to see details of a specific investment
+   - **Steps**:
+     1. Tap on any investment card
+     2. View the security details page
+   - **Expected**:
+     - Detailed information about the security is displayed
+     - Performance charts and historical data are shown
+     - Option to buy/sell is available
+
+### Offline Functionality
+
+1. **View Investments Offline**
+   - **Scenario**: User views their investments without internet connection
+   - **Steps**:
+     1. Disable internet connection
+     2. Open the app
+     3. Navigate to "My Stocks & Equity Funds"
+   - **Expected**:
+     - Previously loaded investments are visible
+     - Appropriate offline indicator is shown
+     - Data is read from local storage
+
+2. **Add Investment Offline**
+   - **Scenario**: User adds a new investment while offline
+   - **Steps**:
+     1. While offline, add a new investment
+     2. View the investment in the list
+   - **Expected**:
+     - Investment is added to local storage
+     - Sync indicator shows pending sync status
+     - Investment appears in the list with offline indicator
+
+### Data Display
+
+1. **Currency and Number Formatting**
+   - **Scenario**: User views financial values
+   - **Steps**:
+     1. View the investments list
+     2. Check various numerical values
+   - **Expected**:
+     - All monetary values are properly formatted
+     - Large numbers are abbreviated appropriately on mobile
+     - Decimal places are consistent (2 for currency, 2 for percentages)
+
+2. **Localization**
+   - **Scenario**: User changes language preference
+   - **Steps**:
+     1. Change app language
+     2. View the investments page
+   - **Expected**:
+     - All text is displayed in the selected language
+     - Number formatting follows locale conventions
+     - RTL layout adjusts for Arabic language
+
 ## Login Page
 
 ### Authentication
