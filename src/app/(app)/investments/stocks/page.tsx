@@ -193,17 +193,17 @@ export default function MyStocksPage() {
                 isTotalStockProfitable ? "text-accent" : "text-destructive",
               )}
             >
-              {formatNumberForMobile(isMobile, totalStockPnL)}
+              <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalStockPnL)}</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {totalStockPnLPercent === Infinity
-                ? "∞"
-                : totalStockPnLPercent.toFixed(2)}
-              {t("overall_pl")}
+              <span>{`${t("overall_pl")}: `}</span>
+              <span className="font-medium text-foreground">
+                {`${totalStockPnLPercent === Infinity ? "∞" : totalStockPnLPercent.toFixed(2)}%`}
+              </span>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("total_invested")}
-              {formatNumberForMobile(isMobile, totalStockCost)}
+              {`${t("total_invested")}: `}
+              <span className="font-medium text-foreground">{formatNumberForMobile(isMobile, totalStockCost)}</span>
             </p>
           </CardContent>
         </Card>

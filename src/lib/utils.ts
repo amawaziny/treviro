@@ -90,7 +90,7 @@ export function formatNumberWithSuffix(
     suffix = "K";
   }
 
-  let formatted = value.toFixed(1).replace(/\.0$/, "");
+  let formatted = value.toFixed(3).replace(/\.0$/, "");
   if (suffix) formatted += suffix;
 
   return `${currency} ${num < 0 ? "-" : ""}${formatted}`;
