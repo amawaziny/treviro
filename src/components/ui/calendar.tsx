@@ -13,6 +13,7 @@ type Props = {
   disableFuture?: boolean;
   dateFormat?: string;
   mobile?: boolean;
+  'data-testid'?: string;
 };
 
 function Calendar({
@@ -23,6 +24,7 @@ function Calendar({
   disableFuture,
   dateFormat,
   mobile = false,
+  ...props
 }: Props) {
   return (
     <div className="relative w-full">
@@ -36,11 +38,26 @@ function Calendar({
         containerClassName="w-full"
         inputMode="none"
         inputClass={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${locale === "ar" ? "" : "md:text-sm"} w-full ps-10`}
+        render={(value, openCalendar) => (
+          <div className="relative w-full">
+            <input
+              name="calendar"
+              data-testid={props['data-testid']}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm ps-10"
+              value={value}
+              onChange={() => {}}
+              onClick={openCalendar}
+              readOnly={false}
+            />
+            <CalenderIcon
+              className={`absolute ${dir === "rtl" ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none w-4 h-4`}
+            />
+          </div>
+        )}
         {...(dir === "rtl" ? { rtl: true } : {})}
+        {...props}
       />
-      <CalenderIcon
-        className={`absolute ${dir === "rtl" ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none w-4 h-4`}
-      />
+
     </div>
   );
 }

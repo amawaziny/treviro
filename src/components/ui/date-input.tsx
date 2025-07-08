@@ -18,6 +18,7 @@ interface DateInputBaseProps {
   language?: string;
   dir?: "ltr" | "rtl";
   mobile?: boolean; // Whether to use mobile styles
+  'data-testid'?: string;
 }
 
 type DateInputProps = DateInputBaseProps &
@@ -88,9 +89,10 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     };
 
     return (
-      <div className={cn("w-full relative", className)} {...props}>
+      <div className={cn("w-full relative", className)}>
         <div className="relative">
           <Calendar
+            data-testid={props['data-testid']}
             onChange={handleSelect}
             value={date}
             locale={language}
@@ -98,6 +100,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             disableFuture={disableFuture}
             dateFormat={dateFormat}
             mobile={mobile}
+            {...props}
           />
         </div>
       </div>

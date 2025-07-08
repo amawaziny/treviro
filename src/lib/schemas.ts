@@ -55,7 +55,7 @@ const stringToRequiredNonNegativeNumberCoerced = z.preprocess(
   (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : val),
   z
     .number({ invalid_type_error: "Must be a valid number." })
-    .min(0, { message: "Amount cannot be negative." }),
+    .gt(0, { message: "Amount must be greater than 0." }),
 );
 
 // For optional fields that must be positive numbers if provided

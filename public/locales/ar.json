@@ -119,7 +119,7 @@
   "charity_fixed": "صدقة (ثابتة)",
   "chart_error": "خطأ في الرسم البياني",
   "check_email_for_instructions": "يرجى التحقق من بريدك الإلكتروني للحصول على تعليمات لإعادة تعيين كلمة المرور الخاصة بك.",
-  "check_if_this_other_item_is_an_expense_uncheck_if_its_income": "حدد إذا كان هذا البند 'أخرى' مصروفًا. ألغِ التحديد إذا كان دخلًا.",
+  "check_if_this_other_item_is_an_expense_uncheck_if_its_income": "حدد إذا كان هذا البند 'أخرى' مصروفًا. ألغِ التحديد إذا كان دخلاً.",
   "cheque_number": "رقم الشيك",
   "choose_the_month_your_financial_year_begins": "اختر الشهر الذي تبدأ فيه سنتك المالية.",
   "company_logo": "شعار الشركة",
@@ -701,5 +701,6 @@
   "the_requested_debt_instrument_could_not_be_found": "تعذر العثور على أدوات الدين المطلوبة.",
   "this_action_will_permanently_delete_this_debt_record_this_cannot_be_undone": "سيؤدي هذا الإجراء إلى حذف سجل أداة الدين هذا بشكل دائم. ﻻ يمكن التراجع عن هذا الإجراء.",
   "certificates_expiring_soon": "شهادات تنتهي في عام",
-  "Select a date": "إختر التاريخ"
+  "Select a date": "إختر التاريخ",
+  "Amount must be greater than 0.":"المبلغ يجب ان يكون اكبر من 0."
 }
