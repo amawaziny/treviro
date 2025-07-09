@@ -288,8 +288,27 @@ test.describe("Dashboard Page", () => {
   test("should display correct investment types based on configuration", async ({
     page,
   }) => {
-    // Wait for the page to load completely
-    // await page.waitForLoadState("networkidle");
+    // Wait for the dashboard to be fully loaded
+    await expect(page.getByTestId("dashboard-page")).toBeVisible();
+
+    // Wait for the investment section to be visible
+    const breakdownSection = page.getByTestId("investment-breakdown-section");
+    await expect(breakdownSection).toBeVisible({ timeout: 15000 });
+
+    // Find investment types by their exact text content
+    const typeElements = page
+      .locator('text="Debt Instruments"')
+      .or(page.locator('text="Real Estate"'))
+      .or(page.locator('text="Stocks"'))
+      .or(page.locator('text="Currencies"'))
+      .or(page.locator('text="Gold"'));
+
+    // Wait for at least one type to be visible
+    await expect(typeElements.first()).toBeVisible({ timeout: 10000 });
+
+    // Get all investment type names from the page
+    const typeCount = await typeElements.count();
+    expect(typeCount).toBeGreaterThan(0);
 
     // Expected investment types from the default configuration
     const expectedTypes = [
@@ -300,22 +319,17 @@ test.describe("Dashboard Page", () => {
       "Gold",
     ];
 
-    // Get all investment type names from the page
-    const breakdownSection = page.getByTestId("investment-breakdown-section");
-    const typeElements = breakdownSection.locator(
-      'span[class*="text-md"][class*="font-bold"]',
-    );
-    const typeCount = await typeElements.count();
-
-    // Check if we have at least one type
-    expect(typeCount).toBeGreaterThan(0);
+    // Wait for all elements to be visible
+    for (let i = 0; i < typeCount; i++) {
+      await expect(typeElements.nth(i)).toBeVisible();
+    }
 
     // Collect all displayed types
     const displayedTypes = [];
     for (let i = 0; i < typeCount; i++) {
       const typeName = await typeElements.nth(i).textContent();
       if (typeName) {
-        displayedTypes.push(typeName);
+        displayedTypes.push(typeName.trim());
       }
     }
 

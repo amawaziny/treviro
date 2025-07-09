@@ -3,7 +3,11 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import React, { useEffect, useState } from "react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
-import type { ListedSecurity, StockInvestment, Transaction } from "@/lib/types";
+import type {
+  ListedSecurity,
+  SecurityInvestment,
+  Transaction,
+} from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "@/contexts/form-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,7 +53,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function SecurityDetailPage() {
-  const { t, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const params = useParams();
   const searchParams = useSearchParams();
   const securityId = params.securityId as string;
@@ -80,6 +84,7 @@ export default function SecurityDetailPage() {
     null,
   );
 
+  const securityName = security?.[language === "ar" ? "name_ar" : "name"];
   // Set up header props after security data is loaded
   useEffect(() => {
     if (!security) return;
@@ -88,7 +93,7 @@ export default function SecurityDetailPage() {
       showBackButton: true,
       backHref: backLinkHref,
       backLabel: "Back",
-      title: security.name,
+      title: securityName,
       showNavControls: false,
     });
 
@@ -123,7 +128,7 @@ export default function SecurityDetailPage() {
     () =>
       investments.filter(
         (inv) => inv.type === "Stocks" && inv.tickerSymbol === security?.symbol,
-      ) as StockInvestment[],
+      ) as SecurityInvestment[],
     [investments, security],
   );
 
@@ -200,9 +205,9 @@ export default function SecurityDetailPage() {
         id: inv.id,
         date: inv.purchaseDate,
         type: "Buy" as "Buy" | "Sell",
-        shares: (inv as StockInvestment).numberOfShares || 0,
-        price: (inv as StockInvestment).purchasePricePerShare || 0,
-        fees: (inv as StockInvestment).purchaseFees || 0,
+        shares: (inv as SecurityInvestment).numberOfShares || 0,
+        price: (inv as SecurityInvestment).purchasePricePerShare || 0,
+        fees: (inv as SecurityInvestment).purchaseFees || 0,
         totalAmount: inv.amountInvested,
         isInvestmentRecord: true,
         tickerSymbol: security.symbol,
@@ -354,7 +359,7 @@ export default function SecurityDetailPage() {
             <Avatar className="h-10 w-10 md:h-12 md:w-12">
               <AvatarImage
                 src={security.logoUrl}
-                alt={security.name}
+                alt={securityName}
                 data-ai-hint={
                   security.securityType === "Fund"
                     ? t("logo_fund")
@@ -491,7 +496,7 @@ export default function SecurityDetailPage() {
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
               <CardDescription className="text-xs">
                 {t("historical_price_performance_of")}
-                {security.name}
+                {securityName}
               </CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
@@ -509,7 +514,7 @@ export default function SecurityDetailPage() {
               <CardTitle className="text-md">{t("my_position")}</CardTitle>
               <CardDescription className="text-xs">
                 {t("your_current_investment_in")}
-                {security.name}
+                {securityName}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -601,7 +606,7 @@ export default function SecurityDetailPage() {
               </CardTitle>
               <CardDescription className="text-xs">
                 {t("all_buy_sell_and_dividend_records_for")}
-                {security.name}
+                {securityName}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -807,11 +812,11 @@ export default function SecurityDetailPage() {
                 ? (transactionToDelete as any).shares
                 : (transactionToDelete?.numberOfShares ?? 0)
               ).toLocaleString()}{" "}
-              {security?.securityType === "Fund" ? "units" : "shares"} of{" "}
-              {security?.name} on{" "}
-              {transactionToDelete
-                ? formatDateDisplay(transactionToDelete.date)
-                : ""}
+              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${
+                transactionToDelete
+                  ? formatDateDisplay(transactionToDelete.date)
+                  : ""
+              }`}
               {t(
                 "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
               )}
@@ -838,11 +843,11 @@ export default function SecurityDetailPage() {
                 ? (transactionToDelete as any).shares
                 : (transactionToDelete?.numberOfShares ?? 0)
               ).toLocaleString()}{" "}
-              {security?.securityType === "Fund" ? "units" : "shares"} of{" "}
-              {security?.name} on{" "}
-              {transactionToDelete
-                ? formatDateDisplay(transactionToDelete.date)
-                : ""}
+              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${
+                transactionToDelete
+                  ? formatDateDisplay(transactionToDelete.date)
+                  : ""
+              }`}
               {t(
                 "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
               )}

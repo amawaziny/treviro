@@ -3,9 +3,26 @@ import { twMerge } from "tailwind-merge";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale/ar";
 import { enUS } from "date-fns/locale/en-US";
+import { InvestmentType } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/**
+ * Determines the investment type based on the fund type
+ * @param fundType - The fund type to evaluate
+ * @returns The corresponding investment type ("Gold" | "Real Estate" | "Debt" | "Stock" | "Other")
+ */
+export function getInvestmentType(fundType?: string): InvestmentType {
+  if (!fundType) return "Stocks";
+
+  if (isGoldRelatedFund(fundType)) return "Gold";
+  if (isRealEstateRelatedFund(fundType)) return "Real Estate";
+  if (isDebtRelatedFund(fundType)) return "Debt Instruments";
+  if (isStockRelatedFund(fundType)) return "Stocks";
+
+  return "Stocks";
 }
 
 // Helper function to identify gold-related funds
@@ -38,6 +55,7 @@ export function isDebtRelatedFund(fundType?: string): boolean {
     "bond",
     "fixed income",
     "money market",
+    "mmf",
     "cash management",
     "treasury",
     "certificate", // For funds that might invest in CDs
@@ -50,7 +68,7 @@ export function formatNumberForMobile(
   currency: string = "EGP",
 ) {
   if (isMobile) {
-    return formatNumberWithSuffix(num, currency);
+    return formatCurrencyWithCommas(num, currency);
   }
   return formatCurrencyWithCommas(num, currency);
 }
@@ -72,7 +90,7 @@ export function formatNumberWithSuffix(
     suffix = "K";
   }
 
-  let formatted = value.toFixed(1).replace(/\.0$/, "");
+  let formatted = value.toFixed(3).replace(/\.0$/, "");
   if (suffix) formatted += suffix;
 
   return `${currency} ${num < 0 ? "-" : ""}${formatted}`;
@@ -144,13 +162,13 @@ export function formatCurrencyWithCommas(
   digitsOverride?: number,
 ): string {
   if (value === undefined || value === null || Number.isNaN(value))
-    return `${currency} 0.000`;
+    return `${currency} 0`;
   const num = typeof value === "number" ? value : parseFloat(value);
   // toFixed(3) ensures 3 digits after decimal
   return new Intl.NumberFormat("en-EG", {
     style: "currency",
     currency: currency,
-    minimumFractionDigits: digitsOverride ?? 3,
+    minimumFractionDigits: digitsOverride ?? 0,
     maximumFractionDigits: digitsOverride ?? 3,
   }).format(num);
 }

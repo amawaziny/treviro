@@ -41,7 +41,7 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
   ListedSecurity,
   InvestmentType,
-  StockInvestment,
+  SecurityInvestment,
   GoldInvestment,
   CurrencyInvestment,
   RealEstateInvestment,
@@ -50,7 +50,11 @@ import type {
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
 import { RealEstateForm } from "./real-estate/real-estate-form";
-import { formatCurrencyWithCommas, getCurrentDate } from "@/lib/utils";
+import {
+  formatCurrencyWithCommas,
+  getCurrentDate,
+  getInvestmentType,
+} from "@/lib/utils";
 
 // Initial values for each investment type
 const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
@@ -383,7 +387,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
   onSecuritySelect,
   isPreSelectedStockMode,
 }) => {
-  const { t, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   return (
     <div className="space-y-6 mt-6 p-6 border rounded-md">
       <h3 className="text-lg font-medium text-primary">
@@ -430,7 +434,8 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
                   <SelectContent>
                     {listedSecurities.map((security) => (
                       <SelectItem key={security.id} value={security.id}>
-                        {security.name} ({security.symbol}) -{" "}
+                        {security[language === "ar" ? "name_ar" : "name"]} (
+                        {security.symbol}) -{" "}
                         {security.securityType === "Fund"
                           ? security.fundType
                           : security.market}
@@ -446,7 +451,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
         {preSelectedSecurityDetails && (
           <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
             <p className="text-sm font-medium">
-              {`${t("selected_security")}: ${preSelectedSecurityDetails.name} (${preSelectedSecurityDetails.symbol})`}
+              {`${t("selected_security")}: ${preSelectedSecurityDetails[language === "ar" ? "name_ar" : "name"]} (${preSelectedSecurityDetails.symbol})`}
             </p>
             <p className="text-xs text-muted-foreground">
               {`${t("current_market_price")}: ${formatCurrencyWithCommas(preSelectedSecurityDetails.price)}`}
@@ -551,17 +556,18 @@ interface RenderDebtFieldsProps {
   control: any;
   setValue: any;
   watch: any;
+  isEditMode: boolean;
 }
-const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
+const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = ({
+  isEditMode,
+}) => {
   const { t, dir } = useLanguage();
   const { control, setValue, watch } =
     useReactHookFormContext<InvestmentFormValues>();
   const watchedDebtSubType = watch("debtSubType");
 
   useEffect(() => {
-    if (watchedDebtSubType === "Certificate") {
-      setValue("purchaseDate", "");
-    } else if (watchedDebtSubType && !watch("purchaseDate")) {
+    if (watchedDebtSubType && !watch("purchaseDate")) {
       setValue("purchaseDate", getCurrentDate());
     }
   }, [watchedDebtSubType, setValue, watch]);
@@ -579,10 +585,12 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
             <FormItem>
               <FormLabel>{t("specific_debt_type")}</FormLabel>
               <Select
+                disabled={isEditMode}
                 dir={dir}
                 onValueChange={field.onChange}
                 value={field.value || ""}
                 required
+                data-testid="debt-type-select"
               >
                 <FormControl>
                   <SelectTrigger>
@@ -610,6 +618,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               <FormLabel>{t("issuer_institution")}</FormLabel>
               <FormControl>
                 <Input
+                  data-testid="issuer-input"
                   placeholder={t("e.g., US Treasury, XYZ Corp")}
                   {...field}
                   value={field.value || ""}
@@ -622,28 +631,22 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
 
         <FormField
           control={control}
-          name="interestRate"
-          render={({ field }) => {
-            // Convert value to string for the NumericInput component
-            const value = field.value !== undefined ? String(field.value) : "";
-            return (
-              <FormItem>
-                <FormLabel>{t("interest_rate")}</FormLabel>
-                <FormControl>
-                  <NumericInput
-                    placeholder="e.g., 5.5"
-                    value={value}
-                    onChange={(val) => {
-                      // Convert back to number when updating the form
-                      field.onChange(val === "" ? undefined : Number(val));
-                    }}
-                    allowDecimal={true}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          name="purchaseDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("purchase_date")}</FormLabel>
+              <FormControl>
+                <Input
+                  data-testid="purchase-date-input"
+                  dir={dir}
+                  type="date"
+                  {...field}
+                  value={field.value || getCurrentDate()}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
@@ -654,6 +657,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               <FormLabel>{t("maturity_date")}</FormLabel>
               <FormControl>
                 <Input
+                  data-testid="expiry-date-input"
                   type="date"
                   dir={dir}
                   {...field}
@@ -673,6 +677,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
               <FormControl>
                 <NumericInput
+                  data-testid="total-cost-input"
                   placeholder="e.g., 10000.75"
                   value={field.value}
                   onChange={field.onChange}
@@ -687,6 +692,50 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
           )}
         />
 
+        <FormField
+          control={control}
+          name="interestRate"
+          render={({ field }) => {
+            // Convert value to string for the NumericInput component
+            const value = field.value !== undefined ? String(field.value) : "";
+            return (
+              <FormItem>
+                <FormLabel>{t("interest_rate")}</FormLabel>
+                <FormControl>
+                  <NumericInput
+                    data-testid="interest-rate-input"
+                    placeholder="e.g., 5.5"
+                    value={value}
+                    onChange={(val) => {
+                      // Allow empty string or just a decimal point
+                      if (val === "" || val === ".") {
+                        field.onChange(val);
+                        return;
+                      }
+
+                      // If it's a valid number
+                      const numVal = Number(val);
+                      if (!isNaN(numVal)) {
+                        // Check if the integer part is within 3 digits
+                        const [integerPart] = val.split(".");
+                        if (integerPart.length > 3) return;
+
+                        // Check max value
+                        if (numVal > 100) return;
+
+                        field.onChange(val); // Keep as string to allow decimal input
+                      }
+                    }}
+                    allowDecimal={true}
+                    maxLength={5} // Allow for decimal point and one decimal place
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
         {/* Certificate Interest Frequency Dropdown */}
         {watchedDebtSubType === "Certificate" && (
           <FormField
@@ -696,6 +745,7 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
               <FormItem>
                 <FormLabel>{t("certificate_interest_frequency")}</FormLabel>
                 <Select
+                  data-testid="interest-frequency-select"
                   dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
@@ -714,27 +764,6 @@ const RenderDebtFieldsComponent: React.FC<RenderDebtFieldsProps> = () => {
                 <FormDescription>
                   {t("how_often_interest_is_paid_default_is_monthly")}
                 </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        {/* Only show purchase date for non-certificate debt types */}
-        {watchedDebtSubType !== "Certificate" && (
-          <FormField
-            control={control}
-            name="purchaseDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("purchase_date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    dir={dir}
-                    type="date"
-                    {...field}
-                    value={field.value || getCurrentDate()}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -781,7 +810,7 @@ export function InvestmentForm({
   mode?: "add" | "edit";
   initialValues?: Partial<InvestmentFormValues>;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Use a state to track the current type for initial values
   const [currentType, setCurrentType] = useState<InvestmentType>(
@@ -799,7 +828,11 @@ export function InvestmentForm({
         : getInitialFormValues(currentType),
   });
 
-  const { addInvestment, updateRealEstateInvestment } = useInvestments();
+  const {
+    addInvestment,
+    updateRealEstateInvestment,
+    updateDebtInstrumentInvestment,
+  } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -958,7 +991,7 @@ export function InvestmentForm({
 
     let newInvestment:
       | DebtInstrumentInvestment
-      | StockInvestment
+      | SecurityInvestment
       | GoldInvestment
       | CurrencyInvestment
       | RealEstateInvestment;
@@ -982,17 +1015,18 @@ export function InvestmentForm({
       const calculatedAmountInvested =
         values.numberOfShares * values.purchasePricePerShare +
         values.purchaseFees;
-      investmentName = `${selectedSecurity.name} ${t("Purchase")}`;
+      investmentName = `${selectedSecurity[language === "ar" ? "name_ar" : "name"]} ${t("Purchase")}`;
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
         amountInvested: calculatedAmountInvested,
         tickerSymbol: selectedSecurity.symbol as string,
-        stockLogoUrl: selectedSecurity.logoUrl,
+        securityId: selectedSecurity.id,
         numberOfShares: values.numberOfShares,
         purchasePricePerShare: values.purchasePricePerShare,
         purchaseFees: values.purchaseFees,
-        type: "Stocks",
+        type: getInvestmentType(selectedSecurity.fundType),
+        fundType: selectedSecurity.fundType,
       };
     } else if (
       preSelectedInvestmentType === "Debt Instruments" &&
@@ -1090,6 +1124,17 @@ export function InvestmentForm({
         });
         router.push("/investments/real-estate");
         return;
+      } else if (values.type === "Debt Instruments") {
+        await updateDebtInstrumentInvestment(
+          initialValues["id"] as string,
+          removeUndefinedFieldsDeep(values),
+        );
+        toast({
+          title: t("investment_updated"),
+          description: `${t(values.debtSubType)} - ${values.issuer} ${t("has_been_successfully_updated")}.`,
+        });
+        router.push("/investments/debt-instruments");
+        return;
       }
       // Add more types here if you want to support editing other investment types
     } else {
@@ -1097,6 +1142,7 @@ export function InvestmentForm({
       toast({
         title: t("investment_added"),
         description: `${t(preSelectedInvestmentType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
+        testId: "investment-added-toast",
       });
     }
 
@@ -1140,6 +1186,8 @@ export function InvestmentForm({
     submitButtonText = t("save_changes");
   } else if (mode === "edit" && preSelectedInvestmentType === "Real Estate") {
     submitButtonText = t("save_changes");
+  } else if (mode === "edit" && isDedicatedDebtMode) {
+    submitButtonText = t("save_changes");
   } else if (isDedicatedGoldMode) {
     submitButtonText = t("add_gold");
   } else if (isDedicatedDebtMode) {
@@ -1179,6 +1227,7 @@ export function InvestmentForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {isDedicatedDebtMode ? (
               <MemoizedRenderDebtFields
+                isEditMode={mode === "edit"}
                 control={form.control}
                 setValue={form.setValue}
                 watch={form.watch}
@@ -1212,6 +1261,7 @@ export function InvestmentForm({
             <Button
               type="submit"
               className="w-full md:w-auto"
+              data-testid="save-certificate-button"
               disabled={
                 form.formState.isSubmitting ||
                 (preSelectedInvestmentType === "Stocks" &&

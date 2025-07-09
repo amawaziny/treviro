@@ -1,6 +1,8 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
+import { format } from "date-fns";
+import { DateInput } from "@/components/ui/date-input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm as useReactHookForm } from "react-hook-form";
@@ -13,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/numeric-input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -31,9 +32,15 @@ import {
 } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const initialFormValues: ExpenseFormValues = {
   category: "Other",
@@ -57,8 +64,9 @@ export function ExpenseForm({
   onSubmit,
   isEditMode,
 }: ExpenseFormProps) {
-  const { t, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const router = useRouter();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
@@ -99,7 +107,7 @@ export function ExpenseForm({
 
       toast({
         title: t("expense_record_saved"),
-        description: `${values.category} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
+        description: `${t(values.category)} ${t("expense of")} ${values.amount} EGP ${t("recorded successfully")}.`,
         testId: isEditMode ? "edit-success-toast" : "success-toast",
       });
 
@@ -181,7 +189,6 @@ export function ExpenseForm({
                     } // ensure value is always a string
                     onChange={field.onChange} // RHF onChange expects string or number
                     allowDecimal={true}
-                    min={1}
                   />
                 </FormControl>
                 <FormMessage />
@@ -192,28 +199,41 @@ export function ExpenseForm({
           <FormField
             control={form.control}
             name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("Date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    data-testid="date-input"
-                    value={field.value || ""}
+            render={({ field }) => {
+              // Convert YYYY-MM-DD to DD-MM-YYYY for display
+              return (
+                <FormItem
+                  className="flex flex-col"
+                  data-testid="date-form-item"
+                >
+                  <FormLabel>{t("Date")}</FormLabel>
+                  <DateInput
+                    value={field.value}
                     onChange={field.onChange}
-                    max={getCurrentDate()}
+                    placeholder={t("Select a date")}
+                    dir={dir}
+                    language={language}
+                    dateFormat="dd-MM-yyyy"
+                    disabled={form.formState.isSubmitting}
+                    disableFuture={true}
+                    mobile={isMobile}
+                    data-testid="date-input"
+                    className="w-full"
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="md:col-span-2">
+              <FormItem
+                className="md:col-span-2"
+                data-testid="description-form-item"
+              >
                 <FormLabel>{t("description_optional")}</FormLabel>
                 <FormControl>
                   <Textarea
@@ -236,7 +256,10 @@ export function ExpenseForm({
                 control={form.control}
                 name="isInstallment"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
+                  <FormItem
+                    className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"
+                    data-testid="installment-form-item"
+                  >
                     <FormControl>
                       <Checkbox
                         dir={dir}
@@ -258,8 +281,10 @@ export function ExpenseForm({
                   control={form.control}
                   name="numberOfInstallments"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("number_of_months")}</FormLabel>
+                    <FormItem data-testid="installments-form-item">
+                      <FormLabel data-testid="installments-label">
+                        {t("number_of_months")}
+                      </FormLabel>
                       <FormControl>
                         <NumericInput
                           data-testid="installments-input"

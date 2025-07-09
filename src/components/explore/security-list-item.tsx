@@ -8,6 +8,8 @@ import { cn, formatCurrencyWithCommas } from "@/lib/utils";
 import React from "react";
 import Link from "next/link";
 import { FundTypeIcon } from "@/components/ui/fund-type-icon";
+import { useLanguage } from "@/contexts/language-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SecurityListItemProps {
   security: ListedSecurity;
@@ -26,6 +28,10 @@ export const SecurityListItem = React.memo(function SecurityListItem({
 
   const isPositiveChange = security.changePercent >= 0;
 
+  const { language } = useLanguage();
+  const isMobile = useIsMobile();
+  const securityName = security[language === "ar" ? "name_ar" : "name"];
+
   const detailPageLink = `/securities/details/${security.id}?previousTab=${currentTab}`;
 
   return (
@@ -35,7 +41,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
           {/* Logo */}
           <Image
             src={security.logoUrl || "https://placehold.co/40x40.png"}
-            alt={`${security.name} logo`}
+            alt={`${securityName} logo`}
             width={32}
             height={32}
             className="rounded-full object-cover flex-shrink-0 mt-1"
@@ -56,9 +62,9 @@ export const SecurityListItem = React.memo(function SecurityListItem({
               )}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              {security.name.length > 15
-                ? `${security.name.substring(0, 15)}...`
-                : security.name}
+              {isMobile && securityName.length > 15
+                ? `${securityName.substring(0, 15)}...`
+                : securityName}
               <span className="mx-1">•</span>
               {security.market.toUpperCase()}
             </p>

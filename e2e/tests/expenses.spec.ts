@@ -1,4 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
+import { format } from "date-fns";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
@@ -15,7 +16,7 @@ const TEST_EXPENSE = {
   category: "Credit Card",
   description: "Test expense",
   amount: "1000",
-  date: new Date().toISOString().split("T")[0],
+  date: format(new Date(), "dd-MM-yyyy"),
   isInstallment: true,
   numberOfInstallments: "3",
 };
@@ -75,6 +76,9 @@ test.describe("Expenses Management", () => {
 
     // Submit the form
     await page.getByTestId("submit-button").click();
+    await page.waitForSelector('[data-testid="success-toast"]', {
+      state: "attached",
+    });
 
     // Verify success toast
     await expect(page.getByTestId("success-toast")).toBeVisible();
@@ -94,7 +98,7 @@ test.describe("Expenses Management", () => {
     // Fill with invalid data
     await page.getByTestId("amount-input").fill("0");
     await page.getByTestId("submit-button").click();
-    await expect(page.getByText("Amount cannot be less than 1")).toBeVisible();
+    await expect(page.getByText("Amount must be greater than 0")).toBeVisible();
 
     // Toggle installment but don't provide number of installments
     await page.getByTestId("category-select").click();

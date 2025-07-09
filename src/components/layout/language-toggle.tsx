@@ -11,10 +11,10 @@ import { useLanguage } from "@/contexts/language-context";
 import { Globe } from "lucide-react";
 
 export function LanguageToggle() {
-  const { t, setLanguage } = useLanguage();
+  const { t, setLanguage, dir } = useLanguage();
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir={dir}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"

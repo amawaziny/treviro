@@ -6,7 +6,7 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 import type {
   RealEstateInvestment,
-  StockInvestment,
+  SecurityInvestment,
   ListedSecurity,
 } from "@/lib/types";
 import {
@@ -35,7 +35,7 @@ import { Home, Building, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import { cn, formatNumberWithSuffix } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MyRealEstateListItem } from "@/components/investments/real-estate/my-real-estate-list-item";
 
@@ -57,7 +57,7 @@ export default function MyRealEstatePage() {
 
     const stockInvestments = investments.filter(
       (inv) => inv.type === "Stocks",
-    ) as StockInvestment[];
+    ) as SecurityInvestment[];
 
     return stockInvestments
       .map((stockInv) => {
@@ -92,7 +92,7 @@ export default function MyRealEstatePage() {
         }
         return null;
       })
-      .filter(Boolean) as (StockInvestment & {
+      .filter(Boolean) as (SecurityInvestment & {
       fundDetails: ListedSecurity;
       totalCost: number;
       currentValue: number;

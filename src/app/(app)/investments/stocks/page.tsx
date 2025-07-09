@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/language-context";
 import React from "react"; // Added React for useMemo
 import { useInvestments } from "@/hooks/use-investments"; // To calculate total P/L
 import { useListedSecurities } from "@/hooks/use-listed-securities"; // For current prices
-import type { StockInvestment } from "@/lib/types";
+import type { SecurityInvestment } from "@/lib/types";
 import { cn, formatNumberForMobile } from "@/lib/utils"; // For styling and formatting
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isStockRelatedFund } from "@/lib/utils";
@@ -26,7 +26,7 @@ export default function MyStocksPage() {
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
   const [offlineInvestments, setOfflineInvestments] = React.useState<
-    StockInvestment[]
+    SecurityInvestment[]
   >([]);
   const isOffline = useOnlineStatus();
 
@@ -39,7 +39,7 @@ export default function MyStocksPage() {
               inv.type === "Stocks" &&
               typeof inv.numberOfShares === "number" &&
               typeof inv.purchaseFees === "number",
-          ) as StockInvestment[],
+          ) as SecurityInvestment[],
         );
       });
     } else {
@@ -54,7 +54,7 @@ export default function MyStocksPage() {
   const stockInvestments = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
-    return allInvestments.filter((inv): inv is StockInvestment => {
+    return allInvestments.filter((inv): inv is SecurityInvestment => {
       // Only process investments that have a tickerSymbol (i.e., StockInvestment)
       if (!("tickerSymbol" in inv) || typeof inv.tickerSymbol !== "string") {
         return false;
@@ -155,11 +155,11 @@ export default function MyStocksPage() {
 
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+      <div data-testid="stocks-header">
+        <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="stocks-title">
           {t("my_stocks_equity_funds")}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-sm" data-testid="stocks-subtitle">
           {t("overview_of_your_stock_and_equity_fund_investments")}
         </p>
       </div>
@@ -175,15 +175,15 @@ export default function MyStocksPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card data-testid="portfolio-summary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium" data-testid="pl-title">
               {t("total_stocks_equity_funds_pl")}
             </CardTitle>
             {isTotalStockProfitable ? (
-              <TrendingUp className="h-4 w-4 text-accent" />
+              <TrendingUp className="h-4 w-4 text-accent" data-testid="trend-up-icon" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive" />
+              <TrendingDown className="h-4 w-4 text-destructive" data-testid="trend-down-icon" />
             )}
           </CardHeader>
           <CardContent>
@@ -193,17 +193,21 @@ export default function MyStocksPage() {
                 isTotalStockProfitable ? "text-accent" : "text-destructive",
               )}
             >
-              {formatNumberForMobile(isMobile, totalStockPnL)}
+              <span className="font-medium text-foreground" data-testid="total-pl-amount">
+                {formatNumberForMobile(isMobile, totalStockPnL)}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {totalStockPnLPercent === Infinity
-                ? "∞"
-                : totalStockPnLPercent.toFixed(2)}
-              {t("overall_pl")}
+              <span>{`${t("overall_pl")}: `}</span>
+              <span data-testid="pl-percentage-value" className="font-medium text-foreground">
+                {`${totalStockPnLPercent === Infinity ? "∞" : totalStockPnLPercent.toFixed(2)}%`}
+              </span>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("total_invested")}
-              {formatNumberForMobile(isMobile, totalStockCost)}
+              {`${t("total_invested")}: `}
+              <span className="font-medium text-foreground" data-testid="total-invested-amount">
+                  {formatNumberForMobile(isMobile, totalStockCost)}
+              </span>
             </p>
           </CardContent>
         </Card>
@@ -224,7 +228,7 @@ export default function MyStocksPage() {
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid="investments-list">
           {stockInvestments.map((investment) => {
             if (!investment.tickerSymbol) return null;
 
@@ -236,6 +240,7 @@ export default function MyStocksPage() {
 
             return (
               <InvestmentSecurityCard
+                data-testid="investment-card"
                 key={`${investment.id}-${investment.tickerSymbol}`}
                 security={listedSecurity}
                 investment={investment}
@@ -248,6 +253,7 @@ export default function MyStocksPage() {
       <div style={{ marginBottom: "96px" }}></div>
       <Link href="/securities" passHref>
         <Button
+          data-testid="add-security-button"
           variant="default"
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}

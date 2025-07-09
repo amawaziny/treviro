@@ -73,10 +73,16 @@ export default function FixedEstimatesPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+        <h1
+          data-testid="page-title"
+          className="text-xl font-bold tracking-tight text-foreground"
+        >
           {t("fixed_estimates")}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p
+          data-testid="page-description"
+          className="text-muted-foreground text-sm"
+        >
           {t(
             "manage_your_recurring_income_and_expenses_like_salary_zakat_and_charity",
           )}
@@ -171,7 +177,12 @@ export default function FixedEstimatesPage() {
                         passHref
                         legacyBehavior
                       >
-                        <Button variant="ghost" size="icon" aria-label="Edit">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Edit"
+                          data-testid="edit-button"
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
                       </Link>
@@ -182,6 +193,7 @@ export default function FixedEstimatesPage() {
                             size="icon"
                             className="text-muted-foreground hover:text-destructive"
                             aria-label="Delete"
+                            data-testid="delete-button"
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">
@@ -204,6 +216,7 @@ export default function FixedEstimatesPage() {
                             <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              data-testid="confirm-delete-button"
                               onClick={async () => {
                                 try {
                                   await deleteFixedEstimate(record.id);

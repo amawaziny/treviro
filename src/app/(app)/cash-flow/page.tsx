@@ -34,10 +34,10 @@ import {
   IncomeRecord,
   Transaction,
   RealEstateInvestment,
-  StockInvestment,
+  SecurityInvestment,
   Installment,
 } from "@/lib/types";
-import { calculateCashFlowDetails } from "@/lib/financial-utils";
+import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function CashFlowPage() {
@@ -73,7 +73,9 @@ export default function CashFlowPage() {
     const installmentsList = investments
       .filter(
         (inv): inv is RealEstateInvestment =>
-          inv.type === "Real Estate" && inv.installments !== undefined,
+          inv.type === "Real Estate" &&
+          "installments" in inv &&
+          inv.installments !== undefined,
       )
       .flatMap((inv: RealEstateInvestment) => {
         return (inv.installments || []).map((installment: Installment) => ({
@@ -110,20 +112,14 @@ export default function CashFlowPage() {
   const realEstateInstallmentsThisMonth = realEstateInstallments.total;
 
   const cashFlowSummary = useMemo(() => {
-    return calculateCashFlowDetails({
+    return calculateMonthlyCashFlowSummary({
       incomeRecords: incomeRecords || [],
       expenseRecords: expenseRecords || [],
       investments: investments || [],
       fixedEstimates: fixedEstimates || [],
       transactions: transactions || [],
     });
-  }, [
-    incomeRecords,
-    expenseRecords,
-    investments,
-    fixedEstimates,
-    transactions,
-  ]);
+  }, [incomeRecords, expenseRecords, investments, fixedEstimates]);
 
   const {
     totalManualIncomeThisMonth,
@@ -402,7 +398,7 @@ export default function CashFlowPage() {
                           );
                         })
                         .map((investment) => {
-                          const stock = investment as StockInvestment;
+                          const stock = investment as SecurityInvestment;
                           return (
                             <li
                               key={stock.id}

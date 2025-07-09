@@ -5,7 +5,7 @@ import type { AggregatedGoldHolding } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gem, TrendingUp, TrendingDown } from "lucide-react";
-import { cn, formatNumberForMobile, formatNumberWithSuffix } from "@/lib/utils";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { calcProfit } from "@/lib/financial-utils";
@@ -105,10 +105,10 @@ export function PhysicalGoldListItem({ holding }: PhysicalGoldListItemProps) {
         </div>
         <div className="mt-3 text-xs text-muted-foreground grid grid-cols-2 gap-2">
           <p>
-            {`${t("avg_cost")}: ${formatNumberWithSuffix(averagePurchasePrice, currency)}`}
+            {`${t("avg_cost")}: ${formatNumberForMobile(isMobile, averagePurchasePrice, currency)}`}
           </p>
           <p className="text-end">
-            {`${t("market_price")}: ${formatNumberWithSuffix(currentMarketPrice || 0, currency)}`}
+            {`${t("market_price")}: ${formatNumberForMobile(isMobile, currentMarketPrice || 0, currency)}`}
           </p>
         </div>
       </CardContent>

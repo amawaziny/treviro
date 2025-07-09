@@ -21,7 +21,7 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import type { ListedSecurity, StockInvestment } from "@/lib/types";
+import type { ListedSecurity, SecurityInvestment } from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -40,7 +40,7 @@ interface SellSecurityFormProps {
 export function SellStockForm({
   securityId: securityId,
 }: SellSecurityFormProps) {
-  const { t: t } = useLanguage();
+  const { t, language } = useLanguage();
   const {
     recordSellStockTransaction,
     investments,
@@ -78,7 +78,7 @@ export function SellStockForm({
           (inv) =>
             inv.type === "Stocks" &&
             inv.tickerSymbol === listedSecurityData.symbol,
-        ) as StockInvestment[];
+        ) as SecurityInvestment[];
 
         const totalOwned = userOwnedForThisSymbol.reduce(
           (sum, inv) => sum + (inv.numberOfShares || 0),
@@ -138,7 +138,7 @@ export function SellStockForm({
       );
       toast({
         title: t("sale_recorded"),
-        description: `${t("Successfully recorded sale of")} ${values.numberOfSharesToSell} ${securityLabel} ${t("of")} ${securityBeingSold.name}.`,
+        description: `${t("Successfully recorded sale of")} ${values.numberOfSharesToSell} ${securityLabel} ${t("of")} ${securityBeingSold[language === "ar" ? "name_ar" : "name"]}.`,
       });
       router.push(`/securities/details/${securityId}`);
     } catch (error: any) {

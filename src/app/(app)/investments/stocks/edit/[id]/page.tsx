@@ -25,7 +25,7 @@ export default function EditStockInvestmentPage({
   // Find the investment by id
   const security = investments.find(
     (inv) => inv.id === id && inv.type === "Stocks",
-  ) as import("@/lib/types").StockInvestment | undefined;
+  ) as import("@/lib/types").SecurityInvestment | undefined;
 
   if (!security) {
     return notFound();

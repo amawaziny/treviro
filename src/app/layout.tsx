@@ -14,12 +14,16 @@ import PageViewTrackerWrapper from "@/components/analytics/PageViewTrackerWrappe
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
+
+// Tajawal font is loaded via CSS @import
 
 export const metadata: Metadata = {
   title: "Treviro",
@@ -29,11 +33,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params: { lang = "en" },
 }: Readonly<{
   children: React.ReactNode;
+  params: { lang?: string };
 }>) {
+  const isRTL = lang === "ar";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang={lang}
+      dir={isRTL ? "rtl" : "ltr"}
+      className="font-sans"
+      suppressHydrationWarning
+    >
       <head>
         {/* PWA Meta Tags */}
         <meta name="application-name" content="Treviro" />

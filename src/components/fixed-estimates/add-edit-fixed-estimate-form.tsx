@@ -54,7 +54,7 @@ export function AddEditFixedEstimateForm({
   estimate,
 }: AddEditFixedEstimateFormProps) {
   const { t, dir } = useLanguage();
-  const { addFixedEstimate } = useInvestments(); // Add updateFixedEstimate later
+  const { addFixedEstimate, updateFixedEstimate } = useInvestments(); // Add updateFixedEstimate later
   const { toast } = useToast();
   const router = useRouter();
 
@@ -118,12 +118,14 @@ export function AddEditFixedEstimateForm({
         toast({
           title: t("fixed_estimate_added"),
           description: `${t(dataToSave.name || dataToSave.type)} ${t("estimate recorded successfully")}.`,
+          testId: "success-toast",
         });
       } else if (mode === "edit" && estimate) {
-        // await updateFixedEstimate(estimate.id, dataToSave); // To be implemented
+        await updateFixedEstimate(estimate.id, dataToSave); // To be implemented
         toast({
           title: t("fixed_estimate_updated"),
           description: `${t(dataToSave.name || dataToSave.type)} ${t("estimate updated successfully")}.`,
+          testId: "edit-success-toast",
         });
       }
       form.reset(initialFormValues);
@@ -134,6 +136,7 @@ export function AddEditFixedEstimateForm({
         title: `${t("Failed to")} ${mode === "add" ? t("add") : t("Update")} ${t("Estimate")}`,
         description: error.message || t("could_not_save_the_estimate"),
         variant: "destructive",
+        testId: "error-toast",
       });
     }
   }
@@ -158,16 +161,19 @@ export function AddEditFixedEstimateForm({
                     field.onChange(value as FixedEstimateType)
                   }
                   value={field.value || ""}
-                  data-testid="type-select"
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-testid="type-select">
                       <SelectValue placeholder={t("Select estimate type")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {fixedEstimateTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
+                      <SelectItem
+                        data-testid={`type-option-${type}`}
+                        key={type}
+                        value={type}
+                      >
                         {t(type)}
                       </SelectItem>
                     ))}
@@ -193,7 +199,7 @@ export function AddEditFixedEstimateForm({
                     data-testid="amount-input"
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid="amount-error" />
               </FormItem>
             )}
           />
@@ -229,16 +235,19 @@ export function AddEditFixedEstimateForm({
                   dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
-                  data-testid="period-select"
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-testid="period-select">
                       <SelectValue placeholder="Select period" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {fixedEstimatePeriods.map((period) => (
-                      <SelectItem key={period} value={period}>
+                      <SelectItem
+                        data-testid={`period-option-${period}`}
+                        key={period}
+                        value={period}
+                      >
                         {t(period)}
                       </SelectItem>
                     ))}

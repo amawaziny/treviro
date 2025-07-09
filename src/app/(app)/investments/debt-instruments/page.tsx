@@ -5,7 +5,7 @@ import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import type {
   DebtInstrumentInvestment,
-  StockInvestment,
+  SecurityInvestment,
   AggregatedDebtHolding,
 } from "@/lib/types";
 import {
@@ -32,24 +32,24 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DirectDebtListItem } from "@/components/investments/debt/my-debt-list-item";
-import { cn, formatNumberWithSuffix } from "@/lib/utils";
-import { format, parseISO, isValid } from "date-fns";
+import { cn } from "@/lib/utils";
+import { format, parseISO, isValid, addYears, isBefore } from "date-fns";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
 export default function MyDebtInstrumentsPage() {
-  const { t: t } = useLanguage();
+  const { t, language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const { listedSecurities, isLoading: isLoadingListedSecurities } =
     useListedSecurities();
-  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
   const {
     directDebtHoldings,
     debtFundHoldings,
     totalProjectedAnnualInterest,
+    totalProjectedMonthlyInterest,
     totalDebtFundPnL,
     totalDebtFundCost,
     totalDirectDebtInvested,
@@ -75,7 +75,7 @@ export default function MyDebtInstrumentsPage() {
     let directDebtInvestedSum = 0;
 
     const directDebtInvestments = investments.filter(
-      (inv) => inv.type === "Debt Instruments",
+      (inv) => inv.type === "Debt Instruments" && !inv.fundType,
     ) as DebtInstrumentInvestment[];
     directDebtInvestments.forEach((debt) => {
       let maturityDay: string | undefined;
@@ -137,20 +137,17 @@ export default function MyDebtInstrumentsPage() {
       });
     });
 
-    const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
-    ) as StockInvestment[];
+    const debtInvestments = investments.filter(
+      (inv) =>
+        inv.type === "Debt Instruments" && isDebtRelatedFund(inv.fundType),
+    ) as SecurityInvestment[];
     const debtFundAggregationMap = new Map<string, AggregatedDebtHolding>();
 
-    stockInvestments.forEach((stockInv) => {
+    debtInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol,
+        (ls) => ls.id === stockInv.securityId,
       );
-      if (
-        security &&
-        security.securityType === "Fund" &&
-        isDebtRelatedFund(security.fundType)
-      ) {
+      if (security) {
         const symbol = security.symbol;
         const costOfThisLot = stockInv.amountInvested || 0;
         const unitsOfThisLot = stockInv.numberOfShares || 0;
@@ -159,7 +156,20 @@ export default function MyDebtInstrumentsPage() {
           debtFundAggregationMap.set(symbol, {
             id: security.id,
             itemType: "fund",
-            displayName: security.name,
+            displayName: security[language === "ar" ? "name_ar" : "name"],
+            totalUnits: unitsOfThisLot,
+            totalCost: costOfThisLot,
+            currentMarketPrice: security.price,
+            currency: security.currency,
+            logoUrl: security.logoUrl,
+            fundDetails: security,
+            fundInvestment: stockInv,
+          });
+        } else {
+          debtFundAggregationMap.set(symbol, {
+            id: security.id,
+            itemType: "fund",
+            displayName: security[language === "ar" ? "name_ar" : "name"],
             totalUnits: unitsOfThisLot,
             totalCost: costOfThisLot,
             currentMarketPrice: security.price,
@@ -230,17 +240,55 @@ export default function MyDebtInstrumentsPage() {
   const isTotalFundProfitable = totalDebtFundPnL >= 0;
   const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
 
-  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
+  // Calculate certificates expiring within a year
+  const { expiringCertificatesSum, expiringCertificatesPercentage } =
+    React.useMemo(() => {
+      if (isLoadingInvestments) {
+        return {
+          expiringCertificatesSum: 0,
+          expiringCertificatesPercentage: 0,
+        };
+      }
 
-  const formatCurrencyWithSuffix = (
-    value: number | undefined,
-    currencyCode: string = "EGP",
-  ) => {
-    if (value === undefined || value === null || isNaN(value))
-      return `${currencyCode} 0`;
-    const formattedNumber = formatNumberWithSuffix(value);
-    return `${currencyCode} ${formattedNumber}`;
-  };
+      const now = new Date();
+      const oneYearFromNow = addYears(now, 1);
+
+      let expiringSum = 0;
+      let totalCertificatesSum = 0;
+
+      directDebtHoldings.forEach((debt) => {
+        if (
+          debt.debtSubType === "Certificate" &&
+          debt.maturityDate &&
+          debt.amountInvested
+        ) {
+          totalCertificatesSum += debt.amountInvested;
+          try {
+            const maturityDate = parseISO(debt.maturityDate);
+            if (
+              isValid(maturityDate) &&
+              isBefore(maturityDate, oneYearFromNow)
+            ) {
+              expiringSum += debt.amountInvested;
+            }
+          } catch (e) {
+            console.error("Error processing maturity date:", e);
+          }
+        }
+      });
+
+      const percentage =
+        totalCertificatesSum > 0
+          ? (expiringSum / totalCertificatesSum) * 100
+          : 0;
+
+      return {
+        expiringCertificatesSum: expiringSum,
+        expiringCertificatesPercentage: percentage,
+      };
+    }, [directDebtHoldings, isLoadingInvestments]);
+
+  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   if (isLoading) {
     return (
@@ -273,7 +321,10 @@ export default function MyDebtInstrumentsPage() {
   }
 
   return (
-    <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
+    <div
+      className="space-y-8 relative min-h-[calc(100vh-10rem)]"
+      data-testid="debts-page"
+    >
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t("debt_instruments")}
@@ -331,18 +382,24 @@ export default function MyDebtInstrumentsPage() {
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {`${t("direct")}: ${formatNumberForMobile(
-                  isMobile,
-                  totalDirectDebtInvested,
-                  debtFundHoldings[0]?.currency,
-                )}`}
+                {`${t("direct")}: `}
+                <span className="font-medium text-foreground">
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalDirectDebtInvested,
+                    debtFundHoldings[0]?.currency,
+                  )}
+                </span>
               </span>
               <span>
-                {`${t("funds")}: ${formatNumberForMobile(
-                  isMobile,
-                  totalDebtFundCost,
-                  debtFundHoldings[0]?.currency,
-                )}`}
+                {`${t("funds")}: `}
+                <span className="font-medium text-foreground">
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalDebtFundCost,
+                    debtFundHoldings[0]?.currency,
+                  )}
+                </span>
               </span>
             </div>
           </div>
@@ -357,14 +414,54 @@ export default function MyDebtInstrumentsPage() {
           </CardTitle>
           <CardDescription>
             <p>{`${t("bonds_certificates_treasury_bills_you_own_directly")}`}</p>
-            {`${t("projected_interest")}: ${formatNumberForMobile(isMobile, totalProjectedAnnualInterest, debtFundHoldings[0]?.currency)} ${t("annually")}`}
+            <p>
+              {`${t("projected_interest")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  totalProjectedMonthlyInterest,
+                  debtFundHoldings[0]?.currency,
+                )}{" "}
+                ${t("monthly")}
+              </span>
+            </p>
+            <p>
+              {`${t("projected_interest")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  totalProjectedAnnualInterest,
+                  debtFundHoldings[0]?.currency,
+                )}{" "}
+                ${t("annually")}
+              </span>
+            </p>
+            <p>
+              {`${t("certificates_expiring_soon")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(
+                  isMobile,
+                  expiringCertificatesSum,
+                  debtFundHoldings[0]?.currency,
+                )}{" "}
+                - ${expiringCertificatesPercentage.toFixed(2)}%
+              </span>
+            </p>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {directDebtHoldings.length > 0 ? (
-            directDebtHoldings.map((debt) => (
-              <DirectDebtListItem key={debt.id} holding={debt} />
-            ))
+            [...directDebtHoldings]
+              .sort((a, b) => {
+                // Sort by day of the month, then by name if days are equal
+                const dayA = a.maturityDay ? parseInt(a.maturityDay, 10) : 0;
+                const dayB = b.maturityDay ? parseInt(b.maturityDay, 10) : 0;
+                if (dayA !== dayB) return dayA - dayB;
+                return (a.displayName || "").localeCompare(b.displayName || "");
+              })
+              .map((debt) => (
+                <DirectDebtListItem key={debt.id} holding={debt} />
+              ))
           ) : (
             <p className="text-muted-foreground py-4 text-center">
               {t("you_havent_added_any_direct_debt_investments_yet")}
@@ -407,8 +504,9 @@ export default function MyDebtInstrumentsPage() {
           size="icon"
           className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
           aria-label="Add new debt instrument"
+          data-testid="add-debt-certificate-button"
         >
-          <Plus className="h-7 w-7" />
+          <Plus className="h-7 w-7" data-testid="plus-icon" />
         </Button>
       </Link>
     </div>

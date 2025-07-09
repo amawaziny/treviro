@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { navItems } from "@/lib/navigation";
+import { Menu } from "lucide-react";
 
 export function BottomTabBar() {
-  const { t: t } = useLanguage();
+  const { t, dir } = useLanguage();
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
@@ -21,6 +22,7 @@ export function BottomTabBar() {
   return (
     <>
       <nav
+        dir={dir}
         className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-14 border-t bg-white dark:bg-[#181c2a] shadow-md max-w-full overflow-x-auto"
         style={{
           borderTop:
@@ -48,7 +50,7 @@ export function BottomTabBar() {
           className={`flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors text-muted-foreground`}
           onClick={() => setMenuOpen(true)}
         >
-          <span className="text-lg">☰</span>
+          <Menu className="h-4 w-4 mb-1" />
           {t("Menu")}
         </button>
       </nav>
@@ -57,6 +59,7 @@ export function BottomTabBar() {
       {/* Modal for the rest of the menu */}
       {menuOpen && (
         <div
+          dir={dir}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
           onClick={() => setMenuOpen(false)}
         >

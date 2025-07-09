@@ -391,7 +391,7 @@ export default function ExpensesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <TrendingDown className="mr-2 h-4 w-4 text-primary" />
+              <TrendingDown className="me-2 h-4 w-4 text-primary" />
               {t("no_itemized_expenses_recorded_this_month")}
             </CardTitle>
           </CardHeader>

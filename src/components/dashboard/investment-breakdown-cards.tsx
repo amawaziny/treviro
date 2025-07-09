@@ -2,7 +2,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useInvestments } from "@/hooks/use-investments";
-import { formatNumberWithSuffix, parseDateString } from "@/lib/utils";
+import { formatNumberForMobile, parseDateString } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
@@ -14,6 +14,7 @@ import {
   Plus,
 } from "lucide-react";
 import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const investmentTypeIcons = {
   ["Real Estate"]: Landmark,
@@ -49,6 +50,7 @@ export function InvestmentBreakdownCards({
   appSettings,
 }: InvestmentBreakdownCardsProps) {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const { investments } = useInvestments();
   if (!investments || investments.length === 0) {
     return (
@@ -168,7 +170,7 @@ export function InvestmentBreakdownCards({
                     <TrendingDown className="inline h-4 w-4 mr-1" />
                   )}
                   {plAmount >= 0 ? "+" : ""}
-                  {formatNumberWithSuffix(plAmount)}
+                  {formatNumberForMobile(isMobile, plAmount)}
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-4 items-end justify-between mt-2">
@@ -177,7 +179,7 @@ export function InvestmentBreakdownCards({
                     {t("invested")}
                   </div>
                   <div className="font-bold text-md text-[#23255a] dark:text-white truncate">
-                    {formatNumberWithSuffix(invested)}
+                    {formatNumberForMobile(isMobile, invested)}
                   </div>
                 </div>
                 <div>
@@ -185,7 +187,7 @@ export function InvestmentBreakdownCards({
                     {t("current")}
                   </div>
                   <div className="font-bold text-md text-[#23255a] dark:text-white truncate">
-                    {formatNumberWithSuffix(current)}
+                    {formatNumberForMobile(isMobile, current)}
                   </div>
                 </div>
                 <div>
@@ -202,7 +204,8 @@ export function InvestmentBreakdownCards({
                   </div>
                   <div className="font-bold text-md text-green-600 dark:text-green-400 truncate flex items-center">
                     <Plus className="h-4 w-4 mr-1" />
-                    {formatNumberWithSuffix(
+                    {formatNumberForMobile(
+                      isMobile,
                       Math.max(
                         0,
                         (totalCashBalance *

@@ -35,7 +35,10 @@ importers:
       '@radix-ui/react-menubar':
         specifier: ^1.1.6
         version: 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@radix-ui/react-progress':
+      "@radix-ui/react-popover":
+        specifier: ^1.1.14
+        version: 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-progress":
         specifier: ^1.1.2
         version: 1.1.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-radio-group':
@@ -104,12 +107,18 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
+      react-date-object:
+        specifier: ^2.1.9
+        version: 2.1.9
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       react-hook-form:
         specifier: ^7.54.2
         version: 7.57.0(react@18.3.1)
+      react-multi-date-picker:
+        specifier: ^4.5.2
+        version: 4.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: ^2.15.1
         version: 2.15.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1174,8 +1183,27 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@radix-ui/react-popper@1.2.7':
-    resolution: {integrity: sha512-IUFAccz1JyKcf/RjB552PlWwxjeCJB8/4KxT7EhBHOJM+mN7LdW+B3kacJXILm32xawcMMjb2i0cIZpo+f9kiQ==}
+  "@radix-ui/react-popover@1.1.14":
+    resolution:
+      {
+        integrity: sha512-ODz16+1iIbGUfFEfKx2HTPKizg2MN39uIOV8MXeHnmdd3i/N9Wt7vU46wbHsqA0xoaQyXVcs0KIlBdOA2Y95bw==,
+      }
+    peerDependencies:
+      "@types/react": "*"
+      "@types/react-dom": "*"
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      "@types/react":
+        optional: true
+      "@types/react-dom":
+        optional: true
+
+  "@radix-ui/react-popper@1.2.7":
+    resolution:
+      {
+        integrity: sha512-IUFAccz1JyKcf/RjB552PlWwxjeCJB8/4KxT7EhBHOJM+mN7LdW+B3kacJXILm32xawcMMjb2i0cIZpo+f9kiQ==,
+      }
     peerDependencies:
       '@types/react': '*'
       '@types/react-dom': '*'
@@ -3312,16 +3340,37 @@ packages:
     hasBin: true
 
   queue-microtask@1.2.3:
-    resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+    resolution:
+      {
+        integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==,
+      }
+
+  react-date-object@2.1.9:
+    resolution:
+      {
+        integrity: sha512-BHxD/quWOTo9fLKV/cfL/M31ePoj4a1JaJ/CnOf8Ndg3mrkh4x9wEMMkCfTrzduxDOgU8ZgR8uarhqI5G71sTg==,
+      }
 
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
     peerDependencies:
       react: ^18.3.1
 
+  react-element-popper@2.1.7:
+    resolution:
+      {
+        integrity: sha512-tuM2OxKlW32h+6uFSK6EENHPeZ2OGgOipHfOAl+VLWEv9/j3QkSGbD+ADX3A9uJlmq24i37n28RjJmAbGTfpEg==,
+      }
+    peerDependencies:
+      react: ">=16.8.0"
+      react-dom: ">=16.8.0"
+
   react-hook-form@7.57.0:
-    resolution: {integrity: sha512-RbEks3+cbvTP84l/VXGUZ+JMrKOS8ykQCRYdm5aYsxnDquL0vspsyNhGRO7pcH6hsZqWlPOjLye7rJqdtdAmlg==}
-    engines: {node: '>=18.0.0'}
+    resolution:
+      {
+        integrity: sha512-RbEks3+cbvTP84l/VXGUZ+JMrKOS8ykQCRYdm5aYsxnDquL0vspsyNhGRO7pcH6hsZqWlPOjLye7rJqdtdAmlg==,
+      }
+    engines: { node: ">=18.0.0" }
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
 
@@ -3332,7 +3381,19 @@ packages:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
   react-lifecycles-compat@3.0.4:
-    resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
+    resolution:
+      {
+        integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==,
+      }
+
+  react-multi-date-picker@4.5.2:
+    resolution:
+      {
+        integrity: sha512-FgWjZB3Z6IA6XpcWiLPk85PwcRUhOiYhKK42o5k672gD/n2I6rzPfQ8bUrldOIiF/Z7FfOCdH7a6FeubzqteLg==,
+      }
+    peerDependencies:
+      react: ">=16.8.0"
+      react-dom: ">=16.8.0"
 
   react-remove-scroll-bar@2.3.8:
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
@@ -4931,7 +4992,30 @@ snapshots:
       '@types/react': 18.3.23
       '@types/react-dom': 18.3.7(@types/react@18.3.23)
 
-  '@radix-ui/react-popper@1.2.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  "@radix-ui/react-popover@1.1.14(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)":
+    dependencies:
+      "@radix-ui/primitive": 1.1.2
+      "@radix-ui/react-compose-refs": 1.1.2(@types/react@18.3.23)(react@18.3.1)
+      "@radix-ui/react-context": 1.1.2(@types/react@18.3.23)(react@18.3.1)
+      "@radix-ui/react-dismissable-layer": 1.1.10(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-focus-guards": 1.1.2(@types/react@18.3.23)(react@18.3.1)
+      "@radix-ui/react-focus-scope": 1.1.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-id": 1.1.1(@types/react@18.3.23)(react@18.3.1)
+      "@radix-ui/react-popper": 1.2.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-portal": 1.1.9(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-presence": 1.1.4(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-primitive": 2.1.3(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      "@radix-ui/react-slot": 1.2.3(@types/react@18.3.23)(react@18.3.1)
+      "@radix-ui/react-use-controllable-state": 1.2.2(@types/react@18.3.23)(react@18.3.1)
+      aria-hidden: 1.2.6
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-remove-scroll: 2.7.1(@types/react@18.3.23)(react@18.3.1)
+    optionalDependencies:
+      "@types/react": 18.3.23
+      "@types/react-dom": 18.3.7(@types/react@18.3.23)
+
+  "@radix-ui/react-popper@1.2.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)":
     dependencies:
       '@floating-ui/react-dom': 2.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-arrow': 1.1.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7390,11 +7474,18 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
+  react-date-object@2.1.9: {}
+
   react-dom@18.3.1(react@18.3.1):
     dependencies:
       loose-envify: 1.4.0
       react: 18.3.1
       scheduler: 0.23.2
+
+  react-element-popper@2.1.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   react-hook-form@7.57.0(react@18.3.1):
     dependencies:
@@ -7405,6 +7496,13 @@ snapshots:
   react-is@18.3.1: {}
 
   react-lifecycles-compat@3.0.4: {}
+
+  react-multi-date-picker@4.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-date-object: 2.1.9
+      react-dom: 18.3.1(react@18.3.1)
+      react-element-popper: 2.1.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   react-remove-scroll-bar@2.3.8(@types/react@18.3.23)(react@18.3.1):
     dependencies:

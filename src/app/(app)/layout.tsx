@@ -26,9 +26,8 @@ import { useIsDetailsPage } from "@/hooks/use-route-check";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const { language } = useLanguage(); // Added to get current language
+  const { t, language, dir } = useLanguage(); // Added to get current language
   const isMobile = useIsMobile();
-  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -38,7 +37,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center">
+      <div
+        className="flex h-screen w-screen items-center justify-center"
+        dir={dir}
+      >
         <div className="flex flex-col items-center gap-4">
           <Coins className="h-12 w-12 animate-spin text-primary" />
           <p className="text-muted-foreground">{t("loading")}</p>
@@ -68,7 +70,7 @@ function FormAwareLayout({
   const { isFormOpen } = useForm();
   const { setOpenMobile } = useSidebar(); // This comes from @/components/ui/sidebar
   const isDetailsPage = useIsDetailsPage();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
 
   // Close sidebar and bottom tabs when form is open or on details page
   React.useEffect(() => {
@@ -85,6 +87,7 @@ function FormAwareLayout({
           variant="sidebar"
           collapsible="icon"
           side={language === "ar" ? "right" : "left"}
+          dir={dir}
         >
           <SidebarRail />
           <SidebarHeader className="p-4 justify-center items-center group-data-[collapsible=icon]:justify-start">
@@ -101,12 +104,11 @@ function FormAwareLayout({
         </Sidebar>
       )}
       <SidebarInset>
-        {" "}
         {/* This component renders a <main> tag that is flex flex-col */}
         <Header /> {/* This is the app's main top bar for the content area */}
         {/* This div will wrap the page content, provide padding, and grow to fill remaining vertical space */}
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
-          {children}{" "}
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background" dir={dir}>
+          {children}
           {/* This is the page-specific content, e.g., DashboardPage */}
         </div>
         {!isFormOpen && !isDetailsPage && <BottomTabBar />}

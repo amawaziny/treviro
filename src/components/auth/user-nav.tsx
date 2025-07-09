@@ -18,7 +18,7 @@ import Link from "next/link";
 
 export function UserNav() {
   const { isAuthenticated, user, logout, login, isLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   if (isLoading) {
     return (
       <Button
@@ -44,7 +44,7 @@ export function UserNav() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir={dir}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
