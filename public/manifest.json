@@ -2,10 +2,24 @@
   "name": "Treviro",
   "short_name": "Treviro",
   "description": "Modern Investment Portfolio Tracker",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#F2F4F7",
   "theme_color": "#3498DB",
+  "orientation": "portrait",
+  "categories": ["finance", "productivity"],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your portfolio",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
