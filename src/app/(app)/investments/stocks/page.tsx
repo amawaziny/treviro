@@ -166,7 +166,7 @@ export default function MyStocksPage() {
       <Separator />
 
       {isLoading ? (
-        <Card>
+        <Card data-testid="loading-skeleton">
           <CardHeader>
             <Skeleton className="h-6 w-1/3" />
           </CardHeader>

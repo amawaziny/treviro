@@ -116,7 +116,7 @@ test.describe("Stocks & Equity Funds Page", () => {
     await expect(loadingIndicator).toBeVisible();
     
     // Wait for data to load
-    await page.waitForLoadState("networkidle");
+    // await page.waitForLoadState("networkidle");
     
     // Verify loading state is gone
     await expect(loadingIndicator).not.toBeVisible({ timeout: 10000 });
