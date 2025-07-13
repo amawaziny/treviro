@@ -1,0 +1,891 @@
+[
+  {
+    "isin": "EGS30211C014",
+    "companyName": "AJWA for Food Industries company Egypt",
+    "sector": "Real Estate",
+    "companyNameAr": "اجواء للصناعات الغذائية - مصر",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS32331C018",
+    "companyName": "ARAB POLVARA SPINNING & WEAVING CO.",
+    "sector": "Real Estate",
+    "companyNameAr": "العربيه وبولفارا للغزل والنسيج - يونيراب",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3E071C013",
+    "companyName": "Acrow Misr",
+    "sector": "Banks",
+    "companyNameAr": "اكرومصر للشدات والسقالات المعدنية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS7D5P1C019",
+    "companyName": "Act Financial",
+    "sector": "Banks",
+    "companyNameAr": "اكت فاينانشال للاستشارات",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS02291C010",
+    "companyName": "Al Khair River For Development Agricultural Investment&Envir",
+    "sector": "Banks",
+    "companyNameAr": "نهر الخير للتنمية والأستثمار الزراعى والخدمات البيئية",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS676N1C015",
+    "companyName": "Al Tawfeek Leasing Company-A.T.LEASE",
+    "sector": "Banks",
+    "companyNameAr": "A.T.LEASEالتوفيق للتأجير التمويلي -أية.تي.ليس",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS07331C019",
+    "companyName": "Al – Ahly Group For Modern Agriculture",
+    "sector": "Banks",
+    "companyNameAr": "مجموعة الأهلى للزراعات الحديثة",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS42111C012",
+    "companyName": "Alexandria Containers and goods",
+    "sector": "Banks",
+    "companyNameAr": "الاسكندرية لتداول الحاويات والبضائع",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30471C014",
+    "companyName": "Alexandria Flour Mills",
+    "sector": "Banks",
+    "companyNameAr": "مطاحن ومخابز الاسكندرية",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS380P1C010",
+    "companyName": "Alexandria Mineral Oils Company",
+    "sector": "Banks",
+    "companyNameAr": "الاسكندرية للزيوت المعدنية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS67331C016",
+    "companyName": "Alexandria National Company for Financial Investment",
+    "sector": "Banks",
+    "companyNameAr": "الاسكندريه الوطنيه للاستثمارات الماليه",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS32041C013",
+    "companyName": "Alexandria Spinning & Weaving (SPINALEX)",
+    "sector": "Health Care",
+    "companyNameAr": "الاسكندرية للغزل والنسيج (سبينالكس)",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS32221C011",
+    "companyName": "Arab Cotton Ginning",
+    "sector": "Real Estate",
+    "companyNameAr": "العربية لحليج الأقطان",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS67221C019",
+    "companyName": "Arab Moltaka Investments Co",
+    "sector": "Real Estate",
+    "companyNameAr": "الملتقي العربي للاستثمارات",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3E1E1C013",
+    "companyName": "Arab Valves Company",
+    "sector": "Real Estate",
+    "companyNameAr": "العربية للمحابس",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS21351C019",
+    "companyName": "Arabia Investments Holding",
+    "sector": "Real Estate",
+    "companyNameAr": "ارابيا انفستمنتس هولدنج",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3C0O1C016",
+    "companyName": "Arabian Cement Company",
+    "sector": "Real Estate",
+    "companyNameAr": "العربية للاسمنت",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30031C016",
+    "companyName": "Arabian Food Industries DOMTY",
+    "sector": "Real Estate",
+    "companyNameAr": "الصناعات الغذائية العربية-دومتى",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS691L1C018",
+    "companyName": "Aspire Capital Holding For Financial Investments",
+    "sector": "Real Estate",
+    "companyNameAr": "اسباير كابيتال القابضة للاستثمارات المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS691T1C010",
+    "companyName": "B Investments Holding",
+    "sector": "Real Estate",
+    "companyNameAr": "بى انفستمنتس القابضه",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS691G1C015",
+    "companyName": "Beltone Holding",
+    "sector": "Banks",
+    "companyNameAr": "بلتون القابضة",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS691D1C018",
+    "companyName": "CI Capital Holding For Financial Investments",
+    "sector": "Real Estate",
+    "companyNameAr": "سى اى كابيتال القابضة للاستثمارات المالية",
+    "sectorAr": "الاتصالات"
+  },
+  {
+    "isin": "EGS72201C014",
+    "companyName": "Cairo Educational Services",
+    "sector": "Real Estate",
+    "companyNameAr": "القاهرة للخدمات التعليمية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS65541C012",
+    "companyName": "EGS72201C014Education Services",
+    "sector": "Real Estate",
+    "companyNameAr": "القاهره للإستثمار و التنمية العقاريه سيرا للتعليم",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30581C010",
+    "companyName": "Cairo Oils & Soap",
+    "sector": "Real Estate",
+    "companyNameAr": "القاهرة للزيوت والصابون",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS02051C018",
+    "companyName": "Cairo Poultry",
+    "sector": "Health Care",
+    "companyNameAr": "القاهرة للدواجن",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS44031C010",
+    "companyName": "Canal Shipping Agencies",
+    "sector": "Health Care",
+    "companyNameAr": "القناة للتوكيلات الملاحية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS698X1C017",
+    "companyName": "Catalyst Partners Middle East –CPME",
+    "sector": "Health Care",
+    "companyNameAr": "كاتليست بارتنرز ميديل ايست",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS3C111C019",
+    "companyName": "Ceramic & Porcelain",
+    "sector": "Health Care",
+    "companyNameAr": "العامة لمنتجات الخزف والصيني",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS696Z1C017",
+    "companyName": "Certificates Of Odin Egyptian Equity Investment Fund-KASAB",
+    "sector": "Health Care",
+    "companyNameAr": "EGS694B1C017خدمات مالية غير مصرفية",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS672I2C014",
+    "companyName": "Concrete Fashion Group For Commercial& Industrial Investment",
+    "sector": "Banks",
+    "companyNameAr": "كونكريت فاشون جروب للاستثمارات التجارية والصناعية",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS738I1C018",
+    "companyName": "Contact Financial Holding",
+    "sector": "Banks",
+    "companyNameAr": "كونتكت المالية القابضة",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS65511C015",
+    "companyName": "EGS738I1C018Non-bank financial services",
+    "sector": "Real Estate",
+    "companyNameAr": "كوبر للاستثمار التجارى و التطوير العقارى",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS23141C012",
+    "companyName": "EGS65511C015Contracting & Construction Engineering",
+    "sector": "Real Estate",
+    "companyNameAr": "كريستمارك للمقاولات والتطوير العقاري",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS42121C011",
+    "companyName": "Damietta Container and Cargo Handling",
+    "sector": "Banks",
+    "companyNameAr": "دمياط لتداول الحاويات و البضائع",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS63031C016",
+    "companyName": "Delta For Printing & Packaging",
+    "sector": "Insurance",
+    "companyNameAr": "الدلتا للتأمين",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30201C015",
+    "companyName": "Delta Sugar",
+    "sector": "Insurance",
+    "companyNameAr": "الدلتا للسكر",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS33321C018",
+    "companyName": "Dice Sport & Casual Wear",
+    "sector": "Real Estate",
+    "companyNameAr": "دايس للملابس الجاهزة",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS69101C011",
+    "companyName": "EFG Holding",
+    "sector": "Media",
+    "companyNameAr": "مجموعة اي اف جي القابضة",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS69491M015",
+    "companyName": "EGS69101C011Non-bank financial services",
+    "sector": "Media",
+    "companyNameAr": "EGX 30 INDEX ETF-وثائق استثمار شركة صناديق المؤشرات",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30351C018",
+    "companyName": "East Delta Flour Mills",
+    "sector": "Industrial Goods",
+    "companyNameAr": "مطاحن شرق الدلتا",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS37091C013",
+    "companyName": "Eastern Company",
+    "sector": "Industrial Goods",
+    "companyNameAr": "الشرقية - ايسترن كومباني",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS305I1C011",
+    "companyName": "Edita Food Industries S.A.E",
+    "sector": "Industrial Goods",
+    "companyNameAr": "ايديتا للصناعات الغذائية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS02211C018",
+    "companyName": "Egypt for Poultry",
+    "sector": "Basic Resources",
+    "companyNameAr": "المصرية للدواجن",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS681D1C010",
+    "companyName": "Egyptian Arabian(Themar)Comp. For Securities&Bonds Brok. EAC",
+    "sector": "Basic Resources",
+    "companyNameAr": "EAC المصرية العربية (ثمار) لتداول الاوراق المالية والسندات",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS69082C013",
+    "companyName": "Egyptian Kuwaiti Holding",
+    "sector": "Basic Resources",
+    "companyNameAr": "القابضة المصرية الكويتية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS69081C023",
+    "companyName": "Egyptian Kuwaiti Holding-EGP",
+    "sector": "Basic Resources",
+    "companyNameAr": "القابضة المصرية الكويتية بالجنية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS42051C010",
+    "companyName": "Egyptian Transport (EGYTRANS)",
+    "sector": "Media",
+    "companyNameAr": "المصرية لخدمات النقل (ايجيترانس)",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS213S1C010",
+    "companyName": "Egyptians For Investment & Urban Development",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "المصريين للاستثمار والتنمية العمرانية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS694B1C017",
+    "companyName": "Egyptians Housing Development & Reconstruction",
+    "sector": "Real Estate",
+    "companyNameAr": "وثائق شركة صندوق استثمار المصريين للاستثمار العقارى",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS69021C011",
+    "companyName": "El Ahli Investment and Development",
+    "sector": "Real Estate",
+    "companyNameAr": "الاهلي للتنمية والاستثمار",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS360A1C011",
+    "companyName": "El Ahram Co. For Printing And Packing",
+    "sector": "Real Estate",
+    "companyNameAr": "الاهرام للطباعة و التغليف",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS65771C015",
+    "companyName": "El Arabia for Land Reclamation",
+    "sector": "Industrial Goods",
+    "companyNameAr": "العربية لاستصلاح الاراضي",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3C071C015",
+    "companyName": "El Ezz Porcelain (Gemma)",
+    "sector": "Industrial Goods",
+    "companyNameAr": "العز للسيراميك و البورسلين - الجوهره",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS69011C012",
+    "companyName": "El Kahera El Watania Investment",
+    "sector": "Industrial Goods",
+    "companyNameAr": "القاهرة الوطنية للاستثمار والاوراق المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS33061C010",
+    "companyName": "El Nasr Clothes & Textiles (Kabo)",
+    "sector": "Real Estate",
+    "companyNameAr": "النصر للملابس والمنسوجات - كابو",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS300L1C011",
+    "companyName": "El Nasr For Manufacturing Agricultural Crops",
+    "sector": "Real Estate",
+    "companyNameAr": "النصر لتصنيع الحاصلات الزراعية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS681I1C015",
+    "companyName": "El Orouba Securities Brokerage",
+    "sector": "Real Estate",
+    "companyNameAr": "العروبة للسمسرة فى الأوراق المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3F021C017",
+    "companyName": "Engineering Industries (ICON)",
+    "sector": "Real Estate",
+    "companyNameAr": "الصناعات الهندسية المعمارية للانشاء والتعمير - ايكون",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS38251C012",
+    "companyName": "Extracted Oils",
+    "sector": "Banks",
+    "companyNameAr": "الزيوت المستخلصة ومنتجاتها",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS46051C016",
+    "companyName": "GMC GROUP FOR INDUSTRIAL COMMERCIAL & FINANCIAL INVESTMENTS",
+    "sector": "Industrial Goods",
+    "companyNameAr": "مجموعة جى . أم . سى للاستثمارات الصناعية و التجارية المالية",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS59U92C011",
+    "companyName": "GTEX For Commercial And Industrial",
+    "sector": "Industrial Goods",
+    "companyNameAr": "جيتكس للاستثمارات التجارية والصناعية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS01081C016",
+    "companyName": "General Company For Land Reclamation,Development & Reconstru",
+    "sector": "Industrial Goods",
+    "companyNameAr": "العامة لاستصلاح الاراضي و التنمية و التعمير",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30441C017",
+    "companyName": "General Silos & Storage",
+    "sector": "Industrial Goods",
+    "companyNameAr": "العامة للصوامع والتخزين",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS21541C015",
+    "companyName": "Giza General Contracting",
+    "sector": "Real Estate",
+    "companyNameAr": "الجيزةالعامة للمقاولات والاستثمارالعقارى",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS07DR1C012",
+    "companyName": "Gogreen for Agricultural Investment",
+    "sector": "Health Care",
+    "companyNameAr": "جو جرين للاستثمار الزراعى والتنمية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS32161C019",
+    "companyName": "Golden Textiles & Clothes Wool",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "جولدن تكس للاصواف",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS69261C013",
+    "companyName": "Grand Investment Capital",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "جراند انفستمنت القابضة للاستثمارات المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS22171C010",
+    "companyName": "Industrial & Engineering Projects",
+    "sector": "Health Care",
+    "companyNameAr": "المشروعات الصناعية والهندسية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS07061C012",
+    "companyName": "International Agricultural Products",
+    "sector": "Health Care",
+    "companyNameAr": "الدوليه للمحاصيل الزراعيه",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS520D1C015",
+    "companyName": "International Company For Fertilizers & Chemicals",
+    "sector": "Real Estate",
+    "companyNameAr": "الدولية للأسمدة والكيماويات",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS67001C015",
+    "companyName": "International Company For Leasing (IncoLEASE)",
+    "sector": "Real Estate",
+    "companyNameAr": "الدولية للتأجير التمويلي (إنكوليس)",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS02021C011",
+    "companyName": "Ismailia Misr Poultry",
+    "sector": "Real Estate",
+    "companyNameAr": "الاسماعيلية مصر للدواجن",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS01041C010",
+    "companyName": "Ismailia National Food Industries",
+    "sector": "Real Estate",
+    "companyNameAr": "الاسماعيلية الوطنية للصناعات الغذائية (فوديكو)",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30901C010",
+    "companyName": "Juhayna Food Industries",
+    "sector": "Real Estate",
+    "companyNameAr": "جهينة للصناعات الغذائية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS07911C018",
+    "companyName": "KORRA",
+    "sector": "Real Estate",
+    "companyNameAr": "قرة لمشروعات الطاقة والاستثمار",
+    "sectorAr": "البنوك"
+  },
+  {
+    "isin": "EGS3C161C014",
+    "companyName": "Lecico Egypt",
+    "sector": "Basic Resources",
+    "companyNameAr": "ليسيكو مصر",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS07661C019",
+    "companyName": "Lotus For Agricultural Investments And Development",
+    "sector": "Basic Resources",
+    "companyNameAr": "لوتس للتنمية والاستثمار الزراعى",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS75011C014",
+    "companyName": "MM Group For Industry And International Trade",
+    "sector": "Industrial Goods",
+    "companyNameAr": "ام.ام جروب للصناعة والتجارة العالمية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS02091C014",
+    "companyName": "Mansourah Poultry",
+    "sector": "Real Estate",
+    "companyNameAr": "المنصورة للدواجن",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS44012C010",
+    "companyName": "Maridive & oil services",
+    "sector": "Real Estate",
+    "companyNameAr": "الخدمات الملاحية والبترولية  - ماريديف",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30421C019",
+    "companyName": "Middle & West Delta Flour Mills",
+    "sector": "Real Estate",
+    "companyNameAr": "مطاحن وسط وغرب الدلتا",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS3C001C012",
+    "companyName": "Middle East Glass Manufacturing",
+    "sector": "Real Estate",
+    "companyNameAr": "الشرق الأوسط لصناعة الزجاج",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30401C011",
+    "companyName": "Middle Egypt Flour Mills",
+    "sector": "Real Estate",
+    "companyNameAr": "مطاحن مصر الوسطي",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS3C371C019",
+    "companyName": "Misr Beni Suef Cement",
+    "sector": "Health Care",
+    "companyNameAr": "مصر بنى سويف للاسمنت",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS3C391C017",
+    "companyName": "Misr Cement (Qena)",
+    "sector": "Health Care",
+    "companyNameAr": "مصر للاسمنت - قنا",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS53051C016",
+    "companyName": "Misr Duty Free Shops",
+    "sector": "Basic Resources",
+    "companyNameAr": "مصر للاسواق الحرة",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS38421C011",
+    "companyName": "Misr Oils & Soap",
+    "sector": "Basic Resources",
+    "companyNameAr": "مصر للزيوت و الصابون",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS63041C015",
+    "companyName": "EGS38421C011Food, Beverages and Tobacco",
+    "sector": "Insurance",
+    "companyNameAr": "المهندس للتأمين",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS69182C011",
+    "companyName": "Naeem Holding",
+    "sector": "Insurance",
+    "companyNameAr": "النعيم القابضة للاستثمارات",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS23111C015",
+    "companyName": "Nasr Company for Civil Works",
+    "sector": "Insurance",
+    "companyNameAr": "شركة النصر للأعمال المدنية",
+    "sectorAr": "الاتصالات"
+  },
+  {
+    "isin": "EGS735N2C012",
+    "companyName": "National Drilling",
+    "sector": "Insurance",
+    "companyNameAr": "الحفر الوطنية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS370O1C013",
+    "companyName": "National Printing",
+    "sector": "Real Estate",
+    "companyNameAr": "الوطنية للطباعة",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30361C017",
+    "companyName": "North Cairo Mills",
+    "sector": "Utilities",
+    "companyNameAr": "مطاحن ومخابز شمال القاهرة",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS52041C018",
+    "companyName": "Northern Upper Egypt Development & Agricultural Production",
+    "sector": "Utilities",
+    "companyNameAr": "شمال الصعيد للتنمية والانتاج الزراعى (نيوداب)",
+    "sectorAr": "الاتصالات"
+  },
+  {
+    "isin": "EGS67181C015",
+    "companyName": "ODIN Investments",
+    "sector": "Health Care",
+    "companyNameAr": "اودن للاستثمارات المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30AL1C012",
+    "companyName": "Obour Land For Food Industries",
+    "sector": "Health Care",
+    "companyNameAr": "عبور لاند للصناعات الغذائية",
+    "sectorAr": "الاتصالات"
+  },
+  {
+    "isin": "EGS95001C011",
+    "companyName": "Orascom Construction PLC",
+    "sector": "Health Care",
+    "companyNameAr": "اوراسكوم كونستراكشون بي ال سي",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS696S1C016",
+    "companyName": "Orascom Financial Holding",
+    "sector": "Real Estate",
+    "companyNameAr": "اوراسكوم المالية القابضة",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS33041C012",
+    "companyName": "Oriental Weavers",
+    "sector": "Media",
+    "companyNameAr": "النساجون الشرقيون للسجاد",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS68181C014",
+    "companyName": "Osool ESB Securities Brokerage",
+    "sector": "Media",
+    "companyNameAr": "اصول E.S.B. للوساطة في الاوراق المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS36091C014",
+    "companyName": "Paper Middle East (Simo)",
+    "sector": "Real Estate",
+    "companyNameAr": "الورق للشرق الاوسط - سيمو",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS42101C013",
+    "companyName": "Port Said Containers And Cargo Handling Co.",
+    "sector": "Real Estate",
+    "companyNameAr": "بورسعيد لتداول الحاويات والبضائع",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS691A1C011",
+    "companyName": "Prime Holding",
+    "sector": "Real Estate",
+    "companyNameAr": "برايم القابضة للاستثمارات المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS73541C012",
+    "companyName": "QALA For Financial Investments",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "القلعة للاستثمارات المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS73541P048",
+    "companyName": "QALA For Financial Investments - Preferred Shares",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "EGS73541C012خدمات مالية غير مصرفية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS36021C011",
+    "companyName": "Rakta Paper Manufacturing",
+    "sector": "Banks",
+    "companyNameAr": "العامة لصناعة الورق - راكتا",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS690C1C010",
+    "companyName": "Raya Holding For Financial Investments",
+    "sector": "Media",
+    "companyNameAr": "راية القابضة للأستثمارات المالية",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS923X1C014",
+    "companyName": "Rights Issue Of Al Tawfeek Leasing Company - A.T.LEASE -3",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "حق اكتتاب شركة التوفيق للتأجير التمويلى - ايه.تى.ليس 3",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS923W1C015",
+    "companyName": "Rights Issue Of El Nasr Clothes And Textiles Kabo -3",
+    "sector": "Real Estate",
+    "companyNameAr": "حق اكتتاب شركة النصر للملابس والمنسوجات-كابو-3",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3A221C018",
+    "companyName": "Rubex International for Plastic and Acrylic Manufacturing",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "روبكس العالميه لتصنيع البلاستيك والاكريلك",
+    "sectorAr": "الاتصالات"
+  },
+  {
+    "isin": "EGS51191C012",
+    "companyName": "Samad Misr -EGYFERT",
+    "sector": "Health Care",
+    "companyNameAr": "سماد مصر (ايجيفرت)",
+    "sectorAr": "الاتصالات"
+  },
+  {
+    "isin": "EGS67031C012",
+    "companyName": "Saudi Egyptian Investment & Finance",
+    "sector": "Health Care",
+    "companyNameAr": "السعودية المصرية للاستثمار والتمويل",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS67032C010",
+    "companyName": "Saudi Egyptian Investment & Finance $",
+    "sector": "Health Care",
+    "companyNameAr": "السعودية المصرية للاستثمار والتمويل   $",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30291C016",
+    "companyName": "Sharkia National Food",
+    "sector": "Health Care",
+    "companyNameAr": "الشرقية الوطنية للامن الغذائي",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3C401C014",
+    "companyName": "Sinai Cement",
+    "sector": "Basic Resources",
+    "companyNameAr": "اسمنت سيناء",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30411C010",
+    "companyName": "South Cairo & Giza Mills & Bakeries",
+    "sector": "Banks",
+    "companyNameAr": "مطاحن ومخابز جنوب القاهرة والجيزة",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS3C351C011",
+    "companyName": "South Valley Cement",
+    "sector": "Banks",
+    "companyNameAr": "جنوب الوادى للاسمنت",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS740C1C010",
+    "companyName": "Speed Medical",
+    "sector": "Technology",
+    "companyNameAr": "EGS07911C018مقاولات و إنشاءات هندسية",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS597R1C017",
+    "companyName": "Taaleem Management Services",
+    "sector": "Real Estate",
+    "companyNameAr": "Taaleem Management Services تعليم لخدمات الإدارة",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS3C151C015",
+    "companyName": "The Arab Ceramic CO.- Ceramica Remas",
+    "sector": "Health Care",
+    "companyNameAr": "العربية للخزف - سيراميكا ريماس",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS30221C013",
+    "companyName": "The Arab Dairy Products Co. Arab Dairy - Panda",
+    "sector": "Health Care",
+    "companyNameAr": "العربية لمنتجات الألبان\" آراب ديرى - باندا\"",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS729F1C012",
+    "companyName": "The Egyptian Modern Education Systems",
+    "sector": "Health Care",
+    "companyNameAr": "المصرية لنظم التعليم الحديثة",
+    "sectorAr": "غير محدد"
+  },
+  {
+    "isin": "EGS505Z1C018",
+    "companyName": "U Consumer Finance",
+    "sector": "Travel & Leisure",
+    "companyNameAr": "يو للتمويل الاستهلاكى",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS38161C013",
+    "companyName": "Universal For Paper and Packaging Materials (Unipack",
+    "sector": "Real Estate",
+    "companyNameAr": "يونيفرسال لصناعة مواد التعبئة و التغليف و الورق - يونيباك",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS30451C016",
+    "companyName": "Upper Egypt Flour Mills",
+    "sector": "Real Estate",
+    "companyNameAr": "مطاحن مصر العليا",
+    "sectorAr": "التكنولوجيا"
+  },
+  {
+    "isin": "EGS01071C017",
+    "companyName": "Wadi Kom Ombo Land Reclamation",
+    "sector": "Real Estate",
+    "companyNameAr": "وادي كوم امبو لاستصلاح الاراضي",
+    "sectorAr": "التكنولوجيا"
+  }
+]
