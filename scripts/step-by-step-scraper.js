@@ -9,7 +9,7 @@ const readline = require('readline').createInterface({
 });
 
 // File paths
-const BILINGUAL_JSON = path.join(__dirname, '../data/egx-stocks-bilingual.json');
+const ISINS_JSON = path.join(__dirname, '../data/egx-isins.json');
 const DETAILED_JSON = path.join(__dirname, '../data/egx-companies-detailed.json');
 
 // Load existing data
@@ -18,8 +18,8 @@ if (fs.existsSync(DETAILED_JSON)) {
   detailedCompanies = JSON.parse(fs.readFileSync(DETAILED_JSON, 'utf-8'));
 }
 
-// Load bilingual data
-const bilingualData = JSON.parse(fs.readFileSync(BILINGUAL_JSON, 'utf-8'));
+// Load ISINs
+const isins = JSON.parse(fs.readFileSync(ISINS_JSON, 'utf-8'));
 
 // Create a map of existing companies by ISIN for faster lookup
 const companiesByIsin = new Map(detailedCompanies.map(company => [company.isin, company]));
@@ -70,7 +70,7 @@ async function getCompanyDetails(isin, companyName, sector, companyNameAr, secto
       console.log('CAPTCHA solved! Extracting data...');
       
       // Take a screenshot for reference
-      await page.screenshot({ path: `debug-${isin}.png` });
+      // await page.screenshot({ path: `debug-${isin}.png` });
       
       // Extract data using the same approach as manual-captcha-solver.js
       const data = await page.evaluate((isin) => {
@@ -221,82 +221,112 @@ async function getCompanyDetails(isin, companyName, sector, companyNameAr, secto
 
 // Process companies one by one
 async function processCompanies() {
-  const results = [];
-  
-  for (const [index, company] of bilingualData.entries()) {
+  console.log(`Found ${isins.length} companies in ISINs list.\n`);
+
+  for (const isin of isins) {
+    const existingCompany = companiesByIsin.get(isin);
+    
+    // Skip if already processed and not forced
+    if (existingCompany && !process.env.FORCE_UPDATE) {
+      console.log(`\n=== Skipping (already processed): ${isin} ===`);
+      continue;
+    }
+
+    console.log(`\n=== Processing: ${isin} ===`);
+    
     try {
-      const existingCompany = companiesByIsin.get(company.isin);
-      
-      // Skip if company already has complete data
-      if (existingCompany && existingCompany.details && Object.keys(existingCompany.details).length > 0) {
-        console.log(`\nSkipping ${company.isin} - already exists`);
-        results.push(existingCompany);
-        continue;
-      }
-      
-      console.log(`\n=== Processing ${index + 1}/${bilingualData.length} ===`);
-      
-      // Get company details
-      const details = await getCompanyDetails(
-        company.isin,
-        company.companyName,
-        company.sector,
-        company.companyNameAr,
-        company.sectorAr
+      // Get company details with empty values for bilingual data
+      const companyData = await getCompanyDetails(
+        isin,
+        '',  // companyName will be filled from the page
+        '',  // sector will be filled from the page
+        '',  // companyNameAr will be empty
+        ''   // sectorAr will be empty
       );
+
+      // Show the extracted data
+      console.log('\n=== Extracted Data ===');
+      console.log(JSON.stringify(companyData, null, 2));
+
+      // Ask for confirmation
+      const isCorrect = await prompt('\nIs this data correct? (y/n): ');
       
-      // Update existing company or add new one
-      if (existingCompany) {
-        Object.assign(existingCompany, details);
-        results.push(existingCompany);
+      if (isCorrect) {
+        // Update or add the company data
+        if (existingCompany) {
+          Object.assign(existingCompany, companyData);
+        } else {
+          companiesByIsin.set(isin, companyData);
+        }
+        
+        // Save the updated data
+        fs.writeFileSync(
+          DETAILED_JSON,
+          JSON.stringify(Array.from(companiesByIsin.values()), null, 2),
+          'utf-8'
+        );
+        
+        console.log('Data saved successfully!');
       } else {
-        results.push(details);
+        console.log('Data not saved. Please update the data and press Enter to continue...');
+        await new Promise(resolve => readline.once('line', resolve));
+        
+        // Save the data as is if the user manually updated it
+        if (existingCompany) {
+          Object.assign(existingCompany, companyData);
+        } else {
+          companiesByIsin.set(isin, companyData);
+        }
+        
+        fs.writeFileSync(
+          DETAILED_JSON,
+          JSON.stringify(Array.from(companiesByIsin.values()), null, 2),
+          'utf-8'
+        );
+        
+        console.log('Data saved with manual updates.');
       }
-      
-      // Save progress after each company
-      fs.writeFileSync(DETAILED_JSON, JSON.stringify(results, null, 2));
-      console.log(`\nSaved progress for ${company.isin}`);
-      
-      // Ask user if they want to continue
-      const shouldContinue = await prompt('\nContinue to next company? (y/n): ');
-      if (!shouldContinue) {
-        console.log('\nStopped by user.');
-        break;
-      }
-      
     } catch (error) {
-      console.error(`Error processing ${company.isin}:`, error);
-      // Keep existing data if available
-      results.push(companiesByIsin.get(company.isin) || {
-        isin: company.isin,
-        companyName: company.companyName || '',
-        sector: company.sector || '',
-        companyNameAr: company.companyNameAr || '',
-        sectorAr: company.sectorAr || '',
+      console.error(`Error processing ${isin}:`, error);
+      
+      // Save error information
+      const errorData = {
+        isin: isin,
         error: error.message,
         lastUpdated: new Date().toISOString()
-      });
+      };
       
-      // Save error
-      fs.writeFileSync(DETAILED_JSON, JSON.stringify(results, null, 2));
-      
-      // Ask user if they want to continue after error
-      const shouldContinue = await prompt('\nAn error occurred. Continue to next company? (y/n): ');
-      if (!shouldContinue) {
-        console.log('\nStopped by user after error.');
-        break;
+      if (existingCompany) {
+        Object.assign(existingCompany, errorData);
+      } else {
+        companiesByIsin.set(isin, errorData);
       }
+      
+      fs.writeFileSync(
+        DETAILED_JSON,
+        JSON.stringify(Array.from(companiesByIsin.values()), null, 2),
+        'utf-8'
+      );
+      
+      console.log('Error details saved.');
+    }
+    
+    // Ask if user wants to continue
+    const shouldContinue = await prompt('\nContinue to next company? (y/n): ');
+    if (!shouldContinue) {
+      console.log('\nStopped by user.');
+      break;
     }
   }
   
-  return results;
+  return Array.from(companiesByIsin.values());
 }
 
 // Run the script
 (async () => {
   try {
     console.log('Starting step-by-step company data extraction...');
-    console.log(`Found ${bilingualData.length} companies in bilingual data.`);
+    console.log(`Found ${isins.length} companies in bilingual data.`);
     
     const results = await processCompanies();
     

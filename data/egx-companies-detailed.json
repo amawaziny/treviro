@@ -673,5 +673,55 @@
       "marketCap": "9,465,000,000"
     },
     "lastUpdated": "2025-07-13T21:11:03.729Z"
+  },
+  {
+    "isin": "EGS01041C010",
+    "symbol": "INFI.CA",
+    "companyName": "Ismailia National Food Industries",
+    "sector": "Food, Beverages and Tobacco",
+    "companyNameAr": "",
+    "sectorAr": "",
+    "details": {
+      "parValue": "5",
+      "currency": "Egyptian Pound",
+      "listingDate": "06/09/2010",
+      "securityType": "Egyptian securities-Stocks",
+      "listedShares": "14,547,500",
+      "tradedVolume": "441,133",
+      "couponPaymentDate": "30/04/2025",
+      "tradedValue": "38,711,705",
+      "priceEarningRatio": "13.45",
+      "dividendYield": "0.28",
+      "cashDividends": "0.25",
+      "couponNo": "3",
+      "closingPrice": "88.19",
+      "marketCap": "1,282,944,025"
+    },
+    "lastUpdated": "2025-07-13T21:40:29.299Z"
+  },
+  {
+    "isin": "EGS01071C017",
+    "symbol": "WKOL.CA",
+    "companyName": "Wadi Kom Ombo Land Reclamation",
+    "sector": "Contracting & Construction Engineering",
+    "companyNameAr": "",
+    "sectorAr": "",
+    "details": {
+      "parValue": "5",
+      "currency": "Egyptian Pound",
+      "listingDate": "25/11/1995",
+      "securityType": "Egyptian securities-Stocks",
+      "listedShares": "5,600,000",
+      "tradedVolume": "154,827",
+      "couponPaymentDate": "19/12/2024",
+      "tradedValue": "23,377,553",
+      "priceEarningRatio": "20.04",
+      "dividendYield": "2.27",
+      "cashDividends": "3.50",
+      "couponNo": "14",
+      "closingPrice": "154.26",
+      "marketCap": "863,856,000"
+    },
+    "lastUpdated": "2025-07-13T21:41:31.312Z"
   }
 ]
