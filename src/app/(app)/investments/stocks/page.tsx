@@ -54,15 +54,16 @@ export default function MyStocksPage() {
   const stockInvestments = React.useMemo(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
-    return allInvestments.filter((inv): inv is SecurityInvestment => {
-      // Only process investments that have a tickerSymbol (i.e., StockInvestment)
-      if (!("tickerSymbol" in inv) || typeof inv.tickerSymbol !== "string") {
+    // First, filter valid stock investments
+    const validStockInvestments = allInvestments.filter((inv): inv is SecurityInvestment => {
+      // Only process investments that have a securityId (i.e., StockInvestment)
+      if (!("securityId" in inv) || typeof inv.securityId !== "string") {
         return false;
       }
 
       // Find the corresponding listed security for the investment
       const listedSecurity = listedSecurities.find(
-        (ls) => ls.symbol === inv.tickerSymbol,
+        (ls) => ls.id === inv.securityId,
       );
 
       if (!listedSecurity) {
@@ -78,6 +79,45 @@ export default function MyStocksPage() {
 
       return isStock || isStockFund;
     });
+
+    // Then aggregate investments by securityId
+    const aggregatedInvestments = new Map<string, SecurityInvestment>();
+
+    validStockInvestments.forEach((inv) => {
+      if (!inv.securityId) return; // Skip if no securityId
+      
+      const existing = aggregatedInvestments.get(inv.securityId);
+      
+      if (existing) {
+        // If we already have this security, sum up the shares and adjust the cost
+        const existingShares = existing.numberOfShares ?? 0;
+        const invShares = inv.numberOfShares ?? 0;
+        const totalShares = existingShares + invShares;
+        
+        const existingPrice = existing.purchasePricePerShare ?? 0;
+        const invPrice = inv.purchasePricePerShare ?? 0;
+        const totalCost = (existingShares * existingPrice) + (invShares * invPrice);
+        
+        // Ensure we have valid dates before comparing
+        const existingDate = existing.purchaseDate ? new Date(existing.purchaseDate) : new Date(0);
+        const invDate = inv.purchaseDate ? new Date(inv.purchaseDate) : new Date(0);
+        
+        const updatedInvestment: SecurityInvestment = {
+          ...existing,
+          numberOfShares: totalShares,
+          purchasePricePerShare: totalShares > 0 ? totalCost / totalShares : 0,
+          // Keep the first purchase date (earliest date)
+          purchaseDate: invDate < existingDate ? inv.purchaseDate : existing.purchaseDate
+        };
+        
+        aggregatedInvestments.set(inv.securityId, updatedInvestment);
+      } else {
+        // First time seeing this security, add it to the map
+        aggregatedInvestments.set(inv.securityId, { ...inv });
+      }
+    });
+
+    return Array.from(aggregatedInvestments.values());
   }, [
     allInvestments,
     listedSecurities,
@@ -97,33 +137,33 @@ export default function MyStocksPage() {
       let costSum = 0;
       let valueSum = 0;
 
-      // Aggregate investments by ticker symbol
-      const aggregatedBySymbol: {
+      // Aggregate investments by securityId
+      const aggregatedBySecurityId: {
         [key: string]: {
           totalShares: number;
           totalCost: number;
-          symbol: string;
+          securityId: string;
         };
       } = {};
       stockInvestments.forEach((inv) => {
-        if (inv.tickerSymbol) {
-          if (!aggregatedBySymbol[inv.tickerSymbol]) {
-            aggregatedBySymbol[inv.tickerSymbol] = {
+        if (inv.securityId) {
+          if (!aggregatedBySecurityId[inv.securityId]) {
+            aggregatedBySecurityId[inv.securityId] = {
               totalShares: 0,
               totalCost: 0,
-              symbol: inv.tickerSymbol,
+              securityId: inv.securityId,
             };
           }
-          aggregatedBySymbol[inv.tickerSymbol].totalShares +=
+          aggregatedBySecurityId[inv.securityId].totalShares +=
             inv.numberOfShares || 0;
-          aggregatedBySymbol[inv.tickerSymbol].totalCost +=
+          aggregatedBySecurityId[inv.securityId].totalCost +=
             (inv.numberOfShares || 0) * (inv.purchasePricePerShare || 0);
         }
       });
 
-      Object.values(aggregatedBySymbol).forEach((agg) => {
+      Object.values(aggregatedBySecurityId).forEach((agg) => {
         const security = listedSecurities.find(
-          (ls) => ls.symbol === agg.symbol,
+          (ls) => ls.id === agg.securityId,
         );
         if (security && security.price && agg.totalShares > 0) {
           const currentValue = security.price * agg.totalShares;
