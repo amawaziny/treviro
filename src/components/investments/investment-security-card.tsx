@@ -64,7 +64,10 @@ export function InvestmentSecurityCard({
   const detailPageLink = `/securities/details/${security.id}?fromMyStocks=true`;
 
   return (
-    <Card className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden">
+    <Card 
+      className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden"
+      data-testid="investment-card"
+    >
       <Link href={detailPageLink} passHref className="block">
         <CardContent className="pt-4">
           <div className="flex items-start justify-between gap-2 w-full max-w-full overflow-hidden">
@@ -73,9 +76,12 @@ export function InvestmentSecurityCard({
               <div className="flex-shrink-0">{getIcon()}</div>
               <div className="truncate">
                 <div className="flex items-baseline gap-2">
-                  <p className="font-semibold text-sm text-foreground truncate">
-                    {security.symbol}
-                  </p>
+                  <p 
+                  className="font-semibold text-sm text-foreground truncate"
+                  data-testid="investment-symbol"
+                >
+                  {security.symbol}
+                </p>
                   {security.fundType && (
                     <>
                       <span>•</span>
@@ -83,7 +89,10 @@ export function InvestmentSecurityCard({
                     </>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground truncate">
+                <p 
+                  className="text-xs text-muted-foreground truncate"
+                  data-testid="investment-name"
+                >
                   {isMobile && securityName.length > 15
                     ? `${securityName.substring(0, 15)}...`
                     : securityName}

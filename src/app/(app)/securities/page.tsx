@@ -48,7 +48,11 @@ export default function SecuritiesPage() {
         dir={dir}
       >
         <TabsList className="grid w-full grid-cols-2 md:w-[300px] max-w-full">
-          <TabsTrigger value="stocks" className="w-full text-xs sm:text-sm">
+          <TabsTrigger 
+            value="stocks" 
+            className="w-full text-xs sm:text-sm"
+            data-testid="stocks-tab"
+          >
             {t("stocks")}
           </TabsTrigger>
           <TabsTrigger value="funds" className="w-full text-xs sm:text-sm">

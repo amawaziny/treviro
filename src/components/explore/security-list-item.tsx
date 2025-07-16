@@ -36,7 +36,10 @@ export const SecurityListItem = React.memo(function SecurityListItem({
 
   return (
     <Link href={detailPageLink} passHref>
-      <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm">
+      <Card 
+        className="p-4 hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm"
+        data-testid="security-card"
+      >
         <div className="flex items-start gap-4">
           {/* Logo */}
           <Image
@@ -52,7 +55,10 @@ export const SecurityListItem = React.memo(function SecurityListItem({
 
           {/* Left Column: Symbol and Name */}
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-foreground flex items-baseline gap-2">
+            <p 
+              className="font-semibold text-sm text-foreground flex items-baseline gap-2"
+              data-testid="security-symbol"
+            >
               {security.symbol}
               {security.securityType === "Fund" && (
                 <>
@@ -61,7 +67,10 @@ export const SecurityListItem = React.memo(function SecurityListItem({
                 </>
               )}
             </p>
-            <p className="text-xs text-muted-foreground truncate">
+            <p 
+              className="text-xs text-muted-foreground truncate"
+              data-testid="security-name"
+            >
               {isMobile && securityName.length > 15
                 ? `${securityName.substring(0, 15)}...`
                 : securityName}

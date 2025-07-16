@@ -121,4 +121,53 @@ test.describe("Stocks & Equity Funds Page", () => {
     // Verify loading state is gone
     await expect(loadingIndicator).not.toBeVisible({ timeout: 10000 });
   });
+
+  test("should allow purchasing a stock and display it in the portfolio", async ({ page }) => {
+    // Navigate to the explore page
+    await page.getByTestId("add-security-button").click();
+    await page.waitForURL("**/securities");
+    
+    // Click on the Stocks tab
+    await page.getByTestId("stocks-tab").click();
+    
+    // Wait for stocks to load and click on the first stock
+    const firstStock = page.getByTestId("security-card").first();
+    await expect(firstStock).toBeVisible();
+    const stockName = await firstStock.getByTestId("security-name").textContent();
+    
+    // Navigate to stock details
+    await firstStock.click();
+    await page.waitForURL("**/securities/details/**");
+    
+    // Click on Buy button
+    const buyButton = page.getByTestId("buy-security-button");
+    await expect(buyButton).toBeVisible();
+    await buyButton.click();
+    
+    // Wait for the add investment form to load
+    await page.waitForURL((url) => url.pathname.includes('/investments/add'));
+    
+    // Fill out the investment form
+    await page.getByTestId("purchase-price-input").fill("100");
+    await page.getByTestId("shares-input").fill("1");
+    await page.getByTestId("purchase-date-input").fill(new Date().toISOString().split('T')[0]);
+    await page.getByTestId("fees-input").fill("0");
+    
+    // Submit the form
+    await page.getByTestId("submit-investment-button").click();
+    
+    // Wait for navigation back to stocks page
+    await page.waitForURL("**/investments/stocks");
+    
+    // Verify the stock appears in the portfolio
+    const investmentCards = page.getByTestId("investment-card");
+    await expect(investmentCards).toHaveCount(1);
+    
+    // Verify the stock name matches what we purchased
+    const purchasedStockName = await page.getByTestId("investment-name").first().textContent();
+    expect(purchasedStockName).toContain(stockName?.trim());
+    
+    // Note: Delete functionality is not implemented yet
+    // The test will leave the investment in the database for now
+  });
 });

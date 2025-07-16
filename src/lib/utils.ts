@@ -26,7 +26,7 @@ export function getInvestmentType(fundType?: string): InvestmentType {
 }
 
 // Helper function to identify gold-related funds
-export function isGoldRelatedFund(fundType?: string): boolean {
+export function isGoldRelatedFund(fundType?: string | null): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
   const goldKeywords = ["gold", "precious metal", "gld", "bullion"]; // Add more keywords if needed
@@ -34,7 +34,7 @@ export function isGoldRelatedFund(fundType?: string): boolean {
 }
 
 // Helper function to identify real estate-related funds (REITs)
-export function isRealEstateRelatedFund(fundType?: string): boolean {
+export function isRealEstateRelatedFund(fundType?: string | null): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
   const realEstateKeywords = [
@@ -47,7 +47,7 @@ export function isRealEstateRelatedFund(fundType?: string): boolean {
 }
 
 // Helper function to identify debt-related funds
-export function isDebtRelatedFund(fundType?: string): boolean {
+export function isDebtRelatedFund(fundType?: string | null): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
   const debtKeywords = [
@@ -174,7 +174,7 @@ export function formatCurrencyWithCommas(
 }
 
 // Helper function to identify stock-related funds
-export function isStockRelatedFund(fundType?: string): boolean {
+export function isStockRelatedFund(fundType?: string | null): boolean {
   if (!fundType) return false;
   const lowerFundType = fundType.toLowerCase();
   const stockKeywords = [

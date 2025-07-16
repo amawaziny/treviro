@@ -104,7 +104,7 @@ test.describe("Debt Certificate Management", () => {
       );
 
       // Save the certificate
-      await page.click('[data-testid="save-certificate-button"]');
+      await page.click('[data-testid="submit-investment-button"]');
 
       // Verify success toast is shown
       await expect(

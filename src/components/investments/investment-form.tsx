@@ -472,6 +472,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
               <FormLabel>{t("number_of_securities")}</FormLabel>
               <FormControl>
                 <NumericInput
+                  data-testid="shares-input"
                   placeholder="e.g., 100"
                   value={
                     field.value !== undefined ? String(field.value) : undefined
@@ -493,6 +494,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
               <FormLabel>{t("purchase_price_per_security")}</FormLabel>
               <FormControl>
                 <NumericInput
+                  data-testid="purchase-price-input"
                   placeholder="e.g., 150.50"
                   value={
                     field.value !== undefined ? String(field.value) : undefined
@@ -514,6 +516,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
               <FormLabel>{t("purchase_fees_optional")}</FormLabel>
               <FormControl>
                 <NumericInput
+                  data-testid="fees-input"
                   placeholder="e.g., 5.00"
                   value={field.value}
                   onChange={field.onChange}
@@ -537,6 +540,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
               <FormControl>
                 <Input
                   dir={dir}
+                  data-testid="purchase-date-input"
                   type="date"
                   {...field}
                   value={field.value || getCurrentDate()}
@@ -1026,7 +1030,7 @@ export function InvestmentForm({
         purchasePricePerShare: values.purchasePricePerShare,
         purchaseFees: values.purchaseFees,
         type: getInvestmentType(selectedSecurity.fundType),
-        fundType: selectedSecurity.fundType,
+        fundType: selectedSecurity.fundType ? selectedSecurity.fundType : null,
       };
     } else if (
       preSelectedInvestmentType === "Debt Instruments" &&
@@ -1261,7 +1265,7 @@ export function InvestmentForm({
             <Button
               type="submit"
               className="w-full md:w-auto"
-              data-testid="save-certificate-button"
+              data-testid="submit-investment-button"
               disabled={
                 form.formState.isSubmitting ||
                 (preSelectedInvestmentType === "Stocks" &&

@@ -37,7 +37,7 @@ export interface BaseInvestment {
   currentValue?: number;
   createdAt?: string;
   securityId?: string;
-  fundType?: string;
+  fundType?: string | null;
 }
 
 export interface SecurityInvestment extends BaseInvestment {
