@@ -225,7 +225,8 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p
+              <p 
+                data-testid="total-realized-pl-amount"
                 className={`text-xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {formatNumberForMobile(isMobile, totalRealizedPnL)}
@@ -252,6 +253,7 @@ export default function DashboardPage() {
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p
+                data-testid="total-current-portfolio-pl-amount"
                 className={`text-xl font-medium ${totalCurrentPortfolioPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >
                 {formatNumberForMobile(isMobile, totalCurrentPortfolioPnL)}
@@ -276,7 +278,10 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p className="text-xl font-medium">
+              <p
+                data-testid="total-cash-balance-amount"
+                className="text-xl font-medium"
+              >
                 {formatNumberForMobile(isMobile, totalCashBalance)}
               </p>
             )}
