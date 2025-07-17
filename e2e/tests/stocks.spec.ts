@@ -175,6 +175,27 @@ test.describe("Stocks & Equity Funds Page", () => {
     const purchasedStockName = await page.locator('[data-testid^="investment-card-"] [data-testid="investment-name"]').first().textContent();
     expect(purchasedStockName).toContain(stockName?.trim());
     
+    // Verify portfolio summary is updated
+    const portfolioSummary = page.getByTestId("portfolio-summary");
+    await expect(portfolioSummary).toBeVisible();
+    
+    // Verify total P/L amount is displayed
+    const totalPL = portfolioSummary.getByTestId("total-pl-amount");
+    await expect(totalPL).toBeVisible();
+    
+    // Verify P/L percentage is displayed
+    const plPercentage = portfolioSummary.getByTestId("pl-percentage-value");
+    await expect(plPercentage).toBeVisible();
+    
+    // Verify total invested amount is displayed
+    const totalInvested = portfolioSummary.getByTestId("total-invested-amount");
+    await expect(totalInvested).toBeVisible();
+    
+    // Verify the total invested amount reflects the new purchase (100 EGP * 1 share + 0 fees)
+    const investedText = await totalInvested.textContent();
+    const investedAmount = parseFloat(investedText?.replace(/[^0-9.]/g, '') || '0');
+    expect(investedAmount).toBeGreaterThanOrEqual(100);
+    
     // Note: Delete functionality is not implemented yet
     // The test will leave the investment in the database for now
   });
