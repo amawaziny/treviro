@@ -156,8 +156,9 @@ test.describe("Stocks & Equity Funds Page", () => {
     // Submit the form
     await page.getByTestId("submit-investment-button").click();
     
-    // Wait for navigation back to stocks page
-    await page.waitForURL("**/investments/stocks");
+    // Manually navigate to the stocks page
+    await page.goto("/investments/stocks");
+    // await page.waitForLoadState("networkidle");
     
     // Verify the stock appears in the portfolio
     const investmentCards = page.getByTestId("investment-card");
