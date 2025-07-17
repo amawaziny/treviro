@@ -280,7 +280,7 @@ export default function MyStocksPage() {
 
             return (
               <InvestmentSecurityCard
-                data-testid="investment-card"
+                data-testid={`investment-card-${investment.id}`}
                 key={`${investment.id}-${investment.tickerSymbol}`}
                 security={listedSecurity}
                 investment={investment}

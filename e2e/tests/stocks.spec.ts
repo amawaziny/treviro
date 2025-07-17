@@ -64,8 +64,11 @@ test.describe("Stocks & Equity Funds Page", () => {
   });
 
   test("should display list of investments", async ({ page }) => {
-    // Check if there are any investment cards
-    const investmentCards = page.getByTestId("investment-card");
+    // Wait for investment cards to be visible
+    const investmentCards = page.locator('[data-testid^="investment-card-"]');
+    await expect(investmentCards.first()).toBeVisible({ timeout: 10000 });
+    
+    // Count the investment cards
     const count = await investmentCards.count();
     
     if (count > 0) {
@@ -83,8 +86,11 @@ test.describe("Stocks & Equity Funds Page", () => {
   });
 
   test("should navigate to security details when clicking on an investment", async ({ page }) => {
-    // First check if there are any investment cards
-    const investmentCards = page.getByTestId("investment-card");
+    // Wait for investment cards to be visible
+    const investmentCards = page.locator('[data-testid^="investment-card-"]');
+    await expect(investmentCards.first()).toBeVisible({ timeout: 10000 });
+    
+    // Count the investment cards
     const count = await investmentCards.count();
     
     if (count > 0) {
@@ -161,11 +167,12 @@ test.describe("Stocks & Equity Funds Page", () => {
     // await page.waitForLoadState("networkidle");
     
     // Verify the stock appears in the portfolio
-    const investmentCards = page.getByTestId("investment-card");
+    const investmentCards = page.locator('[data-testid^="investment-card-"]');
+    await expect(investmentCards.first()).toBeVisible({ timeout: 10000 });
     await expect(investmentCards).toHaveCount(1);
     
     // Verify the stock name matches what we purchased
-    const purchasedStockName = await page.getByTestId("investment-name").first().textContent();
+    const purchasedStockName = await page.locator('[data-testid^="investment-card-"] [data-testid="investment-name"]').first().textContent();
     expect(purchasedStockName).toContain(stockName?.trim());
     
     // Note: Delete functionality is not implemented yet

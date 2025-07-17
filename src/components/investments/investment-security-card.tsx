@@ -66,7 +66,7 @@ export function InvestmentSecurityCard({
   return (
     <Card 
       className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden"
-      data-testid="investment-card"
+      data-testid={`investment-card-${security.id}`}
     >
       <Link href={detailPageLink} passHref className="block">
         <CardContent className="pt-4">
