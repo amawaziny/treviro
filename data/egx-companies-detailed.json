@@ -1374,14 +1374,27 @@
   },
   {
     "isin": "EGS30291C016",
-    "symbol": "ECFI.CA",
-    "companyName": "Eastern Company for Food Industries",
+    "symbol": "SNFC.CA",
+    "companyName": "Sharkia National Food",
     "sector": "Food, Beverages and Tobacco",
     "companyNameAr": "الشرقية الوطنية للامن الغذائي",
     "sectorAr": "أغذية و مشروبات و تبغ",
     "details": {
+      "parValue": "0.50",
+      "currency": "Egyptian Pound",
       "currencyAr": "جنيه مصري",
-      "securityTypeAr": "اوراق مالية مصرية - اسهم"
+      "listingDate": "27/02/1995",
+      "securityType": "Egyptian securities-Stocks",
+      "securityTypeAr": "اوراق مالية مصرية - اسهم",
+      "listedShares": "163,927,120",
+      "tradedVolume": "390,478",
+      "couponPaymentDate": "27/04/2015",
+      "tradedValue": "3,300,018",
+      "priceEarningRatio": "4960.35",
+      "dividendYield": "0",
+      "couponNo": "29",
+      "closingPrice": "8.52",
+      "marketCap": "1,396,659,062"
     },
     "lastUpdated": "2025-07-19T14:30:34.910Z"
   },
