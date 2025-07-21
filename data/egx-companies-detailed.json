@@ -5633,14 +5633,27 @@
   },
   {
     "isin": "EGS7D971C011",
-    "symbol": "",
-    "companyName": "ماكرو جروب للمستحضرات الطبية-ماكرو كابيتال",
-    "sector": "",
+    "symbol": "MCRO.CA",
+    "companyName": "Macro Group Pharmaceuticals -Macro Capital",
+    "sector": "Health Care & Pharmaceuticals",
     "companyNameAr": "ماكرو جروب للمستحضرات الطبية-ماكرو كابيتال",
     "sectorAr": "رعاية صحية و ادوية",
     "details": {
+      "parValue": 0.2,
+      "currency": "Egyptian Pound",
       "currencyAr": "جنيه مصري",
-      "securityTypeAr": "اوراق مالية مصرية - اسهم"
+      "listingDate": "12/01/2022",
+      "securityType": "Egyptian securities-Stocks",
+      "securityTypeAr": "اوراق مالية مصرية - اسهم",
+      "listedShares": 570206456,
+      "tradedVolume": 1660122,
+      "couponPaymentDate": "20/04/2023",
+      "tradedValue": 3706461,
+      "priceEarningRatio": 0,
+      "dividendYield": 0,
+      "couponNo": 2,
+      "closingPrice": 2.22,
+      "marketCap": 1265858332
     },
     "lastUpdated": "2025-07-21T20:50:10.531Z"
   },
