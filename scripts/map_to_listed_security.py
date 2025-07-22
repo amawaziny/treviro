@@ -14,7 +14,7 @@ def map_to_listed_security(company: Dict[str, Any]) -> Dict[str, Any]:
         "isin": company.get("isin", ""),
         "name": company.get("companyName", ""),
         "name_ar": company.get("companyNameAr", ""),
-        "symbol": company.get("symbol", ""),
+        "symbol": symbol,  # Using the cleaned symbol without .CA
         "logoUrl": "",  # Not in source data
         "price": details.get("closingPrice", 0),
         "currency": details.get("currency", "EGP"),
