@@ -1,8 +1,8 @@
 [
   {
-    "id": "AJWA-EGX",
+    "id": "EGX-AJWA",
     "isin": "EGS30211C014",
-    "name": "AJWA for Food Industries company    Egypt",
+    "name": "AJWA for Food Industries company - Egypt",
     "name_ar": "اجواء للصناعات الغذائية - مصر",
     "symbol": "AJWA",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/ajwa-for-food-industries-company-egypt--big.svg",
@@ -31,7 +31,7 @@
     "couponNo": 9
   },
   {
-    "id": "APSW-EGX",
+    "id": "EGX-APSW",
     "isin": "EGS32331C018",
     "name": "ARAB POLVARA SPINNING & WEAVING CO.",
     "name_ar": "العربيه وبولفارا للغزل والنسيج - يونيراب",
@@ -62,7 +62,7 @@
     "couponNo": 41
   },
   {
-    "id": "ACRO-EGX",
+    "id": "EGX-ACRO",
     "isin": "EGS3E071C013",
     "name": "Acrow Misr",
     "name_ar": "اكرومصر للشدات والسقالات المعدنية",
@@ -93,7 +93,7 @@
     "couponNo": 34
   },
   {
-    "id": "ACTF-EGX",
+    "id": "EGX-ACTF",
     "isin": "EGS7D5P1C019",
     "name": "Act Financial",
     "name_ar": "اكت فاينانشال للاستشارات",
@@ -124,7 +124,7 @@
     "couponNo": 3
   },
   {
-    "id": "KRDI-EGX",
+    "id": "EGX-KRDI",
     "isin": "EGS02291C010",
     "name": "Al Khair River For Development Agricultural Investment&Envir",
     "name_ar": "نهر الخير للتنمية والأستثمار الزراعى والخدمات البيئية",
@@ -155,7 +155,7 @@
     "couponNo": 0
   },
   {
-    "id": "ATLC-EGX",
+    "id": "EGX-ATLC",
     "isin": "EGS676N1C015",
     "name": "Al Tawfeek Leasing Company-A.T.LEASE",
     "name_ar": "A.T.LEASEالتوفيق للتأجير التمويلي -أية.تي.ليس",
@@ -186,7 +186,7 @@
     "couponNo": 18
   },
   {
-    "id": "AAGR-EGX",
+    "id": "EGX-AAGR",
     "isin": "EGS07331C019",
     "name": "Al – Ahly Group For Modern Agriculture",
     "name_ar": "مجموعة الأهلى للزراعات الحديثة",
@@ -217,7 +217,7 @@
     "couponNo": 0
   },
   {
-    "id": "ALCN-EGX",
+    "id": "EGX-ALCN",
     "isin": "EGS42111C012",
     "name": "Alexandria Containers and goods",
     "name_ar": "الاسكندرية لتداول الحاويات والبضائع",
@@ -248,7 +248,7 @@
     "couponNo": 32
   },
   {
-    "id": "AFMC-EGX",
+    "id": "EGX-AFMC",
     "isin": "EGS30471C014",
     "name": "Alexandria Flour Mills",
     "name_ar": "مطاحن ومخابز الاسكندرية",
@@ -279,7 +279,7 @@
     "couponNo": 27
   },
   {
-    "id": "AMOC-EGX",
+    "id": "EGX-AMOC",
     "isin": "EGS380P1C010",
     "name": "Alexandria Mineral Oils Company",
     "name_ar": "الاسكندرية للزيوت المعدنية",
@@ -310,7 +310,7 @@
     "couponNo": 20
   },
   {
-    "id": "ANFI-EGX",
+    "id": "EGX-ANFI",
     "isin": "EGS67331C016",
     "name": "Alexandria National Company for Financial Investment",
     "name_ar": "الاسكندريه الوطنيه للاستثمارات الماليه",
@@ -341,7 +341,7 @@
     "couponNo": 0
   },
   {
-    "id": "SPIN-EGX",
+    "id": "EGX-SPIN",
     "isin": "EGS32041C013",
     "name": "Alexandria Spinning & Weaving (SPINALEX)",
     "name_ar": "الاسكندرية للغزل والنسيج (سبينالكس)",
@@ -372,7 +372,7 @@
     "couponNo": 44
   },
   {
-    "id": "ACGC-EGX",
+    "id": "EGX-ACGC",
     "isin": "EGS32221C011",
     "name": "Arab Cotton Ginning",
     "name_ar": "العربية لحليج الأقطان",
@@ -403,7 +403,7 @@
     "couponNo": 23
   },
   {
-    "id": "AMIA-EGX",
+    "id": "EGX-AMIA",
     "isin": "EGS67221C019",
     "name": "Arab Moltaka Investments Co",
     "name_ar": "الملتقي العربي للاستثمارات",
@@ -434,7 +434,7 @@
     "couponNo": 29
   },
   {
-    "id": "ARVA-EGX",
+    "id": "EGX-ARVA",
     "isin": "EGS3E1E1C013",
     "name": "Arab Valves Company",
     "name_ar": "العربية للمحابس",
@@ -465,7 +465,7 @@
     "couponNo": 9
   },
   {
-    "id": "AIH-EGX",
+    "id": "EGX-AIH",
     "isin": "EGS21351C019",
     "name": "Arabia Investments Holding",
     "name_ar": "ارابيا انفستمنتس هولدنج",
@@ -496,7 +496,7 @@
     "couponNo": 1
   },
   {
-    "id": "ARCC-EGX",
+    "id": "EGX-ARCC",
     "isin": "EGS3C0O1C016",
     "name": "Arabian Cement Company",
     "name_ar": "العربية للاسمنت",
@@ -527,7 +527,7 @@
     "couponNo": 16
   },
   {
-    "id": "DOMT-EGX",
+    "id": "EGX-DOMT",
     "isin": "EGS30031C016",
     "name": "Arabian Food Industries DOMTY",
     "name_ar": "الصناعات الغذائية العربية-دومتى",
@@ -558,7 +558,7 @@
     "couponNo": 20
   },
   {
-    "id": "ASPI-EGX",
+    "id": "EGX-ASPI",
     "isin": "EGS691L1C018",
     "name": "Aspire Capital Holding For Financial Investments",
     "name_ar": "اسباير كابيتال القابضة للاستثمارات المالية",
@@ -589,7 +589,7 @@
     "couponNo": 2
   },
   {
-    "id": "BINV-EGX",
+    "id": "EGX-BINV",
     "isin": "EGS691T1C010",
     "name": "B Investments Holding",
     "name_ar": "بى انفستمنتس القابضه",
@@ -620,7 +620,7 @@
     "couponNo": 12
   },
   {
-    "id": "BTFH-EGX",
+    "id": "EGX-BTFH",
     "isin": "EGS691G1C015",
     "name": "Beltone Holding",
     "name_ar": "بلتون القابضة",
@@ -651,7 +651,7 @@
     "couponNo": 3
   },
   {
-    "id": "CICH-EGX",
+    "id": "EGX-CICH",
     "isin": "EGS691D1C018",
     "name": "CI Capital Holding For Financial Investments",
     "name_ar": "سى اى كابيتال القابضة للاستثمارات المالية",
@@ -682,7 +682,7 @@
     "couponNo": 6
   },
   {
-    "id": "CAED-EGX",
+    "id": "EGX-CAED",
     "isin": "EGS72201C014",
     "name": "Cairo Educational Services",
     "name_ar": "القاهرة للخدمات التعليمية",
@@ -713,7 +713,7 @@
     "couponNo": 24
   },
   {
-    "id": "CIRA-EGX",
+    "id": "EGX-CIRA",
     "isin": "EGS65541C012",
     "name": "Cairo For Investment And Real Estate Developments-CIRA Edu",
     "name_ar": "القاهره للإستثمار و التنمية العقاريه سيرا للتعليم",
@@ -744,7 +744,7 @@
     "couponNo": 28
   },
   {
-    "id": "COSG-EGX",
+    "id": "EGX-COSG",
     "isin": "EGS30581C010",
     "name": "Cairo Oils & Soap",
     "name_ar": "القاهرة للزيوت والصابون",
@@ -775,7 +775,7 @@
     "couponNo": 6
   },
   {
-    "id": "POUL-EGX",
+    "id": "EGX-POUL",
     "isin": "EGS02051C018",
     "name": "Cairo Poultry",
     "name_ar": "القاهرة للدواجن",
@@ -806,7 +806,7 @@
     "couponNo": 40
   },
   {
-    "id": "CSAG-EGX",
+    "id": "EGX-CSAG",
     "isin": "EGS44031C010",
     "name": "Canal Shipping Agencies",
     "name_ar": "القناة للتوكيلات الملاحية",
@@ -837,7 +837,7 @@
     "couponNo": 53
   },
   {
-    "id": "INFI-EGX",
+    "id": "EGX-INFI",
     "isin": "EGS01041C010",
     "name": "Ismailia National Food Industries",
     "name_ar": "الاسماعيلية الوطنية للصناعات الغذائية (فوديكو)",
@@ -868,7 +868,7 @@
     "couponNo": 3
   },
   {
-    "id": "WKOL-EGX",
+    "id": "EGX-WKOL",
     "isin": "EGS01071C017",
     "name": "Wadi Kom Ombo Land Reclamation",
     "name_ar": "وادي كوم امبو لاستصلاح الاراضي",
@@ -899,7 +899,7 @@
     "couponNo": 14
   },
   {
-    "id": "AALR-EGX",
+    "id": "EGX-AALR",
     "isin": "EGS01081C016",
     "name": "General Company For Land Reclamation,Development & Reconstru",
     "name_ar": "العامة لاستصلاح الاراضي و التنمية و التعمير",
@@ -930,7 +930,7 @@
     "couponNo": 11
   },
   {
-    "id": "ISMA-EGX",
+    "id": "EGX-ISMA",
     "isin": "EGS02021C011",
     "name": "Ismailia Misr Poultry",
     "name_ar": "الاسماعيلية مصر للدواجن",
@@ -961,7 +961,7 @@
     "couponNo": 20
   },
   {
-    "id": "MPCO-EGX",
+    "id": "EGX-MPCO",
     "isin": "EGS02091C014",
     "name": "Mansourah Poultry",
     "name_ar": "المنصورة للدواجن",
@@ -992,7 +992,7 @@
     "couponNo": 27
   },
   {
-    "id": "AIFI-EGX",
+    "id": "EGX-AIFI",
     "isin": "EGS071L1C018",
     "name": "Atlas For Investment and Food Industries",
     "name_ar": "أطلس للإستثمار وصناعات الغذائية",
@@ -1023,7 +1023,7 @@
     "couponNo": 0
   },
   {
-    "id": "LUTS-EGX",
+    "id": "EGX-LUTS",
     "isin": "EGS07661C019",
     "name": "Lotus For Agricultural Investments And Development",
     "name_ar": "لوتس للتنمية والاستثمار الزراعى",
@@ -1054,7 +1054,7 @@
     "couponNo": 0
   },
   {
-    "id": "KORA-EGX",
+    "id": "EGX-KORA",
     "isin": "EGS07911C018",
     "name": "KORRA",
     "name_ar": "قرة لمشروعات الطاقة والاستثمار",
@@ -1085,7 +1085,7 @@
     "couponNo": 0
   },
   {
-    "id": "GGRN-EGX",
+    "id": "EGX-GGRN",
     "isin": "EGS07DR1C012",
     "name": "Gogreen for Agricultural Investment",
     "name_ar": "جو جرين للاستثمار الزراعى والتنمية",
@@ -1116,7 +1116,7 @@
     "couponNo": 0
   },
   {
-    "id": "ASCM-EGX",
+    "id": "EGX-ASCM",
     "isin": "EGS10001C013",
     "name": "ASEC Company For Mining - ASCOM",
     "name_ar": "اسيك للتعدين    -  اسكوم",
@@ -1147,7 +1147,7 @@
     "couponNo": 0
   },
   {
-    "id": "ISMQ-EGX",
+    "id": "EGX-ISMQ",
     "isin": "EGS102S1C014",
     "name": "Iron And Steel for Mines and Quarries",
     "name_ar": "الحديد والصلب للمناجم والمحاجر",
@@ -1178,7 +1178,7 @@
     "couponNo": 3
   },
   {
-    "id": "ZMID-EGX",
+    "id": "EGX-ZMID",
     "isin": "EGS21171C011",
     "name": "Zahraa Maadi Investment & Development",
     "name_ar": "زهراء المعادي للاستثمار والتعمير",
@@ -1209,7 +1209,7 @@
     "couponNo": 43
   },
   {
-    "id": "EIUD-EGX",
+    "id": "EGX-EIUD",
     "isin": "EGS213S1C010",
     "name": "Egyptians For Investment & Urban Development",
     "name_ar": "المصريين للاستثمار والتنمية العمرانية",
@@ -1240,7 +1240,7 @@
     "couponNo": 1
   },
   {
-    "id": "IDRE-EGX",
+    "id": "EGX-IDRE",
     "isin": "EGS214Q1C011",
     "name": "Ismailia Development and Real Estate Co",
     "name_ar": "الاسماعيلية الجديدة للتطوير والتنمية العمرانية-شركة منقسمة",
@@ -1271,7 +1271,7 @@
     "couponNo": 0
   },
   {
-    "id": "UEGC-EGX",
+    "id": "EGX-UEGC",
     "isin": "EGS21531C016",
     "name": "Elsaeed Contracting& Real Estate Investment Company SCCD",
     "name_ar": "الصعيد العامة للمقاولات والاستثمار العقاري SCCD",
@@ -1302,7 +1302,7 @@
     "couponNo": 10
   },
   {
-    "id": "GGCC-EGX",
+    "id": "EGX-GGCC",
     "isin": "EGS21541C015",
     "name": "Giza General Contracting",
     "name_ar": "الجيزةالعامة للمقاولات والاستثمارالعقارى",
@@ -1333,7 +1333,7 @@
     "couponNo": 11
   },
   {
-    "id": "TANM-EGX",
+    "id": "EGX-TANM",
     "isin": "EGS21EB1C011",
     "name": "Tanmiya for Real Estate Investment",
     "name_ar": "تنمية للاستثمار العقاري",
@@ -1364,7 +1364,7 @@
     "couponNo": 0
   },
   {
-    "id": "PRDC-EGX",
+    "id": "EGX-PRDC",
     "isin": "EGS21FW1C015",
     "name": "Pioneers Properties For Urban Development(PREDCO)",
     "name_ar": "بايونيرز بروبرتيز للتنمية العمرانية",
@@ -1395,7 +1395,7 @@
     "couponNo": 0
   },
   {
-    "id": "IEEC-EGX",
+    "id": "EGX-IEEC",
     "isin": "EGS22171C010",
     "name": "Industrial & Engineering Projects",
     "name_ar": "المشروعات الصناعية والهندسية",
@@ -1426,7 +1426,7 @@
     "couponNo": 5
   },
   {
-    "id": "MBEG-EGX",
+    "id": "EGX-MBEG",
     "isin": "EGS221V1C015",
     "name": "M.B Engineering",
     "name_ar": "أم بي للهندسةM.B",
@@ -1457,7 +1457,7 @@
     "couponNo": 0
   },
   {
-    "id": "NCCW-EGX",
+    "id": "EGX-NCCW",
     "isin": "EGS23111C015",
     "name": "Nasr Company for Civil Works",
     "name_ar": "شركة النصر للأعمال المدنية",
@@ -1488,7 +1488,7 @@
     "couponNo": 18
   },
   {
-    "id": "CRST-EGX",
+    "id": "EGX-CRST",
     "isin": "EGS23141C012",
     "name": "Creast Mark For Contracting And Real Estate Development",
     "name_ar": "كريستمارك للمقاولات والتطوير العقاري",
@@ -1519,7 +1519,7 @@
     "couponNo": 0
   },
   {
-    "id": "ELNA-EGX",
+    "id": "EGX-ELNA",
     "isin": "EGS300L1C011",
     "name": "El Nasr For Manufacturing Agricultural Crops",
     "name_ar": "النصر لتصنيع الحاصلات الزراعية",
@@ -1550,7 +1550,7 @@
     "couponNo": 0
   },
   {
-    "id": "SUGR-EGX",
+    "id": "EGX-SUGR",
     "isin": "EGS30201C015",
     "name": "Delta Sugar",
     "name_ar": "الدلتا للسكر",
@@ -1581,7 +1581,7 @@
     "couponNo": 43
   },
   {
-    "id": "ADPC-EGX",
+    "id": "EGX-ADPC",
     "isin": "EGS30221C013",
     "name": "The Arab Dairy Products Co. Arab Dairy - Panda",
     "name_ar": "العربية لمنتجات الألبان\" آراب ديرى - باندا\"",
@@ -1612,7 +1612,7 @@
     "couponNo": 4
   },
   {
-    "id": "SNFC-EGX",
+    "id": "EGX-SNFC",
     "isin": "EGS30291C016",
     "name": "Sharkia National Food",
     "name_ar": "الشرقية الوطنية للامن الغذائي",
@@ -1643,7 +1643,7 @@
     "couponNo": 29
   },
   {
-    "id": "EDFM-EGX",
+    "id": "EGX-EDFM",
     "isin": "EGS30351C018",
     "name": "East Delta Flour Mills",
     "name_ar": "مطاحن شرق الدلتا",
@@ -1674,7 +1674,7 @@
     "couponNo": 29
   },
   {
-    "id": "MILS-EGX",
+    "id": "EGX-MILS",
     "isin": "EGS30361C017",
     "name": "North Cairo Mills",
     "name_ar": "مطاحن ومخابز شمال القاهرة",
@@ -1705,7 +1705,7 @@
     "couponNo": 28
   },
   {
-    "id": "CEFM-EGX",
+    "id": "EGX-CEFM",
     "isin": "EGS30401C011",
     "name": "Middle Egypt Flour Mills",
     "name_ar": "مطاحن مصر الوسطي",
@@ -1736,7 +1736,7 @@
     "couponNo": 27
   },
   {
-    "id": "SCFM-EGX",
+    "id": "EGX-SCFM",
     "isin": "EGS30411C010",
     "name": "South Cairo & Giza Mills & Bakeries",
     "name_ar": "مطاحن ومخابز جنوب القاهرة والجيزة",
@@ -1767,7 +1767,7 @@
     "couponNo": 22
   },
   {
-    "id": "WCDF-EGX",
+    "id": "EGX-WCDF",
     "isin": "EGS30421C019",
     "name": "Middle & West Delta Flour Mills",
     "name_ar": "مطاحن وسط وغرب الدلتا",
@@ -1798,7 +1798,7 @@
     "couponNo": 29
   },
   {
-    "id": "GSSC-EGX",
+    "id": "EGX-GSSC",
     "isin": "EGS30441C017",
     "name": "General Silos & Storage",
     "name_ar": "العامة للصوامع والتخزين",
@@ -1829,7 +1829,7 @@
     "couponNo": 29
   },
   {
-    "id": "UEFM-EGX",
+    "id": "EGX-UEFM",
     "isin": "EGS30451C016",
     "name": "Upper Egypt Flour Mills",
     "name_ar": "مطاحن مصر العليا",
@@ -1860,7 +1860,7 @@
     "couponNo": 29
   },
   {
-    "id": "EFID-EGX",
+    "id": "EGX-EFID",
     "isin": "EGS305I1C011",
     "name": "Edita Food Industries S.A.E",
     "name_ar": "ايديتا للصناعات الغذائية",
@@ -1891,7 +1891,7 @@
     "couponNo": 23
   },
   {
-    "id": "JUFO-EGX",
+    "id": "EGX-JUFO",
     "isin": "EGS30901C010",
     "name": "Juhayna Food Industries",
     "name_ar": "جهينة للصناعات الغذائية",
@@ -1922,7 +1922,7 @@
     "couponNo": 27
   },
   {
-    "id": "OLFI-EGX",
+    "id": "EGX-OLFI",
     "isin": "EGS30AL1C012",
     "name": "Obour Land For Food Industries",
     "name_ar": "عبور لاند للصناعات الغذائية",
@@ -1953,7 +1953,7 @@
     "couponNo": 9
   },
   {
-    "id": "GTWL-EGX",
+    "id": "EGX-GTWL",
     "isin": "EGS32161C019",
     "name": "Golden Textiles & Clothes Wool",
     "name_ar": "جولدن تكس للاصواف",
@@ -1984,7 +1984,7 @@
     "couponNo": 34
   },
   {
-    "id": "ORWE-EGX",
+    "id": "EGX-ORWE",
     "isin": "EGS33041C012",
     "name": "Oriental Weavers",
     "name_ar": "النساجون الشرقيون للسجاد",
@@ -2015,7 +2015,7 @@
     "couponNo": 34
   },
   {
-    "id": "KABO-EGX",
+    "id": "EGX-KABO",
     "isin": "EGS33061C010",
     "name": "El Nasr Clothes & Textiles (Kabo)",
     "name_ar": "النصر للملابس والمنسوجات - كابو",
@@ -2046,7 +2046,7 @@
     "couponNo": 38
   },
   {
-    "id": "DSCW-EGX",
+    "id": "EGX-DSCW",
     "isin": "EGS33321C018",
     "name": "Dice Sport & Casual Wear",
     "name_ar": "دايس للملابس الجاهزة",
@@ -2077,7 +2077,7 @@
     "couponNo": 1
   },
   {
-    "id": "RAKT-EGX",
+    "id": "EGX-RAKT",
     "isin": "EGS36021C011",
     "name": "Rakta Paper Manufacturing",
     "name_ar": "العامة لصناعة الورق - راكتا",
@@ -2108,7 +2108,7 @@
     "couponNo": 37
   },
   {
-    "id": "SIMO-EGX",
+    "id": "EGX-SIMO",
     "isin": "EGS36091C014",
     "name": "Paper Middle East (Simo)",
     "name_ar": "الورق للشرق الاوسط - سيمو",
@@ -2139,7 +2139,7 @@
     "couponNo": 2
   },
   {
-    "id": "EPPK-EGX",
+    "id": "EGX-EPPK",
     "isin": "EGS360A1C011",
     "name": "El Ahram Co. For Printing And Packing",
     "name_ar": "الاهرام للطباعة و التغليف",
@@ -2170,7 +2170,7 @@
     "couponNo": 21
   },
   {
-    "id": "EAST-EGX",
+    "id": "EGX-EAST",
     "isin": "EGS37091C013",
     "name": "Eastern Company",
     "name_ar": "الشرقية - ايسترن كومباني",
@@ -2201,7 +2201,7 @@
     "couponNo": 31
   },
   {
-    "id": "NAPR-EGX",
+    "id": "EGX-NAPR",
     "isin": "EGS370O1C013",
     "name": "National Printing",
     "name_ar": "الوطنية للطباعة",
@@ -2232,7 +2232,7 @@
     "couponNo": 0
   },
   {
-    "id": "DTPP-EGX",
+    "id": "EGX-DTPP",
     "isin": "EGS370W1C013",
     "name": "Delta For Printing & Packaging",
     "name_ar": "دلتا للطباعة والتغليف",
@@ -2263,7 +2263,7 @@
     "couponNo": 16
   },
   {
-    "id": "PHAR-EGX",
+    "id": "EGX-PHAR",
     "isin": "EGS38081C013",
     "name": "Egyptian International Pharmaceuticals (EIPICO)",
     "name_ar": "المصرية الدولية للصناعات الدوائية - ايبيكو",
@@ -2294,7 +2294,7 @@
     "couponNo": 39
   },
   {
-    "id": "MIPH-EGX",
+    "id": "EGX-MIPH",
     "isin": "EGS380G1C011",
     "name": "Minapharm Pharmaceuticals",
     "name_ar": "مينا فارم للأدوية و الصناعات الكيماوية",
@@ -2325,7 +2325,7 @@
     "couponNo": 20
   },
   {
-    "id": "OCPH-EGX",
+    "id": "EGX-OCPH",
     "isin": "EGS380R1C018",
     "name": "October Pharma",
     "name_ar": "اكتوبر فارما",
@@ -2356,7 +2356,7 @@
     "couponNo": 15
   },
   {
-    "id": "SKPC-EGX",
+    "id": "EGX-SKPC",
     "isin": "EGS380S1C017",
     "name": "Sidi Kerir Petrochemicals - SIDPEC",
     "name_ar": "سيدى كرير للبتروكيماويات - سيدبك",
@@ -2387,7 +2387,7 @@
     "couponNo": 21
   },
   {
-    "id": "UNIP-EGX",
+    "id": "EGX-UNIP",
     "isin": "EGS38161C013",
     "name": "Universal For Paper and Packaging Materials (Unipack",
     "name_ar": "يونيفرسال لصناعة مواد التعبئة و التغليف و الورق - يونيباك",
@@ -2418,7 +2418,7 @@
     "couponNo": 13
   },
   {
-    "id": "BIOC-EGX",
+    "id": "EGX-BIOC",
     "isin": "EGS38171C012",
     "name": "Glaxo Smith Kline",
     "name_ar": "جلاكسو سميثكلاين",
@@ -2449,7 +2449,7 @@
     "couponNo": 23
   },
   {
-    "id": "ABUK-EGX",
+    "id": "EGX-ABUK",
     "isin": "EGS38191C010",
     "name": "Abou Kir Fertilizers",
     "name_ar": "ابوقير للاسمدة والصناعات الكيماوية",
@@ -2480,7 +2480,7 @@
     "couponNo": 46
   },
   {
-    "id": "RMDA-EGX",
+    "id": "EGX-RMDA",
     "isin": "EGS381B1C015",
     "name": "Tenth Of Ramadan Pharmaceutical Industries&Diagnostic-Rameda",
     "name_ar": "العاشر من رمضان للصناعات الدوائية والمستحضرات تشخيصية-راميدا",
@@ -2511,7 +2511,7 @@
     "couponNo": 6
   },
   {
-    "id": "EGCH-EGX",
+    "id": "EGX-EGCH",
     "isin": "EGS38201C017",
     "name": "Egyptian Chemical Industries (Kima)",
     "name_ar": "الصناعات الكيماوية المصرية - كيما",
@@ -2542,7 +2542,7 @@
     "couponNo": 47
   },
   {
-    "id": "MICH-EGX",
+    "id": "EGX-MICH",
     "isin": "EGS38211C016",
     "name": "Misr Chemical Industries",
     "name_ar": "مصر لصناعة الكيماويات",
@@ -2573,7 +2573,7 @@
     "couponNo": 62
   },
   {
-    "id": "ZEOT-EGX",
+    "id": "EGX-ZEOT",
     "isin": "EGS38251C012",
     "name": "Extracted Oils",
     "name_ar": "الزيوت المستخلصة ومنتجاتها",
@@ -2604,7 +2604,7 @@
     "couponNo": 20
   },
   {
-    "id": "SIPC-EGX",
+    "id": "EGX-SIPC",
     "isin": "EGS382M1C011",
     "name": "Sabaa International Company for Pharmaceutical and Chemical",
     "name_ar": "سبأ الدولية للأدوية والصناعات الكيماوية",
@@ -2635,7 +2635,7 @@
     "couponNo": 0
   },
   {
-    "id": "ADCI-EGX",
+    "id": "EGX-ADCI",
     "isin": "EGS38321C013",
     "name": "Arab Pharmaceuticals",
     "name_ar": "العربية للادوية والصناعات الكيماوية",
@@ -2666,7 +2666,7 @@
     "couponNo": 27
   },
   {
-    "id": "NIPH-EGX",
+    "id": "EGX-NIPH",
     "isin": "EGS38331C012",
     "name": "El-Nile Co. For Pharmaceuticals And Chemical Industries",
     "name_ar": "النيل للادوية والصناعات الكيماوية - النيل",
@@ -2697,7 +2697,7 @@
     "couponNo": 27
   },
   {
-    "id": "AXPH-EGX",
+    "id": "EGX-AXPH",
     "isin": "EGS38341C011",
     "name": "Alexandria Pharmaceuticals",
     "name_ar": "الاسكندرية للادوية والصناعات الكيماوية",
@@ -2728,7 +2728,7 @@
     "couponNo": 30
   },
   {
-    "id": "MPCI-EGX",
+    "id": "EGX-MPCI",
     "isin": "EGS38351C010",
     "name": "Memphis Pharmaceuticals",
     "name_ar": "ممفيس للادوية والصناعات الكيماوية",
@@ -2759,7 +2759,7 @@
     "couponNo": 20
   },
   {
-    "id": "EFIC-EGX",
+    "id": "EGX-EFIC",
     "isin": "EGS38381C017",
     "name": "Egyptian Financial & Industrial",
     "name_ar": "المالية و الصناعية المصرية",
@@ -2790,7 +2790,7 @@
     "couponNo": 25
   },
   {
-    "id": "CPCI-EGX",
+    "id": "EGX-CPCI",
     "isin": "EGS38391C016",
     "name": "Cairo Pharmaceuticals",
     "name_ar": "القاهرة للادوية والصناعات الكيماوية",
@@ -2821,7 +2821,7 @@
     "couponNo": 27
   },
   {
-    "id": "KZPC-EGX",
+    "id": "EGX-KZPC",
     "isin": "EGS38411C012",
     "name": "Kafr El Zayat Pesticides",
     "name_ar": "كفر الزيات للمبيدات والكيماويات",
@@ -2852,7 +2852,7 @@
     "couponNo": 29
   },
   {
-    "id": "MOSC-EGX",
+    "id": "EGX-MOSC",
     "isin": "EGS38421C011",
     "name": "Misr Oils & Soap",
     "name_ar": "مصر للزيوت و الصابون",
@@ -2883,7 +2883,7 @@
     "couponNo": 22
   },
   {
-    "id": "FERC-EGX",
+    "id": "EGX-FERC",
     "isin": "EGS385S1C012",
     "name": "FERCHEM MISR CO. FOR FERTILLIZERS & CHEMICALS",
     "name_ar": "فيركيم مصر للاسمدة والكيماويات",
@@ -2914,7 +2914,7 @@
     "couponNo": 9
   },
   {
-    "id": "EGAS-EGX",
+    "id": "EGX-EGAS",
     "isin": "EGS39011C019",
     "name": "Natural Gas & Mining Project (Egypt Gas)",
     "name_ar": "غاز مصر",
@@ -2945,7 +2945,7 @@
     "couponNo": 40
   },
   {
-    "id": "MFPC-EGX",
+    "id": "EGX-MFPC",
     "isin": "EGS39061C014",
     "name": "Misr Fertilizers Production Company - Mopco",
     "name_ar": "مصر لإنتاج الأسمدة - موبكو",
@@ -2976,7 +2976,7 @@
     "couponNo": 17
   },
   {
-    "id": "RUBX-EGX",
+    "id": "EGX-RUBX",
     "isin": "EGS3A221C018",
     "name": "Rubex International for Plastic and Acrylic Manufacturing",
     "name_ar": "روبكس العالميه لتصنيع البلاستيك والاكريلك",
@@ -3007,7 +3007,7 @@
     "couponNo": 12
   },
   {
-    "id": "MEGM-EGX",
+    "id": "EGX-MEGM",
     "isin": "EGS3C001C012",
     "name": "Middle East Glass Manufacturing",
     "name_ar": "الشرق الأوسط لصناعة الزجاج",
@@ -3038,7 +3038,7 @@
     "couponNo": 8
   },
   {
-    "id": "ECAP-EGX",
+    "id": "EGX-ECAP",
     "isin": "EGS3C071C015",
     "name": "El Ezz Porcelain (Gemma)",
     "name_ar": "العز للسيراميك و البورسلين - الجوهره",
@@ -3069,7 +3069,7 @@
     "couponNo": 13
   },
   {
-    "id": "PRCL-EGX",
+    "id": "EGX-PRCL",
     "isin": "EGS3C111C019",
     "name": "Ceramic & Porcelain",
     "name_ar": "العامة لمنتجات الخزف والصيني",
@@ -3100,7 +3100,7 @@
     "couponNo": 42
   },
   {
-    "id": "CERA-EGX",
+    "id": "EGX-CERA",
     "isin": "EGS3C151C015",
     "name": "The Arab Ceramic CO.- Ceramica Remas",
     "name_ar": "العربية للخزف - سيراميكا ريماس",
@@ -3131,7 +3131,7 @@
     "couponNo": 37
   },
   {
-    "id": "LCSW-EGX",
+    "id": "EGX-LCSW",
     "isin": "EGS3C161C014",
     "name": "Lecico Egypt",
     "name_ar": "ليسيكو مصر",
@@ -3162,7 +3162,7 @@
     "couponNo": 31
   },
   {
-    "id": "SVCE-EGX",
+    "id": "EGX-SVCE",
     "isin": "EGS3C351C011",
     "name": "South Valley Cement",
     "name_ar": "جنوب الوادى للاسمنت",
@@ -3193,7 +3193,7 @@
     "couponNo": 3
   },
   {
-    "id": "MBSC-EGX",
+    "id": "EGX-MBSC",
     "isin": "EGS3C371C019",
     "name": "Misr Beni Suef Cement",
     "name_ar": "مصر بنى سويف للاسمنت",
@@ -3224,7 +3224,7 @@
     "couponNo": 19
   },
   {
-    "id": "MCQE-EGX",
+    "id": "EGX-MCQE",
     "isin": "EGS3C391C017",
     "name": "Misr Cement (Qena)",
     "name_ar": "مصر للاسمنت - قنا",
@@ -3255,7 +3255,7 @@
     "couponNo": 26
   },
   {
-    "id": "SCEM-EGX",
+    "id": "EGX-SCEM",
     "isin": "EGS3C401C014",
     "name": "Sinai Cement",
     "name_ar": "اسمنت سيناء",
@@ -3286,7 +3286,7 @@
     "couponNo": 15
   },
   {
-    "id": "MEPA-EGX",
+    "id": "EGX-MEPA",
     "isin": "EGS3C4L1C015",
     "name": "Medical Packaging Company",
     "name_ar": "العبوات الطبية",
@@ -3317,7 +3317,7 @@
     "couponNo": 0
   },
   {
-    "id": "ALUM-EGX",
+    "id": "EGX-ALUM",
     "isin": "EGS3D031C018",
     "name": "Arab Aluminum",
     "name_ar": "الالومنيوم العربية",
@@ -3348,7 +3348,7 @@
     "couponNo": 37
   },
   {
-    "id": "IRON-EGX",
+    "id": "EGX-IRON",
     "isin": "EGS3D061C015",
     "name": "Egyptian Iron & Steel",
     "name_ar": "الحديد والصلب المصرية",
@@ -3379,7 +3379,7 @@
     "couponNo": 48
   },
   {
-    "id": "ATQA-EGX",
+    "id": "EGX-ATQA",
     "isin": "EGS3D0C1C018",
     "name": "Misr National Steel - Ataqa",
     "name_ar": "مصر الوطنية للصلب - عتاقة",
@@ -3410,7 +3410,7 @@
     "couponNo": 4
   },
   {
-    "id": "EGAL-EGX",
+    "id": "EGX-EGAL",
     "isin": "EGS3E181C010",
     "name": "Egypt Aluminum",
     "name_ar": "مصر للالومنيوم",
@@ -3441,7 +3441,7 @@
     "couponNo": 22
   },
   {
-    "id": "ENGC-EGX",
+    "id": "EGX-ENGC",
     "isin": "EGS3F021C017",
     "name": "Engineering Industries (ICON)",
     "name_ar": "الصناعات الهندسية المعمارية للانشاء والتعمير - ايكون",
@@ -3472,7 +3472,7 @@
     "couponNo": 27
   },
   {
-    "id": "SWDY-EGX",
+    "id": "EGX-SWDY",
     "isin": "EGS3G0Z1C014",
     "name": "ELSWEDY ELECTRIC",
     "name_ar": "السويدى اليكتريك",
@@ -3503,7 +3503,7 @@
     "couponNo": 17
   },
   {
-    "id": "EEII-EGX",
+    "id": "EGX-EEII",
     "isin": "EGS3G111C015",
     "name": "El Arabia Engineering Industries",
     "name_ar": "العربية للصناعات الهندسية",
@@ -3534,7 +3534,7 @@
     "couponNo": 28
   },
   {
-    "id": "ELEC-EGX",
+    "id": "EGX-ELEC",
     "isin": "EGS3G231C011",
     "name": "Electro Cable Egypt",
     "name_ar": "الكابلات الكهربائية المصرية",
@@ -3565,7 +3565,7 @@
     "couponNo": 11
   },
   {
-    "id": "GDWA-EGX",
+    "id": "EGX-GDWA",
     "isin": "EGS3JM11C012",
     "name": "Gadwa For Industrial Development",
     "name_ar": "جدوى للتنمية الصناعية",
@@ -3596,7 +3596,7 @@
     "couponNo": 0
   },
   {
-    "id": "ETRS-EGX",
+    "id": "EGX-ETRS",
     "isin": "EGS42051C010",
     "name": "Egyptian Transport (EGYTRANS)",
     "name_ar": "المصرية لخدمات النقل (ايجيترانس)",
@@ -3627,7 +3627,7 @@
     "couponNo": 14
   },
   {
-    "id": "POCO-EGX",
+    "id": "EGX-POCO",
     "isin": "EGS42101C013",
     "name": "Port Said Containers And Cargo Handling Co.",
     "name_ar": "بورسعيد لتداول الحاويات والبضائع",
@@ -3658,7 +3658,7 @@
     "couponNo": 12
   },
   {
-    "id": "DCCC-EGX",
+    "id": "EGX-DCCC",
     "isin": "EGS42121C011",
     "name": "Damietta Container and Cargo Handling",
     "name_ar": "دمياط لتداول الحاويات و البضائع",
@@ -3689,14 +3689,14 @@
     "couponNo": 22
   },
   {
-    "id": "MOIL-EGX",
+    "id": "EGX-MOIL",
     "isin": "EGS44012C010",
     "name": "Maridive & oil services",
     "name_ar": "ماريديف وخدمات النفط",
     "symbol": "MOIL",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/maridive-and-oil-services--big.svg",
     "price": 0.38,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -3720,7 +3720,7 @@
     "couponNo": 25
   },
   {
-    "id": "GMCI-EGX",
+    "id": "EGX-GMCI",
     "isin": "EGS46051C016",
     "name": "GMC GROUP FOR INDUSTRIAL COMMERCIAL & FINANCIAL INVESTMENTS",
     "name_ar": "مجموعة جى . أم . سى للاستثمارات الصناعية و التجارية المالية",
@@ -3751,14 +3751,14 @@
     "couponNo": 0
   },
   {
-    "id": "EGSA-EGX",
+    "id": "EGX-EGSA",
     "isin": "EGS48022C015",
     "name": "Egyptian Satellites (NileSat)",
     "name_ar": "المصرية للأقمار الصناعية (نايل سات)",
     "symbol": "EGSA",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/egyptian-satellites-nilesat--big.svg",
     "price": 6.47,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -3782,7 +3782,7 @@
     "couponNo": 24
   },
   {
-    "id": "ETEL-EGX",
+    "id": "EGX-ETEL",
     "isin": "EGS48031C016",
     "name": "Telecom Egypt",
     "name_ar": "المصرية للاتصالات",
@@ -3813,7 +3813,7 @@
     "couponNo": 23
   },
   {
-    "id": "TAQA-EGX",
+    "id": "EGX-TAQA",
     "isin": "EGS490S1C014",
     "name": "Taqa Arabia",
     "name_ar": "طاقة عربية",
@@ -3844,7 +3844,7 @@
     "couponNo": 0
   },
   {
-    "id": "VALU-EGX",
+    "id": "EGX-VALU",
     "isin": "EGS505Z1C018",
     "name": "U Consumer Finance",
     "name_ar": "يو للتمويل الاستهلاكى",
@@ -3875,7 +3875,7 @@
     "couponNo": 0
   },
   {
-    "id": "SMFR-EGX",
+    "id": "EGX-SMFR",
     "isin": "EGS51191C012",
     "name": "Samad Misr -EGYFERT",
     "name_ar": "سماد مصر (ايجيفرت)",
@@ -3906,7 +3906,7 @@
     "couponNo": 16
   },
   {
-    "id": "ISPH-EGX",
+    "id": "EGX-ISPH",
     "isin": "EGS512O1C012",
     "name": "Ibnsina Pharma",
     "name_ar": "ابن سينا فارما",
@@ -3937,7 +3937,7 @@
     "couponNo": 12
   },
   {
-    "id": "NEDA-EGX",
+    "id": "EGX-NEDA",
     "isin": "EGS52041C018",
     "name": "Northern Upper Egypt Development & Agricultural Production",
     "name_ar": "شمال الصعيد للتنمية والانتاج الزراعى (نيوداب)",
@@ -3968,7 +3968,7 @@
     "couponNo": 0
   },
   {
-    "id": "ICFC-EGX",
+    "id": "EGX-ICFC",
     "isin": "EGS520D1C015",
     "name": "International Company For Fertilizers & Chemicals",
     "name_ar": "الدولية للأسمدة والكيماويات",
@@ -3999,7 +3999,7 @@
     "couponNo": 2
   },
   {
-    "id": "MFSC-EGX",
+    "id": "EGX-MFSC",
     "isin": "EGS53051C016",
     "name": "Misr Duty Free Shops",
     "name_ar": "مصر للاسواق الحرة",
@@ -4030,7 +4030,7 @@
     "couponNo": 28
   },
   {
-    "id": "TALM-EGX",
+    "id": "EGX-TALM",
     "isin": "EGS597R1C017",
     "name": "Taaleem Management Services",
     "name_ar": "Taaleem Management Services تعليم لخدمات الإدارة",
@@ -4061,14 +4061,14 @@
     "couponNo": 0
   },
   {
-    "id": "GTEX-EGX",
+    "id": "EGX-GTEX",
     "isin": "EGS59U92C011",
     "name": "GTEX For Commercial And Industrial",
     "name_ar": "جيتكس للاستثمارات التجارية والصناعية",
     "symbol": "GTEX",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/gtex-for-commercial-and-industrial--big.svg",
     "price": 0.04,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -4092,7 +4092,7 @@
     "couponNo": 0
   },
   {
-    "id": "CIEB-EGX",
+    "id": "EGX-CIEB",
     "isin": "EGS60041C018",
     "name": "Credit Agricole Egypt",
     "name_ar": "بنك كريدي اجريكول مصر",
@@ -4123,7 +4123,7 @@
     "couponNo": 36
   },
   {
-    "id": "QNBE-EGX",
+    "id": "EGX-QNBE",
     "isin": "EGS60081C014",
     "name": "Qatar National Bank",
     "name_ar": "بنك قطر الوطني",
@@ -4154,7 +4154,7 @@
     "couponNo": 41
   },
   {
-    "id": "BQDC-EGX",
+    "id": "EGX-BQDC",
     "isin": "EGS600K1C019",
     "name": "Banque Du Caire",
     "name_ar": "بنك القاهرة",
@@ -4185,7 +4185,7 @@
     "couponNo": 0
   },
   {
-    "id": "UBEE-EGX",
+    "id": "EGX-UBEE",
     "isin": "EGS600M1C017",
     "name": "The United Bank",
     "name_ar": "المصرف المتحد",
@@ -4216,7 +4216,7 @@
     "couponNo": 2
   },
   {
-    "id": "SAUD-EGX",
+    "id": "EGX-SAUD",
     "isin": "EGS60101C010",
     "name": "Al Baraka Bank Egypt",
     "name_ar": "بنك البركة مصر",
@@ -4247,7 +4247,7 @@
     "couponNo": 17
   },
   {
-    "id": "ADIB-EGX",
+    "id": "EGX-ADIB",
     "isin": "EGS60111C019",
     "name": "Abu Dhabi Islamic Bank- Egypt",
     "name_ar": "مصرف أبو ظبي الأسلامي- مصر",
@@ -4278,7 +4278,7 @@
     "couponNo": 18
   },
   {
-    "id": "AMER-EGX",
+    "id": "EGX-AMER",
     "isin": "EGS675S1C011",
     "name": "Amer Group Holding",
     "name_ar": "(مجموعة عامر القابضة (عامر جروب",
@@ -4309,7 +4309,7 @@
     "couponNo": 5
   },
   {
-    "id": "ELKA-EGX",
+    "id": "EGX-ELKA",
     "isin": "EGS65071C010",
     "name": "El Kahera Housing",
     "name_ar": "القاهرة للاسكان والتعمير",
@@ -4340,7 +4340,7 @@
     "couponNo": 39
   },
   {
-    "id": "DAPH-EGX",
+    "id": "EGX-DAPH",
     "isin": "EGS65081C019",
     "name": "Development & Engineering Consultants",
     "name_ar": "التعمير والاستشارات الهندسية",
@@ -4371,7 +4371,7 @@
     "couponNo": 10
   },
   {
-    "id": "ELSH-EGX",
+    "id": "EGX-ELSH",
     "isin": "EGS65091C018",
     "name": "El Shams Housing & Urbanization",
     "name_ar": "الشمس للاسكان والتعمير",
@@ -4402,7 +4402,7 @@
     "couponNo": 41
   },
   {
-    "id": "NHPS-EGX",
+    "id": "EGX-NHPS",
     "isin": "EGS65131C012",
     "name": "National Housing for Professional Syndicates",
     "name_ar": "الوطنية للاسكان للنقابات المهنية",
@@ -4433,7 +4433,7 @@
     "couponNo": 22
   },
   {
-    "id": "CCRS-EGX",
+    "id": "EGX-CCRS",
     "isin": "EGS651B1C018",
     "name": "Gulf Canadian Real Estate Investment Co.",
     "name_ar": "الخليجية الكندية للاستثمار العقاري العربي",
@@ -4464,7 +4464,7 @@
     "couponNo": 2
   },
   {
-    "id": "AREH-EGX",
+    "id": "EGX-AREH",
     "isin": "EGS65211C012",
     "name": "Egyptian Real Estate Group",
     "name_ar": "المجموعه المصريه العقاريه",
@@ -4495,7 +4495,7 @@
     "couponNo": 4
   },
   {
-    "id": "EHDR-EGX",
+    "id": "EGX-EHDR",
     "isin": "EGS65341C017",
     "name": "Egyptians Housing Development & Reconstruction",
     "name_ar": "المصريين للاسكان والتنمية والتعمير",
@@ -4526,7 +4526,7 @@
     "couponNo": 14
   },
   {
-    "id": "MENA-EGX",
+    "id": "EGX-MENA",
     "isin": "EGS65441C015",
     "name": "Mena Touristic & Real Estate Investment",
     "name_ar": "مينا للاستثمار السياحي والعقاري",
@@ -4557,7 +4557,7 @@
     "couponNo": 15
   },
   {
-    "id": "MENA-EGX",
+    "id": "EGX-MENA",
     "isin": "EGS65461C013",
     "name": "Mena Touristic & Real Estate Investment",
     "name_ar": "مينا للاستثمار السياحي والعقاري",
@@ -4588,7 +4588,7 @@
     "couponNo": 15
   },
   {
-    "id": "COPR-EGX",
+    "id": "EGX-COPR",
     "isin": "EGS65511C015",
     "name": "Copper For Commercial Investment & Real Estate Development",
     "name_ar": "كوبر للاستثمار التجارى و التطوير العقارى",
@@ -4619,7 +4619,7 @@
     "couponNo": 22
   },
   {
-    "id": "OBRI-EGX",
+    "id": "EGX-OBRI",
     "isin": "EGS65551C011",
     "name": "El Obour Real Estate Investment",
     "name_ar": "العبور للاستثمار العقارى",
@@ -4650,7 +4650,7 @@
     "couponNo": 14
   },
   {
-    "id": "MASR-EGX",
+    "id": "EGX-MASR",
     "isin": "EGS65571C019",
     "name": "Madinet Masr For Housing and Development",
     "name_ar": "مدينة مصر للاسكان والتعمير",
@@ -4681,7 +4681,7 @@
     "couponNo": 50
   },
   {
-    "id": "HELI-EGX",
+    "id": "EGX-HELI",
     "isin": "EGS65591C017",
     "name": "Heliopolis Housing",
     "name_ar": "مصر الجديدة للاسكان والتعمير",
@@ -4712,7 +4712,7 @@
     "couponNo": 30
   },
   {
-    "id": "PHDC-EGX",
+    "id": "EGX-PHDC",
     "isin": "EGS655L1C012",
     "name": "Palm Hills Development Company",
     "name_ar": "بالم هيلز للتعمير",
@@ -4743,7 +4743,7 @@
     "couponNo": 3
   },
   {
-    "id": "BONY-EGX",
+    "id": "EGX-BONY",
     "isin": "EGS656M1C010",
     "name": "Bonyan for Development and Trade",
     "name_ar": "بنيان للتنمية والتجارة",
@@ -4774,7 +4774,7 @@
     "couponNo": 0
   },
   {
-    "id": "EALR-EGX",
+    "id": "EGX-EALR",
     "isin": "EGS65771C015",
     "name": "El Arabia for Land Reclamation",
     "name_ar": "العربية لاستصلاح الاراضي",
@@ -4805,7 +4805,7 @@
     "couponNo": 15
   },
   {
-    "id": "OCDI-EGX",
+    "id": "EGX-OCDI",
     "isin": "EGS65851C015",
     "name": "Six of October Development & Investment (SODIC)",
     "name_ar": "السادس من اكتوبر للتنميه والاستثمار- سوديك",
@@ -4836,7 +4836,7 @@
     "couponNo": 4
   },
   {
-    "id": "ICLE-EGX",
+    "id": "EGX-ICLE",
     "isin": "EGS67001C015",
     "name": "International Company For Leasing (IncoLEASE)",
     "name_ar": "الدولية للتأجير التمويلي (إنكوليس)",
@@ -4867,7 +4867,7 @@
     "couponNo": 22
   },
   {
-    "id": "ODIN-EGX",
+    "id": "EGX-ODIN",
     "isin": "EGS67181C015",
     "name": "ODIN Investments",
     "name_ar": "اودن للاستثمارات المالية",
@@ -4898,7 +4898,7 @@
     "couponNo": 25
   },
   {
-    "id": "ICID-EGX",
+    "id": "EGX-ICID",
     "isin": "EGS67191C014",
     "name": "International Co For Investment & Development",
     "name_ar": "العالمية للاستثمار والتنمية",
@@ -4929,14 +4929,14 @@
     "couponNo": 26
   },
   {
-    "id": "CFGH-EGX",
+    "id": "EGX-CFGH",
     "isin": "EGS672I2C014",
     "name": "Concrete Fashion Group For Commercial& Industrial Investment",
     "name_ar": "كونكريت فاشون جروب للاستثمارات التجارية والصناعية",
     "symbol": "CFGH",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/al-arafa-for-investment-and-consultancies--big.svg",
     "price": 0.12,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -4960,7 +4960,7 @@
     "couponNo": 3
   },
   {
-    "id": "GBCO-EGX",
+    "id": "EGX-GBCO",
     "isin": "EGS673T1C012",
     "name": "GB Corp",
     "name_ar": "جى بى كوربوريشن",
@@ -4991,7 +4991,7 @@
     "couponNo": 8
   },
   {
-    "id": "EMFD-EGX",
+    "id": "EGX-EMFD",
     "isin": "EGS673Y1C015",
     "name": "Emaar Misr for Development",
     "name_ar": "إعمار مصر للتنمية",
@@ -5022,7 +5022,7 @@
     "couponNo": 0
   },
   {
-    "id": "EBSC-EGX",
+    "id": "EGX-EBSC",
     "isin": "EGS68181C014",
     "name": "Osool ESB Securities Brokerage",
     "name_ar": "اصول E.S.B. للوساطة في الاوراق المالية",
@@ -5053,7 +5053,7 @@
     "couponNo": 3
   },
   {
-    "id": "EASB-EGX",
+    "id": "EGX-EASB",
     "isin": "EGS681D1C010",
     "name": "Egyptian Arabian(Themar)Comp. For Securities&Bonds Brok. EAC",
     "name_ar": "EAC المصرية العربية (ثمار) لتداول الاوراق المالية والسندات",
@@ -5084,7 +5084,7 @@
     "couponNo": 14
   },
   {
-    "id": "EOSB-EGX",
+    "id": "EGX-EOSB",
     "isin": "EGS681I1C015",
     "name": "El Orouba Securities Brokerage",
     "name_ar": "العروبة للسمسرة فى الأوراق المالية",
@@ -5115,7 +5115,7 @@
     "couponNo": 5
   },
   {
-    "id": "KWIN-EGX",
+    "id": "EGX-KWIN",
     "isin": "EGS69011C012",
     "name": "El Kahera El Watania Investment",
     "name_ar": "القاهرة الوطنية للاستثمار والاوراق المالية",
@@ -5146,7 +5146,7 @@
     "couponNo": 7
   },
   {
-    "id": "AFDI-EGX",
+    "id": "EGX-AFDI",
     "isin": "EGS69021C011",
     "name": "El Ahli Investment and Development",
     "name_ar": "الاهلي للتنمية والاستثمار",
@@ -5177,7 +5177,7 @@
     "couponNo": 3
   },
   {
-    "id": "RAYA-EGX",
+    "id": "EGX-RAYA",
     "isin": "EGS690C1C010",
     "name": "Raya Holding For Financial Investments",
     "name_ar": "راية القابضة للأستثمارات المالية",
@@ -5208,7 +5208,7 @@
     "couponNo": 18
   },
   {
-    "id": "HRHO-EGX",
+    "id": "EGX-HRHO",
     "isin": "EGS69101C011",
     "name": "EFG Holding",
     "name_ar": "مجموعة اي اف جي القابضة",
@@ -5239,14 +5239,14 @@
     "couponNo": 10
   },
   {
-    "id": "NAHO-EGX",
+    "id": "EGX-NAHO",
     "isin": "EGS69182C011",
     "name": "Naeem Holding",
     "name_ar": "النعيم القابضة للاستثمارات",
     "symbol": "NAHO",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/naeem--big.svg",
     "price": 0.13,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -5270,7 +5270,7 @@
     "couponNo": 3
   },
   {
-    "id": "REAC-EGX",
+    "id": "EGX-REAC",
     "isin": "EGS69191C012",
     "name": "Reacap Financial Investments",
     "name_ar": "ريكاب  للاستثمارات المالية",
@@ -5301,7 +5301,7 @@
     "couponNo": 0
   },
   {
-    "id": "PRMH-EGX",
+    "id": "EGX-PRMH",
     "isin": "EGS691A1C011",
     "name": "Prime Holding",
     "name_ar": "برايم القابضة للاستثمارات المالية",
@@ -5332,7 +5332,7 @@
     "couponNo": 5
   },
   {
-    "id": "TMGH-EGX",
+    "id": "EGX-TMGH",
     "isin": "EGS691S1C011",
     "name": "T M G Holding",
     "name_ar": "مجموعة طلعت مصطفى القابضة",
@@ -5363,7 +5363,7 @@
     "couponNo": 12
   },
   {
-    "id": "GRCA-EGX",
+    "id": "EGX-GRCA",
     "isin": "EGS69261C013",
     "name": "Grand Investment Capital",
     "name_ar": "جراند انفستمنت القابضة للاستثمارات المالية",
@@ -5394,7 +5394,7 @@
     "couponNo": 1
   },
   {
-    "id": "OIH-EGX",
+    "id": "EGX-OIH",
     "isin": "EGS693V1C014",
     "name": "Orascom Investment Holding",
     "name_ar": "اوراسكوم للاستثمار القابضه",
@@ -5425,7 +5425,7 @@
     "couponNo": 3
   },
   {
-    "id": "EGX30ETF-EGX",
+    "id": "EGX-EGX30ETF",
     "isin": "EGS69491M015",
     "name": "EGX 30 INDEX ETF",
     "name_ar": "EGX 30 INDEX ETF-وثائق استثمار شركة صناديق المؤشرات",
@@ -5456,7 +5456,7 @@
     "couponNo": 0
   },
   {
-    "id": "ARAB-EGX",
+    "id": "EGX-ARAB",
     "isin": "EGS694A1C018",
     "name": "Arab Developers Holding",
     "name_ar": "المطورون العرب القابضة",
@@ -5487,7 +5487,7 @@
     "couponNo": 1
   },
   {
-    "id": "EGREF-EGX",
+    "id": "EGX-EGREF",
     "isin": "EGS694B1C017",
     "name": "Egyptians Real Estate Fund Certificates",
     "name_ar": "وثائق شركة صندوق استثمار المصريين للاستثمار العقارى",
@@ -5518,7 +5518,7 @@
     "couponNo": 0
   },
   {
-    "id": "OFH-EGX",
+    "id": "EGX-OFH",
     "isin": "EGS696S1C016",
     "name": "Orascom Financial Holding",
     "name_ar": "اوراسكوم المالية القابضة",
@@ -5549,7 +5549,7 @@
     "couponNo": 0
   },
   {
-    "id": "KASABF-EGX",
+    "id": "EGX-KASABF",
     "isin": "EGS696Z1C017",
     "name": "Certificates Of Odin Egyptian Equity Investment Fund-KASAB",
     "name_ar": "وثائق صندوق استثمار أودن للاستثمار في الاسهم المصرية -كسب",
@@ -5580,7 +5580,7 @@
     "couponNo": 0
   },
   {
-    "id": "ACAP-EGX",
+    "id": "EGX-ACAP",
     "isin": "EGS697S1C015",
     "name": "A Capital Holding",
     "name_ar": "اية كابيتال القابضة",
@@ -5611,7 +5611,7 @@
     "couponNo": 0
   },
   {
-    "id": "CPME-EGX",
+    "id": "EGX-CPME",
     "isin": "EGS698X1C017",
     "name": "Catalyst Partners Middle East –CPME",
     "name_ar": "كاتليست بارتنرز ميديل ايست",
@@ -5642,7 +5642,7 @@
     "couponNo": 0
   },
   {
-    "id": "MHOT-EGX",
+    "id": "EGX-MHOT",
     "isin": "EGS70081C012",
     "name": "Misr Hotels",
     "name_ar": "مصر للفنادق",
@@ -5673,7 +5673,7 @@
     "couponNo": 58
   },
   {
-    "id": "RTVC-EGX",
+    "id": "EGX-RTVC",
     "isin": "EGS70271C019",
     "name": "Remco for Touristic Villages Construction",
     "name_ar": "رمكو لانشاء القرى السياحيه",
@@ -5704,7 +5704,7 @@
     "couponNo": 2
   },
   {
-    "id": "ROTO-EGX",
+    "id": "EGX-ROTO",
     "isin": "EGS70281C018",
     "name": "Rowad Tourism (Al Rowad)",
     "name_ar": "رواد السياحة - الرواد",
@@ -5735,7 +5735,7 @@
     "couponNo": 14
   },
   {
-    "id": "ORHD-EGX",
+    "id": "EGX-ORHD",
     "isin": "EGS70321C012",
     "name": "Orascom Development Egypt",
     "name_ar": "اوراسكوم للتنمية مصر",
@@ -5766,7 +5766,7 @@
     "couponNo": 2
   },
   {
-    "id": "PHTV-EGX",
+    "id": "EGX-PHTV",
     "isin": "EGS70331C011",
     "name": "Pyramisa Hotels",
     "name_ar": "بيراميزا للفنادق والقرى السياحية - بيراميزا",
@@ -5797,14 +5797,14 @@
     "couponNo": 14
   },
   {
-    "id": "GPPL-EGX",
+    "id": "EGX-GPPL",
     "isin": "EGS70342C018",
     "name": "Golden Pyramids Plaza",
     "name_ar": "جولدن بيراميدز بلازا",
     "symbol": "GPPL",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/golden-pyramids-plaza--big.svg",
     "price": 1.0,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -5828,7 +5828,7 @@
     "couponNo": 1
   },
   {
-    "id": "EGTS-EGX",
+    "id": "EGX-EGTS",
     "isin": "EGS70431C019",
     "name": "Egyptian for Tourism Resorts",
     "name_ar": "المصرية للمنتجعات السياحية",
@@ -5859,7 +5859,7 @@
     "couponNo": 3
   },
   {
-    "id": "SDTI-EGX",
+    "id": "EGX-SDTI",
     "isin": "EGS70571C012",
     "name": "Sharm Dreams Co. for Tourism Investment",
     "name_ar": "شارم دريمز للاستثمار السياحى",
@@ -5890,7 +5890,7 @@
     "couponNo": 6
   },
   {
-    "id": "GOCO-EGX",
+    "id": "EGX-GOCO",
     "isin": "EGS70GV1C015",
     "name": "Golden Coast Company",
     "name_ar": "جولدن كوست السخنة للاستثمار السياحى",
@@ -5921,14 +5921,14 @@
     "couponNo": 4
   },
   {
-    "id": "SPHT-EGX",
+    "id": "EGX-SPHT",
     "isin": "EGS70H02C014",
     "name": "El Shams Pyramids For Hotels& Touristic Projects",
     "name_ar": "الشمس بيراميدز للفنادق والمنشأت السياحية",
     "symbol": "SPHT",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/el-shams-pyramids-for-hotelsand-touristic-projects--big.svg",
     "price": 2.55,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -5952,7 +5952,7 @@
     "couponNo": 0
   },
   {
-    "id": "MMAT-EGX",
+    "id": "EGX-MMAT",
     "isin": "EGS70P91C010",
     "name": "Marsa Marsa Alam For Tourism Development",
     "name_ar": "الشمس بيراميدز للفنادق والمنشأت السياحية",
@@ -5983,7 +5983,7 @@
     "couponNo": 0
   },
   {
-    "id": "ELWA-EGX",
+    "id": "EGX-ELWA",
     "isin": "EGS70R91C016",
     "name": "El Wadi For International and Investement Development",
     "name_ar": "الوادى العالمية للاستثمار و التنمية",
@@ -6014,7 +6014,7 @@
     "couponNo": 7
   },
   {
-    "id": "NINH-EGX",
+    "id": "EGX-NINH",
     "isin": "EGS72011C017",
     "name": "Nozha International Hospital",
     "name_ar": "مستشفى النزهه الدولي",
@@ -6045,7 +6045,7 @@
     "couponNo": 25
   },
   {
-    "id": "AMES-EGX",
+    "id": "EGX-AMES",
     "isin": "EGS72081C010",
     "name": "Alexandria New Medical Center",
     "name_ar": "الاسكندرية للخدمات الطبية - المركز الطبى الجديد - الاسكندرية",
@@ -6076,7 +6076,7 @@
     "couponNo": 15
   },
   {
-    "id": "MOED-EGX",
+    "id": "EGX-MOED",
     "isin": "EGS729F1C012",
     "name": "The Egyptian Modern Education Systems",
     "name_ar": "المصرية لنظم التعليم الحديثة",
@@ -6107,7 +6107,7 @@
     "couponNo": 0
   },
   {
-    "id": "CLHO-EGX",
+    "id": "EGX-CLHO",
     "isin": "EGS729J1C018",
     "name": "Cleopatra Hospital Company",
     "name_ar": "شركة مستشفي كليوباترا",
@@ -6138,7 +6138,7 @@
     "couponNo": 0
   },
   {
-    "id": "ACAMD-EGX",
+    "id": "EGX-ACAMD",
     "isin": "EGS72AQ1C016",
     "name": "Arab Co. for Asset Management And Development",
     "name_ar": "الشركة العربية لادارة وتطوير الاصول",
@@ -6169,7 +6169,7 @@
     "couponNo": 1
   },
   {
-    "id": "CCAP-EGX",
+    "id": "EGX-CCAP",
     "isin": "EGS73541C012",
     "name": "QALA For Financial Investments",
     "name_ar": "القلعة للاستثمارات المالية",
@@ -6200,7 +6200,7 @@
     "couponNo": 0
   },
   {
-    "id": "CCAPP-EGX",
+    "id": "EGX-CCAPP",
     "isin": "EGS73541P048",
     "name": "QALA For Financial Investments - Preferred Shares",
     "name_ar": "القلعة للاستثمارات المالية - اسهم ممتازة",
@@ -6231,14 +6231,14 @@
     "couponNo": 0
   },
   {
-    "id": "NDRL.-EGX",
+    "id": "EGX-NDRL.",
     "isin": "EGS735N2C012",
     "name": "National Drilling",
     "name_ar": "الحفر الوطنية",
     "symbol": "NDRL.",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/national-drilling--big.svg",
     "price": 4.69,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -6262,7 +6262,7 @@
     "couponNo": 0
   },
   {
-    "id": "CNFN-EGX",
+    "id": "EGX-CNFN",
     "isin": "EGS738I1C018",
     "name": "Contact Financial Holding",
     "name_ar": "كونتكت المالية القابضة",
@@ -6293,7 +6293,7 @@
     "couponNo": 7
   },
   {
-    "id": "MAAL-EGX",
+    "id": "EGX-MAAL",
     "isin": "EGS739Z1C016",
     "name": "Egyptian Gulf Marseilia For Real Estate Investment",
     "name_ar": "مرسيليا المصرية الخليجية للاستثمار العقارى",
@@ -6324,7 +6324,7 @@
     "couponNo": 4
   },
   {
-    "id": "SPMD-EGX",
+    "id": "EGX-SPMD",
     "isin": "EGS73BR1C013",
     "name": "Speed Medical",
     "name_ar": "سبيد ميديكال",
@@ -6355,7 +6355,7 @@
     "couponNo": 0
   },
   {
-    "id": "SCTS-EGX",
+    "id": "EGX-SCTS",
     "isin": "EGS740C1C010",
     "name": "Sues Canal Company For Technology Settling",
     "name_ar": "قناة السويس لتوطين التكنولوجيا",
@@ -6386,7 +6386,7 @@
     "couponNo": 25
   },
   {
-    "id": "RACC-EGX",
+    "id": "EGX-RACC",
     "isin": "EGS74191C015",
     "name": "Raya Customer Experience",
     "name_ar": "راية لخدمات مراكز الاتصالات",
@@ -6417,7 +6417,7 @@
     "couponNo": 12
   },
   {
-    "id": "EFIH-EGX",
+    "id": "EGX-EFIH",
     "isin": "EGS743O1C013",
     "name": "E-finance For Digital and Financial Investments",
     "name_ar": "اي فاينانس للاستثمارات المالية والرقمية",
@@ -6448,7 +6448,7 @@
     "couponNo": 17
   },
   {
-    "id": "FWRY-EGX",
+    "id": "EGX-FWRY",
     "isin": "EGS745L1C014",
     "name": "Fawry For Banking Technology And Electronic Payment",
     "name_ar": "فوري لتكنولوجيا البنوك والمدفوعات الالكترونية",
@@ -6479,7 +6479,7 @@
     "couponNo": 0
   },
   {
-    "id": "DGTZ-EGX",
+    "id": "EGX-DGTZ",
     "isin": "EGS74F71C015",
     "name": "Digitize for Investment And Technology",
     "name_ar": "ديجيتايز للاستثمار والتقنية",
@@ -6510,7 +6510,7 @@
     "couponNo": 0
   },
   {
-    "id": "MTIE-EGX",
+    "id": "EGX-MTIE",
     "isin": "EGS75011C014",
     "name": "MM Group For Industry And International Trade",
     "name_ar": "ام.ام جروب للصناعة والتجارة العالمية",
@@ -6541,7 +6541,7 @@
     "couponNo": 0
   },
   {
-    "id": "MPRC-EGX",
+    "id": "EGX-MPRC",
     "isin": "EGS78021C010",
     "name": "Egyptian Media Production City",
     "name_ar": "مدينة إنتاج الإعلام المصرية",
@@ -6572,14 +6572,14 @@
     "couponNo": 5
   },
   {
-    "id": "TRTO-EGX",
+    "id": "EGX-TRTO",
     "isin": "EGS79072C012",
     "name": "TransOceans Tours",
     "name_ar": "عبر المحيطات للسياحه",
     "symbol": "TRTO",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/transoceans-tours--big.svg",
     "price": 0.04,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -6603,7 +6603,7 @@
     "couponNo": 27
   },
   {
-    "id": "MCRO-EGX",
+    "id": "EGX-MCRO",
     "isin": "EGS7D971C011",
     "name": "Macro Group Pharmaceuticals -Macro Capital",
     "name_ar": "ماكرو جروب للمستحضرات الطبية-ماكرو كابيتال",
@@ -6634,7 +6634,7 @@
     "couponNo": 2
   },
   {
-    "id": "ORAS-EGX",
+    "id": "EGX-ORAS",
     "isin": "EGS95001C011",
     "name": "Orascom Construction PLC",
     "name_ar": "اوراسكوم كونستراكشون بي ال سي",
@@ -6665,7 +6665,7 @@
     "couponNo": 12
   },
   {
-    "id": "EPCO-EGX",
+    "id": "EGX-EPCO",
     "isin": "EGS02211C018",
     "name": "Egypt for Poultry",
     "name_ar": "المصرية للدواجن",
@@ -6696,7 +6696,7 @@
     "couponNo": 11
   },
   {
-    "id": "IFAP-EGX",
+    "id": "EGX-IFAP",
     "isin": "EGS07061C012",
     "name": "International Agricultural Products",
     "name_ar": "الدوليه للمحاصيل الزراعيه",
@@ -6727,7 +6727,7 @@
     "couponNo": 10
   },
   {
-    "id": "COMI-EGX",
+    "id": "EGX-COMI",
     "isin": "EGS60121C018",
     "name": "Commercial International Bank-Egypt (CIB)",
     "name_ar": "البنك التجاري الدولي -مصر (سى اى بى )",
@@ -6758,14 +6758,14 @@
     "couponNo": 48
   },
   {
-    "id": "SAIB-EGX",
+    "id": "EGX-SAIB",
     "isin": "EGS60142C014",
     "name": "Societe Arabe Internationale De Banque S.A.E.",
     "name_ar": "بنك الشركة المصرفية العربية الدولية- شركة مساهمة مصرية",
     "symbol": "SAIB",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/societe-arabe-internationale-de-banque-saib--big.svg",
     "price": 2.11,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -6789,14 +6789,14 @@
     "couponNo": 38
   },
   {
-    "id": "EGBE-EGX",
+    "id": "EGX-EGBE",
     "isin": "EGS60182C010",
     "name": "Egyptian Gulf Bank",
     "name_ar": "البنك المصري الخليجي",
     "symbol": "EGBE",
     "logoUrl": "https://s3-symbol-logo.tradingview.com/egyptian-gulf-bank--big.svg",
     "price": 0.29,
-    "currency": "US Dollar ($)",
+    "currency": "USD",
     "changePercent": 0,
     "market": "EGX",
     "securityType": "Egyptian securities-Stocks",
@@ -6820,7 +6820,7 @@
     "couponNo": 20
   },
   {
-    "id": "CANA-EGX",
+    "id": "EGX-CANA",
     "isin": "EGS60231C015",
     "name": "Suez Canal Bank S.A.E",
     "name_ar": "بنك قناة السويس شركة مساهمة مصرية",
@@ -6851,7 +6851,7 @@
     "couponNo": 24
   },
   {
-    "id": "EXPA-EGX",
+    "id": "EGX-EXPA",
     "isin": "EGS60241C014",
     "name": "Export Development Bank of Egypt",
     "name_ar": "البنك المصري لتنمية الصادرات",
@@ -6882,7 +6882,7 @@
     "couponNo": 30
   },
   {
-    "id": "HDBK-EGX",
+    "id": "EGX-HDBK",
     "isin": "EGS60301C016",
     "name": "Housing & Development Bank",
     "name_ar": "بنك التعمير والاسكان",
@@ -6913,7 +6913,7 @@
     "couponNo": 43
   },
   {
-    "id": "MOIN-EGX",
+    "id": "EGX-MOIN",
     "isin": "EGS63041C015",
     "name": "Mohandes Insurance",
     "name_ar": "المهندس للتأمين",
@@ -6944,7 +6944,7 @@
     "couponNo": 44
   },
   {
-    "id": "RREI-EGX",
+    "id": "EGX-RREI",
     "isin": "EGS65011C016",
     "name": "Arab Real Estate Investment CO.-ALICO",
     "name_ar": "الاستثمار العقاري العربي - اليكو",
@@ -6975,7 +6975,7 @@
     "couponNo": 7
   },
   {
-    "id": "UNIT-EGX",
+    "id": "EGX-UNIT",
     "isin": "EGS65061C011",
     "name": "United Housing & Development",
     "name_ar": "المتحدة للاسكان والتعمير",

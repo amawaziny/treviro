@@ -10,12 +10,12 @@ def map_to_listed_security(company: Dict[str, Any]) -> Dict[str, Any]:
     symbol = company.get("symbol", "").replace(".CA", "")
     security = {
         # Core ListedSecurity fields
-        "id": f"{symbol}-EGX",
+        "id": f"EGX-{symbol}",
         "isin": company.get("isin", ""),
         "name": company.get("companyName", ""),
         "name_ar": company.get("companyNameAr", ""),
         "symbol": symbol,  # Using the cleaned symbol without .CA
-        "logoUrl": "",  # Not in source data
+        "logoUrl": "",  # Leave empty for manual updates
         "price": details.get("closingPrice", 0),
         "currency": details.get("currency", "EGP"),
         "changePercent": 0,  # Not available in source data
