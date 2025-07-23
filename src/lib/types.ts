@@ -161,17 +161,35 @@ export interface FixedEstimateRecord {
 
 export interface ListedSecurity {
   id: string;
+  isin?: string;
   name: string;
   name_ar: string;
   symbol: string;
-  logoUrl: string;
+  logoUrl?: string;
   price: number;
   currency: string;
-  changePercent: number;
+  changePercent?: number;
   market: string;
-  securityType?: "Stock" | "Fund";
+  securityType: "Stock" | "Fund";
   fundType?: string;
   description?: string;
+  sector?: string;
+  sectorAr?: string;
+  lastUpdated?: string;
+  listingDate?: string;
+  securityTypeAr?: string;
+  listedShares?: number;
+  tradedVolume?: number;
+  tradedValue?: number;
+  priceEarningRatio?: number;
+  dividendYield?: number;
+  cashDividends?: string;
+  marketCap?: number;
+  parValue?: number;
+  currencyAr?: string;
+  couponPaymentDate?: string;
+  couponNo?: number | string;
+  updatedAt?: string;
 }
 
 export interface StockChartDataPoint {
