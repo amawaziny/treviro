@@ -90,7 +90,7 @@ export function StockDetailChart({
         let firestoreQuery;
         const priceHistoryRef = collection(
           db!,
-          `listedStocks/${securityId}/priceHistory`,
+          `listedSecurities/${securityId}/priceHistory`,
         );
 
         if (selectedRange === "1W" || selectedRange === "1M") {

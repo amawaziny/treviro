@@ -160,7 +160,7 @@ export function SecurityList({
           {isOffline
             ? t("no_cached_securities_available_for_offline_viewing")
             : t(
-                "no_securities_found_the_listedstocks_collection_in_firestore_might_be_empty_or_not_yet_populated",
+                "no_securities_found_the_listedSecurities_collection_in_firestore_might_be_empty_or_not_yet_populated",
               )}
         </p>
       </div>

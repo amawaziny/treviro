@@ -374,7 +374,7 @@
   "no_real_estate_investment_found_for_this_id": "No real estate investment found for this ID.",
   "no_real_estaterelated_fund_investments_found": "No real estate-related fund investments found.",
   "no_securities_available": "No securities available",
-  "no_securities_found_the_listedstocks_collection_in_firestore_might_be_empty_or_not_yet_populated": "No securities found. The 'listedStocks' collection in Firestore might be empty or not yet populated.",
+  "no_securities_found_the_listedSecurities_collection_in_firestore_might_be_empty_or_not_yet_populated": "No securities found. The 'listedSecurities' collection in Firestore might be empty or not yet populated.",
   "no_security_id_provided_to_fetch_chart_data": "No security ID provided to fetch chart data.",
   "no_settings_here": "No settings here.",
   "no_stock_investments_yet": "No Stock Investments Yet!",

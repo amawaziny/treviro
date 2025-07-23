@@ -14,8 +14,7 @@ export const useListedSecurities = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    // Firestore collection is still named 'listedStocks' for data continuity
-    const securitiesCollectionRef = collection(db, "listedStocks");
+    const securitiesCollectionRef = collection(db, "listedSecurities");
     const q = query(securitiesCollectionRef);
 
     const unsubscribe = onSnapshot(
@@ -48,7 +47,7 @@ export const useListedSecurities = () => {
       }
       // If not in cache, fetch from Firestore
       try {
-        const securityDocRef = doc(db, "listedStocks", id);
+        const securityDocRef = doc(db, "listedSecurities", id);
         const securityDocSnap = await getDoc(securityDocRef);
         if (securityDocSnap.exists()) {
           return {

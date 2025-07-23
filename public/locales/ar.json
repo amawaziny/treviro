@@ -359,7 +359,7 @@
   "no_real_estate_investment_found_for_this_id": "لم يتم العثور على استثمار عقاري بهذا المعرف.",
   "no_real_estaterelated_fund_investments_found": "لم يتم العثور على استثمارات في صناديق عقارية.",
   "no_securities_available": "ﻻ توجد أوراق مالية متاحة",
-  "no_securities_found_the_listedstocks_collection_in_firestore_might_be_empty_or_not_yet_populated": "لم يتم العثور على أوراق مالية. قد تكون مجموعة 'listedStocks' في Firestore فارغة أو لم يتم تعبئتها بعد.",
+  "no_securities_found_the_listedSecurities_collection_in_firestore_might_be_empty_or_not_yet_populated": "لم يتم العثور على أوراق مالية. قد تكون مجموعة 'listedSecurities' في Firestore فارغة أو لم يتم تعبئتها بعد.",
   "no_security_id_provided_to_fetch_chart_data": "لم يتم توفير معرف الورقة المالية لجلب بيانات الرسم البياني.",
   "no_settings_here": "ﻻ توجد إعدادات هنا.",
   "no_stock_investments_yet": "ﻻ توجد استثمارات في اﻷسهم بعد!",

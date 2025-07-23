@@ -26,9 +26,9 @@ export async function GET(req: NextRequest) {
         message: `Today (${today}) is a vacation. Skipping stock scraping.`,
       });
     }
-    // 1. Read the list of securities from collection listedStocks in firebase and filter by securityType=Stock
+    // 1. Read the list of securities from collection listedSecurities in firebase and filter by securityType=Stock
     const q = query(
-      collection(db, "listedStocks"),
+      collection(db, "listedSecurities"),
       where("securityType", "==", "Stock"),
     );
     const snapshot = await getDocs(q);
@@ -48,11 +48,11 @@ export async function GET(req: NextRequest) {
         const priceText = $(".leading-48").first().text();
         const price = parseFloat(priceText.replace(/[^\d.\-]/g, ""));
         if (!isNaN(price)) {
-          // 4. Update listedStocks collection in firebase and set price column
+          // 4. Update listedSecurities collection in firebase and set price column
           updates.push(
             (async () => {
-              // Update the price in listedStocks
-              await updateDoc(firestoreDoc(db, "listedStocks", stockDoc.id), {
+              // Update the price in listedSecurities
+              await updateDoc(firestoreDoc(db, "listedSecurities", stockDoc.id), {
                 price,
               });
               // Also update priceHistory subcollection
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
               // Check if today's priceHistory record exists and price is the same
               const todayDocRef = docFn(
                 db,
-                "listedStocks",
+                "listedSecurities",
                 stockDoc.id,
                 "priceHistory",
                 today,
@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
               await setDoc(
                 firestoreDoc(
                   db,
-                  "listedStocks",
+                  "listedSecurities",
                   stockDoc.id,
                   "priceHistory",
                   today,
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
               // Fetch two most recent priceHistory docs
               const priceHistRef = coll(
                 db,
-                "listedStocks",
+                "listedSecurities",
                 stockDoc.id,
                 "priceHistory",
               );
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
               if (prices.length === 2 && prices[1] !== 0) {
                 changePercent = ((prices[0] - prices[1]) / prices[1]) * 100;
               }
-              await updateDoc(firestoreDoc(db, "listedStocks", stockDoc.id), {
+              await updateDoc(firestoreDoc(db, "listedSecurities", stockDoc.id), {
                 changePercent,
               });
             })(),
