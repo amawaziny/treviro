@@ -115,7 +115,7 @@ async function uploadSecurities(firestore: Firestore) {
     console.log(`Found ${securities.length} securities to process...`);
     
     // Reference to the Firestore collection
-    const securitiesCollection = collection(db, 'listedStocks');
+    const securitiesCollection = collection(db, 'listedSecurities');
     
     // Counter for tracking progress
     let successCount = 0;
