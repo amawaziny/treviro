@@ -133,36 +133,47 @@ test.describe("Stocks & Equity Funds Page", () => {
     await page.getByTestId("add-security-button").click();
     await page.waitForURL("**/securities");
     
-    // Click on the Stocks tab
-    await page.getByTestId("stocks-tab").click();
+    // Get initial P/L from dashboard
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const initialDashboardPL = await getNumericValue(page, '[data-testid="total-current-portfolio-pl-amount"]');
     
-    // Wait for stocks to load and click on the first stock
-    const firstStock = page.getByTestId("security-card").first();
-    await expect(firstStock).toBeVisible();
-    const stockName = await firstStock.getByTestId("security-name").textContent();
-    
-    // Navigate to stock details
-    await firstStock.click();
-    await page.waitForURL("**/securities/details/**");
-    
-    // Click on Buy button
-    const buyButton = page.getByTestId("buy-security-button");
-    await expect(buyButton).toBeVisible();
-    await buyButton.click();
-    
-    // Wait for the add investment form to load
-    await page.waitForURL((url) => url.pathname.includes('/investments/add'));
-    
-    // Fill out the investment form
-    await page.getByTestId("purchase-price-input").fill("100");
-    await page.getByTestId("shares-input").fill("1");
-    await page.getByTestId("purchase-date-input").fill(new Date().toISOString().split('T')[0]);
-    await page.getByTestId("fees-input").fill("0");
-    
+    // Get initial P/L from stocks page
+    await page.goto("/investments/stocks");
+    await page.waitForLoadState("networkidle");
+    const initialStocksPL = await getNumericValue(page, '[data-testid="total-pl-amount"]');
+
+    // Navigate to the stock details page
+    await page.goto("/securities/EGX-ETEL");
+    await page.waitForLoadState("networkidle");
+
+    // Get the stock name for later verification
+    const stockName = await page
+      .getByTestId("security-name")
+      .textContent();
+
+    // Click the buy button
+    await page.getByTestId("buy-button").click();
+
+    // Fill in the purchase form
+    await page.getByLabel("Number of Shares").fill("1");
+    await page.getByLabel("Price per Share").fill("100");
+    await page.getByLabel("Fees").fill("0");
+
     // Submit the form
-    await page.getByTestId("submit-investment-button").click();
+    await page.getByRole("button", { name: /purchase/i }).click();
+
+    // Wait for the success message
+    await expect(
+      page.getByText(/purchase successful/i),
+    ).toBeVisible();
+
+    // Get updated P/L from dashboard
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const updatedDashboardPL = await getNumericValue(page, '[data-testid="total-current-portfolio-pl-amount"]');
     
-    // Manually navigate to the stocks page
+    // Navigate to stocks page and verify updates
     await page.goto("/investments/stocks");
     // await page.waitForLoadState("networkidle");
     
@@ -179,9 +190,8 @@ test.describe("Stocks & Equity Funds Page", () => {
     const portfolioSummary = page.getByTestId("portfolio-summary");
     await expect(portfolioSummary).toBeVisible();
     
-    // Verify total P/L amount is displayed
-    const totalPL = portfolioSummary.getByTestId("total-pl-amount");
-    await expect(totalPL).toBeVisible();
+    // Get updated P/L from stocks page
+    const updatedStocksPL = await getNumericValue(page, '[data-testid="total-pl-amount"]');
     
     // Verify P/L percentage is displayed
     const plPercentage = portfolioSummary.getByTestId("pl-percentage-value");
@@ -193,8 +203,24 @@ test.describe("Stocks & Equity Funds Page", () => {
     
     // Verify the total invested amount reflects the new purchase (100 EGP * 1 share + 0 fees)
     const investedText = await totalInvested.textContent();
-    const investedAmount = parseFloat(investedText?.replace(/[^0-9.]/g, '') || '0');
+    const investedAmount = parseFloat(investedText?.replace(/[^0-9.-]/g, '') || '0');
     expect(investedAmount).toBeGreaterThanOrEqual(100);
+    
+    // Calculate the differences
+    const dashboardPLDiff = updatedDashboardPL - initialDashboardPL;
+    const stocksPLDiff = updatedStocksPL - initialStocksPL;
+    
+    // The difference in P/L between dashboard and stocks page should be the same
+    // We use toBeCloseTo to handle potential floating point precision issues
+    expect(dashboardPLDiff).toBeCloseTo(stocksPLDiff, 2);
+    
+    // Helper function to extract numeric value from element text
+    async function getNumericValue(page: any, selector: string): Promise<number> {
+      const element = await page.locator(selector);
+      await expect(element).toBeVisible();
+      const text = await element.textContent();
+      return parseFloat(text?.replace(/[^0-9.-]/g, '') || '0');
+    }
     
     // Note: Delete functionality is not implemented yet
     // The test will leave the investment in the database for now
