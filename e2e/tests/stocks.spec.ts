@@ -155,17 +155,17 @@ test.describe("Stocks & Equity Funds Page", () => {
     // Click the buy button
     await page.getByTestId("buy-button").click();
 
-    // Fill in the purchase form
-    await page.getByLabel("Number of Shares").fill("1");
-    await page.getByLabel("Price per Share").fill("100");
-    await page.getByLabel("Fees").fill("0");
+    // Fill in the purchase form using test IDs from the form component
+    await page.getByTestId("shares-input").fill("1");
+    await page.getByTestId("purchase-price-input").fill("100");
+    await page.getByTestId("fees-input").fill("0");
 
     // Submit the form
-    await page.getByRole("button", { name: /purchase/i }).click();
+    await page.getByTestId("submit-investment-button").click();
 
-    // Wait for the success message
+    // Wait for the success message (using the toast test ID from the form)
     await expect(
-      page.getByText(/purchase successful/i),
+      page.getByTestId("investment-added-toast")
     ).toBeVisible();
 
     // Get updated P/L from dashboard
@@ -183,7 +183,7 @@ test.describe("Stocks & Equity Funds Page", () => {
     await expect(investmentCards).toHaveCount(1);
     
     // Verify the stock name matches what we purchased
-    const purchasedStockName = await page.locator('[data-testid^="investment-card-"] [data-testid="investment-name"]').first().textContent();
+    const purchasedStockName = await page.getByTestId('investment-name').first().textContent();
     expect(purchasedStockName).toContain(stockName?.trim());
     
     // Verify portfolio summary is updated

@@ -123,6 +123,8 @@ export async function GET(req: NextRequest) {
               });
             })(),
           );
+        } else{
+          console.error("Price is NaN:", code, price)
         }
       } catch (err) {
         // Log and skip this stock on error
@@ -132,6 +134,7 @@ export async function GET(req: NextRequest) {
     await Promise.all(updates);
     return NextResponse.json({ success: true, updated: updates.length });
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
       { error: (error as Error).message },
       { status: 500 },
