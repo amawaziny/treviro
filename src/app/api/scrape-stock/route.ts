@@ -26,14 +26,22 @@ export async function GET(req: NextRequest) {
         message: `Today (${today}) is a vacation. Skipping stock scraping.`,
       });
     }
+    // Parse offset, limit, and all from query parameters
+    const { searchParams } = new URL(req.url);
+    const all = searchParams.get('all');
+    const offset = parseInt(searchParams.get('offset') || '0', 10);
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+
     // 1. Read the list of securities from collection listedSecurities in firebase and filter by securityType=Stock
     const q = query(
       collection(db, "listedSecurities"),
       where("securityType", "==", "Stock"),
     );
     const snapshot = await getDocs(q);
+    // If 'all' is set, process all stocks, otherwise only the batch
+    const batchDocs = (all && all.toLowerCase() === 'true') ? snapshot.docs : snapshot.docs.slice(offset, offset + limit);
     const updates: Array<Promise<any>> = [];
-    for (const stockDoc of snapshot.docs) {
+    for (const stockDoc of batchDocs) {
       const symbol = stockDoc.get("symbol");
       if (!symbol) continue;
       // 2. Concat :EC to symbol
