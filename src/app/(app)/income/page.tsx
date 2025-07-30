@@ -129,7 +129,7 @@ export default function IncomePage() {
               <CardDescription>
                 {showAll
                   ? t("view_and_manage_all_your_recorded_income_sources")
-                  : `See and manage all income received in ${formatMonthYear(new Date())}.`}
+                  : `${t("see_and_manage_all_income_received_in")} ${formatMonthYear(new Date(), language)}.`}
               </CardDescription>
             </CardHeader>
             <CardContent>
