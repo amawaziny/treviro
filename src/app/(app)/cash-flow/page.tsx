@@ -257,7 +257,7 @@ export default function CashFlowPage() {
             {totalProjectedCertificateInterestThisMonth > 0 && (
               <div className="flex justify-between text-xs">
                 <span>
-                  <FileText className="inline mr-2 h-4 w-4 text-green-600" />
+                  <FileText className="inline me-2 h-4 w-4 text-green-600" />
                   {t("projected_debt_interest")}
                 </span>
                 <span>
