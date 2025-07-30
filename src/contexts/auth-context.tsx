@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
       return;
     }
-    
+
     const unsubscribe = onAuthStateChanged(
       firebaseAuthService,
       (firebaseUser: FirebaseUser | null) => {
@@ -91,50 +91,57 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       trackEvent("login_error", {
         error: error instanceof Error ? error.message : "Unknown error",
       });
-      if(error instanceof FirebaseError){
-      if (error.code === "auth/popup-closed-by-user") {
-        console.warn(
-          "AuthContext: Google sign-in popup was closed by user or due to an interruption.",
-        );
-        toast({
-          title: "Error",
-          description: "Google sign-in popup was closed by user or due to an interruption.",
-          variant: "destructive",
-        });
-      } else if (error.code === "auth/cancelled-popup-request") {
-        console.warn(
-          "AuthContext: Google sign-in popup request cancelled (e.g., multiple popups).",
-        );
-        toast({
-          title: "Error",
-          description: "Google sign-in popup request cancelled (e.g., multiple popups).",
-          variant: "destructive",
-        });
-      } else if (error.code === "auth/popup-blocked") {
-        console.warn(
-          "AuthContext: Google sign-in popup blocked by the browser. Consider notifying the user to enable popups.",
-        );
-        toast({
-          title: "Error",
-          description: "Google sign-in popup blocked by the browser. Consider notifying the user to enable popups.",
-          variant: "destructive",
-        });
-      } else {
-        console.error(
-          "AuthContext: An unexpected error occurred during Google sign-in. Code:",
-          error.code,
-          "Message:",
-          error.message,
-        );
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred during Google sign-in. Code: " + error.code + "Message: " + error.message,
-          variant: "destructive",
-        });
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/popup-closed-by-user") {
+          console.warn(
+            "AuthContext: Google sign-in popup was closed by user or due to an interruption.",
+          );
+          toast({
+            title: "Error",
+            description:
+              "Google sign-in popup was closed by user or due to an interruption.",
+            variant: "destructive",
+          });
+        } else if (error.code === "auth/cancelled-popup-request") {
+          console.warn(
+            "AuthContext: Google sign-in popup request cancelled (e.g., multiple popups).",
+          );
+          toast({
+            title: "Error",
+            description:
+              "Google sign-in popup request cancelled (e.g., multiple popups).",
+            variant: "destructive",
+          });
+        } else if (error.code === "auth/popup-blocked") {
+          console.warn(
+            "AuthContext: Google sign-in popup blocked by the browser. Consider notifying the user to enable popups.",
+          );
+          toast({
+            title: "Error",
+            description:
+              "Google sign-in popup blocked by the browser. Consider notifying the user to enable popups.",
+            variant: "destructive",
+          });
+        } else {
+          console.error(
+            "AuthContext: An unexpected error occurred during Google sign-in. Code:",
+            error.code,
+            "Message:",
+            error.message,
+          );
+          toast({
+            title: "Error",
+            description:
+              "An unexpected error occurred during Google sign-in. Code: " +
+              error.code +
+              "Message: " +
+              error.message,
+            variant: "destructive",
+          });
+        }
+        throw error;
       }
-      throw error;
     }
-  }
   }, [router]);
 
   const logout = useCallback(async () => {

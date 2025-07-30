@@ -191,14 +191,23 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               {t("net_invested_assets")}
             </CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" data-testid="net-invested-assets-icon" />
+            <Briefcase
+              className="h-4 w-4 text-muted-foreground"
+              data-testid="net-invested-assets-icon"
+            />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p data-testid="net-invested-assets-amount" className="text-xl font-medium">
-                {formatNumberForMobile(isMobile, totalInvested + totalCashBalance)}
+              <p
+                data-testid="net-invested-assets-amount"
+                className="text-xl font-medium"
+              >
+                {formatNumberForMobile(
+                  isMobile,
+                  totalInvested + totalCashBalance,
+                )}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -211,14 +220,23 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               {t("net_worth")}
             </CardTitle>
-            <Coins className="h-4 w-4 text-muted-foreground" data-testid="net-worth-icon" />
+            <Coins
+              className="h-4 w-4 text-muted-foreground"
+              data-testid="net-worth-icon"
+            />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
               <p data-testid="net-worth-amount" className="text-xl font-medium">
-                {formatNumberForMobile(isMobile, totalInvested + totalCashBalance + totalRealizedPnL + totalCurrentPortfolioPnL)}
+                {formatNumberForMobile(
+                  isMobile,
+                  totalInvested +
+                    totalCashBalance +
+                    totalRealizedPnL +
+                    totalCurrentPortfolioPnL,
+                )}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -269,7 +287,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-3/4 mt-1" />
             ) : (
-              <p 
+              <p
                 data-testid="total-realized-pl-amount"
                 className={`text-xl font-medium ${totalRealizedPnL >= 0 ? "text-accent" : "text-destructive"}`}
               >

@@ -415,7 +415,7 @@ export default function MyDebtInstrumentsPage() {
               <span className="font-medium text-foreground">
                 {`${formatNumberForMobile(
                   isMobile,
-                  totalProjectedMonthlyInterest
+                  totalProjectedMonthlyInterest,
                 )} ${t("monthly")}`}
               </span>
             </p>

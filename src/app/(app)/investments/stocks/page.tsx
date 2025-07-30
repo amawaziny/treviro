@@ -55,61 +55,68 @@ export default function MyStocksPage() {
     if (isLoadingInvestments || isLoadingListedSecurities) return [];
 
     // First, filter valid stock investments
-    const validStockInvestments = allInvestments.filter((inv): inv is SecurityInvestment => {
-      // Only process investments that have a securityId (i.e., StockInvestment)
-      if (!("securityId" in inv) || typeof inv.securityId !== "string") {
-        return false;
-      }
+    const validStockInvestments = allInvestments.filter(
+      (inv): inv is SecurityInvestment => {
+        // Only process investments that have a securityId (i.e., StockInvestment)
+        if (!("securityId" in inv) || typeof inv.securityId !== "string") {
+          return false;
+        }
 
-      // Find the corresponding listed security for the investment
-      const listedSecurity = listedSecurities.find(
-        (ls) => ls.id === inv.securityId,
-      );
+        // Find the corresponding listed security for the investment
+        const listedSecurity = listedSecurities.find(
+          (ls) => ls.id === inv.securityId,
+        );
 
-      if (!listedSecurity) {
-        // If no listed security is found, exclude the investment
-        return false;
-      }
+        if (!listedSecurity) {
+          // If no listed security is found, exclude the investment
+          return false;
+        }
 
-      // Apply the filter condition based on the listed security's type and fundType
-      const isStock = listedSecurity.securityType === "Stock";
-      const isStockFund =
-        listedSecurity.securityType === "Fund" &&
-        isStockRelatedFund(listedSecurity.fundType);
+        // Apply the filter condition based on the listed security's type and fundType
+        const isStock = listedSecurity.securityType === "Stock";
+        const isStockFund =
+          listedSecurity.securityType === "Fund" &&
+          isStockRelatedFund(listedSecurity.fundType);
 
-      return isStock || isStockFund;
-    });
+        return isStock || isStockFund;
+      },
+    );
 
     // Then aggregate investments by securityId
     const aggregatedInvestments = new Map<string, SecurityInvestment>();
 
     validStockInvestments.forEach((inv) => {
       if (!inv.securityId) return; // Skip if no securityId
-      
+
       const existing = aggregatedInvestments.get(inv.securityId);
-      
+
       if (existing) {
         // If we already have this security, sum up the shares and adjust the cost
         const existingShares = existing.numberOfShares ?? 0;
         const invShares = inv.numberOfShares ?? 0;
         const totalShares = existingShares + invShares;
-        
+
         const existingPrice = existing.purchasePricePerShare ?? 0;
         const invPrice = inv.purchasePricePerShare ?? 0;
-        const totalCost = (existingShares * existingPrice) + (invShares * invPrice);
-        
+        const totalCost = existingShares * existingPrice + invShares * invPrice;
+
         // Ensure we have valid dates before comparing
-        const existingDate = existing.purchaseDate ? new Date(existing.purchaseDate) : new Date(0);
-        const invDate = inv.purchaseDate ? new Date(inv.purchaseDate) : new Date(0);
-        
+        const existingDate = existing.purchaseDate
+          ? new Date(existing.purchaseDate)
+          : new Date(0);
+        const invDate = inv.purchaseDate
+          ? new Date(inv.purchaseDate)
+          : new Date(0);
+
         const updatedInvestment: SecurityInvestment = {
           ...existing,
           numberOfShares: totalShares,
           purchasePricePerShare: totalShares > 0 ? totalCost / totalShares : 0,
           // Keep the first purchase date (earliest date)
-          purchaseDate: invDate < existingDate ? inv.purchaseDate : existing.purchaseDate
+          purchaseDate:
+            invDate < existingDate ? inv.purchaseDate : existing.purchaseDate,
         };
-        
+
         aggregatedInvestments.set(inv.securityId, updatedInvestment);
       } else {
         // First time seeing this security, add it to the map
@@ -196,10 +203,16 @@ export default function MyStocksPage() {
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
       <div data-testid="stocks-header">
-        <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="stocks-title">
+        <h1
+          className="text-xl font-bold tracking-tight text-foreground"
+          data-testid="stocks-title"
+        >
           {t("my_stocks_equity_funds")}
         </h1>
-        <p className="text-muted-foreground text-sm" data-testid="stocks-subtitle">
+        <p
+          className="text-muted-foreground text-sm"
+          data-testid="stocks-subtitle"
+        >
           {t("overview_of_your_stock_and_equity_fund_investments")}
         </p>
       </div>
@@ -221,9 +234,15 @@ export default function MyStocksPage() {
               {t("total_stocks_equity_funds_pl")}
             </CardTitle>
             {isTotalStockProfitable ? (
-              <TrendingUp className="h-4 w-4 text-accent" data-testid="trend-up-icon" />
+              <TrendingUp
+                className="h-4 w-4 text-accent"
+                data-testid="trend-up-icon"
+              />
             ) : (
-              <TrendingDown className="h-4 w-4 text-destructive" data-testid="trend-down-icon" />
+              <TrendingDown
+                className="h-4 w-4 text-destructive"
+                data-testid="trend-down-icon"
+              />
             )}
           </CardHeader>
           <CardContent>
@@ -233,20 +252,29 @@ export default function MyStocksPage() {
                 isTotalStockProfitable ? "text-accent" : "text-destructive",
               )}
             >
-              <span className="font-medium text-foreground" data-testid="total-pl-amount">
+              <span
+                className="font-medium text-foreground"
+                data-testid="total-pl-amount"
+              >
                 {formatNumberForMobile(isMobile, totalStockPnL)}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
               <span>{`${t("overall_pl")}: `}</span>
-              <span data-testid="pl-percentage-value" className="font-medium text-foreground">
+              <span
+                data-testid="pl-percentage-value"
+                className="font-medium text-foreground"
+              >
                 {`${totalStockPnLPercent === Infinity ? "∞" : totalStockPnLPercent.toFixed(2)}%`}
               </span>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {`${t("total_invested")}: `}
-              <span className="font-medium text-foreground" data-testid="total-invested-amount">
-                  {formatNumberForMobile(isMobile, totalStockCost)}
+              <span
+                className="font-medium text-foreground"
+                data-testid="total-invested-amount"
+              >
+                {formatNumberForMobile(isMobile, totalStockCost)}
               </span>
             </p>
           </CardContent>

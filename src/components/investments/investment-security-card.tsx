@@ -64,7 +64,7 @@ export function InvestmentSecurityCard({
   const detailPageLink = `/securities/details/${security.id}?fromMyStocks=true`;
 
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow w-full max-w-full overflow-hidden"
       data-testid={`investment-card-${security.id}`}
     >
@@ -76,12 +76,12 @@ export function InvestmentSecurityCard({
               <div className="flex-shrink-0">{getIcon()}</div>
               <div className="truncate">
                 <div className="flex items-baseline gap-2">
-                  <p 
-                  className="font-semibold text-sm text-foreground truncate"
-                  data-testid="investment-symbol"
-                >
-                  {security.symbol}
-                </p>
+                  <p
+                    className="font-semibold text-sm text-foreground truncate"
+                    data-testid="investment-symbol"
+                  >
+                    {security.symbol}
+                  </p>
                   {security.fundType && (
                     <>
                       <span>•</span>
@@ -89,7 +89,7 @@ export function InvestmentSecurityCard({
                     </>
                   )}
                 </div>
-                <p 
+                <p
                   className="text-xs text-muted-foreground truncate"
                   data-testid="investment-name"
                 >

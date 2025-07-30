@@ -36,7 +36,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
 
   return (
     <Link href={detailPageLink} passHref>
-      <Card 
+      <Card
         className="p-4 hover:bg-muted/50 transition-colors cursor-pointer rounded-lg shadow-sm"
         data-testid="security-card"
       >
@@ -55,7 +55,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
 
           {/* Left Column: Symbol and Name */}
           <div className="flex-1 min-w-0">
-            <p 
+            <p
               className="font-semibold text-sm text-foreground flex items-baseline gap-2"
               data-testid="security-symbol"
             >
@@ -67,7 +67,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
                 </>
               )}
             </p>
-            <p 
+            <p
               className="text-xs text-muted-foreground truncate"
               data-testid="security-name"
             >

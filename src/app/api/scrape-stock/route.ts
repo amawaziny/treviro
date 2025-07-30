@@ -28,9 +28,9 @@ export async function GET(req: NextRequest) {
     }
     // Parse offset, limit, and all from query parameters
     const { searchParams } = new URL(req.url);
-    const all = searchParams.get('all');
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const all = searchParams.get("all");
+    const offset = parseInt(searchParams.get("offset") || "0", 10);
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
 
     // 1. Read the list of securities from collection listedSecurities in firebase and filter by securityType=Stock
     const q = query(
@@ -39,7 +39,10 @@ export async function GET(req: NextRequest) {
     );
     const snapshot = await getDocs(q);
     // If 'all' is set, process all stocks, otherwise only the batch
-    const batchDocs = (all && all.toLowerCase() === 'true') ? snapshot.docs : snapshot.docs.slice(offset, offset + limit);
+    const batchDocs =
+      all && all.toLowerCase() === "true"
+        ? snapshot.docs
+        : snapshot.docs.slice(offset, offset + limit);
     const updates: Array<Promise<any>> = [];
     for (const stockDoc of batchDocs) {
       const symbol = stockDoc.get("symbol");
@@ -61,9 +64,12 @@ export async function GET(req: NextRequest) {
           updates.push(
             (async () => {
               // Update the price in listedSecurities
-              await updateDoc(firestoreDoc(db, "listedSecurities", stockDoc.id), {
-                price,
-              });
+              await updateDoc(
+                firestoreDoc(db, "listedSecurities", stockDoc.id),
+                {
+                  price,
+                },
+              );
               // Also update priceHistory subcollection
               const today = new Date().toISOString();
               const {
@@ -127,14 +133,17 @@ export async function GET(req: NextRequest) {
               if (prices.length === 2 && prices[1] !== 0) {
                 changePercent = ((prices[0] - prices[1]) / prices[1]) * 100;
               }
-              await updateDoc(firestoreDoc(db, "listedSecurities", stockDoc.id), {
-                changePercent,
-              });
+              await updateDoc(
+                firestoreDoc(db, "listedSecurities", stockDoc.id),
+                {
+                  changePercent,
+                },
+              );
             })(),
           );
-          console.log(`Updated: ${code}`)
-        } else{
-          console.error("Price is NaN:", code, price)
+          console.log(`Updated: ${code}`);
+        } else {
+          console.error("Price is NaN:", code, price);
         }
       } catch (err) {
         // Log and skip this stock on error
@@ -144,7 +153,7 @@ export async function GET(req: NextRequest) {
     await Promise.all(updates);
     return NextResponse.json({ success: true, updated: updates.length });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return NextResponse.json(
       { error: (error as Error).message },
       { status: 500 },

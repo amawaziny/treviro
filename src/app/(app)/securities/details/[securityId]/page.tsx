@@ -400,10 +400,7 @@ export default function SecurityDetailPage() {
         {/* Desktop Buttons */}
         <CardContent className="hidden md:flex justify-end gap-2 pb-4">
           <Link href={`/investments/add?securityId=${security.id}`} passHref>
-            <Button 
-              variant="default"
-              data-testid="buy-security-button"
-            >
+            <Button variant="default" data-testid="buy-security-button">
               <ShoppingCart className="h-4 w-4" /> {t("buy")}
             </Button>
           </Link>

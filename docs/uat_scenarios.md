@@ -5,6 +5,7 @@
 ### Viewing Investment Portfolio
 
 1. **View Investment Summary**
+
    - **Scenario**: User views their stocks and equity funds portfolio
    - **Steps**:
      1. Navigate to "My Stocks & Equity Funds" page
@@ -38,6 +39,7 @@
 ### Navigation
 
 1. **Browse Securities**
+
    - **Scenario**: User wants to add a new investment
    - **Steps**:
      1. Click the "+" floating action button
@@ -60,6 +62,7 @@
 ### Offline Functionality
 
 1. **View Investments Offline**
+
    - **Scenario**: User views their investments without internet connection
    - **Steps**:
      1. Disable internet connection
@@ -83,6 +86,7 @@
 ### Data Display
 
 1. **Currency and Number Formatting**
+
    - **Scenario**: User views financial values
    - **Steps**:
      1. View the investments list
