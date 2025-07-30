@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
         const $ = cheerio.load(content);
         const priceText = $(".leading-48").first().text();
         const price = parseFloat(priceText.replace(/[^\d.\-]/g, ""));
+        console.log(`Parsing: ${code}, Price: ${price}`);
         if (!isNaN(price)) {
           // 4. Update listedSecurities collection in firebase and set price column
           updates.push(
@@ -123,6 +124,7 @@ export async function GET(req: NextRequest) {
               });
             })(),
           );
+          console.log(`Updated: ${code}`)
         } else{
           console.error("Price is NaN:", code, price)
         }
