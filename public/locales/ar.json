@@ -703,5 +703,9 @@
   "certificates_expiring_soon": "شهادات تنتهي في عام",
   "Select a date": "إختر التاريخ",
   "Amount must be greater than 0.": "المبلغ يجب ان يكون اكبر من 0.",
-  "Purchase date must be before maturity date.":"تاريخ الشراء يجب ان يكون قبل تاريخ الاستحقاق"
-}
+  "Purchase date must be before maturity date.": "تاريخ الشراء يجب ان يكون قبل تاريخ الاستحقاق",
+  "net_invested_assets": "صافي الأصول المستثمرة",
+  "net_invested_assets_desc": "مجموع جميع استثماراتك ورصيدك النقدي الحالي.",
+  "net_worth": "صافي الثروة",
+  "net_worth_desc": "صافي الأصول المستثمرة بالإضافة إلى جميع الأرباح/الخسائر المحققة وغير المحققة."
+ }

@@ -183,6 +183,50 @@ export default function DashboardPage() {
           {t("recalculate_summary")}
         </Button>
       </div>
+
+      {/* New summary cards for Net Invested Assets and Net Worth */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 mb-4">
+        <Card className="lg:col-span-1" data-testid="net-invested-assets-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t("net_invested_assets")}
+            </CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground" data-testid="net-invested-assets-icon" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-3/4 mt-1" />
+            ) : (
+              <p data-testid="net-invested-assets-amount" className="text-xl font-medium">
+                {formatNumberForMobile(isMobile, totalInvested + totalCashBalance)}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {t("net_invested_assets_desc")}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-1" data-testid="net-worth-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t("net_worth")}
+            </CardTitle>
+            <Coins className="h-4 w-4 text-muted-foreground" data-testid="net-worth-icon" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-3/4 mt-1" />
+            ) : (
+              <p data-testid="net-worth-amount" className="text-xl font-medium">
+                {formatNumberForMobile(isMobile, totalInvested + totalCashBalance + totalRealizedPnL + totalCurrentPortfolioPnL)}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {t("net_worth_desc")}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="lg:col-span-1" data-testid="total-invested-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
