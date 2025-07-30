@@ -384,11 +384,7 @@ export default function MyDebtInstrumentsPage() {
               <span>
                 {`${t("direct")}: `}
                 <span className="font-medium text-foreground">
-                  {formatNumberForMobile(
-                    isMobile,
-                    totalDirectDebtInvested,
-                    debtFundHoldings[0]?.currency,
-                  )}
+                  {formatNumberForMobile(isMobile, totalDirectDebtInvested)}
                 </span>
               </span>
               <span>
@@ -417,34 +413,28 @@ export default function MyDebtInstrumentsPage() {
             <p>
               {`${t("projected_interest")}: `}
               <span className="font-medium text-foreground">
-                {formatNumberForMobile(
+                {`${formatNumberForMobile(
                   isMobile,
-                  totalProjectedMonthlyInterest,
-                  debtFundHoldings[0]?.currency,
-                )}{" "}
-                ${t("monthly")}
+                  totalProjectedMonthlyInterest
+                )} ${t("monthly")}`}
               </span>
             </p>
             <p>
               {`${t("projected_interest")}: `}
               <span className="font-medium text-foreground">
-                {formatNumberForMobile(
+                {`${formatNumberForMobile(
                   isMobile,
                   totalProjectedAnnualInterest,
-                  debtFundHoldings[0]?.currency,
-                )}{" "}
-                ${t("annually")}
+                )} ${t("annually")}`}
               </span>
             </p>
             <p>
               {`${t("certificates_expiring_soon")}: `}
               <span className="font-medium text-foreground">
-                {formatNumberForMobile(
+                {`${formatNumberForMobile(
                   isMobile,
                   expiringCertificatesSum,
-                  debtFundHoldings[0]?.currency,
-                )}{" "}
-                - ${expiringCertificatesPercentage.toFixed(2)}%
+                )} - ${expiringCertificatesPercentage.toFixed(2)}%`}
               </span>
             </p>
           </CardDescription>
