@@ -232,7 +232,24 @@ export const InvestmentSchema = z.discriminatedUnion("type", [
   CurrencyInvestmentSchema,
   RealEstateInvestmentSchema,
   DebtInstrumentInvestmentSchema,
-]);
+]).superRefine((data, ctx) => {
+  if (data.type === "Debt Instruments") {
+    const purchaseDate = data.purchaseDate;
+    const maturityDate = data.maturityDate;
+    if (purchaseDate && maturityDate) {
+      const purchase = Date.parse(purchaseDate);
+      const maturity = Date.parse(maturityDate);
+      if (!isNaN(purchase) && !isNaN(maturity) && purchase >= maturity) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Purchase date must be before maturity date.",
+          path: ["purchaseDate"],
+        });
+      }
+    }
+  }
+});
+
 
 export type InvestmentFormValues = z.infer<typeof InvestmentSchema>;
 

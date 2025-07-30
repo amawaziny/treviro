@@ -702,5 +702,6 @@
   "this_action_will_permanently_delete_this_debt_record_this_cannot_be_undone": "سيؤدي هذا الإجراء إلى حذف سجل أداة الدين هذا بشكل دائم. ﻻ يمكن التراجع عن هذا الإجراء.",
   "certificates_expiring_soon": "شهادات تنتهي في عام",
   "Select a date": "إختر التاريخ",
-  "Amount must be greater than 0.": "المبلغ يجب ان يكون اكبر من 0."
+  "Amount must be greater than 0.": "المبلغ يجب ان يكون اكبر من 0.",
+  "Purchase date must be before maturity date.":"تاريخ الشراء يجب ان يكون قبل تاريخ الاستحقاق"
 }
