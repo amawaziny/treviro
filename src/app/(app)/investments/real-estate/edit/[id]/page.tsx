@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { InvestmentForm } from "@/components/investments/investment-form";
+import { InvestmentForm } from "@/components/investments/investment-forms/investment-form";
 import type { RealEstateInvestment } from "@/lib/types";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";

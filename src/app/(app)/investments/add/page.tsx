@@ -9,7 +9,7 @@ import { useForm } from "@/contexts/form-context";
 
 // Define a simple loading fallback for the Suspense boundary
 function PageLoadingFallback() {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
   return (
     <div className="flex items-center justify-center py-10">
       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -23,7 +23,7 @@ function PageLoadingFallback() {
 // We can remove the suspense: true here if the parent handles suspense
 const AddInvestmentForm = dynamic(
   () =>
-    import("@/components/investments/investment-form").then(
+    import("@/components/investments/investment-forms/investment-form").then(
       (mod) => mod.InvestmentForm,
     ),
   {
@@ -117,9 +117,14 @@ function AddInvestmentPageContent() {
     };
   }, [searchParams.toString(), setHeaderProps, openForm, closeForm]);
 
+  const securityId = searchParams.get("securityId");
+  
   return (
     <div className="container mx-auto flex-1">
-      <AddInvestmentForm />
+      <AddInvestmentForm 
+        initialType={searchParams.get("type") || "Stocks"}
+        securityId={securityId || undefined}
+      />
     </div>
   );
 }

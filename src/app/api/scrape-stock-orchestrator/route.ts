@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 // Number of companies and batch size must match your scrape-stock logic
-const TOTAL_COMPANIES = 220;
+const TOTAL_COMPANIES = 235;
 const BATCH_SIZE = 20;
 
 export async function GET() {
