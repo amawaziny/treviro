@@ -27,7 +27,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, XCircle, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn, formatDateDisplay, formatNumberForMobile } from "@/lib/utils";
@@ -65,6 +65,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRowClick = (installment: Installment) => {
     setSelectedNumber(installment.number);
@@ -105,9 +106,11 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
   };
 
   const handleStatusChange = async (markAsPaid: boolean) => {
-    if (selectedNumber == null) {
+    if (selectedNumber == null || isSubmitting) {
       return;
     }
+    
+    setIsSubmitting(true);
 
     const newStatus = markAsPaid ? "Paid" : "Unpaid";
     let newAmountInvested = investment.amountInvested || 0;
@@ -138,8 +141,11 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
       setChequeNumber("");
       setSelectedInstallment(null);
     } catch (error) {
+      console.error("Error updating installment status:", error);
       setErrorMessage(t("failed_to_update_installment_status"));
       setShowErrorDialog(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -310,7 +316,11 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
                           selectedInstallment?.status !== "Paid",
                         )
                       }
+                      disabled={isSubmitting}
                     >
+                      {isSubmitting && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       {selectedInstallment?.status === "Paid"
                         ? t("mark_as_unpaid")
                         : t("mark_as_paid")}
