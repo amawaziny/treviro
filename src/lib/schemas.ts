@@ -58,6 +58,14 @@ const stringToRequiredNonNegativeNumberCoerced = z.preprocess(
     .gt(0, { message: "Amount must be greater than 0." }),
 );
 
+// For real estate amountInvested that can be zero
+const realEstateAmountInvested = z.preprocess(
+  (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : val),
+  z
+    .number({ invalid_type_error: "Must be a valid number." })
+    .min(0, { message: "Amount cannot be negative." }),
+);
+
 // For optional fields that must be positive numbers if provided
 const stringToOptionalPositiveNumberCoerced = z.preprocess(
   (val) =>
@@ -157,7 +165,7 @@ const RealEstateInvestmentSchema = z.object({
   propertyType: z.enum(propertyTypes, {
     required_error: "Property type is required.",
   }),
-  amountInvested: stringToRequiredNonNegativeNumberCoerced,
+  amountInvested: realEstateAmountInvested,
   installmentFrequency: z.enum(["Monthly", "Quarterly", "Yearly"]).optional(),
   installmentAmount: stringToOptionalPositiveNumberCoerced,
   installmentStartDate: z

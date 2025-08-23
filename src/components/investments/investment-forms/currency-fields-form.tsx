@@ -49,13 +49,13 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
         )}
         <FormField
           control={control}
-          name="currencyType"
+          name="currencyCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("currency_type")}</FormLabel>
+              <FormLabel>{t("transaction_currency_code")}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder={t("e.g., USD, EUR")}
+                  placeholder="e.g., USD, EUR"
                   {...field}
                   value={field.value || ""}
                 />
@@ -66,25 +66,47 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
         />
         <FormField
           control={control}
-          name="amountInvested"
+          name="foreignCurrencyAmount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("total_amount_invested_cost")}</FormLabel>
+              <FormLabel>{t("foreign_currency_amount")}</FormLabel>
               <FormControl>
                 <NumericInput
-                  placeholder="e.g., 10000.50"
-                  value={field.value !== undefined ? String(field.value) : ""}
+                  placeholder="e.g., 1000.50"
+                  value={
+                    field.value !== undefined ? String(field.value) : undefined
+                  }
                   onChange={field.onChange}
                   allowDecimal={true}
                 />
               </FormControl>
               <FormDescription>
-                {t("total_cost_including_any_fees")}
+                {t("amount_of_the_foreign_currency_you_bought")}
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+        <FormField
+          control={control}
+          name="exchangeRateAtPurchase"
+          render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("exchange_rate_at_purchase_to_egp")}</FormLabel>
+            <FormControl>
+              <NumericInput
+                placeholder="e.g., 30.85 (for USD to EGP)"
+                value={
+                  field.value !== undefined ? String(field.value) : undefined
+                }
+                onChange={field.onChange}
+                allowDecimal={true}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
         <FormField
           control={control}
           name="purchaseDate"

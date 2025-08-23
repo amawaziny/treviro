@@ -30,6 +30,19 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({ control }) => {
   const { t, dir } = useLanguage();
   return (
     <div className="space-y-6">
+      {/* Hidden field for amountInvested with default value of 0 */}
+      <FormField
+        control={control}
+        name="amountInvested"
+        defaultValue={0}
+        render={({ field }) => (
+          <FormItem className="hidden">
+            <FormControl>
+              <Input type="hidden" {...field} value={field.value} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
       {/* Unit Details Section */}
       <div className="space-y-6 mt-6 p-6 border rounded-md">
         <h3 className="text-lg font-medium text-primary">
