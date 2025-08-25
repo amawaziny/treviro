@@ -16,13 +16,10 @@ import { DollarSign, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-type CurrencyRatesDialogProps = {
-  // No props needed as we're managing state internally now
-};
-
 export function CurrencyRatesDialog() {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const isMobile = useIsMobile();
+  const sheetSide = dir === "rtl" ? "left" : "right";
   const { exchangeRates, isLoading, error } = useExchangeRates();
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -71,8 +68,8 @@ export function CurrencyRatesDialog() {
     if (isLoading) {
       return (
         <>
-          <SheetHeader>
-            <SheetTitle>{t("loading")}...</SheetTitle>
+          <SheetHeader dir={dir}>
+            <SheetTitle dir={dir}>{t("loading")}...</SheetTitle>
           </SheetHeader>
           <div className="py-4">
             <p>{t("loading_exchange_rates")}</p>
@@ -84,8 +81,8 @@ export function CurrencyRatesDialog() {
     if (error) {
       return (
         <>
-          <SheetHeader>
-            <SheetTitle>{t("error")}</SheetTitle>
+          <SheetHeader dir={dir}>
+            <SheetTitle dir={dir}>{t("error")}</SheetTitle>
           </SheetHeader>
           <div className="py-4 text-destructive">
             <p>{t("error_loading_exchange_rates")}</p>
@@ -96,8 +93,8 @@ export function CurrencyRatesDialog() {
 
     return (
       <>
-        <SheetHeader className="flex-shrink-0 p-6 pb-3 border-b">
-          <SheetTitle>{t("all_currency_rates")} (vs EGP)</SheetTitle>
+        <SheetHeader dir={dir} className="flex-shrink-0 p-6 pb-3 border-b">
+          <SheetTitle dir={dir}>{t("all_currency_rates")}</SheetTitle>
         </SheetHeader>
         {renderSearchBar()}
         <div className="flex-1 overflow-y-auto -mx-1">
@@ -143,17 +140,19 @@ export function CurrencyRatesDialog() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+      <SheetTrigger dir={dir} asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <DollarSign className="h-4 w-4" />
           {t("show_all_rates")}
         </Button>
       </SheetTrigger>
       <SheetContent
-        side={isMobile ? "bottom" : "right"}
+        dir={dir}
+        side={isMobile ? "bottom" : sheetSide}
         className={cn(
           "flex flex-col p-0 overflow-hidden",
           isMobile ? "h-[90vh] max-h-[90vh]" : "h-full max-h-screen",
+          dir === "rtl" ? "rtl" : "ltr",
         )}
       >
         {renderContent()}
