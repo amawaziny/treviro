@@ -149,7 +149,7 @@ export function InvestmentForm({
   const isDedicatedGoldMode = watchedType === "Gold";
   const isDedicatedCurrencyMode = watchedType === "Currencies";
   const isDedicatedRealEstateMode = watchedType === "Real Estate";
-  const isPreSelectedStockMode = watchedType === "Stocks";
+  const isPreSelectedStockMode = Boolean(initialType === "Stocks" || watchedType === "Stocks" || form.getValues("type") === "Stocks");
 
   // Stock-specific logic
   const { listedSecurities, isLoading: isLoadingListedSecurities, error: listedSecuritiesError } = useListedSecurities();
@@ -347,6 +347,14 @@ export function InvestmentForm({
         description: `${t(watchedType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
         testId: "investment-added-toast",
       });
+      
+      // Reset the form to initial state after successful submission
+      form.reset(getInitialFormValues(watchedType as InvestmentType));
+      
+      // If it's a stock purchase, redirect to the stocks page
+      if (watchedType === 'Stocks') {
+        router.push('/investments/stocks');
+      }
     }
 
     // Fix: always use a valid InvestmentType for reset, never undefined
