@@ -1,13 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatNumberForMobile } from "@/lib/utils";
-import { DollarSign } from "lucide-react";
+import { DollarSign, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type CurrencyRatesDialogProps = {
   // No props needed as we're managing state internally now
@@ -18,17 +25,47 @@ export function CurrencyRatesDialog() {
   const isMobile = useIsMobile();
   const { exchangeRates, isLoading, error } = useExchangeRates();
   const [open, setOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
 
-  // Process and sort all exchange rates
+  // Process, filter and sort all exchange rates
   const rates = React.useMemo(() => {
-    return Object.entries(exchangeRates || {})
-      .filter(([key]) => key.includes('_')) // Only include valid currency pairs
+    const allRates = Object.entries(exchangeRates || {})
+      .filter(([key]) => key.includes("_")) // Only include valid currency pairs
       .map(([pair, rate]) => {
-        const [from, to] = pair.split('_');
+        const [from, to] = pair.split("_");
         return { pair, from, to, rate: rate as number };
-      })
-      .sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to));
-  }, [exchangeRates]);
+      });
+
+    // Filter based on search term
+    const filtered = searchTerm
+      ? allRates.filter(
+          ({ from, to }) =>
+            from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            to.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            `${from}/${to}`.toLowerCase().includes(searchTerm.toLowerCase()),
+        )
+      : allRates;
+
+    // Sort the filtered results
+    return filtered.sort(
+      (a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to),
+    );
+  }, [exchangeRates, searchTerm]);
+
+  const renderSearchBar = () => (
+    <div className="sticky top-0 z-10 p-4 bg-background border-b">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder={t("search_currencies_placeholder")}
+          className="w-full pl-9"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+    </div>
+  );
 
   const renderContent = () => {
     if (isLoading) {
@@ -59,13 +96,17 @@ export function CurrencyRatesDialog() {
 
     return (
       <>
-        <SheetHeader className="flex-shrink-0 p-6 pb-3">
+        <SheetHeader className="flex-shrink-0 p-6 pb-3 border-b">
           <SheetTitle>{t("all_currency_rates")} (vs EGP)</SheetTitle>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto px-6 pb-6 -mx-1">
+        {renderSearchBar()}
+        <div className="flex-1 overflow-y-auto -mx-1">
           <div className="space-y-3 pr-1">
             {rates.map(({ pair, from, to, rate }) => (
-              <div key={pair} className="border rounded-lg p-4 hover:bg-accent/5 transition-colors">
+              <div
+                key={pair}
+                className="border rounded-lg p-4 hover:bg-accent/5 transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted text-primary">
@@ -108,11 +149,11 @@ export function CurrencyRatesDialog() {
           {t("show_all_rates")}
         </Button>
       </SheetTrigger>
-      <SheetContent 
-        side={isMobile ? "bottom" : "right"} 
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
         className={cn(
-          "flex flex-col p-0",
-          isMobile ? "h-[90vh] max-h-[90vh]" : "h-full max-h-screen"
+          "flex flex-col p-0 overflow-hidden",
+          isMobile ? "h-[90vh] max-h-[90vh]" : "h-full max-h-screen",
         )}
       >
         {renderContent()}

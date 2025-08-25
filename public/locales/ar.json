@@ -709,10 +709,9 @@
   "net_worth": "صافي الثروة",
   "net_worth_desc": "صافي الأصول المستثمرة بالإضافة إلى جميع الأرباح/الخسائر المحققة وغير المحققة.",
   "show_all_rates": "عرض جميع الأسعار",
-  "all_currency_rates": "أسعار جميع العملات",
+  "all_currency_rates": "جميع أسعار العملات",
+  "search_currencies_placeholder": "ابحث عن العملات...",
+  "no_currencies_found": "لم يتم العثور على عملات تطابق بحثك",
   "loading_exchange_rates": "جاري تحميل أسعار الصرف...",
-  "loading": "جاري التحميل",
-  "error": "خطأ",
-  "error_loading_exchange_rates": "فشل تحميل أسعار الصرف. يرجى المحاولة مرة أخرى لاحقاً.",
   "rate": "السعر"
 }

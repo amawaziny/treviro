@@ -169,13 +169,10 @@ export default function MyCurrenciesPage() {
           {t("view_your_currency_holdings_and_their_performance_against_egp")}
         </p>
       </div>
-      <Separator />
-
+      <div className="flex justify-end">
+        <CurrencyRatesDialog />
+      </div>
       <Card>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">{t("my_currencies")}</h1>
-          <CurrencyRatesDialog />
-        </div>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             {t("total_currencies_pl_vs_egp")}
