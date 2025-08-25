@@ -32,16 +32,16 @@ import { MyCurrencyListItem } from "@/components/investments/currencies/my-curre
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatNumberForMobile } from "@/lib/utils";
+import { CurrencyRatesDialog } from "@/components/investments/currencies/currency-rates-dialog";
 
 export default function MyCurrenciesPage() {
-  const { t: t } = useLanguage();
+  const { t: t, language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
   const {
     exchangeRates,
     isLoading: isLoadingRates,
     error: ratesError,
   } = useExchangeRates();
-  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
   const aggregatedCurrencyHoldings = React.useMemo(() => {
@@ -172,6 +172,10 @@ export default function MyCurrenciesPage() {
       <Separator />
 
       <Card>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">{t("my_currencies")}</h1>
+          <CurrencyRatesDialog />
+        </div>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             {t("total_currencies_pl_vs_egp")}
