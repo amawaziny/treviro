@@ -118,10 +118,10 @@ function AddInvestmentPageContent() {
   }, [searchParams.toString(), setHeaderProps, openForm, closeForm]);
 
   const securityId = searchParams.get("securityId");
-  
+
   return (
     <div className="container mx-auto flex-1">
-      <AddInvestmentForm 
+      <AddInvestmentForm
         initialType={searchParams.get("type") || "Stocks"}
         securityId={securityId || undefined}
       />

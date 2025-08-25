@@ -75,10 +75,10 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
                           isLoadingListedSecurities
                             ? t("loading_securities")
                             : listedSecuritiesError
-                            ? t("error_loading_securities")
-                            : listedSecurities.length === 0
-                            ? t("no_securities_available")
-                            : t("select_a_security_from_the_list")
+                              ? t("error_loading_securities")
+                              : listedSecurities.length === 0
+                                ? t("no_securities_available")
+                                : t("select_a_security_from_the_list")
                         }
                       />
                     </SelectTrigger>

@@ -25,7 +25,9 @@ export interface RenderRealEstateFieldsProps {
   control: any;
 }
 
-const RenderRealEstateFieldsComponent: React.FC<RenderRealEstateFieldsProps> = ({ control }) => {
+const RenderRealEstateFieldsComponent: React.FC<
+  RenderRealEstateFieldsProps
+> = ({ control }) => {
   const { t, dir } = useLanguage();
   return (
     <div className="space-y-6">
@@ -343,4 +345,6 @@ const RenderRealEstateFieldsComponent: React.FC<RenderRealEstateFieldsProps> = (
   );
 };
 
-export const MemoizedRenderRealEstateFields = React.memo(RenderRealEstateFieldsComponent);
+export const MemoizedRenderRealEstateFields = React.memo(
+  RenderRealEstateFieldsComponent,
+);

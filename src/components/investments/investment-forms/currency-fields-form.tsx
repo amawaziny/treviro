@@ -91,22 +91,22 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
           control={control}
           name="exchangeRateAtPurchase"
           render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t("exchange_rate_at_purchase_to_egp")}</FormLabel>
-            <FormControl>
-              <NumericInput
-                placeholder="e.g., 30.85 (for USD to EGP)"
-                value={
-                  field.value !== undefined ? String(field.value) : undefined
-                }
-                onChange={field.onChange}
-                allowDecimal={true}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+            <FormItem>
+              <FormLabel>{t("exchange_rate_at_purchase_to_egp")}</FormLabel>
+              <FormControl>
+                <NumericInput
+                  placeholder="e.g., 30.85 (for USD to EGP)"
+                  value={
+                    field.value !== undefined ? String(field.value) : undefined
+                  }
+                  onChange={field.onChange}
+                  allowDecimal={true}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={control}
           name="purchaseDate"
@@ -130,4 +130,6 @@ const RenderCurrencyFieldsComponent: React.FC<RenderCurrencyFieldsProps> = ({
   );
 };
 
-export const MemoizedRenderCurrencyFields = React.memo(RenderCurrencyFieldsComponent);
+export const MemoizedRenderCurrencyFields = React.memo(
+  RenderCurrencyFieldsComponent,
+);

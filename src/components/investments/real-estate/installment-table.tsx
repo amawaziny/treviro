@@ -109,7 +109,7 @@ export const InstallmentTable: React.FC<InstallmentTableProps> = ({
     if (selectedNumber == null || isSubmitting) {
       return;
     }
-    
+
     setIsSubmitting(true);
 
     const newStatus = markAsPaid ? "Paid" : "Unpaid";

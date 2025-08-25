@@ -6,9 +6,7 @@ import {
   useFormContext as useReactHookFormContext,
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import {
   InvestmentSchema,
   type InvestmentFormValues,
@@ -25,7 +23,7 @@ import type {
   GoldInvestment,
   InvestmentType,
   RealEstateInvestment,
-  SecurityInvestment
+  SecurityInvestment,
 } from "@/lib/types";
 import { useLanguage } from "@/contexts/language-context";
 import { MemoizedRenderGoldFieldsSection } from "./gold-fields-form";
@@ -128,9 +126,11 @@ export function InvestmentForm({
           ...initialValues,
         };
       }
-      
-      const defaults = getInitialFormValues((initialType as InvestmentType) || "Stocks");
-      
+
+      const defaults = getInitialFormValues(
+        (initialType as InvestmentType) || "Stocks",
+      );
+
       // If securityId is provided, set it as the selectedSecurityId
       if (securityId) {
         return {
@@ -138,7 +138,7 @@ export function InvestmentForm({
           selectedSecurityId: securityId,
         };
       }
-      
+
       return defaults;
     })(),
   });
@@ -149,18 +149,28 @@ export function InvestmentForm({
   const isDedicatedGoldMode = watchedType === "Gold";
   const isDedicatedCurrencyMode = watchedType === "Currencies";
   const isDedicatedRealEstateMode = watchedType === "Real Estate";
-  const isPreSelectedStockMode = Boolean(initialType === "Stocks" || watchedType === "Stocks" || form.getValues("type") === "Stocks");
+  const isPreSelectedStockMode = Boolean(
+    initialType === "Stocks" ||
+      watchedType === "Stocks" ||
+      form.getValues("type") === "Stocks",
+  );
 
   // Stock-specific logic
-  const { listedSecurities, isLoading: isLoadingListedSecurities, error: listedSecuritiesError } = useListedSecurities();
+  const {
+    listedSecurities,
+    isLoading: isLoadingListedSecurities,
+    error: listedSecuritiesError,
+  } = useListedSecurities();
   const preSelectedSecurityId = form.watch("selectedSecurityId");
-  const preSelectedSecurityDetails = listedSecurities.find(sec => sec.id === preSelectedSecurityId) || null;
+  const preSelectedSecurityDetails =
+    listedSecurities.find((sec) => sec.id === preSelectedSecurityId) || null;
   const handleSecuritySelect = (value: string) => {
     form.setValue("selectedSecurityId", value);
   };
 
   // Button text
-  const submitButtonText = mode === "edit" ? t("update_investment") : t("add_investment");
+  const submitButtonText =
+    mode === "edit" ? t("update_investment") : t("add_investment");
 
   // onSubmit handler
   async function onSubmit(values: InvestmentFormValues) {
@@ -234,9 +244,7 @@ export function InvestmentForm({
         type: getInvestmentType(selectedSecurity.fundType),
         fundType: selectedSecurity.fundType ? selectedSecurity.fundType : null,
       };
-    } else if (
-      isDedicatedDebtMode && values.type == "Debt Instruments"
-    ) {
+    } else if (isDedicatedDebtMode && values.type == "Debt Instruments") {
       investmentName = `${t(values.debtSubType)} - ${values.issuer}`;
       newInvestment = {
         ...newInvestmentBase,
@@ -261,9 +269,7 @@ export function InvestmentForm({
         quantityInGrams: values.quantityInGrams,
         type: "Gold",
       };
-    } else if (
-      isDedicatedCurrencyMode && values.type == "Currencies"
-    ) {
+    } else if (isDedicatedCurrencyMode && values.type == "Currencies") {
       investmentName =
         values.name || `${t("currency")} (${values.currencyCode || t("na")})`;
       const calculatedCost =
@@ -277,9 +283,7 @@ export function InvestmentForm({
         exchangeRateAtPurchase: values.exchangeRateAtPurchase,
         type: "Currencies",
       };
-    } else if (
-      isDedicatedRealEstateMode && values.type == "Real Estate"
-    ) {
+    } else if (isDedicatedRealEstateMode && values.type == "Real Estate") {
       investmentName =
         values.name ||
         `${t("real_estate")} (${values.propertyAddress || t("na")})`;
@@ -347,13 +351,13 @@ export function InvestmentForm({
         description: `${t(watchedType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
         testId: "investment-added-toast",
       });
-      
+
       // Reset the form to initial state after successful submission
       form.reset(getInitialFormValues(watchedType as InvestmentType));
-      
+
       // If it's a stock purchase, redirect to the stocks page
-      if (watchedType === 'Stocks') {
-        router.push('/investments/stocks');
+      if (watchedType === "Stocks") {
+        router.push("/investments/stocks");
       }
     }
 

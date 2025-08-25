@@ -157,4 +157,6 @@ const RenderGoldFieldsComponent: React.FC<RenderGoldFieldsProps> = ({
   );
 };
 
-export const MemoizedRenderGoldFieldsSection = React.memo(RenderGoldFieldsComponent);
+export const MemoizedRenderGoldFieldsSection = React.memo(
+  RenderGoldFieldsComponent,
+);
