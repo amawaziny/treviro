@@ -52,7 +52,7 @@ export default function MyGoldPage() {
     const holdings: AggregatedGoldHolding[] = [];
 
     const physicalGoldInvestments = investments.filter(
-      (inv) => inv.type === "Gold",
+      (inv) => inv.type === "Gold" && !inv.fundType,
     ) as GoldInvestment[];
     const physicalAggregated: {
       [key in GoldType]?: {
@@ -110,7 +110,7 @@ export default function MyGoldPage() {
     });
 
     const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
+      (inv) => inv.type === "Gold" && inv.fundType,
     ) as SecurityInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
@@ -159,8 +159,8 @@ export default function MyGoldPage() {
               si.id ===
                 investments.find(
                   (i) =>
-                    i.type === "Stocks" &&
-                    (i as SecurityInvestment).tickerSymbol === symbol,
+                    i.type === "Gold" && i.fundType &&
+                    (i as GoldInvestment).securityId === symbol,
                 )?.id,
           );
           if (initialFundInvestment) {
