@@ -12,7 +12,7 @@ import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatNumberForMobile } from "@/lib/utils";
-import { DollarSign, Search } from "lucide-react";
+import { DollarSign, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -20,7 +20,7 @@ export function CurrencyRatesDialog() {
   const { t, dir } = useLanguage();
   const isMobile = useIsMobile();
   const sheetSide = dir === "rtl" ? "left" : "right";
-  const { exchangeRates, isLoading, error } = useExchangeRates();
+  const { exchangeRates, isLoading, isRefreshing, error, refreshRates } = useExchangeRates();
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
 
@@ -94,7 +94,23 @@ export function CurrencyRatesDialog() {
     return (
       <>
         <SheetHeader dir={dir} className="flex-shrink-0 p-6 pb-3 border-b">
-          <SheetTitle dir={dir}>{t("all_currency_rates")}</SheetTitle>
+          <div className="flex items-center justify-between">
+            <SheetTitle dir={dir}>{t("all_currency_rates")}</SheetTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={refreshRates}
+              disabled={isLoading || isRefreshing}
+              className={cn(
+                "h-8 w-8",
+                isRefreshing && "animate-spin"
+              )}
+              title={t("refresh_rates")}
+            >
+              <RefreshCw className={cn("h-4 w-4", isRefreshing && "opacity-50")} />
+              <span className="sr-only">{t("refresh_rates")}</span>
+            </Button>
+          </div>
         </SheetHeader>
         {renderSearchBar()}
         <div className="flex-1 overflow-y-auto -mx-1">

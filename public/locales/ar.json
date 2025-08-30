@@ -710,6 +710,7 @@
   "net_worth_desc": "صافي الأصول المستثمرة بالإضافة إلى جميع الأرباح/الخسائر المحققة وغير المحققة.",
   "show_all_rates": "عرض جميع الأسعار",
   "all_currency_rates": "جميع أسعار العملات",
+  "refresh_rates": "تحديث أسعار الصرف",
   "search_currencies_placeholder": "ابحث عن العملات...",
   "no_currencies_found": "لم يتم العثور على عملات تطابق بحثك",
   "loading_exchange_rates": "جاري تحميل أسعار الصرف...",
