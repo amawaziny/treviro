@@ -97,7 +97,7 @@ export default function MyGoldPage() {
       }
 
       holdings.push({
-        id: `physical_${goldType}`,
+        id: goldType,
         displayName: `Physical Gold - ${goldType === "K24" ? t("24_karat") : goldType === "K21" ? t("21_karat") : goldType}`,
         itemType: "physical",
         totalQuantity: data.totalQuantity,

@@ -713,5 +713,10 @@
   "search_currencies_placeholder": "ابحث عن العملات...",
   "no_currencies_found": "لم يتم العثور على عملات تطابق بحثك",
   "loading_exchange_rates": "جاري تحميل أسعار الصرف...",
-  "rate": "السعر"
+  "rate": "السعر",
+  "gold_investment_deleted": "تم حذف استثمار الذهب",
+  "gold_investment_has_been_deleted": "تم حذف استثمار الذهب",
+  "error_deleting_gold_investment": "خطأ في حذف استثمار الذهب",
+  "delete_gold_investment": "حذف استثمار الذهب",
+  "are_you_sure_delete_gold_investment": "هل أنت متأكد من حذف هذا استثمار الذهب؟"
 }
