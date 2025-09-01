@@ -38,22 +38,33 @@ import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 
+// Define types for our component
+type DebtData = {
+  directDebtHoldings: any[];
+  debtFundHoldings: any[];
+  totalProjectedMonthlyInterest: number;
+  totalProjectedAnnualInterest: number;
+  totalDebtFundPnL: number;
+  totalDebtFundCost: number;
+  totalDirectDebtInvested: number;
+  totalMaturedDebt: number;
+  isTotalFundProfitable: boolean;
+  totalInvestedInDebt: number;
+};
+
+type ExpiringCertificates = {
+  expiringCertificatesSum: number;
+  expiringCertificatesPercentage: number;
+};
+
 export default function MyDebtInstrumentsPage() {
   const { t, language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } =
-    useListedSecurities();
+  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
   const isMobile = useIsMobile();
 
-  const {
-    directDebtHoldings,
-    debtFundHoldings,
-    totalProjectedAnnualInterest,
-    totalProjectedMonthlyInterest,
-    totalDebtFundPnL,
-    totalDebtFundCost,
-    totalDirectDebtInvested,
-  } = React.useMemo(() => {
+  // Calculate debt data
+  const debtData = React.useMemo<DebtData>(() => {
     if (isLoadingInvestments || isLoadingListedSecurities) {
       return {
         directDebtHoldings: [],
@@ -63,6 +74,9 @@ export default function MyDebtInstrumentsPage() {
         totalDebtFundPnL: 0,
         totalDebtFundCost: 0,
         totalDirectDebtInvested: 0,
+        totalMaturedDebt: 0,
+        isTotalFundProfitable: false,
+        totalInvestedInDebt: 0,
       };
     }
 
@@ -74,9 +88,36 @@ export default function MyDebtInstrumentsPage() {
     let debtFundCostSum = 0;
     let directDebtInvestedSum = 0;
 
-    const directDebtInvestments = investments.filter(
-      (inv) => inv.type === "Debt Instruments" && !inv.fundType,
-    ) as DebtInstrumentInvestment[];
+    let totalMaturedDebt = 0;
+    const directDebtInvestments = investments.filter((inv) => {
+      if (inv.type !== "Debt Instruments" || inv.fundType) return false;
+      
+      const debt = inv as DebtInstrumentInvestment;
+      
+      // Skip already matured debt instruments
+      if (debt.isMatured) {
+        totalMaturedDebt += debt.amountInvested || 0;
+        return false;
+      }
+      
+      // Check maturity date for non-matured debts
+      if (debt.maturityDate) {
+        try {
+          const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z");
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (isValid(parsedMaturityDate) && isBefore(parsedMaturityDate, today)) {
+            totalMaturedDebt += debt.amountInvested || 0;
+            return false; // Filter out matured debt
+          }
+        } catch (e) {
+          console.error("Error processing maturity date for debt instrument:", debt.id, e);
+        }
+      }
+      
+      return true;
+    }) as DebtInstrumentInvestment[];
     directDebtInvestments.forEach((debt) => {
       let maturityDay: string | undefined;
       let maturityMonth: string | undefined;
@@ -211,65 +252,52 @@ export default function MyDebtInstrumentsPage() {
       fundHoldingsAggregated.push(aggHolding);
     });
 
+    // Calculate if the total fund is profitable
+    const isTotalFundProfitable = debtFundPnLSum >= 0;
+    const totalInvestedInDebt = directDebtInvestedSum + debtFundCostSum;
+    
+    // Certificate expiration tracking is now handled in the separate memo
+
+    const isFundProfitable = debtFundPnLSum >= 0;
+    const totalInvested = directDebtInvestedSum + debtFundCostSum;
+    
     return {
-      directDebtHoldings: directHoldings.sort((a, b) =>
-        (a.displayName || "").localeCompare(b.displayName || ""),
-      ),
-      debtFundHoldings: fundHoldingsAggregated.sort((a, b) =>
-        (a.displayName || "").localeCompare(b.displayName || ""),
-      ),
+      directDebtHoldings: directHoldings,
+      debtFundHoldings: fundHoldingsAggregated,
       totalProjectedMonthlyInterest: monthlyInterestSum,
       totalProjectedAnnualInterest: annualInterestSum,
       totalDebtFundPnL: debtFundPnLSum,
       totalDebtFundCost: debtFundCostSum,
       totalDirectDebtInvested: directDebtInvestedSum,
+      totalMaturedDebt,
+      isTotalFundProfitable: debtFundPnLSum >= 0,
+      totalInvestedInDebt: directDebtInvestedSum + debtFundCostSum
     };
-  }, [
-    investments,
-    listedSecurities,
-    isLoadingInvestments,
-    isLoadingListedSecurities,
-  ]);
+  }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities, language, t]);
 
-  const totalDebtFundPnLPercent =
-    totalDebtFundCost > 0
-      ? (totalDebtFundPnL / totalDebtFundCost) * 100
-      : totalDebtFundPnL !== 0
-        ? Infinity
-        : 0;
-  const isTotalFundProfitable = totalDebtFundPnL >= 0;
-  const totalInvestedInDebt = totalDirectDebtInvested + totalDebtFundCost;
+  // Calculate expiring certificates
+  const { expiringCertificatesSum, expiringCertificatesPercentage } = React.useMemo<ExpiringCertificates>(() => {
+    if (isLoadingInvestments) {
+      return { expiringCertificatesSum: 0, expiringCertificatesPercentage: 0 };
+    }
 
-  // Calculate certificates expiring within a year
-  const { expiringCertificatesSum, expiringCertificatesPercentage } =
-    React.useMemo(() => {
-      if (isLoadingInvestments) {
-        return {
-          expiringCertificatesSum: 0,
-          expiringCertificatesPercentage: 0,
-        };
-      }
+    let localExpiringSum = 0;
+    let localTotalCertificatesSum = 0;
+    const now = new Date();
+    const oneYearFromNow = addYears(now, 1);
 
-      const now = new Date();
-      const oneYearFromNow = addYears(now, 1);
-
-      let expiringSum = 0;
-      let totalCertificatesSum = 0;
-
-      directDebtHoldings.forEach((debt) => {
-        if (
-          debt.debtSubType === "Certificate" &&
-          debt.maturityDate &&
-          debt.amountInvested
-        ) {
-          totalCertificatesSum += debt.amountInvested;
-          try {
+    // Calculate expiring certificates from direct debt holdings
+    const currentDebtHoldings = debtData.directDebtHoldings || [];
+    currentDebtHoldings.forEach((debt: any) => {
+      if (debt.debtSubType === "Certificate" && debt.maturityDate && debt.amountInvested) {
+        localTotalCertificatesSum += debt.amountInvested || 0;
+        try {
             const maturityDate = parseISO(debt.maturityDate);
             if (
               isValid(maturityDate) &&
               isBefore(maturityDate, oneYearFromNow)
             ) {
-              expiringSum += debt.amountInvested;
+              localExpiringSum += debt.amountInvested || 0;
             }
           } catch (e) {
             console.error("Error processing maturity date:", e);
@@ -278,15 +306,29 @@ export default function MyDebtInstrumentsPage() {
       });
 
       const percentage =
-        totalCertificatesSum > 0
-          ? (expiringSum / totalCertificatesSum) * 100
+        localTotalCertificatesSum > 0
+          ? (localExpiringSum / localTotalCertificatesSum) * 100
           : 0;
 
       return {
-        expiringCertificatesSum: expiringSum,
+        expiringCertificatesSum: localExpiringSum,
         expiringCertificatesPercentage: percentage,
       };
-    }, [directDebtHoldings, isLoadingInvestments]);
+  }, [debtData.directDebtHoldings, isLoadingInvestments]);
+
+// Use the debt data directly in the component
+  const {
+    directDebtHoldings = [],
+    debtFundHoldings = [],
+    totalProjectedAnnualInterest = 0,
+    totalProjectedMonthlyInterest = 0,
+    totalDebtFundPnL = 0,
+    totalDebtFundCost = 0,
+    totalDirectDebtInvested = 0,
+    totalMaturedDebt = 0,
+    isTotalFundProfitable = false,
+    totalInvestedInDebt = 0
+  } = debtData;
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
@@ -362,9 +404,11 @@ export default function MyDebtInstrumentsPage() {
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            {totalDebtFundPnLPercent === Infinity
-              ? "∞"
-              : totalDebtFundPnLPercent.toFixed(2)}
+            {totalDebtFundCost > 0
+              ? (totalDebtFundPnL / totalDebtFundCost * 100).toFixed(2)
+              : totalDebtFundPnL > 0
+                ? "∞"
+                : "0.00"}
             {t("overall_pl_from_funds")}
           </p>
           <div className="mt-2 pt-2 border-t">

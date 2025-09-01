@@ -102,6 +102,8 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   maturityDate: string; // YYYY-MM-DD
   certificateInterestFrequency: "Monthly" | "Quarterly" | "Yearly";
   interestAmount?: number; // Optional: actual or projected interest amount
+  isMatured?: boolean; // Indicates if the debt instrument has matured
+  maturedOn?: string; // Date when the instrument matured (YYYY-MM-DD)
 }
 
 export type Investment =

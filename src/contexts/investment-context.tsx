@@ -193,6 +193,65 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     return doc(firestoreInstance, `users/${userId}/settings/appSettings`);
   }, [userId]);
 
+  // Function to handle matured debt instruments
+  const handleMaturedDebtInstruments = useCallback(async () => {
+    if (!firestoreInstance || !userId) return;
+
+    try {
+      const debtInstrumentsRef = collection(firestoreInstance, `users/${userId}/investments`);
+      const q = query(
+        debtInstrumentsRef,
+        where('type', '==', 'Debt Instruments'),
+        where('maturityDate', '!=', null)
+      );
+
+      const querySnapshot = await getDocs(q);
+      const batch = writeBatch(firestoreInstance);
+      let maturedAmount = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split('T')[0];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as DebtInstrumentInvestment;
+        if (data.maturityDate && !data.isMatured) {
+          const maturityDate = new Date(data.maturityDate);
+          maturityDate.setHours(0, 0, 0, 0);
+          
+          // If maturity date has passed
+          if (maturityDate <= today) {
+            // Mark as matured and set the matured date
+            batch.update(doc.ref, { 
+              isMatured: true,
+              maturedOn: todayStr
+            });
+            // Add to matured amount
+            maturedAmount += data.amountInvested || 0;
+          }
+        }
+      });
+
+      // If we have matured debt, update the cash balance
+      if (maturedAmount > 0) {
+        const summaryDocRef = getDashboardSummaryDocRef();
+        if (summaryDocRef) {
+          batch.update(summaryDocRef, {
+            totalCashBalance: increment(maturedAmount)
+          });
+        }
+      }
+
+      // Commit all updates
+      try {
+        await batch.commit();
+      } catch (commitError) {
+        console.error('Error committing batch updates:', commitError);
+      }
+    } catch (error) {
+      console.error('Error processing matured debt instruments:', error);
+    }
+  }, [userId, firestoreInstance, getDashboardSummaryDocRef]);
+
   const updateDashboardSummaryDoc = useCallback(
     async (updates: Partial<DashboardSummary>) => {
       if (!userId || !firestoreInstance) {
@@ -244,6 +303,21 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     },
     [userId, getDashboardSummaryDocRef, firestoreInstance],
   );
+
+  // Check for matured debt instruments on initial load and periodically
+  useEffect(() => {
+    if (!firestoreInstance || !userId) return;
+
+    // Initial check
+    handleMaturedDebtInstruments();
+
+    // Check daily for matured debt instruments
+    const checkMaturedDebtInterval = setInterval(() => {
+      handleMaturedDebtInstruments();
+    }, 24 * 60 * 60 * 1000); // 24 hours
+
+    return () => clearInterval(checkMaturedDebtInterval);
+  }, [firestoreInstance, userId, handleMaturedDebtInstruments]);
 
   useEffect(() => {
     if (authIsLoading || !firestoreInstance) {
@@ -1144,49 +1218,56 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       if (!firestoreInstance || !userId) {
         throw new Error("Firestore instance or user ID is not initialized");
       }
+
       try {
         const investmentDocRef = doc(
           firestoreInstance,
           `users/${userId}/investments/${investmentId}`,
         );
-        const docSnap = await getDoc(investmentDocRef);
-        if (!docSnap.exists()) throw new Error("Investment not found.");
-        const oldData = docSnap.data() as DebtInstrumentInvestment;
-        if (oldData.type !== "Debt Instruments")
-          throw new Error("Not a debt instrument investment.");
 
-        const oldAmountInvested = oldData.amountInvested || 0;
-        // `dataToUpdate.amountInvested` could be string from form, so coerce to number
-        const newAmountInvested =
-          typeof dataToUpdate.amountInvested === "string"
-            ? parseFloat(dataToUpdate.amountInvested)
-            : typeof dataToUpdate.amountInvested === "number"
-              ? dataToUpdate.amountInvested
-              : oldAmountInvested;
+        // Get the current investment to calculate deltas
+        const investmentDoc = await getDoc(investmentDocRef);
+        if (!investmentDoc.exists()) {
+          throw new Error("Investment not found");
+        }
 
-        if (isNaN(newAmountInvested)) {
+        const currentInvestment = investmentDoc.data() as DebtInstrumentInvestment;
+        const currentAmount = currentInvestment.amountInvested || 0;
+        const newAmount = dataToUpdate.amountInvested || currentAmount;
+
+        if (isNaN(newAmount)) {
           throw new Error("Invalid amountInvested provided for update.");
         }
 
-        await setDoc(investmentDocRef, dataToUpdate, { merge: true });
+        // Update the investment document
+        await setDoc(investmentDocRef, { ...dataToUpdate, updatedAt: serverTimestamp() }, { merge: true });
 
-        const amountInvestedDelta = newAmountInvested - oldAmountInvested;
-        const cashBalanceDelta = -amountInvestedDelta; // If investment cost increases, cash decreases
-
-        const summaryUpdates: Partial<DashboardSummary> = {};
-        if (!isNaN(amountInvestedDelta) && amountInvestedDelta !== 0)
-          summaryUpdates.totalInvestedAcrossAllAssets = amountInvestedDelta;
-        if (!isNaN(cashBalanceDelta) && cashBalanceDelta !== 0)
-          summaryUpdates.totalCashBalance = cashBalanceDelta;
-
-        if (Object.keys(summaryUpdates).length > 0)
-          await updateDashboardSummaryDoc(summaryUpdates);
+        // Calculate deltas for dashboard summary
+        const amountInvestedDelta = newAmount - currentAmount;
+        
+        // Only proceed with dashboard update if there are actual changes to the amount
+        if (amountInvestedDelta !== 0) {
+          const summaryDocRef = getDashboardSummaryDocRef();
+          if (summaryDocRef) {
+            const summaryDoc = await getDoc(summaryDocRef);
+            if (summaryDoc.exists()) {
+              const currentSummary = summaryDoc.data() as DashboardSummary;
+              const newTotalInvested = (currentSummary.totalInvestedAcrossAllAssets || 0) + amountInvestedDelta;
+              const newCashBalance = (currentSummary.totalCashBalance || 0) - amountInvestedDelta;
+              
+              await updateDashboardSummaryDoc({
+                totalInvestedAcrossAllAssets: newTotalInvested,
+                totalCashBalance: newCashBalance
+              });
+            }
+          }
+        }
       } catch (error) {
         console.error("Error updating debt instrument investment:", error);
         throw error;
       }
     },
-    [userId, isAuthenticated, firestoreInstance],
+    [userId, firestoreInstance, updateDashboardSummaryDoc],
   );
 
   const recalculateDashboardSummary = useCallback(async () => {
