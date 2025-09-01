@@ -114,7 +114,7 @@ export default function MyGoldPage() {
     ) as SecurityInvestment[];
     stockInvestments.forEach((stockInv) => {
       const security = listedSecurities.find(
-        (ls) => ls.symbol === stockInv.tickerSymbol,
+        (ls) => ls.id === stockInv.securityId,
       );
       if (
         security &&
@@ -132,20 +132,20 @@ export default function MyGoldPage() {
           currentMarketPrice: security.price,
           currency: security.currency,
           fundDetails: security,
-          fundInvestment: stockInv,
         });
       }
     });
 
     const finalFundHoldings: AggregatedGoldHolding[] = [];
     const fundAggregationMap = new Map<string, AggregatedGoldHolding>();
-
+console.log('holdings',holdings)
     holdings
       .filter((h) => h.itemType === "fund")
       .forEach((fundHolding) => {
-        const symbol = fundHolding.fundDetails!.symbol;
-        if (fundAggregationMap.has(symbol)) {
-          const existing = fundAggregationMap.get(symbol)!;
+        const fundId = fundHolding.id;
+        if (fundAggregationMap.has(fundId)) {
+          const existing = fundAggregationMap.get(fundId)!;
+          console.log('existing',existing)
           existing.totalQuantity += fundHolding.totalQuantity;
           existing.totalCost += fundHolding.totalCost;
           if (existing.totalQuantity > 0) {
@@ -155,23 +155,18 @@ export default function MyGoldPage() {
         } else {
           const initialFundInvestment = stockInvestments.find(
             (si) =>
-              si.tickerSymbol === symbol &&
-              si.id ===
-                investments.find(
-                  (i) =>
-                    i.type === "Gold" && i.fundType &&
-                    (i as GoldInvestment).securityId === symbol,
-                )?.id,
+              si.securityId === fundId 
           );
+          console.log('initialFundInvestment',initialFundInvestment)
           if (initialFundInvestment) {
             fundHolding.averagePurchasePrice =
               initialFundInvestment.purchasePricePerShare || 0;
             fundHolding.totalCost = initialFundInvestment.amountInvested || 0;
           }
-          fundAggregationMap.set(symbol, { ...fundHolding });
+          fundAggregationMap.set(fundId, { ...fundHolding });
         }
       });
-
+console.log('fundAggregationMap',fundAggregationMap)
     finalFundHoldings.push(...Array.from(fundAggregationMap.values()));
 
     return [
@@ -345,13 +340,28 @@ export default function MyGoldPage() {
             <div className="space-y-4">
               {aggregatedGoldHoldings
                 .filter((h) => h.itemType === "fund")
-                .map((holding) => (
-                  <InvestmentSecurityCard
-                    key={holding.id}
-                    security={holding.fundDetails!}
-                    investment={holding.fundInvestment!}
-                  />
-                ))}
+                .map((holding) => {
+                  // Map the holding to match the expected investment structure
+                  const investment: SecurityInvestment = {
+                    id: holding.id,
+                    name: holding.displayName,
+                    amountInvested: holding.totalCost,
+                    numberOfShares: holding.totalQuantity,
+                    purchasePricePerShare: holding.averagePurchasePrice,
+                    tickerSymbol: holding.fundDetails?.symbol || '',
+                    type: 'Gold', // Using 'Stocks' as the type since it's a fund investment
+                    fundType: holding.fundDetails?.fundType,
+                    securityId: holding.id                 
+                  };
+                  
+                  return (
+                    <InvestmentSecurityCard
+                      key={holding.id}
+                      security={holding.fundDetails!}
+                      investment={investment}
+                    />
+                  );
+                })}
             </div>
           ) : (
             <p className="text-muted-foreground py-4 text-center">

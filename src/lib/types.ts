@@ -241,7 +241,7 @@ export type AggregatedGoldHolding = {
   currentMarketPrice?: number;
   currency: string;
   fundDetails?: ListedSecurity;
-  fundInvestment?: SecurityInvestment;
+  // fundInvestment?: SecurityInvestment;
   physicalGoldType?: GoldType;
 };
 
