@@ -1276,11 +1276,28 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     let calculatedTotalInvested = 0;
     let calculatedTotalRealizedPnL = 0;
     let calculatedTotalCashBalance = 0;
+    let totalMaturedDebt = 0;
 
+    // First pass: calculate matured debt
     investments.forEach((inv) => {
-      calculatedTotalInvested += inv.amountInvested || 0;
-      calculatedTotalCashBalance -= inv.amountInvested || 0; // Investment cost is an outflow
+      const debtInv = inv as DebtInstrumentInvestment;
+      if (inv.type === "Debt Instruments" && debtInv.isMatured) {
+        totalMaturedDebt += debtInv.amountInvested || 0;
+      }
     });
+
+    // Second pass: calculate other values
+    investments.forEach((inv) => {
+      const debtInv = inv as DebtInstrumentInvestment;
+      // Don't count matured debt in total invested
+      if (!(inv.type === "Debt Instruments" && debtInv.isMatured)) {
+        calculatedTotalInvested += inv.amountInvested || 0;
+        calculatedTotalCashBalance -= inv.amountInvested || 0; // Investment cost is an outflow
+      }
+    });
+
+    // Add matured debt to cash balance
+    calculatedTotalCashBalance += totalMaturedDebt;
 
     transactions.forEach((txn) => {
       if (txn.type === "sell") {
@@ -1305,6 +1322,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           totalInvestedAcrossAllAssets: calculatedTotalInvested,
           totalRealizedPnL: calculatedTotalRealizedPnL,
           totalCashBalance: calculatedTotalCashBalance,
+          totalMaturedDebt,
         },
         { merge: true },
       ); // Use merge:true to not overwrite other potential fields accidentally
