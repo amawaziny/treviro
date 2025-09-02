@@ -60,7 +60,8 @@ type ExpiringCertificates = {
 export default function MyDebtInstrumentsPage() {
   const { t, language } = useLanguage();
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } = useListedSecurities();
+  const { listedSecurities, isLoading: isLoadingListedSecurities } =
+    useListedSecurities();
   const isMobile = useIsMobile();
 
   // Calculate debt data
@@ -91,31 +92,38 @@ export default function MyDebtInstrumentsPage() {
     let totalMaturedDebt = 0;
     const directDebtInvestments = investments.filter((inv) => {
       if (inv.type !== "Debt Instruments" || inv.fundType) return false;
-      
+
       const debt = inv as DebtInstrumentInvestment;
-      
+
       // Skip already matured debt instruments
       if (debt.isMatured) {
         totalMaturedDebt += debt.amountInvested || 0;
         return false;
       }
-      
+
       // Check maturity date for non-matured debts
       if (debt.maturityDate) {
         try {
           const parsedMaturityDate = parseISO(debt.maturityDate + "T00:00:00Z");
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
-          if (isValid(parsedMaturityDate) && isBefore(parsedMaturityDate, today)) {
+
+          if (
+            isValid(parsedMaturityDate) &&
+            isBefore(parsedMaturityDate, today)
+          ) {
             totalMaturedDebt += debt.amountInvested || 0;
             return false; // Filter out matured debt
           }
         } catch (e) {
-          console.error("Error processing maturity date for debt instrument:", debt.id, e);
+          console.error(
+            "Error processing maturity date for debt instrument:",
+            debt.id,
+            e,
+          );
         }
       }
-      
+
       return true;
     }) as DebtInstrumentInvestment[];
     directDebtInvestments.forEach((debt) => {
@@ -255,12 +263,12 @@ export default function MyDebtInstrumentsPage() {
     // Calculate if the total fund is profitable
     const isTotalFundProfitable = debtFundPnLSum >= 0;
     const totalInvestedInDebt = directDebtInvestedSum + debtFundCostSum;
-    
+
     // Certificate expiration tracking is now handled in the separate memo
 
     const isFundProfitable = debtFundPnLSum >= 0;
     const totalInvested = directDebtInvestedSum + debtFundCostSum;
-    
+
     return {
       directDebtHoldings: directHoldings,
       debtFundHoldings: fundHoldingsAggregated,
@@ -271,27 +279,42 @@ export default function MyDebtInstrumentsPage() {
       totalDirectDebtInvested: directDebtInvestedSum,
       totalMaturedDebt,
       isTotalFundProfitable: debtFundPnLSum >= 0,
-      totalInvestedInDebt: directDebtInvestedSum + debtFundCostSum
+      totalInvestedInDebt: directDebtInvestedSum + debtFundCostSum,
     };
-  }, [investments, listedSecurities, isLoadingInvestments, isLoadingListedSecurities, language, t]);
+  }, [
+    investments,
+    listedSecurities,
+    isLoadingInvestments,
+    isLoadingListedSecurities,
+    language,
+    t,
+  ]);
 
   // Calculate expiring certificates
-  const { expiringCertificatesSum, expiringCertificatesPercentage } = React.useMemo<ExpiringCertificates>(() => {
-    if (isLoadingInvestments) {
-      return { expiringCertificatesSum: 0, expiringCertificatesPercentage: 0 };
-    }
+  const { expiringCertificatesSum, expiringCertificatesPercentage } =
+    React.useMemo<ExpiringCertificates>(() => {
+      if (isLoadingInvestments) {
+        return {
+          expiringCertificatesSum: 0,
+          expiringCertificatesPercentage: 0,
+        };
+      }
 
-    let localExpiringSum = 0;
-    let localTotalCertificatesSum = 0;
-    const now = new Date();
-    const oneYearFromNow = addYears(now, 1);
+      let localExpiringSum = 0;
+      let localTotalCertificatesSum = 0;
+      const now = new Date();
+      const oneYearFromNow = addYears(now, 1);
 
-    // Calculate expiring certificates from direct debt holdings
-    const currentDebtHoldings = debtData.directDebtHoldings || [];
-    currentDebtHoldings.forEach((debt: any) => {
-      if (debt.debtSubType === "Certificate" && debt.maturityDate && debt.amountInvested) {
-        localTotalCertificatesSum += debt.amountInvested || 0;
-        try {
+      // Calculate expiring certificates from direct debt holdings
+      const currentDebtHoldings = debtData.directDebtHoldings || [];
+      currentDebtHoldings.forEach((debt: any) => {
+        if (
+          debt.debtSubType === "Certificate" &&
+          debt.maturityDate &&
+          debt.amountInvested
+        ) {
+          localTotalCertificatesSum += debt.amountInvested || 0;
+          try {
             const maturityDate = parseISO(debt.maturityDate);
             if (
               isValid(maturityDate) &&
@@ -314,9 +337,9 @@ export default function MyDebtInstrumentsPage() {
         expiringCertificatesSum: localExpiringSum,
         expiringCertificatesPercentage: percentage,
       };
-  }, [debtData.directDebtHoldings, isLoadingInvestments]);
+    }, [debtData.directDebtHoldings, isLoadingInvestments]);
 
-// Use the debt data directly in the component
+  // Use the debt data directly in the component
   const {
     directDebtHoldings = [],
     debtFundHoldings = [],
@@ -327,7 +350,7 @@ export default function MyDebtInstrumentsPage() {
     totalDirectDebtInvested = 0,
     totalMaturedDebt = 0,
     isTotalFundProfitable = false,
-    totalInvestedInDebt = 0
+    totalInvestedInDebt = 0,
   } = debtData;
 
   const isLoading = isLoadingInvestments || isLoadingListedSecurities;
@@ -405,7 +428,7 @@ export default function MyDebtInstrumentsPage() {
           </div>
           <p className="text-xs text-muted-foreground">
             {totalDebtFundCost > 0
-              ? (totalDebtFundPnL / totalDebtFundCost * 100).toFixed(2)
+              ? ((totalDebtFundPnL / totalDebtFundCost) * 100).toFixed(2)
               : totalDebtFundPnL > 0
                 ? "∞"
                 : "0.00"}

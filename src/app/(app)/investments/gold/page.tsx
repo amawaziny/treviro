@@ -138,14 +138,13 @@ export default function MyGoldPage() {
 
     const finalFundHoldings: AggregatedGoldHolding[] = [];
     const fundAggregationMap = new Map<string, AggregatedGoldHolding>();
-console.log('holdings',holdings)
+
     holdings
       .filter((h) => h.itemType === "fund")
       .forEach((fundHolding) => {
         const fundId = fundHolding.id;
         if (fundAggregationMap.has(fundId)) {
           const existing = fundAggregationMap.get(fundId)!;
-          console.log('existing',existing)
           existing.totalQuantity += fundHolding.totalQuantity;
           existing.totalCost += fundHolding.totalCost;
           if (existing.totalQuantity > 0) {
@@ -154,10 +153,8 @@ console.log('holdings',holdings)
           }
         } else {
           const initialFundInvestment = stockInvestments.find(
-            (si) =>
-              si.securityId === fundId 
+            (si) => si.securityId === fundId,
           );
-          console.log('initialFundInvestment',initialFundInvestment)
           if (initialFundInvestment) {
             fundHolding.averagePurchasePrice =
               initialFundInvestment.purchasePricePerShare || 0;
@@ -166,7 +163,7 @@ console.log('holdings',holdings)
           fundAggregationMap.set(fundId, { ...fundHolding });
         }
       });
-console.log('fundAggregationMap',fundAggregationMap)
+
     finalFundHoldings.push(...Array.from(fundAggregationMap.values()));
 
     return [
@@ -348,12 +345,12 @@ console.log('fundAggregationMap',fundAggregationMap)
                     amountInvested: holding.totalCost,
                     numberOfShares: holding.totalQuantity,
                     purchasePricePerShare: holding.averagePurchasePrice,
-                    tickerSymbol: holding.fundDetails?.symbol || '',
-                    type: holding.fundDetails?.fundType || 'Gold', // Using 'Stocks' as the type since it's a fund investment
+                    tickerSymbol: holding.fundDetails?.symbol || "",
+                    type: holding.fundDetails?.fundType || "Gold", // Using 'Stocks' as the type since it's a fund investment
                     fundType: holding.fundDetails?.fundType,
-                    securityId: holding.id                 
+                    securityId: holding.id,
                   };
-                  
+
                   return (
                     <InvestmentSecurityCard
                       key={holding.id}

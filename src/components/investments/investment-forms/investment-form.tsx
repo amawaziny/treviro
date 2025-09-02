@@ -33,10 +33,7 @@ import { MemoizedRenderDebtFields } from "./debt-fields-form";
 import { MemoizedRenderRealEstateFields } from "./real-estate-fields-form";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
-import {
-  getCurrentDate,
-  removeUndefinedFieldsDeep,
-} from "@/lib/utils";
+import { getCurrentDate, removeUndefinedFieldsDeep } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useInvestments } from "@/hooks/use-investments";
 
@@ -237,7 +234,7 @@ export function InvestmentForm({
         numberOfShares: values.numberOfShares,
         purchasePricePerShare: values.purchasePricePerShare,
         purchaseFees: values.purchaseFees,
-        type: selectedSecurity.fundType?? "Stocks",
+        type: selectedSecurity.fundType ?? "Stocks",
         fundType: selectedSecurity.fundType ? selectedSecurity.fundType : null,
       };
     } else if (isDedicatedDebtMode && values.type == "Debt Instruments") {

@@ -20,7 +20,7 @@ export interface RenderStockFieldsProps {
 
 const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
   control,
-  preSelectedSecurityDetails
+  preSelectedSecurityDetails,
 }) => {
   const { t, language, dir } = useLanguage();
   return (

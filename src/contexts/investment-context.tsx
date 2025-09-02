@@ -198,11 +198,14 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     if (!firestoreInstance || !userId) return;
 
     try {
-      const debtInstrumentsRef = collection(firestoreInstance, `users/${userId}/investments`);
+      const debtInstrumentsRef = collection(
+        firestoreInstance,
+        `users/${userId}/investments`,
+      );
       const q = query(
         debtInstrumentsRef,
-        where('type', '==', 'Debt Instruments'),
-        where('maturityDate', '!=', null)
+        where("type", "==", "Debt Instruments"),
+        where("maturityDate", "!=", null),
       );
 
       const querySnapshot = await getDocs(q);
@@ -210,20 +213,20 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       let maturedAmount = 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todayStr = today.toISOString().split('T')[0];
+      const todayStr = today.toISOString().split("T")[0];
 
       querySnapshot.forEach((doc) => {
         const data = doc.data() as DebtInstrumentInvestment;
         if (data.maturityDate && !data.isMatured) {
           const maturityDate = new Date(data.maturityDate);
           maturityDate.setHours(0, 0, 0, 0);
-          
+
           // If maturity date has passed
           if (maturityDate <= today) {
             // Mark as matured and set the matured date
-            batch.update(doc.ref, { 
+            batch.update(doc.ref, {
               isMatured: true,
-              maturedOn: todayStr
+              maturedOn: todayStr,
             });
             // Add to matured amount
             maturedAmount += data.amountInvested || 0;
@@ -236,7 +239,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         const summaryDocRef = getDashboardSummaryDocRef();
         if (summaryDocRef) {
           batch.update(summaryDocRef, {
-            totalCashBalance: increment(maturedAmount)
+            totalCashBalance: increment(maturedAmount),
           });
         }
       }
@@ -245,10 +248,10 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       try {
         await batch.commit();
       } catch (commitError) {
-        console.error('Error committing batch updates:', commitError);
+        console.error("Error committing batch updates:", commitError);
       }
     } catch (error) {
-      console.error('Error processing matured debt instruments:', error);
+      console.error("Error processing matured debt instruments:", error);
     }
   }, [userId, firestoreInstance, getDashboardSummaryDocRef]);
 
@@ -312,9 +315,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     handleMaturedDebtInstruments();
 
     // Check daily for matured debt instruments
-    const checkMaturedDebtInterval = setInterval(() => {
-      handleMaturedDebtInstruments();
-    }, 24 * 60 * 60 * 1000); // 24 hours
+    const checkMaturedDebtInterval = setInterval(
+      () => {
+        handleMaturedDebtInstruments();
+      },
+      24 * 60 * 60 * 1000,
+    ); // 24 hours
 
     return () => clearInterval(checkMaturedDebtInterval);
   }, [firestoreInstance, userId, handleMaturedDebtInstruments]);
@@ -1231,7 +1237,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           throw new Error("Investment not found");
         }
 
-        const currentInvestment = investmentDoc.data() as DebtInstrumentInvestment;
+        const currentInvestment =
+          investmentDoc.data() as DebtInstrumentInvestment;
         const currentAmount = currentInvestment.amountInvested || 0;
         const newAmount = dataToUpdate.amountInvested || currentAmount;
 
@@ -1240,11 +1247,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Update the investment document
-        await setDoc(investmentDocRef, { ...dataToUpdate, updatedAt: serverTimestamp() }, { merge: true });
+        await setDoc(
+          investmentDocRef,
+          { ...dataToUpdate, updatedAt: serverTimestamp() },
+          { merge: true },
+        );
 
         // Calculate deltas for dashboard summary
         const amountInvestedDelta = newAmount - currentAmount;
-        
+
         // Only proceed with dashboard update if there are actual changes to the amount
         if (amountInvestedDelta !== 0) {
           const summaryDocRef = getDashboardSummaryDocRef();
@@ -1252,12 +1263,15 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             const summaryDoc = await getDoc(summaryDocRef);
             if (summaryDoc.exists()) {
               const currentSummary = summaryDoc.data() as DashboardSummary;
-              const newTotalInvested = (currentSummary.totalInvestedAcrossAllAssets || 0) + amountInvestedDelta;
-              const newCashBalance = (currentSummary.totalCashBalance || 0) - amountInvestedDelta;
-              
+              const newTotalInvested =
+                (currentSummary.totalInvestedAcrossAllAssets || 0) +
+                amountInvestedDelta;
+              const newCashBalance =
+                (currentSummary.totalCashBalance || 0) - amountInvestedDelta;
+
               await updateDashboardSummaryDoc({
                 totalInvestedAcrossAllAssets: newTotalInvested,
-                totalCashBalance: newCashBalance
+                totalCashBalance: newCashBalance,
               });
             }
           }

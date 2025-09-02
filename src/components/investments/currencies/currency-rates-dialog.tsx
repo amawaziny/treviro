@@ -20,7 +20,8 @@ export function CurrencyRatesDialog() {
   const { t, dir } = useLanguage();
   const isMobile = useIsMobile();
   const sheetSide = dir === "rtl" ? "left" : "right";
-  const { exchangeRates, isLoading, isRefreshing, error, refreshRates } = useExchangeRates();
+  const { exchangeRates, isLoading, isRefreshing, error, refreshRates } =
+    useExchangeRates();
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
 
@@ -101,13 +102,12 @@ export function CurrencyRatesDialog() {
               size="icon"
               onClick={refreshRates}
               disabled={isLoading || isRefreshing}
-              className={cn(
-                "h-8 w-8",
-                isRefreshing && "animate-spin"
-              )}
+              className={cn("h-8 w-8", isRefreshing && "animate-spin")}
               title={t("refresh_rates")}
             >
-              <RefreshCw className={cn("h-4 w-4", isRefreshing && "opacity-50")} />
+              <RefreshCw
+                className={cn("h-4 w-4", isRefreshing && "opacity-50")}
+              />
               <span className="sr-only">{t("refresh_rates")}</span>
             </Button>
           </div>
