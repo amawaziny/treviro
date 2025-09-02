@@ -197,7 +197,7 @@ export default function SecurityDetailPage() {
 
     const buyTransactions = investments
       .filter(
-        (inv) => inv.type === "Stocks" && inv.tickerSymbol === security.symbol,
+        (inv) => inv.securityId === security.id,
       )
       .map((inv) => ({
         id: inv.id,
