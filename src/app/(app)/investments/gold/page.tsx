@@ -349,7 +349,7 @@ console.log('fundAggregationMap',fundAggregationMap)
                     numberOfShares: holding.totalQuantity,
                     purchasePricePerShare: holding.averagePurchasePrice,
                     tickerSymbol: holding.fundDetails?.symbol || '',
-                    type: 'Gold', // Using 'Stocks' as the type since it's a fund investment
+                    type: holding.fundDetails?.fundType || 'Gold', // Using 'Stocks' as the type since it's a fund investment
                     fundType: holding.fundDetails?.fundType,
                     securityId: holding.id                 
                   };

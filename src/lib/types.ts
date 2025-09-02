@@ -172,7 +172,7 @@ export interface ListedSecurity {
   changePercent: number;
   market: string;
   securityType?: "Stock" | "Fund";
-  fundType?: string;
+  fundType?: InvestmentType;
   description?: string;
 }
 

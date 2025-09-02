@@ -35,7 +35,6 @@ import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 import {
   getCurrentDate,
-  getInvestmentType,
   removeUndefinedFieldsDeep,
 } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -164,9 +163,6 @@ export function InvestmentForm({
   const preSelectedSecurityId = form.watch("selectedSecurityId");
   const preSelectedSecurityDetails =
     listedSecurities.find((sec) => sec.id === preSelectedSecurityId) || null;
-  const handleSecuritySelect = (value: string) => {
-    form.setValue("selectedSecurityId", value);
-  };
 
   // Button text
   const submitButtonText =
@@ -241,7 +237,7 @@ export function InvestmentForm({
         numberOfShares: values.numberOfShares,
         purchasePricePerShare: values.purchasePricePerShare,
         purchaseFees: values.purchaseFees,
-        type: getInvestmentType(selectedSecurity.fundType),
+        type: selectedSecurity.fundType?? "Stocks",
         fundType: selectedSecurity.fundType ? selectedSecurity.fundType : null,
       };
     } else if (isDedicatedDebtMode && values.type == "Debt Instruments") {
@@ -418,11 +414,6 @@ export function InvestmentForm({
               <MemoizedRenderStockFields
                 control={form.control}
                 preSelectedSecurityDetails={preSelectedSecurityDetails}
-                listedSecurities={listedSecurities}
-                isLoadingListedSecurities={isLoadingListedSecurities}
-                listedSecuritiesError={listedSecuritiesError}
-                onSecuritySelect={handleSecuritySelect}
-                isPreSelectedStockMode={true}
               />
             ) : (
               <div>Cannot determine investment type</div>

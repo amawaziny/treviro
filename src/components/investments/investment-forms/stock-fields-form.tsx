@@ -9,13 +9,6 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useLanguage } from "@/contexts/language-context";
 import { getCurrentDate, formatCurrencyWithCommas } from "@/lib/utils";
 import type { ListedSecurity } from "@/lib/types";
@@ -23,21 +16,11 @@ import type { ListedSecurity } from "@/lib/types";
 export interface RenderStockFieldsProps {
   control: any;
   preSelectedSecurityDetails: ListedSecurity | null;
-  listedSecurities: ListedSecurity[];
-  isLoadingListedSecurities: boolean;
-  listedSecuritiesError: Error | null;
-  onSecuritySelect: (value: string) => void;
-  isPreSelectedStockMode: boolean;
 }
 
 const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
   control,
-  preSelectedSecurityDetails,
-  listedSecurities,
-  isLoadingListedSecurities,
-  listedSecuritiesError,
-  onSecuritySelect,
-  isPreSelectedStockMode,
+  preSelectedSecurityDetails
 }) => {
   const { t, language, dir } = useLanguage();
   return (
@@ -48,58 +31,6 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
           : t("stock_purchase_details")}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        {!isPreSelectedStockMode && (
-          <FormField
-            control={control}
-            name="selectedsecurityId"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>{t("select_security_stock_or_fund")}</FormLabel>
-                <Select
-                  dir={dir}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    onSecuritySelect(value);
-                  }}
-                  value={field.value || ""}
-                  disabled={
-                    isLoadingListedSecurities ||
-                    !!listedSecuritiesError ||
-                    listedSecurities.length === 0
-                  }
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          isLoadingListedSecurities
-                            ? t("loading_securities")
-                            : listedSecuritiesError
-                              ? t("error_loading_securities")
-                              : listedSecurities.length === 0
-                                ? t("no_securities_available")
-                                : t("select_a_security_from_the_list")
-                        }
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {listedSecurities.map((security) => (
-                      <SelectItem key={security.id} value={security.id}>
-                        {security[language === "ar" ? "name_ar" : "name"]} (
-                        {security.symbol}) -{" "}
-                        {security.securityType === "Fund"
-                          ? security.fundType
-                          : security.market}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
         {preSelectedSecurityDetails && (
           <div className="md:col-span-2 p-3 bg-muted/50 rounded-md">
             <p className="text-sm font-medium">
