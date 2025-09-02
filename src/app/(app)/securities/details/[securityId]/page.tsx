@@ -124,13 +124,11 @@ export default function SecurityDetailPage() {
     }
   }, [securityId, getListedSecurityById]);
 
-  const userOwnedSecurities = React.useMemo(
-    () =>
-      investments.filter(
-        (inv) => inv.type === "Stocks" && inv.tickerSymbol === security?.symbol,
-      ) as SecurityInvestment[],
-    [investments, security],
-  );
+  const userOwnedSecurities = React.useMemo<SecurityInvestment[]>(() => {
+    return investments.filter((inv) => {
+      return inv.securityId === securityId;
+    });
+  }, [investments, securityId]);
 
   const totalSharesOwned = React.useMemo(
     () =>
