@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       tds.toArray().forEach((td) => row.push($(td).text().trim()));
       // row[0]: Currency name, row[4]: Transfer Sell
       const currencyName = row[0].replace(/\s+/g, " ").trim();
-      const transferSell = parseFloat(row[4]?.replace(/,/g, ""));
+      const transferSell = parseFloat(row[3]?.replace(/,/g, ""));
       const code = currencyNameToCode[currencyName];
       if (code && !isNaN(transferSell)) {
         rates[code] = transferSell;
