@@ -493,8 +493,7 @@ export default function SecurityDetailPage() {
             <CardHeader>
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
               <CardDescription className="text-xs">
-                {t("historical_price_performance_of")}
-                {securityName}
+                {`${t("historical_price_performance_of")} ${securityName}`}
               </CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
@@ -511,8 +510,7 @@ export default function SecurityDetailPage() {
             <CardHeader>
               <CardTitle className="text-md">{t("my_position")}</CardTitle>
               <CardDescription className="text-xs">
-                {t("your_current_investment_in")}
-                {securityName}
+                {`${t("your_current_investment_in")} ${securityName}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -603,8 +601,7 @@ export default function SecurityDetailPage() {
                 {t("transaction_history")}
               </CardTitle>
               <CardDescription className="text-xs">
-                {t("all_buy_sell_and_dividend_records_for")}
-                {securityName}
+                {`${t("all_buy_sell_and_dividend_records_for")} ${securityName}`}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
