@@ -192,7 +192,7 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("income_details")}</CardTitle>
             <CardDescription>
-              {`${t("breakdown_of_income_for")}${formatMonthYear(currentMonthStart, language)}`}
+              {`${t("breakdown_of_income_for")} ${formatMonthYear(currentMonthStart, language)}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -280,7 +280,7 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("expense_details")}</CardTitle>
             <CardDescription>
-              {`${t("breakdown_of_expenses_for")}${formatMonthYear(currentMonthStart, language)}`}
+              {`${t("breakdown_of_expenses_for")} ${formatMonthYear(currentMonthStart, language)}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
