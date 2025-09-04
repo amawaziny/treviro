@@ -220,7 +220,7 @@ export default function CashFlowPage() {
                 (fe) =>
                   !fe.isExpense &&
                   fe.period === "Monthly" &&
-                  fe.type !== "Salary"
+                  fe.type !== "Salary",
               )
               .map((income, idx) => (
                 <div key={`fixed-income-${idx}`} className="flex flex-col">
