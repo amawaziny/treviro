@@ -196,9 +196,7 @@ export default function SecurityDetailPage() {
     if (!security) return [];
 
     const buyTransactions = investments
-      .filter(
-        (inv) => inv.securityId === security.id,
-      )
+      .filter((inv) => inv.securityId === security.id)
       .map((inv) => ({
         id: inv.id,
         date: inv.purchaseDate,

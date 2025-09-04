@@ -188,14 +188,60 @@ export default function CashFlowPage() {
       {/* Details Section: 3 Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-6">
         {/* Income Details */}
-        <Card className="flex flex-col h-full min-h-[220px]">
+        <Card className="flex flex-col h-full">
           <CardHeader>
             <CardTitle>{t("income_details")}</CardTitle>
             <CardDescription>
               {`${t("breakdown_of_income_for")} ${formatMonthYear(currentMonthStart, language)}`}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
+            {/* Salary Income */}
+            {cashFlowSummary.monthlySalary > 0 && (
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Briefcase className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-medium">
+                    {t("monthly_salary_fixed")}
+                  </span>
+                </div>
+                <span className="text-sm">
+                  {formatNumberForMobile(
+                    isMobile,
+                    cashFlowSummary.monthlySalary,
+                  )}
+                </span>
+              </div>
+            )}
+
+            {/* Other Fixed Incomes */}
+            {fixedEstimates
+              .filter(
+                (fe) =>
+                  !fe.isExpense &&
+                  fe.period === "Monthly" &&
+                  fe.type !== "Salary"
+              )
+              .map((income, idx) => (
+                <div key={`fixed-income-${idx}`} className="flex flex-col">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <Wallet className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium">
+                        {income.name || t(income.type)}
+                      </span>
+                    </div>
+                    <span className="text-sm">
+                      {formatNumberForMobile(isMobile, income.amount)}
+                    </span>
+                  </div>
+                  {income.type && (
+                    <p className="text-xs text-muted-foreground pl-6">
+                      {t(income.type)}
+                    </p>
+                  )}
+                </div>
+              ))}
             {incomeRecords
               .filter((income: IncomeRecord) => {
                 const incomeDate = parseDateString(income.date);
@@ -248,12 +294,6 @@ export default function CashFlowPage() {
                     </span>
                   </div>
                 ))}
-            <div className="flex justify-between text-xs font-semibold mt-1">
-              <span>{t("total_other_logged_income")}</span>
-              <span>
-                {formatNumberForMobile(isMobile, totalManualIncomeThisMonth)}
-              </span>
-            </div>
             {totalProjectedCertificateInterestThisMonth > 0 && (
               <div className="flex justify-between text-xs">
                 <span>
