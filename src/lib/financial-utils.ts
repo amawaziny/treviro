@@ -362,11 +362,38 @@ export function calculateMonthlyCashFlowSummary({
     totalIncome - totalExpensesOnly - totalInvestmentsOnly;
 
   // Calculate current month's income (sum of all income components)
+  let proratedCertificateInterest = 0;
+  
+  if (isSameMonth(today, month)) {
+    const currentDay = today.getDate();
+    
+    // Calculate interest for certificates with day <= currentDay
+    (investments || []).forEach((inv) => {
+      if (inv.type === "Debt Instruments") {
+        const debtInv = inv as DebtInstrumentInvestment;
+        
+        // Only include certificates with day <= currentDay
+        if (debtInv.interestRate && debtInv.amountInvested && !debtInv.isMatured) {
+          const maturityDate = debtInv.maturityDate ? parseDateString(debtInv.maturityDate) : null;
+          
+          // If purchase date exists and is in the current month, check the day
+          if (maturityDate && maturityDate.getDate() <= currentDay) {
+            const monthlyInterest = (debtInv.amountInvested * debtInv.interestRate / 100) / 12;
+            proratedCertificateInterest += monthlyInterest;
+          }
+        }
+      }
+    });
+  } else {
+    // For past months, use the full projected interest
+    proratedCertificateInterest = totalProjectedCertificateInterestThisMonth;
+  }
+  
   const currentMonthIncome =
     monthlySalary +
     otherFixedIncomeMonthly +
     totalManualIncomeThisMonth +
-    totalProjectedCertificateInterestThisMonth;
+    proratedCertificateInterest;
 
   return {
     totalIncome,
