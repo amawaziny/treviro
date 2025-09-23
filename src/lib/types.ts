@@ -174,6 +174,23 @@ export interface ListedSecurity {
   securityType?: "Stock" | "Fund";
   fundType?: InvestmentType;
   description?: string;
+  isin: string;
+  sector: string;
+  sectorAr: string;
+  lastUpdated: string;
+  listingDate: string;
+  securityTypeAr: string;
+  listedShares: number;
+  tradedVolume: number;
+  tradedValue: number;
+  priceEarningRatio: number;
+  dividendYield: number;
+  cashDividends: string;
+  marketCap: number;
+  parValue: number;
+  currencyAr: string;
+  couponPaymentDate: string;
+  couponNo: number;
 }
 
 export interface StockChartDataPoint {

@@ -487,18 +487,199 @@ export default function SecurityDetailPage() {
           {/* Add more TabsTrigger here for future tabs—they will scroll! */}
         </TabsList>
         <TabsContent value="performance" className="w-full max-w-full">
-          <Card className="mb-16 md:mb-4">
+          <Card className="mb-2">
             <CardHeader>
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
-              <CardDescription className="text-xs">
-                {`${t("historical_price_performance_of")} ${securityName}`}
-              </CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
               <StockDetailChart
                 securityId={security.id}
                 currency={displayCurrency}
               />
+            </CardContent>
+          </Card>
+
+          {/* Security Details Section */}
+          <Card className="mb-16 md:mb-2">
+            <CardHeader>
+              <CardTitle className="text-md">{t("security_details")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">
+                  {t("basic_information")}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("isin")}
+                    </p>
+                    <p className="text-sm">
+                      {security.isin || t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("sector")}
+                    </p>
+                    <p className="text-sm">
+                      {language === "ar"
+                        ? security.sectorAr || security.sector
+                        : security.sector || t("not_available")}
+                    </p>
+                  </div>
+                  {security.fundType && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {t("fund_type")}
+                      </p>
+                      <p className="text-sm">{security.fundType}</p>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("listing_date")}
+                    </p>
+                    <p className="text-sm">
+                      {security.listingDate
+                        ? security.listingDate
+                        : t("not_available")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Market Data */}
+              <div className="pt-4 border-t space-y-4">
+                <h3 className="text-sm font-medium">{t("market_data")}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("market_cap")}
+                    </p>
+                    <p className="text-sm">
+                      {security.marketCap
+                        ? formatCurrencyWithCommas(
+                            security.marketCap,
+                            security.currency,
+                          )
+                        : t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("traded_volume")}
+                    </p>
+                    <p className="text-sm">
+                      {security.tradedVolume?.toLocaleString() ||
+                        t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("traded_value")}
+                    </p>
+                    <p className="text-sm">
+                      {security.tradedValue
+                        ? formatCurrencyWithCommas(
+                            security.tradedValue,
+                            security.currency,
+                          )
+                        : t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("listed_shares")}
+                    </p>
+                    <p className="text-sm">
+                      {security.listedShares?.toLocaleString() ||
+                        t("not_available")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Metrics */}
+              <div className="pt-4 border-t space-y-4">
+                <h3 className="text-sm font-medium">
+                  {t("financial_metrics")}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("pe_ratio")}
+                    </p>
+                    <p className="text-sm">
+                      {security.priceEarningRatio?.toFixed(2) ||
+                        t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("dividend_yield")}
+                    </p>
+                    <p className="text-sm">
+                      {security.dividendYield
+                        ? `${security.dividendYield.toFixed(2)}%`
+                        : t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("par_value")}
+                    </p>
+                    <p className="text-sm">
+                      {security.parValue
+                        ? formatCurrencyWithCommas(
+                            security.parValue,
+                            security.currency,
+                          )
+                        : t("not_available")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dividend */}
+              <div className="pt-4 border-t space-y-4">
+                <h3 className="text-sm font-medium">{t("dividend")}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("coupon_payment_date")}
+                    </p>
+                    <p className="text-sm">
+                      {security.couponPaymentDate
+                        ? security.couponPaymentDate
+                        : t("not_available")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("coupon_number")}
+                    </p>
+                    <p className="text-sm">{security.couponNo}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("cash_dividends")}
+                    </p>
+                    <p className="text-sm">{security.cashDividends}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="pt-4 border-t space-y-4">
+                <h3 className="text-sm font-medium">{t("description")}</h3>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {security.description}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
