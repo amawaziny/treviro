@@ -102,7 +102,7 @@ export default function DashboardPage() {
         costBasisSum += inv.amountInvested || 0;
         let currentVal = inv.amountInvested || 0; // Default to cost if no market price
 
-        if (inv.type === "Stocks") {
+        if (inv.type === "Stocks" || inv.fundType) {
           const stockInv = inv as SecurityInvestment;
           const security = listedSecurities.find(
             (ls) => ls.symbol === stockInv.tickerSymbol,
