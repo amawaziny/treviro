@@ -85,11 +85,14 @@ export function InvestmentBreakdownCards({
     {} as Record<string, typeof investments>,
   );
 
-  // For percent, use the sum of all invested (legacy: full amount for all types)
-  const totalInvested = investments.reduce(
-    (sum, inv) => sum + (inv.amountInvested || 0),
-    0,
-  );
+  // Calculate total invested, excluding matured debt instruments
+  const totalInvested = investments.reduce((sum, inv) => {
+    // Skip matured debt instruments
+    if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
+      return sum;
+    }
+    return sum + (inv.amountInvested || 0);
+  }, 0);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -116,15 +119,25 @@ export function InvestmentBreakdownCards({
             }
           });
         } else {
-          invested = invs.reduce(
-            (sum, inv) => sum + (inv.amountInvested || 0),
-            0,
-          );
+          invested = invs.reduce((sum, inv) => {
+          // Skip matured debt instruments
+          if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
+            return sum;
+          }
+          return sum + (inv.amountInvested || 0);
+        }, 0);
         }
-        const current = invs.reduce(
-          (sum, inv) => sum + (inv.currentValue ?? inv.amountInvested ?? 0),
-          0,
-        );
+        const current = invs.reduce((sum, inv) => {
+          // Skip matured debt instruments
+          if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
+            return sum;
+          }
+          // For stocks, ensure we're using currentValue if available, otherwise use amountInvested
+          const value = inv.type === 'Stocks' 
+            ? (inv.currentValue || inv.amountInvested || 0)
+            : (inv.amountInvested || 0);
+          return sum + value;
+        }, 0);
         const percent =
           totalInvested > 0 ? (invested / totalInvested) * 100 : 0;
         const plAmount = current - invested;
