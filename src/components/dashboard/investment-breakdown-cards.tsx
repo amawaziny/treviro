@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useListedSecurities } from "@/hooks/use-listed-securities";
 
 const investmentTypeIcons = {
   ["Real Estate"]: Landmark,
@@ -52,6 +53,7 @@ export function InvestmentBreakdownCards({
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   const { investments } = useInvestments();
+  const { listedSecurities } = useListedSecurities();
   if (!investments || investments.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-8">
@@ -132,11 +134,17 @@ export function InvestmentBreakdownCards({
           if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
             return sum;
           }
-          // For stocks, ensure we're using currentValue if available, otherwise use amountInvested
-          const value = inv.type === 'Stocks' 
-            ? (inv.currentValue || inv.amountInvested || 0)
-            : (inv.amountInvested || 0);
-          return sum + value;
+          
+          if (inv.type === 'Stocks' && 'securityId' in inv) {
+            const stockInv = inv as any;
+            const security = listedSecurities.find(sec => sec.id === stockInv.securityId);
+            const currentPrice = security?.price || stockInv.purchasePricePerShare || 0;
+            const shares = stockInv.numberOfShares || 0;
+            return sum + (shares * currentPrice);
+          }
+          
+          // For other types, use currentValue if available, otherwise fall back to amountInvested
+          return sum + (inv.currentValue || inv.amountInvested || 0);
         }, 0);
         const percent =
           totalInvested > 0 ? (invested / totalInvested) * 100 : 0;
