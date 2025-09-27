@@ -275,10 +275,16 @@ export default function MyGoldPage() {
               totalProfitLossPercent === Infinity
                 ? "∞"
                 : totalProfitLossPercent.toFixed(2)
-            } ${t("overall_pl")}`}
+            }% ${t("overall_pl")}`}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {`${t("total_invested")} ${formatCurrencyWithCommas(totalCost)}`}
+            {`${t("total_invested")}: `}
+            <span
+              className="font-medium text-foreground"
+              data-testid="total-invested-amount"
+            >
+              {formatNumberForMobile(isMobile, totalCost)}
+            </span>
           </p>
         </CardContent>
       </Card>
