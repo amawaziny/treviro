@@ -17,6 +17,7 @@ import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
+import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 
 const investmentTypeIcons = {
   ["Real Estate"]: Landmark,
@@ -56,6 +57,7 @@ export function InvestmentBreakdownCards({
   const { investments } = useInvestments();
   const { listedSecurities } = useListedSecurities();
   const { exchangeRates } = useExchangeRates();
+  const { goldMarketPrices } = useGoldMarketPrices();
   if (!investments || investments.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-8">
@@ -82,8 +84,10 @@ export function InvestmentBreakdownCards({
   // Group by type and calculate current month's investments
   const typeGroups = investments.reduce(
     (acc, inv) => {
-      acc[inv.type] = acc[inv.type] || [];
-      acc[inv.type].push(inv);
+      // Group gold funds and physical gold under the same "Gold" type
+      const type = inv.type === 'Gold' ? 'Gold' : inv.type;
+      acc[type] = acc[type] || [];
+      acc[type].push(inv);
       return acc;
     },
     {} as Record<string, typeof investments>,
@@ -148,6 +152,44 @@ export function InvestmentBreakdownCards({
             return sum + shares * currentPrice;
           }
 
+          // Handle gold investments
+          if (inv.type === "Gold") {
+            // Handle physical gold
+            if ("goldType" in inv) {
+              const goldInv = inv as any;
+              let currentPricePerGram = 0;
+              
+              if (goldMarketPrices) {
+                if (goldInv.goldType === "K24") {
+                  currentPricePerGram = goldMarketPrices.pricePerGramK24 || 0;
+                } else if (goldInv.goldType === "K21") {
+                  currentPricePerGram = goldMarketPrices.pricePerGramK21 || 0;
+                } else if (goldInv.goldType === "Pound") {
+                  currentPricePerGram = goldMarketPrices.pricePerGoldPound || 0;
+                } else if (goldInv.goldType === "Ounce") {
+                  currentPricePerGram = goldMarketPrices.pricePerOunce || 0;
+                }
+              }
+              
+              if (currentPricePerGram > 0) {
+                return sum + (goldInv.quantityInGrams * currentPricePerGram);
+              }
+            }
+            
+            // Handle gold funds (stocks with fundType)
+            if ("securityId" in inv) {
+              const stockInv = inv as any;
+              const security = listedSecurities.find(
+                (sec) => sec.id === stockInv.securityId
+              );
+              if (security && security.securityType === "Fund") {
+                const currentPrice = security?.price || stockInv.purchasePricePerShare || 0;
+                const shares = stockInv.numberOfShares || 0;
+                return sum + (shares * currentPrice);
+              }
+            }
+          }
+          
           // Handle currency investments
           if (inv.type === "Currencies" && "currencyCode" in inv) {
             const currencyInv = inv as any;
