@@ -200,7 +200,7 @@ export function InvestmentBreakdownCards({
                 >
                   {t(type)}
                 </span>
-                <Badge className={`text-xs px-2 py-1 bg-green-600 text-white`}>
+                <Badge className={`text-xs px-2 py-1 ${plAmount >= 0 ? 'bg-green-600' : 'bg-red-600'} text-white`}>
                   {plAmount >= 0 ? (
                     <TrendingUp className="inline h-4 w-4 mr-1" />
                   ) : (
