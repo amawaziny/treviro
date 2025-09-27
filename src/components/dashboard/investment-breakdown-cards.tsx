@@ -16,6 +16,7 @@ import {
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
+import { useExchangeRates } from "@/hooks/use-exchange-rates";
 
 const investmentTypeIcons = {
   ["Real Estate"]: Landmark,
@@ -54,6 +55,7 @@ export function InvestmentBreakdownCards({
   const isMobile = useIsMobile();
   const { investments } = useInvestments();
   const { listedSecurities } = useListedSecurities();
+  const { exchangeRates } = useExchangeRates();
   if (!investments || investments.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-8">
@@ -141,6 +143,17 @@ export function InvestmentBreakdownCards({
             const currentPrice = security?.price || stockInv.purchasePricePerShare || 0;
             const shares = stockInv.numberOfShares || 0;
             return sum + (shares * currentPrice);
+          }
+          
+          // Handle currency investments
+          if (inv.type === 'Currencies' && 'currencyCode' in inv) {
+            const currencyInv = inv as any;
+            const currentRateKey = `${currencyInv.currencyCode}_EGP`;
+            const currentRate = exchangeRates?.[currentRateKey];
+            
+            if (currentRate) {
+              return sum + (currencyInv.foreignCurrencyAmount * currentRate);
+            }
           }
           
           // For other types, use currentValue if available, otherwise fall back to amountInvested
