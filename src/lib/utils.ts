@@ -90,10 +90,16 @@ export function formatNumberWithSuffix(
     suffix = "K";
   }
 
-  let formatted = value.toFixed(3).replace(/\.0$/, "");
+  let formatted = new Intl.NumberFormat("en-EG", {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+  }).format(value);
+
   if (suffix) formatted += suffix;
 
-  return `${currency} ${num < 0 ? "-" : ""}${formatted}`;
+  return `${num < 0 ? "-" : ""}${formatted}`;
 }
 
 /**

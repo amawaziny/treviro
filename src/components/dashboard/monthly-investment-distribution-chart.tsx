@@ -23,6 +23,7 @@ export function MonthlyInvestmentDistributionChart() {
         expenseRecords,
         investments,
         fixedEstimates,
+        transactions: [],
         month: now,
       }),
     [expenseRecords, investments, fixedEstimates, now],
@@ -38,46 +39,40 @@ export function MonthlyInvestmentDistributionChart() {
     }> = [];
 
     // Add investment categories
-    if (cashFlowSummary.totalStockInvestmentThisMonth > 0) {
-      data.push({
-        id: "Stocks",
-        label: t("stocks"),
-        value: cashFlowSummary.totalStockInvestmentThisMonth,
-        color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
-      });
-    }
-    if (cashFlowSummary.totalGoldInvestmentThisMonth > 0) {
-      data.push({
-        id: "Gold",
-        label: t("gold"),
-        value: cashFlowSummary.totalGoldInvestmentThisMonth,
-        color: "#e6b93e",
-      });
-    }
-    if (cashFlowSummary.totalDebtInvestmentThisMonth > 0) {
-      data.push({
-        id: "Debt instruments",
-        label: t("debt_instruments"),
-        value: cashFlowSummary.totalDebtInvestmentThisMonth,
-        color: resolvedTheme === "dark" ? "#b6d037" : "#5e9c1c",
-      });
-    }
-    if (cashFlowSummary.totalCurrencyInvestmentThisMonth > 0) {
-      data.push({
-        id: "Currencies",
-        label: t("currencies"),
-        value: cashFlowSummary.totalCurrencyInvestmentThisMonth,
-        color: resolvedTheme === "dark" ? "#45818e" : "#7bb661",
-      });
-    }
-    if (cashFlowSummary.realEstateInstallmentsMonthly > 0) {
-      data.push({
-        id: "Real Estate",
-        label: t("real_estate"),
-        value: cashFlowSummary.realEstateInstallmentsMonthly,
-        color: resolvedTheme === "dark" ? "#7bb661" : "#b6d037",
-      });
-    }
+    data.push({
+      id: "Stocks",
+      label: t("stocks"),
+      value: cashFlowSummary.totalStockInvestmentThisMonth,
+      color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
+    });
+
+    data.push({
+      id: "Gold",
+      label: t("gold"),
+      value: cashFlowSummary.totalGoldInvestmentThisMonth,
+      color: "#e6b93e",
+    });
+
+    data.push({
+      id: "Debt instruments",
+      label: t("debt_instruments"),
+      value: cashFlowSummary.totalDebtInvestmentThisMonth,
+      color: resolvedTheme === "dark" ? "#b6d037" : "#5e9c1c",
+    });
+
+    data.push({
+      id: "Currencies",
+      label: t("currencies"),
+      value: cashFlowSummary.totalCurrencyInvestmentThisMonth,
+      color: resolvedTheme === "dark" ? "#45818e" : "#7bb661",
+    });
+
+    data.push({
+      id: "Real Estate",
+      label: t("real_estate"),
+      value: cashFlowSummary.realEstateInstallmentsMonthly,
+      color: resolvedTheme === "dark" ? "#7bb661" : "#b6d037",
+    });
 
     // Add combined expenses
     const totalExpenses =
@@ -87,14 +82,12 @@ export function MonthlyInvestmentDistributionChart() {
       (cashFlowSummary.otherFixedExpensesMonthly || 0) +
       (cashFlowSummary.totalItemizedExpensesThisMonth || 0);
 
-    if (totalExpenses > 0) {
-      data.push({
-        id: "Expenses",
-        label: t("expenses"),
-        value: totalExpenses,
-        color: resolvedTheme === "dark" ? "#9ca3af" : "#6b7280",
-      });
-    }
+    data.push({
+      id: "Expenses",
+      label: t("expenses"),
+      value: totalExpenses,
+      color: resolvedTheme === "dark" ? "#9ca3af" : "#6b7280",
+    });
 
     return data;
   }, [cashFlowSummary, isLoading, resolvedTheme, t]);

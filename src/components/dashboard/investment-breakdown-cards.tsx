@@ -92,7 +92,7 @@ export function InvestmentBreakdownCards({
   // Calculate total invested, excluding matured debt instruments
   const totalInvested = investments.reduce((sum, inv) => {
     // Skip matured debt instruments
-    if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
+    if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
       return sum;
     }
     return sum + (inv.amountInvested || 0);
@@ -124,38 +124,41 @@ export function InvestmentBreakdownCards({
           });
         } else {
           invested = invs.reduce((sum, inv) => {
-          // Skip matured debt instruments
-          if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
-            return sum;
-          }
-          return sum + (inv.amountInvested || 0);
-        }, 0);
+            // Skip matured debt instruments
+            if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
+              return sum;
+            }
+            return sum + (inv.amountInvested || 0);
+          }, 0);
         }
         const current = invs.reduce((sum, inv) => {
           // Skip matured debt instruments
-          if (inv.type === 'Debt Instruments' && (inv as any).isMatured) {
+          if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
             return sum;
           }
-          
-          if (inv.type === 'Stocks' && 'securityId' in inv) {
+
+          if (inv.type === "Stocks" && "securityId" in inv) {
             const stockInv = inv as any;
-            const security = listedSecurities.find(sec => sec.id === stockInv.securityId);
-            const currentPrice = security?.price || stockInv.purchasePricePerShare || 0;
+            const security = listedSecurities.find(
+              (sec) => sec.id === stockInv.securityId,
+            );
+            const currentPrice =
+              security?.price || stockInv.purchasePricePerShare || 0;
             const shares = stockInv.numberOfShares || 0;
-            return sum + (shares * currentPrice);
+            return sum + shares * currentPrice;
           }
-          
+
           // Handle currency investments
-          if (inv.type === 'Currencies' && 'currencyCode' in inv) {
+          if (inv.type === "Currencies" && "currencyCode" in inv) {
             const currencyInv = inv as any;
             const currentRateKey = `${currencyInv.currencyCode}_EGP`;
             const currentRate = exchangeRates?.[currentRateKey];
-            
+
             if (currentRate) {
-              return sum + (currencyInv.foreignCurrencyAmount * currentRate);
+              return sum + currencyInv.foreignCurrencyAmount * currentRate;
             }
           }
-          
+
           // For other types, use currentValue if available, otherwise fall back to amountInvested
           return sum + (inv.currentValue || inv.amountInvested || 0);
         }, 0);
