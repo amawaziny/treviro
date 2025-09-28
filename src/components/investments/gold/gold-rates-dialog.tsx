@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Gem, RefreshCw } from "lucide-react";
+import { Gem, RefreshCw, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -121,8 +122,23 @@ export function GoldRatesDialog() {
     },
   ].filter(rate => rate.value !== undefined);
 
+  const [searchTerm, setSearchTerm] = React.useState("");
   const isMobile = useIsMobile();
   const sheetSide = isMobile ? "bottom" : dir === "rtl" ? "left" : "right";
+
+  // Filter rates based on search term
+  interface RateItem {
+    name: string;
+    value: number | undefined;
+    currency: string;
+  }
+
+  const filteredRates = React.useMemo<RateItem[]>(() => {
+    if (!searchTerm) return rates;
+    return rates.filter((rate: RateItem) => 
+      rate.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [rates, searchTerm]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -155,18 +171,34 @@ export function GoldRatesDialog() {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
+          
+          {/* Search Bar */}
+          <div className="relative mt-4">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder={t("search_gold_rates")}
+              className="w-full pl-9"
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </SheetHeader>
         
         <div className="space-y-4">
           {isLoading ? (
             <div className="space-y-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map((i) => (
+              {Array.from({ length: 19 }).map((_, i) => (
                 <Skeleton key={i} className="h-14 w-full rounded-lg" />
               ))}
             </div>
+          ) : filteredRates.length === 0 ? (
+            <div className="text-center py-4 text-muted-foreground">
+              {t("no_rates_found")}
+            </div>
           ) : (
             <div className="space-y-3">
-              {rates.map((rate) => (
+              {filteredRates.map((rate: RateItem) => (
                 <div
                   key={rate.name}
                   className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent/50 transition-colors"
