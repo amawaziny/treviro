@@ -13,6 +13,8 @@ import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Gem, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function GoldRatesDialog() {
   const { t, dir } = useLanguage();
@@ -42,7 +44,8 @@ export function GoldRatesDialog() {
     },
   ].filter(rate => rate.value !== undefined);
 
-  const sheetSide = dir === "rtl" ? "left" : "right";
+  const isMobile = useIsMobile();
+  const sheetSide = isMobile ? "bottom" : dir === "rtl" ? "left" : "right";
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -52,7 +55,13 @@ export function GoldRatesDialog() {
           <span>{t("view_gold_rates")}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side={sheetSide} className="w-full sm:max-w-md">
+      <SheetContent 
+        side={sheetSide} 
+        className={cn(
+          "w-full sm:max-w-md",
+          isMobile && "rounded-t-xl"
+        )}
+      >
         <SheetHeader className="mb-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
