@@ -169,6 +169,7 @@ export default function MyCurrenciesPage() {
           {t("view_your_currency_holdings_and_their_performance_against_egp")}
         </p>
       </div>
+      <Separator />
       <div className="flex justify-end">
         <CurrencyRatesDialog />
       </div>

@@ -28,6 +28,7 @@ import { Gem, Plus, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PhysicalGoldListItem } from "@/components/investments/gold/my-gold-list-item";
+import { GoldRatesDialog } from "@/components/investments/gold/gold-rates-dialog";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -249,6 +250,9 @@ export default function MyGoldPage() {
         </p>
       </div>
       <Separator />
+      <div className="flex justify-end">
+        <GoldRatesDialog />
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
