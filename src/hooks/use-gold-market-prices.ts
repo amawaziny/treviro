@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { GoldMarketPrices } from "@/lib/types";
@@ -9,14 +9,15 @@ export const useGoldMarketPrices = () => {
   const [goldMarketPrices, setGoldMarketPrices] =
     useState<GoldMarketPrices | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetchRates = useCallback(() => {
     if (!db) {
       setError(new Error("Firestore is not initialized."));
       setIsLoading(false);
       setGoldMarketPrices(null);
-      return;
+      return () => {};
     }
 
     setIsLoading(true);
@@ -54,8 +55,32 @@ export const useGoldMarketPrices = () => {
       },
     );
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  return { goldMarketPrices, isLoading, error };
+  useEffect(() => {
+    const unsubscribe = fetchRates();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [fetchRates]);
+
+  const refreshRates = useCallback(() => {
+    if (isLoading || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    const unsubscribe = fetchRates();
+    
+    // Simulate minimum loading time for better UX
+    const timer = setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+    
+    return () => {
+      clearTimeout(timer);
+      if (unsubscribe) unsubscribe();
+    };
+  }, [fetchRates, isLoading, isRefreshing]);
+
+  return { goldMarketPrices, isLoading: isLoading || isRefreshing, isRefreshing, error, refreshRates };
 };
