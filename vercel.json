@@ -6,7 +6,7 @@
       "schedule": "0 12 * * 0-4"
     },
     {
-      "path": "/api/scrape-exchange-rate",
+      "path": "/api/scrape-market-data",
       "schedule": "0 4 * * *"
     }
   ]

@@ -167,7 +167,7 @@ export function InvestmentBreakdownCards({
                 } else if (goldInv.goldType === "Pound") {
                   currentPricePerGram = goldMarketPrices.pricePerGoldPound || 0;
                 } else if (goldInv.goldType === "Ounce") {
-                  currentPricePerGram = goldMarketPrices.pricePerOunce || 0;
+                  currentPricePerGram = goldMarketPrices.pricePerOunceK24 || 0;
                 }
               }
               
