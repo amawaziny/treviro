@@ -70,10 +70,10 @@ export const useGoldMarketPrices = () => {
   const refreshRates = useCallback(async () => {
     try {
       if (isLoading || isRefreshing) return;
-      
+
       setIsRefreshing(true);
       setError(null);
-      
+
       const response = await fetch("/api/scrape-gold-prices");
       if (!response.ok) {
         throw new Error("Failed to refresh gold prices");
@@ -82,13 +82,17 @@ export const useGoldMarketPrices = () => {
     } catch (err) {
       console.error("Error refreshing gold prices:", err);
       setError(
-        err instanceof Error
-          ? err
-          : new Error("Failed to refresh gold prices"),
+        err instanceof Error ? err : new Error("Failed to refresh gold prices"),
       );
       setIsRefreshing(false);
     }
   }, [isLoading, isRefreshing]);
 
-  return { goldMarketPrices, isLoading: isLoading || isRefreshing, isRefreshing, error, refreshRates };
+  return {
+    goldMarketPrices,
+    isLoading: isLoading || isRefreshing,
+    isRefreshing,
+    error,
+    refreshRates,
+  };
 };

@@ -19,108 +19,109 @@ import { cn } from "@/lib/utils";
 
 export function GoldRatesDialog() {
   const { t, dir } = useLanguage();
-  const { goldMarketPrices, isLoading, isRefreshing, refreshRates } = useGoldMarketPrices();
+  const { goldMarketPrices, isLoading, isRefreshing, refreshRates } =
+    useGoldMarketPrices();
   const [open, setOpen] = React.useState(false);
 
   const rates = [
     // Gram prices
-    { 
-      name: t("24_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK24, 
-      currency: "EGP" 
+    {
+      name: t("24_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK24,
+      currency: "EGP",
     },
-    { 
-      name: t("22_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK22, 
-      currency: "EGP" 
+    {
+      name: t("22_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK22,
+      currency: "EGP",
     },
-    { 
-      name: t("21_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK21, 
-      currency: "EGP" 
+    {
+      name: t("21_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK21,
+      currency: "EGP",
     },
-    { 
-      name: t("18_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK18, 
-      currency: "EGP" 
+    {
+      name: t("18_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK18,
+      currency: "EGP",
     },
-    { 
-      name: t("14_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK14, 
-      currency: "EGP" 
+    {
+      name: t("14_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK14,
+      currency: "EGP",
     },
-    { 
-      name: t("12_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK12, 
-      currency: "EGP" 
+    {
+      name: t("12_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK12,
+      currency: "EGP",
     },
-    { 
-      name: t("10_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK10, 
-      currency: "EGP" 
+    {
+      name: t("10_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK10,
+      currency: "EGP",
     },
-    { 
-      name: t("9_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK9, 
-      currency: "EGP" 
+    {
+      name: t("9_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK9,
+      currency: "EGP",
     },
-    { 
-      name: t("8_karat_gram"), 
-      value: goldMarketPrices?.pricePerGramK8, 
-      currency: "EGP" 
+    {
+      name: t("8_karat_gram"),
+      value: goldMarketPrices?.pricePerGramK8,
+      currency: "EGP",
     },
-    { 
-      name: t("gold_pound"), 
-      value: goldMarketPrices?.pricePerGoldPound, 
-      currency: "EGP" 
+    {
+      name: t("gold_pound"),
+      value: goldMarketPrices?.pricePerGoldPound,
+      currency: "EGP",
     },
     // Ounce prices
-    { 
-      name: t("24_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK24, 
-      currency: "EGP" 
+    {
+      name: t("24_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK24,
+      currency: "EGP",
     },
-    { 
-      name: t("22_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK22, 
-      currency: "EGP" 
+    {
+      name: t("22_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK22,
+      currency: "EGP",
     },
-    { 
-      name: t("21_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK21, 
-      currency: "EGP" 
+    {
+      name: t("21_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK21,
+      currency: "EGP",
     },
-    { 
-      name: t("18_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK18, 
-      currency: "EGP" 
+    {
+      name: t("18_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK18,
+      currency: "EGP",
     },
-    { 
-      name: t("14_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK14, 
-      currency: "EGP" 
+    {
+      name: t("14_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK14,
+      currency: "EGP",
     },
-    { 
-      name: t("12_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK12, 
-      currency: "EGP" 
+    {
+      name: t("12_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK12,
+      currency: "EGP",
     },
-    { 
-      name: t("10_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK10, 
-      currency: "EGP" 
+    {
+      name: t("10_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK10,
+      currency: "EGP",
     },
-    { 
-      name: t("9_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK9, 
-      currency: "EGP" 
+    {
+      name: t("9_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK9,
+      currency: "EGP",
     },
-    { 
-      name: t("8_karat_ounce"), 
-      value: goldMarketPrices?.pricePerOunceK8, 
-      currency: "EGP" 
+    {
+      name: t("8_karat_ounce"),
+      value: goldMarketPrices?.pricePerOunceK8,
+      currency: "EGP",
     },
-  ].filter(rate => rate.value !== undefined);
+  ].filter((rate) => rate.value !== undefined);
 
   const [searchTerm, setSearchTerm] = React.useState("");
   const isMobile = useIsMobile();
@@ -135,8 +136,8 @@ export function GoldRatesDialog() {
 
   const filteredRates = React.useMemo<RateItem[]>(() => {
     if (!searchTerm) return rates;
-    return rates.filter((rate: RateItem) => 
-      rate.name.toLowerCase().includes(searchTerm.toLowerCase())
+    return rates.filter((rate: RateItem) =>
+      rate.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [rates, searchTerm]);
 
@@ -148,11 +149,12 @@ export function GoldRatesDialog() {
           <span>{t("view_gold_rates")}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent dir={dir}
-        side={sheetSide} 
+      <SheetContent
+        dir={dir}
+        side={sheetSide}
         className={cn(
           "flex flex-col w-full sm:max-w-md p-0",
-          isMobile && "rounded-t-xl"
+          isMobile && "rounded-t-xl",
         )}
       >
         <SheetHeader dir={dir} className="flex-shrink-0 p-6 pb-3 border-b">
@@ -168,23 +170,27 @@ export function GoldRatesDialog() {
               disabled={isRefreshing || isLoading}
               className="h-8 w-8"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </SheetHeader>
-          
-          {/* Search Bar */}
-          <div className="relative px-6 pt-4 pb-2 border-b">
-            <Search className="absolute left-9 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={t("search_gold_rates")}
-              className="w-full pl-10"
-              value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        
+
+        {/* Search Bar */}
+        <div className="relative px-6 pt-4 pb-2 border-b">
+          <Search className="absolute left-9 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder={t("search_gold_rates")}
+            className="w-full pl-10"
+            value={searchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
+          />
+        </div>
+
         <div className="flex-1 overflow-y-auto -mx-1 px-6 py-2">
           {isLoading ? (
             <div className="space-y-2">
@@ -208,7 +214,10 @@ export function GoldRatesDialog() {
                   </div>
                   <div className="text-right">
                     <p className="font-mono font-medium">
-                      {rate.value?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || 'N/A'} {rate.currency}
+                      {rate.value?.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      }) || "N/A"}{" "}
+                      {rate.currency}
                     </p>
                   </div>
                 </div>

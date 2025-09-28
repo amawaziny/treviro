@@ -85,7 +85,7 @@ export function InvestmentBreakdownCards({
   const typeGroups = investments.reduce(
     (acc, inv) => {
       // Group gold funds and physical gold under the same "Gold" type
-      const type = inv.type === 'Gold' ? 'Gold' : inv.type;
+      const type = inv.type === "Gold" ? "Gold" : inv.type;
       acc[type] = acc[type] || [];
       acc[type].push(inv);
       return acc;
@@ -158,7 +158,7 @@ export function InvestmentBreakdownCards({
             if ("goldType" in inv) {
               const goldInv = inv as any;
               let currentPricePerGram = 0;
-              
+
               if (goldMarketPrices) {
                 if (goldInv.goldType === "K24") {
                   currentPricePerGram = goldMarketPrices.pricePerGramK24 || 0;
@@ -170,26 +170,27 @@ export function InvestmentBreakdownCards({
                   currentPricePerGram = goldMarketPrices.pricePerOunceK24 || 0;
                 }
               }
-              
+
               if (currentPricePerGram > 0) {
-                return sum + (goldInv.quantityInGrams * currentPricePerGram);
+                return sum + goldInv.quantityInGrams * currentPricePerGram;
               }
             }
-            
+
             // Handle gold funds (stocks with fundType)
             if ("securityId" in inv) {
               const stockInv = inv as any;
               const security = listedSecurities.find(
-                (sec) => sec.id === stockInv.securityId
+                (sec) => sec.id === stockInv.securityId,
               );
               if (security && security.securityType === "Fund") {
-                const currentPrice = security?.price || stockInv.purchasePricePerShare || 0;
+                const currentPrice =
+                  security?.price || stockInv.purchasePricePerShare || 0;
                 const shares = stockInv.numberOfShares || 0;
-                return sum + (shares * currentPrice);
+                return sum + shares * currentPrice;
               }
             }
           }
-          
+
           // Handle currency investments
           if (inv.type === "Currencies" && "currencyCode" in inv) {
             const currencyInv = inv as any;
