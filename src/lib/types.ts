@@ -229,8 +229,24 @@ export interface DashboardSummary {
 export interface GoldMarketPrices {
   pricePerGramK24?: number;
   pricePerGramK21?: number;
+  pricePerGramK22?: number;
+  pricePerGramK18?: number;
+  pricePerGramK14?: number;
+  pricePerGramK12?: number;
+  pricePerGramK10?: number;
+  pricePerGramK9?: number;
+  pricePerGramK8?: number;
   pricePerGoldPound?: number;
-  pricePerOunce?: number;
+  pricePerOunceK24?: number;
+  pricePerOunceK21?: number;
+  pricePerOunceK22?: number;
+  pricePerOunceK18?: number;
+  pricePerOunceK14?: number;
+  pricePerOunceK12?: number;
+  pricePerOunceK10?: number;
+  pricePerOunceK9?: number;
+  pricePerOunceK8?: number;
+  source?: string;
   lastUpdated?: any;
 }
 

@@ -5,6 +5,7 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 
 interface GoldPrices {
+  // Gram prices
   pricePerGramK24?: number;
   pricePerGramK21?: number;
   pricePerGramK22?: number;
@@ -15,84 +16,95 @@ interface GoldPrices {
   pricePerGramK9?: number;
   pricePerGramK8?: number;
   pricePerGoldPound?: number;
+  
+  // Ounce prices
+  pricePerOunceK24?: number;
+  pricePerOunceK21?: number;
+  pricePerOunceK22?: number;
+  pricePerOunceK18?: number;
+  pricePerOunceK14?: number;
+  pricePerOunceK12?: number;
+  pricePerOunceK10?: number;
+  pricePerOunceK9?: number;
+  pricePerOunceK8?: number;
+  
   [key: string]: number | undefined;
+}
+
+async function fetchAndParsePrices(url: string, unit: 'gram' | 'ounce'): Promise<Partial<GoldPrices>> {
+  console.log(`Fetching ${unit} prices from:`, url);
+  const { data: html } = await axios.get(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+  });
+  
+  const prices: Partial<GoldPrices> = {};
+  const $ = cheerio.load(html);
+  const content = $('body').text();
+  const priceRegex = /gold\s+(Gram|Ounce)\s+(\d+)K\s+in\s+Egypt\s+is\s+([\d,]+\.[\d]+)/gi;
+  
+  let match;
+  while ((match = priceRegex.exec(content)) !== null) {
+    const matchUnit = match[1].toLowerCase();
+    const karat = match[2];
+    const price = parseFloat(match[3].replace(/,/g, ''));
+    
+    // Only process if the unit matches what we're looking for
+    if (matchUnit !== unit) continue;
+    
+    if (!isNaN(price)) {
+      const priceKey = `pricePer${unit.charAt(0).toUpperCase() + unit.slice(1)}K${karat}` as keyof GoldPrices;
+      prices[priceKey] = price;
+    }
+  }
+  
+  return prices;
 }
 
 export async function GET(req: NextRequest) {
   try {
-    const url = "https://www.goldrate24.com/gold-prices/middle-east/egypt/gram/";
-    const { data: html } = await axios.get(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-    });
-    
     const goldPrices: GoldPrices = {};
     
-    // Extract the last updated time
-    const lastUpdated = new Date().toISOString();
+    // Fetch gram prices
+    const gramPrices = await fetchAndParsePrices(
+      "https://www.goldrate24.com/gold-prices/middle-east/egypt/gram/",
+      "gram"
+    );
+    Object.assign(goldPrices, gramPrices);
     
-    // Parse HTML content with cheerio
-    const $ = cheerio.load(html);
-    
-    // Extract gold prices from the text content
-    const content = $('body').text();
-    const priceRegex = /gold\s+Gram\s+(\d+)K\s+in\s+Egypt\s+is\s+([\d,]+\.[\d]+)/gi;
-    const matches = [...content.matchAll(priceRegex)];
-    
-    for (const match of matches) {
-      const karat = match[1];
-      const price = parseFloat(match[2].replace(/,/g, ''));
-      
-      if (!isNaN(price)) {
-        switch (karat) {
-          case '24':
-            goldPrices.pricePerGramK24 = price;
-            break;
-          case '21':
-            goldPrices.pricePerGramK21 = price;
-            break;
-          case '22':
-            goldPrices.pricePerGramK22 = price;
-            break;
-          case '18':
-            goldPrices.pricePerGramK18 = price;
-            break;
-          case '14':
-            goldPrices.pricePerGramK14 = price;
-            break;
-          case '12':
-            goldPrices.pricePerGramK12 = price;
-            break;
-          case '10':
-            goldPrices.pricePerGramK10 = price;
-            break;
-          case '9':
-            goldPrices.pricePerGramK9 = price;
-            break;
-          case '8':
-            goldPrices.pricePerGramK8 = price;
-            break;
-        }
-      }
-    }
-    
-    // Calculate gold pound price (8g of 21K gold)
+    // Calculate gold pound price (8g of 21K gold) if we have the 21K gram price
     if (goldPrices.pricePerGramK21) {
       goldPrices.pricePerGoldPound = goldPrices.pricePerGramK21 * 8;
     }
+    
+    // Fetch ounce prices
+    const ouncePrices = await fetchAndParsePrices(
+      "https://www.goldrate24.com/gold-prices/middle-east/egypt/ounce/",
+      "ounce"
+    );
+    Object.assign(goldPrices, ouncePrices);
+    
+    // Extract the last updated time
+    const lastUpdated = new Date().toISOString();
     
     console.log('Extracted gold prices:', goldPrices);
 
     // Prepare data with only defined fields
     const goldMarketData: Record<string, unknown> = {
       lastUpdated,
-      source: url,
+      source: 'goldrate24.com',
     };
     
     // Only add defined values to the document
     const priceFields = [
+      // Gram prices
       'pricePerGramK24', 'pricePerGramK21', 'pricePerGramK22', 'pricePerGramK18',
       'pricePerGramK14', 'pricePerGramK12', 'pricePerGramK10', 'pricePerGramK9',
-      'pricePerGramK8', 'pricePerGoldPound'
+      'pricePerGramK8', 'pricePerGoldPound',
+      
+      // Ounce prices
+      'pricePerOunceK24', 'pricePerOunceK21', 'pricePerOunceK22', 'pricePerOunceK18',
+      'pricePerOunceK14', 'pricePerOunceK12', 'pricePerOunceK10', 'pricePerOunceK9',
+      'pricePerOunceK8'
     ] as const;
     
     priceFields.forEach((field) => {

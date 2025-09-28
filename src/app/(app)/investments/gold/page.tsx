@@ -93,7 +93,7 @@ export default function MyGoldPage() {
         else if (goldType === "Pound")
           currentMarketPrice = goldMarketPrices.pricePerGoldPound;
         else if (goldType === "Ounce")
-          currentMarketPrice = goldMarketPrices.pricePerOunce;
+          currentMarketPrice = goldMarketPrices.pricePerOunceK24;
       }
 
       holdings.push({
