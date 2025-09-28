@@ -46,12 +46,14 @@ export const useGoldMarketPrices = () => {
           setGoldMarketPrices({}); // Set to empty object or specific default
         }
         setIsLoading(false);
+        setIsRefreshing(false);
       },
       (err) => {
         console.error("Error fetching gold market prices:", err);
         setError(err);
         setGoldMarketPrices(null);
         setIsLoading(false);
+        setIsRefreshing(false);
       },
     );
 
@@ -65,22 +67,28 @@ export const useGoldMarketPrices = () => {
     };
   }, [fetchRates]);
 
-  const refreshRates = useCallback(() => {
-    if (isLoading || isRefreshing) return;
-    
-    setIsRefreshing(true);
-    const unsubscribe = fetchRates();
-    
-    // Simulate minimum loading time for better UX
-    const timer = setTimeout(() => {
+  const refreshRates = useCallback(async () => {
+    try {
+      if (isLoading || isRefreshing) return;
+      
+      setIsRefreshing(true);
+      setError(null);
+      
+      const response = await fetch("/api/scrape-gold-prices");
+      if (!response.ok) {
+        throw new Error("Failed to refresh gold prices");
+      }
+      // The rates will be updated automatically via the Firestore listener
+    } catch (err) {
+      console.error("Error refreshing gold prices:", err);
+      setError(
+        err instanceof Error
+          ? err
+          : new Error("Failed to refresh gold prices"),
+      );
       setIsRefreshing(false);
-    }, 500);
-    
-    return () => {
-      clearTimeout(timer);
-      if (unsubscribe) unsubscribe();
-    };
-  }, [fetchRates, isLoading, isRefreshing]);
+    }
+  }, [isLoading, isRefreshing]);
 
   return { goldMarketPrices, isLoading: isLoading || isRefreshing, isRefreshing, error, refreshRates };
 };
