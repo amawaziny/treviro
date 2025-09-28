@@ -151,11 +151,11 @@ export function GoldRatesDialog() {
       <SheetContent 
         side={sheetSide} 
         className={cn(
-          "w-full sm:max-w-md",
+          "flex flex-col w-full sm:max-w-md p-0",
           isMobile && "rounded-t-xl"
         )}
       >
-        <SheetHeader className="mb-4">
+        <SheetHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
               <Gem className="h-5 w-5 text-yellow-500" />
@@ -173,19 +173,19 @@ export function GoldRatesDialog() {
           </div>
           
           {/* Search Bar */}
-          <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative px-6 pt-4 pb-2">
+            <Search className="absolute left-9 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder={t("search_gold_rates")}
-              className="w-full pl-9"
+              className="w-full pl-10"
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             />
           </div>
         </SheetHeader>
         
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto -mx-1 px-6 py-2">
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 19 }).map((_, i) => (
@@ -215,7 +215,7 @@ export function GoldRatesDialog() {
               ))}
             </div>
           )}
-          <p className="text-xs text-muted-foreground text-center pt-2">
+          <p className="text-xs text-muted-foreground text-center py-4">
             {t("prices_updated_periodically")}
           </p>
         </div>
