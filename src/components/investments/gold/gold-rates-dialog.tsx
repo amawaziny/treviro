@@ -142,22 +142,22 @@ export function GoldRatesDialog() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+      <SheetTrigger dir={dir} asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Gem className="h-4 w-4" />
           <span>{t("view_gold_rates")}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent 
+      <SheetContent dir={dir}
         side={sheetSide} 
         className={cn(
           "flex flex-col w-full sm:max-w-md p-0",
           isMobile && "rounded-t-xl"
         )}
       >
-        <SheetHeader className="p-6 pb-0">
+        <SheetHeader dir={dir} className="flex-shrink-0 p-6 pb-3 border-b">
           <div className="flex items-center justify-between">
-            <SheetTitle className="flex items-center gap-2">
+            <SheetTitle dir={dir} className="flex items-center gap-2">
               <Gem className="h-5 w-5 text-yellow-500" />
               {t("gold_market_rates")}
             </SheetTitle>
@@ -171,9 +171,10 @@ export function GoldRatesDialog() {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
+        </SheetHeader>
           
           {/* Search Bar */}
-          <div className="relative px-6 pt-4 pb-2">
+          <div className="relative px-6 pt-4 pb-2 border-b">
             <Search className="absolute left-9 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
@@ -183,7 +184,6 @@ export function GoldRatesDialog() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             />
           </div>
-        </SheetHeader>
         
         <div className="flex-1 overflow-y-auto -mx-1 px-6 py-2">
           {isLoading ? (
