@@ -22,9 +22,15 @@ export function GoldRatesDialog() {
   const [open, setOpen] = React.useState(false);
 
   const rates = [
+    // Gram prices
     { 
       name: t("24_karat_gram"), 
       value: goldMarketPrices?.pricePerGramK24, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("22_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK22, 
       currency: "EGP" 
     },
     { 
@@ -33,13 +39,84 @@ export function GoldRatesDialog() {
       currency: "EGP" 
     },
     { 
+      name: t("18_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK18, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("14_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK14, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("12_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK12, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("10_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK10, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("9_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK9, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("8_karat_gram"), 
+      value: goldMarketPrices?.pricePerGramK8, 
+      currency: "EGP" 
+    },
+    { 
       name: t("gold_pound"), 
       value: goldMarketPrices?.pricePerGoldPound, 
       currency: "EGP" 
     },
+    // Ounce prices
     { 
       name: t("24_karat_ounce"), 
       value: goldMarketPrices?.pricePerOunceK24, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("22_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK22, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("21_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK21, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("18_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK18, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("14_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK14, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("12_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK12, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("10_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK10, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("9_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK9, 
+      currency: "EGP" 
+    },
+    { 
+      name: t("8_karat_ounce"), 
+      value: goldMarketPrices?.pricePerOunceK8, 
       currency: "EGP" 
     },
   ].filter(rate => rate.value !== undefined);
@@ -83,7 +160,7 @@ export function GoldRatesDialog() {
         <div className="space-y-4">
           {isLoading ? (
             <div className="space-y-2">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map((i) => (
                 <Skeleton key={i} className="h-14 w-full rounded-lg" />
               ))}
             </div>
