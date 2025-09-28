@@ -39,6 +39,7 @@ import {
 } from "@/lib/types";
 import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Separator } from "@/components/ui/separator";
 
 export default function CashFlowPage() {
   const { t, language } = useLanguage();
@@ -183,6 +184,9 @@ export default function CashFlowPage() {
           </p>
         </div>
       </div>
+      
+      <Separator />
+
       <CashFlowSummaryCards cashFlowSummary={cashFlowSummary} />
 
       {/* Details Section: 3 Columns */}
@@ -200,7 +204,7 @@ export default function CashFlowPage() {
             {cashFlowSummary.monthlySalary > 0 && (
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <Briefcase className="h-4 w-4 text-amber-500" />
+                  <Briefcase className="me-2 h-4 w-4 text-amber-500" />
                   <span className="text-sm font-medium">
                     {t("monthly_salary_fixed")}
                   </span>
@@ -308,7 +312,7 @@ export default function CashFlowPage() {
                 </span>
               </div>
             )}
-            <hr className="my-2" />
+            <Separator className="my-2" />
             <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_projected_income")}</span>
               <span>{formatNumberForMobile(isMobile, totalIncome)}</span>
@@ -379,7 +383,7 @@ export default function CashFlowPage() {
               </div>
             )}
 
-            <hr className="my-2" />
+            <Separator className="my-2" />
             <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_projected_expenses")}</span>
               <span>{formatNumberForMobile(isMobile, totalExpensesOnly)}</span>
@@ -600,7 +604,7 @@ export default function CashFlowPage() {
               </div>
             )}
 
-            <hr className="my-2" />
+            <Separator className="my-2" />
             <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_investments")}</span>
               <span>

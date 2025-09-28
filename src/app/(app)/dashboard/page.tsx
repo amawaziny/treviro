@@ -121,7 +121,7 @@ export default function DashboardPage() {
             else if (goldInv.goldType === "Pound")
               pricePerUnit = goldMarketPrices.pricePerGoldPound;
             else if (goldInv.goldType === "Ounce")
-              pricePerUnit = goldMarketPrices.pricePerOunce;
+              pricePerUnit = goldMarketPrices.pricePerOunceK24;
             if (pricePerUnit)
               currentVal = pricePerUnit * goldInv.quantityInGrams;
           }
