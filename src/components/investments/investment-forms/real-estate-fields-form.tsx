@@ -114,10 +114,10 @@ const RenderRealEstateFieldsComponent: React.FC<
 
           <FormField
             control={control}
-            name="propertyType"
+            name="propertyUsage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("property_type")}</FormLabel>
+                <FormLabel>{t("property_usage")}</FormLabel>
                 <Select
                   dir={dir}
                   onValueChange={field.onChange}
@@ -125,7 +125,7 @@ const RenderRealEstateFieldsComponent: React.FC<
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("Select property type")} />
+                      <SelectValue placeholder={t("Select property usage")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
