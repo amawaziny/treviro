@@ -750,5 +750,6 @@
   "has_garden": "Has Garden",
   "built_up_area": "Built-up Area",
   "built_up_area_desc": "The total built-up area of the property in square meters",
-  "Enter built-up area": "Enter built-up area"
+  "Enter built-up area": "Enter built-up area",
+  "price_per_sqm": "Price per sqm"
 }

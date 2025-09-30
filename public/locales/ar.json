@@ -787,5 +787,6 @@
   "has_garden": "يوجد حديقة",
   "built_up_area": "مساحة المبنى",
   "Enter built-up area": "أدخل مساحة المبنى",
-  "built_up_area_desc": "مساحة المبنى"
+  "built_up_area_desc": "مساحة المبنى",
+  "price_per_sqm": "سعر المتر المربع"
 }

@@ -242,6 +242,19 @@ export default function RealEstateDetailPage() {
                   )
                 : t("na")}
             </div>
+            {investment.builtUpArea && investment.totalInstallmentPrice && (
+              <>
+                <div className="font-medium text-muted-foreground">
+                  {t("price_per_sqm")}
+                </div>
+                <div>
+                  {formatNumberForMobile(
+                    isMobile,
+                    investment.totalInstallmentPrice / investment.builtUpArea,
+                  )}
+                </div>
+              </>
+            )}
             <div className="font-medium text-muted-foreground">
               {t("installment_end_date")}
             </div>
