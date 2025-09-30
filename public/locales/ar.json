@@ -783,5 +783,9 @@
   "search_gold_rates": "بحث أسعار الذهب",
   "prices_updated_periodically": "أسعار الذهب تحدث بشكل دوري",
   "select_property_usage": "اختر نوع الاستخدام",
-  "property_usage": "إستخدام الوحدة"
+  "property_usage": "إستخدام الوحدة",
+  "has_garden": "يوجد حديقة",
+  "built_up_area": "مساحة المبنى",
+  "Enter built-up area": "أدخل مساحة المبنى",
+  "built_up_area_desc": "مساحة المبنى"
 }

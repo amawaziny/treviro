@@ -746,5 +746,9 @@
   "search_gold_rates": "Search Gold Rates",
   "prices_updated_periodically": "Prices updated periodically",
   "property_usage": "Property Usage",
-  "select_property_usage": "Select property usage"
+  "select_property_usage": "Select property usage",
+  "has_garden": "Has Garden",
+  "built_up_area": "Built-up Area",
+  "built_up_area_desc": "The total built-up area of the property in square meters",
+  "Enter built-up area": "Enter built-up area"
 }

@@ -16,6 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { propertyTypes } from "@/lib/schemas";
 import { useLanguage } from "@/contexts/language-context";
 import { getCurrentDate } from "@/lib/utils";
@@ -137,6 +141,49 @@ const RenderRealEstateFieldsComponent: React.FC<
                   </SelectContent>
                 </Select>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+<FormField
+            control={control}
+            name="builtUpArea"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("built_up_area")} (m²)</FormLabel>
+                <FormControl>
+                  <NumericInput
+                    placeholder={t("Enter built-up area")}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    allowDecimal={true}
+                    min={0}
+                  />
+                </FormControl>
+                <FormDescription>
+                  {t(
+                    "built_up_area_desc",
+                  )}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="hasGarden"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value || false}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>{t("has_garden")}</FormLabel>
+                </div>
               </FormItem>
             )}
           />

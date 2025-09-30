@@ -91,6 +91,8 @@ export interface RealEstateInvestment extends BaseInvestment {
   maintenanceAmount?: number; // NEW FIELD
   maintenancePaymentDate?: string; // NEW FIELD
   installments?: Array<Installment>;
+  builtUpArea?: number; // Area in square meters
+  hasGarden?: boolean; // Whether the property has a garden
 }
 
 export type DebtSubType = "Certificate" | "Treasury Bill" | "Bond" | "Other";
