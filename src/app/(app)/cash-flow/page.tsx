@@ -184,7 +184,7 @@ export default function CashFlowPage() {
           </p>
         </div>
       </div>
-      
+
       <Separator />
 
       <CashFlowSummaryCards cashFlowSummary={cashFlowSummary} />

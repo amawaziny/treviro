@@ -243,7 +243,8 @@ export function InvestmentBreakdownCards({
                 >
                   {t(type)}
                 </span>
-                <Badge dir="auto"
+                <Badge
+                  dir="auto"
                   className={`text-xs px-2 py-1 ${plAmount >= 0 ? "bg-green-600" : "bg-red-600"} text-white`}
                 >
                   {plAmount >= 0 ? (
@@ -283,7 +284,10 @@ export function InvestmentBreakdownCards({
                   <div className="text-xs opacity-80 text-[#23255a] dark:text-white font-medium">
                     {t("to_invest")}
                   </div>
-                  <div dir="auto" className="font-bold text-md text-green-600 dark:text-green-400 truncate flex items-center">
+                  <div
+                    dir="auto"
+                    className="font-bold text-md text-green-600 dark:text-green-400 truncate flex items-center"
+                  >
                     {formatNumberForMobile(
                       isMobile,
                       Math.max(
@@ -294,7 +298,8 @@ export function InvestmentBreakdownCards({
                           ] || 0)) /
                           100 -
                           invested,
-                      ),"always"
+                      ),
+                      "always",
                     )}
                   </div>
                 </div>

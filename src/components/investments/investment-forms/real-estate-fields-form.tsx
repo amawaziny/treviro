@@ -145,7 +145,7 @@ const RenderRealEstateFieldsComponent: React.FC<
             )}
           />
 
-<FormField
+          <FormField
             control={control}
             name="builtUpArea"
             render={({ field }) => (
@@ -160,11 +160,7 @@ const RenderRealEstateFieldsComponent: React.FC<
                     min={0}
                   />
                 </FormControl>
-                <FormDescription>
-                  {t(
-                    "built_up_area_desc",
-                  )}
-                </FormDescription>
+                <FormDescription>{t("built_up_area_desc")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
