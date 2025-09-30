@@ -65,12 +65,13 @@ export function isDebtRelatedFund(fundType?: string | null): boolean {
 export function formatNumberForMobile(
   isMobile: boolean = false,
   num: number | undefined,
+  signDisplay: "negative" | "always" = "negative",
   currency: string = "EGP",
 ) {
   if (isMobile) {
-    return formatCurrencyWithCommas(num, currency);
+    return formatCurrencyWithCommas(num, currency, signDisplay);
   }
-  return formatCurrencyWithCommas(num, currency);
+  return formatCurrencyWithCommas(num, currency, signDisplay);
 }
 export function formatNumberWithSuffix(
   num: number | undefined,
@@ -165,6 +166,7 @@ export function isInCurrentMonth(date: Date | string): boolean {
 export function formatCurrencyWithCommas(
   value: number | string | undefined,
   currency: string = "EGP",
+  signDisplay: "negative" | "always" = "negative",
   digitsOverride?: number,
 ): string {
   if (value === undefined || value === null || Number.isNaN(value))
@@ -176,6 +178,7 @@ export function formatCurrencyWithCommas(
     currency: currency,
     minimumFractionDigits: digitsOverride ?? 0,
     maximumFractionDigits: digitsOverride ?? 3,
+    signDisplay: signDisplay,
   }).format(num);
 }
 
