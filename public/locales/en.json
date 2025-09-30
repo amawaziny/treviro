@@ -744,5 +744,7 @@
   "view_gold_rates": "View Gold Rates",
   "gold_market_rates": "Gold Market Rates",
   "search_gold_rates": "Search Gold Rates",
-  "prices_updated_periodically": "Prices updated periodically"
+  "prices_updated_periodically": "Prices updated periodically",
+  "property_usage": "Property Usage",
+  "select_property_usage": "Select property usage"
 }

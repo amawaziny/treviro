@@ -125,7 +125,7 @@ const RenderRealEstateFieldsComponent: React.FC<
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("Select property usage")} />
+                      <SelectValue placeholder={t("select_property_usage")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
