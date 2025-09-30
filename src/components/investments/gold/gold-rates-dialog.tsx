@@ -215,7 +215,7 @@ export function GoldRatesDialog() {
                     <p className="text-sm font-medium">{rate.name}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-mono font-medium">
+                    <p className="font-medium">
                       {rate.value?.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                       }) || "N/A"}{" "}
