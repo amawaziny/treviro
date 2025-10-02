@@ -7,9 +7,7 @@ import { Home, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
-import {
-  formatNumberForMobile,
-} from "@/lib/utils";
+import { formatNumberForMobile } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,

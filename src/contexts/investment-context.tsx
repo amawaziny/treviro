@@ -7,8 +7,6 @@ import type {
   SecurityInvestment,
   Transaction,
   DashboardSummary,
-  GoldInvestment,
-  GoldType,
   DebtInstrumentInvestment,
   IncomeRecord,
   ExpenseRecord,
@@ -60,7 +58,6 @@ export interface InvestmentContextType {
     fees: number,
   ) => Promise<void>;
   transactions: Transaction[];
-  removeStockInvestmentsBySymbol: (tickerSymbol: string) => Promise<void>;
   updateStockInvestment: (
     investmentId: string,
     dataToUpdate: Pick<
@@ -73,10 +70,6 @@ export interface InvestmentContextType {
     oldAmountInvested: number,
   ) => Promise<void>;
   deleteSellTransaction: (transaction: Transaction) => Promise<void>;
-  removeGoldInvestments: (
-    identifier: string,
-    itemType: "physical" | "fund",
-  ) => Promise<void>;
   removeDirectDebtInvestment: (investmentId: string) => Promise<void>;
   removeRealEstateInvestment: (investmentId: string) => Promise<void>;
   dashboardSummary: DashboardSummary | null;
@@ -994,90 +987,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance],
   );
 
-  const removeStockInvestmentsBySymbol = useCallback(
-    async (tickerSymbol: string) => {
-      if (!firestoreInstance || !isAuthenticated || !userId) {
-        throw new Error("User not authenticated or Firestore not available.");
-      }
-      const q = query(
-        collection(firestoreInstance, `users/${userId}/investments`),
-        where("type", "==", "Stocks"),
-        where("tickerSymbol", "==", tickerSymbol),
-      );
-      const querySnapshot = await getDocs(q);
-      const batch = writeBatch(firestoreInstance);
-      let totalAmountInvestedRemoved = 0;
-      querySnapshot.forEach((docSnapshot) => {
-        const investmentData = docSnapshot.data() as SecurityInvestment;
-        totalAmountInvestedRemoved += investmentData.amountInvested || 0;
-        batch.delete(docSnapshot.ref);
-      });
-      await batch.commit();
-
-      const summaryUpdates: Partial<DashboardSummary> = {};
-      if (
-        !isNaN(totalAmountInvestedRemoved) &&
-        totalAmountInvestedRemoved !== 0
-      ) {
-        summaryUpdates.totalInvestedAcrossAllAssets =
-          -totalAmountInvestedRemoved;
-        summaryUpdates.totalCashBalance = totalAmountInvestedRemoved; // Cash increases as investment is "returned"
-      }
-      if (Object.keys(summaryUpdates).length > 0)
-        await updateDashboardSummaryDoc(summaryUpdates);
-    },
-    [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance],
-  );
-
-  const removeGoldInvestments = useCallback(
-    async (identifier: string, itemType: "physical" | "fund") => {
-      if (!firestoreInstance || !isAuthenticated || !userId) {
-        throw new Error("User not authenticated or Firestore not available.");
-      }
-      let totalAmountInvestedRemoved = 0;
-      const investmentsCollectionPath = `users/${userId}/investments`;
-      const batch = writeBatch(firestoreInstance);
-      let q;
-
-      if (itemType === "physical") {
-        const goldType = identifier as GoldType;
-        q = query(
-          collection(firestoreInstance, investmentsCollectionPath),
-          where("type", "==", "Gold"),
-          where("goldType", "==", goldType),
-        );
-      } else {
-        // itemType === 'fund'
-        q = query(
-          collection(firestoreInstance, investmentsCollectionPath),
-          where("type", "==", "Stocks"),
-          where("tickerSymbol", "==", identifier),
-        );
-      }
-
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((docSnapshot) => {
-        totalAmountInvestedRemoved +=
-          (docSnapshot.data() as Investment).amountInvested || 0;
-        batch.delete(docSnapshot.ref);
-      });
-      await batch.commit();
-
-      const summaryUpdates: Partial<DashboardSummary> = {};
-      if (
-        !isNaN(totalAmountInvestedRemoved) &&
-        totalAmountInvestedRemoved !== 0
-      ) {
-        summaryUpdates.totalInvestedAcrossAllAssets =
-          -totalAmountInvestedRemoved;
-        summaryUpdates.totalCashBalance = totalAmountInvestedRemoved;
-      }
-      if (Object.keys(summaryUpdates).length > 0)
-        await updateDashboardSummaryDoc(summaryUpdates);
-    },
-    [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance],
-  );
-
   const removeDirectDebtInvestment = useCallback(
     async (investmentId: string) => {
       if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -1457,10 +1366,8 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         recordSellStockTransaction,
         transactions,
-        removeStockInvestmentsBySymbol,
         updateStockInvestment: correctedUpdateStockInvestment,
         deleteSellTransaction,
-        removeGoldInvestments,
         removeDirectDebtInvestment,
         removeRealEstateInvestment,
         updateRealEstateInvestment,

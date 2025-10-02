@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
 const OfflineIndicator = dynamic(
-  () => import('@/components/common/OfflineIndicator'),
-  { ssr: false }
+  () => import("@/components/common/OfflineIndicator"),
+  { ssr: false },
 );
 
 export default function OfflineIndicatorWrapper() {

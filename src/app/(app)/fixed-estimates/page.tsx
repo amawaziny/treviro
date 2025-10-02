@@ -15,10 +15,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
-import {
-  cn,
-  formatNumberForMobile,
-} from "@/lib/utils";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 import {
   AlertDialog,

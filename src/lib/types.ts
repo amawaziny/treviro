@@ -276,7 +276,7 @@ export type AggregatedGoldHolding = {
   averagePurchasePrice: number;
   totalCost: number;
   currentMarketPrice?: number;
-  currency: string;
+  currency: CurrencyCode;
   fundDetails?: ListedSecurity;
   // fundInvestment?: SecurityInvestment;
   physicalGoldType?: GoldType;
