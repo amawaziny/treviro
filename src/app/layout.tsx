@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -10,6 +9,14 @@ import { FirebaseIntegrations } from "@/components/layout/firebase-integrations"
 import { LanguageProvider } from "@/contexts/language-context";
 import { LanguageInitializer } from "@/components/layout/language-initializer";
 import PageViewTrackerWrapper from "@/components/analytics/PageViewTrackerWrapper";
+import OfflineIndicatorWrapper from "@/components/common/OfflineIndicatorWrapper";
+
+// Define metadata type to avoid TypeScript errors
+type Metadata = {
+  title: string;
+  description: string;
+  manifest?: string;
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +32,8 @@ const geistMono = Geist_Mono({
 
 // Tajawal font is loaded via CSS @import
 
-export const metadata: Metadata = {
+// Metadata for the application
+export const metadata = {
   title: "Treviro",
   description: "Modern Investment Portfolio Tracker",
   manifest: "/manifest.json", // Link to the manifest file

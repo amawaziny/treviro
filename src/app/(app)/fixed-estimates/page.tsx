@@ -17,9 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
 import {
   cn,
-  formatCurrencyWithCommas,
   formatNumberForMobile,
-  formatNumberWithSuffix,
 } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 import {

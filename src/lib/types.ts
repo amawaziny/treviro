@@ -1,3 +1,5 @@
+export type CurrencyCode = "EGP" | "USD";
+
 export type InvestmentType =
   | "Real Estate"
   | "Gold"
@@ -170,7 +172,7 @@ export interface ListedSecurity {
   symbol: string;
   logoUrl: string;
   price: number;
-  currency: string;
+  currency: CurrencyCode;
   changePercent: number;
   market: string;
   securityType?: "Stock" | "Fund";

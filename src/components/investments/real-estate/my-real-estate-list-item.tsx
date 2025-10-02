@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
 import {
-  formatCurrencyWithCommas,
   formatNumberForMobile,
-  formatNumberWithSuffix,
 } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {

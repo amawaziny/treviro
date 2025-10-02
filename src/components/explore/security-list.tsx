@@ -26,7 +26,7 @@ export function SecurityList({
   title,
   currentTab,
 }: SecurityListProps) {
-  const { t: t } = useLanguage();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const { listedSecurities, isLoading, error } = useListedSecurities();
   const isOffline = useOnlineStatus();
@@ -35,10 +35,8 @@ export function SecurityList({
   );
   const [usingCache, setUsingCache] = useState(false);
 
-  // Cache securities when online and loaded
   useEffect(() => {
     if (!isOffline && listedSecurities.length > 0) {
-      // Map ListedSecurity to OfflineSecurity (type: 'stock' | 'fund')
       cacheSecurities(
         listedSecurities.map((sec) => ({
           id: sec.id,
@@ -64,20 +62,36 @@ export function SecurityList({
       getCachedSecurities(
         filterType ? (filterType === "Fund" ? "fund" : "stock") : undefined,
       ).then((secs) => {
-        // Convert OfflineSecurity[] to ListedSecurity[]
         setCachedSecurities(
           secs.map((sec) => ({
             id: sec.id,
             name: sec.name,
-            name_ar: sec.name_ar,
+            name_ar: sec.name_ar || '',
             symbol: sec.symbol,
-            logoUrl: sec.logoUrl,
-            price: sec.price,
-            currency: sec.currency,
-            changePercent: sec.changePercent,
-            market: sec.market,
-            securityType: sec.securityType,
+            logoUrl: sec.logoUrl || '',
+            price: sec.price || 0,
+            currency: sec.currency || 'EGP',
+            changePercent: sec.changePercent || 0,
+            market: sec.market || '',
+            securityType: sec.securityType || 'Stock',
             fundType: sec.fundType,
+            isin: sec.isin || '',
+            sector: sec.sector || '',
+            sectorAr: sec.sectorAr || '',
+            lastUpdated: new Date().toISOString(),
+            listingDate: new Date().toISOString(),
+            securityTypeAr: sec.securityTypeAr || '',
+            listedShares: sec.listedShares || 0,
+            tradedVolume: sec.tradedVolume || 0,
+            tradedValue: sec.tradedValue || 0,
+            priceEarningRatio: sec.priceEarningRatio || 0,
+            dividendYield: sec.dividendYield || 0,
+            cashDividends: '0',
+            marketCap: sec.marketCap || 0,
+            parValue: sec.parValue || 0,
+            currencyAr: sec.currencyAr || '',
+            couponPaymentDate: new Date().toISOString(),
+            couponNo: sec.couponNo || 0
           })),
         );
         setUsingCache(true);

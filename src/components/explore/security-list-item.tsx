@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { ListedSecurity } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { cn, formatCurrencyWithCommas } from "@/lib/utils";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 import React from "react";
 import Link from "next/link";
 import { FundTypeIcon } from "@/components/ui/fund-type-icon";
@@ -20,12 +20,6 @@ export const SecurityListItem = React.memo(function SecurityListItem({
   security,
   currentTab,
 }: SecurityListItemProps) {
-  const formattedPrice = formatCurrencyWithCommas(
-    security.price,
-    security.currency,
-    3,
-  );
-
   const isPositiveChange = security.changePercent >= 0;
 
   const { language } = useLanguage();
@@ -34,6 +28,13 @@ export const SecurityListItem = React.memo(function SecurityListItem({
 
   const detailPageLink = `/securities/details/${security.id}?previousTab=${currentTab}`;
 
+  const formattedPrice = formatNumberForMobile(
+    isMobile,
+    security.price,
+    security.currency,
+    "negative",
+    3,
+  );
   return (
     <Link href={detailPageLink} passHref>
       <Card

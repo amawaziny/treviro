@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale/ar";
 import { enUS } from "date-fns/locale/en-US";
-import { InvestmentType } from "./types";
+import { CurrencyCode, InvestmentType } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -65,17 +65,18 @@ export function isDebtRelatedFund(fundType?: string | null): boolean {
 export function formatNumberForMobile(
   isMobile: boolean = false,
   num: number | undefined,
+  currency: CurrencyCode = "EGP",
   signDisplay: "negative" | "always" = "negative",
-  currency: string = "EGP",
+  digitsOverride?: number,
 ) {
   if (isMobile) {
-    return formatCurrencyWithCommas(num, currency, signDisplay);
+    return formatCurrencyWithCommas(num, currency, signDisplay, digitsOverride);
   }
-  return formatCurrencyWithCommas(num, currency, signDisplay);
+  return formatCurrencyWithCommas(num, currency, signDisplay, digitsOverride);
 }
 export function formatNumberWithSuffix(
   num: number | undefined,
-  currency: string = "EGP",
+  currency: CurrencyCode = "EGP",
 ): string {
   if (num === undefined || num === null || isNaN(num))
     return `${currency} 0.00`;

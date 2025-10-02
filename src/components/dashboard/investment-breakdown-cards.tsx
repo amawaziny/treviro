@@ -252,7 +252,7 @@ export function InvestmentBreakdownCards({
                   ) : (
                     <TrendingDown className="inline h-4 w-4 me-1" />
                   )}
-                  {formatNumberForMobile(isMobile, plAmount, "always")}
+                  {formatNumberForMobile(isMobile, plAmount, "EGP", "always")}
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-4 items-end justify-between mt-2">
@@ -261,7 +261,7 @@ export function InvestmentBreakdownCards({
                     {t("invested")}
                   </div>
                   <div className="font-bold text-md text-[#23255a] dark:text-white truncate">
-                    {formatNumberForMobile(isMobile, invested)}
+                    {formatNumberForMobile(isMobile, invested, "EGP", "always")}
                   </div>
                 </div>
                 <div>
@@ -299,6 +299,7 @@ export function InvestmentBreakdownCards({
                           100 -
                           invested,
                       ),
+                      "EGP",
                       "always",
                     )}
                   </div>
