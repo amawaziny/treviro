@@ -877,6 +877,7 @@ export default function SecurityDetailPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               {tx.isInvestmentRecord && (
+                                <div>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -884,16 +885,13 @@ export default function SecurityDetailPage() {
                                   asChild
                                 >
                                   <Link
-                                    href={`/investments/stocks/edit/${tx.id}`}
+                                    href={`/investments/security/edit/${tx.id}`}
                                   >
                                     <Edit3 className="h-3.5 w-3.5" />
                                     <span className="sr-only">{t("Edit")}</span>
                                   </Link>
                                 </Button>
-                              )}
-                              {isSell &&
-                                !(tx as any).isInvestmentRecord &&
-                                isDesktop && (
+                             
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -909,6 +907,7 @@ export default function SecurityDetailPage() {
                                       {t("Delete")}
                                     </span>
                                   </Button>
+                                  </div>
                                 )}
                             </div>
                           </div>

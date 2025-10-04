@@ -58,17 +58,7 @@ export interface InvestmentContextType {
     fees: number,
   ) => Promise<void>;
   transactions: Transaction[];
-  updateStockInvestment: (
-    investmentId: string,
-    dataToUpdate: Pick<
-      SecurityInvestment,
-      | "numberOfShares"
-      | "purchasePricePerShare"
-      | "purchaseDate"
-      | "purchaseFees"
-    >,
-    oldAmountInvested: number,
-  ) => Promise<void>;
+  
   deleteSellTransaction: (transaction: Transaction) => Promise<void>;
   removeDirectDebtInvestment: (investmentId: string) => Promise<void>;
   removeRealEstateInvestment: (investmentId: string) => Promise<void>;
@@ -905,54 +895,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     ],
   );
 
-  const correctedUpdateStockInvestment = useCallback(
-    async (
-      investmentId: string,
-      dataToUpdate: Pick<
-        SecurityInvestment,
-        | "numberOfShares"
-        | "purchasePricePerShare"
-        | "purchaseDate"
-        | "purchaseFees"
-      >,
-      oldAmountInvested: number,
-    ) => {
-      if (!firestoreInstance || !isAuthenticated || !userId) {
-        throw new Error("User not authenticated or Firestore not available.");
-      }
-      const investmentDocRef = doc(
-        firestoreInstance,
-        `users/${userId}/investments`,
-        investmentId,
-      );
-      const newNumberOfShares = dataToUpdate.numberOfShares ?? 0;
-      const newPurchasePricePerShare = dataToUpdate.purchasePricePerShare ?? 0;
-      const newPurchaseFees = dataToUpdate.purchaseFees ?? 0;
-      const newCalculatedAmountInvested =
-        newNumberOfShares * newPurchasePricePerShare + newPurchaseFees;
-      const updatedInvestmentData = {
-        ...dataToUpdate,
-        amountInvested: newCalculatedAmountInvested,
-        updatedAt: serverTimestamp(),
-      };
-      await setDoc(investmentDocRef, updatedInvestmentData, { merge: true });
-
-      const amountInvestedDelta =
-        newCalculatedAmountInvested - oldAmountInvested;
-      const cashBalanceDelta = -amountInvestedDelta; // If investment cost increases, cash decreases
-
-      const summaryUpdates: Partial<DashboardSummary> = {};
-      if (!isNaN(amountInvestedDelta) && amountInvestedDelta !== 0)
-        summaryUpdates.totalInvestedAcrossAllAssets = amountInvestedDelta;
-      if (!isNaN(cashBalanceDelta) && cashBalanceDelta !== 0)
-        summaryUpdates.totalCashBalance = cashBalanceDelta;
-
-      if (Object.keys(summaryUpdates).length > 0)
-        await updateDashboardSummaryDoc(summaryUpdates);
-    },
-    [userId, isAuthenticated, updateDashboardSummaryDoc, firestoreInstance],
-  );
-
   const deleteSellTransaction = useCallback(
     async (transactionToDelete: Transaction) => {
       if (!firestoreInstance || !isAuthenticated || !userId) {
@@ -1366,7 +1308,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         recordSellStockTransaction,
         transactions,
-        updateStockInvestment: correctedUpdateStockInvestment,
         deleteSellTransaction,
         removeDirectDebtInvestment,
         removeRealEstateInvestment,
