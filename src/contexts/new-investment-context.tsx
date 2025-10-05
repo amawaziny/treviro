@@ -47,6 +47,11 @@ export interface InvestmentContextType {
   addInvestment: (
     investmentData: Omit<Investment, "createdAt" | "id">,
   ) => Promise<void>;
+  /**
+   * Deletes an investment by ID, updates dashboard summary accordingly.
+   * @param investmentId - The investment's ID
+   */
+  deleteInvestment: (investmentId: string) => Promise<void>;
 }
 
 export const InvestmentContext = React.createContext<InvestmentContextType | undefined>(undefined);
@@ -192,8 +197,30 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
   /**
    * Provider for the investment context. Supplies all investment actions and state.
    */
+  /**
+   * Deletes an investment by ID, updates dashboard summary accordingly.
+   * @param investmentId - The investment's ID
+   */
+  const deleteInvestment = useCallback(
+    async (investmentId: string) => {
+      if (!investmentService) throw new Error("InvestmentService not initialized or user not authenticated");
+      const investmentData = await investmentService.deleteInvestment(investmentId);
+      const totalInvested = (investmentData as any)?.totalInvested;
+      if (typeof totalInvested === "number" && totalInvested !== 0) {
+        await updateDashboardSummaryDoc({
+          totalInvestedAcrossAllAssets: -totalInvested,
+          totalCashBalance: totalInvested,
+        });
+      }
+    },
+    [investmentService, updateDashboardSummaryDoc]
+  );
+
+  /**
+   * Provider for the investment context. Supplies all investment actions and state.
+   */
   return (
-    <InvestmentContext.Provider value={{ updateIncomeRecord, addInvestment }}>
+    <InvestmentContext.Provider value={{ updateIncomeRecord, addInvestment, deleteInvestment }}>
       {children}
     </InvestmentContext.Provider>
   );

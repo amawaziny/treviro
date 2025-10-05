@@ -11,7 +11,8 @@ import {
   query, 
   where, 
   getDocs,
-  writeBatch
+  writeBatch,
+  deleteDoc
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { 
@@ -675,4 +676,18 @@ export class InvestmentService {
   }
 
   // Add more specific transaction recording methods as needed (dividends, interest, etc.)
+
+  /**
+   * Deletes an investment by ID and returns the deleted investment data if it existed.
+   * @param investmentId - The investment's ID
+   * @returns The deleted investment data, or null if not found
+   */
+  async deleteInvestment(investmentId: string): Promise<Investment | null> {
+    const investmentRef = this.getInvestmentRef(investmentId);
+    const docSnap = await getDoc(investmentRef);
+    if (!docSnap.exists()) return null;
+    const investmentData = docSnap.data() as Investment;
+    await deleteDoc(investmentRef);
+    return investmentData;
+  }
 }
