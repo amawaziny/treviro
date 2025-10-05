@@ -112,7 +112,7 @@ export class InvestmentService {
     const now = new Date().toISOString();
     
     // Create base investment with required fields
-    const baseInvestment = {
+    let baseInvestment = {
       id: investmentId,
       userId: this.userId, // Add userId to the investment
       lastUpdated: now,
@@ -127,6 +127,19 @@ export class InvestmentService {
         ...(investmentData.metadata || {})
       }
     };
+
+    // Attach installment schedule if Real Estate and schedule fields are present
+    if (investmentData.type === 'Real Estate') {
+      // Import here to avoid circular deps if any
+      const { generateInstallmentSchedule } = require("@/lib/installment-utils");
+      const installments = generateInstallmentSchedule(baseInvestment, []);
+      if (installments && installments.length > 0) {
+        baseInvestment = {
+          ...baseInvestment,
+          installments,
+        };
+      }
+    }
 
     // Type assertion to the specific investment type
     const newInvestment = baseInvestment as unknown as T;
