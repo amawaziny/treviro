@@ -51,11 +51,27 @@ export interface InvestmentContextType {
 
 export const InvestmentContext = React.createContext<InvestmentContextType | undefined>(undefined);
 
+/**
+ * InvestmentProvider context supplies investment-related actions and state to consumers.
+ * Handles adding investments, updating dashboard summary, and updating income records.
+ */
 export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
+  /**
+   * State for income records (used for local updates after Firestore writes)
+   */
   const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
+
+  /**
+   * Authenticated user info from useAuth hook
+   */
   const { user } = useAuth();
   const userId = user?.uid;
 
+  /**
+   * Updates an income record in Firestore and local state.
+   * @param incomeId - ID of the income record to update
+   * @param updatedFields - Fields to update
+   */
   const updateIncomeRecord = useCallback(
     async (incomeId: string, updatedFields: Partial<IncomeRecord>) => {
       if (!firestoreInstance || !userId) {
@@ -80,16 +96,26 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     [userId]
   );
 
-  // TODO: Wire up userId from auth
+  /**
+   * Service for all investment CRUD and business logic, scoped to current user.
+   */
   const investmentService = userId ? new InvestmentService(userId) : null;
 
-  // Utility to get dashboard summary doc ref
+  /**
+   * Utility to get a Firestore reference to the user's dashboard summary document.
+   * Used for updating portfolio aggregates after investment changes.
+   */
   const getDashboardSummaryDocRef = () => {
     if (!userId || !firestoreInstance) return null;
     return doc(firestoreInstance, `users/${userId}/dashboard_aggregates/summary`);
   };
 
-  // Migrate updateDashboardSummaryDoc
+  /**
+   * Updates the dashboard summary aggregate document in Firestore.
+   * Increments or sets fields based on the updates object.
+   * Used after investment add, update, or delete.
+   * @param updates - Partial<DashboardSummary> with fields to increment
+   */
   const updateDashboardSummaryDoc = useCallback(
     async (updates: Partial<DashboardSummary>) => {
       if (!userId || !firestoreInstance) {
@@ -135,6 +161,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     [userId, firestoreInstance]
   );
 
+  /**
+   * Adds a new investment of any supported type (stocks, gold, currencies, real estate, debt instruments).
+   * Delegates business logic and Firestore writes to InvestmentService.
+   * Updates the dashboard summary after successful creation.
+   * @param investmentData - Investment data (without id/createdAt)
+   */
   const addInvestment = useCallback(
     async (investmentData: Omit<Investment, "createdAt" | "id">) => {
       if (!investmentService)
@@ -157,6 +189,9 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
     [investmentService, updateDashboardSummaryDoc]
   );
 
+  /**
+   * Provider for the investment context. Supplies all investment actions and state.
+   */
   return (
     <InvestmentContext.Provider value={{ updateIncomeRecord, addInvestment }}>
       {children}
