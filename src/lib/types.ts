@@ -5,7 +5,8 @@ export type InvestmentType =
   | "Gold"
   | "Stocks"
   | "Debt Instruments"
-  | "Currencies";
+  | "Currencies"
+  | "Securities";
 export type IncomeType =
   | "Profit Share"
   | "Bonus"
