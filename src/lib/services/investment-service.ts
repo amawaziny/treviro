@@ -283,16 +283,16 @@ export class InvestmentService {
    */
   private calculateInvestmentUpdate(
     current: { totalShares: number; totalInvested: number; averagePurchasePrice: number },
-    transaction: Pick<Transaction, 'type' | 'quantity' | 'amount' | 'pricePerUnit' | 'fees'>
+    transaction: Pick<Transaction, 'type' | 'quantity' | 'amount' | 'pricePerUnit' | 'fees' | 'investmentType' | 'installmentNumber'>
   ): TransactionUpdate {
-    const { type, quantity, amount } = transaction;
+    const { type, quantity = 0, amount = 0, pricePerUnit = 0, fees = 0, investmentType } = transaction;
     let { totalShares, totalInvested, averagePurchasePrice } = current;
 
     switch (type) {
       case 'BUY':
         totalShares += quantity;
         totalInvested += amount;
-        averagePurchasePrice = totalInvested / totalShares;
+        averagePurchasePrice = totalShares > 0 ? totalInvested / totalShares : 0;
         break;
 
       case 'SELL':
@@ -300,12 +300,24 @@ export class InvestmentService {
           throw new Error('Not enough shares to sell');
         }
         totalShares -= quantity;
-        // Cost basis remains the same, we just reduce the quantity
+        // For real estate, we don't reduce totalInvested when selling
+        if (investmentType !== 'Real Estate') {
+          totalInvested -= (current.averagePurchasePrice * quantity);
+        }
+        break;
+
+      case 'PAYMENT':
+        if (investmentType === 'Real Estate' && transaction.installmentNumber !== undefined) {
+          // For real estate installments, we don't modify shares or average price
+          // Just update the total invested amount
+          totalInvested += Math.abs(amount);
+        } else {
+          totalInvested += amount;
+        }
         break;
 
       case 'DIVIDEND':
-      case 'PAYMENT':
-        // These don't affect the cost basis or share count
+        // Dividends don't affect the cost basis or share count
         break;
     }
 
@@ -321,14 +333,18 @@ export class InvestmentService {
    * This is the main method for recording any type of transaction.
    * 
    * @param transactionData - The transaction data (excluding auto-generated fields)
+   * @param transactionData.investmentType - The type of investment (e.g., 'Stocks', 'Real Estate')
+   * @param transactionData.installmentNumber - For installment payments, the number of the installment being paid
    * @returns The created transaction with all fields populated
    * 
    * @throws {Error} If the investment is not found or there are insufficient shares to sell
    * 
    * @example
+   * // Example of a stock purchase
    * await investmentService.recordTransaction({
    *   investmentId: 'inv-123',
    *   securityId: 'stock-aapl',
+   *   investmentType: 'Stocks',
    *   type: 'BUY',
    *   date: '2025-10-05',
    *   amount: 1000,
@@ -338,17 +354,30 @@ export class InvestmentService {
    *   currency: 'EGP',
    *   metadata: { note: 'Initial purchase' }
    * });
+   * 
+   * @example
+   * // Example of a real estate installment payment
+   * await investmentService.recordTransaction({
+   *   investmentId: 'real-estate-123',
+   *   investmentType: 'Real Estate',
+   *   type: 'PAYMENT',
+   *   installmentNumber: 1,
+   *   date: '2025-10-05',
+   *   amount: 5000,
+   *   description: 'Monthly installment payment',
+   *   currency: 'EGP'
+   * });
    */
   private async recordTransaction(transactionData: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>): Promise<Transaction> {
     // Ensure required fields are present
     if (!transactionData.investmentId) {
       throw new Error('investmentId is required');
     }
-    if (!transactionData.securityId) {
-      throw new Error('securityId is required');
+    if (!transactionData.securityId && transactionData.type !== 'PAYMENT') {
+      throw new Error('securityId is required for non-payment transactions');
     }
-    if (transactionData.quantity === undefined || transactionData.quantity === null) {
-      throw new Error('quantity is required');
+    if ((transactionData.quantity === undefined || transactionData.quantity === null) && transactionData.type !== 'PAYMENT') {
+      throw new Error('quantity is required for non-payment transactions');
     }
     if (transactionData.amount === undefined || transactionData.amount === null) {
       throw new Error('amount is required');
@@ -367,18 +396,16 @@ export class InvestmentService {
         id: transactionId,
         userId: this.userId,
         createdAt: now,
-        // Ensure metadata exists and has the correct shape
         metadata: {
           ...(transactionData.metadata || {})
         },
-        // Ensure all required fields have default values if not provided
         pricePerUnit: transactionData.pricePerUnit || 0,
         fees: transactionData.fees || 0,
         currency: transactionData.currency || 'EGP' as CurrencyCode,
-        description: transactionData.description || ''
+        description: transactionData.description || '',
+        quantity: transactionData.quantity || 0,
       };
 
-      // Handle all other transaction types (single investment)
       const investmentRef = this.getInvestmentRef(transactionData.investmentId);
       const investmentDoc = await transaction.get(investmentRef);
       
@@ -393,19 +420,46 @@ export class InvestmentService {
         averagePurchasePrice: investment.averagePurchasePrice
       }, {
         type: transactionData.type,
-        quantity: transactionData.quantity,
+        quantity: transactionData.quantity || 0,
         amount: transactionData.amount,
         pricePerUnit: transactionData.pricePerUnit || 0,
-        fees: transactionData.fees || 0
+        fees: transactionData.fees || 0,
+        investmentType: transactionData.investmentType,
+        installmentNumber: transactionData.installmentNumber
       });
 
-      // Update the investment
-      transaction.update(investmentRef, {
+      // Prepare update data
+      const updateData: any = {
         totalShares: update.totalShares,
         totalInvested: update.totalInvested,
         averagePurchasePrice: update.averagePurchasePrice,
         lastUpdated: now,
-      });
+      };
+
+      // If this is a payment for a real estate installment, mark it as paid
+      if (transactionData.type === 'PAYMENT' && 
+          transactionData.investmentType === 'Real Estate' && 
+          transactionData.installmentNumber !== undefined) {
+        
+        const realEstateInvestment = investment as RealEstateInvestment;
+        if (realEstateInvestment.installments) {
+          const updatedInstallments = realEstateInvestment.installments.map(installment => {
+            if (installment.number === transactionData.installmentNumber) {
+              return {
+                ...installment,
+                status: 'Paid',
+                paymentDate: now
+              };
+            }
+            return installment;
+          });
+
+          updateData.installments = updatedInstallments;
+        }
+      }
+
+      // Update the investment
+      transaction.update(investmentRef, updateData);
 
       // Add the transaction
       transaction.set(this.getTransactionRef(transactionId), newTransaction);
