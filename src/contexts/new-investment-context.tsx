@@ -4,14 +4,12 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
 import { AppSettingsService } from "@/lib/services/app-settings-service";
+import { FinancialRecordsService, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/services/financial-records-service";
 import type { 
   Investment, 
   Transaction, 
   DashboardSummary, 
   AppSettings,
-  IncomeRecord,
-  ExpenseRecord,
-  FixedEstimateRecord
 } from "@/lib/types";
 
 export interface InvestmentContextType {
@@ -47,19 +45,19 @@ export interface InvestmentContextType {
   
   // Income & Expenses
   incomeRecords: IncomeRecord[];
-  addIncomeRecord: (data: Omit<IncomeRecord, "id" | "createdAt">) => Promise<void>;
-  updateIncomeRecord: (id: string, data: Partial<IncomeRecord>) => Promise<void>;
+  addIncomeRecord: (data: Omit<IncomeRecord, "id" | "createdAt">) => Promise<IncomeRecord>;
+  updateIncomeRecord: (id: string, data: Partial<IncomeRecord>) => Promise<IncomeRecord>;
   deleteIncomeRecord: (id: string) => Promise<void>;
   
   expenseRecords: ExpenseRecord[];
-  addExpenseRecord: (data: Omit<ExpenseRecord, "id" | "createdAt">) => Promise<void>;
-  updateExpenseRecord: (id: string, data: Partial<ExpenseRecord>) => Promise<void>;
+  addExpenseRecord: (data: Omit<ExpenseRecord, "id" | "createdAt">) => Promise<ExpenseRecord>;
+  updateExpenseRecord: (id: string, data: Partial<ExpenseRecord>) => Promise<ExpenseRecord>;
   deleteExpenseRecord: (id: string) => Promise<void>;
   
   // Fixed Estimates
   fixedEstimates: FixedEstimateRecord[];
-  addFixedEstimate: (data: Omit<FixedEstimateRecord, "id" | "createdAt">) => Promise<void>;
-  updateFixedEstimate: (id: string, data: Partial<FixedEstimateRecord>) => Promise<void>;
+  addFixedEstimate: (data: Omit<FixedEstimateRecord, "id" | "createdAt">) => Promise<FixedEstimateRecord>;
+  updateFixedEstimate: (id: string, data: Partial<FixedEstimateRecord>) => Promise<FixedEstimateRecord>;
   deleteFixedEstimate: (id: string) => Promise<void>;
   
   // App Settings
@@ -91,20 +89,27 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
   const [isLoading, setIsLoading] = useState(true);
   const [investmentService, setInvestmentService] = useState<InvestmentService | null>(null);
   const [appSettingsService, setAppSettingsService] = useState<AppSettingsService | null>(null);
+  const [financialRecordsService, setFinancialRecordsService] = useState<FinancialRecordsService | null>(null);
 
   // Initialize services when user is authenticated
   useEffect(() => {
     if (user?.uid) {
       const investmentService = new InvestmentService(user.uid);
       const settingsService = new AppSettingsService(user.uid);
+      const recordsService = new FinancialRecordsService(user.uid);
       
       setInvestmentService(investmentService);
       setAppSettingsService(settingsService);
-      loadInitialData(investmentService, settingsService);
+      setFinancialRecordsService(recordsService);
+      loadInitialData(investmentService, settingsService, recordsService);
     }
   }, [user?.uid]);
 
-  const loadInitialData = async (investmentService: InvestmentService, settingsService: AppSettingsService) => {
+  const loadInitialData = async (
+    investmentService: InvestmentService, 
+    settingsService: AppSettingsService,
+    recordsService: FinancialRecordsService
+  ) => {
     try {
       setIsLoading(true);
           // Load critical data first
@@ -114,9 +119,9 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
       await Promise.all([
         fetchInvestments(investmentService),
         fetchTransactions(investmentService),
-        fetchIncomeRecords(investmentService),
-        fetchExpenseRecords(investmentService),
-        fetchFixedEstimates(investmentService),
+        fetchIncomeRecords(recordsService),
+        fetchExpenseRecords(recordsService),
+        fetchFixedEstimates(recordsService),
         fetchDashboardSummary(investmentService)
       ]);
     } catch (error) {
@@ -219,63 +224,153 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   // CRUD operations for Income
-  const fetchIncomeRecords = async (service: InvestmentService) => {
-    // Implementation will be added
+  const fetchIncomeRecords = async (service: FinancialRecordsService) => {
+    try {
+      const records = await service.getIncomeRecords();
+      setIncomeRecords(records);
+      return records;
+    } catch (error) {
+      console.error('Error fetching income records:', error);
+      setIncomeRecords([]);
+      return [];
+    }
   };
 
-  const addIncomeRecord = async (incomeRecordData: Omit<IncomeRecord, "id" | "createdAt">) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+  const addIncomeRecord = async (data: Omit<IncomeRecord, 'id' | 'createdAt'>) => {
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      const newRecord = await financialRecordsService.addIncomeRecord(data);
+      setIncomeRecords(prev => [newRecord, ...prev]);
+      return newRecord;
+    } catch (error) {
+      console.error('Error adding income record:', error);
+      throw error;
+    }
   };
 
   const updateIncomeRecord = async (id: string, data: Partial<IncomeRecord>) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      const updatedRecord = await financialRecordsService.updateIncomeRecord(id, data);
+      setIncomeRecords(prev => 
+        prev.map(record => record.id === id ? { ...record, ...updatedRecord } : record)
+      );
+      return updatedRecord;
+    } catch (error) {
+      console.error('Error updating income record:', error);
+      throw error;
+    }
   };
 
   const deleteIncomeRecord = async (id: string) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      await financialRecordsService.deleteIncomeRecord(id);
+      setIncomeRecords(prev => prev.filter(record => record.id !== id));
+    } catch (error) {
+      console.error('Error deleting income record:', error);
+      throw error;
+    }
   };
 
   // CRUD operations for Expenses
-  const fetchExpenseRecords = async (service: InvestmentService) => {
-    // Implementation will be added
+  const fetchExpenseRecords = async (service: FinancialRecordsService) => {
+    try {
+      const records = await service.getExpenseRecords();
+      setExpenseRecords(records);
+      return records;
+    } catch (error) {
+      console.error('Error fetching expense records:', error);
+      setExpenseRecords([]);
+      return [];
+    }
   };
 
-  const addExpenseRecord = async (expenseRecordData: Omit<ExpenseRecord, "id" | "createdAt">) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+  const addExpenseRecord = async (data: Omit<ExpenseRecord, 'id' | 'createdAt'>) => {
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      const newRecord = await financialRecordsService.addExpenseRecord(data);
+      setExpenseRecords(prev => [newRecord, ...prev]);
+      return newRecord;
+    } catch (error) {
+      console.error('Error adding expense record:', error);
+      throw error;
+    }
   };
 
   const updateExpenseRecord = async (id: string, data: Partial<ExpenseRecord>) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      const updatedRecord = await financialRecordsService.updateExpenseRecord(id, data);
+      setExpenseRecords(prev => 
+        prev.map(record => record.id === id ? { ...record, ...updatedRecord } : record)
+      );
+      return updatedRecord;
+    } catch (error) {
+      console.error('Error updating expense record:', error);
+      throw error;
+    }
   };
 
   const deleteExpenseRecord = async (id: string) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      await financialRecordsService.deleteExpenseRecord(id);
+      setExpenseRecords(prev => prev.filter(record => record.id !== id));
+    } catch (error) {
+      console.error('Error deleting expense record:', error);
+      throw error;
+    }
   };
 
   // CRUD operations for Fixed Estimates
-  const fetchFixedEstimates = async (service: InvestmentService) => {
-    // Implementation will be added
+  const fetchFixedEstimates = async (service: FinancialRecordsService) => {
+    try {
+      const estimates = await service.getFixedEstimates();
+      setFixedEstimates(estimates);
+      return estimates;
+    } catch (error) {
+      console.error('Error fetching fixed estimates:', error);
+      setFixedEstimates([]);
+      return [];
+    }
   };
 
-  const addFixedEstimate = async (fixedEstimateRecordData: Omit<FixedEstimateRecord, "id" | "createdAt">) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+  const addFixedEstimate = async (data: Omit<FixedEstimateRecord, 'id' | 'createdAt'>) => {
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      const newEstimate = await financialRecordsService.addFixedEstimate(data);
+      setFixedEstimates(prev => [newEstimate, ...prev]);
+      return newEstimate;
+    } catch (error) {
+      console.error('Error adding fixed estimate:', error);
+      throw error;
+    }
   };
 
   const updateFixedEstimate = async (id: string, data: Partial<FixedEstimateRecord>) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      const updatedEstimate = await financialRecordsService.updateFixedEstimate(id, data);
+      setFixedEstimates(prev => 
+        prev.map(estimate => estimate.id === id ? { ...estimate, ...updatedEstimate } : estimate)
+      );
+      return updatedEstimate;
+    } catch (error) {
+      console.error('Error updating fixed estimate:', error);
+      throw error;
+    }
   };
 
   const deleteFixedEstimate = async (id: string) => {
-    if (!investmentService) throw new Error('Investment service not initialized');
-    // Implementation will be added
+    if (!financialRecordsService) throw new Error('Financial records service not initialized');
+    try {
+      await financialRecordsService.deleteFixedEstimate(id);
+      setFixedEstimates(prev => prev.filter(estimate => estimate.id !== id));
+    } catch (error) {
+      console.error('Error deleting fixed estimate:', error);
+      throw error;
+    }
   };
 
   // App Settings Operations
