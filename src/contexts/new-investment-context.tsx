@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
+import { AppSettingsService } from "@/lib/services/app-settings-service";
 import type { 
   Investment, 
   Transaction, 
@@ -63,7 +64,7 @@ export interface InvestmentContextType {
   
   // App Settings
   appSettings: AppSettings;
-  updateAppSettings: (settings: Partial<AppSettings>) => Promise<void>;
+  updateAppSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>;
 }
 
 const defaultDashboardSummary: DashboardSummary = {
@@ -89,28 +90,34 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
   const [appSettings, setAppSettings] = useState<AppSettings>(defaultAppSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [investmentService, setInvestmentService] = useState<InvestmentService | null>(null);
+  const [appSettingsService, setAppSettingsService] = useState<AppSettingsService | null>(null);
 
-  // Initialize investment service when user is authenticated
+  // Initialize services when user is authenticated
   useEffect(() => {
     if (user?.uid) {
-      const service = new InvestmentService(user.uid);
-      setInvestmentService(service);
-      loadInitialData(service);
+      const investmentService = new InvestmentService(user.uid);
+      const settingsService = new AppSettingsService(user.uid);
+      
+      setInvestmentService(investmentService);
+      setAppSettingsService(settingsService);
+      loadInitialData(investmentService, settingsService);
     }
   }, [user?.uid]);
 
-  const loadInitialData = async (service: InvestmentService) => {
+  const loadInitialData = async (investmentService: InvestmentService, settingsService: AppSettingsService) => {
     try {
       setIsLoading(true);
-      // Load initial data in parallel
+          // Load critical data first
+      await fetchAppSettings(settingsService);
+      
+      // Then load remaining data in parallel
       await Promise.all([
-        fetchInvestments(service),
-        fetchTransactions(service),
-        fetchIncomeRecords(service),
-        fetchExpenseRecords(service),
-        fetchFixedEstimates(service),
-        fetchDashboardSummary(service),
-        fetchAppSettings(service)
+        fetchInvestments(investmentService),
+        fetchTransactions(investmentService),
+        fetchIncomeRecords(investmentService),
+        fetchExpenseRecords(investmentService),
+        fetchFixedEstimates(investmentService),
+        fetchDashboardSummary(investmentService)
       ]);
     } catch (error) {
       console.error('Error loading initial data:', error);
@@ -124,27 +131,28 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
     // Implementation will be added
   };
 
-  const fetchTransactions = async (service: InvestmentService) => {
-    // Implementation will be added
-  };
-
-  const fetchIncomeRecords = async (service: InvestmentService) => {
-    // Implementation will be added
-  };
-  const fetchExpenseRecords = async (service: InvestmentService) => {
-    // Implementation will be added
-  };
-
-  const fetchFixedEstimates = async (service: InvestmentService) => {
-    // Implementation will be added
-  };
-
   const fetchDashboardSummary = async (service: InvestmentService) => {
     // Implementation will be added
   };
 
-  const fetchAppSettings = async (service: InvestmentService) => {
-    // Implementation will be added
+  const fetchAppSettings = async (service: AppSettingsService) => {
+    try {
+      let settings = await service.getAppSettings();
+      
+      // If no settings exist, initialize with defaults
+      if (!settings) {
+        settings = await service.initializeDefaultSettings();
+      }
+      
+      setAppSettings(prev => ({
+        ...defaultAppSettings, // Start with defaults
+        ...settings, // Override with saved settings
+        ...prev // Keep any existing state that might be needed
+      }));
+    } catch (error) {
+      console.error('Error in fetchAppSettings:', error);
+      setAppSettings(defaultAppSettings);
+    }
   };
 
   // CRUD operations for investments
@@ -174,6 +182,10 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   // CRUD operations for transactions
+  const fetchTransactions = async (service: InvestmentService) => {
+    // Implementation will be added
+  };
+
   const addTransaction = async (transactionData: Omit<Transaction, "id" | "createdAt">) => {
     if (!investmentService) throw new Error('Investment service not initialized');
     // Implementation will be added
@@ -206,7 +218,86 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
     // Implementation will be added
   };
 
-  // Other CRUD operations will be added here...
+  // CRUD operations for Income
+  const fetchIncomeRecords = async (service: InvestmentService) => {
+    // Implementation will be added
+  };
+
+  const addIncomeRecord = async (incomeRecordData: Omit<IncomeRecord, "id" | "createdAt">) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  const updateIncomeRecord = async (id: string, data: Partial<IncomeRecord>) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  const deleteIncomeRecord = async (id: string) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  // CRUD operations for Expenses
+  const fetchExpenseRecords = async (service: InvestmentService) => {
+    // Implementation will be added
+  };
+
+  const addExpenseRecord = async (expenseRecordData: Omit<ExpenseRecord, "id" | "createdAt">) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  const updateExpenseRecord = async (id: string, data: Partial<ExpenseRecord>) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  const deleteExpenseRecord = async (id: string) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  // CRUD operations for Fixed Estimates
+  const fetchFixedEstimates = async (service: InvestmentService) => {
+    // Implementation will be added
+  };
+
+  const addFixedEstimate = async (fixedEstimateRecordData: Omit<FixedEstimateRecord, "id" | "createdAt">) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  const updateFixedEstimate = async (id: string, data: Partial<FixedEstimateRecord>) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  const deleteFixedEstimate = async (id: string) => {
+    if (!investmentService) throw new Error('Investment service not initialized');
+    // Implementation will be added
+  };
+
+  // App Settings Operations
+  const updateAppSettings = async (settings: Partial<AppSettings>) => {
+    if (!appSettingsService) throw new Error('App settings service not initialized');
+    
+    try {
+      // Update in the database
+      const updatedSettings = await appSettingsService.updateAppSettings(settings);
+      
+      // Update local state
+      setAppSettings(prev => ({
+        ...prev,
+        ...updatedSettings
+      }));
+      
+      return updatedSettings;
+    } catch (error) {
+      console.error('Error updating app settings:', error);
+      throw error;
+    }
+  };
 
   const refreshDashboard = async () => {
     if (!investmentService) throw new Error('Investment service not initialized');
@@ -240,49 +331,19 @@ export const InvestmentProvider = ({ children }: { children: React.ReactNode }) 
     dashboardSummary,
     refreshDashboard,
     incomeRecords,
-    addIncomeRecord: async (data) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
-    updateIncomeRecord: async (id, data) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
-    deleteIncomeRecord: async (id) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
+    addIncomeRecord,
+    updateIncomeRecord,
+    deleteIncomeRecord,
     expenseRecords,
-    addExpenseRecord: async (data) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
-    updateExpenseRecord: async (id, data) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
-    deleteExpenseRecord: async (id) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
+    addExpenseRecord,
+    updateExpenseRecord,
+    deleteExpenseRecord,
     fixedEstimates,
-    addFixedEstimate: async (data) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
-    updateFixedEstimate: async (id, data) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
-    deleteFixedEstimate: async (id) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
+    addFixedEstimate,
+    updateFixedEstimate,
+    deleteFixedEstimate,
     appSettings,
-    updateAppSettings: async (settings) => {
-      if (!investmentService) throw new Error('Investment service not initialized');
-      // Implementation will be added
-    },
+    updateAppSettings,
   };
 
   return (

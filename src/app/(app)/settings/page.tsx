@@ -2,9 +2,8 @@
 import { useLanguage } from "@/contexts/language-context";
 import React, { useEffect, useState, useCallback } from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import type { InvestmentType, AppSettings } from "@/lib/types";
+import type { InvestmentType, AppSettings, InvestmentTypePercentage } from "@/lib/types";
 
-type InvestmentPercentage = Record<InvestmentType, number>;
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,12 +37,13 @@ export default function SettingsPage() {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [investmentPercentages, setInvestmentPercentages] =
-    useState<InvestmentPercentage>({
+    useState<InvestmentTypePercentage>({
       "Real Estate": 30,
-      Stocks: 25,
+      Securities: 25,
       "Debt Instruments": 20,
       Currencies: 10,
       Gold: 15,
+      Stocks: 25
     });
   const [totalPercentage, setTotalPercentage] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
@@ -119,6 +119,7 @@ export default function SettingsPage() {
           "Real Estate": investmentPercentages["Real Estate"] || 0,
           Gold: investmentPercentages["Gold"] || 0,
           Stocks: investmentPercentages["Stocks"] || 0,
+          Securities: investmentPercentages["Securities"] || 0,
           "Debt Instruments": investmentPercentages["Debt Instruments"] || 0,
           Currencies: investmentPercentages["Currencies"] || 0,
         },

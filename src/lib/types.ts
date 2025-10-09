@@ -259,15 +259,6 @@ export interface ExchangeRates {
   [key: string]: number;
 }
 
-// Placeholder for AppSettings. Update with real fields as needed.
-export interface AppSettings {
-  // Example fields
-  theme?: string;
-  notificationsEnabled?: boolean;
-  financialYearStartMonth?: number;
-  // Add more fields as needed
-}
-
 export type AggregatedGoldHolding = {
   id: string;
   displayName: string;
@@ -325,11 +316,10 @@ export interface AggregatedDebtHolding {
   fundInvestment?: SecurityInvestment;
 }
 
-export interface InvestmentTypePercentages {
-  [key: string]: number; // Key is InvestmentType, value is percentage (0-100)
-}
+export type InvestmentTypePercentage = Record<InvestmentType, number>;
+
 
 export interface AppSettings {
   financialYearStartMonth?: number;
-  investmentTypePercentages?: InvestmentTypePercentages;
+  investmentTypePercentages?: InvestmentTypePercentage;
 }
