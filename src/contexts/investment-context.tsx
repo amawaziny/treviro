@@ -113,6 +113,8 @@ const defaultDashboardSummary: DashboardSummary = {
   totalInvestedAcrossAllAssets: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0, // Initialize totalCashBalance
+  totalMaturedDebt: 0,
+  updatedAt: new Date().toISOString(),
 };
 
 const defaultAppSettings: AppSettings = {

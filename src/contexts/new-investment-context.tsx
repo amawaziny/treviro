@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
 import { AppSettingsService } from "@/lib/services/app-settings-service";
 import { FinancialRecordsService, IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/services/financial-records-service";
+import { DashboardService } from "@/lib/services/dashboard-service";
 import type { 
   Investment, 
   Transaction, 
@@ -69,6 +70,8 @@ const defaultDashboardSummary: DashboardSummary = {
   totalInvestedAcrossAllAssets: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0,
+  totalMaturedDebt: 0,
+  updatedAt: new Date().toISOString(),
 };
 
 const defaultAppSettings: AppSettings = {

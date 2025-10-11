@@ -48,6 +48,15 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     purchaseDate: getCurrentDate(),
     name: "",
   },
+  Securities: {
+    type: "Stocks",
+    selectedSecurityId: "",
+    numberOfShares: 1, // must be number for Zod transform result
+    purchasePricePerShare: 0,
+    purchaseFees: 0,
+    purchaseDate: getCurrentDate(),
+    name: "",
+  },
   Gold: {
     type: "Gold",
     goldType: goldTypes[0],

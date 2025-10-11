@@ -228,7 +228,9 @@ export interface Transaction {
 export interface DashboardSummary {
   totalInvestedAcrossAllAssets: number;
   totalRealizedPnL: number;
-  totalCashBalance: number; // Added this field
+  totalCashBalance: number;
+  totalMaturedDebt: number; // Total amount from matured debt instruments
+  updatedAt: string;
 }
 
 export interface GoldMarketPrices {
