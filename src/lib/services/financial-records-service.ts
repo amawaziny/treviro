@@ -2,69 +2,36 @@ import { db } from "@/lib/firebase";
 import { 
   collection, 
   doc, 
-  getDocs, 
   setDoc, 
-  deleteDoc, 
+  getDocs, 
   query, 
   where, 
-  orderBy, 
-  serverTimestamp,
-  writeBatch,
-  getDoc
+  deleteDoc,
+  updateDoc, 
+  getDoc, 
+  DocumentData, 
+  DocumentReference, 
+  orderBy,
+  CollectionReference,
 } from "firebase/firestore";
+import { eventBus } from "./events";
 import { v4 as uuidv4 } from 'uuid';
 import type { 
-  IncomeType,
-  ExpenseCategory,
-  FixedEstimateType,
-  FixedEstimatePeriod
+  BaseRecord,
+  IncomeRecord,
+  ExpenseRecord,
+  FixedEstimateRecord,
 } from "@/lib/types";
 
+
+// Collection names as const for type safety
 const COLLECTIONS = {
-  INCOME: 'incomeRecords',
-  EXPENSES: 'expenseRecords',
-  FIXED_ESTIMATES: 'fixedEstimates'
+  INCOMES: 'incomes' as const,
+  EXPENSES: 'expenses' as const,
+  FIXED_ESTIMATES: 'fixedEstimates' as const
 } as const;
 
 type CollectionType = typeof COLLECTIONS[keyof typeof COLLECTIONS];
-
-// Base interface that enforces common fields across all record types
-interface BaseRecord {
-  id: string;
-  userId: string;
-  amount: number;
-  description?: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Extend the record interfaces to include BaseRecord
-
-export interface IncomeRecord extends BaseRecord {
-  type: IncomeType;
-  source?: string;
-  isRecurring?: boolean;
-  recurrencePeriod?: string;
-}
-
-export interface ExpenseRecord extends BaseRecord {
-  category: ExpenseCategory;
-  isInstallment?: boolean;
-  numberOfInstallments?: number;
-  _originalAmount?: number;
-  _requiredAmount?: number;
-  installmentMonthIndex?: number;
-}
-
-export interface FixedEstimateRecord extends BaseRecord {
-  type: FixedEstimateType;
-  name?: string;
-  period: FixedEstimatePeriod;
-  isExpense: boolean;
-}
-
-
-export type FinancialRecord = IncomeRecord | ExpenseRecord | FixedEstimateRecord;
 
 export class FinancialRecordsService {
   private userId: string;
@@ -74,12 +41,14 @@ export class FinancialRecordsService {
   }
 
   // Generic helper to get collection reference with user path
-  private getCollectionRef(collectionName: CollectionType) {
-    return collection(db, `users/${this.userId}/${collectionName}`);
+  private getCollectionRef<T extends DocumentData>(collectionName: CollectionType): CollectionReference<T> {
+    if (!db) throw new Error('Firestore not initialized');
+    return collection(db, `users/${this.userId}/${collectionName}`) as CollectionReference<T>;
   }
 
   // Generic helper to get document reference with user path
-  private getDocRef(collectionName: CollectionType, id: string) {
+  private getDocRef(collectionName: CollectionType, id: string): DocumentReference<DocumentData> {
+    if (!db) throw new Error('Firestore not initialized');
     return doc(db, `users/${this.userId}/${collectionName}`, id);
   }
 
@@ -97,9 +66,28 @@ export class FinancialRecordsService {
         userId: this.userId,
         createdAt: now,
         updatedAt: now,
-      } as unknown as T;
+      } as T;
 
-      await setDoc(this.getDocRef(collectionName, id), recordData);
+      await setDoc(this.getDocRef(collectionName, id), recordData as DocumentData);
+      
+      // Publish appropriate event based on collection type
+      if (collectionName === COLLECTIONS.INCOMES) {
+        await eventBus.publish({
+          type: 'income:added',
+          record: recordData as unknown as IncomeRecord
+        });
+      } else if (collectionName === COLLECTIONS.EXPENSES) {
+        await eventBus.publish({
+          type: 'expense:added',
+          record: recordData as unknown as ExpenseRecord
+        });
+      } else if (collectionName === COLLECTIONS.FIXED_ESTIMATES) {
+        await eventBus.publish({
+          type: 'fixedEstimate:added',
+          record: recordData as unknown as FixedEstimateRecord
+        });
+      }
+      
       return recordData;
     } catch (error) {
       console.error(`Error adding ${collectionName} record:`, error);
@@ -119,14 +107,33 @@ export class FinancialRecordsService {
       if (!docSnap.exists()) {
         throw new Error(`${collectionName} record not found`);
       }
-
+      const currentData = docSnap.data() as T;
       const updatedData = {
-        ...docSnap.data(),
+        ...currentData,
         ...data,
         updatedAt: new Date().toISOString(),
-      } as unknown as T;
+      } as T;
 
-      await setDoc(docRef, updatedData, { merge: true });
+      await updateDoc(docRef, updatedData as DocumentData);
+      
+      // Publish appropriate event based on collection type
+      if (collectionName === COLLECTIONS.INCOMES) {
+        await eventBus.publish({
+          type: 'income:updated',
+          record: updatedData as unknown as IncomeRecord
+        });
+      } else if (collectionName === COLLECTIONS.EXPENSES) {
+        await eventBus.publish({
+          type: 'expense:updated',
+          record: updatedData as unknown as ExpenseRecord
+        });
+      } else if (collectionName === COLLECTIONS.FIXED_ESTIMATES) {
+        await eventBus.publish({
+          type: 'fixedEstimate:updated',
+          record: updatedData as unknown as FixedEstimateRecord
+        });
+      }
+      
       return updatedData;
     } catch (error) {
       console.error(`Error updating ${collectionName} record:`, error);
@@ -136,7 +143,27 @@ export class FinancialRecordsService {
 
   private async deleteRecord(collectionName: CollectionType, id: string): Promise<void> {
     try {
-      await deleteDoc(this.getDocRef(collectionName, id));
+      const docRef = this.getDocRef(collectionName, id);
+
+      await deleteDoc(docRef);
+      
+      // Publish appropriate event based on collection type
+      if (collectionName === COLLECTIONS.INCOMES) {
+        await eventBus.publish({
+          type: 'income:deleted',
+          recordId: id
+        });
+      } else if (collectionName === COLLECTIONS.EXPENSES) {
+        await eventBus.publish({
+          type: 'expense:deleted',
+          recordId: id
+        });
+      } else if (collectionName === COLLECTIONS.FIXED_ESTIMATES) {
+        await eventBus.publish({
+          type: 'fixedEstimate:deleted',
+          recordId: id
+        });
+      }
     } catch (error) {
       console.error(`Error deleting ${collectionName} record:`, error);
       throw error;
@@ -145,7 +172,7 @@ export class FinancialRecordsService {
 
   private async getRecords<T extends BaseRecord>(
     collectionName: CollectionType,
-    filters?: Record<string, any>
+    filters?: Partial<T>
   ): Promise<T[]> {
     try {
       let q = query(
@@ -166,7 +193,7 @@ export class FinancialRecordsService {
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      })) as T[];
+      } as T));
     } catch (error) {
       console.error(`Error getting ${collectionName} records:`, error);
       throw error;
@@ -175,24 +202,24 @@ export class FinancialRecordsService {
 
   // Income Records
   async getIncomeRecords(filters?: Partial<IncomeRecord>): Promise<IncomeRecord[]> {
-    const records = await this.getRecords<IncomeRecord>(COLLECTIONS.INCOME, filters);
+    const records = await this.getRecords<IncomeRecord>(COLLECTIONS.INCOMES, filters);
     return records.map(record => ({
       ...record,
       createdAt: record.createdAt || new Date().toISOString(),
-      updatedAt: record.updatedAt
-    }));
+      updatedAt: record.updatedAt || new Date().toISOString()
+    } as IncomeRecord));
   }
 
-  async addIncomeRecord(data: Omit<IncomeRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<IncomeRecord> {
-    return this.addRecord<IncomeRecord>(COLLECTIONS.INCOME, data);
+  async addIncomeRecord(incomeData: Omit<IncomeRecord, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<IncomeRecord> {
+    return this.addRecord(COLLECTIONS.INCOMES, incomeData);
   }
 
   async updateIncomeRecord(id: string, data: Partial<IncomeRecord>): Promise<IncomeRecord> {
-    return this.updateRecord<IncomeRecord>(COLLECTIONS.INCOME, id, data);
+    return this.updateRecord<IncomeRecord>(COLLECTIONS.INCOMES, id, data);
   }
 
   async deleteIncomeRecord(id: string): Promise<void> {
-    return this.deleteRecord(COLLECTIONS.INCOME, id);
+    return this.deleteRecord(COLLECTIONS.INCOMES, id);
   }
 
   // Expense Records
@@ -201,12 +228,12 @@ export class FinancialRecordsService {
     return records.map(record => ({
       ...record,
       createdAt: record.createdAt || new Date().toISOString(),
-      updatedAt: record.updatedAt
-    }));
+      updatedAt: record.updatedAt || new Date().toISOString()
+    } as ExpenseRecord));
   }
 
-  async addExpenseRecord(data: Omit<ExpenseRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<ExpenseRecord> {
-    return this.addRecord<ExpenseRecord>(COLLECTIONS.EXPENSES, data);
+  async addExpenseRecord(expenseData: Omit<ExpenseRecord, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<ExpenseRecord> {
+    return this.addRecord(COLLECTIONS.EXPENSES, expenseData);
   }
 
   async updateExpenseRecord(id: string, data: Partial<ExpenseRecord>): Promise<ExpenseRecord> {
@@ -217,20 +244,19 @@ export class FinancialRecordsService {
     return this.deleteRecord(COLLECTIONS.EXPENSES, id);
   }
 
-  // Fixed Estimate Records
+  // Fixed Estimates
   async getFixedEstimates(filters?: Partial<FixedEstimateRecord>): Promise<FixedEstimateRecord[]> {
     const records = await this.getRecords<FixedEstimateRecord>(COLLECTIONS.FIXED_ESTIMATES, filters);
     return records.map(record => ({
       ...record,
       createdAt: record.createdAt || new Date().toISOString(),
-      updatedAt: record.updatedAt
-    }));
+      updatedAt: record.updatedAt || new Date().toISOString()
+    } as FixedEstimateRecord));
   }
 
-  async addFixedEstimate(data: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<FixedEstimateRecord> {
-    return this.addRecord<FixedEstimateRecord>(COLLECTIONS.FIXED_ESTIMATES, data);
+  async addFixedEstimateRecord(fixedEstimateData: Omit<FixedEstimateRecord, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<FixedEstimateRecord> {
+    return this.addRecord(COLLECTIONS.FIXED_ESTIMATES, fixedEstimateData);
   }
-
   async updateFixedEstimate(id: string, data: Partial<FixedEstimateRecord>): Promise<FixedEstimateRecord> {
     return this.updateRecord<FixedEstimateRecord>(COLLECTIONS.FIXED_ESTIMATES, id, data);
   }

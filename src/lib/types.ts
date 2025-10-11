@@ -118,32 +118,42 @@ export type Investment =
   | RealEstateInvestment
   | DebtInstrumentInvestment;
 
-export interface IncomeRecord {
+export type FinancialRecord = IncomeRecord | ExpenseRecord | FixedEstimateRecord;
+
+// Base interface that enforces common fields across all record types
+export interface BaseRecord {
   id: string;
-  type: IncomeType;
-  source?: string;
+  userId: string;
   amount: number;
-  date: string;
   description?: string;
   createdAt: string;
-  userId: string;
+  updatedAt?: string;
+}
+
+// Extend the record interfaces to include BaseRecord
+export interface IncomeRecord extends BaseRecord {
+  date: string;
+  type: IncomeType;
+  source?: string;
   isRecurring?: boolean;
   recurrencePeriod?: string;
 }
 
-export interface ExpenseRecord {
-  id: string;
-  userId: string;
-  description?: string;
-  amount: number;
+export interface ExpenseRecord extends BaseRecord {
   date: string;
   category: ExpenseCategory;
   isInstallment?: boolean;
   numberOfInstallments?: number;
-  createdAt?: string;
   _originalAmount?: number;
   _requiredAmount?: number;
   installmentMonthIndex?: number;
+}
+
+export interface FixedEstimateRecord extends BaseRecord {
+  type: FixedEstimateType;
+  name?: string;
+  period: FixedEstimatePeriod;
+  isExpense: boolean;
 }
 
 export type FixedEstimateType =
@@ -153,18 +163,6 @@ export type FixedEstimateType =
   | "Living Expenses"
   | "Other";
 export type FixedEstimatePeriod = "Monthly" | "Quarterly" | "Yearly";
-
-export interface FixedEstimateRecord {
-  id: string;
-  userId: string;
-  type: FixedEstimateType;
-  name?: string; // Used if type is 'Other'
-  amount: number;
-  period: FixedEstimatePeriod;
-  isExpense: boolean; // True for Zakat, Charity, 'Other' expenses; False for Salary, 'Other' income
-  createdAt: string;
-  updatedAt?: string;
-}
 
 export interface ListedSecurity {
   id: string;
