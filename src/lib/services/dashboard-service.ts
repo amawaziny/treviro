@@ -8,7 +8,14 @@ import {
 } from "@/lib/types";
 import { db as firestoreInstance } from "@/lib/firebase";
 import { doc, setDoc, getDoc, runTransaction, increment } from "firebase/firestore";
-
+/**
+ * TODO: 
+ * 1. TransactionService collection should consume events from FinancialRecordsService 
+ * 2. TransactionService collection should consume events from InvestmentService
+ * 3. DashboardService should consume events from TransactionService
+ * 4. Dashboard recalculateDashboardSummary should recalculate dashboard summary on every transaction
+ * 5. Constants class for collection names
+ */
 export class DashboardService {
   private userId: string;
   private static readonly DASHBOARD_PATH = 'dashboard_aggregates/summary';

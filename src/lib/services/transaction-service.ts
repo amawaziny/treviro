@@ -7,7 +7,9 @@ import {
   where,
   getDocs,
   Transaction as FirebaseTransaction,
-  setDoc
+  setDoc,
+  getDoc,
+  deleteDoc
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type { 
@@ -47,10 +49,12 @@ export class TransactionService {
   private setupEventSubscriptions() {
     // Subscribe to income events
     const unsubscribe = eventBus.subscribe(async (event: FinancialRecordEvent) => {
-      if (event.type === 'income:added') {
-        await this.createFinancialRecordTransaction(event.record, 'INCOME');
-      } else if (event.type === 'expense:added') {
-        await this.createFinancialRecordTransaction(event.record, 'EXPENSE');
+      if (event.type === 'income:added' || event.type === 'income:updated') {
+        await this.setFinancialRecordTransaction(event.record, 'INCOME');
+      } else if (event.type === 'expense:added' || event.type === 'expense:updated') {
+        await this.setFinancialRecordTransaction(event.record, 'EXPENSE');
+      }else if(event.type=="income:deleted" || event.type=="expense:deleted"){
+        await this.deleteFinancialRecordTransaction(event.recordId);
       }
     });
     
@@ -98,6 +102,19 @@ export class TransactionService {
     const q = query(
       this.getTransactionsCollection(),
       where('investmentId', '==', investmentId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as Transaction));
+  }
+
+  private async getTransactionBySourceId(sourceId: string): Promise<Transaction[] | null> {
+    const q = query(
+      this.getTransactionsCollection(),
+      where('sourceId', '==', sourceId)
     );
     
     const querySnapshot = await getDocs(q);
@@ -161,10 +178,15 @@ export class TransactionService {
     };
   }
 
-  private async createFinancialRecordTransaction(record: BaseRecord, type: TransactionType) {
+  private async setFinancialRecordTransaction(record: BaseRecord, type: TransactionType) {
   try {
-    const transactionId = uuidv4();
     const now = new Date().toISOString();
+
+    let transactionId = uuidv4();
+    const transaction = await this.getTransactionBySourceId(record.id);
+    if (transaction) {
+      transactionId = transaction[0].id;
+    }
     
     const newTransaction: Transaction = {
       id: transactionId,
@@ -189,6 +211,15 @@ export class TransactionService {
   } catch (error) {
     console.error('Failed to create income transaction', error);
     throw new Error('Failed to create income transaction');
+  }
+}
+
+private async deleteFinancialRecordTransaction(recordId: string) {
+  try {
+    await deleteDoc(this.getTransactionRef(recordId));
+  } catch (error) {
+    console.error('Failed to delete income transaction', error);
+    throw new Error('Failed to delete income transaction');
   }
 }
 
