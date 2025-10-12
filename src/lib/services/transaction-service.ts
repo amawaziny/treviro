@@ -6,15 +6,17 @@ import {
   query,
   where,
   getDocs,
-  Transaction as FirebaseTransaction
+  Transaction as FirebaseTransaction,
+  setDoc
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type { 
-  TransactionType, 
   InvestmentType,
-  CurrencyCode
+  CurrencyCode,
+  BaseRecord,
 } from "@/lib/types";
-import { RealEstateInvestment, Transaction } from "@/lib/investment-types";
+import { RealEstateInvestment, Transaction, TransactionType } from "@/lib/investment-types";
+import { eventBus, FinancialRecordEvent } from "@/lib/services/events";
 
 type TransactionUpdate = {
   totalShares: number;
@@ -31,6 +33,7 @@ const INVESTMENTS_COLLECTION = 'investments';
  */
 export class TransactionService {
   private userId: string;
+  private unsubscribeCallbacks: (() => void)[] = [];
 
   /**
    * Creates a new TransactionService instance for a specific user.
@@ -38,6 +41,20 @@ export class TransactionService {
    */
   constructor(userId: string) {
     this.userId = userId;
+    this.setupEventSubscriptions();
+  }
+
+  private setupEventSubscriptions() {
+    // Subscribe to income events
+    const unsubscribe = eventBus.subscribe(async (event: FinancialRecordEvent) => {
+      if (event.type === 'income:added') {
+        await this.createFinancialRecordTransaction(event.record, 'INCOME');
+      } else if (event.type === 'expense:added') {
+        await this.createFinancialRecordTransaction(event.record, 'EXPENSE');
+      }
+    });
+    
+    this.unsubscribeCallbacks.push(unsubscribe);
   }
 
   /**
@@ -144,6 +161,37 @@ export class TransactionService {
     };
   }
 
+  private async createFinancialRecordTransaction(record: BaseRecord, type: TransactionType) {
+  try {
+    const transactionId = uuidv4();
+    const now = new Date().toISOString();
+    
+    const newTransaction: Transaction = {
+      id: transactionId,
+      userId: this.userId,
+      sourceId: record.id,
+      type: type,
+      date: record.date || now,
+      amount: type === 'EXPENSE' ? -record.amount : record.amount,
+      description: record.description,
+      currency: 'EGP',
+      quantity: 0,
+      pricePerUnit: 0,
+      fees: 0,
+      createdAt: now,
+      metadata: {
+        source: 'financial-records',
+      }
+    };
+
+    await setDoc(this.getTransactionRef(transactionId), newTransaction);
+
+  } catch (error) {
+    console.error('Failed to create income transaction', error);
+    throw new Error('Failed to create income transaction');
+  }
+}
+
   /**
    * Records a transaction and updates the associated investment.
    * This is the main method for recording any type of transaction.
@@ -157,8 +205,8 @@ export class TransactionService {
     transactionData: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<Transaction> {
     // Ensure required fields are present
-    if (!transactionData.investmentId) {
-      throw new Error('investmentId is required');
+    if (!transactionData.sourceId) {
+      throw new Error('sourceId is required');
     }
     if (!transactionData.securityId && transactionData.type !== 'PAYMENT') {
       throw new Error('securityId is required for non-payment transactions');
@@ -193,7 +241,7 @@ export class TransactionService {
         quantity: transactionData.quantity || 0,
       };
 
-      const investmentRef = this.getInvestmentRef(transactionData.investmentId);
+      const investmentRef = this.getInvestmentRef(transactionData.sourceId);
       const investmentDoc = await transaction.get(investmentRef);
       
       if (!investmentDoc.exists()) {
@@ -280,7 +328,7 @@ export class TransactionService {
     
     return this.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       securityId,
       investmentType,
       type: 'BUY',
@@ -322,7 +370,7 @@ export class TransactionService {
     
     return this.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       securityId,
       investmentType,
       type: 'SELL',
@@ -357,7 +405,7 @@ export class TransactionService {
   ): Promise<Transaction> {
     return this.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       securityId,
       investmentType,
       type: 'DIVIDEND',
@@ -396,7 +444,7 @@ export class TransactionService {
   ): Promise<Transaction> {
     return this.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       investmentType,
       installmentNumber,
       type: 'PAYMENT',
@@ -410,5 +458,11 @@ export class TransactionService {
         ...metadata,
       },
     });
+  }
+
+   cleanup() {
+    // Unsubscribe from all event listeners
+    this.unsubscribeCallbacks.forEach(unsubscribe => unsubscribe());
+    this.unsubscribeCallbacks = [];
   }
 }

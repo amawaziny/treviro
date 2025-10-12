@@ -5,6 +5,9 @@ export type TransactionType =
   | 'SELL'     // For selling any asset
   | 'DIVIDEND' // For dividend/interest income
   | 'PAYMENT'  // For installments, fees, or other payments
+  | 'INCOME'   // For receiving income
+  | 'FIXED_ESTIMATE'
+  | 'EXPENSE';
 //TODO: review all fields in each investment type
 export interface BaseInvestment {
   id: string;
@@ -88,8 +91,8 @@ export type Investment =
 export interface Transaction {
   id: string;
   userId: string;
-  investmentType: InvestmentType;
-  investmentId: string;
+  investmentType?: InvestmentType;
+  sourceId: string;
   securityId?: string;
   installmentNumber?: number;
   type: TransactionType;

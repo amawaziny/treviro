@@ -122,6 +122,7 @@ export type FinancialRecord = IncomeRecord | ExpenseRecord | FixedEstimateRecord
 
 // Base interface that enforces common fields across all record types
 export interface BaseRecord {
+  date?: string;
   id: string;
   userId: string;
   amount: number;
@@ -132,7 +133,6 @@ export interface BaseRecord {
 
 // Extend the record interfaces to include BaseRecord
 export interface IncomeRecord extends BaseRecord {
-  date: string;
   type: IncomeType;
   source?: string;
   isRecurring?: boolean;
@@ -140,7 +140,6 @@ export interface IncomeRecord extends BaseRecord {
 }
 
 export interface ExpenseRecord extends BaseRecord {
-  date: string;
   category: ExpenseCategory;
   isInstallment?: boolean;
   numberOfInstallments?: number;

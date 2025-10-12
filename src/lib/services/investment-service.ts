@@ -185,7 +185,7 @@ export class InvestmentService {
     
     return this.transactionService.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       securityId,
       investmentType,
       type: 'BUY',
@@ -232,7 +232,7 @@ export class InvestmentService {
     
     return this.transactionService.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       securityId,
       investmentType,
       type: 'SELL',
@@ -272,7 +272,7 @@ export class InvestmentService {
   ): Promise<Transaction> {
     return this.transactionService.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       securityId,
       investmentType,
       type: 'DIVIDEND',
@@ -316,7 +316,7 @@ export class InvestmentService {
   ): Promise<Transaction> {
     return this.transactionService.recordTransaction({
       userId: this.userId,
-      investmentId,
+      sourceId: investmentId,
       investmentType,
       installmentNumber,
       type: 'PAYMENT',
