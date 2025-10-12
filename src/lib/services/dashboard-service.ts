@@ -1,16 +1,22 @@
-import { 
-  Investment, 
-  DebtInstrumentInvestment, 
-  Transaction, 
-  IncomeRecord, 
+import {
+  Investment,
+  DebtInstrumentInvestment,
+  Transaction,
+  IncomeRecord,
   ExpenseRecord,
-  DashboardSummary 
+  DashboardSummary,
 } from "@/lib/types";
 import { db as firestoreInstance } from "@/lib/firebase";
-import { doc, setDoc, getDoc, runTransaction, increment } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  runTransaction,
+  increment,
+} from "firebase/firestore";
 /**
- * TODO: 
- * 1. TransactionService collection should consume events from FinancialRecordsService 
+ * TODO:
+ * 1. TransactionService collection should consume events from FinancialRecordsService
  * 2. TransactionService collection should consume events from InvestmentService
  * 3. DashboardService should consume events from TransactionService
  * 4. Dashboard recalculateDashboardSummary should recalculate dashboard summary on every transaction
@@ -18,32 +24,37 @@ import { doc, setDoc, getDoc, runTransaction, increment } from "firebase/firesto
  */
 export class DashboardService {
   private userId: string;
-  private static readonly DASHBOARD_PATH = 'dashboard_aggregates/summary';
+  private static readonly DASHBOARD_PATH = "dashboard_aggregates/summary";
 
   constructor(userId: string) {
     if (!userId) {
-      throw new Error('User ID is required for DashboardService');
+      throw new Error("User ID is required for DashboardService");
     }
     this.userId = userId;
   }
 
   private getDashboardDocRef() {
     if (!this.userId || !firestoreInstance) return null;
-    return doc(firestoreInstance, `users/${this.userId}/${DashboardService.DASHBOARD_PATH}`);
+    return doc(
+      firestoreInstance,
+      `users/${this.userId}/${DashboardService.DASHBOARD_PATH}`,
+    );
   }
 
   /**
    * Updates the dashboard summary with the provided fields using a transaction
    * @param updates Partial DashboardSummary with fields to update
    */
-  async updateDashboardSummary(updates: Partial<DashboardSummary>): Promise<void> {
+  async updateDashboardSummary(
+    updates: Partial<DashboardSummary>,
+  ): Promise<void> {
     const dashboardRef = this.getDashboardDocRef();
     if (!dashboardRef || !firestoreInstance) return;
 
     try {
       await runTransaction(firestoreInstance, async (transaction) => {
         const summaryDoc = await transaction.get(dashboardRef);
-        
+
         // Initialize with default values if document doesn't exist
         const currentData: DashboardSummary = summaryDoc.exists()
           ? (summaryDoc.data() as DashboardSummary)
@@ -52,21 +63,21 @@ export class DashboardService {
               totalRealizedPnL: 0,
               totalCashBalance: 0,
               totalMaturedDebt: 0,
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             };
-        
+
         // Merge updates with current data
-        const newData = { 
-          ...currentData, 
+        const newData = {
+          ...currentData,
           ...updates,
-          updatedAt: new Date().toISOString() 
+          updatedAt: new Date().toISOString(),
         };
-        
+
         // Update document
         transaction.set(dashboardRef, newData, { merge: true });
       });
     } catch (error) {
-      console.error('Error in updateDashboardSummary transaction:', error);
+      console.error("Error in updateDashboardSummary transaction:", error);
       throw error;
     }
   }
@@ -77,9 +88,11 @@ export class DashboardService {
 
     try {
       const dashboardSnap = await getDoc(dashboardRef);
-      return dashboardSnap.exists() ? dashboardSnap.data() as DashboardSummary : null;
+      return dashboardSnap.exists()
+        ? (dashboardSnap.data() as DashboardSummary)
+        : null;
     } catch (error) {
-      console.error('Error getting dashboard summary:', error);
+      console.error("Error getting dashboard summary:", error);
       throw error;
     }
   }
@@ -95,7 +108,7 @@ export class DashboardService {
     investments: Investment[],
     transactions: Transaction[],
     incomeRecords: IncomeRecord[],
-    expenseRecords: ExpenseRecord[]
+    expenseRecords: ExpenseRecord[],
   ): Promise<DashboardSummary> {
     let calculatedTotalInvested = 0;
     let calculatedTotalRealizedPnL = 0;
@@ -150,7 +163,7 @@ export class DashboardService {
 
     // Update the dashboard in Firebase
     await this.updateDashboardSummary(summary);
-    
+
     return summary;
   }
 }

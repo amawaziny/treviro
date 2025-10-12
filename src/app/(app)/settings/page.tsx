@@ -2,7 +2,11 @@
 import { useLanguage } from "@/contexts/language-context";
 import React, { useEffect, useState, useCallback } from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import type { InvestmentType, AppSettings, InvestmentTypePercentage } from "@/lib/types";
+import type {
+  InvestmentType,
+  AppSettings,
+  InvestmentTypePercentage,
+} from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +47,7 @@ export default function SettingsPage() {
       "Debt Instruments": 20,
       Currencies: 10,
       Gold: 15,
-      Stocks: 25
+      Stocks: 25,
     });
   const [totalPercentage, setTotalPercentage] = useState(0);
   const [showWarning, setShowWarning] = useState(false);

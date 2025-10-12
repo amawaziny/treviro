@@ -878,20 +878,22 @@ export default function SecurityDetailPage() {
                             <div className="flex items-center gap-2">
                               {tx.isInvestmentRecord && (
                                 <div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-4 w-4"
-                                  asChild
-                                >
-                                  <Link
-                                    href={`/investments/security/edit/${tx.id}`}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-4 w-4"
+                                    asChild
                                   >
-                                    <Edit3 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">{t("Edit")}</span>
-                                  </Link>
-                                </Button>
-                             
+                                    <Link
+                                      href={`/investments/security/edit/${tx.id}`}
+                                    >
+                                      <Edit3 className="h-3.5 w-3.5" />
+                                      <span className="sr-only">
+                                        {t("Edit")}
+                                      </span>
+                                    </Link>
+                                  </Button>
+
                                   <Button
                                     variant="ghost"
                                     size="icon"
@@ -907,8 +909,8 @@ export default function SecurityDetailPage() {
                                       {t("Delete")}
                                     </span>
                                   </Button>
-                                  </div>
-                                )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

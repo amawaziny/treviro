@@ -118,7 +118,10 @@ export type Investment =
   | RealEstateInvestment
   | DebtInstrumentInvestment;
 
-export type FinancialRecord = IncomeRecord | ExpenseRecord | FixedEstimateRecord;
+export type FinancialRecord =
+  | IncomeRecord
+  | ExpenseRecord
+  | FixedEstimateRecord;
 
 // Base interface that enforces common fields across all record types
 export interface BaseRecord {
@@ -316,7 +319,6 @@ export interface AggregatedDebtHolding {
 }
 
 export type InvestmentTypePercentage = Record<InvestmentType, number>;
-
 
 export interface AppSettings {
   financialYearStartMonth?: number;

@@ -4,7 +4,7 @@ import type { AppSettings } from "@/lib/types";
 
 export class AppSettingsService {
   private userId: string;
-  private readonly SETTINGS_DOC = 'appSettings';
+  private readonly SETTINGS_DOC = "appSettings";
 
   constructor(userId: string) {
     this.userId = userId;
@@ -22,15 +22,15 @@ export class AppSettingsService {
     try {
       const docRef = this.getSettingsDocRef();
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return docSnap.data() as AppSettings;
       }
-      
+
       return null;
     } catch (error) {
-      console.error('Error getting app settings:', error);
-      throw new Error('Failed to fetch app settings');
+      console.error("Error getting app settings:", error);
+      throw new Error("Failed to fetch app settings");
     }
   }
 
@@ -39,23 +39,25 @@ export class AppSettingsService {
    * @param settings Partial settings to update
    * @returns The updated settings
    */
-  async updateAppSettings(settings: Partial<AppSettings>): Promise<AppSettings> {
+  async updateAppSettings(
+    settings: Partial<AppSettings>,
+  ): Promise<AppSettings> {
     try {
       const docRef = this.getSettingsDocRef();
       const currentSettings = await this.getAppSettings();
-      
+
       const updatedSettings = {
         ...currentSettings,
         ...settings,
         updatedAt: serverTimestamp(),
       };
-      
+
       await setDoc(docRef, updatedSettings, { merge: true });
-      
+
       return updatedSettings as AppSettings;
     } catch (error) {
-      console.error('Error updating app settings:', error);
-      throw new Error('Failed to update app settings');
+      console.error("Error updating app settings:", error);
+      throw new Error("Failed to update app settings");
     }
   }
 
@@ -78,7 +80,7 @@ export class AppSettingsService {
 
     const docRef = this.getSettingsDocRef();
     await setDoc(docRef, defaultSettings);
-    
+
     return defaultSettings;
   }
 }

@@ -58,7 +58,7 @@ export interface InvestmentContextType {
     fees: number,
   ) => Promise<void>;
   transactions: Transaction[];
-  
+
   deleteSellTransaction: (transaction: Transaction) => Promise<void>;
   removeDirectDebtInvestment: (investmentId: string) => Promise<void>;
   removeRealEstateInvestment: (investmentId: string) => Promise<void>;

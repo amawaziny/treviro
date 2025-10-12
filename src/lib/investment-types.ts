@@ -1,13 +1,20 @@
-import { CurrencyCode, InvestmentType, DebtSubType, PropertyType, GoldType, FundType } from "./types";
+import {
+  CurrencyCode,
+  InvestmentType,
+  DebtSubType,
+  PropertyType,
+  GoldType,
+  FundType,
+} from "./types";
 
-export type TransactionType = 
-  | 'BUY'      // For purchasing any asset (stocks, gold, currency, etc.)
-  | 'SELL'     // For selling any asset
-  | 'DIVIDEND' // For dividend/interest income
-  | 'PAYMENT'  // For installments, fees, or other payments
-  | 'INCOME'   // For receiving income
-  | 'FIXED_ESTIMATE'
-  | 'EXPENSE';
+export type TransactionType =
+  | "BUY" // For purchasing any asset (stocks, gold, currency, etc.)
+  | "SELL" // For selling any asset
+  | "DIVIDEND" // For dividend/interest income
+  | "PAYMENT" // For installments, fees, or other payments
+  | "INCOME" // For receiving income
+  | "FIXED_ESTIMATE"
+  | "EXPENSE";
 //TODO: review all fields in each investment type
 export interface BaseInvestment {
   id: string;
@@ -28,18 +35,18 @@ export interface BaseInvestment {
 }
 
 export interface SecurityInvestment extends BaseInvestment {
-  type: 'Securities';
+  type: "Securities";
   securityId: string;
 }
 
 export interface GoldInvestment extends BaseInvestment {
-  type: 'Gold';
+  type: "Gold";
   goldType: GoldType;
   weightInGrams: number;
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
-  type: 'Currencies';
+  type: "Currencies";
   currencyCode: string;
   exchangeRateAtPurchase: number;
 }
@@ -56,7 +63,7 @@ export interface Installment {
 }
 
 export interface RealEstateInvestment extends BaseInvestment {
-  type: 'Real Estate';
+  type: "Real Estate";
   propertyType: PropertyType;
   propertyAddress?: string;
   installmentFrequency?: "Monthly" | "Quarterly" | "Yearly";
@@ -70,18 +77,18 @@ export interface RealEstateInvestment extends BaseInvestment {
   installments?: Array<Installment>;
   builtUpArea?: number; // Area in square meters
   hasGarden?: boolean; // Whether the property has a garden
-  }
+}
 
 export interface DebtInstrumentInvestment extends BaseInvestment {
-  type: 'Debt Instruments';
+  type: "Debt Instruments";
   debtSubType: DebtSubType;
   issuer: string;
   interestRate: number;
   maturityDate: string;
-  interestFrequency: 'Monthly' | 'Quarterly' | 'Yearly';
+  interestFrequency: "Monthly" | "Quarterly" | "Yearly";
 }
 
-export type Investment = 
+export type Investment =
   | SecurityInvestment
   | GoldInvestment
   | CurrencyInvestment
@@ -105,28 +112,38 @@ export interface Transaction {
   description?: string;
   metadata: {
     // Additional type-specific data
-    [key: string]: any;         // Allow other metadata
+    [key: string]: any; // Allow other metadata
   };
   createdAt: string; // ISO timestamp
 }
 
 // Type guards
-export function isSecurityInvestment(investment: Investment): investment is SecurityInvestment {
-  return investment.type === 'Securities';
+export function isSecurityInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return investment.type === "Securities";
 }
 
-export function isGoldInvestment(investment: Investment): investment is GoldInvestment {
-  return investment.type === 'Gold';
+export function isGoldInvestment(
+  investment: Investment,
+): investment is GoldInvestment {
+  return investment.type === "Gold";
 }
 
-export function isCurrencyInvestment(investment: Investment): investment is CurrencyInvestment {
-  return investment.type === 'Currencies';
+export function isCurrencyInvestment(
+  investment: Investment,
+): investment is CurrencyInvestment {
+  return investment.type === "Currencies";
 }
 
-export function isRealEstateInvestment(investment: Investment): investment is RealEstateInvestment {
-  return investment.type === 'Real Estate';
+export function isRealEstateInvestment(
+  investment: Investment,
+): investment is RealEstateInvestment {
+  return investment.type === "Real Estate";
 }
 
-export function isDebtInstrumentInvestment(investment: Investment): investment is DebtInstrumentInvestment {
-  return investment.type === 'Debt Instruments';
+export function isDebtInstrumentInvestment(
+  investment: Investment,
+): investment is DebtInstrumentInvestment {
+  return investment.type === "Debt Instruments";
 }
