@@ -1,48 +1,20 @@
 import { db } from "@/lib/firebase";
-import { 
-  collection, 
+import {  
   doc, 
-  setDoc, 
   getDoc, 
-  updateDoc, 
-  arrayUnion, 
   runTransaction, 
-  serverTimestamp, 
-  query, 
-  where, 
-  getDocs,
-  writeBatch,
-  deleteDoc,
-  DocumentReference,
-  DocumentData,
-  DocumentSnapshot
 } from "firebase/firestore";
 import {Transaction as FirebaseTransaction} from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { 
   Investment, 
   Transaction, 
-  TransactionType,
-  isSecurityInvestment,
-  isGoldInvestment,
-  isCurrencyInvestment,
   isRealEstateInvestment,
-  isDebtInstrumentInvestment,
-  SecurityInvestment
 } from "@/lib/investment-types";
 import { CurrencyCode, InvestmentType } from "../types";
-import { RealEstateInvestment } from "../investment-types";
-
-type TransactionUpdate = {
-  totalShares: number;
-  totalInvested: number;
-  averagePurchasePrice: number;
-};
-
-type InvestmentWithId = Investment & { id: string };
+import { TransactionService } from "./transaction-service";
 
 const INVESTMENTS_COLLECTION = 'investments';
-const TRANSACTIONS_COLLECTION = 'transactions';
 
 /**
  * Service for managing investments and transactions in Firestore.
@@ -50,6 +22,8 @@ const TRANSACTIONS_COLLECTION = 'transactions';
  */
 export class InvestmentService {
   private userId: string;
+  private transactionService: TransactionService;
+
 
   /**
    * Creates a new InvestmentService instance for a specific user.
@@ -57,22 +31,7 @@ export class InvestmentService {
    */
   constructor(userId: string) {
     this.userId = userId;
-  }
-
-  /**
-   * Gets a reference to the user's investments collection
-   * @private
-   */
-  private getInvestmentsCollection() {
-    return collection(db, `users/${this.userId}/${INVESTMENTS_COLLECTION}`);
-  }
-
-  /**
-   * Gets a reference to the user's transactions collection
-   * @private
-   */
-  private getTransactionsCollection() {
-    return collection(db, `users/${this.userId}/${TRANSACTIONS_COLLECTION}`);
+    this.transactionService = new TransactionService(userId);
   }
 
   /**
@@ -93,92 +52,12 @@ export class InvestmentService {
   }
 
   /**
-   * Retrieves all transactions for a specific investment.
-   * 
-   * @param investmentId - The ID of the investment to get transactions for
-   * @returns Array of transactions for the specified investment
-   * 
-   * @example
-   * const transactions = await investmentService.getTransactionsForInvestment('inv-123');
-   * console.log('Transaction history:', transactions);
-   */
-  async getTransactionsForInvestment(investmentId: string): Promise<Transaction[]> {
-    const q = query(
-      this.getTransactionsCollection(),
-      where('investmentId', '==', investmentId)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data() as Transaction);
-  }
-
-  /**
-   * Finds an investment by its security ID
-   * @private
-   */
-  private async findInvestmentBySecurityId(securityId: string): Promise<InvestmentWithId | null> {
-    if (!securityId) return null;
-    
-    const investmentsRef = this.getInvestmentsCollection();
-    const q = query(investmentsRef, where('securityId', '==', securityId));
-    const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) return null;
-    
-    return {
-      id: querySnapshot.docs[0].id,
-      ...querySnapshot.docs[0].data()
-    } as InvestmentWithId;
-  }
-
-  /**
    * Gets a reference to a specific investment document
    * @param investmentId - The ID of the investment
    * @private
    */
   private getInvestmentRef(investmentId: string) {
     return doc(db, `users/${this.userId}/${INVESTMENTS_COLLECTION}/${investmentId}`);
-  }
-
-  /**
-   * Gets a reference to a specific transaction document
-   * @param transactionId - The ID of the transaction
-   * @private
-   * @returns A reference to the transaction document
-   */
-  private getTransactionRef(transactionId: string) {
-    const realEstateInvestment: RealEstateInvestment  = {
-      id: uuidv4(),
-      userId: this.userId,
-      firstPurchaseDate: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-      name: 'Luxury Apartment in New Cairo',
-      type: 'Real Estate',
-      propertyType: 'Commercial' ,
-      propertyAddress: '123 Palm Hills, New Cairo, Egypt',
-      currency: 'EGP',
-      // For real estate, you might want to set these based on your payment plan
-      totalShares: 1, // Typically 1 for real estate
-      totalInvested: 5000000, // Total property price in EGP
-      averagePurchasePrice: 5000000, // Same as totalInvested for real estate
-      // Installment plan details
-      installmentFrequency: 'Monthly' ,
-      installmentAmount: 50000, // Monthly payment amount
-      totalInstallmentPrice: 6000000, // Total price including interest
-      installmentStartDate: '2023-01-01', // Start date of installments
-      installmentEndDate: '2024-12-01', // End date of installments
-      downPayment: 1000000, // Down payment amount
-      maintenanceAmount: 50000, // Maintenance amount
-      maintenancePaymentDate: '2023-01-01', // Maintenance payment date
-      builtUpArea: 100, // Built-up area in square meters
-      hasGarden: true, // Whether the property has a garden
-      // Add any other metadata
-      metadata: {
-        // Any additional metadata here
-      }
-    };
-    this.buyNew(realEstateInvestment); 
-    return doc(db, `users/${this.userId}/${TRANSACTIONS_COLLECTION}/${transactionId}`);
   }
 
   /**
@@ -272,202 +151,6 @@ export class InvestmentService {
     });
   }
 
-  /**
-   * Calculates the updated investment values based on a transaction.
-   * This is an internal method used by recordTransaction.
-   * 
-   * @param current - Current investment state
-   * @param transaction - The transaction being processed
-   * @returns Updated investment values
-   * @private
-   */
-  private calculateInvestmentUpdate(
-    current: { totalShares: number; totalInvested: number; averagePurchasePrice: number },
-    transaction: Pick<Transaction, 'type' | 'quantity' | 'amount' | 'pricePerUnit' | 'fees' | 'investmentType' | 'installmentNumber'>
-  ): TransactionUpdate {
-    const { type, quantity = 0, amount = 0, pricePerUnit = 0, fees = 0, investmentType } = transaction;
-    let { totalShares, totalInvested, averagePurchasePrice } = current;
-
-    switch (type) {
-      case 'BUY':
-        totalShares += quantity;
-        totalInvested += amount;
-        averagePurchasePrice = totalShares > 0 ? totalInvested / totalShares : 0;
-        break;
-
-      case 'SELL':
-        if (quantity > current.totalShares) {
-          throw new Error('Not enough shares to sell');
-        }
-        totalShares -= quantity;
-        // For real estate, we don't reduce totalInvested when selling
-        if (investmentType !== 'Real Estate') {
-          totalInvested -= (current.averagePurchasePrice * quantity);
-        }
-        break;
-
-      case 'PAYMENT':
-        if (investmentType === 'Real Estate' && transaction.installmentNumber !== undefined) {
-          // For real estate installments, we don't modify shares or average price
-          // Just update the total invested amount
-          totalInvested += Math.abs(amount);
-        } else {
-          totalInvested += amount;
-        }
-        break;
-
-      case 'DIVIDEND':
-        // Dividends don't affect the cost basis or share count
-        break;
-    }
-
-    return {
-      totalShares,
-      totalInvested,
-      averagePurchasePrice: totalShares > 0 ? totalInvested / totalShares : 0,
-    };
-  }
-
-  /**
-   * Records a transaction and updates the associated investment.
-   * This is the main method for recording any type of transaction.
-   * 
-   * @param transactionData - The transaction data (excluding auto-generated fields)
-   * @param transactionData.investmentType - The type of investment (e.g., 'Stocks', 'Real Estate')
-   * @param transactionData.installmentNumber - For installment payments, the number of the installment being paid
-   * @returns The created transaction with all fields populated
-   * 
-   * @throws {Error} If the investment is not found or there are insufficient shares to sell
-   * 
-   * @example
-   * // Example of a stock purchase
-   * await investmentService.recordTransaction({
-   *   investmentId: 'inv-123',
-   *   securityId: 'stock-aapl',
-   *   investmentType: 'Stocks',
-   *   type: 'BUY',
-   *   date: '2025-10-05',
-   *   amount: 1000,
-   *   quantity: 10,
-   *   pricePerUnit: 100,
-   *   fees: 10,
-   *   currency: 'EGP',
-   *   metadata: { note: 'Initial purchase' }
-   * });
-   * 
-   * @example
-   * // Example of a real estate installment payment
-   * await investmentService.recordTransaction({
-   *   investmentId: 'real-estate-123',
-   *   investmentType: 'Real Estate',
-   *   type: 'PAYMENT',
-   *   installmentNumber: 1,
-   *   date: '2025-10-05',
-   *   amount: 5000,
-   *   description: 'Monthly installment payment',
-   *   currency: 'EGP'
-   * });
-   */
-  private async recordTransaction(transactionData: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>): Promise<Transaction> {
-    // Ensure required fields are present
-    if (!transactionData.investmentId) {
-      throw new Error('investmentId is required');
-    }
-    if (!transactionData.securityId && transactionData.type !== 'PAYMENT') {
-      throw new Error('securityId is required for non-payment transactions');
-    }
-    if ((transactionData.quantity === undefined || transactionData.quantity === null) && transactionData.type !== 'PAYMENT') {
-      throw new Error('quantity is required for non-payment transactions');
-    }
-    if (transactionData.amount === undefined || transactionData.amount === null) {
-      throw new Error('amount is required');
-    }
-    if (!transactionData.type) {
-      throw new Error('type is required');
-    }
-
-    return runTransaction(db, async (transaction: FirebaseTransaction) => {
-      const transactionId = uuidv4();
-      const now = new Date().toISOString();
-      
-      // Create the transaction with all required fields
-      const newTransaction: Transaction = {
-        ...transactionData,
-        id: transactionId,
-        userId: this.userId,
-        createdAt: now,
-        metadata: {
-          ...(transactionData.metadata || {})
-        },
-        pricePerUnit: transactionData.pricePerUnit || 0,
-        fees: transactionData.fees || 0,
-        currency: transactionData.currency || 'EGP' as CurrencyCode,
-        description: transactionData.description || '',
-        quantity: transactionData.quantity || 0,
-      };
-
-      const investmentRef = this.getInvestmentRef(transactionData.investmentId);
-      const investmentDoc = await transaction.get(investmentRef);
-      
-      if (!investmentDoc.exists()) {
-        throw new Error('Investment not found');
-      }
-
-      const investment = investmentDoc.data() as Investment;
-      const update = this.calculateInvestmentUpdate({
-        totalShares: investment.totalShares,
-        totalInvested: investment.totalInvested,
-        averagePurchasePrice: investment.averagePurchasePrice
-      }, {
-        type: transactionData.type,
-        quantity: transactionData.quantity || 0,
-        amount: transactionData.amount,
-        pricePerUnit: transactionData.pricePerUnit || 0,
-        fees: transactionData.fees || 0,
-        investmentType: transactionData.investmentType,
-        installmentNumber: transactionData.installmentNumber
-      });
-
-      // Prepare update data
-      const updateData: any = {
-        totalShares: update.totalShares,
-        totalInvested: update.totalInvested,
-        averagePurchasePrice: update.averagePurchasePrice,
-        lastUpdated: now,
-      };
-
-      // If this is a payment for a real estate installment, mark it as paid
-      if (transactionData.type === 'PAYMENT' && 
-          transactionData.investmentType === 'Real Estate' && 
-          transactionData.installmentNumber !== undefined) {
-        
-        const realEstateInvestment = investment as RealEstateInvestment;
-        if (realEstateInvestment.installments) {
-          const updatedInstallments = realEstateInvestment.installments.map(installment => {
-            if (installment.number === transactionData.installmentNumber) {
-              return {
-                ...installment,
-                status: 'Paid',
-                paymentDate: now
-              };
-            }
-            return installment;
-          });
-
-          updateData.installments = updatedInstallments;
-        }
-      }
-
-      // Update the investment
-      transaction.update(investmentRef, updateData);
-
-      // Add the transaction
-      transaction.set(this.getTransactionRef(transactionId), newTransaction);
-
-      return newTransaction;
-    });
-  }
-
   // Helper methods for specific transaction types
   /**
    * Records a buy transaction for an investment.
@@ -500,7 +183,7 @@ export class InvestmentService {
   ): Promise<Transaction> {
     const amount = quantity * pricePerUnit + fees;
     
-    return this.recordTransaction({
+    return this.transactionService.recordTransaction({
       userId: this.userId,
       investmentId,
       securityId,
@@ -547,7 +230,7 @@ export class InvestmentService {
   ): Promise<Transaction> {
     const amount = quantity * pricePerUnit - fees;
     
-    return this.recordTransaction({
+    return this.transactionService.recordTransaction({
       userId: this.userId,
       investmentId,
       securityId,
@@ -587,7 +270,7 @@ export class InvestmentService {
     date: string,
     metadata: Record<string, any> = {}
   ): Promise<Transaction> {
-    return this.recordTransaction({
+    return this.transactionService.recordTransaction({
       userId: this.userId,
       investmentId,
       securityId,
@@ -631,7 +314,7 @@ export class InvestmentService {
     date: string,
     metadata: Record<string, any> = {}
   ): Promise<Transaction> {
-    return this.recordTransaction({
+    return this.transactionService.recordTransaction({
       userId: this.userId,
       investmentId,
       investmentType,
