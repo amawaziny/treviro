@@ -310,7 +310,7 @@ export class TransactionService {
 
     return runFirestoreTransaction(
       db,
-      async (transaction: FirestoreTransaction) => {
+      async (firestoreTransaction: FirestoreTransaction) => {
         const transactionId = uuidv4();
         const now = new Date().toISOString();
 
@@ -331,7 +331,7 @@ export class TransactionService {
         };
 
         const investmentRef = this.getInvestmentRef(transactionData.sourceId);
-        const investmentDoc = await transaction.get(investmentRef);
+        const investmentDoc = await firestoreTransaction.get(investmentRef);
 
         if (!investmentDoc.exists()) {
           throw new Error("Investment not found");
@@ -388,10 +388,10 @@ export class TransactionService {
         }
 
         // Update the investment
-        transaction.update(investmentRef, updateData);
+        firestoreTransaction.update(investmentRef, updateData);
 
         // Add the transaction
-        transaction.set(this.getTransactionRef(transactionId), newTransaction);
+        firestoreTransaction.set(this.getTransactionRef(transactionId), newTransaction);
 
         return newTransaction;
       },

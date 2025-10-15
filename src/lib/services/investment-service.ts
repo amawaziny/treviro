@@ -125,7 +125,7 @@ export class InvestmentService {
 
     return runFirestoreTransaction(
       db,
-      async (transaction: FirestoreTransaction) => {
+      async (firestoreTransaction: FirestoreTransaction) => {
         const now = new Date().toISOString();
         let investment: any;
         let investmentId = uuidv4();
@@ -162,7 +162,7 @@ export class InvestmentService {
 
         // Save the new investment
         const investmentRef = this.getInvestmentRef(investmentId);
-        transaction.set(investmentRef, investment);
+        firestoreTransaction.set(investmentRef, investment);
 
         let transactionData: Transaction | null = null;
         if (!isRealEstateInvestment(investment)) {
