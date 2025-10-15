@@ -10,13 +10,11 @@ import { db as firestoreInstance } from "@/lib/firebase";
 import { doc, getDoc, runTransaction } from "firebase/firestore";
 /**
  * TODO:
- * 1. TransactionService collection should consume events from FinancialRecordsService
- * 2. TransactionService collection should consume events from InvestmentService
- * 3. DashboardService should consume events from TransactionService
- * 4. Dashboard recalculateDashboardSummary should recalculate dashboard summary on every transaction
- * 5. Constants class for collection names
- * 6. Organize types and investment-types
- * 7. FixedEstimates & MaturedDebt should have scheduler or a way to calculate them on specific dates
+ * 1. DashboardService should consume events from TransactionService
+ * 2. Dashboard recalculateDashboardSummary should recalculate dashboard summary on every transaction
+ * 3. Constants class for collection names
+ * 4. Organize types and investment-types
+ * 5. FixedEstimates & MaturedDebt should have scheduler or a way to calculate them on specific dates
  */
 export class DashboardService {
   private userId: string;
