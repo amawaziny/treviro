@@ -7,13 +7,7 @@ import {
   DashboardSummary,
 } from "@/lib/types";
 import { db as firestoreInstance } from "@/lib/firebase";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  runTransaction,
-  increment,
-} from "firebase/firestore";
+import { doc, getDoc, runTransaction } from "firebase/firestore";
 /**
  * TODO:
  * 1. TransactionService collection should consume events from FinancialRecordsService
@@ -21,6 +15,7 @@ import {
  * 3. DashboardService should consume events from TransactionService
  * 4. Dashboard recalculateDashboardSummary should recalculate dashboard summary on every transaction
  * 5. Constants class for collection names
+ * 6. Organize types and investment-types
  */
 export class DashboardService {
   private userId: string;

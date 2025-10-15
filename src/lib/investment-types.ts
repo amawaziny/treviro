@@ -13,7 +13,6 @@ export type TransactionType =
   | "DIVIDEND" // For dividend/interest income
   | "PAYMENT" // For installments, fees, or other payments
   | "INCOME" // For receiving income
-  | "FIXED_ESTIMATE"
   | "EXPENSE";
 //TODO: review all fields in each investment type
 export interface BaseInvestment {

@@ -91,11 +91,6 @@ export class FinancialRecordsService {
           type: "expense:added",
           record: recordData as unknown as ExpenseRecord,
         });
-      } else if (collectionName === COLLECTIONS.FIXED_ESTIMATES) {
-        await eventBus.publish({
-          type: "fixedEstimate:added",
-          record: recordData as unknown as FixedEstimateRecord,
-        });
       }
 
       return recordData;
@@ -137,11 +132,6 @@ export class FinancialRecordsService {
           type: "expense:updated",
           record: updatedData as unknown as ExpenseRecord,
         });
-      } else if (collectionName === COLLECTIONS.FIXED_ESTIMATES) {
-        await eventBus.publish({
-          type: "fixedEstimate:updated",
-          record: updatedData as unknown as FixedEstimateRecord,
-        });
       }
 
       return updatedData;
@@ -169,11 +159,6 @@ export class FinancialRecordsService {
       } else if (collectionName === COLLECTIONS.EXPENSES) {
         await eventBus.publish({
           type: "expense:deleted",
-          recordId: id,
-        });
-      } else if (collectionName === COLLECTIONS.FIXED_ESTIMATES) {
-        await eventBus.publish({
-          type: "fixedEstimate:deleted",
           recordId: id,
         });
       }

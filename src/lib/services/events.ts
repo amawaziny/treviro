@@ -1,8 +1,4 @@
-import type {
-  IncomeRecord,
-  ExpenseRecord,
-  FixedEstimateRecord,
-} from "@/lib/types";
+import type { IncomeRecord, ExpenseRecord } from "@/lib/types";
 
 export type FinancialRecordEvent =
   | { type: "income:added"; record: IncomeRecord }
@@ -10,10 +6,7 @@ export type FinancialRecordEvent =
   | { type: "income:deleted"; recordId: string }
   | { type: "expense:added"; record: ExpenseRecord }
   | { type: "expense:updated"; record: ExpenseRecord }
-  | { type: "expense:deleted"; recordId: string }
-  | { type: "fixedEstimate:added"; record: FixedEstimateRecord }
-  | { type: "fixedEstimate:updated"; record: FixedEstimateRecord }
-  | { type: "fixedEstimate:deleted"; recordId: string };
+  | { type: "expense:deleted"; recordId: string };
 
 type EventHandler = (event: FinancialRecordEvent) => Promise<void>;
 
