@@ -16,6 +16,7 @@ import { doc, getDoc, runTransaction } from "firebase/firestore";
  * 4. Dashboard recalculateDashboardSummary should recalculate dashboard summary on every transaction
  * 5. Constants class for collection names
  * 6. Organize types and investment-types
+ * 7. FixedEstimates & MaturedDebt should have scheduler or a way to calculate them on specific dates
  */
 export class DashboardService {
   private userId: string;
