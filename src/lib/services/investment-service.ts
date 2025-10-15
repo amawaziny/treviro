@@ -8,13 +8,21 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import {
   Investment,
+  RealEstateInvestment,
   Transaction,
   isRealEstateInvestment,
 } from "@/lib/investment-types";
 import { CurrencyCode, InvestmentType } from "../types";
 import { TransactionService } from "./transaction-service";
+import { eventBus } from "./events";
 
 const INVESTMENTS_COLLECTION = "investments";
+
+type InvestmentUpdate = {
+  totalShares: number;
+  totalInvested: number;
+  averagePurchasePrice: number;
+};
 
 /**
  * Service for managing investments and transactions in Firestore.
@@ -104,10 +112,7 @@ export class InvestmentService {
       pricePerUnit?: number;
       fees?: number;
     },
-  ): Promise<{
-    investment: T & { id: string };
-    transaction: Transaction | null;
-  }> {
+  ): Promise<T & { id: string }> {
     const {
       securityId,
       type,
@@ -163,26 +168,176 @@ export class InvestmentService {
         // Save the new investment
         const investmentRef = this.getInvestmentRef(investmentId);
         firestoreTransaction.set(investmentRef, investment);
-
-        let transactionData: Transaction | null = null;
-        if (!isRealEstateInvestment(investment)) {
-          transactionData = await this.buy(
-            investmentId,
+        await eventBus.publish({
+          type: "investment:added",
+          transaction: {
+            sourceId: investmentId,
             securityId,
-            type,
+            type: "BUY",
+            amount,
             quantity,
             pricePerUnit,
             fees,
             currency,
-          );
-        }
+          } as Transaction,
+        });
 
-        return {
-          investment: investment as T & { id: string },
-          transaction: transactionData,
-        };
+        return investment as T & { id: string };
       },
     );
+  }
+
+  /**
+   * Calculates the updated investment values based on a transaction.
+   *
+   * @param current - Current investment state
+   * @param transaction - The transaction being processed
+   * @returns Updated investment values
+   */
+  private calculateInvestmentUpdate(
+    current: {
+      totalShares: number;
+      totalInvested: number;
+      averagePurchasePrice: number;
+    },
+    transaction: Pick<
+      Transaction,
+      | "type"
+      | "quantity"
+      | "amount"
+      | "pricePerUnit"
+      | "fees"
+      | "investmentType"
+      | "installmentNumber"
+    >,
+  ): InvestmentUpdate {
+    const {
+      type,
+      quantity = 0,
+      amount = 0,
+      pricePerUnit = 0,
+      fees = 0,
+      investmentType,
+    } = transaction;
+    let { totalShares, totalInvested, averagePurchasePrice } = current;
+
+    switch (type) {
+      case "BUY":
+        totalShares += quantity;
+        totalInvested += amount;
+        averagePurchasePrice =
+          totalShares > 0 ? totalInvested / totalShares : 0;
+        break;
+
+      case "SELL":
+        if (quantity > current.totalShares) {
+          throw new Error("Not enough shares to sell");
+        }
+        totalShares -= quantity;
+        // For real estate, we don't reduce totalInvested when selling
+        if (investmentType !== "Real Estate") {
+          totalInvested -= current.averagePurchasePrice * quantity;
+        }
+        break;
+
+      case "PAYMENT":
+        if (
+          investmentType === "Real Estate" &&
+          transaction.installmentNumber !== undefined
+        ) {
+          // For real estate installments, we don't modify shares or average price
+          // Just update the total invested amount
+          totalInvested += Math.abs(amount);
+        } else {
+          totalInvested += amount;
+        }
+        break;
+
+      case "DIVIDEND":
+        // Dividends don't affect the cost basis or share count
+        break;
+    }
+
+    return {
+      totalShares,
+      totalInvested,
+      averagePurchasePrice: totalShares > 0 ? totalInvested / totalShares : 0,
+    };
+  }
+
+  private async updateInvestment(
+    transactionData: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
+  ): Promise<Investment> {
+    const investmentRef = this.getInvestmentRef(transactionData.sourceId);
+    const now = new Date().toISOString();
+
+    return runFirestoreTransaction(db, async (firestoreTransaction) => {
+      const investmentDoc = await firestoreTransaction.get(investmentRef);
+
+      if (!investmentDoc.exists()) {
+        throw new Error("Investment not found");
+      }
+
+      const investment = investmentDoc.data() as any;
+      const update = this.calculateInvestmentUpdate(
+        {
+          totalShares: investment.totalShares || 0,
+          totalInvested: investment.totalInvested || 0,
+          averagePurchasePrice: investment.averagePurchasePrice || 0,
+        },
+        {
+          type: transactionData.type,
+          quantity: transactionData.quantity || 0,
+          amount: transactionData.amount,
+          pricePerUnit: transactionData.pricePerUnit || 0,
+          fees: transactionData.fees || 0,
+          investmentType: transactionData.investmentType,
+          installmentNumber: transactionData.installmentNumber,
+        },
+      );
+
+      // Prepare update data
+      const updateData: any = {
+        totalShares: update.totalShares,
+        totalInvested: update.totalInvested,
+        averagePurchasePrice: update.averagePurchasePrice,
+        lastUpdated: now,
+      };
+
+      // If this is a payment for a real estate installment, mark it as paid
+      if (
+        transactionData.type === "PAYMENT" &&
+        transactionData.investmentType === "Real Estate" &&
+        transactionData.installmentNumber !== undefined
+      ) {
+        const realEstateInvestment = investment as RealEstateInvestment;
+        if (realEstateInvestment.installments) {
+          const updatedInstallments = realEstateInvestment.installments.map(
+            (installment) => ({
+              ...installment,
+              ...(installment.number === transactionData.installmentNumber
+                ? {
+                    status: "Paid",
+                    paymentDate: now,
+                  }
+                : {}),
+            }),
+          );
+
+          updateData.installments = updatedInstallments;
+        }
+      }
+
+      // Update the investment
+      firestoreTransaction.update(investmentRef, updateData);
+
+      await eventBus.publish({
+        type: "investment:updated",
+        transaction: transactionData as Transaction,
+      });
+      //TODO: add investment updateData
+      return investment;
+    });
   }
 
   // Helper methods for specific transaction types
@@ -214,10 +369,10 @@ export class InvestmentService {
     fees: number,
     date: string,
     metadata: Record<string, any> = {},
-  ): Promise<Transaction> {
+  ): Promise<Investment> {
     const amount = quantity * pricePerUnit + fees;
 
-    return this.transactionService.recordTransaction({
+    return this.updateInvestment({
       userId: this.userId,
       sourceId: investmentId,
       securityId,
@@ -261,10 +416,10 @@ export class InvestmentService {
     fees: number,
     date: string,
     metadata: Record<string, any> = {},
-  ): Promise<Transaction> {
+  ): Promise<Investment> {
     const amount = quantity * pricePerUnit - fees;
 
-    return this.transactionService.recordTransaction({
+    return this.updateInvestment({
       userId: this.userId,
       sourceId: investmentId,
       securityId,
@@ -277,49 +432,6 @@ export class InvestmentService {
       fees,
       currency: "EGP",
       metadata,
-    });
-  }
-
-  /**
-   * Records a dividend payment for an investment.
-   *
-   * @param investmentId - The ID of the investment receiving the dividend
-   * @param securityId - The ID of the security paying the dividend
-   * @param amount - The dividend amount
-   * @param date - Dividend payment date (ISO string)
-   * @param metadata - Additional metadata about the dividend
-   *
-   * @example
-   * // Record a $50 dividend payment
-   * await investmentService.addDividend(
-   *   'inv-123', 'stock-aapl', 50, '2025-10-05',
-   *   { period: 'Q3 2025', taxWithheld: 5 }
-   * );
-   */
-  async addDividend(
-    investmentId: string,
-    securityId: string,
-    investmentType: InvestmentType,
-    amount: number,
-    date: string,
-    metadata: Record<string, any> = {},
-  ): Promise<Transaction> {
-    return this.transactionService.recordTransaction({
-      userId: this.userId,
-      sourceId: investmentId,
-      securityId,
-      investmentType,
-      type: "DIVIDEND",
-      date,
-      amount,
-      quantity: 0, // No change in share count
-      pricePerUnit: 0,
-      fees: 0,
-      currency: "EGP",
-      metadata: {
-        ...metadata,
-        isIncome: true,
-      },
     });
   }
 
@@ -347,8 +459,8 @@ export class InvestmentService {
     amount: number,
     date: string,
     metadata: Record<string, any> = {},
-  ): Promise<Transaction> {
-    return this.transactionService.recordTransaction({
+  ): Promise<Investment> {
+    return this.updateInvestment({
       userId: this.userId,
       sourceId: investmentId,
       investmentType,
@@ -362,6 +474,49 @@ export class InvestmentService {
       currency: "EGP",
       metadata: {
         ...metadata,
+      },
+    });
+  }
+
+  /**
+   * Records a dividend payment for an investment.
+   *
+   * @param investmentId - The ID of the investment receiving the dividend
+   * @param securityId - The ID of the security paying the dividend
+   * @param amount - The dividend amount
+   * @param date - Dividend payment date (ISO string)
+   * @param metadata - Additional metadata about the dividend
+   *
+   * @example
+   * // Record a $50 dividend payment
+   * await investmentService.addDividend(
+   *   'inv-123', 'stock-aapl', 50, '2025-10-05',
+   *   { period: 'Q3 2025', taxWithheld: 5 }
+   * );
+   */
+  async addDividend(
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    amount: number,
+    date: string,
+    metadata: Record<string, any> = {},
+  ): Promise<Investment> {
+    return this.updateInvestment({
+      userId: this.userId,
+      sourceId: investmentId,
+      securityId,
+      investmentType,
+      type: "DIVIDEND",
+      date,
+      amount,
+      quantity: 0, // No change in share count
+      pricePerUnit: 0,
+      fees: 0,
+      currency: "EGP",
+      metadata: {
+        ...metadata,
+        isIncome: true,
       },
     });
   }

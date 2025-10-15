@@ -9,11 +9,11 @@ import {
 
 export type TransactionType =
   | "BUY" // For purchasing any asset (stocks, gold, currency, etc.)
+  | "PAYMENT" // For installments, fees, or other payments
+  | "EXPENSE" // For expenses
   | "SELL" // For selling any asset
   | "DIVIDEND" // For dividend/interest income
-  | "PAYMENT" // For installments, fees, or other payments
-  | "INCOME" // For receiving income
-  | "EXPENSE";
+  | "INCOME" // For receiving income;
 //TODO: review all fields in each investment type
 export interface BaseInvestment {
   id: string;

@@ -1,4 +1,5 @@
 import type { IncomeRecord, ExpenseRecord } from "@/lib/types";
+import { Transaction } from "../investment-types";
 
 export type FinancialRecordEvent =
   | { type: "income:added"; record: IncomeRecord }
@@ -8,7 +9,14 @@ export type FinancialRecordEvent =
   | { type: "expense:updated"; record: ExpenseRecord }
   | { type: "expense:deleted"; recordId: string };
 
-type EventHandler = (event: FinancialRecordEvent) => Promise<void>;
+export type InvestmentEvent =
+  | { type: "investment:added"; transaction: Transaction }
+  | { type: "investment:updated"; transaction: Transaction }
+  | { type: "investment:deleted"; sourceId: string };
+
+type EventHandler = (
+  event: FinancialRecordEvent | InvestmentEvent,
+) => Promise<void>;
 
 export class EventBus {
   private static instance: EventBus;
@@ -30,7 +38,7 @@ export class EventBus {
     };
   }
 
-  async publish(event: FinancialRecordEvent): Promise<void> {
+  async publish(event: FinancialRecordEvent | InvestmentEvent): Promise<void> {
     await Promise.all(this.handlers.map((handler) => handler(event)));
   }
 }
