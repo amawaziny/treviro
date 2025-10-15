@@ -2,13 +2,12 @@ import { db } from "@/lib/firebase";
 import {
   collection,
   doc,
-  runTransaction as firestoreRunTransaction,
+  runTransaction as runFirestoreTransaction,
   query,
   where,
   getDocs,
-  Transaction as FirebaseTransaction,
+  Transaction as FirestoreTransaction,
   setDoc,
-  getDoc,
   deleteDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
@@ -309,9 +308,9 @@ export class TransactionService {
       throw new Error("type is required");
     }
 
-    return firestoreRunTransaction(
+    return runFirestoreTransaction(
       db,
-      async (transaction: FirebaseTransaction) => {
+      async (transaction: FirestoreTransaction) => {
         const transactionId = uuidv4();
         const now = new Date().toISOString();
 

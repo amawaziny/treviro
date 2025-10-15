@@ -1,6 +1,10 @@
 import { db } from "@/lib/firebase";
-import { doc, getDoc, runTransaction } from "firebase/firestore";
-import { Transaction as FirebaseTransaction } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  runTransaction as runFirestoreTransaction,
+  Transaction as FirestoreTransaction,
+} from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import {
   Investment,
@@ -119,63 +123,66 @@ export class InvestmentService {
       throw new Error("securityId is required for stock and fund investments");
     }
 
-    return runTransaction(db, async (transaction: FirebaseTransaction) => {
-      const now = new Date().toISOString();
-      let investment: any;
-      let investmentId = uuidv4();
+    return runFirestoreTransaction(
+      db,
+      async (transaction: FirestoreTransaction) => {
+        const now = new Date().toISOString();
+        let investment: any;
+        let investmentId = uuidv4();
 
-      // Create base investment with required fields
-      investment = {
-        ...investmentData,
-        id: investmentId,
-        userId: this.userId,
-        securityId: securityId || "",
-        currency,
-        lastUpdated: now,
-        totalShares: quantity,
-        totalInvested: amount,
-        averagePurchasePrice: quantity > 0 ? amount / quantity : 0,
-        metadata: {
-          ...(investmentData.metadata || {}),
-        },
-      };
+        // Create base investment with required fields
+        investment = {
+          ...investmentData,
+          id: investmentId,
+          userId: this.userId,
+          securityId: securityId || "",
+          currency,
+          lastUpdated: now,
+          totalShares: quantity,
+          totalInvested: amount,
+          averagePurchasePrice: quantity > 0 ? amount / quantity : 0,
+          metadata: {
+            ...(investmentData.metadata || {}),
+          },
+        };
 
-      // Handle type-specific fields
-      if (isRealEstateInvestment(investment)) {
-        // Handle real estate specific fields if needed
-        if (investment.metadata?.installmentFrequency) {
-          const {
-            generateInstallmentSchedule,
-          } = require("@/lib/installment-utils");
-          const installments = generateInstallmentSchedule(investment, []);
-          if (installments?.length > 0) {
-            investment.installments = installments;
+        // Handle type-specific fields
+        if (isRealEstateInvestment(investment)) {
+          // Handle real estate specific fields if needed
+          if (investment.metadata?.installmentFrequency) {
+            const {
+              generateInstallmentSchedule,
+            } = require("@/lib/installment-utils");
+            const installments = generateInstallmentSchedule(investment, []);
+            if (installments?.length > 0) {
+              investment.installments = installments;
+            }
           }
         }
-      }
 
-      // Save the new investment
-      const investmentRef = this.getInvestmentRef(investmentId);
-      transaction.set(investmentRef, investment);
+        // Save the new investment
+        const investmentRef = this.getInvestmentRef(investmentId);
+        transaction.set(investmentRef, investment);
 
-      let transactionData: Transaction | null = null;
-      if (!isRealEstateInvestment(investment)) {
-        transactionData = await this.buy(
-          investmentId,
-          securityId,
-          type,
-          quantity,
-          pricePerUnit,
-          fees,
-          currency,
-        );
-      }
+        let transactionData: Transaction | null = null;
+        if (!isRealEstateInvestment(investment)) {
+          transactionData = await this.buy(
+            investmentId,
+            securityId,
+            type,
+            quantity,
+            pricePerUnit,
+            fees,
+            currency,
+          );
+        }
 
-      return {
-        investment: investment as T & { id: string },
-        transaction: transactionData,
-      };
-    });
+        return {
+          investment: investment as T & { id: string },
+          transaction: transactionData,
+        };
+      },
+    );
   }
 
   // Helper methods for specific transaction types
