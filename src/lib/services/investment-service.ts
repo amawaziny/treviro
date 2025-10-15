@@ -88,11 +88,47 @@ export class InvestmentService {
    * });
    */
   /**
-   * Creates a new investment or updates an existing one if securityId matches.
-   * Ensures only one record exists per security and creates a transaction for the initial purchase.
+   * Creates a new investment and records the initial purchase transaction.
    *
-   * @param investmentData - The investment data to create
-   * @returns The created/updated investment with all required fields
+   * This method handles the creation of a new investment with proper initialization of all required fields,
+   * including automatic calculation of investment metrics. It also creates the initial purchase transaction
+   * and handles type-specific initialization for different investment types.
+   *
+   * @template T - The specific investment type (e.g., RealEstateInvestment, SecurityInvestment)
+   * @param {Object} investmentData - The investment data including type-specific properties
+   * @param {string} [investmentData.securityId] - Required for security type investments
+   * @param {number} [investmentData.quantity=0] - Number of units/shares being purchased
+   * @param {number} [investmentData.pricePerUnit=0] - Price per unit at time of purchase
+   * @param {number} [investmentData.fees=0] - Any additional fees associated with the purchase
+   * @param {CurrencyCode} [investmentData.currency=EGP] - Currency of the investment
+   * @returns {Promise<T & { id: string }>} The newly created investment with all required fields populated
+   * @throws {Error} If required fields are missing (e.g., securityId for security investments)
+   *
+   * @example
+   * // Create a new stock investment
+   * const newStock = await investmentService.buyNew<SecurityInvestment>({
+   *   type: 'Securities',
+   *   name: 'Apple Inc.',
+   *   securityId: 'AAPL',
+   *   tickerSymbol: 'AAPL',
+   *   quantity: 10,
+   *   pricePerUnit: 150.50,
+   *   fees: 10
+   * });
+   *
+   * @example
+   * // Create a new real estate investment with installments
+   * const property = await investmentService.buyNew<RealEstateInvestment>({
+   *   type: 'Real Estate',
+   *   name: 'Luxury Apartment',
+   *   propertyType: 'Apartment',
+   *   totalInstallmentPrice: 5000000,
+   *   installmentAmount: 50000,
+   *   installmentFrequency: 'Monthly',
+   *   downPayment: 1000000,
+   *   quantity: 1,
+   *   pricePerUnit: 5000000
+   * });
    */
   async buyNew<T extends Investment>(
     investmentData: Omit<

@@ -22,8 +22,14 @@ import {
 const TRANSACTIONS_COLLECTION = "transactions";
 
 /**
- * Service for managing investment transactions in Firestore.
- * Handles all transaction-related operations for investments.
+ * Service for managing financial transactions in Firestore.
+ *
+ * This service provides methods to create, retrieve, and manage financial transactions
+ * across different investment types. It handles transaction validation, event subscriptions,
+ * and maintains data consistency with related investments and financial records.
+ *
+ * Transactions can be of various types including BUY, SELL, INCOME, EXPENSE, etc.,
+ * and are linked to specific investments or financial records through source IDs.
  */
 export class TransactionService {
   private userId: string;
@@ -31,13 +37,25 @@ export class TransactionService {
 
   /**
    * Creates a new TransactionService instance for a specific user.
-   * @param userId - The ID of the user to manage transactions for
+   *
+   * @param {string} userId - The unique identifier of the user
+   * @throws {Error} If userId is not provided or invalid
    */
   constructor(userId: string) {
+    if (!userId) {
+      throw new Error("User ID is required to initialize TransactionService");
+    }
     this.userId = userId;
     this.setupEventSubscriptions();
   }
 
+  /**
+   * Sets up event subscriptions for transaction-related operations.
+   * Subscribes to various financial events to automatically create/update/delete
+   * transactions when related entities change.
+   *
+   * @private
+   */
   private setupEventSubscriptions() {
     // Subscribe to income events
     const unsubscribe = eventBus.subscribe(

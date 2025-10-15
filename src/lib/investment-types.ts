@@ -13,7 +13,7 @@ export type TransactionType =
   | "EXPENSE" // For expenses
   | "SELL" // For selling any asset
   | "DIVIDEND" // For dividend/interest income
-  | "INCOME" // For receiving income;
+  | "INCOME"; // For receiving income;
 //TODO: review all fields in each investment type
 export interface BaseInvestment {
   id: string;
