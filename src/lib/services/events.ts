@@ -4,23 +4,27 @@ import { Transaction } from "../investment-types";
 export type FinancialRecordEvent =
   | { type: "income:added"; record: IncomeRecord }
   | { type: "income:updated"; record: IncomeRecord }
-  | { type: "income:deleted"; recordId: string }
+  | { type: "income:deleted"; record: IncomeRecord }
   | { type: "expense:added"; record: ExpenseRecord }
   | { type: "expense:updated"; record: ExpenseRecord }
-  | { type: "expense:deleted"; recordId: string };
+  | { type: "expense:deleted"; record: ExpenseRecord };
 
 export type InvestmentEvent =
   | { type: "investment:added"; transaction: Transaction }
   | { type: "investment:updated"; transaction: Transaction }
-  | { type: "investment:deleted"; sourceId: string };
+  | { type: "investment:deleted"; transaction: Transaction };
 
-type EventHandler = (
-  event: FinancialRecordEvent | InvestmentEvent,
-) => Promise<void>;
+export type TransactionEvent =
+  | { type: "transaction:created"; transaction: Transaction }
+  | { type: "transaction:updated"; transaction: Transaction }
+  | { type: "transaction:deleted"; transactionId: string };
+
+type EventType = FinancialRecordEvent | InvestmentEvent | TransactionEvent;
+type EventHandler<T extends EventType> = (event: T) => Promise<void> | void;
 
 export class EventBus {
   private static instance: EventBus;
-  private handlers: EventHandler[] = [];
+  private handlers: Map<string, Set<Function>> = new Map();
 
   private constructor() {}
 
@@ -31,15 +35,36 @@ export class EventBus {
     return EventBus.instance;
   }
 
-  subscribe(handler: EventHandler): () => void {
-    this.handlers.push(handler);
+  subscribe<T extends EventType>(
+    eventType: T["type"],
+    handler: EventHandler<T>,
+  ): () => void {
+    if (!this.handlers.has(eventType)) {
+      this.handlers.set(eventType, new Set());
+    }
+    const handlers = this.handlers.get(eventType)!;
+    handlers.add(handler);
+
     return () => {
-      this.handlers = this.handlers.filter((h) => h !== handler);
+      handlers.delete(handler);
+      if (handlers.size === 0) {
+        this.handlers.delete(eventType);
+      }
     };
   }
 
-  async publish(event: FinancialRecordEvent | InvestmentEvent): Promise<void> {
-    await Promise.all(this.handlers.map((handler) => handler(event)));
+  async publish<T extends EventType>(event: T): Promise<void> {
+    const handlers = this.handlers.get(event.type) || [];
+    await Promise.all(
+      Array.from(handlers).map((handler) => {
+        try {
+          return Promise.resolve(handler(event));
+        } catch (error) {
+          console.error(`Error in event handler for ${event.type}:`, error);
+          return Promise.resolve();
+        }
+      }),
+    );
   }
 }
 

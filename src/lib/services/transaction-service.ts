@@ -57,33 +57,77 @@ export class TransactionService {
    * @private
    */
   private setupEventSubscriptions() {
-    // Subscribe to income events
-    const unsubscribe = eventBus.subscribe(
-      async (event: FinancialRecordEvent | InvestmentEvent) => {
-        if (event.type === "income:added" || event.type === "income:updated") {
-          await this.setFinancialRecordTransaction(event.record, "INCOME");
-        } else if (
-          event.type === "expense:added" ||
-          event.type === "expense:updated"
-        ) {
-          await this.setFinancialRecordTransaction(event.record, "EXPENSE");
-        } else if (
-          event.type == "income:deleted" ||
-          event.type == "expense:deleted"
-        ) {
-          await this.deleteTransactionsBySourceId(event.recordId);
-        } else if (
-          event.type === "investment:added" ||
-          event.type === "investment:updated"
-        ) {
-          await this.recordTransaction(event.transaction);
-        } else if (event.type === "investment:deleted") {
-          await this.deleteTransactionsBySourceId(event.sourceId);
-        }
+    const incomeAddedUnsubscribe = eventBus.subscribe(
+      "income:added",
+      async (event: FinancialRecordEvent) => {
+        await this.setFinancialRecordTransaction(event.record, "INCOME");
       },
     );
+    this.unsubscribeCallbacks.push(incomeAddedUnsubscribe);
 
-    this.unsubscribeCallbacks.push(unsubscribe);
+    const incomeUpdatedUnsubscribe = eventBus.subscribe(
+      "income:updated",
+      async (event: FinancialRecordEvent) => {
+        await this.setFinancialRecordTransaction(event.record, "INCOME");
+      },
+    );
+    this.unsubscribeCallbacks.push(incomeUpdatedUnsubscribe);
+
+    const expenseAddedUnsubscribe = eventBus.subscribe(
+      "expense:added",
+      async (event: FinancialRecordEvent) => {
+        await this.setFinancialRecordTransaction(event.record, "EXPENSE");
+      },
+    );
+    this.unsubscribeCallbacks.push(expenseAddedUnsubscribe);
+
+    const expenseUpdatedUnsubscribe = eventBus.subscribe(
+      "expense:updated",
+      async (event: FinancialRecordEvent) => {
+        await this.setFinancialRecordTransaction(event.record, "EXPENSE");
+      },
+    );
+    this.unsubscribeCallbacks.push(expenseUpdatedUnsubscribe);
+
+    const incomeDeletedUnsubscribe = eventBus.subscribe(
+      "income:deleted",
+      async (event: FinancialRecordEvent) => {
+        await this.deleteTransactionsBySourceId(event.record.id);
+      },
+    );
+    this.unsubscribeCallbacks.push(incomeDeletedUnsubscribe);
+
+    const expenseDeletedUnsubscribe = eventBus.subscribe(
+      "expense:deleted",
+      async (event: FinancialRecordEvent) => {
+        await this.deleteTransactionsBySourceId(event.record.id);
+      },
+    );
+    this.unsubscribeCallbacks.push(expenseDeletedUnsubscribe);
+
+    const investmentAddedUnsubscribe = eventBus.subscribe(
+      "investment:added",
+      async (event: InvestmentEvent) => {
+        await this.recordTransaction(event.transaction);
+      },
+    );
+    this.unsubscribeCallbacks.push(investmentAddedUnsubscribe);
+
+    const investmentUpdatedUnsubscribe = eventBus.subscribe(
+      "investment:updated",
+      async (event: InvestmentEvent) => {
+        await this.recordTransaction(event.transaction);
+      },
+    );
+    this.unsubscribeCallbacks.push(investmentUpdatedUnsubscribe);
+
+    const investmentDeletedUnsubscribe = eventBus.subscribe(
+      "investment:deleted",
+      async (event: InvestmentEvent) => {
+        await this.deleteTransactionsBySourceId(event.transaction.sourceId);
+      },
+    );
+    this.unsubscribeCallbacks.push(investmentDeletedUnsubscribe);
   }
 
   /**

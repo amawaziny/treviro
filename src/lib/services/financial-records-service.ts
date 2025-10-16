@@ -148,18 +148,25 @@ export class FinancialRecordsService {
     try {
       const docRef = this.getDocRef(collectionName, id);
 
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error(`${collectionName} record not found`);
+      }
+      const currentData = docSnap.data();
+
       await deleteDoc(docRef);
 
       // Publish appropriate event based on collection type
       if (collectionName === COLLECTIONS.INCOMES) {
         await eventBus.publish({
           type: "income:deleted",
-          recordId: id,
+          record: currentData as unknown as IncomeRecord,
         });
       } else if (collectionName === COLLECTIONS.EXPENSES) {
         await eventBus.publish({
           type: "expense:deleted",
-          recordId: id,
+          record: currentData as unknown as ExpenseRecord,
         });
       }
     } catch (error) {
