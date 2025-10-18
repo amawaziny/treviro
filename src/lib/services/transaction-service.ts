@@ -228,7 +228,7 @@ export class TransactionService {
         },
       };
 
-      await setDoc(this.getTransactionRef(transactionId), newTransaction);
+      await this.recordTransaction(newTransaction);
     } catch (error) {
       console.error("Failed to create income transaction", error);
       throw new Error("Failed to create income transaction");
@@ -245,6 +245,11 @@ export class TransactionService {
         });
         await batch.commit();
       }
+      
+      await eventBus.publish({
+        type: "transaction:deleted",
+        sourceId: sourceId,
+      });
     } catch (error) {
       console.error("Failed to delete transaction", error);
       throw new Error("Failed to delete transaction");
@@ -261,7 +266,7 @@ export class TransactionService {
    * @throws {Error} If the investment is not found or there are insufficient shares to sell
    */
   async recordTransaction(
-    transactionData: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
+    transactionData: Omit<Transaction, "createdAt">,
   ): Promise<Transaction> {
     // Ensure required fields are present
     if (!transactionData.sourceId) {
@@ -290,7 +295,7 @@ export class TransactionService {
     return runFirestoreTransaction(
       db,
       async (firestoreTransaction: FirestoreTransaction) => {
-        const transactionId = uuidv4();
+        const transactionId = transactionData.id || uuidv4();
         const now = new Date().toISOString();
 
         // Create the transaction with all required fields
@@ -317,7 +322,7 @@ export class TransactionService {
 
         // Publish the transaction:created event after successful transaction creation
         await eventBus.publish({
-          type: "transaction:created",
+          type: transactionData.id ? "transaction:updated" : "transaction:created",
           transaction: newTransaction,
         });
 
