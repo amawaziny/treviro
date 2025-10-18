@@ -315,6 +315,12 @@ export class TransactionService {
           newTransaction,
         );
 
+        // Publish the transaction:created event after successful transaction creation
+        await eventBus.publish({
+          type: "transaction:created",
+          transaction: newTransaction,
+        });
+
         return newTransaction;
       },
     );
