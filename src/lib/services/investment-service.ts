@@ -247,14 +247,7 @@ export class InvestmentService {
       | "installmentNumber"
     >,
   ): InvestmentUpdate {
-    const {
-      type,
-      quantity = 0,
-      amount = 0,
-      pricePerUnit = 0,
-      fees = 0,
-      investmentType,
-    } = transaction;
+    const { type, quantity = 0, amount = 0, investmentType } = transaction;
     let { totalShares, totalInvested, averagePurchasePrice } = current;
 
     switch (type) {
@@ -306,6 +299,16 @@ export class InvestmentService {
   ): Promise<Investment> {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
     const now = new Date().toISOString();
+    let {
+      type,
+      quantity = 0,
+      amount = 0,
+      pricePerUnit = 0,
+      fees = 0,
+    } = transactionData;
+    if (amount == 0) {
+      amount = pricePerUnit * quantity + fees;
+    }
 
     return runFirestoreTransaction(db, async (firestoreTransaction) => {
       const investmentDoc = await firestoreTransaction.get(investmentRef);
@@ -322,12 +325,12 @@ export class InvestmentService {
           averagePurchasePrice: investment.averagePurchasePrice || 0,
         },
         {
-          type: transactionData.type,
-          quantity: transactionData.quantity || 0,
-          amount: transactionData.amount,
-          pricePerUnit: transactionData.pricePerUnit || 0,
-          fees: transactionData.fees || 0,
-          investmentType: transactionData.investmentType,
+          type,
+          quantity,
+          amount,
+          pricePerUnit,
+          fees,
+          investmentType: investment.type,
           installmentNumber: transactionData.installmentNumber,
         },
       );
