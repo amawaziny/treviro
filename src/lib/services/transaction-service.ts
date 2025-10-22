@@ -223,6 +223,8 @@ export class TransactionService {
         pricePerUnit: 0,
         fees: 0,
         createdAt: now,
+        averagePurchasePrice: 0,
+        profitOrLoss: 0,
         metadata: {
           source: "financial-records",
         },
@@ -245,7 +247,7 @@ export class TransactionService {
         });
         await batch.commit();
       }
-      
+
       await eventBus.publish({
         type: "transaction:deleted",
         sourceId: sourceId,
@@ -297,21 +299,34 @@ export class TransactionService {
       async (firestoreTransaction: FirestoreTransaction) => {
         const transactionId = transactionData.id || uuidv4();
         const now = new Date().toISOString();
+        let {
+          pricePerUnit = 0,
+          profitOrLoss = 0,
+          fees = 0,
+          quantity = 0,
+        } = transactionData;
 
+        transactionData.amount = pricePerUnit * quantity + fees;
+        if (transactionData.type === "SELL") {
+          profitOrLoss =
+            quantity * transactionData.averagePurchasePrice -
+            transactionData.amount;
+        }
         // Create the transaction with all required fields
         const newTransaction: Transaction = {
           ...transactionData,
           id: transactionId,
           userId: this.userId,
           createdAt: now,
+          pricePerUnit: pricePerUnit,
+          fees: fees,
+          quantity: quantity,
+          profitOrLoss: profitOrLoss,
+          currency: transactionData.currency || ("EGP" as CurrencyCode),
+          description: transactionData.description || "",
           metadata: {
             ...(transactionData.metadata || {}),
           },
-          pricePerUnit: transactionData.pricePerUnit || 0,
-          fees: transactionData.fees || 0,
-          currency: transactionData.currency || ("EGP" as CurrencyCode),
-          description: transactionData.description || "",
-          quantity: transactionData.quantity || 0,
         };
 
         // Add the transaction
@@ -322,7 +337,9 @@ export class TransactionService {
 
         // Publish the transaction:created event after successful transaction creation
         await eventBus.publish({
-          type: transactionData.id ? "transaction:updated" : "transaction:created",
+          type: transactionData.id
+            ? "transaction:updated"
+            : "transaction:created",
           transaction: newTransaction,
         });
 

@@ -248,14 +248,12 @@ export class InvestmentService {
     >,
   ): InvestmentUpdate {
     const { type, quantity = 0, amount = 0, investmentType } = transaction;
-    let { totalShares, totalInvested, averagePurchasePrice } = current;
+    let { totalShares, totalInvested } = current;
 
     switch (type) {
       case "BUY":
         totalShares += quantity;
         totalInvested += amount;
-        averagePurchasePrice =
-          totalShares > 0 ? totalInvested / totalShares : 0;
         break;
 
       case "SELL":
@@ -270,20 +268,7 @@ export class InvestmentService {
         break;
 
       case "PAYMENT":
-        if (
-          investmentType === "Real Estate" &&
-          transaction.installmentNumber !== undefined
-        ) {
-          // For real estate installments, we don't modify shares or average price
-          // Just update the total invested amount
-          totalInvested += Math.abs(amount);
-        } else {
-          totalInvested += amount;
-        }
-        break;
-
-      case "DIVIDEND":
-        // Dividends don't affect the cost basis or share count
+        totalInvested += amount;
         break;
     }
 
@@ -295,7 +280,10 @@ export class InvestmentService {
   }
 
   private async updateInvestment(
-    transactionData: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
+    transactionData: Omit<
+      Transaction,
+      "id" | "createdAt" | "profitOrLoss" | "averagePurchasePrice"
+    >,
   ): Promise<Investment> {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
     const now = new Date().toISOString();
@@ -309,6 +297,8 @@ export class InvestmentService {
     if (amount == 0) {
       amount = pricePerUnit * quantity + fees;
     }
+
+    pricePerUnit = amount / quantity;
 
     return runFirestoreTransaction(db, async (firestoreTransaction) => {
       const investmentDoc = await firestoreTransaction.get(investmentRef);
@@ -372,7 +362,10 @@ export class InvestmentService {
 
       await eventBus.publish({
         type: "investment:updated",
-        transaction: transactionData as Transaction,
+        transaction: {
+          ...transactionData,
+          averagePurchasePrice: update.averagePurchasePrice,
+        } as Transaction,
       });
       //TODO: add investment updateData
       return investment;

@@ -13,7 +13,9 @@ export type TransactionType =
   | "EXPENSE" // For expenses
   | "SELL" // For selling any asset
   | "DIVIDEND" // For dividend/interest income
-  | "INCOME"; // For receiving income;
+  | "INCOME" // For receiving income;
+  | "INTEREST" // For interest income
+  | "MATURED_DEBT"; // For matured debt
 //TODO: review all fields in each investment type
 export interface BaseInvestment {
   id: string;
@@ -106,6 +108,8 @@ export interface Transaction {
   amount: number; // Total transaction amount (signed: positive for in, negative for out)
   quantity: number; // Number of shares/units (signed: positive for buy, negative for sell)
   pricePerUnit: number; // Price per share/unit
+  averagePurchasePrice: number; // Average purchase price
+  profitOrLoss?: number; // Profit or loss from transaction
   fees: number; // Transaction fees
   currency: CurrencyCode;
   description?: string;

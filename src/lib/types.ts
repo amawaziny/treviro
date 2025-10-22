@@ -229,7 +229,7 @@ export interface DashboardSummary {
   totalInvestedAcrossAllAssets: number;
   totalRealizedPnL: number;
   totalCashBalance: number;
-  totalMaturedDebt: number; // Total amount from matured debt instruments
+  totalMaturedDebt?: number; // Total amount from matured debt instruments
   updatedAt: string;
 }
 
