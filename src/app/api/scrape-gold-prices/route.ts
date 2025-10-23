@@ -30,9 +30,9 @@ async function fetchAndParsePrices(
     if (matchUnit !== unit) continue;
 
     if (!isNaN(price)) {
-      const priceKey = (unit === 'gram' 
-        ? `K${karat}` 
-        : `OunceK${karat}`) as keyof GoldMarketPrices;
+      const priceKey = (
+        unit === "gram" ? `K${karat}` : `OunceK${karat}`
+      ) as keyof GoldMarketPrices;
       (prices as Record<string, number>)[priceKey] = price;
     }
   }
@@ -77,11 +77,26 @@ export async function GET(req: NextRequest) {
     // Only add defined values to the document
     const priceFields: (keyof GoldMarketPrices)[] = [
       // Gram prices
-      'K24', 'K22', 'K21', 'K18', 'K14', 'K12', 'K10', 'K9', 'K8',
-      'Pound',
+      "K24",
+      "K22",
+      "K21",
+      "K18",
+      "K14",
+      "K12",
+      "K10",
+      "K9",
+      "K8",
+      "Pound",
       // Ounce prices
-      'Ounce', 'OunceK22', 'OunceK21', 'OunceK18', 'OunceK14', 
-      'OunceK12', 'OunceK10', 'OunceK9', 'OunceK8'
+      "Ounce",
+      "OunceK22",
+      "OunceK21",
+      "OunceK18",
+      "OunceK14",
+      "OunceK12",
+      "OunceK10",
+      "OunceK9",
+      "OunceK8",
     ];
 
     priceFields.forEach((field) => {

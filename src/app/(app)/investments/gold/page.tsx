@@ -87,10 +87,8 @@ export default function MyGoldPage() {
         data.totalQuantity > 0 ? data.totalCost / data.totalQuantity : 0;
       let currentMarketPrice: number | undefined;
       if (goldMarketPrices) {
-        if (goldType === "K24")
-          currentMarketPrice = goldMarketPrices.K24;
-        else if (goldType === "K21")
-          currentMarketPrice = goldMarketPrices.K21;
+        if (goldType === "K24") currentMarketPrice = goldMarketPrices.K24;
+        else if (goldType === "K21") currentMarketPrice = goldMarketPrices.K21;
         else if (goldType === "Pound")
           currentMarketPrice = goldMarketPrices.Pound;
         else if (goldType === "Ounce")

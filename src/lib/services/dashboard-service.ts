@@ -13,7 +13,7 @@ import { TransactionService } from "./transaction-service";
  * 3. Organize types and investment-types
  * 4. FixedEstimates we can implement confirmation then user confirm it
  * 5. MaturedDebt should have scheduler or a way to calculate them on specific dates
- * 6. Check getDocRef we pass ids 
+ * 6. Check getDocRef we pass ids
  * 7. check fees in sell in transaction profitOrLoss
  */
 const DASHBOARD_PATH = "dashboard_aggregates/summary";
@@ -23,7 +23,11 @@ export class DashboardService {
   private investmentService: InvestmentService;
   private transactionService: TransactionService;
 
-  constructor(userId: string, investmentService: InvestmentService, transactionService: TransactionService) {
+  constructor(
+    userId: string,
+    investmentService: InvestmentService,
+    transactionService: TransactionService,
+  ) {
     this.userId = userId;
     if (!userId) {
       throw new Error("User ID is required for DashboardService");
@@ -33,10 +37,7 @@ export class DashboardService {
   }
 
   private getDashboardDocRef() {
-    return doc(
-      db,
-      `users/${this.userId}/${DASHBOARD_PATH}`,
-    );
+    return doc(db, `users/${this.userId}/${DASHBOARD_PATH}`);
   }
 
   /**
@@ -151,7 +152,7 @@ export class DashboardService {
     const totalCashBalance = cashFlow.income - cashFlow.expense;
 
     // 2. Get totalInvested from investments collection
-    const investments = await this.investmentService.getInvestments(); 
+    const investments = await this.investmentService.getInvestments();
     const totalInvestedAcrossAllAssets = investments.reduce(
       (sum, investment) => sum + (investment.totalInvested || 0),
       0,

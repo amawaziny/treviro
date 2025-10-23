@@ -15,7 +15,12 @@ import {
   Transaction,
   isRealEstateInvestment,
 } from "@/lib/investment-types";
-import { CurrencyCode, GoldMarketPrices, InvestmentType, ListedSecurity } from "../types";
+import {
+  CurrencyCode,
+  GoldMarketPrices,
+  InvestmentType,
+  ListedSecurity,
+} from "../types";
 import { eventBus } from "./events";
 
 const INVESTMENTS_COLLECTION = "investments";
@@ -592,7 +597,10 @@ export class InvestmentService {
     throw new Error("Security not found");
   }
 
-  async getExchangeRate(currencyCode: string, currency: string): Promise<number> {
+  async getExchangeRate(
+    currencyCode: string,
+    currency: string,
+  ): Promise<number> {
     const ratesDocRef = doc(db, EXCHANGE_RATES_COLLECTION, "current");
     const ratesDocSnap = await getDoc(ratesDocRef);
     if (ratesDocSnap.exists()) {
@@ -618,16 +626,21 @@ export class InvestmentService {
       let currentMarketPrice = investment.averagePurchasePrice;
       if (investment.type === "Gold") {
         const goldMarketPrices = await this.getGoldMarketPrices();
-        currentMarketPrice = goldMarketPrices[investment.goldType] ?? investment.averagePurchasePrice;
+        currentMarketPrice =
+          goldMarketPrices[investment.goldType] ??
+          investment.averagePurchasePrice;
       } else if (investment.type === "Securities") {
         const security = await this.getSecurity(investment.securityId);
         currentMarketPrice = security.price;
       } else if (investment.type === "Currencies") {
-        currentMarketPrice = await this.getExchangeRate(investment.currencyCode, investment.currency);
+        currentMarketPrice = await this.getExchangeRate(
+          investment.currencyCode,
+          investment.currency,
+        );
       }
       const totalShares = investment.totalShares;
       const totalInvested = investment.totalInvested;
-      const unrealizedPnL = (currentMarketPrice * totalShares) - totalInvested;
+      const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
       totalUnrealizedPnL += unrealizedPnL;
     });
     return totalUnrealizedPnL;

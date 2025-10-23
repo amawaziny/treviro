@@ -114,8 +114,7 @@ export default function DashboardPage() {
           const goldInv = inv as GoldInvestment;
           if (goldMarketPrices && goldInv.quantityInGrams) {
             let pricePerUnit: number | undefined;
-            if (goldInv.goldType === "K24")
-              pricePerUnit = goldMarketPrices.K24;
+            if (goldInv.goldType === "K24") pricePerUnit = goldMarketPrices.K24;
             else if (goldInv.goldType === "K21")
               pricePerUnit = goldMarketPrices.K21;
             else if (goldInv.goldType === "Pound")
