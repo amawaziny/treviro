@@ -115,13 +115,13 @@ export default function DashboardPage() {
           if (goldMarketPrices && goldInv.quantityInGrams) {
             let pricePerUnit: number | undefined;
             if (goldInv.goldType === "K24")
-              pricePerUnit = goldMarketPrices.pricePerGramK24;
+              pricePerUnit = goldMarketPrices.K24;
             else if (goldInv.goldType === "K21")
-              pricePerUnit = goldMarketPrices.pricePerGramK21;
+              pricePerUnit = goldMarketPrices.K21;
             else if (goldInv.goldType === "Pound")
-              pricePerUnit = goldMarketPrices.pricePerGoldPound;
+              pricePerUnit = goldMarketPrices.Pound;
             else if (goldInv.goldType === "Ounce")
-              pricePerUnit = goldMarketPrices.pricePerOunceK24;
+              pricePerUnit = goldMarketPrices.Ounce;
             if (pricePerUnit)
               currentVal = pricePerUnit * goldInv.quantityInGrams;
           }

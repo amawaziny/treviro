@@ -3,44 +3,18 @@ import { db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import axios from "axios";
 import * as cheerio from "cheerio";
-
-interface GoldPrices {
-  // Gram prices
-  pricePerGramK24?: number;
-  pricePerGramK21?: number;
-  pricePerGramK22?: number;
-  pricePerGramK18?: number;
-  pricePerGramK14?: number;
-  pricePerGramK12?: number;
-  pricePerGramK10?: number;
-  pricePerGramK9?: number;
-  pricePerGramK8?: number;
-  pricePerGoldPound?: number;
-
-  // Ounce prices
-  pricePerOunceK24?: number;
-  pricePerOunceK21?: number;
-  pricePerOunceK22?: number;
-  pricePerOunceK18?: number;
-  pricePerOunceK14?: number;
-  pricePerOunceK12?: number;
-  pricePerOunceK10?: number;
-  pricePerOunceK9?: number;
-  pricePerOunceK8?: number;
-
-  [key: string]: number | undefined;
-}
+import { GoldMarketPrices } from "@/lib/types";
 
 async function fetchAndParsePrices(
   url: string,
   unit: "gram" | "ounce",
-): Promise<Partial<GoldPrices>> {
+): Promise<Partial<GoldMarketPrices>> {
   console.log(`Fetching ${unit} prices from:`, url);
   const { data: html } = await axios.get(url, {
     headers: { "User-Agent": "Mozilla/5.0" },
   });
 
-  const prices: Partial<GoldPrices> = {};
+  const prices: Partial<GoldMarketPrices> = {};
   const $ = cheerio.load(html);
   const content = $("body").text();
   const priceRegex =
@@ -56,9 +30,10 @@ async function fetchAndParsePrices(
     if (matchUnit !== unit) continue;
 
     if (!isNaN(price)) {
-      const priceKey =
-        `pricePer${unit.charAt(0).toUpperCase() + unit.slice(1)}K${karat}` as keyof GoldPrices;
-      prices[priceKey] = price;
+      const priceKey = (unit === 'gram' 
+        ? `K${karat}` 
+        : `OunceK${karat}`) as keyof GoldMarketPrices;
+      (prices as Record<string, number>)[priceKey] = price;
     }
   }
 
@@ -67,7 +42,7 @@ async function fetchAndParsePrices(
 
 export async function GET(req: NextRequest) {
   try {
-    const goldPrices: GoldPrices = {};
+    const goldPrices: GoldMarketPrices = { source: "goldrate24.com" };
 
     // Fetch gram prices
     const gramPrices = await fetchAndParsePrices(
@@ -77,8 +52,8 @@ export async function GET(req: NextRequest) {
     Object.assign(goldPrices, gramPrices);
 
     // Calculate gold pound price (8g of 21K gold) if we have the 21K gram price
-    if (goldPrices.pricePerGramK21) {
-      goldPrices.pricePerGoldPound = goldPrices.pricePerGramK21 * 8;
+    if (goldPrices.K21) {
+      goldPrices.Pound = goldPrices.K21 * 8;
     }
 
     // Fetch ounce prices
@@ -94,36 +69,20 @@ export async function GET(req: NextRequest) {
     console.log("Extracted gold prices:", goldPrices);
 
     // Prepare data with only defined fields
-    const goldMarketData: Record<string, unknown> = {
+    const goldMarketData: Partial<GoldMarketPrices> = {
       lastUpdated,
       source: "goldrate24.com",
     };
 
     // Only add defined values to the document
-    const priceFields = [
+    const priceFields: (keyof GoldMarketPrices)[] = [
       // Gram prices
-      "pricePerGramK24",
-      "pricePerGramK21",
-      "pricePerGramK22",
-      "pricePerGramK18",
-      "pricePerGramK14",
-      "pricePerGramK12",
-      "pricePerGramK10",
-      "pricePerGramK9",
-      "pricePerGramK8",
-      "pricePerGoldPound",
-
+      'K24', 'K22', 'K21', 'K18', 'K14', 'K12', 'K10', 'K9', 'K8',
+      'Pound',
       // Ounce prices
-      "pricePerOunceK24",
-      "pricePerOunceK21",
-      "pricePerOunceK22",
-      "pricePerOunceK18",
-      "pricePerOunceK14",
-      "pricePerOunceK12",
-      "pricePerOunceK10",
-      "pricePerOunceK9",
-      "pricePerOunceK8",
-    ] as const;
+      'Ounce', 'OunceK22', 'OunceK21', 'OunceK18', 'OunceK14', 
+      'OunceK12', 'OunceK10', 'OunceK9', 'OunceK8'
+    ];
 
     priceFields.forEach((field) => {
       const value = goldPrices[field];

@@ -161,13 +161,13 @@ export function InvestmentBreakdownCards({
 
               if (goldMarketPrices) {
                 if (goldInv.goldType === "K24") {
-                  currentPricePerGram = goldMarketPrices.pricePerGramK24 || 0;
+                  currentPricePerGram = goldMarketPrices.K24 || 0;
                 } else if (goldInv.goldType === "K21") {
-                  currentPricePerGram = goldMarketPrices.pricePerGramK21 || 0;
+                  currentPricePerGram = goldMarketPrices.K21 || 0;
                 } else if (goldInv.goldType === "Pound") {
-                  currentPricePerGram = goldMarketPrices.pricePerGoldPound || 0;
+                  currentPricePerGram = goldMarketPrices.Pound || 0;
                 } else if (goldInv.goldType === "Ounce") {
-                  currentPricePerGram = goldMarketPrices.pricePerOunceK24 || 0;
+                  currentPricePerGram = goldMarketPrices.Ounce || 0;
                 }
               }
 

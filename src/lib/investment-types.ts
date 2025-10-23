@@ -43,13 +43,14 @@ export interface SecurityInvestment extends BaseInvestment {
 export interface GoldInvestment extends BaseInvestment {
   type: "Gold";
   goldType: GoldType;
-  weightInGrams: number;
+  weightInGrams: number; //weight in grams per gold type
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
   type: "Currencies";
   currencyCode: string;
-  exchangeRateAtPurchase: number;
+  //TODO: remove it because we only need it in the transaction and in the investment we store the total invested amount
+  exchangeRateAtPurchase?: number;
 }
 
 export interface Installment {

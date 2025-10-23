@@ -4,6 +4,9 @@ import {
   getDoc,
   runTransaction as runFirestoreTransaction,
   Transaction as FirestoreTransaction,
+  query,
+  collection,
+  getDocs,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -12,11 +15,13 @@ import {
   Transaction,
   isRealEstateInvestment,
 } from "@/lib/investment-types";
-import { CurrencyCode, InvestmentType } from "../types";
-import { TransactionService } from "./transaction-service";
+import { CurrencyCode, GoldMarketPrices, InvestmentType, ListedSecurity } from "../types";
 import { eventBus } from "./events";
 
 const INVESTMENTS_COLLECTION = "investments";
+const GOLD_MARKET_PRICES_COLLECTION = "goldMarketPrices";
+const LISTED_SECURITIES_COLLECTION = "listedSecurities";
+const EXCHANGE_RATES_COLLECTION = "exchangeRates";
 
 type InvestmentUpdate = {
   totalShares: number;
@@ -30,7 +35,6 @@ type InvestmentUpdate = {
  */
 export class InvestmentService {
   private userId: string;
-  private transactionService: TransactionService;
 
   /**
    * Creates a new InvestmentService instance for a specific user.
@@ -38,7 +42,6 @@ export class InvestmentService {
    */
   constructor(userId: string) {
     this.userId = userId;
-    this.transactionService = new TransactionService(userId);
   }
 
   /**
@@ -68,6 +71,14 @@ export class InvestmentService {
       db,
       `users/${this.userId}/${INVESTMENTS_COLLECTION}/${investmentId}`,
     );
+  }
+
+  /**
+   * Gets a reference to the user's investments collection
+   * @private
+   */
+  private getInvestmentsCollection() {
+    return collection(db, `users/${this.userId}/${INVESTMENTS_COLLECTION}`);
   }
 
   /**
@@ -551,5 +562,74 @@ export class InvestmentService {
         isIncome: true,
       },
     });
+  }
+
+  async getInvestments(): Promise<Investment[]> {
+    const q = query(this.getInvestmentsCollection());
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => doc.data() as Investment);
+  }
+
+  //TODO: create service for Master data and use it here and the hook
+  async getGoldMarketPrices(): Promise<GoldMarketPrices> {
+    const pricesDocRef = doc(db, GOLD_MARKET_PRICES_COLLECTION, "current");
+    const pricesDocSnap = await getDoc(pricesDocRef);
+    if (pricesDocSnap.exists()) {
+      const data = pricesDocSnap.data();
+      return data as GoldMarketPrices;
+    }
+    throw new Error("Gold market prices not found");
+  }
+
+  //TODO: create service for Master data
+  async getSecurity(securityId: string): Promise<ListedSecurity> {
+    const securityDocRef = doc(db, LISTED_SECURITIES_COLLECTION, securityId);
+    const securityDocSnap = await getDoc(securityDocRef);
+    if (securityDocSnap.exists()) {
+      const data = securityDocSnap.data();
+      return data as ListedSecurity;
+    }
+    throw new Error("Security not found");
+  }
+
+  async getExchangeRate(currencyCode: string, currency: string): Promise<number> {
+    const ratesDocRef = doc(db, EXCHANGE_RATES_COLLECTION, "current");
+    const ratesDocSnap = await getDoc(ratesDocRef);
+    if (ratesDocSnap.exists()) {
+      const data = ratesDocSnap.data();
+      const rateKey = `${currencyCode.toUpperCase()}_${currency.toUpperCase()}`;
+      if (data && data[rateKey]) {
+        return data[rateKey];
+      }
+    }
+    throw new Error("Exchange rate not found");
+  }
+
+  /**
+   * Calculates the total unrealized profit or loss for all investments
+   * by get current market price of each investment (if gold get from goldMarketPrices collection and if securities get from listedSecurities collection and if currencies get from exchangeRates collection) and multiply it with shares count
+   * then subtract total invested
+   * @returns Promise that resolves with the total unrealized profit or loss
+   */
+  async calculateUnrealizedPnL(): Promise<number> {
+    const investments = await this.getInvestments();
+    let totalUnrealizedPnL = 0;
+    investments.forEach(async (investment: Investment) => {
+      let currentMarketPrice = investment.averagePurchasePrice;
+      if (investment.type === "Gold") {
+        const goldMarketPrices = await this.getGoldMarketPrices();
+        currentMarketPrice = goldMarketPrices[investment.goldType] ?? investment.averagePurchasePrice;
+      } else if (investment.type === "Securities") {
+        const security = await this.getSecurity(investment.securityId);
+        currentMarketPrice = security.price;
+      } else if (investment.type === "Currencies") {
+        currentMarketPrice = await this.getExchangeRate(investment.currencyCode, investment.currency);
+      }
+      const totalShares = investment.totalShares;
+      const totalInvested = investment.totalInvested;
+      const unrealizedPnL = (currentMarketPrice * totalShares) - totalInvested;
+      totalUnrealizedPnL += unrealizedPnL;
+    });
+    return totalUnrealizedPnL;
   }
 }

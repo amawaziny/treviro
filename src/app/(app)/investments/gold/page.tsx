@@ -88,13 +88,13 @@ export default function MyGoldPage() {
       let currentMarketPrice: number | undefined;
       if (goldMarketPrices) {
         if (goldType === "K24")
-          currentMarketPrice = goldMarketPrices.pricePerGramK24;
+          currentMarketPrice = goldMarketPrices.K24;
         else if (goldType === "K21")
-          currentMarketPrice = goldMarketPrices.pricePerGramK21;
+          currentMarketPrice = goldMarketPrices.K21;
         else if (goldType === "Pound")
-          currentMarketPrice = goldMarketPrices.pricePerGoldPound;
+          currentMarketPrice = goldMarketPrices.Pound;
         else if (goldType === "Ounce")
-          currentMarketPrice = goldMarketPrices.pricePerOunceK24;
+          currentMarketPrice = goldMarketPrices.Ounce;
       }
 
       holdings.push({

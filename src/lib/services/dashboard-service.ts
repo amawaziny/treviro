@@ -1,13 +1,7 @@
-import {
-  Investment,
-  DebtInstrumentInvestment,
-  Transaction,
-  IncomeRecord,
-  ExpenseRecord,
-  DashboardSummary,
-} from "@/lib/types";
+import { IncomeRecord, ExpenseRecord, DashboardSummary } from "@/lib/types";
 import { db as firestoreInstance } from "@/lib/firebase";
 import { doc, getDoc, runTransaction } from "firebase/firestore";
+import { Investment, Transaction } from "@/lib/investment-types";
 /**
  * TODO:
  * 1. DashboardService should consume events from TransactionService
@@ -16,9 +10,9 @@ import { doc, getDoc, runTransaction } from "firebase/firestore";
  * 4. Organize types and investment-types
  * 5. FixedEstimates & MaturedDebt should have scheduler or a way to calculate them on specific dates
  */
+const DASHBOARD_PATH = "dashboard_aggregates/summary";
 export class DashboardService {
   private userId: string;
-  private static readonly DASHBOARD_PATH = "dashboard_aggregates/summary";
 
   constructor(userId: string) {
     if (!userId) {
@@ -31,7 +25,7 @@ export class DashboardService {
     if (!this.userId || !firestoreInstance) return null;
     return doc(
       firestoreInstance,
-      `users/${this.userId}/${DashboardService.DASHBOARD_PATH}`,
+      `users/${this.userId}/${DASHBOARD_PATH}`,
     );
   }
 
@@ -90,68 +84,89 @@ export class DashboardService {
       throw error;
     }
   }
+
   /**
-   * Calculates and updates the dashboard summary based on investments, transactions, and financial records
-   * @param investments Array of all investments
-   * @param transactions Array of all transactions
-   * @param incomeRecords Array of all income records
-   * @param expenseRecords Array of all expense records
+   * TODO:
+   * 1. totalCashBalance = (sum of all INCOME and DIVIDEND and INTEREST and SELL and MATURED_DEBT - sum of all EXPENSE and PAYMENT and BUY) from transactions collection
+   * 2. totalInvestedAcrossAllAssets = sum of all totalInvested amount from investment collection
+   * 3. totalPortfolioValue = totalCashBalance + totalInvestedAcrossAllAssets
+   * 4. totalRealizedPnL = sum of all profitOrLoss from transactions collection
+   * Calculates and updates the dashboard summary based on transactions
+   * @param transactions Array of all transactions to process
    * @returns Promise that resolves with the updated DashboardSummary
    */
   async recalculateDashboardSummary(
-    investments: Investment[],
     transactions: Transaction[],
-    incomeRecords: IncomeRecord[],
-    expenseRecords: ExpenseRecord[],
   ): Promise<DashboardSummary> {
-    let calculatedTotalInvested = 0;
-    let calculatedTotalRealizedPnL = 0;
-    let calculatedTotalCashBalance = 0;
-    let totalMaturedDebt = 0;
+    // Initialize summary values
+    let totalInvested = 0;
+    let totalRealizedPnL = 0;
+    let totalCashBalance = 0;
 
-    // Calculate matured debt
-    investments.forEach((inv) => {
-      const debtInv = inv as DebtInstrumentInvestment;
-      if (inv.type === "Debt Instruments" && debtInv.isMatured) {
-        totalMaturedDebt += debtInv.amountInvested || 0;
+    // Group transactions by source (investment)
+    const transactionsBySource = transactions.reduce<
+      Record<string, Transaction[]>
+    >((acc, txn) => {
+      if (txn.sourceId) {
+        if (!acc[txn.sourceId]) {
+          acc[txn.sourceId] = [];
+        }
+        acc[txn.sourceId].push(txn);
       }
-    });
+      return acc;
+    }, {});
 
-    // Calculate other investment values
-    investments.forEach((inv) => {
-      const debtInv = inv as DebtInstrumentInvestment;
-      if (!(inv.type === "Debt Instruments" && debtInv.isMatured)) {
-        calculatedTotalInvested += inv.amountInvested || 0;
-        calculatedTotalCashBalance -= inv.amountInvested || 0; // Investment cost is an outflow
-      }
-    });
+    // Process transactions by source
+    Object.entries(transactionsBySource).forEach(
+      ([sourceId, sourceTransactions]) => {
+        // Sort transactions by date to process them in chronological order
+        const sortedTransactions = [...sourceTransactions].sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        );
 
-    // Add matured debt to cash balance
-    calculatedTotalCashBalance += totalMaturedDebt;
+        // Process each transaction for this source
+        for (const txn of sortedTransactions) {
+          const amount = txn.amount || 0;
+          const shares = txn.quantity || 0;
 
-    // Process transactions
-    transactions.forEach((txn) => {
-      if (txn.type === "sell") {
-        calculatedTotalRealizedPnL += txn.profitOrLoss || 0;
-        calculatedTotalCashBalance += txn.totalAmount || 0; // Sale proceeds are an inflow
-      }
-    });
+          switch (txn.type) {
+            case "BUY":
+              totalInvested += amount;
+              break;
 
-    // Process income records
-    incomeRecords.forEach((inc) => {
-      calculatedTotalCashBalance += inc.amount || 0; // Income is an inflow
-    });
+            case "SELL":
+              totalInvested -= amount;
+              totalRealizedPnL += amount;
+              totalCashBalance += amount;
+              break;
 
-    // Process expense records
-    expenseRecords.forEach((exp) => {
-      calculatedTotalCashBalance -= exp.amount || 0; // Expense is an outflow
-    });
+            case "DIVIDEND":
+            case "INTEREST":
+            case "INCOME":
+              totalCashBalance += amount;
+              break;
+
+            case "EXPENSE":
+              totalCashBalance -= amount;
+              break;
+
+            case "PAYMENT":
+              // Track payments as part of investment cost
+              totalInvested += amount;
+              break;
+
+            case "MATURED_DEBT":
+              totalCashBalance += amount;
+              break;
+          }
+        }
+      },
+    );
 
     const summary: DashboardSummary = {
-      totalInvestedAcrossAllAssets: calculatedTotalInvested,
-      totalRealizedPnL: calculatedTotalRealizedPnL,
-      totalCashBalance: calculatedTotalCashBalance,
-      totalMaturedDebt,
+      totalInvestedAcrossAllAssets: totalInvested,
+      totalRealizedPnL: totalRealizedPnL,
+      totalCashBalance: totalCashBalance,
       updatedAt: new Date().toISOString(),
     };
 

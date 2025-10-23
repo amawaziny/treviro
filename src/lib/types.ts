@@ -226,6 +226,7 @@ export interface Transaction {
 }
 
 export interface DashboardSummary {
+  totalPortfolioValue?: number;
   totalInvestedAcrossAllAssets: number;
   totalRealizedPnL: number;
   totalCashBalance: number;
@@ -234,25 +235,25 @@ export interface DashboardSummary {
 }
 
 export interface GoldMarketPrices {
-  pricePerGramK24?: number;
-  pricePerGramK21?: number;
-  pricePerGramK22?: number;
-  pricePerGramK18?: number;
-  pricePerGramK14?: number;
-  pricePerGramK12?: number;
-  pricePerGramK10?: number;
-  pricePerGramK9?: number;
-  pricePerGramK8?: number;
-  pricePerGoldPound?: number;
-  pricePerOunceK24?: number;
-  pricePerOunceK21?: number;
-  pricePerOunceK22?: number;
-  pricePerOunceK18?: number;
-  pricePerOunceK14?: number;
-  pricePerOunceK12?: number;
-  pricePerOunceK10?: number;
-  pricePerOunceK9?: number;
-  pricePerOunceK8?: number;
+  K24?: number;
+  K21?: number;
+  K22?: number;
+  K18?: number;
+  K14?: number;
+  K12?: number;
+  K10?: number;
+  K9?: number;
+  K8?: number;
+  Pound?: number;
+  Ounce?: number;
+  OunceK21?: number;
+  OunceK22?: number;
+  OunceK18?: number;
+  OunceK14?: number;
+  OunceK12?: number;
+  OunceK10?: number;
+  OunceK9?: number;
+  OunceK8?: number;
   source?: string;
   lastUpdated?: any;
 }
