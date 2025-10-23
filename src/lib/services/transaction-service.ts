@@ -151,6 +151,12 @@ export class TransactionService {
     );
   }
 
+  async getTransactions(): Promise<Transaction[]> {
+    const q = query(this.getTransactionsCollection());
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => doc.data() as Transaction);
+  }
+
   /**
    * Retrieves all transactions for a specific investment.
    *
@@ -161,7 +167,7 @@ export class TransactionService {
    * const transactions = await transactionService.getTransactionsForInvestment('inv-123');
    * console.log('Transaction history:', transactions);
    */
-  async getTransactionsForInvestment(
+  async getTransactionsByInvestmentId(
     investmentId: string,
   ): Promise<Transaction[]> {
     const q = query(
