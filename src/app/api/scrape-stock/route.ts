@@ -65,12 +65,9 @@ export async function GET(req: NextRequest) {
           updates.push(
             (async () => {
               // Update the price in listedSecurities
-              await updateDoc(
-                doc(db, "listedSecurities", stockDoc.id),
-                {
-                  price,
-                },
-              );
+              await updateDoc(doc(db, "listedSecurities", stockDoc.id), {
+                price,
+              });
               // Also update priceHistory subcollection
               const today = new Date().toISOString();
 
@@ -92,13 +89,7 @@ export async function GET(req: NextRequest) {
               }
 
               await setDoc(
-                doc(
-                  db,
-                  "listedSecurities",
-                  stockDoc.id,
-                  "priceHistory",
-                  today,
-                ),
+                doc(db, "listedSecurities", stockDoc.id, "priceHistory", today),
                 { price },
                 { merge: true },
               );
@@ -124,12 +115,9 @@ export async function GET(req: NextRequest) {
               if (prices.length === 2 && prices[1] !== 0) {
                 changePercent = ((prices[0] - prices[1]) / prices[1]) * 100;
               }
-              await updateDoc(
-                doc(db, "listedSecurities", stockDoc.id),
-                {
-                  changePercent,
-                },
-              );
+              await updateDoc(doc(db, "listedSecurities", stockDoc.id), {
+                changePercent,
+              });
             })(),
           );
           console.log(`Updated: ${code}`);

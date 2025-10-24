@@ -316,11 +316,11 @@ export class TransactionService {
           quantity = 0,
         } = transactionData;
 
-        transactionData.amount = pricePerUnit * quantity + fees;
         if (transactionData.type === "SELL") {
           profitOrLoss =
             quantity * transactionData.averagePurchasePrice -
             transactionData.amount;
+          profitOrLoss -= fees;
         }
         // Create the transaction with all required fields
         const newTransaction: Transaction = {

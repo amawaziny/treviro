@@ -312,11 +312,17 @@ export class InvestmentService {
       pricePerUnit = 0,
       fees = 0,
     } = transactionData;
-    if (amount == 0) {
-      amount = pricePerUnit * quantity + fees;
+    if (amount === 0) {
+      amount = pricePerUnit * quantity;
     }
 
-    pricePerUnit = amount / quantity;
+    if (type !== "SELL") {
+      amount += fees;
+    }
+
+    if (quantity > 0) {
+      pricePerUnit = amount / quantity;
+    }
 
     return runFirestoreTransaction(db, async (firestoreTransaction) => {
       const investmentDoc = await firestoreTransaction.get(investmentRef);
@@ -594,7 +600,9 @@ export class InvestmentService {
           goldMarketPrices[investment.goldType] ??
           investment.averagePurchasePrice;
       } else if (investment.type === "Securities") {
-        const security = await masterDataService.getSecurity(investment.securityId);
+        const security = await masterDataService.getSecurity(
+          investment.securityId,
+        );
         currentMarketPrice = security.price;
       } else if (investment.type === "Currencies") {
         currentMarketPrice = await masterDataService.getExchangeRate(

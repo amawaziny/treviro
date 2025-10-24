@@ -1,9 +1,4 @@
-import {
-  doc,
-  getDoc,
-  runTransaction,
-  setDoc,
-} from "firebase/firestore";
+import { doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
@@ -18,8 +13,6 @@ import { formatPath } from "@/lib/utils";
  * 2. Organize types and investment-types
  * 3. FixedEstimates we can implement confirmation then user confirm it
  * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates
- * 5. Check getDocRef we pass ids
- * 6. check fees in sell in transaction profitOrLoss
  */
 
 export class DashboardService {
@@ -114,20 +107,16 @@ export class DashboardService {
 
           case "SELL": {
             const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
-            const sellAmount = amount - (transaction.fees || 0);
 
             updates.totalInvested = Math.max(
               0,
               (currentData.totalInvested || 0) - costBasis,
             );
             updates.totalCashBalance =
-              (currentData.totalCashBalance || 0) + sellAmount;
+              (currentData.totalCashBalance || 0) + amount;
 
-            // Update realized P&L if there's a profit or loss
-            if (profitOrLoss !== 0) {
-              updates.totalRealizedPnL =
-                (currentData.totalRealizedPnL || 0) + profitOrLoss;
-            }
+            updates.totalRealizedPnL =
+              (currentData.totalRealizedPnL || 0) + profitOrLoss;
             break;
           }
 

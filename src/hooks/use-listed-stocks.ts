@@ -14,7 +14,8 @@ export const useListedSecurities = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    const securitiesCollectionRef = masterDataService.getSecurityCollectionRef();
+    const securitiesCollectionRef =
+      masterDataService.getSecurityCollectionRef();
     const q = query(securitiesCollectionRef);
 
     const unsubscribe = onSnapshot(
