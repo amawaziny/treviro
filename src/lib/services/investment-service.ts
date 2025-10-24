@@ -23,10 +23,8 @@ import {
 } from "../types";
 import { eventBus } from "./events";
 
-const INVESTMENTS_COLLECTION = "investments";
-const GOLD_MARKET_PRICES_COLLECTION = "goldMarketPrices";
-const LISTED_SECURITIES_COLLECTION = "listedSecurities";
-const EXCHANGE_RATES_COLLECTION = "exchangeRates";
+import { INVESTMENTS_COLLECTION_PATH, GOLD_MARKET_PRICES_PATH, LISTED_SECURITIES_COLLECTION, EXCHANGE_RATES_PATH } from "@/lib/constants";
+import { formatPath } from "@/lib/utils";
 
 type InvestmentUpdate = {
   totalShares: number;
@@ -72,10 +70,7 @@ export class InvestmentService {
    * @private
    */
   private getInvestmentRef(investmentId: string) {
-    return doc(
-      db,
-      `users/${this.userId}/${INVESTMENTS_COLLECTION}/${investmentId}`,
-    );
+    return doc(db, `${formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId })}/${investmentId}`);
   }
 
   /**
@@ -83,7 +78,7 @@ export class InvestmentService {
    * @private
    */
   private getInvestmentsCollection() {
-    return collection(db, `users/${this.userId}/${INVESTMENTS_COLLECTION}`);
+    return collection(db, formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId }));
   }
 
   /**
@@ -577,7 +572,7 @@ export class InvestmentService {
 
   //TODO: create service for Master data and use it here and the hook
   async getGoldMarketPrices(): Promise<GoldMarketPrices> {
-    const pricesDocRef = doc(db, GOLD_MARKET_PRICES_COLLECTION, "current");
+    const pricesDocRef = doc(db, GOLD_MARKET_PRICES_PATH);
     const pricesDocSnap = await getDoc(pricesDocRef);
     if (pricesDocSnap.exists()) {
       const data = pricesDocSnap.data();
@@ -601,7 +596,7 @@ export class InvestmentService {
     currencyCode: string,
     currency: string,
   ): Promise<number> {
-    const ratesDocRef = doc(db, EXCHANGE_RATES_COLLECTION, "current");
+    const ratesDocRef = doc(db, EXCHANGE_RATES_PATH);
     const ratesDocSnap = await getDoc(ratesDocRef);
     if (ratesDocSnap.exists()) {
       const data = ratesDocSnap.data();

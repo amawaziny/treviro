@@ -5,6 +5,8 @@ import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
 import { Investment, Transaction } from "@/lib/investment-types";
 import { DashboardSummary } from "@/lib/types";
+import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
+import { formatPath } from "@/lib/utils";
 
 /**
  * TODO:
@@ -15,7 +17,6 @@ import { DashboardSummary } from "@/lib/types";
  * 5. Check getDocRef we pass ids
  * 6. check fees in sell in transaction profitOrLoss
  */
-const DASHBOARD_PATH = "dashboard_aggregates/summary";
 
 export class DashboardService {
   private userId: string;
@@ -64,7 +65,7 @@ export class DashboardService {
   }
 
   private getDashboardDocRef() {
-    return doc(db, `users/${this.userId}/${DASHBOARD_PATH}`);
+    return doc(db, formatPath(DASHBOARD_COLLECTION_PATH, { userId: this.userId }));
   }
 
   /**

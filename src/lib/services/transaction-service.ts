@@ -19,7 +19,8 @@ import {
   InvestmentEvent,
 } from "@/lib/services/events";
 
-const TRANSACTIONS_COLLECTION = "transactions";
+import { TRANSACTIONS_COLLECTION_PATH } from "@/lib/constants";
+import { formatPath } from "../utils";
 
 /**
  * Service for managing financial transactions in Firestore.
@@ -135,7 +136,7 @@ export class TransactionService {
    * @private
    */
   private getTransactionsCollection() {
-    return collection(db, `users/${this.userId}/${TRANSACTIONS_COLLECTION}`);
+    return collection(db, formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId }));
   }
 
   /**
@@ -145,10 +146,7 @@ export class TransactionService {
    * @returns A reference to the transaction document
    */
   private getTransactionRef(transactionId: string) {
-    return doc(
-      db,
-      `users/${this.userId}/${TRANSACTIONS_COLLECTION}/${transactionId}`,
-    );
+    return doc(db, `${formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId })}/${transactionId}`);
   }
 
   async getTransactions(): Promise<Transaction[]> {

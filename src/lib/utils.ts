@@ -226,3 +226,11 @@ export function removeUndefinedFieldsDeep(obj: any): any {
   }
   return obj;
 }
+
+
+export function formatPath(template: string, params: Record<string, string | number>): string {
+  return Object.entries(params).reduce(
+    (str, [key, value]) => str.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value)),
+    template
+  );
+}

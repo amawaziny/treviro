@@ -1,17 +1,18 @@
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { AppSettings } from "@/lib/types";
+import { SETTINGS_COLLECTION_PATH } from "@/lib/constants";
+import { formatPath } from "@/lib/utils";
 
 export class AppSettingsService {
   private userId: string;
-  private readonly SETTINGS_DOC = "appSettings";
 
   constructor(userId: string) {
     this.userId = userId;
   }
 
   private getSettingsDocRef() {
-    return doc(db, `users/${this.userId}/settings/${this.SETTINGS_DOC}`);
+    return doc(db, formatPath(SETTINGS_COLLECTION_PATH, { userId: this.userId }));
   }
 
   /**

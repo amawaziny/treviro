@@ -24,13 +24,10 @@ import type {
 } from "@/lib/types";
 
 // Collection names as const for type safety
-const COLLECTIONS = {
-  INCOMES: "incomes" as const,
-  EXPENSES: "expenses" as const,
-  FIXED_ESTIMATES: "fixedEstimates" as const,
-} as const;
+import { FINANCIAL_COLLECTIONS_PATH , FINANCIAL_COLLECTIONS} from "@/lib/constants";
+import { formatPath } from "../utils";
 
-type CollectionType = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
+type CollectionType = (typeof FINANCIAL_COLLECTIONS)[keyof typeof FINANCIAL_COLLECTIONS];
 
 export class FinancialRecordsService {
   private userId: string;
@@ -46,7 +43,7 @@ export class FinancialRecordsService {
     if (!db) throw new Error("Firestore not initialized");
     return collection(
       db,
-      `users/${this.userId}/${collectionName}`,
+      formatPath(FINANCIAL_COLLECTIONS_PATH, { userId: this.userId, collectionName }),
     ) as CollectionReference<T>;
   }
 
@@ -56,7 +53,7 @@ export class FinancialRecordsService {
     id: string,
   ): DocumentReference<DocumentData> {
     if (!db) throw new Error("Firestore not initialized");
-    return doc(db, `users/${this.userId}/${collectionName}`, id);
+    return doc(db, formatPath(FINANCIAL_COLLECTIONS_PATH, { userId: this.userId, collectionName }), id);
   }
 
   // Generic CRUD operations
@@ -81,12 +78,12 @@ export class FinancialRecordsService {
       );
 
       // Publish appropriate event based on collection type
-      if (collectionName === COLLECTIONS.INCOMES) {
+      if (collectionName === FINANCIAL_COLLECTIONS.INCOMES) {
         await eventBus.publish({
           type: "income:added",
           record: recordData as unknown as IncomeRecord,
         });
-      } else if (collectionName === COLLECTIONS.EXPENSES) {
+      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES) {
         await eventBus.publish({
           type: "expense:added",
           record: recordData as unknown as ExpenseRecord,
@@ -122,12 +119,12 @@ export class FinancialRecordsService {
       await updateDoc(docRef, updatedData as DocumentData);
 
       // Publish appropriate event based on collection type
-      if (collectionName === COLLECTIONS.INCOMES) {
+      if (collectionName === FINANCIAL_COLLECTIONS.INCOMES) {
         await eventBus.publish({
           type: "income:updated",
           record: updatedData as unknown as IncomeRecord,
         });
-      } else if (collectionName === COLLECTIONS.EXPENSES) {
+      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES) {
         await eventBus.publish({
           type: "expense:updated",
           record: updatedData as unknown as ExpenseRecord,
@@ -158,12 +155,12 @@ export class FinancialRecordsService {
       await deleteDoc(docRef);
 
       // Publish appropriate event based on collection type
-      if (collectionName === COLLECTIONS.INCOMES) {
+      if (collectionName === FINANCIAL_COLLECTIONS.INCOMES) {
         await eventBus.publish({
           type: "income:deleted",
           record: currentData as unknown as IncomeRecord,
         });
-      } else if (collectionName === COLLECTIONS.EXPENSES) {
+      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES) {
         await eventBus.publish({
           type: "expense:deleted",
           record: currentData as unknown as ExpenseRecord,
@@ -213,7 +210,7 @@ export class FinancialRecordsService {
     filters?: Partial<IncomeRecord>,
   ): Promise<IncomeRecord[]> {
     const records = await this.getRecords<IncomeRecord>(
-      COLLECTIONS.INCOMES,
+      FINANCIAL_COLLECTIONS.INCOMES,
       filters,
     );
     return records.map(
@@ -229,18 +226,18 @@ export class FinancialRecordsService {
   async addIncomeRecord(
     incomeData: Omit<IncomeRecord, "id" | "createdAt" | "updatedAt" | "userId">,
   ): Promise<IncomeRecord> {
-    return this.addRecord(COLLECTIONS.INCOMES, incomeData);
+    return this.addRecord(FINANCIAL_COLLECTIONS.INCOMES, incomeData);
   }
 
   async updateIncomeRecord(
     id: string,
     data: Partial<IncomeRecord>,
   ): Promise<IncomeRecord> {
-    return this.updateRecord<IncomeRecord>(COLLECTIONS.INCOMES, id, data);
+    return this.updateRecord<IncomeRecord>(FINANCIAL_COLLECTIONS.INCOMES, id, data);
   }
 
   async deleteIncomeRecord(id: string): Promise<void> {
-    return this.deleteRecord(COLLECTIONS.INCOMES, id);
+    return this.deleteRecord(FINANCIAL_COLLECTIONS.INCOMES, id);
   }
 
   // Expense Records
@@ -248,7 +245,7 @@ export class FinancialRecordsService {
     filters?: Partial<ExpenseRecord>,
   ): Promise<ExpenseRecord[]> {
     const records = await this.getRecords<ExpenseRecord>(
-      COLLECTIONS.EXPENSES,
+      FINANCIAL_COLLECTIONS.EXPENSES,
       filters,
     );
     return records.map(
@@ -267,18 +264,18 @@ export class FinancialRecordsService {
       "id" | "createdAt" | "updatedAt" | "userId"
     >,
   ): Promise<ExpenseRecord> {
-    return this.addRecord(COLLECTIONS.EXPENSES, expenseData);
+    return this.addRecord(FINANCIAL_COLLECTIONS.EXPENSES, expenseData);
   }
 
   async updateExpenseRecord(
     id: string,
     data: Partial<ExpenseRecord>,
   ): Promise<ExpenseRecord> {
-    return this.updateRecord<ExpenseRecord>(COLLECTIONS.EXPENSES, id, data);
+    return this.updateRecord<ExpenseRecord>(FINANCIAL_COLLECTIONS.EXPENSES, id, data);
   }
 
   async deleteExpenseRecord(id: string): Promise<void> {
-    return this.deleteRecord(COLLECTIONS.EXPENSES, id);
+    return this.deleteRecord(FINANCIAL_COLLECTIONS.EXPENSES, id);
   }
 
   // Fixed Estimates
@@ -286,7 +283,7 @@ export class FinancialRecordsService {
     filters?: Partial<FixedEstimateRecord>,
   ): Promise<FixedEstimateRecord[]> {
     const records = await this.getRecords<FixedEstimateRecord>(
-      COLLECTIONS.FIXED_ESTIMATES,
+      FINANCIAL_COLLECTIONS.FIXED_ESTIMATES,
       filters,
     );
     return records.map(
@@ -305,20 +302,20 @@ export class FinancialRecordsService {
       "id" | "createdAt" | "updatedAt" | "userId"
     >,
   ): Promise<FixedEstimateRecord> {
-    return this.addRecord(COLLECTIONS.FIXED_ESTIMATES, fixedEstimateData);
+    return this.addRecord(FINANCIAL_COLLECTIONS.FIXED_ESTIMATES, fixedEstimateData);
   }
   async updateFixedEstimate(
     id: string,
     data: Partial<FixedEstimateRecord>,
   ): Promise<FixedEstimateRecord> {
     return this.updateRecord<FixedEstimateRecord>(
-      COLLECTIONS.FIXED_ESTIMATES,
+      FINANCIAL_COLLECTIONS.FIXED_ESTIMATES,
       id,
       data,
     );
   }
 
   async deleteFixedEstimate(id: string): Promise<void> {
-    return this.deleteRecord(COLLECTIONS.FIXED_ESTIMATES, id);
+    return this.deleteRecord(FINANCIAL_COLLECTIONS.FIXED_ESTIMATES, id);
   }
 }
