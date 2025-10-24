@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { collection, onSnapshot, query, doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { onSnapshot, query } from "firebase/firestore";
 import type { ListedSecurity } from "@/lib/types";
+import { masterDataService } from "@/lib/services/master-data-service";
 
 export const useListedSecurities = () => {
   const [listedSecurities, setListedSecurities] = useState<ListedSecurity[]>(
@@ -14,7 +14,7 @@ export const useListedSecurities = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    const securitiesCollectionRef = collection(db, "listedSecurities");
+    const securitiesCollectionRef = masterDataService.getSecurityCollectionRef();
     const q = query(securitiesCollectionRef);
 
     const unsubscribe = onSnapshot(
@@ -46,15 +46,7 @@ export const useListedSecurities = () => {
         return existingSecurity;
       }
       try {
-        const securityDocRef = doc(db, "listedSecurities", id);
-        const securityDocSnap = await getDoc(securityDocRef);
-        if (securityDocSnap.exists()) {
-          return {
-            id: securityDocSnap.id,
-            ...securityDocSnap.data(),
-          } as ListedSecurity;
-        }
-        return undefined;
+        return await masterDataService.getSecurity(id);
       } catch (err) {
         console.error(`Error fetching security by ID ${id}:`, err);
         return undefined;

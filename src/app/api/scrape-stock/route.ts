@@ -6,10 +6,11 @@ import {
   where,
   getDocs,
   updateDoc,
-  doc as firestoreDoc,
-  collection as coll,
-  doc as docFn,
+  doc,
   getDoc,
+  setDoc,
+  orderBy,
+  limit,
 } from "firebase/firestore";
 import axios from "axios";
 import * as cheerio from "cheerio";
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
   try {
     // Vacation check: skip if today is a vacation
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const vacationDocRef = docFn(db, "vacations", today);
+    const vacationDocRef = doc(db, "vacations", today);
     const vacationDocSnap = await getDoc(vacationDocRef);
     if (vacationDocSnap.exists()) {
       return NextResponse.json({
@@ -29,8 +30,8 @@ export async function GET(req: NextRequest) {
     // Parse offset, limit, and all from query parameters
     const { searchParams } = new URL(req.url);
     const all = searchParams.get("all");
-    const offset = parseInt(searchParams.get("offset") || "0", 10);
-    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const searchOffset = parseInt(searchParams.get("offset") || "0", 10);
+    const searchLimit = parseInt(searchParams.get("limit") || "20", 10);
 
     // 1. Read the list of securities from collection listedSecurities in firebase and filter by securityType=Stock
     const q = query(
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
     const batchDocs =
       all && all.toLowerCase() === "true"
         ? snapshot.docs
-        : snapshot.docs.slice(offset, offset + limit);
+        : snapshot.docs.slice(searchOffset, searchOffset + searchLimit);
     const updates: Array<Promise<any>> = [];
     for (const stockDoc of batchDocs) {
       const symbol = stockDoc.get("symbol");
@@ -65,26 +66,16 @@ export async function GET(req: NextRequest) {
             (async () => {
               // Update the price in listedSecurities
               await updateDoc(
-                firestoreDoc(db, "listedSecurities", stockDoc.id),
+                doc(db, "listedSecurities", stockDoc.id),
                 {
                   price,
                 },
               );
               // Also update priceHistory subcollection
               const today = new Date().toISOString();
-              const {
-                setDoc,
-                collection: coll,
-                getDocs,
-                orderBy,
-                limit,
-                query: q,
-                doc: docFn,
-                getDoc,
-              } = await import("firebase/firestore");
 
               // Check if today's priceHistory record exists and price is the same
-              const todayDocRef = docFn(
+              const todayDocRef = doc(
                 db,
                 "listedSecurities",
                 stockDoc.id,
@@ -101,7 +92,7 @@ export async function GET(req: NextRequest) {
               }
 
               await setDoc(
-                firestoreDoc(
+                doc(
                   db,
                   "listedSecurities",
                   stockDoc.id,
@@ -112,13 +103,13 @@ export async function GET(req: NextRequest) {
                 { merge: true },
               );
               // Fetch two most recent priceHistory docs
-              const priceHistRef = coll(
+              const priceHistRef = collection(
                 db,
                 "listedSecurities",
                 stockDoc.id,
                 "priceHistory",
               );
-              const priceHistQuery = q(
+              const priceHistQuery = query(
                 priceHistRef,
                 orderBy("__name__", "desc"),
                 limit(2),
@@ -134,7 +125,7 @@ export async function GET(req: NextRequest) {
                 changePercent = ((prices[0] - prices[1]) / prices[1]) * 100;
               }
               await updateDoc(
-                firestoreDoc(db, "listedSecurities", stockDoc.id),
+                doc(db, "listedSecurities", stockDoc.id),
                 {
                   changePercent,
                 },

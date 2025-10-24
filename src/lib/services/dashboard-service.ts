@@ -3,23 +3,18 @@ import {
   getDoc,
   runTransaction,
   setDoc,
-  collection,
-  getDocs,
-  query,
-  where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
-import { Investment, Transaction } from "@/lib/investment-types";
+import { Transaction } from "@/lib/investment-types";
 import { DashboardSummary } from "@/lib/types";
 import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 
 /**
  * TODO:
- * 1. Constants class for collection names
  * 2. Organize types and investment-types
  * 3. FixedEstimates we can implement confirmation then user confirm it
  * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates

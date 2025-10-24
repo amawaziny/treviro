@@ -23,13 +23,9 @@ import {
 } from "../types";
 import { eventBus } from "./events";
 
-import {
-  INVESTMENTS_COLLECTION_PATH,
-  GOLD_MARKET_PRICES_PATH,
-  LISTED_SECURITIES_COLLECTION,
-  EXCHANGE_RATES_PATH,
-} from "@/lib/constants";
+import { INVESTMENTS_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
+import { masterDataService } from "./master-data-service";
 
 type InvestmentUpdate = {
   totalShares: number;
@@ -581,44 +577,6 @@ export class InvestmentService {
     return querySnapshot.docs.map((doc) => doc.data() as Investment);
   }
 
-  //TODO: create service for Master data and use it here and the hook
-  async getGoldMarketPrices(): Promise<GoldMarketPrices> {
-    const pricesDocRef = doc(db, GOLD_MARKET_PRICES_PATH);
-    const pricesDocSnap = await getDoc(pricesDocRef);
-    if (pricesDocSnap.exists()) {
-      const data = pricesDocSnap.data();
-      return data as GoldMarketPrices;
-    }
-    throw new Error("Gold market prices not found");
-  }
-
-  //TODO: create service for Master data
-  async getSecurity(securityId: string): Promise<ListedSecurity> {
-    const securityDocRef = doc(db, LISTED_SECURITIES_COLLECTION, securityId);
-    const securityDocSnap = await getDoc(securityDocRef);
-    if (securityDocSnap.exists()) {
-      const data = securityDocSnap.data();
-      return data as ListedSecurity;
-    }
-    throw new Error("Security not found");
-  }
-
-  async getExchangeRate(
-    currencyCode: string,
-    currency: string,
-  ): Promise<number> {
-    const ratesDocRef = doc(db, EXCHANGE_RATES_PATH);
-    const ratesDocSnap = await getDoc(ratesDocRef);
-    if (ratesDocSnap.exists()) {
-      const data = ratesDocSnap.data();
-      const rateKey = `${currencyCode.toUpperCase()}_${currency.toUpperCase()}`;
-      if (data && data[rateKey]) {
-        return data[rateKey];
-      }
-    }
-    throw new Error("Exchange rate not found");
-  }
-
   /**
    * Calculates the total unrealized profit or loss for all investments
    * by get current market price of each investment (if gold get from goldMarketPrices collection and if securities get from listedSecurities collection and if currencies get from exchangeRates collection) and multiply it with shares count
@@ -631,15 +589,15 @@ export class InvestmentService {
     investments.forEach(async (investment: Investment) => {
       let currentMarketPrice = investment.averagePurchasePrice;
       if (investment.type === "Gold") {
-        const goldMarketPrices = await this.getGoldMarketPrices();
+        const goldMarketPrices = await masterDataService.getGoldMarketPrices();
         currentMarketPrice =
           goldMarketPrices[investment.goldType] ??
           investment.averagePurchasePrice;
       } else if (investment.type === "Securities") {
-        const security = await this.getSecurity(investment.securityId);
+        const security = await masterDataService.getSecurity(investment.securityId);
         currentMarketPrice = security.price;
       } else if (investment.type === "Currencies") {
-        currentMarketPrice = await this.getExchangeRate(
+        currentMarketPrice = await masterDataService.getExchangeRate(
           investment.currencyCode,
           investment.currency,
         );
