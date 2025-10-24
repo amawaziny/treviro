@@ -252,12 +252,12 @@ export class TransactionService {
           batch.delete(this.getTransactionRef(transaction.id));
         });
         await batch.commit();
-      }
 
-      await eventBus.publish({
-        type: "transaction:deleted",
-        sourceId: sourceId,
-      });
+        await eventBus.publish({
+          type: "transaction:deleted",
+          transaction: transactions[0],
+        });
+      }
     } catch (error) {
       console.error("Failed to delete transaction", error);
       throw new Error("Failed to delete transaction");

@@ -17,7 +17,7 @@ export type InvestmentEvent =
 export type TransactionEvent =
   | { type: "transaction:created"; transaction: Transaction }
   | { type: "transaction:updated"; transaction: Transaction }
-  | { type: "transaction:deleted"; sourceId: string };
+  | { type: "transaction:deleted"; transaction: Transaction };
 
 type EventType = FinancialRecordEvent | InvestmentEvent | TransactionEvent;
 type EventHandler<T extends EventType> = (event: T) => Promise<void> | void;

@@ -1,26 +1,19 @@
-import { IncomeRecord, ExpenseRecord, DashboardSummary } from "@/lib/types";
-import { doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
-import { Investment, Transaction } from "@/lib/investment-types";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { doc, getDoc, runTransaction, setDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
-import {
-  eventBus,
-  FinancialRecordEvent,
-  InvestmentEvent,
-  TransactionEvent,
-} from "@/lib/services/events";
+import { eventBus, TransactionEvent } from "@/lib/services/events";
+import { Investment, Transaction } from "@/lib/investment-types";
+import { DashboardSummary } from "@/lib/types";
 
 /**
  * TODO:
- * 1. DashboardService should consume events from TransactionService
- * 2. Constants class for collection names
- * 3. Organize types and investment-types
- * 4. FixedEstimates we can implement confirmation then user confirm it
- * 5. MaturedDebt should have scheduler or a way to calculate them on specific dates
- * 6. Check getDocRef we pass ids
- * 7. check fees in sell in transaction profitOrLoss
+ * 1. Constants class for collection names
+ * 2. Organize types and investment-types
+ * 3. FixedEstimates we can implement confirmation then user confirm it
+ * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates
+ * 5. Check getDocRef we pass ids
+ * 6. check fees in sell in transaction profitOrLoss
  */
 const DASHBOARD_PATH = "dashboard_aggregates/summary";
 
@@ -45,6 +38,14 @@ export class DashboardService {
   }
 
   private setupEventSubscriptions() {
+    const transactionCreatedUnsubscribe = eventBus.subscribe(
+      "transaction:created",
+      async (event: TransactionEvent) => {
+        await this.partialUpdateDashboardSummary(event.transaction);
+      },
+    );
+    this.unsubscribeCallbacks.push(transactionCreatedUnsubscribe);
+
     const transactionUpdatedUnsubscribe = eventBus.subscribe(
       "transaction:updated",
       async (event: TransactionEvent) => {
@@ -66,29 +67,74 @@ export class DashboardService {
     return doc(db, `users/${this.userId}/${DASHBOARD_PATH}`);
   }
 
-  //TODO:
-  // 1. consume update TransactionEvent if transaction type is BUY          increment totalInvested by amount and decrement totalCashBalance by amount 
-  // 2. consume update TransactionEvent if transaction type is PAYMENT      increment totalInvested by amount and decrement totalCashBalance by amount 
-  // 3. consume update TransactionEvent if transaction type is EXPENSE      decrement totalCashBalance by amount 
-  // 4. consume update TransactionEvent if transaction type is SELL         decrement totalInvested by (averagePurchasePrice * quantity) and increment totalCashBalance by amount and plus event if it is negative amount totalRealizedPnL by profitOrLoss
-  // 5. consume update TransactionEvent if transaction type is DIVIDEND     increment totalCashBalance by amount 
-  // 6. consume update TransactionEvent if transaction type is INTEREST     increment totalCashBalance by amount 
-  // 7. consume update TransactionEvent if transaction type is MATURED_DEBT decrement totalInvested by amount and increment totalCashBalance by amount and increment totalMaturedDebt by amount
-  async partialUpdateDashboardSummary(
-    updates: Partial<DashboardSummary>,
-  ): Promise<DashboardSummary> {
+  /**
+   * Partially updates the dashboard summary based on a single transaction
+   * @param transaction The transaction to process
+   */
+  async partialUpdateDashboardSummary(transaction: Transaction): Promise<void> {
     const dashboardRef = this.getDashboardDocRef();
-    const currentData = await this.getDashboardSummary();
+    if (!dashboardRef) return;
 
-    // Merge updates with current data
-    const newData = {
-      ...currentData,
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      await runTransaction(db, async (firestoreTransaction) => {
+        const dashboardDoc = await firestoreTransaction.get(dashboardRef);
+        const currentData = dashboardDoc.exists() 
+          ? (dashboardDoc.data() as DashboardSummary) 
+          : this.getDefaultDashboardSummary();
 
-    await setDoc(dashboardRef, newData, { merge: true });
-    return newData;
+        const updates: Partial<DashboardSummary> = {
+          updatedAt: new Date().toISOString(),
+        };
+
+        const amount = transaction.amount || 0;
+        const quantity = transaction.quantity || 0;
+        const averagePurchasePrice = transaction.averagePurchasePrice || 0;
+        const profitOrLoss = transaction.profitOrLoss || 0;
+
+        switch (transaction.type) {
+          case 'BUY':
+          case 'PAYMENT':
+            updates.totalInvested = (currentData.totalInvested || 0) + amount;
+            updates.totalCashBalance = (currentData.totalCashBalance || 0) - amount;
+            break;
+
+          case 'EXPENSE':
+            updates.totalCashBalance = (currentData.totalCashBalance || 0) - amount;
+            break;
+
+          case 'SELL': {
+            const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
+            const sellAmount = amount - (transaction.fees || 0);
+            
+            updates.totalInvested = Math.max(0, (currentData.totalInvested || 0) - costBasis);
+            updates.totalCashBalance = (currentData.totalCashBalance || 0) + sellAmount;
+            
+            // Update realized P&L if there's a profit or loss
+            if (profitOrLoss !== 0) {
+              updates.totalRealizedPnL = (currentData.totalRealizedPnL || 0) + profitOrLoss;
+            }
+            break;
+          }
+
+          case 'DIVIDEND':
+          case 'INTEREST':
+            updates.totalCashBalance = (currentData.totalCashBalance || 0) + amount;
+            break;
+
+          case 'MATURED_DEBT':
+            updates.totalInvested = Math.max(0, (currentData.totalInvested || 0) - amount);
+            updates.totalCashBalance = (currentData.totalCashBalance || 0) + amount;
+            updates.totalMaturedDebt = (currentData.totalMaturedDebt || 0) + amount;
+            break;
+        }
+
+        // Apply updates to the dashboard
+        firestoreTransaction.set(dashboardRef, { ...currentData, ...updates }, { merge: true });
+      });
+    } catch (error) {
+      console.error("Error in partialUpdateDashboardSummary:", error);
+      throw error;
+    }
   }
 
   /**
@@ -102,7 +148,7 @@ export class DashboardService {
     const currentData = await this.getDashboardSummary();
 
     // Merge updates with current data
-    const newData = {
+    const newData: DashboardSummary = {
       ...currentData,
       ...updates,
       updatedAt: new Date().toISOString(),
@@ -112,18 +158,35 @@ export class DashboardService {
     return newData;
   }
 
+  /**
+   * Returns a default dashboard summary with all values set to 0
+   */
+  private getDefaultDashboardSummary(): DashboardSummary {
+    return {
+      totalInvested: 0,
+      totalRealizedPnL: 0,
+      totalCashBalance: 0,
+      totalMaturedDebt: 0,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
   async getDashboardSummary(): Promise<DashboardSummary> {
     const dashboardRef = this.getDashboardDocRef();
     const dashboardSnap = await getDoc(dashboardRef);
-    return dashboardSnap.exists()
-      ? (dashboardSnap.data() as DashboardSummary)
-      : {
-          totalInvested: 0,
-          totalRealizedPnL: 0,
-          totalCashBalance: 0,
-          totalMaturedDebt: 0,
-          updatedAt: new Date().toISOString(),
-        };
+    
+    if (dashboardSnap.exists()) {
+      const data = dashboardSnap.data() as Partial<DashboardSummary>;
+      return {
+        totalInvested: data.totalInvested ?? 0,
+        totalRealizedPnL: data.totalRealizedPnL ?? 0,
+        totalCashBalance: data.totalCashBalance ?? 0,
+        totalMaturedDebt: data.totalMaturedDebt ?? 0,
+        updatedAt: data.updatedAt ?? new Date().toISOString(),
+      };
+    }
+    
+    return this.getDefaultDashboardSummary();
   }
 
   /**
