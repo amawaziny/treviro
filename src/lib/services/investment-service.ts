@@ -23,7 +23,12 @@ import {
 } from "../types";
 import { eventBus } from "./events";
 
-import { INVESTMENTS_COLLECTION_PATH, GOLD_MARKET_PRICES_PATH, LISTED_SECURITIES_COLLECTION, EXCHANGE_RATES_PATH } from "@/lib/constants";
+import {
+  INVESTMENTS_COLLECTION_PATH,
+  GOLD_MARKET_PRICES_PATH,
+  LISTED_SECURITIES_COLLECTION,
+  EXCHANGE_RATES_PATH,
+} from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 
 type InvestmentUpdate = {
@@ -70,7 +75,10 @@ export class InvestmentService {
    * @private
    */
   private getInvestmentRef(investmentId: string) {
-    return doc(db, `${formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId })}/${investmentId}`);
+    return doc(
+      db,
+      `${formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId })}/${investmentId}`,
+    );
   }
 
   /**
@@ -78,7 +86,10 @@ export class InvestmentService {
    * @private
    */
   private getInvestmentsCollection() {
-    return collection(db, formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId }));
+    return collection(
+      db,
+      formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId }),
+    );
   }
 
   /**

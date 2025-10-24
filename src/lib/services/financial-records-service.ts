@@ -24,10 +24,14 @@ import type {
 } from "@/lib/types";
 
 // Collection names as const for type safety
-import { FINANCIAL_COLLECTIONS_PATH , FINANCIAL_COLLECTIONS} from "@/lib/constants";
+import {
+  FINANCIAL_COLLECTIONS_PATH,
+  FINANCIAL_COLLECTIONS,
+} from "@/lib/constants";
 import { formatPath } from "../utils";
 
-type CollectionType = (typeof FINANCIAL_COLLECTIONS)[keyof typeof FINANCIAL_COLLECTIONS];
+type CollectionType =
+  (typeof FINANCIAL_COLLECTIONS)[keyof typeof FINANCIAL_COLLECTIONS];
 
 export class FinancialRecordsService {
   private userId: string;
@@ -43,7 +47,10 @@ export class FinancialRecordsService {
     if (!db) throw new Error("Firestore not initialized");
     return collection(
       db,
-      formatPath(FINANCIAL_COLLECTIONS_PATH, { userId: this.userId, collectionName }),
+      formatPath(FINANCIAL_COLLECTIONS_PATH, {
+        userId: this.userId,
+        collectionName,
+      }),
     ) as CollectionReference<T>;
   }
 
@@ -53,7 +60,14 @@ export class FinancialRecordsService {
     id: string,
   ): DocumentReference<DocumentData> {
     if (!db) throw new Error("Firestore not initialized");
-    return doc(db, formatPath(FINANCIAL_COLLECTIONS_PATH, { userId: this.userId, collectionName }), id);
+    return doc(
+      db,
+      formatPath(FINANCIAL_COLLECTIONS_PATH, {
+        userId: this.userId,
+        collectionName,
+      }),
+      id,
+    );
   }
 
   // Generic CRUD operations
@@ -233,7 +247,11 @@ export class FinancialRecordsService {
     id: string,
     data: Partial<IncomeRecord>,
   ): Promise<IncomeRecord> {
-    return this.updateRecord<IncomeRecord>(FINANCIAL_COLLECTIONS.INCOMES, id, data);
+    return this.updateRecord<IncomeRecord>(
+      FINANCIAL_COLLECTIONS.INCOMES,
+      id,
+      data,
+    );
   }
 
   async deleteIncomeRecord(id: string): Promise<void> {
@@ -271,7 +289,11 @@ export class FinancialRecordsService {
     id: string,
     data: Partial<ExpenseRecord>,
   ): Promise<ExpenseRecord> {
-    return this.updateRecord<ExpenseRecord>(FINANCIAL_COLLECTIONS.EXPENSES, id, data);
+    return this.updateRecord<ExpenseRecord>(
+      FINANCIAL_COLLECTIONS.EXPENSES,
+      id,
+      data,
+    );
   }
 
   async deleteExpenseRecord(id: string): Promise<void> {
@@ -302,7 +324,10 @@ export class FinancialRecordsService {
       "id" | "createdAt" | "updatedAt" | "userId"
     >,
   ): Promise<FixedEstimateRecord> {
-    return this.addRecord(FINANCIAL_COLLECTIONS.FIXED_ESTIMATES, fixedEstimateData);
+    return this.addRecord(
+      FINANCIAL_COLLECTIONS.FIXED_ESTIMATES,
+      fixedEstimateData,
+    );
   }
   async updateFixedEstimate(
     id: string,

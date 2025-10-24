@@ -12,7 +12,10 @@ export class AppSettingsService {
   }
 
   private getSettingsDocRef() {
-    return doc(db, formatPath(SETTINGS_COLLECTION_PATH, { userId: this.userId }));
+    return doc(
+      db,
+      formatPath(SETTINGS_COLLECTION_PATH, { userId: this.userId }),
+    );
   }
 
   /**

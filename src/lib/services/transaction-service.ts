@@ -136,7 +136,10 @@ export class TransactionService {
    * @private
    */
   private getTransactionsCollection() {
-    return collection(db, formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId }));
+    return collection(
+      db,
+      formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId }),
+    );
   }
 
   /**
@@ -146,7 +149,10 @@ export class TransactionService {
    * @returns A reference to the transaction document
    */
   private getTransactionRef(transactionId: string) {
-    return doc(db, `${formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId })}/${transactionId}`);
+    return doc(
+      db,
+      `${formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId })}/${transactionId}`,
+    );
   }
 
   async getTransactions(): Promise<Transaction[]> {

@@ -1,4 +1,3 @@
-
 export const SETTINGS_COLLECTION_PATH = `users/{userId}/settings/appSettings`;
 
 export const DASHBOARD_COLLECTION_PATH = `users/{userId}/dashboard_aggregates/summary`;
