@@ -110,7 +110,7 @@ export const InvestmentContext = createContext<
 >(undefined);
 
 const defaultDashboardSummary: DashboardSummary = {
-  totalInvestedAcrossAllAssets: 0,
+  totalInvested: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0, // Initialize totalCashBalance
   totalMaturedDebt: 0,
@@ -581,7 +581,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       const amountInvestedValue = Number(investmentData.amountInvested);
       if (!isNaN(amountInvestedValue) && amountInvestedValue !== 0) {
         await updateDashboardSummaryDoc({
-          totalInvestedAcrossAllAssets: amountInvestedValue,
+          totalInvested: amountInvestedValue,
           totalCashBalance: -amountInvestedValue, // Decrease cash balance by investment amount
         });
       }
@@ -856,8 +856,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         !isNaN(costBasisReductionFromPortfolio) &&
         costBasisReductionFromPortfolio !== 0
       )
-        summaryUpdates.totalInvestedAcrossAllAssets =
-          -costBasisReductionFromPortfolio;
+        summaryUpdates.totalInvested = -costBasisReductionFromPortfolio;
       if (!isNaN(totalProceeds) && totalProceeds !== 0)
         summaryUpdates.totalCashBalance = totalProceeds; // Increase cash by proceeds
 
@@ -951,7 +950,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
       const summaryUpdates: Partial<DashboardSummary> = {};
       if (!isNaN(amountInvested) && amountInvested !== 0) {
-        summaryUpdates.totalInvestedAcrossAllAssets = -amountInvested;
+        summaryUpdates.totalInvested = -amountInvested;
         summaryUpdates.totalCashBalance = amountInvested;
       }
       if (Object.keys(summaryUpdates).length > 0)
@@ -979,7 +978,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
       const summaryUpdates: Partial<DashboardSummary> = {};
       if (!isNaN(amountInvested) && amountInvested !== 0) {
-        summaryUpdates.totalInvestedAcrossAllAssets = -amountInvested;
+        summaryUpdates.totalInvested = -amountInvested;
         summaryUpdates.totalCashBalance = amountInvested;
       }
       if (Object.keys(summaryUpdates).length > 0)
@@ -1059,7 +1058,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
 
       const summaryUpdates: Partial<DashboardSummary> = {};
       if (!isNaN(amountInvestedDelta) && amountInvestedDelta !== 0)
-        summaryUpdates.totalInvestedAcrossAllAssets = amountInvestedDelta;
+        summaryUpdates.totalInvested = amountInvestedDelta;
       if (!isNaN(cashBalanceDelta) && cashBalanceDelta !== 0)
         summaryUpdates.totalCashBalance = cashBalanceDelta;
 
@@ -1117,13 +1116,12 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             if (summaryDoc.exists()) {
               const currentSummary = summaryDoc.data() as DashboardSummary;
               const newTotalInvested =
-                (currentSummary.totalInvestedAcrossAllAssets || 0) +
-                amountInvestedDelta;
+                (currentSummary.totalInvested || 0) + amountInvestedDelta;
               const newCashBalance =
                 (currentSummary.totalCashBalance || 0) - amountInvestedDelta;
 
               await updateDashboardSummaryDoc({
-                totalInvestedAcrossAllAssets: newTotalInvested,
+                totalInvested: newTotalInvested,
                 totalCashBalance: newCashBalance,
               });
             }
@@ -1286,7 +1284,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       const estimate = fixedEstimates.find((est) => est.id === id);
       if (estimate) {
         const summaryUpdates: Partial<DashboardSummary> = {
-          totalInvestedAcrossAllAssets: -estimate.amount,
+          totalInvested: -estimate.amount,
           totalCashBalance: -estimate.amount,
         };
         await updateDashboardSummaryDoc(summaryUpdates);

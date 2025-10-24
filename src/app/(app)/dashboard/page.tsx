@@ -76,7 +76,7 @@ export default function DashboardPage() {
     isLoadingGoldPrices ||
     isLoadingExchangeRates;
 
-  const totalInvested = dashboardSummary?.totalInvestedAcrossAllAssets ?? 0;
+  const totalInvested = dashboardSummary?.totalInvested ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
 

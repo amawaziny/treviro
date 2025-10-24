@@ -226,12 +226,11 @@ export interface Transaction {
 }
 
 export interface DashboardSummary {
-  totalPortfolioValue?: number;
-  totalInvestedAcrossAllAssets: number;
+  totalInvested: number;
   totalRealizedPnL: number;
   totalCashBalance: number;
   totalMaturedDebt?: number; // Total amount from matured debt instruments
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface GoldMarketPrices {

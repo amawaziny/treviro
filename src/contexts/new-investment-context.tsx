@@ -97,7 +97,7 @@ export interface InvestmentContextType {
 }
 
 const defaultDashboardSummary: DashboardSummary = {
-  totalInvestedAcrossAllAssets: 0,
+  totalInvested: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0,
   totalMaturedDebt: 0,

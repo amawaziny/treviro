@@ -1,10 +1,16 @@
 import { IncomeRecord, ExpenseRecord, DashboardSummary } from "@/lib/types";
-import { doc, getDoc, runTransaction } from "firebase/firestore";
+import { doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
 import { Investment, Transaction } from "@/lib/investment-types";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
+import {
+  eventBus,
+  FinancialRecordEvent,
+  InvestmentEvent,
+  TransactionEvent,
+} from "@/lib/services/events";
 
 /**
  * TODO:
@@ -22,6 +28,7 @@ export class DashboardService {
   private userId: string;
   private investmentService: InvestmentService;
   private transactionService: TransactionService;
+  private unsubscribeCallbacks: (() => void)[] = [];
 
   constructor(
     userId: string,
@@ -34,10 +41,54 @@ export class DashboardService {
     }
     this.investmentService = investmentService;
     this.transactionService = transactionService;
+    this.setupEventSubscriptions();
+  }
+
+  private setupEventSubscriptions() {
+    const transactionUpdatedUnsubscribe = eventBus.subscribe(
+      "transaction:updated",
+      async (event: TransactionEvent) => {
+        await this.recalculateDashboardSummary();
+      },
+    );
+    this.unsubscribeCallbacks.push(transactionUpdatedUnsubscribe);
+
+    const transactionDeletedUnsubscribe = eventBus.subscribe(
+      "transaction:deleted",
+      async (event: TransactionEvent) => {
+        await this.recalculateDashboardSummary();
+      },
+    );
+    this.unsubscribeCallbacks.push(transactionDeletedUnsubscribe);
   }
 
   private getDashboardDocRef() {
     return doc(db, `users/${this.userId}/${DASHBOARD_PATH}`);
+  }
+
+  //TODO:
+  // 1. consume update TransactionEvent if transaction type is BUY          increment totalInvested by amount and decrement totalCashBalance by amount 
+  // 2. consume update TransactionEvent if transaction type is PAYMENT      increment totalInvested by amount and decrement totalCashBalance by amount 
+  // 3. consume update TransactionEvent if transaction type is EXPENSE      decrement totalCashBalance by amount 
+  // 4. consume update TransactionEvent if transaction type is SELL         decrement totalInvested by (averagePurchasePrice * quantity) and increment totalCashBalance by amount and plus event if it is negative amount totalRealizedPnL by profitOrLoss
+  // 5. consume update TransactionEvent if transaction type is DIVIDEND     increment totalCashBalance by amount 
+  // 6. consume update TransactionEvent if transaction type is INTEREST     increment totalCashBalance by amount 
+  // 7. consume update TransactionEvent if transaction type is MATURED_DEBT decrement totalInvested by amount and increment totalCashBalance by amount and increment totalMaturedDebt by amount
+  async partialUpdateDashboardSummary(
+    updates: Partial<DashboardSummary>,
+  ): Promise<DashboardSummary> {
+    const dashboardRef = this.getDashboardDocRef();
+    const currentData = await this.getDashboardSummary();
+
+    // Merge updates with current data
+    const newData = {
+      ...currentData,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await setDoc(dashboardRef, newData, { merge: true });
+    return newData;
   }
 
   /**
@@ -46,52 +97,33 @@ export class DashboardService {
    */
   async updateDashboardSummary(
     updates: Partial<DashboardSummary>,
-  ): Promise<void> {
+  ): Promise<DashboardSummary> {
     const dashboardRef = this.getDashboardDocRef();
-    if (!dashboardRef || !db) return;
+    const currentData = await this.getDashboardSummary();
 
-    try {
-      await runTransaction(db, async (transaction) => {
-        const summaryDoc = await transaction.get(dashboardRef);
+    // Merge updates with current data
+    const newData = {
+      ...currentData,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
 
-        // Initialize with default values if document doesn't exist
-        const currentData: DashboardSummary = summaryDoc.exists()
-          ? (summaryDoc.data() as DashboardSummary)
-          : {
-              totalInvestedAcrossAllAssets: 0,
-              totalRealizedPnL: 0,
-              totalCashBalance: 0,
-              totalMaturedDebt: 0,
-              updatedAt: new Date().toISOString(),
-            };
-
-        // Merge updates with current data
-        const newData = {
-          ...currentData,
-          ...updates,
-          updatedAt: new Date().toISOString(),
-        };
-
-        // Update document
-        transaction.set(dashboardRef, newData, { merge: true });
-      });
-    } catch (error) {
-      console.error("Error in updateDashboardSummary transaction:", error);
-      throw error;
-    }
+    await setDoc(dashboardRef, newData, { merge: true });
+    return newData;
   }
 
-  async getDashboardSummary(): Promise<DashboardSummary | null> {
-    try {
-      const dashboardRef = this.getDashboardDocRef();
-      const dashboardSnap = await getDoc(dashboardRef);
-      return dashboardSnap.exists()
-        ? (dashboardSnap.data() as DashboardSummary)
-        : null;
-    } catch (error) {
-      console.error("Error getting dashboard summary:", error);
-      throw error;
-    }
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    const dashboardRef = this.getDashboardDocRef();
+    const dashboardSnap = await getDoc(dashboardRef);
+    return dashboardSnap.exists()
+      ? (dashboardSnap.data() as DashboardSummary)
+      : {
+          totalInvested: 0,
+          totalRealizedPnL: 0,
+          totalCashBalance: 0,
+          totalMaturedDebt: 0,
+          updatedAt: new Date().toISOString(),
+        };
   }
 
   /**
@@ -153,26 +185,25 @@ export class DashboardService {
 
     // 2. Get totalInvested from investments collection
     const investments = await this.investmentService.getInvestments();
-    const totalInvestedAcrossAllAssets = investments.reduce(
+    const totalInvested = investments.reduce(
       (sum, investment) => sum + (investment.totalInvested || 0),
       0,
     );
 
-    // 3. Calculate total portfolio value
-    const totalPortfolioValue = totalCashBalance + totalInvestedAcrossAllAssets;
-
     const summary: DashboardSummary = {
-      totalInvestedAcrossAllAssets,
+      totalInvested,
       totalRealizedPnL,
       totalCashBalance,
-      totalMaturedDebt,
-      totalPortfolioValue, // Add the new field to your DashboardSummary type if not already present
-      updatedAt: new Date().toISOString(),
+      totalMaturedDebt
     };
 
     // Update the dashboard in Firebase
-    await this.updateDashboardSummary(summary);
+    return await this.updateDashboardSummary(summary);
+  }
 
-    return summary;
+  cleanup() {
+    // Unsubscribe from all event listeners
+    this.unsubscribeCallbacks.forEach((unsubscribe) => unsubscribe());
+    this.unsubscribeCallbacks = [];
   }
 }
