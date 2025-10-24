@@ -232,9 +232,8 @@ export class DashboardService {
           cashFlow.income += amount;
           break;
 
-        //TODO: check fees in sell in transaction profitOrLoss
         case "SELL":
-          cashFlow.income += amount - (txn.fees || 0);
+          cashFlow.income += amount;
           break;
 
         case "MATURED_DEBT":

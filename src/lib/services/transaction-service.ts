@@ -320,7 +320,6 @@ export class TransactionService {
           profitOrLoss =
             quantity * transactionData.averagePurchasePrice -
             transactionData.amount;
-          profitOrLoss -= fees;
         }
         // Create the transaction with all required fields
         const newTransaction: Transaction = {

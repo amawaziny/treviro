@@ -316,9 +316,7 @@ export class InvestmentService {
       amount = pricePerUnit * quantity;
     }
 
-    if (type !== "SELL") {
-      amount += fees;
-    }
+    amount = type === "SELL" ? amount - fees : amount + fees;
 
     if (quantity > 0) {
       pricePerUnit = amount / quantity;
