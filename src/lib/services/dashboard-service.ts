@@ -3,8 +3,7 @@ import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
-import { Transaction } from "@/lib/investment-types";
-import { DashboardSummary } from "@/lib/types";
+import { DashboardSummary, Transaction } from "@/lib/types";
 import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 

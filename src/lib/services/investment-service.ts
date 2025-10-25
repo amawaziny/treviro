@@ -9,18 +9,10 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import {
+import { CurrencyCode, Transaction, InvestmentType, 
   Investment,
   RealEstateInvestment,
-  Transaction,
-  isRealEstateInvestment,
-} from "@/lib/investment-types";
-import {
-  CurrencyCode,
-  GoldMarketPrices,
-  InvestmentType,
-  ListedSecurity,
-} from "../types";
+  isRealEstateInvestment, } from "@/lib/types";
 import { eventBus } from "./events";
 
 import { INVESTMENTS_COLLECTION_PATH } from "@/lib/constants";

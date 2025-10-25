@@ -11,8 +11,12 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import type { InvestmentType, CurrencyCode, BaseRecord } from "@/lib/types";
-import { Transaction, TransactionType } from "@/lib/investment-types";
+import type {
+  Transaction,
+  TransactionType,
+  CurrencyCode,
+  BaseRecord,
+} from "@/lib/types";
 import {
   eventBus,
   FinancialRecordEvent,

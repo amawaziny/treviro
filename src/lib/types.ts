@@ -33,42 +33,42 @@ export type FundType =
 
 export interface BaseInvestment {
   id: string;
-  name: string;
+  userId: string;
   type: InvestmentType;
-  amountInvested: number;
-  purchaseDate?: string;
-  currentValue?: number;
-  createdAt?: string;
-  securityId?: string;
-  fundType?: string | null;
+  name: string;
+  totalShares: number; // Current number of shares/units held
+  totalInvested: number; // Total amount invested (cost basis)
+  averagePurchasePrice: number; // Weighted average purchase price
+  firstPurchaseDate: string; // First purchase date (YYYY-MM-DD)
+  lastUpdated: string; // Last update timestamp
+  currency: CurrencyCode;
+  fundType?: FundType;
+  metadata?: {
+    // Type-specific metadata
+    [key: string]: any;
+  };
 }
 
 export interface SecurityInvestment extends BaseInvestment {
-  type: InvestmentType | "Stocks";
-  actualStockName?: string;
-  tickerSymbol?: string;
-  numberOfShares?: number;
-  purchasePricePerShare?: number;
-  purchaseFees?: number;
+  type: "Securities";
+  securityId: string;
 }
 
 export type GoldType = "K24" | "K21" | "Pound" | "Ounce";
 export interface GoldInvestment extends BaseInvestment {
   type: "Gold";
   goldType: GoldType;
-  quantityInGrams: number; // Represents units for Pound/Ounce
+  quantityInGrams: number; //weight in grams per gold type
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
   type: "Currencies";
   currencyCode: string;
-  foreignCurrencyAmount: number;
-  exchangeRateAtPurchase: number;
 }
 
 export type PropertyType = "Residential" | "Touristic" | "Commercial" | "Land";
 
-export type InstallmentFrequency = "Monthly" | "Quarterly" | "Yearly";
+export type Frequency = "Monthly" | "Quarterly" | "Yearly";
 
 export interface Installment {
   number: number;
@@ -83,9 +83,9 @@ export interface Installment {
 
 export interface RealEstateInvestment extends BaseInvestment {
   type: "Real Estate";
+  propertyType: PropertyType;
   propertyAddress?: string;
-  propertyType?: PropertyType;
-  installmentFrequency?: "Monthly" | "Quarterly" | "Yearly";
+  installmentFrequency?: Frequency;
   installmentAmount?: number;
   totalInstallmentPrice?: number; // New: total price at end of all installments
   installmentStartDate?: string; // NEW FIELD
@@ -99,13 +99,14 @@ export interface RealEstateInvestment extends BaseInvestment {
 }
 
 export type DebtSubType = "Certificate" | "Treasury Bill" | "Bond" | "Other";
+
 export interface DebtInstrumentInvestment extends BaseInvestment {
   type: "Debt Instruments";
   debtSubType: DebtSubType;
   issuer: string;
   interestRate: number;
-  maturityDate: string; // YYYY-MM-DD
-  certificateInterestFrequency: "Monthly" | "Quarterly" | "Yearly";
+  maturityDate: string;
+  interestFrequency: Frequency;
   interestAmount?: number; // Optional: actual or projected interest amount
   isMatured?: boolean; // Indicates if the debt instrument has matured
   maturedOn?: string; // Date when the instrument matured (YYYY-MM-DD)
@@ -118,6 +119,37 @@ export type Investment =
   | RealEstateInvestment
   | DebtInstrumentInvestment;
 
+// Type guards
+export function isSecurityInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return investment.type === "Securities";
+}
+
+export function isGoldInvestment(
+  investment: Investment,
+): investment is GoldInvestment {
+  return investment.type === "Gold";
+}
+
+export function isCurrencyInvestment(
+  investment: Investment,
+): investment is CurrencyInvestment {
+  return investment.type === "Currencies";
+}
+
+export function isRealEstateInvestment(
+  investment: Investment,
+): investment is RealEstateInvestment {
+  return investment.type === "Real Estate";
+}
+
+export function isDebtInstrumentInvestment(
+  investment: Investment,
+): investment is DebtInstrumentInvestment {
+  return investment.type === "Debt Instruments";
+}
+
 export type FinancialRecord =
   | IncomeRecord
   | ExpenseRecord
@@ -125,7 +157,7 @@ export type FinancialRecord =
 
 // Base interface that enforces common fields across all record types
 export interface BaseRecord {
-  date?: string;
+  date: string;
   id: string;
   userId: string;
   amount: number;
@@ -205,24 +237,38 @@ export interface StockChartDataPoint {
 
 export type StockChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 
-export type TransactionType = "buy" | "sell" | "dividend" | "interest";
+export type TransactionType =
+  | "BUY" // For purchasing any asset (stocks, gold, currency, etc.)
+  | "PAYMENT" // For installments, fees, or other payments
+  | "EXPENSE" // For expenses
+  | "SELL" // For selling any asset
+  | "DIVIDEND" // For dividend/interest income
+  | "INCOME" // For receiving income;
+  | "INTEREST" // For interest income
+  | "MATURED_DEBT"; // For matured debt
 
 export interface Transaction {
   id: string;
-  investmentId?: string;
+  userId: string;
+  investmentType?: InvestmentType;
+  sourceId: string;
   securityId?: string;
-  tickerSymbol: string;
+  installmentNumber?: number;
   type: TransactionType;
-  date: string;
-  numberOfShares: number;
-  pricePerShare: number;
-  fees: number;
-  totalAmount: number;
-  profitOrLoss?: number;
-  createdAt: string;
-  isInvestmentRecord?: boolean;
-  amount?: number; // Optional, for dividend or other transactions
-  shares?: number; // Optional, for dividend or display-only transactions
+  date: string; // ISO date string
+  amount: number; // Total transaction amount (signed: positive for in, negative for out)
+  quantity: number; // Number of shares/units (signed: positive for buy, negative for sell)
+  pricePerUnit: number; // Price per share/unit
+  averagePurchasePrice: number; // Average purchase price
+  profitOrLoss?: number; // Profit or loss from transaction
+  fees: number; // Transaction fees
+  currency: CurrencyCode;
+  description?: string;
+  metadata: {
+    // Additional type-specific data
+    [key: string]: any; // Allow other metadata
+  };
+  createdAt: string; // ISO timestamp
 }
 
 export interface DashboardSummary {
