@@ -221,7 +221,7 @@ export function CashFlowSummaryCards({
               <span className="text-sm">
                 {formatNumberForMobile(
                   isMobile,
-                  cashFlowSummary.totalStockInvestments,
+                  cashFlowSummary.totalSecuritiesInvestments,
                 )}
               </span>
             </div>

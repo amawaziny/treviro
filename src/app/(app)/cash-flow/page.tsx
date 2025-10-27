@@ -37,7 +37,7 @@ import {
   SecurityInvestment,
   Installment,
 } from "@/lib/types";
-import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
+import { calculateCashFlowMonthlySummary } from "@/lib/financial-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 
@@ -113,7 +113,7 @@ export default function CashFlowPage() {
   const realEstateInstallmentsThisMonth = realEstateInstallments.total;
 
   const cashFlowSummary = useMemo(() => {
-    return calculateMonthlyCashFlowSummary({
+    return calculateCashFlowMonthlySummary({
       incomeRecords: incomeRecords || [],
       expenseRecords: expenseRecords || [],
       investments: investments || [],
@@ -130,7 +130,7 @@ export default function CashFlowPage() {
     livingExpenses: livingExpensesMonthly,
     totalFixedExpenses: otherFixedExpensesMonthly,
     totalItemizedExpenses: totalItemizedExpensesThisMonth,
-    totalStockInvestments: totalStockInvestmentThisMonth,
+    totalSecuritiesInvestments: totalStockInvestmentThisMonth,
     totalInvestments: totalInvestmentsThisMonth,
     totalIncome,
   } = cashFlowSummary;

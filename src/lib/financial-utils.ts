@@ -27,138 +27,69 @@ export interface CashFlowSummaryArgs {
   month?: Date; // Defaults to current month if not provided
 }
 
-export interface CashFlowSummaryResult {
-  // Income
-  totalIncome: number;
-  monthlySalary: number;
-  otherFixedIncomeMonthly: number;
-  totalManualIncomeThisMonth: number;
-  totalProjectedCertificateInterestThisMonth: number;
-  currentMonthIncome: number;
+export interface CashFlowMonthlySummary {
+  totalIncome: number;//total income that already occurred and will be received this month
+  salary: number;//TODO: remove this
+  totalFixedIncome: number;
+  totalManualIncome: number;
+  totalProjectedDebtInterest: number;
+  incomeTillNow: number;
 
   // Expenses
-  totalExpensesOnly: number;
-  livingExpensesMonthly: number;
-  zakatFixedMonthly: number;
-  charityFixedMonthly: number;
-  otherFixedExpensesMonthly: number;
-  realEstateInstallmentsMonthly: number;
-  totalItemizedExpensesThisMonth: number;
+  totalExpenses: number;
+  livingExpenses: number; //TODO: remove this
+  zakat: number;//TODO: remove this
+  charity: number;//TODO: remove this
+  totalFixedExpenses: number;
+  totalRealEstateInstallments: number;
+  totalItemizedExpenses: number; // For regular expenses, check if they occurred in the current month
 
   // Investments
-  totalInvestmentsThisMonth: number;
-  totalStockInvestmentThisMonth: number;
-  totalDebtInvestmentThisMonth: number;
-  totalGoldInvestmentThisMonth: number;
-  totalCurrencyInvestmentThisMonth: number;
-  totalInvestmentsOnly: number;
-  stockDividendThisMonth: number;
+  totalInvestments: number;
+  totalSecuritiesInvestments: number;
+  totalDebtInvestments: number;
+  totalGoldInvestments: number;
+  totalCurrencyInvestments: number;
+  totalInvestmentsOnly: number;//TODO: remove this
+  totalSecuritiesDividend: number;
 
   // Summary
-  netCashFlowThisMonth: number;
-  netCurrentMonthCashFlow: number;
+  netCashFlow: number;
+  netTillNowCashFlow: number;
 }
 
-export function calculateCashFlowDetails({
+/*
+  TODO: Refactor this function to calculate monthly cashflow from transactions
+  1.totalIncome: number; total income that already occurred and will be received this month (totalFixedIncome+totalProjectedDebtInterest+incomeTillNow)
+  2.totalFixedIncome: number; get all fixed estimates records of type income and sum up their amounts
+  3.totalProjectedDebtInterest: number; get all debt instruments investments and sum up their interest rates based on their first purchase date and frequency
+  4.incomeTillNow: number; to calculate totalIncome loop through all transactions and sum up the amount of transactions that occurred in this month and transaction of type INTEREST, DIVIDEND, INCOME, sell, matured debt
+
+  // Expenses
+  5.totalExpenses: total of all expenses records occurred in this month and will be paid this month (totalFixedExpenses+totalRealEstateInstallments+totalItemizedExpenses)
+  6.totalFixedExpenses: get all fixed estimates records of type expense and sum up their amounts;
+  7.totalItemizedExpenses: number; // get all expenses records and with type credit card and isInstallment true and sum up their amounts if current month is within the installment period
+
+  // Investments
+  8.totalInvestments: number; sum up totalStockInvestments+totalDebtInvestments+totalGoldInvestments+totalCurrencyInvestments
+  9.totalSecuritiesInvestments: number; get all transactions of type buy and sourceType investment and has securityId and metadata.sourceSubType = "Securities" and sum up their amounts
+  10.totalDebtInvestments: number; get all transactions of type buy and sourceType investment and metadata.sourceSubType = "Debt Instruments" and sum up their amounts
+  11.totalGoldInvestments: number; get all transactions of type buy and sourceType investment and metadata.sourceSubType = "Gold" and sum up their amounts
+  12.totalCurrencyInvestments: number; get all transactions of type buy and sourceType investment and metadata.sourceSubType = "Currencies" and sum up their amounts
+  13.totalRealEstateInstallments: get all real estate investments and sum up their installments based on their dueDate and installmentFrequency if it is quarterly distribute on 3 months
+
+  // Summary
+  15.netCashFlow: number; totalIncome - totalExpenses - totalInvestments
+  16.netTillNowCashFlow: number; incomeTillNow - totalExpenses - totalInvestments
+*/
+export function calculateCashFlowMonthlySummary({
   incomeRecords = [],
   expenseRecords = [],
   investments = [],
   fixedEstimates = [],
   transactions = [],
   month = new Date(),
-}: CashFlowSummaryArgs & {
-  transactions?: Transaction[];
-}): CashFlowSummaryResult {
-  const summary = calculateMonthlyCashFlowSummary({
-    incomeRecords,
-    expenseRecords,
-    investments,
-    fixedEstimates,
-    transactions,
-    month,
-  });
-
-  const currentMonthStart = startOfMonth(month);
-  const currentMonthEnd = endOfMonth(month);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // Calculate current month income based on payout dates
-  let currentMonthIncome = 0;
-
-  // Process manual income records
-  incomeRecords.forEach((income) => {
-    const incomeDate = parseDateString(income.date);
-    if (incomeDate) {
-      const isInCurrentMonth = isWithinInterval(incomeDate, {
-        start: currentMonthStart,
-        end: currentMonthEnd,
-      });
-
-      if (isInCurrentMonth && incomeDate <= today) {
-        currentMonthIncome += income.amount;
-      }
-    }
-  });
-
-  // Process fixed estimates (salary and other fixed income)
-  fixedEstimates.forEach((fe) => {
-    if (fe.type === "Salary" || !fe.isExpense) {
-      let monthlyAmount = fe.amount;
-      if (fe.period === "Yearly") monthlyAmount /= 12;
-      else if (fe.period === "Quarterly") monthlyAmount /= 3;
-
-      // If we're in the current month, add fixed income to current month income
-      if (isSameMonth(today, month) && today.getDate() >= 1) {
-        currentMonthIncome += monthlyAmount;
-      }
-    }
-  });
-
-  // Process certificate interest for current month
-  const directDebtInvestments = investments.filter(
-    (inv) => inv.type === "Debt Instruments",
-  ) as DebtInstrumentInvestment[];
-
-  directDebtInvestments.forEach((debt) => {
-    if (debt.interestRate && debt.amountInvested) {
-      const annualInterest = (debt.amountInvested * debt.interestRate) / 100;
-      const monthlyInterest = annualInterest / 12;
-
-      // Add interest to current month income if it's past the payout date
-      if (debt.maturityDate) {
-        const paymentDate = new Date(debt.maturityDate);
-        if (paymentDate <= today && isSameMonth(paymentDate, month)) {
-          currentMonthIncome += monthlyInterest;
-        }
-      }
-    }
-  });
-
-  // Calculate net current month cash flow
-  const netCurrentMonthCashFlow =
-    currentMonthIncome -
-    (summary.livingExpensesMonthly +
-      summary.zakatFixedMonthly +
-      summary.charityFixedMonthly +
-      summary.otherFixedExpensesMonthly +
-      summary.totalItemizedExpensesThisMonth);
-
-  return {
-    ...summary,
-    currentMonthIncome,
-    netCurrentMonthCashFlow,
-  };
-}
-
-export function calculateMonthlyCashFlowSummary({
-  incomeRecords = [],
-  expenseRecords = [],
-  investments = [],
-  fixedEstimates = [],
-  transactions = [],
-  month = new Date(),
-}: CashFlowSummaryArgs): CashFlowSummaryResult {
+}: CashFlowSummaryArgs): CashFlowMonthlySummary {
   const currentMonthStart = startOfMonth(month);
   const currentMonthEnd = endOfMonth(month);
   const today = new Date();
@@ -205,10 +136,10 @@ export function calculateMonthlyCashFlowSummary({
       // Calculate monthly interest based on amount and rate
       if (
         debtInv.interestRate &&
-        debtInv.amountInvested &&
-        debtInv.purchaseDate
+        debtInv.totalInvested &&
+        debtInv.firstPurchaseDate
       ) {
-        const purchaseDate = parseDateString(debtInv.purchaseDate);
+        const purchaseDate = parseDateString(debtInv.firstPurchaseDate);
         const maturityDate = debtInv.maturityDate
           ? parseDateString(debtInv.maturityDate)
           : null;
@@ -224,7 +155,7 @@ export function calculateMonthlyCashFlowSummary({
             currentMonthEnd >= purchaseDate
           ) {
             const annualInterest =
-              (debtInv.amountInvested * debtInv.interestRate) / 100;
+              (debtInv.totalInvested * debtInv.interestRate) / 100;
             const monthlyInterest = annualInterest / 12;
             totalProjectedCertificateInterestThisMonth += monthlyInterest;
           }
@@ -240,7 +171,7 @@ export function calculateMonthlyCashFlowSummary({
 
     // Check if this is a credit card installment
     if (
-      record.category === "Credit Card" &&
+      record.type === "Credit Card" &&
       record.isInstallment &&
       record.numberOfInstallments
     ) {
@@ -306,7 +237,7 @@ export function calculateMonthlyCashFlowSummary({
       date &&
       isWithinInterval(date, { start: currentMonthStart, end: currentMonthEnd })
     ) {
-      if (inv.type === "Stocks")
+      if (inv.type === "Securities")
         totalStockInvestmentThisMonth +=
           (inv as SecurityInvestment).amountInvested || 0;
       else if (inv.type === "Debt Instruments")
@@ -404,29 +335,30 @@ export function calculateMonthlyCashFlowSummary({
 
   return {
     totalIncome,
-    monthlySalary,
-    otherFixedIncomeMonthly,
-    totalManualIncomeThisMonth,
-    totalProjectedCertificateInterestThisMonth,
-    currentMonthIncome,
-    totalExpensesOnly,
-    livingExpensesMonthly,
-    zakatFixedMonthly,
-    charityFixedMonthly,
-    otherFixedExpensesMonthly,
-    realEstateInstallmentsMonthly,
-    totalItemizedExpensesThisMonth,
-    totalInvestmentsThisMonth,
-    totalStockInvestmentThisMonth,
-    totalDebtInvestmentThisMonth,
-    totalGoldInvestmentThisMonth,
-    totalCurrencyInvestmentThisMonth,
+    salary: monthlySalary,
+    totalFixedIncome: otherFixedIncomeMonthly,
+    totalManualIncome: totalManualIncomeThisMonth,
+    totalProjectedDebtInterest: totalProjectedCertificateInterestThisMonth,
+    incomeTillNow: currentMonthIncome,
+    totalExpenses: totalExpensesOnly,
+    livingExpenses: livingExpensesMonthly,
+    zakat: zakatFixedMonthly,
+    charity: charityFixedMonthly,
+    totalFixedExpenses: otherFixedExpensesMonthly,
+    totalRealEstateInstallments: realEstateInstallmentsMonthly,
+    totalItemizedExpenses: totalItemizedExpensesThisMonth,
+    totalInvestments: totalInvestmentsThisMonth,
+    totalSecuritiesInvestments: totalStockInvestmentThisMonth,
+    totalDebtInvestments: totalDebtInvestmentThisMonth,
+    totalGoldInvestments: totalGoldInvestmentThisMonth,
+    totalCurrencyInvestments: totalCurrencyInvestmentThisMonth,
     totalInvestmentsOnly,
-    netCashFlowThisMonth,
-    stockDividendThisMonth,
-    netCurrentMonthCashFlow: netCashFlowThisMonth, // Alias for consistency with interface
+    netCashFlow: netCashFlowThisMonth,
+    totalSecuritiesDividend: stockDividendThisMonth,
+    netTillNowCashFlow: netCashFlowThisMonth, // Alias for consistency with interface
   };
 }
+
 export function calcProfit(
   invNumberOfShares: number,
   invPurchasePricePerShare: number,

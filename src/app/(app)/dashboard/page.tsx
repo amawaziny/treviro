@@ -36,7 +36,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCards";
 import { formatMonthYear, formatNumberForMobile } from "@/lib/utils";
-import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
+import { calculateCashFlowMonthlySummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
@@ -81,7 +81,7 @@ export default function DashboardPage() {
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
 
   const cashFlowSummary = useMemo(() => {
-    return calculateMonthlyCashFlowSummary({
+    return calculateCashFlowMonthlySummary({
       incomeRecords: incomeRecords || [],
       expenseRecords: expenseRecords || [],
       investments: investments || [],

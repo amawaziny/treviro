@@ -3,7 +3,7 @@ import { useLanguage } from "@/contexts/language-context";
 
 import * as React from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
+import { calculateCashFlowMonthlySummary } from "@/lib/financial-utils";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";
 
@@ -18,7 +18,7 @@ export function MonthlyInvestmentDistributionChart() {
   const { expenseRecords, fixedEstimates } = useInvestments();
   const cashFlowSummary = React.useMemo(
     () =>
-      calculateMonthlyCashFlowSummary({
+      calculateCashFlowMonthlySummary({
         incomeRecords: [],
         expenseRecords,
         investments,
@@ -42,7 +42,7 @@ export function MonthlyInvestmentDistributionChart() {
     data.push({
       id: "Stocks",
       label: t("stocks"),
-      value: cashFlowSummary.totalStockInvestments,
+      value: cashFlowSummary.totalSecuritiesInvestments,
       color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
     });
 
