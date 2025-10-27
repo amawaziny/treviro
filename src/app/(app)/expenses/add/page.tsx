@@ -24,9 +24,10 @@ export default function AddExpensePage() {
       ExpenseRecord,
       "id" | "createdAt" | "userId"
     > = {
-      category: values.category!,
+      type: values.category!,
       amount: values.amount, // Zod has coerced this to number
       date: values.date,
+      recordType: "Expense",
     };
 
     if (values.description && values.description.trim() !== "") {

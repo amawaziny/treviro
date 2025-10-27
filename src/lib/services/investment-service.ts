@@ -166,6 +166,7 @@ export class InvestmentService {
       pricePerUnit = 0,
       fees = 0,
       currency = "EGP",
+      firstPurchaseDate = new Date().toISOString(),
     } = investmentData as any;
     const amount = quantity * pricePerUnit + fees;
 
@@ -188,6 +189,7 @@ export class InvestmentService {
           userId: this.userId,
           securityId: securityId || "",
           currency,
+          firstPurchaseDate,
           lastUpdated: now,
           totalShares: quantity,
           totalInvested: amount,
@@ -218,13 +220,19 @@ export class InvestmentService {
           type: "investment:added",
           transaction: {
             sourceId: investmentId,
+            sourceType: "Investment",
             securityId,
             type: "BUY",
+            date: investment.firstPurchaseDate,
             amount,
             quantity,
             pricePerUnit,
             fees,
             currency,
+            metadata: {
+              sourceSubType: investment.type,
+              ...investment
+            },
           } as Transaction,
         });
 
@@ -253,9 +261,8 @@ export class InvestmentService {
       | "amount"
       | "pricePerUnit"
       | "fees"
-      | "investmentType"
       | "installmentNumber"
-    >,
+    > & { investmentType: InvestmentType },
   ): InvestmentUpdate {
     const { type, quantity = 0, amount = 0, investmentType } = transaction;
     let { totalShares, totalInvested } = current;
@@ -292,8 +299,8 @@ export class InvestmentService {
   private async updateInvestment(
     transactionData: Omit<
       Transaction,
-      "id" | "createdAt" | "profitOrLoss" | "averagePurchasePrice"
-    >,
+      "id" | "createdAt" | "profitOrLoss" | "averagePurchasePrice" | "sourceType" | "metadata"
+    > & { investmentType: InvestmentType },
   ): Promise<Investment> {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
     const now = new Date().toISOString();
@@ -374,15 +381,26 @@ export class InvestmentService {
       // Update the investment
       firestoreTransaction.update(investmentRef, updateData);
 
+      const updatedInvestment = {
+        ...investment,
+        ...updateData,
+      };
+
+      const {investmentType, ...restTransactionData} = transactionData;
       await eventBus.publish({
         type: "investment:updated",
         transaction: {
-          ...transactionData,
+          ...restTransactionData,
+          sourceType:"Investment",
           averagePurchasePrice: update.averagePurchasePrice,
+          metadata: {
+            sourceSubType: investmentType,
+            ...updatedInvestment
+          },
         } as Transaction,
       });
-      //TODO: add investment updateData
-      return investment;
+
+      return updatedInvestment;
     });
   }
 
@@ -414,7 +432,6 @@ export class InvestmentService {
     pricePerUnit: number,
     fees: number,
     date: string,
-    metadata: Record<string, any> = {},
   ): Promise<Investment> {
     const amount = quantity * pricePerUnit + fees;
 
@@ -429,8 +446,7 @@ export class InvestmentService {
       quantity,
       pricePerUnit,
       fees,
-      currency: "EGP",
-      metadata,
+      currency: "EGP"
     });
   }
 
@@ -461,7 +477,6 @@ export class InvestmentService {
     pricePerUnit: number,
     fees: number,
     date: string,
-    metadata: Record<string, any> = {},
   ): Promise<Investment> {
     const amount = quantity * pricePerUnit - fees;
 
@@ -477,7 +492,6 @@ export class InvestmentService {
       pricePerUnit,
       fees,
       currency: "EGP",
-      metadata,
     });
   }
 
@@ -504,7 +518,6 @@ export class InvestmentService {
     installmentNumber: number,
     amount: number,
     date: string,
-    metadata: Record<string, any> = {},
   ): Promise<Investment> {
     return this.updateInvestment({
       userId: this.userId,
@@ -518,9 +531,6 @@ export class InvestmentService {
       pricePerUnit: 0,
       fees: 0,
       currency: "EGP",
-      metadata: {
-        ...metadata,
-      },
     });
   }
 
@@ -546,7 +556,6 @@ export class InvestmentService {
     investmentType: InvestmentType,
     amount: number,
     date: string,
-    metadata: Record<string, any> = {},
   ): Promise<Investment> {
     return this.updateInvestment({
       userId: this.userId,
@@ -560,10 +569,6 @@ export class InvestmentService {
       pricePerUnit: 0,
       fees: 0,
       currency: "EGP",
-      metadata: {
-        ...metadata,
-        isIncome: true,
-      },
     });
   }
 

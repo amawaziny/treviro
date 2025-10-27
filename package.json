@@ -2,7 +2,7 @@
   "name": "treviro",
   "version": "1.0.0",
   "private": true,
-  "description": "Modern Investment Portfolio Tracker",
+  "description": "Modern Investment Portfolio Tracker and Financial Mentor",
   "author": "amawaziny",
   "license": "MIT",
   "homepage": "https://treviro.vercel.app",
@@ -24,8 +24,11 @@
     "Cash Flow",
     "Expenses",
     "Income",
+    "Dividends",
     "Fixed Estimates",
-    "Monthly Cash Flow Distribution"
+    "Monthly Cash Flow Distribution",
+    "Financial Mentor",
+    "Financial Advisor"
   ],
   "scripts": {
     "dev": "next dev --turbopack -p 9002",

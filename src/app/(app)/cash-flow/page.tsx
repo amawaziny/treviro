@@ -123,15 +123,15 @@ export default function CashFlowPage() {
   }, [incomeRecords, expenseRecords, investments, fixedEstimates]);
 
   const {
-    totalManualIncomeThisMonth,
-    totalProjectedCertificateInterestThisMonth,
-    zakatFixedMonthly,
-    charityFixedMonthly,
-    livingExpensesMonthly,
-    otherFixedExpensesMonthly,
-    totalItemizedExpensesThisMonth,
-    totalStockInvestmentThisMonth,
-    totalInvestmentsThisMonth,
+    totalManualIncome: totalManualIncomeThisMonth,
+    totalProjectedDebtInterest: totalProjectedCertificateInterestThisMonth,
+    zakat: zakatFixedMonthly,
+    charity: charityFixedMonthly,
+    livingExpenses: livingExpensesMonthly,
+    totalFixedExpenses: otherFixedExpensesMonthly,
+    totalItemizedExpenses: totalItemizedExpensesThisMonth,
+    totalStockInvestments: totalStockInvestmentThisMonth,
+    totalInvestments: totalInvestmentsThisMonth,
     totalIncome,
   } = cashFlowSummary;
 
@@ -201,7 +201,7 @@ export default function CashFlowPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {/* Salary Income */}
-            {cashFlowSummary.monthlySalary > 0 && (
+            {cashFlowSummary.salary > 0 && (
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <Briefcase className="me-2 h-4 w-4 text-amber-500" />
@@ -212,7 +212,7 @@ export default function CashFlowPage() {
                 <span className="text-sm">
                   {formatNumberForMobile(
                     isMobile,
-                    cashFlowSummary.monthlySalary,
+                    cashFlowSummary.salary,
                   )}
                 </span>
               </div>
@@ -271,7 +271,7 @@ export default function CashFlowPage() {
               ))}
             {transactions &&
               transactions
-                .filter((tx: Transaction) => tx.type === "dividend")
+                .filter((tx: Transaction) => tx.type === "DIVIDEND")
                 .filter((tx: Transaction) => {
                   const txDate = parseDateString(tx.date);
                   return (
@@ -288,7 +288,7 @@ export default function CashFlowPage() {
                     className="flex justify-between text-xs"
                   >
                     <span>
-                      {`${formatDateDisplay(tx.date)} ${t("dividend")} ${tx.tickerSymbol ? `(${tx.tickerSymbol})` : ""}`}
+                      {`${formatDateDisplay(tx.date)} ${t("dividend")} ${tx.securityId ? `(${tx.securityId})` : ""}`}
                     </span>
                     <span>
                       {formatNumberForMobile(
@@ -415,8 +415,8 @@ export default function CashFlowPage() {
               {/* Stocks */}
               {investments &&
                 investments.filter((inv) => {
-                  if (inv.type !== "Stocks" || !inv.purchaseDate) return false;
-                  const parsed = parseDateString(inv.purchaseDate);
+                  if (inv.type !== "Securities" || !inv.firstPurchaseDate) return false;
+                  const parsed = parseDateString(inv.firstPurchaseDate);
                   return (
                     parsed &&
                     isWithinInterval(parsed, {
@@ -430,9 +430,9 @@ export default function CashFlowPage() {
                     <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
                       {investments
                         .filter((inv) => {
-                          if (inv.type !== "Stocks" || !inv.purchaseDate)
+                          if (inv.type !== "Securities" || !inv.firstPurchaseDate)
                             return false;
-                          const parsed = parseDateString(inv.purchaseDate);
+                          const parsed = parseDateString(inv.firstPurchaseDate);
                           return (
                             parsed &&
                             isWithinInterval(parsed, {
@@ -449,14 +449,14 @@ export default function CashFlowPage() {
                               className="flex justify-between items-center text-xs"
                             >
                               <span>
-                                {stock.tickerSymbol ||
+                                {stock.securityId ||
                                   stock.id ||
                                   t("unnamed_stock")}
                               </span>
                               <span>
                                 {formatNumberForMobile(
                                   isMobile,
-                                  stock.amountInvested || 0,
+                                  stock.totalInvested || 0,
                                 )}
                               </span>
                             </li>
@@ -468,9 +468,9 @@ export default function CashFlowPage() {
               {/* Debt Instruments */}
               {investments &&
                 investments.filter((inv) => {
-                  if (inv.type !== "Debt Instruments" || !inv.purchaseDate)
+                  if (inv.type !== "Debt Instruments" || !inv.firstPurchaseDate)
                     return false;
-                  const parsed = parseDateString(inv.purchaseDate);
+                  const parsed = parseDateString(inv.firstPurchaseDate);
                   return (
                     parsed &&
                     isWithinInterval(parsed, {
@@ -489,10 +489,10 @@ export default function CashFlowPage() {
                         .filter((inv) => {
                           if (
                             inv.type !== "Debt Instruments" ||
-                            !inv.purchaseDate
+                            !inv.firstPurchaseDate
                           )
                             return false;
-                          const parsed = parseDateString(inv.purchaseDate);
+                          const parsed = parseDateString(inv.firstPurchaseDate);
                           return (
                             parsed &&
                             isWithinInterval(parsed, {
@@ -510,7 +510,7 @@ export default function CashFlowPage() {
                             <span>
                               {formatNumberForMobile(
                                 isMobile,
-                                debt.amountInvested || 0,
+                                debt.totalInvested || 0,
                               )}
                             </span>
                           </li>
@@ -521,8 +521,8 @@ export default function CashFlowPage() {
               {/* Gold */}
               {investments &&
                 investments.filter((inv) => {
-                  if (inv.type !== "Gold" || !inv.purchaseDate) return false;
-                  const parsed = parseDateString(inv.purchaseDate);
+                  if (inv.type !== "Gold" || !inv.firstPurchaseDate) return false;
+                  const parsed = parseDateString(inv.firstPurchaseDate);
                   return (
                     parsed &&
                     isWithinInterval(parsed, {
@@ -539,9 +539,9 @@ export default function CashFlowPage() {
                     <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
                       {investments
                         .filter((inv) => {
-                          if (inv.type !== "Gold" || !inv.purchaseDate)
+                          if (inv.type !== "Gold" || !inv.firstPurchaseDate)
                             return false;
-                          const parsed = parseDateString(inv.purchaseDate);
+                          const parsed = parseDateString(inv.firstPurchaseDate);
                           return (
                             parsed &&
                             isWithinInterval(parsed, {
@@ -559,7 +559,7 @@ export default function CashFlowPage() {
                             <span>
                               {formatNumberForMobile(
                                 isMobile,
-                                gold.amountInvested || 0,
+                                gold.totalInvested || 0,
                               )}
                             </span>
                           </li>

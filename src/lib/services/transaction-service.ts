@@ -228,6 +228,7 @@ export class TransactionService {
         id: transactionId,
         userId: this.userId,
         sourceId: record.id,
+        sourceType: record.recordType,
         type: type,
         date: record.date || now,
         amount: type === "EXPENSE" ? -record.amount : record.amount,
@@ -240,7 +241,8 @@ export class TransactionService {
         averagePurchasePrice: 0,
         profitOrLoss: 0,
         metadata: {
-          source: "financial-records",
+          sourceSubType: record.type,
+          ...record,
         },
       };
 

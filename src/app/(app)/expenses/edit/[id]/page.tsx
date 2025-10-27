@@ -78,7 +78,7 @@ export default function EditExpensePage({
         <CardContent>
           <ExpenseForm
             initialValues={{
-              category: expense.category,
+              category: expense.type,
               description: expense.description ?? "",
               //@ts-expect-error
               amount: expense.amount?.toString() ?? "",

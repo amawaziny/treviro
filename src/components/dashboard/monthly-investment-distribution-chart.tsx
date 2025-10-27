@@ -42,45 +42,45 @@ export function MonthlyInvestmentDistributionChart() {
     data.push({
       id: "Stocks",
       label: t("stocks"),
-      value: cashFlowSummary.totalStockInvestmentThisMonth,
+      value: cashFlowSummary.totalStockInvestments,
       color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
     });
 
     data.push({
       id: "Gold",
       label: t("gold"),
-      value: cashFlowSummary.totalGoldInvestmentThisMonth,
+      value: cashFlowSummary.totalGoldInvestments,
       color: "#e6b93e",
     });
 
     data.push({
       id: "Debt instruments",
       label: t("debt_instruments"),
-      value: cashFlowSummary.totalDebtInvestmentThisMonth,
+      value: cashFlowSummary.totalDebtInvestments,
       color: resolvedTheme === "dark" ? "#b6d037" : "#5e9c1c",
     });
 
     data.push({
       id: "Currencies",
       label: t("currencies"),
-      value: cashFlowSummary.totalCurrencyInvestmentThisMonth,
+      value: cashFlowSummary.totalCurrencyInvestments,
       color: resolvedTheme === "dark" ? "#45818e" : "#7bb661",
     });
 
     data.push({
       id: "Real Estate",
       label: t("real_estate"),
-      value: cashFlowSummary.realEstateInstallmentsMonthly,
+      value: cashFlowSummary.totalRealEstateInstallments,
       color: resolvedTheme === "dark" ? "#7bb661" : "#b6d037",
     });
 
     // Add combined expenses
     const totalExpenses =
-      (cashFlowSummary.livingExpensesMonthly || 0) +
-      (cashFlowSummary.zakatFixedMonthly || 0) +
-      (cashFlowSummary.charityFixedMonthly || 0) +
-      (cashFlowSummary.otherFixedExpensesMonthly || 0) +
-      (cashFlowSummary.totalItemizedExpensesThisMonth || 0);
+      (cashFlowSummary.livingExpenses || 0) +
+      (cashFlowSummary.zakat || 0) +
+      (cashFlowSummary.charity || 0) +
+      (cashFlowSummary.totalFixedExpenses || 0) +
+      (cashFlowSummary.totalItemizedExpenses || 0);
 
     data.push({
       id: "Expenses",

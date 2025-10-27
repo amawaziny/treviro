@@ -14,7 +14,7 @@ export type IncomeType =
   | "Rental Income"
   | "Freelance"
   | "Other";
-export type ExpenseCategory = "Credit Card" | "Other";
+export type ExpenseType = "Credit Card" | "Other";
 export type FundType =
   | "Gold"
   | "Debt"
@@ -157,7 +157,9 @@ export type FinancialRecord =
 
 // Base interface that enforces common fields across all record types
 export interface BaseRecord {
+  recordType: "Income" | "Expense" | "Fixed Estimate";
   date: string;
+  type: IncomeType | ExpenseType | FixedEstimateType;
   id: string;
   userId: string;
   amount: number;
@@ -168,6 +170,7 @@ export interface BaseRecord {
 
 // Extend the record interfaces to include BaseRecord
 export interface IncomeRecord extends BaseRecord {
+  recordType: "Income";
   type: IncomeType;
   source?: string;
   isRecurring?: boolean;
@@ -175,7 +178,8 @@ export interface IncomeRecord extends BaseRecord {
 }
 
 export interface ExpenseRecord extends BaseRecord {
-  category: ExpenseCategory;
+  recordType: "Expense";
+  type: ExpenseType;
   isInstallment?: boolean;
   numberOfInstallments?: number;
   _originalAmount?: number;
@@ -184,6 +188,7 @@ export interface ExpenseRecord extends BaseRecord {
 }
 
 export interface FixedEstimateRecord extends BaseRecord {
+  recordType: "Fixed Estimate";
   type: FixedEstimateType;
   name?: string;
   period: FixedEstimatePeriod;
@@ -242,7 +247,7 @@ export type TransactionType =
   | "PAYMENT" // For installments, fees, or other payments
   | "EXPENSE" // For expenses
   | "SELL" // For selling any asset
-  | "DIVIDEND" // For dividend/interest income
+  | "DIVIDEND" // For dividend income
   | "INCOME" // For receiving income;
   | "INTEREST" // For interest income
   | "MATURED_DEBT"; // For matured debt
@@ -250,8 +255,8 @@ export type TransactionType =
 export interface Transaction {
   id: string;
   userId: string;
-  investmentType?: InvestmentType;
   sourceId: string;
+  sourceType: "Investment" | "Income" | "Expense" | "Fixed Estimate";
   securityId?: string;
   installmentNumber?: number;
   type: TransactionType;
@@ -265,6 +270,7 @@ export interface Transaction {
   currency: CurrencyCode;
   description?: string;
   metadata: {
+    sourceSubType: string;
     // Additional type-specific data
     [key: string]: any; // Allow other metadata
   };

@@ -71,7 +71,7 @@ export default function ExpensesPage() {
     // Helper: is record required this month?
     function isRequiredThisMonth(record: ExpenseRecord) {
       if (
-        record.category === "Credit Card" &&
+        record.type === "Credit Card" &&
         record.isInstallment &&
         record.numberOfInstallments &&
         record.date
@@ -104,7 +104,7 @@ export default function ExpensesPage() {
     return filtered
       .flatMap((record) => {
         if (
-          record.category === "Credit Card" &&
+          record.type === "Credit Card" &&
           record.isInstallment &&
           record.numberOfInstallments &&
           record.date
@@ -285,14 +285,14 @@ export default function ExpensesPage() {
                     {/* Top Row: Title, Date, Installment Badge */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="font-semibold truncate text-base">
-                        {record.description || t(record.category)}
+                        {record.description || t(record.type)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDateDisplay(record.date)}
                       </span>
                       {record.isInstallment &&
                         record.numberOfInstallments &&
-                        record.category === "Credit Card" && (
+                        record.type === "Credit Card" && (
                           <div className="flex items-center gap-2">
                             <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
                               {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
@@ -334,7 +334,7 @@ export default function ExpensesPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                {`${t("Remove")} ${record.description || t(record.category)}`}
+                                {`${t("Remove")} ${record.description || t(record.type)}`}
                               </span>
                             </Button>
                           </AlertDialogTrigger>
@@ -373,7 +373,7 @@ export default function ExpensesPage() {
                     {/* Installment Details */}
                     {record.isInstallment &&
                       record.numberOfInstallments &&
-                      record.category === t("credit_card") && (
+                      record.type === t("credit_card") && (
                         <div className="text-xs text-muted-foreground mt-1">
                           {`${t("installment_egp")} ${formatNumberForMobile(
                             isMobile,
