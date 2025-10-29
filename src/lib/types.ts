@@ -33,7 +33,6 @@ export type FundType =
 
 export interface BaseInvestment {
   id: string;
-  userId: string;
   type: InvestmentType;
   name: string;
   totalShares: number; // Current number of shares/units held
@@ -85,17 +84,17 @@ export interface RealEstateInvestment extends BaseInvestment {
   type: "Real Estate";
   propertyType: PropertyType;
   propertyAddress?: string;
-  installmentFrequency?: Frequency;
-  installmentAmount?: number;
-  totalInstallmentPrice?: number; // New: total price at end of all installments
-  installmentStartDate?: string; // NEW FIELD
-  installmentEndDate?: string; // New: end date of all installments
-  downPayment?: number; // NEW FIELD
-  maintenanceAmount?: number; // NEW FIELD
-  maintenancePaymentDate?: string; // NEW FIELD
-  installments?: Array<Installment>;
+  totalPrice?: number; // total price at end of all installments
   builtUpArea?: number; // Area in square meters
   hasGarden?: boolean; // Whether the property has a garden
+  downPayment?: number; 
+  maintenanceAmount?: number; 
+  maintenancePaymentDate?: string; 
+  installmentFrequency?: Frequency;
+  installmentAmount?: number;
+  installmentStartDate?: string;
+  installmentEndDate?: string;
+  installments?: Array<Installment>;
 }
 
 export type DebtSubType = "Certificate" | "Treasury Bill" | "Bond" | "Other";
@@ -107,8 +106,9 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   interestRate: number;
   maturityDate: string;
   interestFrequency: Frequency;
-  interestAmount?: number; // Optional: actual or projected interest amount
-  isMatured?: boolean; // Indicates if the debt instrument has matured
+  interestAmount: number; // projected interest amount
+  monthlyInterestAmount: number; // projected monthly interest amount
+  isMatured: boolean; // Indicates if the debt instrument has matured
   maturedOn?: string; // Date when the instrument matured (YYYY-MM-DD)
 }
 
@@ -158,10 +158,9 @@ export type FinancialRecord =
 // Base interface that enforces common fields across all record types
 export interface BaseRecord {
   recordType: "Income" | "Expense" | "Fixed Estimate";
-  date: string;
+  date?: string;
   type: IncomeType | ExpenseType | FixedEstimateType;
   id: string;
-  userId: string;
   amount: number;
   description?: string;
   createdAt: string;
@@ -254,7 +253,6 @@ export type TransactionType =
 
 export interface Transaction {
   id: string;
-  userId: string;
   sourceId: string;
   sourceType: "Investment" | "Income" | "Expense" | "Fixed Estimate";
   securityId?: string;

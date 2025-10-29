@@ -235,14 +235,14 @@ export default function RealEstateDetailPage() {
               {t("total_price_at_end")}
             </div>
             <div>
-              {investment.totalInstallmentPrice
+              {investment.totalPrice
                 ? formatNumberForMobile(
                     isMobile,
-                    investment.totalInstallmentPrice,
+                    investment.totalPrice,
                   )
                 : t("na")}
             </div>
-            {investment.builtUpArea && investment.totalInstallmentPrice && (
+            {investment.builtUpArea && investment.totalPrice && (
               <>
                 <div className="font-medium text-muted-foreground">
                   {t("price_per_sqm")}
@@ -250,7 +250,7 @@ export default function RealEstateDetailPage() {
                 <div>
                   {formatNumberForMobile(
                     isMobile,
-                    investment.totalInstallmentPrice / investment.builtUpArea,
+                    investment.totalPrice / investment.builtUpArea,
                   )}
                 </div>
               </>

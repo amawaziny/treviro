@@ -97,6 +97,7 @@ export function AddEditFixedEstimateForm({
         "id" | "createdAt" | "userId" | "updatedAt"
       > = {
         type: values.type!,
+        recordType: "Fixed Estimate",
         amount: parseFloat(values.amount),
         period: values.period!,
         isExpense:
@@ -231,7 +232,7 @@ export function AddEditFixedEstimateForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("period")}</FormLabel>
-                <Select
+                <Select disabled
                   dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}

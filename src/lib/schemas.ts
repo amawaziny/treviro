@@ -217,7 +217,7 @@ const DebtInstrumentInvestmentSchema = z.object({
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid maturity date format.",
     }),
-  certificateInterestFrequency: z
+  interestFrequency: z
     .enum(["Monthly", "Quarterly", "Yearly"])
     .default("Monthly")
     .optional(),

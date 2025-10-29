@@ -436,7 +436,6 @@ export class InvestmentService {
     const amount = quantity * pricePerUnit + fees;
 
     return this.updateInvestment({
-      userId: this.userId,
       sourceId: investmentId,
       securityId,
       investmentType,
@@ -481,7 +480,6 @@ export class InvestmentService {
     const amount = quantity * pricePerUnit - fees;
 
     return this.updateInvestment({
-      userId: this.userId,
       sourceId: investmentId,
       securityId,
       investmentType,
@@ -520,7 +518,6 @@ export class InvestmentService {
     date: string,
   ): Promise<Investment> {
     return this.updateInvestment({
-      userId: this.userId,
       sourceId: investmentId,
       investmentType,
       installmentNumber,
@@ -558,7 +555,6 @@ export class InvestmentService {
     date: string,
   ): Promise<Investment> {
     return this.updateInvestment({
-      userId: this.userId,
       sourceId: investmentId,
       securityId,
       investmentType,

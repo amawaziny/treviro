@@ -558,7 +558,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
             {
               ...realEstateData,
               id: investmentId,
-              userId,
               createdAt: new Date().toISOString(),
             } as RealEstateInvestment,
             [],
@@ -698,7 +697,6 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
       const finalEstimateData: FixedEstimateRecord = {
         ...estimateData,
         id: estimateId,
-        userId,
         createdAt: serverTimestamp() as unknown as string,
         updatedAt: serverTimestamp() as unknown as string,
       };

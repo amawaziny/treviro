@@ -226,7 +226,6 @@ export class TransactionService {
 
       const newTransaction: Transaction = {
         id: transactionId,
-        userId: this.userId,
         sourceId: record.id,
         sourceType: record.recordType,
         type: type,
@@ -331,7 +330,6 @@ export class TransactionService {
         const newTransaction: Transaction = {
           ...transactionData,
           id: transactionId,
-          userId: this.userId,
           createdAt: now,
           pricePerUnit: pricePerUnit,
           fees: fees,

@@ -89,7 +89,7 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     issuer: "",
     interestRate: 1,
     maturityDate: getCurrentDate(),
-    certificateInterestFrequency: "Monthly",
+    interestFrequency: "Monthly",
     amountInvested: 0,
     purchaseDate: getCurrentDate(),
     name: "",
@@ -176,6 +176,7 @@ export function InvestmentForm({
 
   // onSubmit handler
   async function onSubmit(values: InvestmentFormValues) {
+    const now = new Date().toISOString();
     if (
       form.formState.errors &&
       Object.keys(form.formState.errors).length > 0
@@ -203,9 +204,9 @@ export function InvestmentForm({
     let newInvestmentBase = {
       id: investmentId,
       type: watchedType,
-      purchaseDate: values.purchaseDate,
-      amountInvested: 0,
-      name: "",
+      firstPurchaseDate: values.purchaseDate || now,
+      lastUpdated: now,
+      currency: "EGP" as const,
     };
 
     let newInvestment:
@@ -248,17 +249,22 @@ export function InvestmentForm({
       };
     } else if (isDedicatedDebtMode && values.type == "Debt Instruments") {
       investmentName = `${t(values.debtSubType)} - ${values.issuer}`;
+      const annualInterest = (values.amountInvested * values.interestRate) / 100;
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
-        amountInvested: values.amountInvested,
+        totalShares: 1,
+        averagePurchasePrice: values.amountInvested,
+        totalInvested: values.amountInvested,
         issuer: values.issuer || "",
         interestRate: values.interestRate,
         maturityDate: values.maturityDate!,
         debtSubType: values.debtSubType!,
         type: "Debt Instruments",
-        certificateInterestFrequency:
-          values.certificateInterestFrequency || "Monthly",
+        interestFrequency:
+          values.interestFrequency || "Monthly",
+        interestAmount: annualInterest / (values.interestFrequency === "Monthly" ? 12 : values.interestFrequency === "Quarterly" ? 4 : 1),
+        monthlyInterestAmount: annualInterest / 12,
       };
     } else if (isDedicatedGoldMode && values.type == "Gold") {
       investmentName =
@@ -266,7 +272,7 @@ export function InvestmentForm({
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
-        amountInvested: values.amountInvested,
+        totalInvested: values.amountInvested,
         goldType: values.goldType!,
         quantityInGrams: values.quantityInGrams,
         type: "Gold",
@@ -279,7 +285,7 @@ export function InvestmentForm({
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
-        amountInvested: calculatedCost,
+        totalInvested: calculatedCost,
         currencyCode: values.currencyCode!,
         foreignCurrencyAmount: values.foreignCurrencyAmount,
         exchangeRateAtPurchase: values.exchangeRateAtPurchase,
@@ -292,7 +298,7 @@ export function InvestmentForm({
       newInvestment = removeUndefinedFieldsDeep({
         ...newInvestmentBase,
         name: investmentName,
-        amountInvested: values.amountInvested,
+        totalInvested: values.amountInvested,
         propertyAddress: values.propertyAddress,
         propertyType: values.propertyType,
         installmentFrequency: values.installmentFrequency,
@@ -310,7 +316,7 @@ export function InvestmentForm({
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
-        amountInvested: values.amountInvested,
+        totalInvested: values.amountInvested,
         type: watchedType as any,
       };
     }

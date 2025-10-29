@@ -19,7 +19,6 @@ export function MonthlyInvestmentDistributionChart() {
   const cashFlowSummary = React.useMemo(
     () =>
       calculateCashFlowMonthlySummary({
-        incomeRecords: [],
         expenseRecords,
         investments,
         fixedEstimates,
@@ -75,12 +74,7 @@ export function MonthlyInvestmentDistributionChart() {
     });
 
     // Add combined expenses
-    const totalExpenses =
-      (cashFlowSummary.livingExpenses || 0) +
-      (cashFlowSummary.zakat || 0) +
-      (cashFlowSummary.charity || 0) +
-      (cashFlowSummary.totalFixedExpenses || 0) +
-      (cashFlowSummary.totalItemizedExpenses || 0);
+    const totalExpenses = cashFlowSummary.totalExpenses;
 
     data.push({
       id: "Expenses",

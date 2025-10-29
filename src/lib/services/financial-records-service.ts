@@ -81,7 +81,6 @@ export class FinancialRecordsService {
       const recordData = {
         ...data,
         id,
-        userId: this.userId,
         createdAt: now,
         updatedAt: now,
       } as T;
