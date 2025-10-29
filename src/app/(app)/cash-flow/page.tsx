@@ -210,10 +210,7 @@ export default function CashFlowPage() {
                   </span>
                 </div>
                 <span className="text-sm">
-                  {formatNumberForMobile(
-                    isMobile,
-                    cashFlowSummary.salary,
-                  )}
+                  {formatNumberForMobile(isMobile, cashFlowSummary.salary)}
                 </span>
               </div>
             )}
@@ -415,7 +412,8 @@ export default function CashFlowPage() {
               {/* Stocks */}
               {investments &&
                 investments.filter((inv) => {
-                  if (inv.type !== "Securities" || !inv.firstPurchaseDate) return false;
+                  if (inv.type !== "Securities" || !inv.firstPurchaseDate)
+                    return false;
                   const parsed = parseDateString(inv.firstPurchaseDate);
                   return (
                     parsed &&
@@ -430,7 +428,10 @@ export default function CashFlowPage() {
                     <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
                       {investments
                         .filter((inv) => {
-                          if (inv.type !== "Securities" || !inv.firstPurchaseDate)
+                          if (
+                            inv.type !== "Securities" ||
+                            !inv.firstPurchaseDate
+                          )
                             return false;
                           const parsed = parseDateString(inv.firstPurchaseDate);
                           return (
@@ -521,7 +522,8 @@ export default function CashFlowPage() {
               {/* Gold */}
               {investments &&
                 investments.filter((inv) => {
-                  if (inv.type !== "Gold" || !inv.firstPurchaseDate) return false;
+                  if (inv.type !== "Gold" || !inv.firstPurchaseDate)
+                    return false;
                   const parsed = parseDateString(inv.firstPurchaseDate);
                   return (
                     parsed &&

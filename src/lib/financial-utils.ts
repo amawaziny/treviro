@@ -55,19 +55,13 @@ export interface CashFlowMonthlySummary {
   netTillNowCashFlow: number; // incomeTillNow - totalExpenses - totalInvestments
 }
 
-/*
-  TODO: 
-  1. totalRealEstateInstallments we need to check if the installmentFrequency is yearly and the difference between installmentStartDate and month param is less than 1 year
-  2. totalRealEstateInstallments we need to check if the installmentFrequency is quarterly and the difference between installmentStartDate and month param is less than 3 months
-  3. totalRealEstateInstallments we need to check if the installmentFrequency is monthly and the difference between installmentStartDate and month param is less than 1 month
-*/
 /**
  * @param expenseRecords calculate expenses of type credit card and has installments and sum up their amounts if month param is within the installment period
  * @param investments calculate projected debt interest and sum up their amounts if not matured and real estate installments based on their dueDate and installmentFrequency if it is quarterly distribute on 3 months
  * @param fixedEstimates calculate fixed estimates of type expense and income and sum up their amounts
  * @param transactions transactions date occurred in the same month param
  * @param month base month for the cashflow summary
- * @returns 
+ * @returns
  */
 export function calculateCashFlowMonthlySummary({
   expenseRecords = [],
@@ -81,54 +75,71 @@ export function calculateCashFlowMonthlySummary({
 
   // 1. Calculate totalFixedIncome (fixed estimates of type income)
   const totalFixedIncome = fixedEstimates
-    .filter(fe => !fe.isExpense)
+    .filter((fe) => !fe.isExpense)
     .reduce((sum, fe) => sum + fe.amount, 0);
 
   // 2. Calculate totalProjectedDebtInterest
   const totalProjectedDebtInterest = investments
-    .filter((inv): inv is DebtInstrumentInvestment => inv.type === 'Debt Instruments')
-    .filter(inv => !inv.isMatured)
+    .filter(
+      (inv): inv is DebtInstrumentInvestment => inv.type === "Debt Instruments",
+    )
+    .filter((inv) => !inv.isMatured)
     .reduce((sum, debtInv) => sum + debtInv.monthlyInterestAmount, 0);
 
   // 3. Calculate incomeTillNow (transactions in current month of specific types)
   const incomeTillNow = transactions
-    .filter(tx => {
-      const isIncomeType = ['INTEREST', 'DIVIDEND', 'INCOME', 'SELL', 'MATURED_DEBT'].includes(tx.type);
+    .filter((tx) => {
+      const isIncomeType = [
+        "INTEREST",
+        "DIVIDEND",
+        "INCOME",
+        "SELL",
+        "MATURED_DEBT",
+      ].includes(tx.type);
       return isIncomeType;
     })
     .reduce((sum, tx) => sum + tx.amount, 0);
 
   // Calculate transactions of type interest and income of type fixed estimate
   const totalInterestAndFixedIncome = transactions
-    .filter(tx => tx.type === 'INTEREST' || (tx.type === 'INCOME' && tx.sourceType === 'Fixed Estimate'))
+    .filter(
+      (tx) =>
+        tx.type === "INTEREST" ||
+        (tx.type === "INCOME" && tx.sourceType === "Fixed Estimate"),
+    )
     .reduce((sum, tx) => sum + tx.amount, 0);
 
   // 4. Calculate totalFixedExpenses (fixed estimates of type expense)
   const totalFixedExpenses = fixedEstimates
-    .filter(fe => fe.isExpense)
+    .filter((fe) => fe.isExpense)
     .reduce((sum, fe) => sum + fe.amount, 0);
 
   // 5. Calculate totalItemizedExpenses (credit card installments for current month)
   //TODO: what if the record type is credit card and isInstallment is false?
   const totalItemizedExpenses = expenseRecords
-    .filter(record => 
-      record.type === 'Credit Card' && 
-      record.isInstallment && 
-      record.numberOfInstallments
+    .filter(
+      (record) =>
+        record.type === "Credit Card" &&
+        record.isInstallment &&
+        record.numberOfInstallments,
     )
     .reduce((sum, record) => {
       const startDate = parseDateString(record.date);
       if (!startDate) return sum;
-      
+
       const startMonth = startDate.getMonth();
       const startYear = startDate.getFullYear();
       const currentMonth = currentMonthStart.getMonth();
       const currentYear = currentMonthStart.getFullYear();
-      
-      const monthsSinceStart = (currentYear - startYear) * 12 + (currentMonth - startMonth);
-      
-      if (monthsSinceStart >= 0 && monthsSinceStart < (record.numberOfInstallments || 0)) {
-        return sum + (record.amount / (record.numberOfInstallments || 1));
+
+      const monthsSinceStart =
+        (currentYear - startYear) * 12 + (currentMonth - startMonth);
+
+      if (
+        monthsSinceStart >= 0 &&
+        monthsSinceStart < (record.numberOfInstallments || 0)
+      ) {
+        return sum + record.amount / (record.numberOfInstallments || 1);
       }
       return sum;
     }, 0);
@@ -137,7 +148,14 @@ export function calculateCashFlowMonthlySummary({
   const totalRealEstateInstallments = investments
     .filter((inv): inv is RealEstateInvestment => {
       if (!isRealEstateInvestment(inv)) return false;
-      return Boolean(differenceInMonths(parseDateString(inv.lastInstallmentDate)!, currentMonthStart) > 1 && inv.installmentAmount && inv.installmentFrequency);
+      return Boolean(
+        differenceInMonths(
+          parseDateString(inv.lastInstallmentDate)!,
+          currentMonthStart,
+        ) > 1 &&
+          inv.installmentAmount &&
+          inv.installmentFrequency,
+      );
     })
     .reduce((sum, re) => {
       const startDate = parseDateString(re.firstInstallmentDate)!;
@@ -145,81 +163,101 @@ export function calculateCashFlowMonthlySummary({
       let shouldIncludeInstallment = false;
 
       switch (re.installmentFrequency) {
-        case 'Monthly':
+        case "Monthly":
           shouldIncludeInstallment = monthsDiff < 1;
           break;
-        case 'Quarterly':
+        case "Quarterly":
           shouldIncludeInstallment = monthsDiff < 3;
           break;
-        case 'Yearly':
+        case "Yearly":
           shouldIncludeInstallment = monthsDiff < 12;
           break;
       }
 
       if (shouldIncludeInstallment) {
         const installmentAmount = re.installmentAmount!;
-        const monthlyInstallmentAmount = re.installmentFrequency === 'Monthly' 
-          ? installmentAmount 
-          : re.installmentFrequency === 'Quarterly' 
-            ? installmentAmount / 3 
-            : installmentAmount / 12;
-            
+        const monthlyInstallmentAmount =
+          re.installmentFrequency === "Monthly"
+            ? installmentAmount
+            : re.installmentFrequency === "Quarterly"
+              ? installmentAmount / 3
+              : installmentAmount / 12;
+
         sum += monthlyInstallmentAmount;
       }
 
       // Add maintenance amount if applicable
-      if (re.maintenanceAmount && re.maintenanceAmount > 0 && re.maintenancePaymentDate) {
+      if (
+        re.maintenanceAmount &&
+        re.maintenanceAmount > 0 &&
+        re.maintenancePaymentDate
+      ) {
         const maintenanceDate = parseDateString(re.maintenancePaymentDate);
-        if (maintenanceDate && isWithinInterval(maintenanceDate, { start: currentMonthStart, end: currentMonthEnd })) {
+        if (
+          maintenanceDate &&
+          isWithinInterval(maintenanceDate, {
+            start: currentMonthStart,
+            end: currentMonthEnd,
+          })
+        ) {
           sum += re.maintenanceAmount;
         }
       }
-      
+
       return sum;
     }, 0);
 
   // 7. Calculate investment totals
   const totalSecuritiesInvestments = transactions
-    .filter(tx => 
-      tx.type === 'BUY' && 
-      tx.sourceType === 'Investment' && 
-      tx.securityId && 
-      tx.metadata.sourceSubType === 'Securities'
+    .filter(
+      (tx) =>
+        tx.type === "BUY" &&
+        tx.sourceType === "Investment" &&
+        tx.securityId &&
+        tx.metadata.sourceSubType === "Securities",
     )
     .reduce((sum, tx) => sum + (tx.amount || 0), 0);
 
   const totalDebtInvestments = transactions
-    .filter(tx => 
-      tx.type === 'BUY' && 
-      tx.sourceType === 'Investment' && 
-      tx.metadata.sourceSubType === 'Debt Instruments'
+    .filter(
+      (tx) =>
+        tx.type === "BUY" &&
+        tx.sourceType === "Investment" &&
+        tx.metadata.sourceSubType === "Debt Instruments",
     )
     .reduce((sum, tx) => sum + (tx.amount || 0), 0);
 
   const totalGoldInvestments = transactions
-    .filter(tx => 
-      tx.type === 'BUY' && 
-      tx.sourceType === 'Investment' && 
-      tx.metadata.sourceSubType === 'Gold'
+    .filter(
+      (tx) =>
+        tx.type === "BUY" &&
+        tx.sourceType === "Investment" &&
+        tx.metadata.sourceSubType === "Gold",
     )
     .reduce((sum, tx) => sum + (tx.amount || 0), 0);
 
   const totalCurrencyInvestments = transactions
-    .filter(tx => 
-      tx.type === 'BUY' && 
-      tx.sourceType === 'Investment' && 
-      tx.metadata.sourceSubType === 'Currencies'
+    .filter(
+      (tx) =>
+        tx.type === "BUY" &&
+        tx.sourceType === "Investment" &&
+        tx.metadata.sourceSubType === "Currencies",
     )
     .reduce((sum, tx) => sum + (tx.amount || 0), 0);
 
-  const totalInvestments = totalSecuritiesInvestments + 
-                          totalDebtInvestments + 
-                          totalGoldInvestments + 
-                          totalCurrencyInvestments +
-                          totalRealEstateInstallments;
+  const totalInvestments =
+    totalSecuritiesInvestments +
+    totalDebtInvestments +
+    totalGoldInvestments +
+    totalCurrencyInvestments +
+    totalRealEstateInstallments;
 
   // Calculate totals
-  const totalIncome = totalFixedIncome + totalProjectedDebtInterest + incomeTillNow - totalInterestAndFixedIncome;
+  const totalIncome =
+    totalFixedIncome +
+    totalProjectedDebtInterest +
+    incomeTillNow -
+    totalInterestAndFixedIncome;
   const totalExpenses = totalFixedExpenses + totalItemizedExpenses;
   const netCashFlow = totalIncome - totalExpenses - totalInvestments;
   const netTillNowCashFlow = incomeTillNow - totalExpenses - totalInvestments;
@@ -245,7 +283,7 @@ export function calculateCashFlowMonthlySummary({
 
     // Summary
     netCashFlow,
-    netTillNowCashFlow
+    netTillNowCashFlow,
   };
 }
 

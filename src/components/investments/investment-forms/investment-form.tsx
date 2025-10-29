@@ -249,7 +249,8 @@ export function InvestmentForm({
       };
     } else if (isDedicatedDebtMode && values.type == "Debt Instruments") {
       investmentName = `${t(values.debtSubType)} - ${values.issuer}`;
-      const annualInterest = (values.amountInvested * values.interestRate) / 100;
+      const annualInterest =
+        (values.amountInvested * values.interestRate) / 100;
       newInvestment = {
         ...newInvestmentBase,
         name: investmentName,
@@ -261,9 +262,14 @@ export function InvestmentForm({
         maturityDate: values.maturityDate!,
         debtSubType: values.debtSubType!,
         type: "Debt Instruments",
-        interestFrequency:
-          values.interestFrequency || "Monthly",
-        interestAmount: annualInterest / (values.interestFrequency === "Monthly" ? 12 : values.interestFrequency === "Quarterly" ? 4 : 1),
+        interestFrequency: values.interestFrequency || "Monthly",
+        interestAmount:
+          annualInterest /
+          (values.interestFrequency === "Monthly"
+            ? 12
+            : values.interestFrequency === "Quarterly"
+              ? 4
+              : 1),
         monthlyInterestAmount: annualInterest / 12,
       };
     } else if (isDedicatedGoldMode && values.type == "Gold") {

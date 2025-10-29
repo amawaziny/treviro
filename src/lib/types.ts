@@ -87,9 +87,9 @@ export interface RealEstateInvestment extends BaseInvestment {
   totalPrice?: number; // total price at end of all installments
   builtUpArea?: number; // Area in square meters
   hasGarden?: boolean; // Whether the property has a garden
-  downPayment?: number; 
-  maintenanceAmount?: number; 
-  maintenancePaymentDate?: string; 
+  downPayment?: number;
+  maintenanceAmount?: number;
+  maintenancePaymentDate?: string;
   installmentFrequency?: Frequency;
   installmentAmount?: number;
   firstInstallmentDate: string;

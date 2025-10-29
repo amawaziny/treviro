@@ -34,10 +34,7 @@ export function CashFlowSummaryCards({
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-green-700 dark:text-green-300">
-              {formatNumberForMobile(
-                isMobile,
-                cashFlowSummary.incomeTillNow,
-              )}
+              {formatNumberForMobile(isMobile, cashFlowSummary.incomeTillNow)}
             </p>
             <p className="text-xs text-green-600 dark:text-green-400 mt-1">
               {t("income_paid_out_by_today")}
@@ -66,10 +63,7 @@ export function CashFlowSummaryCards({
                 <div className="flex justify-between">
                   <span>{t("monthly_salary_fixed")}</span>
                   <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.salary,
-                    )}
+                    {formatNumberForMobile(isMobile, cashFlowSummary.salary)}
                   </span>
                 </div>
               )}
@@ -95,8 +89,7 @@ export function CashFlowSummaryCards({
                   </span>
                 </div>
               )}
-              {cashFlowSummary.totalProjectedDebtInterest >
-                0 && (
+              {cashFlowSummary.totalProjectedDebtInterest > 0 && (
                 <div className="flex justify-between">
                   <span>{t("projected_debt_interest")}</span>
                   <span>
@@ -128,10 +121,7 @@ export function CashFlowSummaryCards({
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-red-700 dark:text-red-300">
-              {formatNumberForMobile(
-                isMobile,
-                cashFlowSummary.totalExpenses,
-              )}
+              {formatNumberForMobile(isMobile, cashFlowSummary.totalExpenses)}
             </p>
             <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
               {cashFlowSummary.totalItemizedExpenses > 0 && (
@@ -149,10 +139,7 @@ export function CashFlowSummaryCards({
                 <div className="flex justify-between">
                   <span>{t("zakat_fixed")}</span>
                   <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.zakat,
-                    )}
+                    {formatNumberForMobile(isMobile, cashFlowSummary.zakat)}
                   </span>
                 </div>
               )}
@@ -160,10 +147,7 @@ export function CashFlowSummaryCards({
                 <div className="flex justify-between">
                   <span>{t("charity_fixed")}</span>
                   <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.charity,
-                    )}
+                    {formatNumberForMobile(isMobile, cashFlowSummary.charity)}
                   </span>
                 </div>
               )}

@@ -9,10 +9,14 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import { CurrencyCode, Transaction, InvestmentType, 
+import {
+  CurrencyCode,
+  Transaction,
+  InvestmentType,
   Investment,
   RealEstateInvestment,
-  isRealEstateInvestment, } from "@/lib/types";
+  isRealEstateInvestment,
+} from "@/lib/types";
 import { eventBus } from "./events";
 
 import { INVESTMENTS_COLLECTION_PATH } from "@/lib/constants";
@@ -231,7 +235,7 @@ export class InvestmentService {
             currency,
             metadata: {
               sourceSubType: investment.type,
-              ...investment
+              ...investment,
             },
           } as Transaction,
         });
@@ -299,7 +303,12 @@ export class InvestmentService {
   private async updateInvestment(
     transactionData: Omit<
       Transaction,
-      "id" | "createdAt" | "profitOrLoss" | "averagePurchasePrice" | "sourceType" | "metadata"
+      | "id"
+      | "createdAt"
+      | "profitOrLoss"
+      | "averagePurchasePrice"
+      | "sourceType"
+      | "metadata"
     > & { investmentType: InvestmentType },
   ): Promise<Investment> {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
@@ -386,16 +395,16 @@ export class InvestmentService {
         ...updateData,
       };
 
-      const {investmentType, ...restTransactionData} = transactionData;
+      const { investmentType, ...restTransactionData } = transactionData;
       await eventBus.publish({
         type: "investment:updated",
         transaction: {
           ...restTransactionData,
-          sourceType:"Investment",
+          sourceType: "Investment",
           averagePurchasePrice: update.averagePurchasePrice,
           metadata: {
             sourceSubType: investmentType,
-            ...updatedInvestment
+            ...updatedInvestment,
           },
         } as Transaction,
       });
@@ -445,7 +454,7 @@ export class InvestmentService {
       quantity,
       pricePerUnit,
       fees,
-      currency: "EGP"
+      currency: "EGP",
     });
   }
 

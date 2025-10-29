@@ -236,10 +236,7 @@ export default function RealEstateDetailPage() {
             </div>
             <div>
               {investment.totalPrice
-                ? formatNumberForMobile(
-                    isMobile,
-                    investment.totalPrice,
-                  )
+                ? formatNumberForMobile(isMobile, investment.totalPrice)
                 : t("na")}
             </div>
             {investment.builtUpArea && investment.totalPrice && (

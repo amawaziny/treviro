@@ -232,7 +232,8 @@ export function AddEditFixedEstimateForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("period")}</FormLabel>
-                <Select disabled
+                <Select
+                  disabled
                   dir={dir}
                   onValueChange={field.onChange}
                   value={field.value || "Monthly"}
