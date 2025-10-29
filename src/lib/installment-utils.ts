@@ -35,8 +35,8 @@ export function generateInstallmentSchedule(
   if (
     !investment.installmentAmount ||
     !investment.installmentFrequency ||
-    !investment.installmentStartDate ||
-    !investment.installmentEndDate
+    !investment.firstInstallmentDate ||
+    !investment.lastInstallmentDate
   ) {
     return [];
   }
@@ -58,8 +58,8 @@ export function generateInstallmentSchedule(
     number++;
   }
 
-  const endDate = parseISO(investment.installmentEndDate);
-  const startDate = parseISO(investment.installmentStartDate);
+  const endDate = parseISO(investment.lastInstallmentDate);
+  const startDate = parseISO(investment.firstInstallmentDate);
   let currentDate = startDate;
 
   while (isBefore(currentDate, addDays(endDate, 1))) {

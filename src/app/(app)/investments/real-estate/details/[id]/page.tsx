@@ -258,7 +258,7 @@ export default function RealEstateDetailPage() {
             <div className="font-medium text-muted-foreground">
               {t("installment_end_date")}
             </div>
-            <div>{formatDateDisplay(investment.installmentEndDate)}</div>
+            <div>{formatDateDisplay(investment.lastInstallmentDate)}</div>
             {investment.maintenanceAmount &&
               investment.maintenancePaymentDate && (
                 <>

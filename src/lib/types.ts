@@ -92,8 +92,8 @@ export interface RealEstateInvestment extends BaseInvestment {
   maintenancePaymentDate?: string; 
   installmentFrequency?: Frequency;
   installmentAmount?: number;
-  installmentStartDate?: string;
-  installmentEndDate?: string;
+  firstInstallmentDate: string;
+  lastInstallmentDate: string;
   installments?: Array<Installment>;
 }
 

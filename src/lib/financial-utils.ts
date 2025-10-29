@@ -3,6 +3,9 @@ import {
   endOfMonth,
   isWithinInterval,
   isSameMonth,
+  addMonths,
+  differenceInMonths,
+  parseISO,
 } from "date-fns";
 import {
   type IncomeRecord,
@@ -53,28 +56,10 @@ export interface CashFlowMonthlySummary {
 }
 
 /*
-  TODO: Refactor this function to calculate monthly cashflow from transactions
-  1.totalIncome: number; total income that already occurred and will be received this month (totalFixedIncome+totalProjectedDebtInterest+incomeTillNow)
-  2.totalFixedIncome: number; get all fixed estimates records of type income and sum up their amounts
-  3.totalProjectedDebtInterest: number; get all debt instruments investments and sum up their interest rates based on their first purchase date and frequency
-  4.incomeTillNow: number; to calculate totalIncome loop through all transactions and sum up the amount of transactions that occurred in this month and transaction of type INTEREST, DIVIDEND, INCOME, sell, matured debt
-
-  // Expenses
-  5.totalExpenses: total of all expenses records occurred in this month and will be paid this month (totalFixedExpenses+totalRealEstateInstallments+totalItemizedExpenses)
-  6.totalFixedExpenses: get all fixed estimates records of type expense and sum up their amounts;
-  7.totalItemizedExpenses: number; // get all expenses records and with type credit card and isInstallment true and sum up their amounts if current month is within the installment period
-
-  // Investments
-  8.totalInvestments: number; sum up totalStockInvestments+totalDebtInvestments+totalGoldInvestments+totalCurrencyInvestments
-  9.totalSecuritiesInvestments: number; get all transactions of type buy and sourceType investment and has securityId and metadata.sourceSubType = "Securities" and sum up their amounts
-  10.totalDebtInvestments: number; get all transactions of type buy and sourceType investment and metadata.sourceSubType = "Debt Instruments" and sum up their amounts
-  11.totalGoldInvestments: number; get all transactions of type buy and sourceType investment and metadata.sourceSubType = "Gold" and sum up their amounts
-  12.totalCurrencyInvestments: number; get all transactions of type buy and sourceType investment and metadata.sourceSubType = "Currencies" and sum up their amounts
-  13.totalRealEstateInstallments: get all real estate investments and sum up their installments based on their dueDate and installmentFrequency if it is quarterly distribute on 3 months
-
-  // Summary
-  15.netCashFlow: number; totalIncome - totalExpenses - totalInvestments
-  16.netTillNowCashFlow: number; incomeTillNow - totalExpenses - totalInvestments
+  TODO: 
+  1. totalRealEstateInstallments we need to check if the installmentFrequency is yearly and the difference between installmentStartDate and month param is less than 1 year
+  2. totalRealEstateInstallments we need to check if the installmentFrequency is quarterly and the difference between installmentStartDate and month param is less than 3 months
+  3. totalRealEstateInstallments we need to check if the installmentFrequency is monthly and the difference between installmentStartDate and month param is less than 1 month
 */
 /**
  * @param expenseRecords calculate expenses of type credit card and has installments and sum up their amounts if month param is within the installment period
@@ -150,19 +135,44 @@ export function calculateCashFlowMonthlySummary({
 
   // 6. Calculate totalRealEstateInstallments
   const totalRealEstateInstallments = investments
-    .filter((inv): inv is RealEstateInvestment => isRealEstateInvestment(inv))
+    .filter((inv): inv is RealEstateInvestment => {
+      if (!isRealEstateInvestment(inv)) return false;
+      return Boolean(differenceInMonths(parseDateString(inv.lastInstallmentDate)!, currentMonthStart) > 1 && inv.installmentAmount && inv.installmentFrequency);
+    })
     .reduce((sum, re) => {
-      if(!re.installmentAmount) return sum;
-      
-      const installmentFrequency = re.installmentFrequency || 'Monthly';
-      const monthlyInstallmentAmount = re.installmentAmount / (installmentFrequency === 'Monthly' ? 1 : installmentFrequency === 'Quarterly' ? 3 : 12);
-      sum += monthlyInstallmentAmount;
-     
-      if(re.maintenanceAmount && re.maintenanceAmount > 0 && re.maintenancePaymentDate){
-        const maintenanceAmount = re.maintenanceAmount;
-        const maintenancePaymentDate = parseDateString(re.maintenancePaymentDate)!;
+      const startDate = parseDateString(re.firstInstallmentDate)!;
+      const monthsDiff = differenceInMonths(currentMonthStart, startDate);
+      let shouldIncludeInstallment = false;
 
-        sum += isWithinInterval(maintenancePaymentDate, { start: currentMonthStart, end: currentMonthEnd }) ? maintenanceAmount : 0;
+      switch (re.installmentFrequency) {
+        case 'Monthly':
+          shouldIncludeInstallment = monthsDiff < 1;
+          break;
+        case 'Quarterly':
+          shouldIncludeInstallment = monthsDiff < 3;
+          break;
+        case 'Yearly':
+          shouldIncludeInstallment = monthsDiff < 12;
+          break;
+      }
+
+      if (shouldIncludeInstallment) {
+        const installmentAmount = re.installmentAmount!;
+        const monthlyInstallmentAmount = re.installmentFrequency === 'Monthly' 
+          ? installmentAmount 
+          : re.installmentFrequency === 'Quarterly' 
+            ? installmentAmount / 3 
+            : installmentAmount / 12;
+            
+        sum += monthlyInstallmentAmount;
+      }
+
+      // Add maintenance amount if applicable
+      if (re.maintenanceAmount && re.maintenanceAmount > 0 && re.maintenancePaymentDate) {
+        const maintenanceDate = parseDateString(re.maintenancePaymentDate);
+        if (maintenanceDate && isWithinInterval(maintenanceDate, { start: currentMonthStart, end: currentMonthEnd })) {
+          sum += re.maintenanceAmount;
+        }
       }
       
       return sum;

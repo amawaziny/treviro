@@ -552,7 +552,7 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
           realEstateData.installmentAmount &&
           realEstateData.installmentFrequency &&
           realEstateData.purchaseDate &&
-          realEstateData.installmentEndDate
+          realEstateData.lastInstallmentDate
         ) {
           const installments = generateInstallmentSchedule(
             {
@@ -1022,11 +1022,11 @@ export const InvestmentProvider = ({ children }: { children: ReactNode }) => {
         (dataToUpdate.installmentAmount !== undefined ||
           dataToUpdate.installmentFrequency !== undefined ||
           dataToUpdate.purchaseDate !== undefined ||
-          dataToUpdate.installmentEndDate !== undefined) &&
+          dataToUpdate.lastInstallmentDate !== undefined) &&
         dataToUpdate.installmentAmount !== undefined &&
         dataToUpdate.installmentFrequency !== undefined &&
         dataToUpdate.purchaseDate !== undefined &&
-        dataToUpdate.installmentEndDate !== undefined;
+        dataToUpdate.lastInstallmentDate !== undefined;
 
       // If we're updating installment-related fields, generate the schedule
       let installments: Installment[] = [];
