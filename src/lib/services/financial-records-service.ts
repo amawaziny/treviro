@@ -219,7 +219,7 @@ export class FinancialRecordsService {
   }
 
   // Income Records
-  async getIncomeRecords(
+  async getIncomes(
     filters?: Partial<IncomeRecord>,
   ): Promise<IncomeRecord[]> {
     const records = await this.getRecords<IncomeRecord>(
@@ -236,13 +236,13 @@ export class FinancialRecordsService {
     );
   }
 
-  async addIncomeRecord(
+  async addIncome(
     incomeData: Omit<IncomeRecord, "id" | "createdAt" | "updatedAt" | "userId">,
   ): Promise<IncomeRecord> {
     return this.addRecord(FINANCIAL_COLLECTIONS.INCOMES, incomeData);
   }
 
-  async updateIncomeRecord(
+  async updateIncome(
     id: string,
     data: Partial<IncomeRecord>,
   ): Promise<IncomeRecord> {
@@ -253,12 +253,12 @@ export class FinancialRecordsService {
     );
   }
 
-  async deleteIncomeRecord(id: string): Promise<void> {
+  async deleteIncome(id: string): Promise<void> {
     return this.deleteRecord(FINANCIAL_COLLECTIONS.INCOMES, id);
   }
 
   // Expense Records
-  async getExpenseRecords(
+  async getExpenses(
     filters?: Partial<ExpenseRecord>,
   ): Promise<ExpenseRecord[]> {
     const records = await this.getRecords<ExpenseRecord>(
@@ -275,7 +275,7 @@ export class FinancialRecordsService {
     );
   }
 
-  async addExpenseRecord(
+  async addExpense(
     expenseData: Omit<
       ExpenseRecord,
       "id" | "createdAt" | "updatedAt" | "userId"
@@ -284,7 +284,7 @@ export class FinancialRecordsService {
     return this.addRecord(FINANCIAL_COLLECTIONS.EXPENSES, expenseData);
   }
 
-  async updateExpenseRecord(
+  async updateExpense(
     id: string,
     data: Partial<ExpenseRecord>,
   ): Promise<ExpenseRecord> {
@@ -295,7 +295,7 @@ export class FinancialRecordsService {
     );
   }
 
-  async deleteExpenseRecord(id: string): Promise<void> {
+  async deleteExpense(id: string): Promise<void> {
     return this.deleteRecord(FINANCIAL_COLLECTIONS.EXPENSES, id);
   }
 
@@ -317,7 +317,7 @@ export class FinancialRecordsService {
     );
   }
 
-  async addFixedEstimateRecord(
+  async addFixedEstimate(
     fixedEstimateData: Omit<
       FixedEstimateRecord,
       "id" | "createdAt" | "updatedAt" | "userId"

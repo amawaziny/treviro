@@ -3,14 +3,16 @@ import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
-import { DashboardSummary, Transaction } from "@/lib/types";
+import { DashboardSummary, defaultDashboardSummary, Transaction } from "@/lib/types";
 import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 
 /**
  * TODO:
- * 1. FixedEstimates we can implement confirmation then user confirm it
- * 2. MaturedDebt should have scheduler or a way to calculate them on specific dates
+ * 1. call calculateUnrealizedPnL in recalculateDashboardSummary
+ * 2. add buy, sell, pay, addDividend
+ * 3. FixedEstimates we can implement confirmation then user confirm it
+ * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates
  */
 
 export class DashboardService {
@@ -79,7 +81,7 @@ export class DashboardService {
         const dashboardDoc = await firestoreTransaction.get(dashboardRef);
         const currentData = dashboardDoc.exists()
           ? (dashboardDoc.data() as DashboardSummary)
-          : this.getDefaultDashboardSummary();
+          : defaultDashboardSummary;
 
         const updates: Partial<DashboardSummary> = {
           updatedAt: new Date().toISOString(),
@@ -170,19 +172,6 @@ export class DashboardService {
     return newData;
   }
 
-  /**
-   * Returns a default dashboard summary with all values set to 0
-   */
-  private getDefaultDashboardSummary(): DashboardSummary {
-    return {
-      totalInvested: 0,
-      totalRealizedPnL: 0,
-      totalCashBalance: 0,
-      totalMaturedDebt: 0,
-      updatedAt: new Date().toISOString(),
-    };
-  }
-
   async getDashboardSummary(): Promise<DashboardSummary> {
     const dashboardRef = this.getDashboardDocRef();
     const dashboardSnap = await getDoc(dashboardRef);
@@ -190,15 +179,15 @@ export class DashboardService {
     if (dashboardSnap.exists()) {
       const data = dashboardSnap.data() as Partial<DashboardSummary>;
       return {
-        totalInvested: data.totalInvested ?? 0,
-        totalRealizedPnL: data.totalRealizedPnL ?? 0,
-        totalCashBalance: data.totalCashBalance ?? 0,
-        totalMaturedDebt: data.totalMaturedDebt ?? 0,
-        updatedAt: data.updatedAt ?? new Date().toISOString(),
+        totalInvested: data.totalInvested ?? defaultDashboardSummary.totalInvested,
+        totalRealizedPnL: data.totalRealizedPnL ?? defaultDashboardSummary.totalRealizedPnL,
+        totalCashBalance: data.totalCashBalance ?? defaultDashboardSummary.totalCashBalance,
+        totalMaturedDebt: data.totalMaturedDebt ?? defaultDashboardSummary.totalMaturedDebt,
+        updatedAt: data.updatedAt ?? defaultDashboardSummary.updatedAt,
       };
     }
 
-    return this.getDefaultDashboardSummary();
+    return defaultDashboardSummary;
   }
 
   /**

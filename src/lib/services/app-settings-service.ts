@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import type { AppSettings } from "@/lib/types";
+import { defaultAppSettings, type AppSettings } from "@/lib/types";
 import { SETTINGS_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 
@@ -70,21 +70,9 @@ export class AppSettingsService {
    * @returns The default settings
    */
   async initializeDefaultSettings(): Promise<AppSettings> {
-    const defaultSettings: AppSettings = {
-      financialYearStartMonth: 1, // January
-      investmentTypePercentages: {
-        "Real Estate": 30,
-        Securities: 25,
-        Stocks: 25,
-        "Debt Instruments": 20,
-        Currencies: 10,
-        Gold: 15,
-      },
-    };
-
     const docRef = this.getSettingsDocRef();
-    await setDoc(docRef, defaultSettings);
+    await setDoc(docRef, defaultAppSettings);
 
-    return defaultSettings;
+    return defaultAppSettings;
   }
 }

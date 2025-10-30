@@ -3,7 +3,6 @@ export type CurrencyCode = "EGP" | "USD";
 export type InvestmentType =
   | "Real Estate"
   | "Gold"
-  | "Stocks"
   | "Debt Instruments"
   | "Currencies"
   | "Securities";
@@ -283,6 +282,14 @@ export interface DashboardSummary {
   updatedAt?: string;
 }
 
+export const defaultDashboardSummary: DashboardSummary = {
+  totalInvested: 0,
+  totalRealizedPnL: 0,
+  totalCashBalance: 0,
+  totalMaturedDebt: 0,
+  updatedAt: new Date().toISOString(),
+};
+
 export interface GoldMarketPrices {
   K24?: number;
   K21?: number;
@@ -374,3 +381,14 @@ export interface AppSettings {
   financialYearStartMonth?: number;
   investmentTypePercentages?: InvestmentTypePercentage;
 }
+
+export const defaultAppSettings: AppSettings = {
+  financialYearStartMonth: 1, // January
+  investmentTypePercentages: {
+    "Real Estate": 30,
+    Securities: 25,
+    "Debt Instruments": 20,
+    Currencies: 10,
+    Gold: 15,
+  },
+};

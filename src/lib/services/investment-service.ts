@@ -7,6 +7,7 @@ import {
   query,
   collection,
   getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -620,5 +621,16 @@ export class InvestmentService {
       totalUnrealizedPnL += unrealizedPnL;
     });
     return totalUnrealizedPnL;
+  }
+
+  async deleteInvestment(id: string): Promise<void> {
+    const docRef = this.getInvestmentRef(id);
+    await deleteDoc(docRef);
+    await eventBus.publish({
+      type: "investment:deleted",
+      transaction: {
+        sourceId: id,
+      } as Transaction,
+    });
   }
 }

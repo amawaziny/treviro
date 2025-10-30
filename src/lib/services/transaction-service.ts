@@ -9,6 +9,7 @@ import {
   Transaction as FirestoreTransaction,
   setDoc,
   writeBatch,
+  updateDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -166,36 +167,18 @@ export class TransactionService {
   }
 
   /**
-   * Retrieves all transactions for a specific investment.
+   * Retrieves all transactions for a specific source (investment, income, expense, fixed estimate).
    *
-   * @param investmentId - The ID of the investment to get transactions for
-   * @returns Array of transactions for the specified investment
+   * @param sourceId - The ID of the source to get transactions for
+   * @returns Array of transactions for the specified source
    *
    * @example
-   * const transactions = await transactionService.getTransactionsForInvestment('inv-123');
+   * const transactions = await transactionService.getTransactionsBySourceId('inv-123');
    * console.log('Transaction history:', transactions);
    */
-  async getTransactionsByInvestmentId(
-    investmentId: string,
-  ): Promise<Transaction[]> {
-    const q = query(
-      this.getTransactionsCollection(),
-      where("investmentId", "==", investmentId),
-    );
-
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        }) as Transaction,
-    );
-  }
-
-  private async getTransactionBySourceId(
+  async getTransactionsBySourceId(
     sourceId: string,
-  ): Promise<Transaction[] | null> {
+  ): Promise<Transaction[]> {
     const q = query(
       this.getTransactionsCollection(),
       where("sourceId", "==", sourceId),
@@ -219,7 +202,7 @@ export class TransactionService {
       const now = new Date().toISOString();
 
       let transactionId = uuidv4();
-      const transaction = await this.getTransactionBySourceId(record.id);
+      const transaction = await this.getTransactionsBySourceId(record.id);
       if (transaction) {
         transactionId = transaction[0].id;
       }
@@ -254,7 +237,7 @@ export class TransactionService {
 
   private async deleteTransactionsBySourceId(sourceId: string) {
     try {
-      const transactions = await this.getTransactionBySourceId(sourceId);
+      const transactions = await this.getTransactionsBySourceId(sourceId);
       if (transactions) {
         const batch = writeBatch(db);
         transactions.forEach((transaction) => {
@@ -359,6 +342,15 @@ export class TransactionService {
         return newTransaction;
       },
     );
+  }
+
+  async updateTransaction(id: string, data: Partial<Transaction>) {
+    try {
+      await this.recordTransaction({ ...data, id } as Transaction);
+    } catch (error) {
+      console.error("Failed to update transaction", error);
+      throw new Error("Failed to update transaction");
+    }
   }
 
   cleanup() {

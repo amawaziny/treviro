@@ -11,18 +11,21 @@ import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
 import { AppSettingsService } from "@/lib/services/app-settings-service";
 import {
-  FinancialRecordsService,
   IncomeRecord,
   ExpenseRecord,
   FixedEstimateRecord,
-} from "@/lib/services/financial-records-service";
-import { DashboardService } from "@/lib/services/dashboard-service";
+  defaultDashboardSummary,
+  defaultAppSettings,
+} from "@/lib/types";
 import type {
   Investment,
   Transaction,
   DashboardSummary,
   AppSettings,
 } from "@/lib/types";
+import { FinancialRecordsService } from "@/lib/services/financial-records-service";
+import { DashboardService } from "@/lib/services/dashboard-service";
+import { TransactionService } from "@/lib/services/transaction-service";
 
 export interface InvestmentContextType {
   // Investments
@@ -33,34 +36,19 @@ export interface InvestmentContextType {
   addInvestment: (
     investmentData: Omit<Investment, "id" | "createdAt">,
   ) => Promise<void>;
-  updateInvestment: (id: string, data: Partial<Investment>) => Promise<void>;
   deleteInvestment: (id: string) => Promise<void>;
-  removeDirectDebtInvestment: (investmentId: string) => Promise<void>;
-  removeRealEstateInvestment: (investmentId: string) => Promise<void>;
 
   // Transactions
   transactions: Transaction[];
-  addTransaction: (
-    transactionData: Omit<Transaction, "id" | "createdAt">,
-  ) => Promise<void>;
+  getTransactionsBySourceId: (sourceId: string) => Promise<Transaction[]>;
   updateTransaction: (id: string, data: Partial<Transaction>) => Promise<void>;
-  deleteTransaction: (id: string) => Promise<void>;
-  deleteSellTransaction: (transaction: Transaction) => Promise<void>;
-  recordSellStockTransaction: (
-    listedsecurityId: string,
-    tickerSymbol: string,
-    numberOfSharesToSell: number,
-    sellPricePerShare: number,
-    sellDate: string,
-    fees: number,
-  ) => Promise<void>;
 
   // Dashboard
   dashboardSummary: DashboardSummary;
   refreshDashboard: () => Promise<void>;
 
   // Income & Expenses
-  incomeRecords: IncomeRecord[];
+  incomes: IncomeRecord[];
   addIncomeRecord: (
     data: Omit<IncomeRecord, "id" | "createdAt">,
   ) => Promise<IncomeRecord>;
@@ -70,7 +58,7 @@ export interface InvestmentContextType {
   ) => Promise<IncomeRecord>;
   deleteIncomeRecord: (id: string) => Promise<void>;
 
-  expenseRecords: ExpenseRecord[];
+  expenses: ExpenseRecord[];
   addExpenseRecord: (
     data: Omit<ExpenseRecord, "id" | "createdAt">,
   ) => Promise<ExpenseRecord>;
@@ -96,18 +84,6 @@ export interface InvestmentContextType {
   updateAppSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>;
 }
 
-const defaultDashboardSummary: DashboardSummary = {
-  totalInvested: 0,
-  totalRealizedPnL: 0,
-  totalCashBalance: 0,
-  totalMaturedDebt: 0,
-  updatedAt: new Date().toISOString(),
-};
-
-const defaultAppSettings: AppSettings = {
-  financialYearStartMonth: 1, // January
-};
-
 export const InvestmentContext = createContext<
   InvestmentContextType | undefined
 >(undefined);
@@ -120,8 +96,8 @@ export const InvestmentProvider = ({
   const { user } = useAuth();
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
-  const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]);
+  const [incomes, setIncomes] = useState<IncomeRecord[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [fixedEstimates, setFixedEstimates] = useState<FixedEstimateRecord[]>(
     [],
   );
@@ -137,6 +113,10 @@ export const InvestmentProvider = ({
     useState<AppSettingsService | null>(null);
   const [financialRecordsService, setFinancialRecordsService] =
     useState<FinancialRecordsService | null>(null);
+  const [dashboardService, setDashboardService] =
+    useState<DashboardService | null>(null);
+  const [transactionService, setTransactionService] =
+    useState<TransactionService | null>(null);
 
   // Initialize services when user is authenticated
   useEffect(() => {
@@ -144,11 +124,15 @@ export const InvestmentProvider = ({
       const investmentService = new InvestmentService(user.uid);
       const settingsService = new AppSettingsService(user.uid);
       const recordsService = new FinancialRecordsService(user.uid);
+      const transactionService = new TransactionService(user.uid);
+      const dashboardService = new DashboardService(user.uid, investmentService, transactionService);
 
       setInvestmentService(investmentService);
       setAppSettingsService(settingsService);
       setFinancialRecordsService(recordsService);
-      loadInitialData(investmentService, settingsService, recordsService);
+      setDashboardService(dashboardService);
+      setTransactionService(transactionService);
+      loadInitialData(investmentService, settingsService, recordsService, dashboardService, transactionService);
     }
   }, [user?.uid]);
 
@@ -156,6 +140,8 @@ export const InvestmentProvider = ({
     investmentService: InvestmentService,
     settingsService: AppSettingsService,
     recordsService: FinancialRecordsService,
+    dashboardService: DashboardService,
+    transactionService: TransactionService,
   ) => {
     try {
       setIsLoading(true);
@@ -165,11 +151,10 @@ export const InvestmentProvider = ({
       // Then load remaining data in parallel
       await Promise.all([
         fetchInvestments(investmentService),
-        fetchTransactions(investmentService),
-        fetchIncomeRecords(recordsService),
-        fetchExpenseRecords(recordsService),
+        fetchIncomes(recordsService),
+        fetchExpenses(recordsService),
         fetchFixedEstimates(recordsService),
-        fetchDashboardSummary(investmentService),
+        fetchDashboardSummary(dashboardService),
       ]);
     } catch (error) {
       console.error("Error loading initial data:", error);
@@ -180,11 +165,13 @@ export const InvestmentProvider = ({
 
   // Data fetching functions
   const fetchInvestments = async (service: InvestmentService) => {
-    // Implementation will be added
+    const investments = await service.getInvestments();
+    setInvestments(investments);
   };
 
-  const fetchDashboardSummary = async (service: InvestmentService) => {
-    // Implementation will be added
+  const fetchDashboardSummary = async (service: DashboardService) => {
+    const summary = await service.getDashboardSummary();
+    setDashboardSummary(summary);
   };
 
   const fetchAppSettings = async (service: AppSettingsService) => {
@@ -213,86 +200,40 @@ export const InvestmentProvider = ({
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
-    // Implementation will be added
-  };
-
-  const updateInvestment = async (id: string, data: Partial<Investment>) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
+    await investmentService.buyNew(investmentData);
   };
 
   const deleteInvestment = async (id: string) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
-    // Implementation will be added
-  };
-
-  const removeDirectDebtInvestment = async (investmentId: string) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
-  };
-
-  const removeRealEstateInvestment = async (investmentId: string) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
+    await investmentService.deleteInvestment(id);
   };
 
   // CRUD operations for transactions
-  const fetchTransactions = async (service: InvestmentService) => {
-    // Implementation will be added
-  };
-
-  const addTransaction = async (
-    transactionData: Omit<Transaction, "id" | "createdAt">,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
+  const getTransactionsBySourceId = async (sourceId: string) => {
+    if (!transactionService)
+      throw new Error("Transaction service not initialized");
+    const transactions = await transactionService.getTransactionsBySourceId(sourceId);
+    setTransactions(transactions);
+    return transactions;
   };
 
   const updateTransaction = async (id: string, data: Partial<Transaction>) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
-  };
-
-  const deleteTransaction = async (id: string) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
-  };
-
-  const deleteSellTransaction = async (transaction: Transaction) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
-  };
-
-  const recordSellStockTransaction = async (
-    listedsecurityId: string,
-    tickerSymbol: string,
-    numberOfSharesToSell: number,
-    sellPricePerShare: number,
-    sellDate: string,
-    fees: number,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    // Implementation will be added
+    if (!transactionService)
+      throw new Error("Transaction service not initialized");
+    await transactionService.updateTransaction(id, data);
+    setTransactions((prev) => prev.map((txn) => (txn.id === id ? { ...txn, ...data } : txn)));
   };
 
   // CRUD operations for Income
-  const fetchIncomeRecords = async (service: FinancialRecordsService) => {
+  const fetchIncomes = async (service: FinancialRecordsService) => {
     try {
-      const records = await service.getIncomeRecords();
-      setIncomeRecords(records);
+      const records = await service.getIncomes();
+      setIncomes(records);
       return records;
     } catch (error) {
       console.error("Error fetching income records:", error);
-      setIncomeRecords([]);
+      setIncomes([]);
       return [];
     }
   };
@@ -303,8 +244,8 @@ export const InvestmentProvider = ({
     if (!financialRecordsService)
       throw new Error("Financial records service not initialized");
     try {
-      const newRecord = await financialRecordsService.addIncomeRecord(data);
-      setIncomeRecords((prev) => [newRecord, ...prev]);
+      const newRecord = await financialRecordsService.addIncome(data);
+      setIncomes((prev) => [newRecord, ...prev]);
       return newRecord;
     } catch (error) {
       console.error("Error adding income record:", error);
@@ -319,11 +260,11 @@ export const InvestmentProvider = ({
     if (!financialRecordsService)
       throw new Error("Financial records service not initialized");
     try {
-      const updatedRecord = await financialRecordsService.updateIncomeRecord(
+      const updatedRecord = await financialRecordsService.updateIncome(
         id,
         data,
       );
-      setIncomeRecords((prev) =>
+      setIncomes((prev) =>
         prev.map((record) =>
           record.id === id ? { ...record, ...updatedRecord } : record,
         ),
@@ -339,8 +280,8 @@ export const InvestmentProvider = ({
     if (!financialRecordsService)
       throw new Error("Financial records service not initialized");
     try {
-      await financialRecordsService.deleteIncomeRecord(id);
-      setIncomeRecords((prev) => prev.filter((record) => record.id !== id));
+      await financialRecordsService.deleteIncome(id);
+      setIncomes((prev) => prev.filter((record) => record.id !== id));
     } catch (error) {
       console.error("Error deleting income record:", error);
       throw error;
@@ -348,14 +289,14 @@ export const InvestmentProvider = ({
   };
 
   // CRUD operations for Expenses
-  const fetchExpenseRecords = async (service: FinancialRecordsService) => {
+  const fetchExpenses = async (service: FinancialRecordsService) => {
     try {
-      const records = await service.getExpenseRecords();
-      setExpenseRecords(records);
+      const records = await service.getExpenses();
+      setExpenses(records);
       return records;
     } catch (error) {
       console.error("Error fetching expense records:", error);
-      setExpenseRecords([]);
+      setExpenses([]);
       return [];
     }
   };
@@ -366,8 +307,8 @@ export const InvestmentProvider = ({
     if (!financialRecordsService)
       throw new Error("Financial records service not initialized");
     try {
-      const newRecord = await financialRecordsService.addExpenseRecord(data);
-      setExpenseRecords((prev) => [newRecord, ...prev]);
+      const newRecord = await financialRecordsService.addExpense(data);
+      setExpenses((prev) => [newRecord, ...prev]);
       return newRecord;
     } catch (error) {
       console.error("Error adding expense record:", error);
@@ -382,11 +323,11 @@ export const InvestmentProvider = ({
     if (!financialRecordsService)
       throw new Error("Financial records service not initialized");
     try {
-      const updatedRecord = await financialRecordsService.updateExpenseRecord(
+      const updatedRecord = await financialRecordsService.updateExpense(
         id,
         data,
       );
-      setExpenseRecords((prev) =>
+      setExpenses((prev) =>
         prev.map((record) =>
           record.id === id ? { ...record, ...updatedRecord } : record,
         ),
@@ -402,8 +343,8 @@ export const InvestmentProvider = ({
     if (!financialRecordsService)
       throw new Error("Financial records service not initialized");
     try {
-      await financialRecordsService.deleteExpenseRecord(id);
-      setExpenseRecords((prev) => prev.filter((record) => record.id !== id));
+      await financialRecordsService.deleteExpense(id);
+      setExpenses((prev) => prev.filter((record) => record.id !== id));
     } catch (error) {
       console.error("Error deleting expense record:", error);
       throw error;
@@ -499,9 +440,9 @@ export const InvestmentProvider = ({
   };
 
   const refreshDashboard = async () => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    await fetchDashboardSummary(investmentService);
+    if (!dashboardService)
+      throw new Error("Dashboard service not initialized");
+    await dashboardService.recalculateDashboardSummary();
   };
 
   const getInvestmentsByType = (type: string): Investment[] => {
@@ -520,23 +461,17 @@ export const InvestmentProvider = ({
     getInvestmentsByType,
     getInvestmentById,
     addInvestment,
-    updateInvestment,
     deleteInvestment,
-    removeDirectDebtInvestment,
-    removeRealEstateInvestment,
     transactions,
-    addTransaction,
+    getTransactionsBySourceId,
     updateTransaction,
-    deleteTransaction,
-    deleteSellTransaction,
-    recordSellStockTransaction,
     dashboardSummary,
     refreshDashboard,
-    incomeRecords,
+    incomes,
     addIncomeRecord,
     updateIncomeRecord,
     deleteIncomeRecord,
-    expenseRecords,
+    expenses,
     addExpenseRecord,
     updateExpenseRecord,
     deleteExpenseRecord,
