@@ -96,8 +96,8 @@ export default function MyDebtInstrumentsPage() {
       const debt = inv as DebtInstrumentInvestment;
 
       // Skip already matured debt instruments
-      if (debt.isMatured) {
-        totalMaturedDebt += debt.amountInvested || 0;
+      if (debt.isClosed) {
+        totalMaturedDebt += debt.totalInvested || 0;
         return false;
       }
 

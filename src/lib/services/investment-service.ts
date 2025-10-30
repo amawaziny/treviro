@@ -27,6 +27,7 @@ type InvestmentUpdate = {
   totalShares: number;
   totalInvested: number;
   averagePurchasePrice: number;
+  isClosed: boolean;
 };
 
 /**
@@ -198,6 +199,7 @@ export class InvestmentService {
           totalShares: quantity,
           totalInvested: amount,
           averagePurchasePrice: quantity > 0 ? amount / quantity : 0,
+          isClosed: false,
           metadata: {
             ...(investmentData.metadata || {}),
           },
@@ -206,7 +208,7 @@ export class InvestmentService {
         // Handle type-specific fields
         if (isRealEstateInvestment(investment)) {
           // Handle real estate specific fields if needed
-          if (investment.metadata?.installmentFrequency) {
+          if (investment.installmentFrequency) {
             const {
               generateInstallmentSchedule,
             } = require("@/lib/installment-utils");
@@ -296,6 +298,7 @@ export class InvestmentService {
     return {
       totalShares,
       totalInvested,
+      isClosed: totalShares === 0,
       averagePurchasePrice: totalShares > 0 ? totalInvested / totalShares : 0,
     };
   }
@@ -360,6 +363,7 @@ export class InvestmentService {
         totalShares: update.totalShares,
         totalInvested: update.totalInvested,
         averagePurchasePrice: update.averagePurchasePrice,
+        isClosed: update.isClosed,
         lastUpdated: now,
       };
 

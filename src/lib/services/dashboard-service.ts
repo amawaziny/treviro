@@ -11,7 +11,6 @@ import { formatPath } from "@/lib/utils";
  * TODO:
  * 1. FixedEstimates we can implement confirmation then user confirm it
  * 2. MaturedDebt should have scheduler or a way to calculate them on specific dates
- * 3. Mark investment as closed if quantity is 0
  */
 
 export class DashboardService {

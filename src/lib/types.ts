@@ -42,6 +42,7 @@ export interface BaseInvestment {
   lastUpdated: string; // Last update timestamp
   currency: CurrencyCode;
   fundType?: FundType;
+  isClosed: boolean;
   metadata?: {
     // Type-specific metadata
     [key: string]: any;
@@ -108,7 +109,6 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   interestFrequency: Frequency;
   interestAmount: number; // projected interest amount
   monthlyInterestAmount: number; // projected monthly interest amount
-  isMatured: boolean; // Indicates if the debt instrument has matured
   maturedOn?: string; // Date when the instrument matured (YYYY-MM-DD)
 }
 

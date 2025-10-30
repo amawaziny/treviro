@@ -83,7 +83,7 @@ export function calculateCashFlowMonthlySummary({
     .filter(
       (inv): inv is DebtInstrumentInvestment => inv.type === "Debt Instruments",
     )
-    .filter((inv) => !inv.isMatured)
+    .filter((inv) => !inv.isClosed)
     .reduce((sum, debtInv) => sum + debtInv.monthlyInterestAmount, 0);
 
   // 3. Calculate incomeTillNow (transactions in current month of specific types)
@@ -147,7 +147,7 @@ export function calculateCashFlowMonthlySummary({
   // 6. Calculate totalRealEstateInstallments
   const totalRealEstateInstallments = investments
     .filter((inv): inv is RealEstateInvestment => {
-      if (!isRealEstateInvestment(inv)) return false;
+      if (!isRealEstateInvestment(inv) || inv.isClosed) return false;
       return Boolean(
         differenceInMonths(
           parseDateString(inv.lastInstallmentDate)!,
