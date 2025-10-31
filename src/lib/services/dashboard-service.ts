@@ -15,12 +15,11 @@ import { formatPath } from "@/lib/utils";
 
 /**
  * TODO:
- * 1. revisit delete transaction and delete investment - subscribe to transaction delete event (start with assuming deleting the last transaction)
+ * 1. revisit delete transaction and investment service should subscribe to transaction delete event (start with assuming deleting the last transaction)
  *  a. fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
  *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
- * 2. We could need updateDebt as a helper function in investmentContext
- * 3. FixedEstimates we can implement confirmation then user confirm it
- * 4. check if we need callback hook in investmentContext so the data is updated in real time
+ * 2. FixedEstimates we can implement confirmation then user confirm it
+ * 3. check if we need callback hook in investmentContext so the data is updated in real time
  */
 
 export class DashboardService {
@@ -263,7 +262,7 @@ export class DashboardService {
     const totalCashBalance = cashFlow.income - cashFlow.expense;
 
     // 2. Get totalInvested from investments collection
-    const investments = await this.investmentService.getInvestments();
+    const investments = await this.investmentService.getOpenedInvestments();
     const totalInvested = investments.reduce(
       (sum, investment) => sum + (investment.totalInvested || 0),
       0,

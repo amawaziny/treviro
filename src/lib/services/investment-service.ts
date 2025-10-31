@@ -8,6 +8,9 @@ import {
   collection,
   getDocs,
   deleteDoc,
+  setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -570,8 +573,8 @@ export class InvestmentService {
     });
   }
 
-  async getInvestments(): Promise<Investment[]> {
-    const q = query(this.getInvestmentsCollection());
+  async getOpenedInvestments(): Promise<Investment[]> {
+    const q = query(this.getInvestmentsCollection(), where('isClosed', '==', false));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => doc.data() as Investment);
   }
@@ -583,7 +586,7 @@ export class InvestmentService {
    * @returns Promise that resolves with the total unrealized profit or loss
    */
   async calculateUnrealizedPnL(): Promise<number> {
-    const investments = await this.getInvestments();
+    const investments = await this.getOpenedInvestments();
     let totalUnrealizedPnL = 0;
     investments.forEach(async (investment: Investment) => {
       let currentMarketPrice = investment.averagePurchasePrice;
@@ -611,21 +614,10 @@ export class InvestmentService {
     return totalUnrealizedPnL;
   }
 
-  async deleteInvestment(id: string): Promise<void> {
-    const docRef = this.getInvestmentRef(id);
-    await deleteDoc(docRef);
-    await eventBus.publish({
-      type: "investment:deleted",
-      transaction: {
-        sourceId: id,
-      } as Transaction,
-    });
-  }
-
   async handleMaturedDebtInstruments(): Promise<void> {
-    const investments = await this.getInvestments();
+    const investments = await this.getOpenedInvestments();
     investments.forEach(async (investment: Investment) => {
-      if (isDebtInstrumentInvestment(investment) && !investment.isClosed) {
+      if (isDebtInstrumentInvestment(investment)) {
         const maturityDate = new Date(investment.maturityDate);
         const today = new Date();
         if (maturityDate <= today) {
@@ -646,5 +638,22 @@ export class InvestmentService {
         }
       }
     });
+  }
+
+  async deleteInvestment(id: string): Promise<void> {
+    const docRef = this.getInvestmentRef(id);
+    await deleteDoc(docRef);
+    await eventBus.publish({
+      type: "investment:deleted",
+      transaction: {
+        sourceId: id,
+      } as Transaction,
+    });
+  }
+
+  async editInvestment(investmentId: string, investment: Partial<Investment>): Promise<Investment> {
+    const docRef = this.getInvestmentRef(investmentId);
+    await updateDoc(docRef, {...investment});
+    return (await this.getInvestment(investmentId))!;
   }
 }
