@@ -10,7 +10,9 @@ import { formatPath } from "@/lib/utils";
 /**
  * TODO:
  * 1. add buy, sell, pay, addDividend
- * 2. revisit delete transaction and delete investment subscribe to transaction delete event (start with assuming deleting the last transaction)
+ * 2. revisit delete transaction and delete investment - subscribe to transaction delete event (start with assuming deleting the last transaction)
+ *  a. fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
+ *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
  * 3. FixedEstimates we can implement confirmation then user confirm it
  * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates
  */

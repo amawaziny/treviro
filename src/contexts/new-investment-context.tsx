@@ -42,6 +42,7 @@ export interface InvestmentContextType {
   transactions: Transaction[];
   getTransactionsBySourceId: (sourceId: string) => Promise<Transaction[]>;
   updateTransaction: (id: string, data: Partial<Transaction>) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
 
   // Dashboard
   dashboardSummary: DashboardSummary;
@@ -132,7 +133,7 @@ export const InvestmentProvider = ({
       setFinancialRecordsService(recordsService);
       setDashboardService(dashboardService);
       setTransactionService(transactionService);
-      loadInitialData(investmentService, settingsService, recordsService, dashboardService, transactionService);
+      loadInitialData(investmentService, settingsService, recordsService, dashboardService);
     }
   }, [user?.uid]);
 
@@ -141,7 +142,6 @@ export const InvestmentProvider = ({
     settingsService: AppSettingsService,
     recordsService: FinancialRecordsService,
     dashboardService: DashboardService,
-    transactionService: TransactionService,
   ) => {
     try {
       setIsLoading(true);
@@ -223,6 +223,13 @@ export const InvestmentProvider = ({
       throw new Error("Transaction service not initialized");
     await transactionService.updateTransaction(id, data);
     setTransactions((prev) => prev.map((txn) => (txn.id === id ? { ...txn, ...data } : txn)));
+  };
+
+  const deleteTransaction = async (id: string) => {
+    if (!transactionService)
+      throw new Error("Transaction service not initialized");
+    await transactionService.deleteTransaction(id);
+    setTransactions((prev) => prev.filter((txn) => txn.id !== id));
   };
 
   // CRUD operations for Income
@@ -465,6 +472,7 @@ export const InvestmentProvider = ({
     transactions,
     getTransactionsBySourceId,
     updateTransaction,
+    deleteTransaction,
     dashboardSummary,
     refreshDashboard,
     incomes,

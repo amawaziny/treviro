@@ -10,6 +10,7 @@ import {
   setDoc,
   writeBatch,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -344,12 +345,24 @@ export class TransactionService {
     );
   }
 
+  //TODO: fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
   async updateTransaction(id: string, data: Partial<Transaction>) {
     try {
       await this.recordTransaction({ ...data, id } as Transaction);
     } catch (error) {
       console.error("Failed to update transaction", error);
       throw new Error("Failed to update transaction");
+    }
+  }
+
+
+  //TODO: fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
+  async deleteTransaction(id: string) {
+    try {
+      await deleteDoc(this.getTransactionRef(id));
+    } catch (error) {
+      console.error("Failed to delete transaction", error);
+      throw new Error("Failed to delete transaction");
     }
   }
 
