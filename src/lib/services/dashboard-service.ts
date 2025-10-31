@@ -3,14 +3,14 @@ import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
-import { DashboardSummary, defaultDashboardSummary, Transaction } from "@/lib/types";
+import { DashboardSummaries, DashboardSummary, defaultDashboardSummary, Transaction } from "@/lib/types";
 import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 
 /**
  * TODO:
- * 1. call calculateUnrealizedPnL in recalculateDashboardSummary
- * 2. add buy, sell, pay, addDividend
+ * 1. add buy, sell, pay, addDividend
+ * 2. revisit delete transaction and delete investment subscribe to transaction delete event (start with assuming deleting the last transaction)
  * 3. FixedEstimates we can implement confirmation then user confirm it
  * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates
  */
@@ -133,9 +133,6 @@ export class DashboardService {
             );
             updates.totalCashBalance =
               (currentData.totalCashBalance || 0) + amount;
-            updates.totalMaturedDebt =
-              (currentData.totalMaturedDebt || 0) + amount;
-            break;
         }
 
         // Apply updates to the dashboard
@@ -172,29 +169,36 @@ export class DashboardService {
     return newData;
   }
 
-  async getDashboardSummary(): Promise<DashboardSummary> {
+  async getDashboardSummary(): Promise<DashboardSummaries> {
     const dashboardRef = this.getDashboardDocRef();
     const dashboardSnap = await getDoc(dashboardRef);
 
     if (dashboardSnap.exists()) {
       const data = dashboardSnap.data() as Partial<DashboardSummary>;
+      const totalInvested= data.totalInvested ?? defaultDashboardSummary.totalInvested;
+      const totalCashBalance= data.totalCashBalance ?? defaultDashboardSummary.totalCashBalance;
+      const totalUnrealizedPnL= await this.investmentService.calculateUnrealizedPnL();
+      const marketTotalInvested= totalInvested+totalUnrealizedPnL;
+      const totalPortfolio= marketTotalInvested+totalCashBalance;
       return {
-        totalInvested: data.totalInvested ?? defaultDashboardSummary.totalInvested,
+        totalInvested,
         totalRealizedPnL: data.totalRealizedPnL ?? defaultDashboardSummary.totalRealizedPnL,
-        totalCashBalance: data.totalCashBalance ?? defaultDashboardSummary.totalCashBalance,
-        totalMaturedDebt: data.totalMaturedDebt ?? defaultDashboardSummary.totalMaturedDebt,
+        totalCashBalance,
+        totalUnrealizedPnL,
+        marketTotalInvested,
+        totalPortfolio,
         updatedAt: data.updatedAt ?? defaultDashboardSummary.updatedAt,
       };
     }
 
-    return defaultDashboardSummary;
+    return {...defaultDashboardSummary, totalUnrealizedPnL: 0, marketTotalInvested: 0, totalPortfolio: 0};
   }
 
   /**
    * Calculates and updates the dashboard summary based on transactions and investments
    * @returns Promise that resolves with the updated DashboardSummary
    */
-  async recalculateDashboardSummary(): Promise<DashboardSummary> {
+  async recalculateDashboardSummary(): Promise<DashboardSummaries> {
     // 1. Calculate totalCashBalance
     const cashFlow = {
       income: 0,
@@ -252,16 +256,29 @@ export class DashboardService {
       (sum, investment) => sum + (investment.totalInvested || 0),
       0,
     );
+      
 
     const summary: DashboardSummary = {
       totalInvested,
       totalRealizedPnL,
       totalCashBalance,
-      totalMaturedDebt,
     };
 
     // Update the dashboard in Firebase
-    return await this.updateDashboardSummary(summary);
+    await this.updateDashboardSummary(summary)
+
+    const totalUnrealizedPnL = await this.investmentService.calculateUnrealizedPnL();
+    const marketTotalInvested = totalInvested + totalUnrealizedPnL;
+    const totalPortfolio = marketTotalInvested + totalCashBalance;
+
+    const updatedSummary = {
+      ...summary,
+      totalUnrealizedPnL,
+      marketTotalInvested,
+      totalPortfolio,
+    };
+
+    return updatedSummary;
   }
 
   cleanup() {

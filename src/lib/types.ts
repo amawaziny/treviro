@@ -278,15 +278,19 @@ export interface DashboardSummary {
   totalInvested: number;
   totalRealizedPnL: number;
   totalCashBalance: number;
-  totalMaturedDebt?: number; // Total amount from matured debt instruments
   updatedAt?: string;
+}
+
+export interface DashboardSummaries extends DashboardSummary {
+  totalUnrealizedPnL: number;
+  marketTotalInvested: number;
+  totalPortfolio: number;
 }
 
 export const defaultDashboardSummary: DashboardSummary = {
   totalInvested: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0,
-  totalMaturedDebt: 0,
   updatedAt: new Date().toISOString(),
 };
 
