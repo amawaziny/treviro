@@ -294,6 +294,13 @@ export const defaultDashboardSummary: DashboardSummary = {
   updatedAt: new Date().toISOString(),
 };
 
+export const defaultDashboardSummaries: DashboardSummaries = {
+  ...defaultDashboardSummary,
+  totalUnrealizedPnL: 0,
+  marketTotalInvested: 0,
+  totalPortfolio: 0,
+};
+
 export interface GoldMarketPrices {
   K24?: number;
   K21?: number;

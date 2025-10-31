@@ -343,7 +343,6 @@ export class TransactionService {
     );
   }
 
-  //TODO: fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
   async updateTransaction(id: string, data: Partial<Transaction>) {
     try {
       await this.recordTransaction({ ...data, id } as Transaction);

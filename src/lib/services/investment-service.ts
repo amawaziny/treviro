@@ -17,6 +17,10 @@ import {
   Investment,
   RealEstateInvestment,
   isRealEstateInvestment,
+  isDebtInstrumentInvestment,
+  isGoldInvestment,
+  isSecurityInvestment,
+  isCurrencyInvestment,
 } from "@/lib/types";
 import { eventBus } from "./events";
 
@@ -583,17 +587,17 @@ export class InvestmentService {
     let totalUnrealizedPnL = 0;
     investments.forEach(async (investment: Investment) => {
       let currentMarketPrice = investment.averagePurchasePrice;
-      if (investment.type === "Gold") {
+      if (isGoldInvestment(investment)) {
         const goldMarketPrices = await masterDataService.getGoldMarketPrices();
         currentMarketPrice =
           goldMarketPrices[investment.goldType] ??
           investment.averagePurchasePrice;
-      } else if (investment.type === "Securities") {
+      } else if (isSecurityInvestment(investment)) {
         const security = await masterDataService.getSecurity(
           investment.securityId,
         );
         currentMarketPrice = security.price;
-      } else if (investment.type === "Currencies") {
+      } else if (isCurrencyInvestment(investment)) {
         currentMarketPrice = await masterDataService.getExchangeRate(
           investment.currencyCode,
           investment.currency,
@@ -615,6 +619,32 @@ export class InvestmentService {
       transaction: {
         sourceId: id,
       } as Transaction,
+    });
+  }
+
+  async handleMaturedDebtInstruments(): Promise<void> {
+    const investments = await this.getInvestments();
+    investments.forEach(async (investment: Investment) => {
+      if (isDebtInstrumentInvestment(investment) && !investment.isClosed) {
+        const maturityDate = new Date(investment.maturityDate);
+        const today = new Date();
+        if (maturityDate <= today) {
+          investment.isClosed = true;
+          investment.maturedOn = maturityDate.toISOString();
+          //TODO: could be converted to batch update
+          await this.updateInvestment({
+            sourceId: investment.id,
+            investmentType: investment.type,
+            type: "MATURED_DEBT",
+            date: maturityDate.toISOString(),
+            amount: investment.totalInvested,
+            quantity: investment.totalShares,
+            pricePerUnit: investment.averagePurchasePrice,
+            fees: 0,
+            currency: "EGP",
+          });
+        }
+      }
     });
   }
 }

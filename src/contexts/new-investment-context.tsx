@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -13,8 +14,8 @@ import {
   IncomeRecord,
   ExpenseRecord,
   FixedEstimateRecord,
-  defaultDashboardSummary,
   defaultAppSettings,
+  defaultDashboardSummaries,
 } from "@/lib/types";
 import type {
   Investment,
@@ -22,6 +23,7 @@ import type {
   DashboardSummary,
   AppSettings,
   InvestmentType,
+  DashboardSummaries,
 } from "@/lib/types";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { DashboardService } from "@/lib/services/dashboard-service";
@@ -134,8 +136,8 @@ export const InvestmentProvider = ({
   const [fixedEstimates, setFixedEstimates] = useState<FixedEstimateRecord[]>(
     [],
   );
-  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary>(
-    defaultDashboardSummary,
+  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummaries>(
+    defaultDashboardSummaries,
   );
   const [appSettings, setAppSettings] =
     useState<AppSettings>(defaultAppSettings);
@@ -154,9 +156,9 @@ export const InvestmentProvider = ({
   // Initialize services when user is authenticated
   useEffect(() => {
     if (user?.uid) {
-      const investmentService = new InvestmentService(user.uid);
       const settingsService = new AppSettingsService(user.uid);
       const recordsService = new FinancialRecordsService(user.uid);
+      const investmentService = new InvestmentService(user.uid);
       const transactionService = new TransactionService(user.uid);
       const dashboardService = new DashboardService(
         user.uid,
@@ -177,6 +179,21 @@ export const InvestmentProvider = ({
       );
     }
   }, [user?.uid]);
+
+  // Check for matured debt instruments on initial load and periodically
+  useEffect(() => {
+    if (!investmentService) return;
+
+    investmentService.handleMaturedDebtInstruments();
+    const checkMaturedDebtInterval = setInterval(
+      () => {
+        investmentService.handleMaturedDebtInstruments();
+      },
+      24 * 60 * 60 * 1000,
+    ); // 24 hours
+
+    return () => clearInterval(checkMaturedDebtInterval);
+  }, [investmentService]);
 
   const loadInitialData = async (
     investmentService: InvestmentService,
