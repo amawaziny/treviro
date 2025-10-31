@@ -1,4 +1,4 @@
-import type { IncomeRecord, ExpenseRecord , Transaction} from "@/lib/types";
+import type { IncomeRecord, ExpenseRecord, Transaction } from "@/lib/types";
 
 export type FinancialRecordEvent =
   | { type: "income:added"; record: IncomeRecord }

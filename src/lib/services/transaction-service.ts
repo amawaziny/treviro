@@ -177,9 +177,7 @@ export class TransactionService {
    * const transactions = await transactionService.getTransactionsBySourceId('inv-123');
    * console.log('Transaction history:', transactions);
    */
-  async getTransactionsBySourceId(
-    sourceId: string,
-  ): Promise<Transaction[]> {
+  async getTransactionsBySourceId(sourceId: string): Promise<Transaction[]> {
     const q = query(
       this.getTransactionsCollection(),
       where("sourceId", "==", sourceId),
@@ -354,7 +352,6 @@ export class TransactionService {
       throw new Error("Failed to update transaction");
     }
   }
-
 
   //TODO: fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
   async deleteTransaction(id: string) {

@@ -5,7 +5,6 @@ import {
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
@@ -22,6 +21,7 @@ import type {
   Transaction,
   DashboardSummary,
   AppSettings,
+  InvestmentType,
 } from "@/lib/types";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { DashboardService } from "@/lib/services/dashboard-service";
@@ -37,6 +37,38 @@ export interface InvestmentContextType {
     investmentData: Omit<Investment, "id" | "createdAt">,
   ) => Promise<void>;
   deleteInvestment: (id: string) => Promise<void>;
+  buy: (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    quantity: number,
+    pricePerUnit: number,
+    fees: number,
+    date: string,
+  ) => Promise<void>;
+  sell: (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    quantity: number,
+    pricePerUnit: number,
+    fees: number,
+    date: string,
+  ) => Promise<void>;
+  pay: (
+    investmentId: string,
+    investmentType: InvestmentType,
+    installmentNumber: number,
+    amount: number,
+    date: string,
+  ) => Promise<void>;
+  addDividend: (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    amount: number,
+    date: string,
+  ) => Promise<void>;
 
   // Transactions
   transactions: Transaction[];
@@ -126,14 +158,23 @@ export const InvestmentProvider = ({
       const settingsService = new AppSettingsService(user.uid);
       const recordsService = new FinancialRecordsService(user.uid);
       const transactionService = new TransactionService(user.uid);
-      const dashboardService = new DashboardService(user.uid, investmentService, transactionService);
+      const dashboardService = new DashboardService(
+        user.uid,
+        investmentService,
+        transactionService,
+      );
 
       setInvestmentService(investmentService);
       setAppSettingsService(settingsService);
       setFinancialRecordsService(recordsService);
       setDashboardService(dashboardService);
       setTransactionService(transactionService);
-      loadInitialData(investmentService, settingsService, recordsService, dashboardService);
+      loadInitialData(
+        investmentService,
+        settingsService,
+        recordsService,
+        dashboardService,
+      );
     }
   }, [user?.uid]);
 
@@ -200,20 +241,112 @@ export const InvestmentProvider = ({
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
-    await investmentService.buyNew(investmentData);
+    const investment = await investmentService.buyNew(investmentData);
+    setInvestments((prev) => [investment, ...prev]);
   };
 
   const deleteInvestment = async (id: string) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
     await investmentService.deleteInvestment(id);
+    setInvestments((prev) => prev.filter((inv) => inv.id !== id));
   };
+
+  const buy = async (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    quantity: number,
+    pricePerUnit: number,
+    fees: number,
+    date: string,
+  ) => {
+    if (!investmentService)
+      throw new Error("Investment service not initialized");
+    const investment = await investmentService.buy(
+      investmentId,
+      securityId,
+      investmentType,
+      quantity,
+      pricePerUnit,
+      fees,
+      date,
+    );
+    setInvestments((prev) =>
+      prev.map((inv) => (inv.id === investmentId ? investment : inv)),
+    );
+  };
+
+  const sell = async (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    quantity: number,
+    pricePerUnit: number,
+    fees: number,
+    date: string,
+  ) => {
+    if (!investmentService)
+      throw new Error("Investment service not initialized");
+    const investment = await investmentService.sell(
+      investmentId,
+      securityId,
+      investmentType,
+      quantity,
+      pricePerUnit,
+      fees,
+      date,
+    );
+    setInvestments((prev) =>
+      prev.map((inv) => (inv.id === investmentId ? investment : inv)),
+    );
+  };
+
+  const pay = async (
+    investmentId: string,
+    investmentType: InvestmentType,
+    installmentNumber: number,
+    amount: number,
+    date: string,
+  ) => {
+    if (!investmentService)
+      throw new Error("Investment service not initialized");
+    const investment = await investmentService.pay(
+      investmentId,
+      investmentType,
+      installmentNumber,
+      amount,
+      date,
+    );
+    setInvestments((prev) =>
+      prev.map((inv) => (inv.id === investmentId ? investment : inv)),
+    );
+  };
+
+  const addDividend = async (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    amount: number,
+    date: string,
+  ) => {
+    if (!investmentService)
+      throw new Error("Investment service not initialized");
+   await investmentService.addDividend(
+      investmentId,
+      securityId,
+      investmentType,
+      amount,
+      date,
+    ); 
+  };  
 
   // CRUD operations for transactions
   const getTransactionsBySourceId = async (sourceId: string) => {
     if (!transactionService)
       throw new Error("Transaction service not initialized");
-    const transactions = await transactionService.getTransactionsBySourceId(sourceId);
+    const transactions =
+      await transactionService.getTransactionsBySourceId(sourceId);
     setTransactions(transactions);
     return transactions;
   };
@@ -222,7 +355,9 @@ export const InvestmentProvider = ({
     if (!transactionService)
       throw new Error("Transaction service not initialized");
     await transactionService.updateTransaction(id, data);
-    setTransactions((prev) => prev.map((txn) => (txn.id === id ? { ...txn, ...data } : txn)));
+    setTransactions((prev) =>
+      prev.map((txn) => (txn.id === id ? { ...txn, ...data } : txn)),
+    );
   };
 
   const deleteTransaction = async (id: string) => {
@@ -447,8 +582,7 @@ export const InvestmentProvider = ({
   };
 
   const refreshDashboard = async () => {
-    if (!dashboardService)
-      throw new Error("Dashboard service not initialized");
+    if (!dashboardService) throw new Error("Dashboard service not initialized");
     await dashboardService.recalculateDashboardSummary();
   };
 
@@ -469,6 +603,10 @@ export const InvestmentProvider = ({
     getInvestmentById,
     addInvestment,
     deleteInvestment,
+    buy,
+    sell,
+    pay,
+    addDividend,
     transactions,
     getTransactionsBySourceId,
     updateTransaction,

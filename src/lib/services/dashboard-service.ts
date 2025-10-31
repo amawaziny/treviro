@@ -3,16 +3,21 @@ import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
-import { DashboardSummaries, DashboardSummary, defaultDashboardSummary, Transaction } from "@/lib/types";
+import {
+  DashboardSummaries,
+  DashboardSummary,
+  defaultDashboardSummary,
+  Transaction,
+} from "@/lib/types";
 import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 
 /**
  * TODO:
- * 1. add buy, sell, pay, addDividend
- * 2. revisit delete transaction and delete investment - subscribe to transaction delete event (start with assuming deleting the last transaction)
+ * 1. revisit delete transaction and delete investment - subscribe to transaction delete event (start with assuming deleting the last transaction)
  *  a. fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
  *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
+ * 2. We could need updateDebt as a helper function in investmentContext
  * 3. FixedEstimates we can implement confirmation then user confirm it
  * 4. MaturedDebt should have scheduler or a way to calculate them on specific dates
  */
@@ -177,14 +182,18 @@ export class DashboardService {
 
     if (dashboardSnap.exists()) {
       const data = dashboardSnap.data() as Partial<DashboardSummary>;
-      const totalInvested= data.totalInvested ?? defaultDashboardSummary.totalInvested;
-      const totalCashBalance= data.totalCashBalance ?? defaultDashboardSummary.totalCashBalance;
-      const totalUnrealizedPnL= await this.investmentService.calculateUnrealizedPnL();
-      const marketTotalInvested= totalInvested+totalUnrealizedPnL;
-      const totalPortfolio= marketTotalInvested+totalCashBalance;
+      const totalInvested =
+        data.totalInvested ?? defaultDashboardSummary.totalInvested;
+      const totalCashBalance =
+        data.totalCashBalance ?? defaultDashboardSummary.totalCashBalance;
+      const totalUnrealizedPnL =
+        await this.investmentService.calculateUnrealizedPnL();
+      const marketTotalInvested = totalInvested + totalUnrealizedPnL;
+      const totalPortfolio = marketTotalInvested + totalCashBalance;
       return {
         totalInvested,
-        totalRealizedPnL: data.totalRealizedPnL ?? defaultDashboardSummary.totalRealizedPnL,
+        totalRealizedPnL:
+          data.totalRealizedPnL ?? defaultDashboardSummary.totalRealizedPnL,
         totalCashBalance,
         totalUnrealizedPnL,
         marketTotalInvested,
@@ -193,7 +202,12 @@ export class DashboardService {
       };
     }
 
-    return {...defaultDashboardSummary, totalUnrealizedPnL: 0, marketTotalInvested: 0, totalPortfolio: 0};
+    return {
+      ...defaultDashboardSummary,
+      totalUnrealizedPnL: 0,
+      marketTotalInvested: 0,
+      totalPortfolio: 0,
+    };
   }
 
   /**
@@ -258,7 +272,6 @@ export class DashboardService {
       (sum, investment) => sum + (investment.totalInvested || 0),
       0,
     );
-      
 
     const summary: DashboardSummary = {
       totalInvested,
@@ -267,9 +280,10 @@ export class DashboardService {
     };
 
     // Update the dashboard in Firebase
-    await this.updateDashboardSummary(summary)
+    await this.updateDashboardSummary(summary);
 
-    const totalUnrealizedPnL = await this.investmentService.calculateUnrealizedPnL();
+    const totalUnrealizedPnL =
+      await this.investmentService.calculateUnrealizedPnL();
     const marketTotalInvested = totalInvested + totalUnrealizedPnL;
     const totalPortfolio = marketTotalInvested + totalCashBalance;
 

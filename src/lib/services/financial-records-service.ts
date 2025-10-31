@@ -219,9 +219,7 @@ export class FinancialRecordsService {
   }
 
   // Income Records
-  async getIncomes(
-    filters?: Partial<IncomeRecord>,
-  ): Promise<IncomeRecord[]> {
+  async getIncomes(filters?: Partial<IncomeRecord>): Promise<IncomeRecord[]> {
     const records = await this.getRecords<IncomeRecord>(
       FINANCIAL_COLLECTIONS.INCOMES,
       filters,

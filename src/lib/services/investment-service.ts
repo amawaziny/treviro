@@ -317,22 +317,6 @@ export class InvestmentService {
   ): Promise<Investment> {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
     const now = new Date().toISOString();
-    let {
-      type,
-      quantity = 0,
-      amount = 0,
-      pricePerUnit = 0,
-      fees = 0,
-    } = transactionData;
-    if (amount === 0) {
-      amount = pricePerUnit * quantity;
-    }
-
-    amount = type === "SELL" ? amount - fees : amount + fees;
-
-    if (quantity > 0) {
-      pricePerUnit = amount / quantity;
-    }
 
     return runFirestoreTransaction(db, async (firestoreTransaction) => {
       const investmentDoc = await firestoreTransaction.get(investmentRef);
@@ -349,11 +333,11 @@ export class InvestmentService {
           averagePurchasePrice: investment.averagePurchasePrice || 0,
         },
         {
-          type,
-          quantity,
-          amount,
-          pricePerUnit,
-          fees,
+          type: transactionData.type,
+          quantity: transactionData.quantity || 0,
+          amount: transactionData.amount || 0,
+          pricePerUnit: transactionData.pricePerUnit || 0,
+          fees: transactionData.fees || 0,
           investmentType: investment.type,
           installmentNumber: transactionData.installmentNumber,
         },
