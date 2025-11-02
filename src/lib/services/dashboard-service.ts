@@ -219,6 +219,7 @@ export class DashboardService {
     // 4. Calculate totalRealizedPnL (sum of all profitOrLoss from transactions)
     let totalRealizedPnL = 0;
     let totalMaturedDebt = 0;
+    let totalInvested = 0;
 
     const transactions = await this.transactionService.getTransactions();
 
@@ -236,11 +237,13 @@ export class DashboardService {
 
         case "SELL":
           cashFlow.income += amount;
+          totalInvested -= txn.sourceType === "Investment" ? amount : 0;
           break;
 
         case "MATURED_DEBT":
           cashFlow.income += amount;
           totalMaturedDebt += amount;
+          totalInvested -= txn.sourceType === "Investment" ? amount : 0;
           break;
 
         case "EXPENSE":
@@ -250,6 +253,7 @@ export class DashboardService {
         case "PAYMENT":
         case "BUY":
           cashFlow.expense += amount;
+          totalInvested += txn.sourceType === "Investment" ? amount : 0;
           break;
       }
 
@@ -260,13 +264,6 @@ export class DashboardService {
     }
 
     const totalCashBalance = cashFlow.income - cashFlow.expense;
-
-    // 2. Get totalInvested from investments collection
-    const investments = await this.investmentService.getOpenedInvestments();
-    const totalInvested = investments.reduce(
-      (sum, investment) => sum + (investment.totalInvested || 0),
-      0,
-    );
 
     const summary: DashboardSummary = {
       totalInvested,

@@ -63,6 +63,7 @@ export interface CashFlowMonthlySummary {
  * @param month base month for the cashflow summary
  * @returns
  */
+//TODO: move to cashflow service or hook
 export function calculateCashFlowMonthlySummary({
   expenseRecords = [],
   investments = [],
@@ -115,14 +116,8 @@ export function calculateCashFlowMonthlySummary({
     .reduce((sum, fe) => sum + fe.amount, 0);
 
   // 5. Calculate totalItemizedExpenses (credit card installments for current month)
-  //TODO: what if the record type is credit card and isInstallment is false?
   const totalItemizedExpenses = expenseRecords
-    .filter(
-      (record) =>
-        record.type === "Credit Card" &&
-        record.isInstallment &&
-        record.numberOfInstallments,
-    )
+    .filter((record) => record.type === "Credit Card")
     .reduce((sum, record) => {
       const startDate = parseDateString(record.date);
       if (!startDate) return sum;
@@ -135,11 +130,13 @@ export function calculateCashFlowMonthlySummary({
       const monthsSinceStart =
         (currentYear - startYear) * 12 + (currentMonth - startMonth);
 
+      record.numberOfInstallments = (record.numberOfInstallments ?? 0) || 1;
+
       if (
         monthsSinceStart >= 0 &&
-        monthsSinceStart < (record.numberOfInstallments || 0)
+        monthsSinceStart <= record.numberOfInstallments
       ) {
-        return sum + record.amount / (record.numberOfInstallments || 1);
+        return sum + record.amount / record.numberOfInstallments;
       }
       return sum;
     }, 0);

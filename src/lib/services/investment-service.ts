@@ -574,7 +574,10 @@ export class InvestmentService {
   }
 
   async getOpenedInvestments(): Promise<Investment[]> {
-    const q = query(this.getInvestmentsCollection(), where('isClosed', '==', false));
+    const q = query(
+      this.getInvestmentsCollection(),
+      where("isClosed", "==", false),
+    );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => doc.data() as Investment);
   }
@@ -651,9 +654,12 @@ export class InvestmentService {
     });
   }
 
-  async editInvestment(investmentId: string, investment: Partial<Investment>): Promise<Investment> {
+  async editInvestment(
+    investmentId: string,
+    investment: Partial<Investment>,
+  ): Promise<Investment> {
     const docRef = this.getInvestmentRef(investmentId);
-    await updateDoc(docRef, {...investment});
+    await updateDoc(docRef, { ...investment });
     return (await this.getInvestment(investmentId))!;
   }
 }

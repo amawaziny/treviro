@@ -39,7 +39,10 @@ export interface InvestmentContextType {
     investmentData: Omit<Investment, "id" | "createdAt">,
   ) => Promise<void>;
   deleteInvestment: (id: string) => Promise<void>;
-  editInvestment: (id: string, investment: Partial<Investment>) => Promise<void>;
+  editInvestment: (
+    id: string,
+    investment: Partial<Investment>,
+  ) => Promise<void>;
   buy: (
     investmentId: string,
     securityId: string,
@@ -276,7 +279,10 @@ export const InvestmentProvider = ({
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
-    const investment = await investmentService.editInvestment(id, investmentData);
+    const investment = await investmentService.editInvestment(
+      id,
+      investmentData,
+    );
     setInvestments((prev) =>
       prev.map((inv) => (inv.id === id ? investment : inv)),
     );
@@ -362,14 +368,14 @@ export const InvestmentProvider = ({
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
-   await investmentService.addDividend(
+    await investmentService.addDividend(
       investmentId,
       securityId,
       investmentType,
       amount,
       date,
-    ); 
-  };  
+    );
+  };
 
   // CRUD operations for transactions
   const getTransactionsBySourceId = async (sourceId: string) => {
