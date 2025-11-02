@@ -28,6 +28,7 @@ import type {
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { DashboardService } from "@/lib/services/dashboard-service";
 import { TransactionService } from "@/lib/services/transaction-service";
+import { hoursToMilliseconds } from "date-fns";
 
 export interface InvestmentContextType {
   // Investments
@@ -189,12 +190,9 @@ export const InvestmentProvider = ({
     if (!investmentService) return;
 
     investmentService.handleMaturedDebtInstruments();
-    const checkMaturedDebtInterval = setInterval(
-      () => {
-        investmentService.handleMaturedDebtInstruments();
-      },
-      24 * 60 * 60 * 1000,
-    ); // 24 hours
+    const checkMaturedDebtInterval = setInterval(() => {
+      investmentService.handleMaturedDebtInstruments();
+    }, hoursToMilliseconds(24));
 
     return () => clearInterval(checkMaturedDebtInterval);
   }, [investmentService]);
