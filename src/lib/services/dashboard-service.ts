@@ -19,7 +19,7 @@ import { formatPath } from "@/lib/utils";
  *  a. fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
  *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
  * 2. FixedEstimates we can implement confirmation then user confirm it
- * 3. check if we need callback hook in investmentContext so the data is updated in real time
+ * 3. move financial records functions from investment-context to new financial context or just call financial records service functions
  */
 
 export class DashboardService {

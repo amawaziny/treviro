@@ -36,6 +36,7 @@ const investmentTypeColors = {
 };
 
 import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { InvestmentTypePercentage } from "@/lib/types";
 
 interface InvestmentBreakdownCardsProps {
   dashboardSummary?: {
@@ -43,7 +44,7 @@ interface InvestmentBreakdownCardsProps {
     // Add other properties from dashboardSummary that you need
   };
   appSettings?: {
-    investmentTypePercentages: Record<string, number>;
+    investmentTypePercentages: InvestmentTypePercentage;
     // Add other settings you need
   };
 }
@@ -99,7 +100,7 @@ export function InvestmentBreakdownCards({
     if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
       return sum;
     }
-    return sum + (inv.amountInvested || 0);
+    return sum + (inv.totalInvested || 0);
   }, 0);
 
   return (
@@ -132,7 +133,7 @@ export function InvestmentBreakdownCards({
             if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
               return sum;
             }
-            return sum + (inv.amountInvested || 0);
+            return sum + (inv.totalInvested || 0);
           }, 0);
         }
         const current = invs.reduce((sum, inv) => {
@@ -141,7 +142,7 @@ export function InvestmentBreakdownCards({
             return sum;
           }
 
-          if (inv.type === "Stocks" && "securityId" in inv) {
+          if (inv.type === "Securities" && "securityId" in inv) {
             const stockInv = inv as any;
             const security = listedSecurities.find(
               (sec) => sec.id === stockInv.securityId,
@@ -203,7 +204,7 @@ export function InvestmentBreakdownCards({
           }
 
           // For other types, use currentValue if available, otherwise fall back to amountInvested
-          return sum + (inv.currentValue || inv.amountInvested || 0);
+          return sum + (inv.totalInvested || 0);
         }, 0);
         const percent =
           totalInvested > 0 ? (invested / totalInvested) * 100 : 0;

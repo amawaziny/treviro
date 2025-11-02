@@ -389,8 +389,8 @@ export interface AggregatedDebtHolding {
 export type InvestmentTypePercentage = Record<InvestmentType, number>;
 
 export interface AppSettings {
-  financialYearStartMonth?: number;
-  investmentTypePercentages?: InvestmentTypePercentage;
+  financialYearStartMonth: number;
+  investmentTypePercentages: InvestmentTypePercentage;
 }
 
 export const defaultAppSettings: AppSettings = {

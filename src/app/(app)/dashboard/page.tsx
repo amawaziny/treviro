@@ -26,10 +26,11 @@ import {
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
-import type {
-  SecurityInvestment,
-  GoldInvestment,
-  CurrencyInvestment,
+import {
+  type SecurityInvestment,
+  type GoldInvestment,
+  type CurrencyInvestment,
+  defaultAppSettings,
 } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,9 +40,6 @@ import { formatMonthYear, formatNumberForMobile } from "@/lib/utils";
 import { calculateCashFlowMonthlySummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
-import { useListedSecurities } from "@/hooks/use-listed-securities";
-import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
-import { useExchangeRates } from "@/hooks/use-exchange-rates";
 
 export default function DashboardPage() {
   const { t, language } = useLanguage();
@@ -49,108 +47,34 @@ export default function DashboardPage() {
 
   const {
     dashboardSummary,
-    isLoading: isLoadingDashboardSummaryContext,
-    incomeRecords,
-    expenseRecords,
+    expenses,
     fixedEstimates,
     investments,
     transactions,
-    isLoading: isLoadingContext,
-    recalculateDashboardSummary,
+    isLoading,
+    refreshDashboard,
     appSettings,
   } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } =
-    useListedSecurities();
-  const { goldMarketPrices, isLoading: isLoadingGoldPrices } =
-    useGoldMarketPrices();
-  const { exchangeRates, isLoading: isLoadingExchangeRates } =
-    useExchangeRates();
 
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const isLoading =
-    isLoadingDashboardSummaryContext ||
-    isLoadingContext ||
-    isLoadingListedSecurities ||
-    isLoadingGoldPrices ||
-    isLoadingExchangeRates;
-
   const totalInvested = dashboardSummary?.totalInvested ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
+  const totalCurrentPortfolioValue = dashboardSummary?. totalPortfolio?? 0;
+  const totalCurrentPortfolioPnL = dashboardSummary?.totalUnrealizedPnL ?? 0;
 
   const cashFlowSummary = useMemo(() => {
     return calculateCashFlowMonthlySummary({
-      incomeRecords: incomeRecords || [],
-      expenseRecords: expenseRecords || [],
+      expenseRecords: expenses || [],
       investments: investments || [],
       fixedEstimates: fixedEstimates || [],
       transactions: transactions || [],
     });
-  }, [incomeRecords, expenseRecords, investments, fixedEstimates]);
+  }, [expenses, investments, fixedEstimates]);
 
-  const { totalCurrentPortfolioValue, totalPortfolioCostBasis } =
-    useMemo(() => {
-      if (isLoading)
-        return { totalCurrentPortfolioValue: 0, totalPortfolioCostBasis: 0 };
 
-      let currentValueSum = 0;
-      let costBasisSum = 0;
-
-      (investments || []).forEach((inv) => {
-        costBasisSum += inv.amountInvested || 0;
-        let currentVal = inv.amountInvested || 0; // Default to cost if no market price
-
-        if (inv.type === "Stocks" || inv.fundType) {
-          const stockInv = inv as SecurityInvestment;
-          const security = listedSecurities.find(
-            (ls) => ls.symbol === stockInv.tickerSymbol,
-          );
-          if (security && security.price && stockInv.numberOfShares) {
-            currentVal = security.price * stockInv.numberOfShares;
-          }
-        } else if (inv.type === "Gold") {
-          const goldInv = inv as GoldInvestment;
-          if (goldMarketPrices && goldInv.quantityInGrams) {
-            let pricePerUnit: number | undefined;
-            if (goldInv.goldType === "K24") pricePerUnit = goldMarketPrices.K24;
-            else if (goldInv.goldType === "K21")
-              pricePerUnit = goldMarketPrices.K21;
-            else if (goldInv.goldType === "Pound")
-              pricePerUnit = goldMarketPrices.Pound;
-            else if (goldInv.goldType === "Ounce")
-              pricePerUnit = goldMarketPrices.Ounce;
-            if (pricePerUnit)
-              currentVal = pricePerUnit * goldInv.quantityInGrams;
-          }
-        } else if (inv.type === "Currencies") {
-          const currInv = inv as CurrencyInvestment;
-          const rateKey = `${currInv.currencyCode.toUpperCase()}_EGP`;
-          if (
-            exchangeRates &&
-            exchangeRates[rateKey] &&
-            currInv.foreignCurrencyAmount
-          ) {
-            currentVal = exchangeRates[rateKey] * currInv.foreignCurrencyAmount;
-          }
-        }
-        currentValueSum += currentVal;
-      });
-      return {
-        totalCurrentPortfolioValue: currentValueSum,
-        totalPortfolioCostBasis: costBasisSum,
-      };
-    }, [
-      investments,
-      listedSecurities,
-      goldMarketPrices,
-      exchangeRates,
-      isLoading,
-    ]);
-
-  const totalCurrentPortfolioPnL =
-    totalCurrentPortfolioValue - totalPortfolioCostBasis;
 
   return (
     <div className="space-y-8" data-testid="dashboard-page">
@@ -170,7 +94,7 @@ export default function DashboardPage() {
           size="sm"
           data-testid="recalculate-summary-button"
           onClick={async () => {
-            await recalculateDashboardSummary();
+            await refreshDashboard();
             toast({
               title: t("summary_recalculated"),
               description: t("dashboard_summary_values_have_been_updated"),
@@ -388,13 +312,7 @@ export default function DashboardPage() {
             dashboardSummary={dashboardSummary}
             appSettings={{
               investmentTypePercentages:
-                appSettings?.investmentTypePercentages || {
-                  "Real Estate": 30,
-                  Stocks: 25,
-                  "Debt Instruments": 20,
-                  Currencies: 10,
-                  Gold: 15,
-                },
+                appSettings?.investmentTypePercentages || defaultAppSettings.investmentTypePercentages,
             }}
           />
         )}

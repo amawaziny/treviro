@@ -20,7 +20,6 @@ import {
 import type {
   Investment,
   Transaction,
-  DashboardSummary,
   AppSettings,
   InvestmentType,
   DashboardSummaries,
@@ -84,7 +83,7 @@ export interface InvestmentContextType {
   deleteTransaction: (id: string) => Promise<void>;
 
   // Dashboard
-  dashboardSummary: DashboardSummary;
+  dashboardSummary: DashboardSummaries;
   refreshDashboard: () => Promise<void>;
 
   // Income & Expenses
