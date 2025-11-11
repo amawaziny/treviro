@@ -15,14 +15,14 @@ export function cn(...inputs: ClassValue[]) {
  * @returns The corresponding investment type ("Gold" | "Real Estate" | "Debt" | "Stock" | "Other")
  */
 export function getInvestmentType(fundType?: string): InvestmentType {
-  if (!fundType) return "Stocks";
+  if (!fundType) return "Securities";
 
   if (isGoldRelatedFund(fundType)) return "Gold";
   if (isRealEstateRelatedFund(fundType)) return "Real Estate";
   if (isDebtRelatedFund(fundType)) return "Debt Instruments";
-  if (isStockRelatedFund(fundType)) return "Stocks";
+  if (isStockRelatedFund(fundType)) return "Securities";
 
-  return "Stocks";
+  return "Securities";
 }
 
 // Helper function to identify gold-related funds
@@ -62,6 +62,22 @@ export function isDebtRelatedFund(fundType?: string | null): boolean {
   ];
   return debtKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
+
+// Helper function to identify currency-related funds
+export function isCurrencyRelatedFund(fundType?: string | null): boolean {
+  if (!fundType) return false;
+  const lowerFundType = fundType.toLowerCase();
+  const currencyKeywords = [
+    "currency",
+    "foreign exchange",
+    "forex",
+    "fx",
+    "money market",
+    "mm",
+  ];
+  return currencyKeywords.some((keyword) => lowerFundType.includes(keyword));
+}
+
 export function formatNumberForMobile(
   isMobile: boolean = false,
   num: number | undefined,
@@ -130,6 +146,10 @@ export const formatDateDisplay = (dateString?: string) => {
   } catch (e) {
     return dateString; // Or 'Error formatting date'
   }
+};
+
+export const formatDateISO = (date: Date) => {
+  return format(date, "YYYY-MM-DD");
 };
 
 export const formatDateTimeDisplay = (dateString?: string) => {

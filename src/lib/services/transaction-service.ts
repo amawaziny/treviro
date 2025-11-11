@@ -161,6 +161,35 @@ export class TransactionService {
     );
   }
 
+  /**
+   * Retrieves all transactions for the user within a specific date range
+   * @param startDate - The start date of the range
+   * @param endDate - The end date of the range
+   * @returns Array of transactions within the specified date range
+   *
+   * @example
+   * const transactions = await transactionService.getTransactionsWithin('2025-01-01', '2025-12-31');
+   */
+  async getTransactionsWithin(
+    startDate: string,
+    endDate: string,
+  ): Promise<Transaction[]> {
+    const q = query(
+      this.getTransactionsCollection(),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate),
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => doc.data() as Transaction);
+  }
+
+  /**
+   * Retrieves all transactions for the user
+   * @returns Array of transactions
+   *
+   * @example
+   * const transactions = await transactionService.getTransactions();
+   */
   async getTransactions(): Promise<Transaction[]> {
     const q = query(this.getTransactionsCollection());
     const querySnapshot = await getDocs(q);

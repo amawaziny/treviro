@@ -19,7 +19,9 @@ import { formatPath } from "@/lib/utils";
  *  a. fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
  *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
  * 2. FixedEstimates we can implement confirmation then user confirm it
- * 3. move financial records functions from investment-context to new financial context or just call financial records service functions
+ * 3. Expense of type credit card should have isClosed property and it should be false until the user confirm the payment
+ * 4. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
+ * 5. always compose the description of the transaction and description of expense, income, fixed estimate
  */
 
 export class DashboardService {

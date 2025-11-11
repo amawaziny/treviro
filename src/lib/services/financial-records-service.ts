@@ -234,6 +234,25 @@ export class FinancialRecordsService {
     );
   }
 
+  async getIncomesWithin(start: string, end: string): Promise<IncomeRecord[]> {
+    const q = query(
+      this.getCollectionRef(FINANCIAL_COLLECTIONS.INCOMES),
+      where("date", ">=", start),
+      where("date", "<=", end),
+    );
+    const querySnapshot = await getDocs(q);
+
+    const records = querySnapshot.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          createdAt: doc.data().createdAt || new Date().toISOString(),
+          updatedAt: doc.data().updatedAt || new Date().toISOString(),
+        }) as IncomeRecord,
+    );
+    return records;
+  }
+
   async addIncome(
     incomeData: Omit<IncomeRecord, "id" | "createdAt" | "updatedAt" | "userId">,
   ): Promise<IncomeRecord> {
@@ -269,6 +288,28 @@ export class FinancialRecordsService {
           ...record,
           createdAt: record.createdAt || new Date().toISOString(),
           updatedAt: record.updatedAt || new Date().toISOString(),
+        }) as ExpenseRecord,
+    );
+  }
+
+  // Expense Records
+  async getExpensesWithin(
+    start: string,
+    end: string,
+  ): Promise<ExpenseRecord[]> {
+    const q = query(
+      this.getCollectionRef(FINANCIAL_COLLECTIONS.EXPENSES),
+      where("date", ">=", start),
+      where("date", "<=", end),
+    );
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          createdAt: doc.data().createdAt || new Date().toISOString(),
+          updatedAt: doc.data().updatedAt || new Date().toISOString(),
         }) as ExpenseRecord,
     );
   }

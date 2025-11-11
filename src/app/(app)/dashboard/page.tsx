@@ -26,35 +26,48 @@ import {
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
-import {
-  type SecurityInvestment,
-  type GoldInvestment,
-  type CurrencyInvestment,
-  defaultAppSettings,
-} from "@/lib/types";
+import { defaultAppSettings } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCards";
 import { formatMonthYear, formatNumberForMobile } from "@/lib/utils";
-import { calculateCashFlowMonthlySummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
+import { useTransactions } from "@/hooks/use-transactions";
+import { useDashboard } from "@/hooks/use-dashboard";
+import useFinancialRecords from "@/hooks/use-financial-records";
+import { useAppSettings } from "@/hooks/use-app-settings";
+import { useCashflow } from "@/hooks/use-cashflow";
 
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
 
+  const { investments, isLoading: isLoadingInvestments } = useInvestments();
+
   const {
     dashboardSummary,
-    expenses,
-    fixedEstimates,
-    investments,
-    transactions,
-    isLoading,
+    isLoading: isLoadingDashboard,
     refreshDashboard,
-    appSettings,
-  } = useInvestments();
+  } = useDashboard();
+
+  const {
+    expensesManualCreditCard,
+    fixedEstimates,
+    isLoading: isLoadingFinancialRecords,
+  } = useFinancialRecords();
+
+  const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
+
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions();
+
+  const isLoading =
+    isLoadingDashboard ||
+    isLoadingFinancialRecords ||
+    isLoadingAppSettings ||
+    isLoadingTransactions ||
+    isLoadingInvestments;
 
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -62,19 +75,28 @@ export default function DashboardPage() {
   const totalInvested = dashboardSummary?.totalInvested ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
-  const totalCurrentPortfolioValue = dashboardSummary?. totalPortfolio?? 0;
   const totalCurrentPortfolioPnL = dashboardSummary?.totalUnrealizedPnL ?? 0;
 
-  const cashFlowSummary = useMemo(() => {
-    return calculateCashFlowMonthlySummary({
-      expenseRecords: expenses || [],
-      investments: investments || [],
-      fixedEstimates: fixedEstimates || [],
-      transactions: transactions || [],
-    });
-  }, [expenses, investments, fixedEstimates]);
-
-
+  const {
+    totalIncome,
+    totalProjectedDebtInterest,
+    totalExpenses,
+    incomeTillNow,
+    totalFixedIncome,
+    totalFixedExpenses,
+    totalRealEstateInstallments,
+    totalSecuritiesInvestments,
+    totalDebtInvestments,
+    totalGoldInvestments,
+    totalInvestments,
+    totalExpensesManualCreditCard,
+    totalCurrencyInvestments,
+  } = useCashflow({
+    expensesManualCreditCard,
+    investments,
+    fixedEstimates,
+    transactions,
+  });
 
   return (
     <div className="space-y-8" data-testid="dashboard-page">
@@ -295,15 +317,39 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <CashFlowSummaryCards cashFlowSummary={cashFlowSummary} />
+          <CashFlowSummaryCards
+            totalIncome={totalIncome}
+            totalFixedIncome={totalFixedIncome}
+            totalProjectedDebtInterest={totalProjectedDebtInterest}
+            incomeTillNow={incomeTillNow}
+            totalExpenses={totalExpenses}
+            totalFixedExpenses={totalFixedExpenses}
+            totalExpensesManualCreditCard={totalExpensesManualCreditCard}
+            totalRealEstateInstallments={totalRealEstateInstallments}
+            totalStockInvestments={totalSecuritiesInvestments}
+            totalDebtInvestments={totalDebtInvestments}
+            totalGoldInvestments={totalGoldInvestments}
+            totalInvestments={totalInvestments}
+          />
         </CardContent>
       </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <div data-testid="investment-distribution-chart">
-          <InvestmentDistributionChart />
+          <InvestmentDistributionChart
+            investments={investments}
+            isLoading={isLoading}
+          />
         </div>
         <div data-testid="monthly-investment-distribution-chart">
-          <MonthlyInvestmentDistributionChart />
+          <MonthlyInvestmentDistributionChart
+            totalSecuritiesInvestments={totalSecuritiesInvestments}
+            totalGoldInvestments={totalGoldInvestments}
+            totalDebtInvestments={totalDebtInvestments}
+            totalRealEstateInstallments={totalRealEstateInstallments}
+            totalExpenses={totalExpenses}
+            totalCurrencyInvestments={totalCurrencyInvestments}
+            isLoading={isLoading}
+          />
         </div>
       </div>
       <div className="lg:col-span-3" data-testid="investment-breakdown-section">
@@ -312,7 +358,8 @@ export default function DashboardPage() {
             dashboardSummary={dashboardSummary}
             appSettings={{
               investmentTypePercentages:
-                appSettings?.investmentTypePercentages || defaultAppSettings.investmentTypePercentages,
+                appSettings?.investmentTypePercentages ||
+                defaultAppSettings.investmentTypePercentages,
             }}
           />
         )}
