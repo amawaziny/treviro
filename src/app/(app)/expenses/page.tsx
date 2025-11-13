@@ -2,8 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
-import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
@@ -35,8 +33,8 @@ import {
   formatMonthYear,
   formatNumberForMobile,
 } from "@/lib/utils";
-import type { ExpenseRecord } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import useFinancialRecords from "@/hooks/use-financial-records";
 
 export default function ExpensesPage() {
   const { t, language } = useLanguage();
@@ -44,127 +42,9 @@ export default function ExpensesPage() {
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
   const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
-
-  const { expenseRecords, isLoading, deleteExpenseRecord } = useInvestments(); // Removed monthlySettings
-
   const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const currentMonthEnd = endOfMonth(now);
 
-  // Filtering logic for expenses
-  const filteredExpenses = React.useMemo(() => {
-    const recordsToFilter = expenseRecords || [];
-    const currentMonth = currentMonthStart.getMonth();
-    const currentYear = currentMonthStart.getFullYear();
-
-    // Helper: is record ended?
-    function isEnded(record: ExpenseRecord) {
-      if (record.isInstallment && record.numberOfInstallments && record.date) {
-        const startDate = new Date(record.date);
-        const endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + record.numberOfInstallments - 1);
-        return now > endDate;
-      }
-      return false;
-    }
-
-    // Helper: is record required this month?
-    function isRequiredThisMonth(record: ExpenseRecord) {
-      if (
-        record.type === "Credit Card" &&
-        record.isInstallment &&
-        record.numberOfInstallments &&
-        record.date
-      ) {
-        const startDate = new Date(record.date);
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const installmentMonths = record.numberOfInstallments;
-        const monthsSinceStart =
-          (currentYear - startYear) * 12 + (currentMonth - startMonth);
-        return monthsSinceStart >= 0 && monthsSinceStart < installmentMonths;
-      } else if (record.date) {
-        return isWithinInterval(new Date(record.date), {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        });
-      }
-      return false;
-    }
-
-    let filtered = recordsToFilter.filter((record) => {
-      // Hide ended if not showing ended
-      if (!showEnded && isEnded(record)) return false;
-      // If not showAll, only show required this month
-      if (!showAll && !isRequiredThisMonth(record)) return false;
-      return true;
-    });
-
-    // For display, augment records as before
-    return filtered
-      .flatMap((record) => {
-        if (
-          record.type === "Credit Card" &&
-          record.isInstallment &&
-          record.numberOfInstallments &&
-          record.date
-        ) {
-          const startDate = new Date(record.date);
-          const startMonth = startDate.getMonth();
-          const startYear = startDate.getFullYear();
-          const installmentMonths = record.numberOfInstallments;
-          const monthsSinceStart =
-            (currentYear - startYear) * 12 + (currentMonth - startMonth);
-          if (monthsSinceStart >= 0 && monthsSinceStart < installmentMonths) {
-            return [
-              {
-                ...record,
-                _originalAmount: record.amount,
-                _requiredAmount: record.amount / record.numberOfInstallments,
-                installmentMonthIndex: monthsSinceStart + 1,
-                numberOfInstallments: installmentMonths,
-                installmentStartDate: startDate,
-                _isRequiredThisMonth: true,
-                _isEnded: isEnded(record),
-              },
-            ];
-          } else {
-            return [
-              {
-                ...record,
-                _isRequiredThisMonth: false,
-                _isEnded: isEnded(record),
-              },
-            ];
-          }
-        } else if (
-          record.date &&
-          isWithinInterval(new Date(record.date), {
-            start: currentMonthStart,
-            end: currentMonthEnd,
-          })
-        ) {
-          return [
-            {
-              ...record,
-              _originalAmount: record.amount,
-              _requiredAmount: record.amount,
-              _isRequiredThisMonth: true,
-              _isEnded: isEnded(record),
-            },
-          ];
-        } else {
-          return [
-            {
-              ...record,
-              _isRequiredThisMonth: false,
-              _isEnded: isEnded(record),
-            },
-          ];
-        }
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [expenseRecords, currentMonthStart, currentMonthEnd, showAll, showEnded]);
+  const { expensesManualOther, expensesManualCreditCard, isLoading, deleteExpense } = useFinancialRecords(); // Removed monthlySettings
 
   if (isLoading) {
     return (
@@ -238,7 +118,7 @@ export default function ExpensesPage() {
 
       {/* Removed the Card for Monthly Fixed Estimates that rendered FinancialSettingsForm */}
 
-      {filteredExpenses.length > 0 ? (
+      {expensesManualOther.length > 0 ? (
         <>
           {/* Summary Card */}
           <Card className="mt-6">
@@ -259,8 +139,8 @@ export default function ExpensesPage() {
               <span className="text-xl font-bold text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  filteredExpenses.reduce(
-                    (sum, r) => sum + (r._requiredAmount || 0),
+                  expensesManualOther.reduce(
+                    (sum, r) => sum + (r._requiredAmount || r.amount),
                     0,
                   ),
                 )}
@@ -269,12 +149,12 @@ export default function ExpensesPage() {
           </Card>
 
           <div className="grid gap-4 mt-8" data-testid="expenses-list">
-            {filteredExpenses.map((record) => (
+            {expensesManualCreditCard.map((record) => (
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
                 className={cn(
-                  record._isRequiredThisMonth ? "border-yellow-300" : "",
-                  record._isEnded ? "opacity-50" : "",
+                  "border-yellow-300",
+                  record.isClosed ? "opacity-50" : "",
                   "last:mb-24",
                 )}
                 data-testid={`expense-card-${record.id}`}
@@ -297,11 +177,9 @@ export default function ExpensesPage() {
                             <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
                               {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
                             </span>
-                            {record._isRequiredThisMonth && (
-                              <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
-                                {t("required_this_month")}
-                              </span>
-                            )}
+                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
+                              {t("required_this_month")}
+                            </span>
                           </div>
                         )}
                     </div>
@@ -357,7 +235,7 @@ export default function ExpensesPage() {
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
                                   try {
-                                    await deleteExpenseRecord(record.id);
+                                    await deleteExpense(record.id);
                                   } catch (e) {
                                     // Optionally show toast or ignore
                                   }

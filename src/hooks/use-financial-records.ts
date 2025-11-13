@@ -13,7 +13,7 @@ export const useFinancialRecords = (
 ) => {
   const { user } = useAuth();
   const [incomes, setIncomes] = useState<IncomeRecord[]>([]);
-  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
+  const [expensesManualOther, setExpensesManualOther] = useState<ExpenseRecord[]>([]);
   const [expensesManualCreditCard, setExpensesManualCreditCard] = useState<
     ExpenseRecord[]
   >([]);
@@ -138,11 +138,11 @@ export const useFinancialRecords = (
   ) => {
     try {
       const records = await service.getExpensesWithin(start, end);
-      setExpenses(records.filter((record) => record.type !== "Credit Card"));
+      setExpensesManualOther(records.filter((record) => record.type !== "Credit Card"));
       return records;
     } catch (error) {
       console.error("Error fetching expense records:", error);
-      setExpenses([]);
+      setExpensesManualOther([]);
       return [];
     }
   };
@@ -169,7 +169,7 @@ export const useFinancialRecords = (
       }
       try {
         const newRecord = await recordsService.addExpense(data);
-        setExpenses((prev) => [newRecord, ...prev]);
+        setExpensesManualOther((prev) => [newRecord, ...prev]);
         return newRecord;
       } catch (error) {
         console.error("Error adding expense record:", error);
@@ -186,7 +186,7 @@ export const useFinancialRecords = (
       }
       try {
         const updatedRecord = await recordsService.updateExpense(id, data);
-        setExpenses((prev) =>
+        setExpensesManualOther((prev) =>
           prev.map((record) =>
             record.id === id ? { ...record, ...updatedRecord } : record,
           ),
@@ -207,7 +207,7 @@ export const useFinancialRecords = (
       }
       try {
         await recordsService.deleteExpense(id);
-        setExpenses((prev) => prev.filter((record) => record.id !== id));
+        setExpensesManualOther((prev) => prev.filter((record) => record.id !== id));
       } catch (error) {
         console.error("Error deleting expense record:", error);
         throw error;
@@ -313,7 +313,7 @@ export const useFinancialRecords = (
   return {
     // State
     incomes,
-    expenses,
+    expensesManualOther,
     expensesManualCreditCard,
     fixedEstimates,
     incomesFixed,
