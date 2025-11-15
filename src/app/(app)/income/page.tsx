@@ -4,12 +4,11 @@ import React from "react";
 import Link from "next/link";
 import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import {
-  formatCurrencyWithCommas,
   formatDateDisplay,
   formatMonthYear,
   formatNumberForMobile,
 } from "@/lib/utils";
-import { useInvestments } from "@/hooks/use-investments";
+import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,31 +42,7 @@ export default function IncomePage() {
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
 
-  const { incomeRecords, isLoading, deleteIncomeRecord } = useInvestments();
-  if (!deleteIncomeRecord) {
-    throw new Error(
-      t(
-        "deleteincomerecord_function_is_required_but_not_provided_by_useinvestments",
-      ),
-    );
-  }
-
-  // Filtering logic for income
-  const filteredIncome = React.useMemo(() => {
-    const recordsToFilter = incomeRecords || [];
-    return recordsToFilter
-      .filter((record) => {
-        // If not showAll, only show income from this month
-        if (!showAll && record.date) {
-          return isWithinInterval(new Date(record.date), {
-            start: startOfMonth(new Date()),
-            end: endOfMonth(new Date()),
-          });
-        }
-        return true;
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [incomeRecords, showAll]);
+  const { incomesManual, isLoading, deleteIncome } = useFinancialRecords();
 
   if (isLoading) {
     return (
@@ -117,7 +92,7 @@ export default function IncomePage() {
         </label>
       </div>
 
-      {filteredIncome.length > 0 ? (
+      {incomesManual.length > 0 ? (
         <>
           {/* Summary Card */}
           <Card className="mt-6">
@@ -136,14 +111,14 @@ export default function IncomePage() {
               <span className="text-xl font-bold text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  filteredIncome.reduce((sum, r) => sum + r.amount, 0),
+                  incomesManual.reduce((sum, r) => sum + r.amount, 0),
                 )}
               </span>
             </CardContent>
           </Card>
 
           <div className="grid gap-4 mt-8">
-            {filteredIncome.map((record) => (
+            {incomesManual.map((record) => (
               <Card key={record.id} className="last:mb-24">
                 <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
                   {/* Main Info Column */}
@@ -206,7 +181,7 @@ export default function IncomePage() {
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
                                   try {
-                                    await deleteIncomeRecord(record.id);
+                                    await deleteIncome(record.id);
                                   } catch (e) {
                                     console.error(
                                       t("error_deleting_income_record"),

@@ -94,10 +94,9 @@ export function AddEditFixedEstimateForm({
     try {
       const dataToSave: Omit<
         FixedEstimateRecord,
-        "id" | "createdAt" | "userId" | "updatedAt"
+        "id" | "createdAt" | "updatedAt" | "recordType"
       > = {
         type: values.type!,
-        recordType: "Fixed Estimate",
         amount: values.amount,
         period: values.period!,
         isExpense:

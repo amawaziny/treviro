@@ -22,12 +22,11 @@ export default function AddExpensePage() {
     // It also ensures numberOfInstallments is a positive int if isInstallment is true.
     const expenseDataToSave: Omit<
       ExpenseRecord,
-      "id" | "createdAt"
+      "id" | "createdAt" | "recordType"
     > = {
       type: values.category!,
       amount: values.amount, // Zod has coerced this to number
-      date: values.date,
-      recordType: "Expense",
+      date: values.date
     };
 
     if (values.description && values.description.trim() !== "") {

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
   Card,
@@ -16,7 +15,6 @@ import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import useFinancialRecords from "@/hooks/use-financial-records";
-import type { ExpenseRecord } from "@/lib/types";
 
 export default function EditExpensePage({
   params,
@@ -29,21 +27,7 @@ export default function EditExpensePage({
   const { id: expenseId } = React.use(params);
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const [expense, setExpense] = useState<ExpenseRecord | null>(null);
-
-  useEffect(() => {
-    const loadExpense = async () => {
-      try {
-        const expenseData = await findExpenseById(expenseId);
-        setExpense(expenseData);
-      } catch (error) {
-        console.error('Error loading expense:', error);
-        setExpense(null);
-      }
-    };
-
-    loadExpense();
-  }, [expenseId]);
+  const expense = React.use(findExpenseById(expenseId));
 
   if (!expense) {
     return notFound();

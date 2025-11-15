@@ -70,10 +70,21 @@ export class FinancialRecordsService {
     );
   }
 
+  private getRecordType(collectionName: CollectionType): string {
+    if (collectionName === FINANCIAL_COLLECTIONS.INCOMES) {
+      return "Income";
+    } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES) {
+      return "Expense";
+    } else if (collectionName === FINANCIAL_COLLECTIONS.FIXED_ESTIMATES) {
+      return "Fixed Estimate";
+    }
+    throw new Error(`Invalid collection name: ${collectionName}`);
+  }
+
   // Generic CRUD operations
   private async addRecord<T extends BaseRecord>(
     collectionName: CollectionType,
-    data: Omit<T, "id" | "createdAt" | "updatedAt" | "userId">,
+    data: Omit<T, "id" | "createdAt" | "updatedAt" | "recordType">,
   ): Promise<T> {
     try {
       const id = uuidv4();
@@ -83,6 +94,7 @@ export class FinancialRecordsService {
         id,
         createdAt: now,
         updatedAt: now,
+        recordType: this.getRecordType(collectionName),
       } as T;
 
       await setDoc(
@@ -113,7 +125,7 @@ export class FinancialRecordsService {
   private async updateRecord<T extends BaseRecord>(
     collectionName: CollectionType,
     id: string,
-    data: Partial<Omit<T, "id" | "createdAt" | "updatedAt" | "userId">>,
+    data: Partial<Omit<T, "id" | "createdAt" | "updatedAt" | "recordType">>,
   ): Promise<T> {
     try {
       const docRef = this.getDocRef(collectionName, id);
@@ -127,6 +139,7 @@ export class FinancialRecordsService {
         ...currentData,
         ...data,
         updatedAt: new Date().toISOString(),
+        recordType: this.getRecordType(collectionName),
       } as T;
 
       await updateDoc(docRef, updatedData as DocumentData);
@@ -254,7 +267,7 @@ export class FinancialRecordsService {
   }
 
   async addIncome(
-    incomeData: Omit<IncomeRecord, "id" | "createdAt" | "updatedAt" | "userId">,
+    incomeData: Omit<IncomeRecord, "id" | "createdAt" | "updatedAt" | "recordType">,
   ): Promise<IncomeRecord> {
     return this.addRecord(FINANCIAL_COLLECTIONS.INCOMES, incomeData);
   }
@@ -276,6 +289,11 @@ export class FinancialRecordsService {
 
   async findExpenseById(id: string): Promise<ExpenseRecord | null> {
     const records = await this.getExpenses({ id });
+    return records[0] || null;
+  }
+
+  async findIncomeById(id: string): Promise<IncomeRecord | null> {
+    const records = await this.getIncomes({ id });
     return records[0] || null;
   }
 
@@ -322,7 +340,7 @@ export class FinancialRecordsService {
   async addExpense(
     expenseData: Omit<
       ExpenseRecord,
-      "id" | "createdAt" | "updatedAt" | "userId"
+      "id" | "createdAt" | "updatedAt" | "recordType"
     >,
   ): Promise<ExpenseRecord> {
     return this.addRecord(FINANCIAL_COLLECTIONS.EXPENSES, expenseData);
@@ -364,7 +382,7 @@ export class FinancialRecordsService {
   async addFixedEstimate(
     fixedEstimateData: Omit<
       FixedEstimateRecord,
-      "id" | "createdAt" | "updatedAt" | "userId"
+      "id" | "createdAt" | "updatedAt" | "recordType"
     >,
   ): Promise<FixedEstimateRecord> {
     return this.addRecord(

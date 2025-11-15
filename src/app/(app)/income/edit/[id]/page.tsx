@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
+import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { IncomeForm } from "@/components/income/income-form";
 import {
   Card,
@@ -22,16 +22,12 @@ export default function EditIncomePage({
   params: Promise<{ id: string }>;
 }) {
   const { t } = useLanguage();
-  const { incomeRecords, updateIncomeRecord } = useInvestments();
+  const { updateIncome, fetchIncomeById } = useFinancialRecords();
   const router = useRouter();
   const { id: incomeId } = React.use(params);
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  // Find the income record by id
-  const income = React.useMemo(
-    () => incomeRecords.find((rec) => rec.id === incomeId),
-    [incomeRecords, incomeId],
-  );
+  const income = React.use(fetchIncomeById(incomeId));
 
   if (!income) {
     return notFound();
@@ -75,14 +71,11 @@ export default function EditIncomePage({
               type: income.type,
               source: income.source,
               description: income.description ?? "",
-              //@ts-expect-error
-              amount: income.amount?.toString() ?? "",
+              amount: income.amount,
               date: income.date,
-              isRecurring: income.isRecurring ?? false,
-              recurrencePeriod: income.recurrencePeriod ?? "",
             }}
             onSubmit={async (values: IncomeFormValues) => {
-              await updateIncomeRecord(incomeId, {
+              await updateIncome(incomeId, {
                 ...values,
                 amount: Number(values.amount),
               });

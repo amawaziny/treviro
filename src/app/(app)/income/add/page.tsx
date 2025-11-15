@@ -15,14 +15,13 @@ import { IncomeFormValues } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { IncomeRecord } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
+import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { getCurrentDate } from "@/lib/utils";
 
 const initialFormValues: IncomeFormValues = {
   type: "Profit Share",
   source: "",
-  //@ts-expect-error
-  amount: "",
+  amount: 0,
   date: getCurrentDate(),
   description: "",
 };
@@ -31,7 +30,7 @@ export default function AddIncomePage() {
   const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const { addIncomeRecord } = useInvestments();
+  const { addIncome } = useFinancialRecords();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -39,7 +38,7 @@ export default function AddIncomePage() {
     try {
       const incomeDataToSave: Omit<
         IncomeRecord,
-        "id" | "createdAt" | "userId"
+        "id" | "createdAt" | "recordType"
       > = {
         type: values.type!, // Zod ensures type is valid and present
         amount: values.amount, // Zod has coerced this to number
@@ -53,7 +52,7 @@ export default function AddIncomePage() {
         incomeDataToSave.description = values.description;
       }
 
-      await addIncomeRecord(incomeDataToSave);
+      await addIncome(incomeDataToSave);
       toast({
         title: t("income_record_added"),
         description: `${t(values.type)} ${t("of")} ${values.amount} EGP ${t("recorded successfully")}.`,
