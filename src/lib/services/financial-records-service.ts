@@ -274,6 +274,11 @@ export class FinancialRecordsService {
     return this.deleteRecord(FINANCIAL_COLLECTIONS.INCOMES, id);
   }
 
+  async findExpenseById(id: string): Promise<ExpenseRecord | null> {
+    const records = await this.getExpenses({ id });
+    return records[0] || null;
+  }
+
   // Expense Records
   async getExpenses(
     filters?: Partial<ExpenseRecord>,

@@ -13,6 +13,7 @@ export const useFinancialRecords = (
 ) => {
   const { user } = useAuth();
   const [incomes, setIncomes] = useState<IncomeRecord[]>([]);
+  const [expensesManual, setExpensesManual] = useState<ExpenseRecord[]>([]);
   const [expensesManualOther, setExpensesManualOther] = useState<ExpenseRecord[]>([]);
   const [expensesManualCreditCard, setExpensesManualCreditCard] = useState<
     ExpenseRecord[]
@@ -41,8 +42,9 @@ export const useFinancialRecords = (
       setIsLoading(true);
       await Promise.all([
         fetchIncomes(recordsService, startDate!, endDate!),
-        fetchExpenses(recordsService, startDate!, endDate!),
-        fetchCreditCardExpenses(recordsService),
+        fetchExpensesManualOther(recordsService, startDate!, endDate!),
+        fetchExpensesManual(recordsService, startDate!, endDate!),
+        fetchExpensesManualCreditCard(recordsService),
         fetchFixedEstimates(recordsService),
       ]);
     } catch (error) {
@@ -130,15 +132,31 @@ export const useFinancialRecords = (
     [recordsService],
   );
 
-  // Expense operations
-  const fetchExpenses = async (
+  const fetchExpensesManual = async (
     service: FinancialRecordsService,
     start: string,
     end: string,
   ) => {
     try {
       const records = await service.getExpensesWithin(start, end);
-      setExpensesManualOther(records.filter((record) => record.type !== "Credit Card"));
+      setExpensesManual(records);
+      return records;
+    } catch (error) {
+      console.error("Error fetching expense records:", error);
+      setExpensesManual([]);
+      return [];
+    }
+  };
+
+  // Expense operations
+  const fetchExpensesManualOther = async (
+    service: FinancialRecordsService,
+    start: string,
+    end: string,
+  ) => {
+    try {
+      const records = await service.getExpensesWithin(start, end);
+      setExpensesManualOther(records.filter((record) => record.type === "Other"));
       return records;
     } catch (error) {
       console.error("Error fetching expense records:", error);
@@ -147,7 +165,7 @@ export const useFinancialRecords = (
     }
   };
 
-  const fetchCreditCardExpenses = async (service: FinancialRecordsService) => {
+  const fetchExpensesManualCreditCard = async (service: FinancialRecordsService) => {
     try {
       const records = await service.getExpenses({
         type: "Credit Card",
@@ -161,6 +179,18 @@ export const useFinancialRecords = (
       return [];
     }
   };
+
+  const findExpenseById = useCallback(async (id: string) => {
+    if (!recordsService) {
+      throw new Error("Financial records service not initialized");
+    }
+    try {
+      return await recordsService.findExpenseById(id);
+    } catch (error) {
+      console.error("Error fetching expense record:", error);
+      return null;
+    }
+  }, [recordsService]);
 
   const addExpense = useCallback(
     async (data: Omit<ExpenseRecord, "id" | "createdAt">) => {
@@ -300,7 +330,7 @@ export const useFinancialRecords = (
       setIsLoading(true);
       await Promise.all([
         fetchIncomes(recordsService, startDate!, endDate!),
-        fetchExpenses(recordsService, startDate!, endDate!),
+        fetchExpensesManualOther(recordsService, startDate!, endDate!),
         fetchFixedEstimates(recordsService),
       ]);
     } catch (error) {
@@ -313,6 +343,7 @@ export const useFinancialRecords = (
   return {
     // State
     incomes,
+    expensesManual,
     expensesManualOther,
     expensesManualCreditCard,
     fixedEstimates,
@@ -326,6 +357,7 @@ export const useFinancialRecords = (
     deleteIncome,
 
     // Expense methods
+    findExpenseById,
     addExpense,
     updateExpense,
     deleteExpense,

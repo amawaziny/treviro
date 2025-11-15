@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useInvestments } from "@/hooks/use-investments";
 import { ExpenseForm } from "@/components/expenses/expense-form";
@@ -15,6 +15,8 @@ import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
+import useFinancialRecords from "@/hooks/use-financial-records";
+import type { ExpenseRecord } from "@/lib/types";
 
 export default function EditExpensePage({
   params,
@@ -22,16 +24,26 @@ export default function EditExpensePage({
   params: Promise<{ id: string }>;
 }) {
   const { t } = useLanguage();
-  const { expenseRecords, updateExpenseRecord } = useInvestments();
+  const { findExpenseById, updateExpense } = useFinancialRecords();
   const router = useRouter();
   const { id: expenseId } = React.use(params);
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  // Find the expense record by id
-  const expense = React.useMemo(
-    () => expenseRecords.find((rec) => rec.id === expenseId),
-    [expenseRecords, expenseId],
-  );
+  const [expense, setExpense] = useState<ExpenseRecord | null>(null);
+
+  useEffect(() => {
+    const loadExpense = async () => {
+      try {
+        const expenseData = await findExpenseById(expenseId);
+        setExpense(expenseData);
+      } catch (error) {
+        console.error('Error loading expense:', error);
+        setExpense(null);
+      }
+    };
+
+    loadExpense();
+  }, [expenseId]);
 
   if (!expense) {
     return notFound();
@@ -80,22 +92,16 @@ export default function EditExpensePage({
             initialValues={{
               category: expense.type,
               description: expense.description ?? "",
-              //@ts-expect-error
-              amount: expense.amount?.toString() ?? "",
+              amount: expense.amount,
               date: expense.date,
               isInstallment: expense.isInstallment ?? false,
-              //@ts-expect-error
-              numberOfInstallments: expense.numberOfInstallments
-                ? expense.numberOfInstallments.toString()
-                : "",
+              numberOfInstallments: expense.numberOfInstallments,
             }}
             onSubmit={async (values: ExpenseFormValues) => {
-              await updateExpenseRecord(expenseId, {
+              await updateExpense(expenseId, {
                 ...values,
-                amount: Number(values.amount),
-                numberOfInstallments: values.numberOfInstallments
-                  ? Number(values.numberOfInstallments)
-                  : undefined,
+                amount: values.amount,
+                numberOfInstallments: values.numberOfInstallments,
               });
               router.push("/expenses");
             }}

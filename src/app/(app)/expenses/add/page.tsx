@@ -9,20 +9,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { useInvestments } from "@/hooks/use-investments";
 import { ExpenseFormValues } from "@/lib/schemas";
 import { ExpenseRecord } from "@/lib/types";
+import { useFinancialRecords } from "@/hooks/use-financial-records";
 
 export default function AddExpensePage() {
   const { t } = useLanguage();
-  const { addExpenseRecord } = useInvestments();
+  const { addExpense } = useFinancialRecords();
 
   async function onSubmit(values: ExpenseFormValues) {
     // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
     // It also ensures numberOfInstallments is a positive int if isInstallment is true.
     const expenseDataToSave: Omit<
       ExpenseRecord,
-      "id" | "createdAt" | "userId"
+      "id" | "createdAt"
     > = {
       type: values.category!,
       amount: values.amount, // Zod has coerced this to number
@@ -42,7 +42,7 @@ export default function AddExpensePage() {
       }
     }
 
-    await addExpenseRecord(expenseDataToSave);
+    await addExpense(expenseDataToSave);
   }
 
   return (
