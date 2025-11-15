@@ -29,7 +29,7 @@ import {
   fixedEstimateTypes,
   fixedEstimatePeriods,
 } from "@/lib/schemas";
-import { useInvestments } from "@/hooks/use-investments";
+import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -44,7 +44,7 @@ interface AddEditFixedEstimateFormProps {
 const initialFormValues: FixedEstimateFormValues = {
   type: "Salary",
   name: "",
-  amount: "",
+  amount: 0,
   period: "Monthly",
   isExpense: false,
 };
@@ -54,7 +54,7 @@ export function AddEditFixedEstimateForm({
   estimate,
 }: AddEditFixedEstimateFormProps) {
   const { t, dir } = useLanguage();
-  const { addFixedEstimate, updateFixedEstimate } = useInvestments(); // Add updateFixedEstimate later
+  const { addFixedEstimate, updateFixedEstimate } = useFinancialRecords(); // Add updateFixedEstimate later
   const { toast } = useToast();
   const router = useRouter();
 
@@ -65,7 +65,7 @@ export function AddEditFixedEstimateForm({
         ? {
             type: estimate.type,
             name: estimate.name ?? "",
-            amount: estimate.amount.toString(),
+            amount: estimate.amount,
             period: estimate.period,
             isExpense: estimate.isExpense,
           }
@@ -98,7 +98,7 @@ export function AddEditFixedEstimateForm({
       > = {
         type: values.type!,
         recordType: "Fixed Estimate",
-        amount: parseFloat(values.amount),
+        amount: values.amount,
         period: values.period!,
         isExpense:
           values.type === "Salary"
@@ -122,7 +122,7 @@ export function AddEditFixedEstimateForm({
           testId: "success-toast",
         });
       } else if (mode === "edit" && estimate) {
-        await updateFixedEstimate(estimate.id, dataToSave); // To be implemented
+        await updateFixedEstimate(estimate.id, dataToSave);
         toast({
           title: t("fixed_estimate_updated"),
           description: `${t(dataToSave.name || dataToSave.type)} ${t("estimate updated successfully")}.`,

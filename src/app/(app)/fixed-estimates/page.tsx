@@ -2,13 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -29,10 +27,11 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import useFinancialRecords from "@/hooks/use-financial-records";
 
 export default function FixedEstimatesPage() {
   const { t } = useLanguage();
-  const { fixedEstimates, isLoading, deleteFixedEstimate } = useInvestments();
+  const { fixedEstimates, isLoading, deleteFixedEstimate } = useFinancialRecords();
   const { language } = useLanguage();
   const isMobile = useIsMobile();
 

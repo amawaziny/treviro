@@ -5,14 +5,14 @@ import { AddEditFixedEstimateForm } from "@/components/fixed-estimates/add-edit-
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
-import { useInvestments } from "@/hooks/use-investments";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import useFinancialRecords from "@/hooks/use-financial-records";
 
 export default function EditFixedEstimatePage() {
   const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
-  const { fixedEstimates, isLoading } = useInvestments();
+  const { fixedEstimates, isLoading } = useFinancialRecords();
   const params = useParams();
   const estimateId = params.id as string;
 
