@@ -1,66 +1,22 @@
 "use client"; // This page needs to be a client component to use next/dynamic with ssr:false
 import { useLanguage } from "@/contexts/language-context";
-import { Suspense, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react"; // Import icons
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation"; // Import hook
-
 import { useForm } from "@/contexts/form-context";
-
-// Define a simple loading fallback for the Suspense boundary
-function PageLoadingFallback() {
-  const { t } = useLanguage();
-  return (
-    <div className="flex items-center justify-center py-10">
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      {t("loading")}
-    </div>
-  );
-}
-
-// Dynamically import AddInvestmentForm with ssr: false
-// The component itself (AddInvestmentForm) must also be marked with "use client";
-// We can remove the suspense: true here if the parent handles suspense
-const AddInvestmentForm = dynamic(
-  () =>
-    import("@/components/investments/investment-forms/investment-form").then(
-      (mod) => mod.InvestmentForm,
-    ),
-  {
-    ssr: false, // Ensure this component is only rendered on the client
-    // suspense: true,  // Removed, parent Suspense handles this
-    loading: () => <PageLoadingFallback />, // Use a loading component if needed within dynamic import
-  },
-);
+import { InvestmentForm } from "@/components/investments/investment-forms/investment-form";
 
 export default function AddInvestmentPage() {
-  return (
-    <div className="flex flex-col">
-      <Suspense fallback={<PageLoadingFallback />}>
-        <AddInvestmentPageContent />
-      </Suspense>
-    </div>
-  );
-}
-
-// Extract the component logic that uses hooks into a new component
-function AddInvestmentPageContent() {
   const { t } = useLanguage();
-  // All hooks must be called at the top level, before any conditional returns
   const searchParams = useSearchParams();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  // Set up header props effect based on investment type
   useEffect(() => {
-    // Open form when component mounts
     openForm();
 
     const securityId = searchParams.get("securityId");
-    // Get the investment type from URL parameters
     const investmentType =
       searchParams.get("type") || (securityId ? "Buy Security" : "investment");
 
-    // Map investment types to their display configurations
     const typeConfigs = {
       funds: {
         title: t("buy_fund"),
@@ -120,11 +76,13 @@ function AddInvestmentPageContent() {
   const securityId = searchParams.get("securityId");
 
   return (
-    <div className="container mx-auto flex-1">
-      <AddInvestmentForm
-        initialType={searchParams.get("type") || "Stocks"}
-        securityId={securityId || undefined}
-      />
+    <div className="flex flex-col">
+      <div className="container mx-auto flex-1">
+        <InvestmentForm
+          initialType={searchParams.get("type") || "Stocks"}
+          securityId={securityId || undefined}
+        />
+      </div>
     </div>
   );
 }

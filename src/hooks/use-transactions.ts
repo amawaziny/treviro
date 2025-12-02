@@ -236,6 +236,22 @@ export const useTransactions = (startDate?: Date, endDate?: Date) => {
     [transactionService],
   );
 
+  // Get transactions by security ID
+  const getTransactionsBySecurityId = useCallback(
+    async (securityId: string): Promise<Transaction[]> => {
+      if (!transactionService)
+        throw new Error("Transaction service not initialized");
+
+      try {
+        return await transactionService.getTransactionsBySecurityId(securityId);
+      } catch (err) {
+        console.error("Failed to fetch transactions by security ID:", err);
+        throw err;
+      }
+    },
+    [transactionService],
+  );
+
   // Update a transaction
   const updateTransaction = useCallback(
     async (id: string, data: Partial<Transaction>): Promise<void> => {
@@ -332,6 +348,7 @@ export const useTransactions = (startDate?: Date, endDate?: Date) => {
     error,
     refresh,
     getTransactionsBySourceId,
+    getTransactionsBySecurityId,
     updateTransaction,
     deleteTransaction,
     incomeFixedTrxs,

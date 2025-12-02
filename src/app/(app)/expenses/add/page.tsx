@@ -26,7 +26,7 @@ export default function AddExpensePage() {
     > = {
       type: values.category!,
       amount: values.amount, // Zod has coerced this to number
-      date: values.date
+      date: values.date,
     };
 
     if (values.description && values.description.trim() !== "") {

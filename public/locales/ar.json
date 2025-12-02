@@ -40,7 +40,7 @@
   "Select the type of debt": "اختر نوع الدين",
   "September": "سبتمبر",
   "Stock": "سهم",
-  "Successfully recorded sale of": "تم تسجيل بيع",
+  "Successfully recorded sale of": "تم تسجيل بيع بنجاح",
   "Yearly": "سنوياً",
   "a_list_of_your_set_recurring_financial_estimates": "قائمة بتقديراتك المالية المتكررة المحددة.",
   "add": "إضافة",
@@ -788,5 +788,12 @@
   "built_up_area": "مساحة المبنى",
   "Enter built-up area": "أدخل مساحة المبنى",
   "built_up_area_desc": "مساحة المبنى",
-  "price_per_sqm": "سعر المتر المربع"
+  "price_per_sqm": "سعر المتر المربع",
+  "cannot_determine_investment_type": "تعذر تحديد نوع الاستثمار",
+  "purchase_recorded": "تم تسجيل الشراء",
+  "Successfully recorded purchase of": "تم تسجيل الشراء بنجاح",
+  "record_purchase": "تسجيل شراء",
+  "price_per": "السعر لكل",
+  "date": "التاريخ",
+  "buying": "جاري الشراء"
 }

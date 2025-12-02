@@ -30,6 +30,24 @@ export type FundType =
   | "MM"
   | string;
 
+export type InvestmentData<T extends Investment = Investment> = Omit<
+  T,
+  | "id"
+  | "lastUpdated"
+  | "totalShares"
+  | "totalInvested"
+  | "averagePurchasePrice"
+  | "currency"
+  | "isClosed"
+> & {
+  type: InvestmentType;
+  securityId?: string;
+  currency?: CurrencyCode;
+  quantity?: number;
+  pricePerUnit?: number;
+  fees?: number;
+};
+
 export interface BaseInvestment {
   id: string;
   type: InvestmentType;
@@ -57,7 +75,6 @@ export type GoldType = "K24" | "K21" | "Pound" | "Ounce";
 export interface GoldInvestment extends BaseInvestment {
   type: "Gold";
   goldType: GoldType;
-  quantityInGrams: number; //weight in grams per gold type
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
@@ -234,12 +251,12 @@ export interface ListedSecurity {
   couponNo: number;
 }
 
-export interface StockChartDataPoint {
+export interface SecurityChartDataPoint {
   date: string;
   price: number;
 }
 
-export type StockChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
+export type SecurityChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 
 export type TransactionType =
   | "BUY" // For purchasing any asset (stocks, gold, currency, etc.)

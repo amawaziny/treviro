@@ -14,7 +14,9 @@ export const useFinancialRecords = (
   const { user } = useAuth();
   const [incomesManual, setIncomesManual] = useState<IncomeRecord[]>([]);
   const [expensesManual, setExpensesManual] = useState<ExpenseRecord[]>([]);
-  const [expensesManualOther, setExpensesManualOther] = useState<ExpenseRecord[]>([]);
+  const [expensesManualOther, setExpensesManualOther] = useState<
+    ExpenseRecord[]
+  >([]);
   const [expensesManualCreditCard, setExpensesManualCreditCard] = useState<
     ExpenseRecord[]
   >([]);
@@ -78,19 +80,20 @@ export const useFinancialRecords = (
     }
   };
 
-  const fetchIncomeById = useCallback(async (
-    id: string,
-  ) => {
-    if (!recordsService)
-      throw new Error("Financial records service not initialized");
+  const fetchIncomeById = useCallback(
+    async (id: string) => {
+      if (!recordsService)
+        throw new Error("Financial records service not initialized");
 
-    try {
-      return await recordsService.findIncomeById(id);
-    } catch (error) {
-      console.error("Error fetching income record:", error);
-      return null;
-    }
-  }, [recordsService]);
+      try {
+        return await recordsService.findIncomeById(id);
+      } catch (error) {
+        console.error("Error fetching income record:", error);
+        return null;
+      }
+    },
+    [recordsService],
+  );
 
   const addIncome = useCallback(
     async (data: Omit<IncomeRecord, "id" | "createdAt" | "recordType">) => {
@@ -170,7 +173,9 @@ export const useFinancialRecords = (
   ) => {
     try {
       const records = await service.getExpensesWithin(start, end);
-      setExpensesManualOther(records.filter((record) => record.type === "Other"));
+      setExpensesManualOther(
+        records.filter((record) => record.type === "Other"),
+      );
       return records;
     } catch (error) {
       console.error("Error fetching expense records:", error);
@@ -179,7 +184,9 @@ export const useFinancialRecords = (
     }
   };
 
-  const fetchExpensesManualCreditCard = async (service: FinancialRecordsService) => {
+  const fetchExpensesManualCreditCard = async (
+    service: FinancialRecordsService,
+  ) => {
     try {
       const records = await service.getExpenses({
         type: "Credit Card",
@@ -194,17 +201,20 @@ export const useFinancialRecords = (
     }
   };
 
-  const findExpenseById = useCallback(async (id: string) => {
-    if (!recordsService) {
-      throw new Error("Financial records service not initialized");
-    }
-    try {
-      return await recordsService.findExpenseById(id);
-    } catch (error) {
-      console.error("Error fetching expense record:", error);
-      return null;
-    }
-  }, [recordsService]);
+  const findExpenseById = useCallback(
+    async (id: string) => {
+      if (!recordsService) {
+        throw new Error("Financial records service not initialized");
+      }
+      try {
+        return await recordsService.findExpenseById(id);
+      } catch (error) {
+        console.error("Error fetching expense record:", error);
+        return null;
+      }
+    },
+    [recordsService],
+  );
 
   const addExpense = useCallback(
     async (data: Omit<ExpenseRecord, "id" | "createdAt" | "recordType">) => {
@@ -251,7 +261,9 @@ export const useFinancialRecords = (
       }
       try {
         await recordsService.deleteExpense(id);
-        setExpensesManualOther((prev) => prev.filter((record) => record.id !== id));
+        setExpensesManualOther((prev) =>
+          prev.filter((record) => record.id !== id),
+        );
       } catch (error) {
         console.error("Error deleting expense record:", error);
         throw error;
@@ -278,7 +290,9 @@ export const useFinancialRecords = (
   };
 
   const addFixedEstimate = useCallback(
-    async (data: Omit<FixedEstimateRecord, "id" | "createdAt" | "recordType">) => {
+    async (
+      data: Omit<FixedEstimateRecord, "id" | "createdAt" | "recordType">,
+    ) => {
       if (!recordsService) {
         throw new Error("Financial records service not initialized");
       }

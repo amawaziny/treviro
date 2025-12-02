@@ -24,6 +24,7 @@ import {
   isGoldInvestment,
   isSecurityInvestment,
   isCurrencyInvestment,
+  InvestmentData,
 } from "@/lib/types";
 import { eventBus } from "./events";
 
@@ -154,23 +155,7 @@ export class InvestmentService {
    * });
    */
   async buyNew<T extends Investment>(
-    investmentData: Omit<
-      T,
-      | "id"
-      | "lastUpdated"
-      | "totalShares"
-      | "totalInvested"
-      | "averagePurchasePrice"
-      | "currency"
-      | "userId"
-    > & {
-      type: T["type"];
-      securityId?: string;
-      currency?: CurrencyCode;
-      quantity?: number;
-      pricePerUnit?: number;
-      fees?: number;
-    },
+    investmentData: InvestmentData<T>,
   ): Promise<T & { id: string }> {
     const {
       securityId,
@@ -199,7 +184,6 @@ export class InvestmentService {
         investment = {
           ...investmentData,
           id: investmentId,
-          userId: this.userId,
           securityId: securityId || "",
           currency,
           firstPurchaseDate,

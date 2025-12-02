@@ -44,7 +44,12 @@ export default function ExpensesPage() {
   const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
   const now = new Date();
 
-  const { expensesManualOther, expensesManualCreditCard, isLoading, deleteExpense } = useFinancialRecords(); // Removed monthlySettings
+  const {
+    expensesManualOther,
+    expensesManualCreditCard,
+    isLoading,
+    deleteExpense,
+  } = useFinancialRecords(); // Removed monthlySettings
 
   if (isLoading) {
     return (

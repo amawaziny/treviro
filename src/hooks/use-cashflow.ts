@@ -150,9 +150,7 @@ export function useCashflow({
   }, [fixedEstimates]);
 
   const calculateTotalProjectedDebtInterest = useCallback(() => {
-    const debtInvestments = investments.filter(
-      (inv): inv is DebtInstrumentInvestment => isDebtInstrumentInvestment(inv),
-    );
+    const debtInvestments = investments.filter(isDebtInstrumentInvestment);
     setDebtInvestments(debtInvestments);
     setTotalProjectedDebtInterest(
       debtInvestments.reduce(

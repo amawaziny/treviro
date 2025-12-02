@@ -70,8 +70,8 @@ const realEstateAmountInvested = z.preprocess(
 const stringToOptionalPositiveNumberCoerced = z.preprocess(
   (val) =>
     (typeof val === "string" && val.trim() === "") ||
-    val === null ||
-    val === undefined
+      val === null ||
+      val === undefined
       ? undefined
       : Number(val),
   z
@@ -105,8 +105,8 @@ const stringToRequiredPositiveIntegerCoerced = z.preprocess(
 );
 
 // Discriminated union for AddInvestmentSchema
-const StockInvestmentSchema = z.object({
-  type: z.literal("Stocks"),
+const SecuritiesInvestmentSchema = z.object({
+  type: z.literal("Securities"),
   name: z.string().optional(),
   selectedSecurityId: z
     .string({ required_error: "Please select a security." })
@@ -195,6 +195,8 @@ const RealEstateInvestmentSchema = z.object({
     .refine((date) => !date || date.trim() === "" || !isNaN(Date.parse(date)), {
       message: "Invalid date format.",
     }),
+  builtUpArea: stringToOptionalPositiveNumberCoerced,
+  hasGarden: z.boolean().optional(),
 });
 
 const DebtInstrumentInvestmentSchema = z.object({
@@ -236,7 +238,7 @@ const DebtInstrumentInvestmentSchema = z.object({
 
 export const InvestmentSchema = z
   .discriminatedUnion("type", [
-    StockInvestmentSchema,
+    SecuritiesInvestmentSchema,
     GoldInvestmentSchema,
     CurrencyInvestmentSchema,
     RealEstateInvestmentSchema,
@@ -262,11 +264,11 @@ export const InvestmentSchema = z
 
 export type InvestmentFormValues = z.infer<typeof InvestmentSchema>;
 
-export const SellStockSchema = z.object({
+export const BuySellSecuritySchema = z.object({
   securityId: z.string(),
-  numberOfSharesToSell: stringToRequiredPositiveIntegerCoerced,
-  sellPricePerShare: stringToRequiredNonNegativeNumberCoerced,
-  sellDate: z
+  numberOfShares: stringToRequiredPositiveIntegerCoerced,
+  pricePerShare: stringToRequiredNonNegativeNumberCoerced,
+  date: z
     .string()
     .min(1, { message: "Date is required." })
     .refine((date) => !isNaN(Date.parse(date)), {
@@ -277,7 +279,7 @@ export const SellStockSchema = z.object({
     .transform((v) => parseFloat(String(v) || "0")),
 });
 
-export type SellStockFormValues = z.infer<typeof SellStockSchema>;
+export type BuySellSecurityFormValues = z.infer<typeof BuySellSecuritySchema>;
 
 export const EditStockInvestmentSchema = z.object({
   purchaseDate: z

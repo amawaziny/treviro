@@ -1,7 +1,7 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 
-import { SellStockForm } from "@/components/investments/stocks/sell-stock-form";
+import { BuySellSecurityForm } from "@/components/investments/securities/buy-sell-security-form";
 import {
   Card,
   CardContent,
@@ -70,7 +70,7 @@ export default function SellSecurityPage() {
           )}
         </CardHeader>
         <CardContent>
-          <SellStockForm securityId={security.id} />
+          <BuySellSecurityForm securityId={security.id} />
         </CardContent>
       </Card>
     </div>

@@ -24,6 +24,10 @@ import { formatPath } from "@/lib/utils";
  * 5. Expenses and incomes page show calendar to select the month and year to show the expenses for that month and year
  * 6. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
  * 7. always compose the description of the transaction and description of expense, income, fixed estimate
+ * 8. we could disable some fields in edit mode of investment form
+ * 9. refactor investment-form to be each form has its own submit button and logic
+ * 10. check if we need context for investment, transaction, expense, income, fixed estimate
+ * 11. remove useEffect from hooks and use React.use to call the functions
  */
 
 export class DashboardService {

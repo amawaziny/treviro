@@ -263,7 +263,7 @@ define(["./workbox-e9849328"], function (e) {
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {
-          url: "/_next/static/chunks/app/(app)/investments/sell-stock/%5BsecurityId%5D/page-02c0a5e1459fe0c0.js",
+          url: "/_next/static/chunks/app/(app)/securities/sell/%5BsecurityId%5D/page-02c0a5e1459fe0c0.js",
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {

@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import type { StockChartDataPoint, StockChartTimeRange } from "@/lib/types";
+import type { SecurityChartDataPoint, SecurityChartTimeRange as SecurityChartTimeRange } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -37,14 +37,14 @@ import {
   formatNumberWithSuffix,
 } from "@/lib/utils";
 
-interface StockDetailChartProps {
+interface SecurityDetailChartProps {
   securityId: string;
   currency: string;
 }
 
-const timeRanges: StockChartTimeRange[] = ["1W", "1M", "6M", "1Y", "5Y"];
+const timeRanges: SecurityChartTimeRange[] = ["1W", "1M", "6M", "1Y", "5Y"];
 
-const getNumPointsForRange = (range: StockChartTimeRange): number => {
+const getNumPointsForRange = (range: SecurityChartTimeRange): number => {
   switch (range) {
     case "6M":
       return 180;
@@ -57,13 +57,13 @@ const getNumPointsForRange = (range: StockChartTimeRange): number => {
   }
 };
 
-export function StockDetailChart({
+export function SecurityDetailChart({
   securityId,
   currency,
-}: StockDetailChartProps) {
+}: SecurityDetailChartProps) {
   const { t, language } = useLanguage();
-  const [selectedRange, setSelectedRange] = useState<StockChartTimeRange>("1W");
-  const [chartData, setChartData] = useState<StockChartDataPoint[]>([]);
+  const [selectedRange, setSelectedRange] = useState<SecurityChartTimeRange>("1W");
+  const [chartData, setChartData] = useState<SecurityChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,7 +117,7 @@ export function StockDetailChart({
         }
 
         const querySnapshot = await getDocs(firestoreQuery);
-        const data: StockChartDataPoint[] = [];
+        const data: SecurityChartDataPoint[] = [];
         querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
           const docData = doc.data();
           if (docData.price !== undefined) {

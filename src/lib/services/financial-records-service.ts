@@ -267,7 +267,10 @@ export class FinancialRecordsService {
   }
 
   async addIncome(
-    incomeData: Omit<IncomeRecord, "id" | "createdAt" | "updatedAt" | "recordType">,
+    incomeData: Omit<
+      IncomeRecord,
+      "id" | "createdAt" | "updatedAt" | "recordType"
+    >,
   ): Promise<IncomeRecord> {
     return this.addRecord(FINANCIAL_COLLECTIONS.INCOMES, incomeData);
   }

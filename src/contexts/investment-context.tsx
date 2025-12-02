@@ -1,19 +1,42 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
-import { Investment, InvestmentType } from "@/lib/types";
+import {
+  CurrencyInvestment,
+  DebtInstrumentInvestment,
+  Investment,
+  InvestmentData,
+  InvestmentType,
+  isCurrencyInvestment,
+  isDebtInstrumentInvestment,
+  isRealEstateInvestment,
+  isSecurityInvestment,
+  RealEstateInvestment,
+  SecurityInvestment,
+} from "@/lib/types";
 import { hoursToMilliseconds } from "date-fns";
 
 export interface InvestmentContextType {
   // Investments
   investments: Investment[];
+  securityInvestments: SecurityInvestment[];
+  debtInvestments: DebtInstrumentInvestment[];
+  realEstateInvestments: RealEstateInvestment[];
+  currencyInvestments: CurrencyInvestment[];
   isLoading: boolean;
   getInvestmentsByType: (type: string) => Investment[];
-  getInvestmentById: (id: string) => Promise<Investment | undefined>;
-  addInvestment: (
-    investmentData: Omit<Investment, "id" | "createdAt">,
+  getInvestmentById: (id: string) => Investment | undefined;
+  getInvestmentBySecurityId: (securityId: string) => Investment | undefined;
+  buyNew: <T extends Investment>(
+    investmentData: InvestmentData<T>,
   ) => Promise<void>;
   deleteInvestment: (id: string) => Promise<void>;
   editInvestment: (
@@ -40,7 +63,6 @@ export interface InvestmentContextType {
   ) => Promise<void>;
   pay: (
     investmentId: string,
-    investmentType: InvestmentType,
     installmentNumber: number,
     amount: number,
     date: string,
@@ -48,7 +70,6 @@ export interface InvestmentContextType {
   addDividend: (
     investmentId: string,
     securityId: string,
-    investmentType: InvestmentType,
     amount: number,
     date: string,
   ) => Promise<void>;
@@ -65,6 +86,18 @@ export const InvestmentProvider = ({
 }) => {
   const { user } = useAuth();
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [securityInvestments, setSecurityInvestments] = useState<
+    SecurityInvestment[]
+  >([]);
+  const [debtInvestments, setDebtInvestments] = useState<
+    DebtInstrumentInvestment[]
+  >([]);
+  const [realEstateInvestments, setRealEstateInvestments] = useState<
+    RealEstateInvestment[]
+  >([]);
+  const [currencyInvestments, setCurrencyInvestments] = useState<
+    CurrencyInvestment[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [investmentService, setInvestmentService] =
     useState<InvestmentService | null>(null);
@@ -101,15 +134,17 @@ export const InvestmentProvider = ({
     }
   };
 
-  // Data fetching functions
   const fetchInvestments = async (service: InvestmentService) => {
     const investments = await service.getOpenedInvestments();
     setInvestments(investments);
+    setSecurityInvestments(investments.filter(isSecurityInvestment));
+    setDebtInvestments(investments.filter(isDebtInstrumentInvestment));
+    setRealEstateInvestments(investments.filter(isRealEstateInvestment));
+    setCurrencyInvestments(investments.filter(isCurrencyInvestment));
   };
 
-  // CRUD operations for investments
-  const addInvestment = async (
-    investmentData: Omit<Investment, "id" | "createdAt">,
+  const buyNew = async <T extends Investment>(
+    investmentData: InvestmentData<T>,
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
@@ -191,7 +226,6 @@ export const InvestmentProvider = ({
 
   const pay = async (
     investmentId: string,
-    investmentType: InvestmentType,
     installmentNumber: number,
     amount: number,
     date: string,
@@ -200,7 +234,7 @@ export const InvestmentProvider = ({
       throw new Error("Investment service not initialized");
     const investment = await investmentService.pay(
       investmentId,
-      investmentType,
+      "Real Estate",
       installmentNumber,
       amount,
       date,
@@ -213,7 +247,6 @@ export const InvestmentProvider = ({
   const addDividend = async (
     investmentId: string,
     securityId: string,
-    investmentType: InvestmentType,
     amount: number,
     date: string,
   ) => {
@@ -222,7 +255,7 @@ export const InvestmentProvider = ({
     await investmentService.addDividend(
       investmentId,
       securityId,
-      investmentType,
+      "Securities",
       amount,
       date,
     );
@@ -232,18 +265,25 @@ export const InvestmentProvider = ({
     return investments.filter((inv) => inv.type === type);
   };
 
-  const getInvestmentById = async (
-    id: string,
-  ): Promise<Investment | undefined> => {
+  const getInvestmentById = (id: string): Investment | undefined => {
     return investments.find((inv) => inv.id === id);
+  };
+
+  const getInvestmentBySecurityId = (securityId: string): Investment | undefined => {
+    return investments.filter(isSecurityInvestment).find((inv) => inv.securityId === securityId);
   };
 
   const contextValue: InvestmentContextType = {
     investments,
+    securityInvestments,
+    debtInvestments,
+    realEstateInvestments,
+    currencyInvestments,
     isLoading,
     getInvestmentsByType,
     getInvestmentById,
-    addInvestment,
+    getInvestmentBySecurityId,
+    buyNew,
     deleteInvestment,
     editInvestment,
     buy,

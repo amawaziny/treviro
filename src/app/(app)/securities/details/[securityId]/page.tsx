@@ -3,15 +3,10 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import React, { useEffect, useState } from "react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
-import type {
-  ListedSecurity,
-  SecurityInvestment,
-  Transaction,
-} from "@/lib/types";
-import { useAuth } from "@/hooks/use-auth";
+import type { Transaction } from "@/lib/types";
 import { useForm } from "@/contexts/form-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AddDividendSheet } from "@/components/investments/stocks/add-dividend-sheet";
+import { AddDividendSheet } from "@/components/investments/securities/add-dividend-sheet";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -22,8 +17,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  ArrowLeft,
-  ArrowRight,
   ShoppingCart,
   DollarSign,
   Loader2,
@@ -32,7 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { StockDetailChart } from "@/components/investments/stocks/stock-detail-chart";
+import { SecurityDetailChart } from "@/components/investments/securities/security-detail-chart";
 import { useInvestments } from "@/hooks/use-investments";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -50,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { useTransactions } from "@/hooks/use-transactions";
 
 export default function SecurityDetailPage() {
   const { t, language, dir } = useLanguage();
@@ -59,16 +52,22 @@ export default function SecurityDetailPage() {
   const securityId = params.securityId as string;
   const { toast } = useToast();
 
-  const { getListedSecurityById, isLoading: isLoadingListedSecurities } =
+  const { getSecurityById, isLoading: isLoadingSecurities } =
     useListedSecurities();
+  const security = getSecurityById(securityId);
+
   const {
-    investments,
     isLoading: isLoadingInvestments,
-    transactions,
-    deleteSellTransaction,
+    addDividend,
+    getInvestmentBySecurityId,
   } = useInvestments();
-  const { user } = useAuth();
-  const userId = user?.uid;
+  const {
+    isLoading: isLoadingTransactions,
+    deleteTransaction,
+    getTransactionsBySecurityId,
+  } = useTransactions();
+  const transactions = React.use(getTransactionsBySecurityId(securityId));
+
   const { setHeaderProps } = useForm();
   const previousTab = searchParams.get("previousTab");
   const fromMyStocks = searchParams.get("fromMyStocks") === "true";
@@ -79,10 +78,6 @@ export default function SecurityDetailPage() {
       : "/securities";
 
   const [dividendSheetOpen, setDividendSheetOpen] = useState(false);
-
-  const [security, setSecurity] = useState<ListedSecurity | null | undefined>(
-    null,
-  );
 
   const securityName = security?.[language === "ar" ? "name_ar" : "name"];
   // Set up header props after security data is loaded
@@ -111,77 +106,22 @@ export default function SecurityDetailPage() {
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  useEffect(() => {
-    if (securityId) {
-      getListedSecurityById(securityId).then((data) => {
-        setSecurity(data || null);
-      });
-    }
-  }, [securityId, getListedSecurityById]);
+  const userOwnedSecurities = getInvestmentBySecurityId(securityId);
 
-  const userOwnedSecurities = React.useMemo<SecurityInvestment[]>(() => {
-    return investments.filter((inv) => {
-      return inv.securityId === securityId;
-    });
-  }, [investments, securityId]);
+  const totalSharesOwned = userOwnedSecurities?.totalShares || 0;
 
-  const totalSharesOwned = React.useMemo(
-    () =>
-      userOwnedSecurities.reduce(
-        (sum, inv) => sum + (inv.numberOfShares || 0),
-        0,
-      ),
-    [userOwnedSecurities],
-  );
-
-  const averagePurchasePrice = React.useMemo(() => {
-    if (totalSharesOwned === 0) return 0;
-    const totalCost = userOwnedSecurities.reduce(
-      (sum, inv) =>
-        sum + (inv.numberOfShares || 0) * (inv.purchasePricePerShare || 0),
-      0,
-    );
-    return totalCost / totalSharesOwned;
-  }, [userOwnedSecurities, totalSharesOwned]);
+  const averagePurchasePrice = userOwnedSecurities?.averagePurchasePrice || 0;
 
   const hasPosition = totalSharesOwned > 0;
 
   // Add Dividend Handler
   const handleAddDividend = async (amount: number, date: string) => {
     try {
-      // Compose dividend transaction object
-      const transactionId = crypto.randomUUID
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2);
-      const newDividendTx = {
-        id: transactionId,
-        type: "dividend",
-        tickerSymbol: security?.symbol,
-        stockId: security?.id,
-        date,
-        amount,
-        totalAmount: amount,
-        shares: totalSharesOwned, // Add shares field for dividend
-        createdAt: new Date().toISOString(),
-      };
-      // Save to Firestore via REST or context (ideally via context action, but fallback to direct call if not exposed)
-      // For now, add to /transactions collection
-      // You may want to expose an addTransaction method in your context for a cleaner approach
-      const { db } = await import("@/lib/firebase");
-      const { doc, setDoc, serverTimestamp } = await import(
-        "firebase/firestore"
-      );
-      if (!userId || !db)
-        throw new Error(t("user_not_authenticated_or_db_unavailable"));
-      await setDoc(doc(db, `users/${userId}/transactions`, transactionId), {
-        ...newDividendTx,
-        createdAt: serverTimestamp(),
-      });
+      await addDividend(userOwnedSecurities!.id, securityId, amount, date);
       setDividendSheetOpen(false);
     } catch (err: any) {
       toast({
@@ -192,112 +132,32 @@ export default function SecurityDetailPage() {
     }
   };
 
-  const securityTransactions = React.useMemo(() => {
-    if (!security) return [];
-
-    const buyTransactions = investments
-      .filter((inv) => inv.securityId === security.id)
-      .map((inv) => ({
-        id: inv.id,
-        date: inv.purchaseDate,
-        type: "Buy" as "Buy" | "Sell",
-        shares: (inv as SecurityInvestment).numberOfShares || 0,
-        price: (inv as SecurityInvestment).purchasePricePerShare || 0,
-        fees: (inv as SecurityInvestment).purchaseFees || 0,
-        totalAmount: inv.amountInvested,
-        isInvestmentRecord: true,
-        tickerSymbol: security.symbol,
-        profitOrLoss: undefined,
-        createdAt: inv.createdAt || new Date().toISOString(),
-      }));
-
-    const sellTransactionsFromContext = transactions
-      .filter((tx) => tx.tickerSymbol === security.symbol && tx.type === "sell")
-      .map((tx) => ({
-        ...tx,
-        isInvestmentRecord: false,
-      }));
-
-    // ADD: Dividend transactions for this security
-    const dividendTransactions = transactions
-      .filter(
-        (tx) => tx.tickerSymbol === security.symbol && tx.type === "dividend",
-      )
-      .map((tx) => ({
-        ...tx,
-        shares: totalSharesOwned, // Always show latest shares owned for display
-        isInvestmentRecord: false,
-      }));
-
-    const allTransactions = [
-      ...buyTransactions,
-      ...sellTransactionsFromContext,
-      ...dividendTransactions,
-    ].map((tx) => ({
-      ...tx,
-      createdAt: tx.createdAt || new Date(0).toISOString(),
-    }));
-
-    return allTransactions.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      if (dateB !== dateA) return dateB - dateA;
-      const createdA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const createdB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return createdB - createdA;
-    });
-  }, [investments, transactions, security]);
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = securityTransactions.slice(
+  const currentTransactions = transactions.slice(
     indexOfFirstItem,
     indexOfLastItem,
   );
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [securityId, securityTransactions.length]);
+  }, [securityId, transactions.length]);
 
-  const handleDeleteConfirmation = (tx: Transaction) => {
-    const sellTx = transactions.find(
-      (t) => t.id === tx.id && t.type === "sell",
-    );
-    if (sellTx) {
-      setTransactionToDelete(sellTx);
-      setIsDeleteAlertOpen(true);
-    } else {
-      toast({
-        title: t("invalid_operation"),
-        description: t("this_action_is_only_available_for_sell_transactions"),
-        variant: "destructive",
-      });
-    }
+  const handleDeleteSellTransaction = () => {
+    deleteTransaction(transactionToDelete!.id);
+    setIsDeleteAlertOpen(false);
+    setTransactionToDelete(null);
   };
 
-  const handleDeleteSellTransaction = async () => {
-    if (!transactionToDelete) return;
-    try {
-      await deleteSellTransaction(transactionToDelete);
-      toast({
-        title: t("transaction_deleted"),
-        description: `${t("sell_transaction_from")} ${transactionToDelete.date ? formatDateDisplay(transactionToDelete.date + "T00:00:00Z") : ""} ${t("has_been_deleted")}.`,
-      });
-    } catch (error: any) {
-      toast({
-        title: t("error_deleting_transaction"),
-        description: error.message || t("could_not_delete_the_transaction"),
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleteAlertOpen(false);
-      setTransactionToDelete(null);
-    }
+  const handleDeleteConfirmation = (tx: Transaction) => {
+    setTransactionToDelete(tx);
+    setIsDeleteAlertOpen(true);
   };
 
   if (
-    isLoadingListedSecurities ||
+    isLoadingSecurities ||
     isLoadingInvestments ||
+    isLoadingTransactions ||
     security === undefined ||
     security == null
   ) {
@@ -335,7 +195,7 @@ export default function SecurityDetailPage() {
 
   const currentMarketPrice = security.price;
   const totalInvestmentValue = totalSharesOwned * currentMarketPrice;
-  const totalCostBasis = totalSharesOwned * averagePurchasePrice;
+  const totalCostBasis = userOwnedSecurities?.totalInvested || 0;
   const PnL = totalInvestmentValue - totalCostBasis;
   const PnLPercentage =
     totalCostBasis > 0
@@ -402,7 +262,7 @@ export default function SecurityDetailPage() {
           </Link>
           {hasPosition && (
             <>
-              <Link href={`/investments/sell-stock/${security.id}`} passHref>
+              <Link href={`/securities/sell/${security.id}`} passHref>
                 <Button variant="outline">
                   <DollarSign className="h-4 w-4" /> {t("sell")}
                 </Button>
@@ -437,7 +297,7 @@ export default function SecurityDetailPage() {
           {hasPosition && (
             <>
               <Link
-                href={`/investments/sell-stock/${security.id}`}
+                href={`/securities/sell/${security.id}`}
                 passHref
                 className="flex-1"
               >
@@ -492,7 +352,7 @@ export default function SecurityDetailPage() {
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <StockDetailChart
+              <SecurityDetailChart
                 securityId={security.id}
                 currency={displayCurrency}
               />
@@ -784,12 +644,12 @@ export default function SecurityDetailPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              {securityTransactions.length > 0 ? (
+              {transactions.length > 0 ? (
                 <div className="divide-y">
                   {currentTransactions.map((tx) => {
-                    const isDividend = tx.type === "dividend";
-                    const isBuy = tx.type === "Buy";
-                    const isSell = tx.type === "Sell";
+                    const isDividend = tx.type === "DIVIDEND";
+                    const isBuy = tx.type === "BUY";
+                    const isSell = tx.type === "SELL";
                     const shares = isDividend
                       ? (tx as any).shares
                       : (tx as any).shares || (tx as any).numberOfShares || 0;
@@ -876,41 +736,35 @@ export default function SecurityDetailPage() {
                               )}
                             </div>
                             <div className="flex items-center gap-2">
-                              {tx.isInvestmentRecord && (
-                                <div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-4 w-4"
-                                    asChild
+                              <div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-4 w-4"
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/investments/security/edit/${tx.id}`}
                                   >
-                                    <Link
-                                      href={`/investments/security/edit/${tx.id}`}
-                                    >
-                                      <Edit3 className="h-3.5 w-3.5" />
-                                      <span className="sr-only">
-                                        {t("Edit")}
-                                      </span>
-                                    </Link>
-                                  </Button>
+                                    <Edit3 className="h-3.5 w-3.5" />
+                                    <span className="sr-only">{t("Edit")}</span>
+                                  </Link>
+                                </Button>
 
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-4 w-4 text-destructive/70 hover:text-destructive"
-                                    onClick={() =>
-                                      handleDeleteConfirmation(
-                                        tx as unknown as Transaction,
-                                      )
-                                    }
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">
-                                      {t("Delete")}
-                                    </span>
-                                  </Button>
-                                </div>
-                              )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-4 w-4 text-destructive/70 hover:text-destructive"
+                                  onClick={() =>
+                                    handleDeleteConfirmation(
+                                      tx as unknown as Transaction,
+                                    )
+                                  }
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <span className="sr-only">{t("Delete")}</span>
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -930,7 +784,7 @@ export default function SecurityDetailPage() {
               )}
 
               {/* Pagination */}
-              {securityTransactions.length > itemsPerPage && (
+              {transactions.length > itemsPerPage && (
                 <div className="flex justify-between items-center px-4 py-3 border-t">
                   <Button
                     variant="ghost"
@@ -946,7 +800,7 @@ export default function SecurityDetailPage() {
                   </Button>
                   <span className="text-sm text-muted-foreground">
                     Page {currentPage} of{" "}
-                    {Math.ceil(securityTransactions.length / itemsPerPage)}
+                    {Math.ceil(transactions.length / itemsPerPage)}
                   </span>
                   <Button
                     variant="ghost"
@@ -954,14 +808,14 @@ export default function SecurityDetailPage() {
                     onClick={() =>
                       setCurrentPage((prev) =>
                         Math.min(
-                          Math.ceil(securityTransactions.length / itemsPerPage),
+                          Math.ceil(transactions.length / itemsPerPage),
                           prev + 1,
                         ),
                       )
                     }
                     disabled={
                       currentPage >=
-                      Math.ceil(securityTransactions.length / itemsPerPage)
+                      Math.ceil(transactions.length / itemsPerPage)
                     }
                     className="gap-1"
                   >
@@ -982,16 +836,7 @@ export default function SecurityDetailPage() {
               {t("are_you_sure_you_want_to_delete_this_sell_transaction")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t("this_will_remove_the_record_of_selling")}{" "}
-              {("shares" in (transactionToDelete ?? {})
-                ? (transactionToDelete as any).shares
-                : (transactionToDelete?.numberOfShares ?? 0)
-              ).toLocaleString()}{" "}
-              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${
-                transactionToDelete
-                  ? formatDateDisplay(transactionToDelete.date)
-                  : ""
-              }`}
+              {`${t("this_will_remove_the_record_of_selling")} ${transactionToDelete?.quantity?.toLocaleString()} ${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ""}`}
               {t(
                 "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
               )}
@@ -1013,16 +858,7 @@ export default function SecurityDetailPage() {
               {t("are_you_sure_you_want_to_delete_this_sell_transaction")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t("this_will_remove_the_record_of_selling")}{" "}
-              {("shares" in (transactionToDelete ?? {})
-                ? (transactionToDelete as any).shares
-                : (transactionToDelete?.numberOfShares ?? 0)
-              ).toLocaleString()}{" "}
-              {`${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${
-                transactionToDelete
-                  ? formatDateDisplay(transactionToDelete.date)
-                  : ""
-              }`}
+              {`${t("this_will_remove_the_record_of_selling")} ${transactionToDelete?.quantity?.toLocaleString()} ${security?.securityType === "Fund" ? "units" : "shares"} ${t("of")} ${securityName} ${t("on")} ${transactionToDelete ? formatDateDisplay(transactionToDelete.date) : ""}`}
               {t(
                 "this_action_will_reverse_its_impact_on_your_total_realized_pl_it_will_not_automatically_add_the_shares_back_to_your_holdings_you_may_need_to_reenter_purchases_or_adjust_existing_ones_if_this_sale_previously_depleted_them_this_action_cannot_be_undone",
               )}

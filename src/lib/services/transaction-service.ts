@@ -11,6 +11,7 @@ import {
   writeBatch,
   updateDoc,
   deleteDoc,
+  orderBy,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -178,6 +179,7 @@ export class TransactionService {
       this.getTransactionsCollection(),
       where("date", ">=", startDate),
       where("date", "<=", endDate),
+      orderBy("date", "desc"),
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => doc.data() as Transaction);
@@ -210,6 +212,36 @@ export class TransactionService {
     const q = query(
       this.getTransactionsCollection(),
       where("sourceId", "==", sourceId),
+      orderBy("date", "desc"),
+    );
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as Transaction,
+    );
+  }
+
+  /**
+   * Retrieves all transactions for a specific security.
+   *
+   * @param securityId - The ID of the security to get transactions for
+   * @returns Array of transactions for the specified security
+   *
+   * @example
+   * const transactions = await transactionService.getTransactionsBySecurityId('sec-123');
+   * console.log('Transaction history:', transactions);
+   */
+  async getTransactionsBySecurityId(
+    securityId: string,
+  ): Promise<Transaction[]> {
+    const q = query(
+      this.getTransactionsCollection(),
+      where("securityId", "==", securityId),
+      orderBy("date", "desc"),
     );
 
     const querySnapshot = await getDocs(q);

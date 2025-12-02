@@ -234,19 +234,6 @@ export const parseDateString = (dateStr?: string): Date | null => {
   return new Date(year, month - 1, day);
 };
 
-export function removeUndefinedFieldsDeep(obj: any): any {
-  if (Array.isArray(obj)) {
-    return obj.map(removeUndefinedFieldsDeep);
-  } else if (obj && typeof obj === "object") {
-    return Object.fromEntries(
-      Object.entries(obj)
-        .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, removeUndefinedFieldsDeep(v)]),
-    );
-  }
-  return obj;
-}
-
 export function formatPath(
   template: string,
   params: Record<string, string | number>,

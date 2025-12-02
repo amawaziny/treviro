@@ -1,10 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useForm as useReactHookForm,
-  useFormContext as useReactHookFormContext,
-} from "react-hook-form";
+import { useForm as useReactHookForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import {
@@ -21,6 +18,7 @@ import type {
   CurrencyInvestment,
   DebtInstrumentInvestment,
   GoldInvestment,
+  InvestmentData,
   InvestmentType,
   RealEstateInvestment,
   SecurityInvestment,
@@ -31,25 +29,14 @@ import { MemoizedRenderCurrencyFields } from "./currency-fields-form";
 import { MemoizedRenderStockFields } from "./stock-fields-form";
 import { MemoizedRenderDebtFields } from "./debt-fields-form";
 import { MemoizedRenderRealEstateFields } from "./real-estate-fields-form";
-import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "next/navigation";
-import { getCurrentDate, removeUndefinedFieldsDeep } from "@/lib/utils";
+import { getCurrentDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useInvestments } from "@/hooks/use-investments";
 
 // Initial values for each investment type
 const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
-  Stocks: {
-    type: "Stocks",
-    selectedSecurityId: "",
-    numberOfShares: 1, // must be number for Zod transform result
-    purchasePricePerShare: 0,
-    purchaseFees: 0,
-    purchaseDate: getCurrentDate(),
-    name: "",
-  },
   Securities: {
-    type: "Stocks",
+    type: "Securities",
     selectedSecurityId: "",
     numberOfShares: 1, // must be number for Zod transform result
     purchasePricePerShare: 0,
@@ -101,6 +88,9 @@ function getInitialFormValues(type: InvestmentType): InvestmentFormValues {
   return { ...initialFormValuesByType[type] };
 }
 
+//TODO:
+// 1. modes buy, buyNew, edit, sell
+// 2. check parameters for each mode .. current parameters are for buyNew and it could be used for edit and i think we could create a new form (transaction-form) for buy, sell, and edit transactions
 interface InvestmentFormProps {
   mode?: "add" | "edit";
   initialValues?: Partial<InvestmentFormValues>;
@@ -116,12 +106,7 @@ export function InvestmentForm({
 }: InvestmentFormProps) {
   const { t, language } = useLanguage();
   const { toast } = useToast();
-  const router = useRouter();
-  const {
-    addInvestment,
-    updateRealEstateInvestment,
-    updateDebtInstrumentInvestment,
-  } = useInvestments();
+  const { buyNew, editInvestment } = useInvestments();
   const form = useReactHookForm<InvestmentFormValues>({
     resolver: zodResolver(InvestmentSchema),
     defaultValues: (() => {
@@ -133,7 +118,7 @@ export function InvestmentForm({
       }
 
       const defaults = getInitialFormValues(
-        (initialType as InvestmentType) || "Stocks",
+        (initialType as InvestmentType) || "Securities",
       );
 
       // If securityId is provided, set it as the selectedSecurityId
@@ -154,21 +139,15 @@ export function InvestmentForm({
   const isDedicatedGoldMode = watchedType === "Gold";
   const isDedicatedCurrencyMode = watchedType === "Currencies";
   const isDedicatedRealEstateMode = watchedType === "Real Estate";
-  const isPreSelectedStockMode = Boolean(
-    initialType === "Stocks" ||
-      watchedType === "Stocks" ||
-      form.getValues("type") === "Stocks",
+  const isDedicatedSecuritiesMode = Boolean(
+    initialType === "Securities" ||
+      watchedType === "Securities" ||
+      form.getValues("type") === "Securities",
   );
 
-  // Stock-specific logic
-  const {
-    listedSecurities,
-    isLoading: isLoadingListedSecurities,
-    error: listedSecuritiesError,
-  } = useListedSecurities();
+  const { getSecurityById } = useListedSecurities();
   const preSelectedSecurityId = form.watch("selectedSecurityId");
-  const preSelectedSecurityDetails =
-    listedSecurities.find((sec) => sec.id === preSelectedSecurityId) || null;
+  const selectedSecurity = getSecurityById(preSelectedSecurityId) || null;
 
   // Button text
   const submitButtonText =
@@ -189,7 +168,6 @@ export function InvestmentForm({
       return;
     }
 
-    const investmentId = uuidv4();
     let investmentName = values.name || "";
 
     if (!watchedType) {
@@ -201,28 +179,15 @@ export function InvestmentForm({
       return;
     }
 
-    let newInvestmentBase = {
-      id: investmentId,
+    const newInvestmentBase = {
       type: watchedType,
       firstPurchaseDate: values.purchaseDate || now,
-      lastUpdated: now,
       currency: "EGP" as const,
     };
 
-    let newInvestment:
-      | DebtInstrumentInvestment
-      | SecurityInvestment
-      | GoldInvestment
-      | CurrencyInvestment
-      | RealEstateInvestment;
+    let newInvestment: InvestmentData;
 
-    // Remove all parsed* variables, use type narrowing instead
-    if (isPreSelectedStockMode && values.type == "Stocks") {
-      const securityToProcessId = preSelectedSecurityId;
-      const selectedSecurity =
-        listedSecurities.find((sec) => sec.id === securityToProcessId) ||
-        preSelectedSecurityDetails;
-
+    if (isDedicatedSecuritiesMode && values.type == "Securities") {
       if (!selectedSecurity) {
         toast({
           title: t("error"),
@@ -231,37 +196,36 @@ export function InvestmentForm({
         });
         return;
       }
-      const calculatedAmountInvested =
-        values.numberOfShares * values.purchasePricePerShare +
-        values.purchaseFees;
+
       investmentName = `${selectedSecurity[language === "ar" ? "name_ar" : "name"]} ${t("Purchase")}`;
-      newInvestment = {
+
+      const securityInvestment: InvestmentData<SecurityInvestment> = {
         ...newInvestmentBase,
-        name: investmentName,
-        amountInvested: calculatedAmountInvested,
-        tickerSymbol: selectedSecurity.symbol as string,
+        type: values.type,
         securityId: selectedSecurity.id,
-        numberOfShares: values.numberOfShares,
-        purchasePricePerShare: values.purchasePricePerShare,
-        purchaseFees: values.purchaseFees,
-        type: selectedSecurity.fundType ?? "Stocks",
-        fundType: selectedSecurity.fundType ? selectedSecurity.fundType : null,
+        name: investmentName,
+        quantity: values.numberOfShares,
+        pricePerUnit: values.purchasePricePerShare,
+        fees: values.purchaseFees,
+        fundType: selectedSecurity.fundType,
       };
+
+      newInvestment = securityInvestment;
     } else if (isDedicatedDebtMode && values.type == "Debt Instruments") {
       investmentName = `${t(values.debtSubType)} - ${values.issuer}`;
       const annualInterest =
         (values.amountInvested * values.interestRate) / 100;
-      newInvestment = {
+
+      const debtInvestment: InvestmentData<DebtInstrumentInvestment> = {
         ...newInvestmentBase,
+        type: values.type,
         name: investmentName,
-        totalShares: 1,
-        averagePurchasePrice: values.amountInvested,
-        totalInvested: values.amountInvested,
+        quantity: 1,
+        pricePerUnit: values.amountInvested,
         issuer: values.issuer || "",
         interestRate: values.interestRate,
         maturityDate: values.maturityDate!,
         debtSubType: values.debtSubType!,
-        type: "Debt Instruments",
         interestFrequency: values.interestFrequency || "Monthly",
         interestAmount:
           annualInterest /
@@ -272,59 +236,66 @@ export function InvestmentForm({
               : 1),
         monthlyInterestAmount: annualInterest / 12,
       };
+
+      newInvestment = debtInvestment;
     } else if (isDedicatedGoldMode && values.type == "Gold") {
       investmentName =
         values.name || `${t("gold")} (${values.goldType || t("na")})`;
-      newInvestment = {
+
+      const goldInvestment: InvestmentData<GoldInvestment> = {
         ...newInvestmentBase,
+        type: values.type,
         name: investmentName,
-        totalInvested: values.amountInvested,
+        quantity: values.quantityInGrams,
+        pricePerUnit: values.amountInvested / values.quantityInGrams,
         goldType: values.goldType!,
-        quantityInGrams: values.quantityInGrams,
-        type: "Gold",
       };
+
+      newInvestment = goldInvestment;
     } else if (isDedicatedCurrencyMode && values.type == "Currencies") {
       investmentName =
         values.name || `${t("currency")} (${values.currencyCode || t("na")})`;
-      const calculatedCost =
-        values.foreignCurrencyAmount * values.exchangeRateAtPurchase;
-      newInvestment = {
+
+      const currencyInvestment: InvestmentData<CurrencyInvestment> = {
         ...newInvestmentBase,
+        type: values.type,
         name: investmentName,
-        totalInvested: calculatedCost,
+        quantity: values.foreignCurrencyAmount,
+        pricePerUnit: values.exchangeRateAtPurchase,
         currencyCode: values.currencyCode!,
-        foreignCurrencyAmount: values.foreignCurrencyAmount,
-        exchangeRateAtPurchase: values.exchangeRateAtPurchase,
-        type: "Currencies",
       };
+
+      newInvestment = currencyInvestment;
     } else if (isDedicatedRealEstateMode && values.type == "Real Estate") {
       investmentName =
-        values.name ||
-        `${t("real_estate")} (${values.propertyAddress || t("na")})`;
-      newInvestment = removeUndefinedFieldsDeep({
+        values.name || `${t("real_estate")} (${values.propertyAddress || ""})`;
+
+      const realEstateInvestment: InvestmentData<RealEstateInvestment> = {
         ...newInvestmentBase,
+        type: values.type,
         name: investmentName,
-        totalInvested: values.amountInvested,
-        propertyAddress: values.propertyAddress,
         propertyType: values.propertyType,
-        installmentFrequency: values.installmentFrequency,
-        installmentAmount: values.installmentAmount,
-        totalInstallmentPrice: values.totalInstallmentPrice,
-        installmentStartDate: values.installmentStartDate,
-        installmentEndDate: values.installmentEndDate,
+        propertyAddress: values.propertyAddress,
+        totalPrice: values.totalInstallmentPrice,
+        builtUpArea: values.builtUpArea,
+        hasGarden: values.hasGarden,
         downPayment: values.downPayment,
         maintenanceAmount: values.maintenanceAmount,
         maintenancePaymentDate: values.maintenancePaymentDate,
-        type: "Real Estate",
-      });
-    } else {
-      investmentName = values.name || `${watchedType} Investment`;
-      newInvestment = {
-        ...newInvestmentBase,
-        name: investmentName,
-        totalInvested: values.amountInvested,
-        type: watchedType as any,
+        installmentFrequency: values.installmentFrequency,
+        installmentAmount: values.installmentAmount,
+        firstInstallmentDate: values.installmentStartDate!,
+        lastInstallmentDate: values.installmentEndDate!,
       };
+
+      newInvestment = realEstateInvestment;
+    } else {
+      toast({
+        title: t("error"),
+        description: t("cannot_determine_investment_type"),
+        variant: "destructive",
+      });
+      return;
     }
 
     if (
@@ -333,75 +304,22 @@ export function InvestmentForm({
       "id" in initialValues &&
       initialValues["id"]
     ) {
-      // Only update for Real Estate investments
-      if (values.type === "Real Estate") {
-        await updateRealEstateInvestment(
-          initialValues["id"] as string,
-          removeUndefinedFieldsDeep(values),
-        );
-        toast({
-          title: t("investment_updated"),
-          description: `${values.name || values.propertyAddress || t("real_estate")} ${t("has_been_successfully_updated")}.`,
-        });
-        router.push("/investments/real-estate");
-        return;
-      } else if (values.type === "Debt Instruments") {
-        await updateDebtInstrumentInvestment(
-          initialValues["id"] as string,
-          removeUndefinedFieldsDeep(values),
-        );
-        toast({
-          title: t("investment_updated"),
-          description: `${t(values.debtSubType)} - ${values.issuer} ${t("has_been_successfully_updated")}.`,
-        });
-        router.push("/investments/debt-instruments");
-        return;
-      }
-      // Add more types here if you want to support editing other investment types
+      await editInvestment(initialValues["id"] as string, newInvestment);
+      toast({
+        title: t("investment_edited"),
+        description: `${t(watchedType)}: ${newInvestment.name} ${t("has_been_successfully_edited")}.`,
+        testId: "investment-edited-toast",
+      });
     } else {
-      await addInvestment(newInvestment);
+      await buyNew(newInvestment);
       toast({
         title: t("investment_added"),
         description: `${t(watchedType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
         testId: "investment-added-toast",
       });
-
-      // Reset the form to initial state after successful submission
-      form.reset(getInitialFormValues(watchedType as InvestmentType));
-
-      // If it's a stock purchase, redirect to the stocks page
-      if (watchedType === "Stocks") {
-        router.push("/investments/stocks");
-      }
     }
 
-    // Fix: always use a valid InvestmentType for reset, never undefined
-    const resetTargetType = isDedicatedDebtMode
-      ? "Debt Instruments"
-      : isDedicatedGoldMode
-        ? "Gold"
-        : isDedicatedCurrencyMode
-          ? "Currencies"
-          : isDedicatedRealEstateMode
-            ? "Real Estate"
-            : isPreSelectedStockMode
-              ? "Stocks"
-              : "Stocks"; // fallback to Stocks if undefined
-
-    // Fix: Only use a single type for reset values, never a union or undefined
-    const resetValues: InvestmentFormValues =
-      initialFormValuesByType[resetTargetType as InvestmentType];
-    form.reset(resetValues);
-
-    if (
-      isPreSelectedStockMode &&
-      preSelectedSecurityDetails &&
-      preSelectedSecurityId
-    ) {
-      form.setValue("purchasePricePerShare", preSelectedSecurityDetails.price);
-    } else if (!resetTargetType && !watchedType) {
-      router.replace("/investments/add");
-    }
+    form.reset(getInitialFormValues(watchedType as InvestmentType));
   }
 
   return (
@@ -428,26 +346,19 @@ export function InvestmentForm({
               />
             ) : isDedicatedRealEstateMode ? (
               <MemoizedRenderRealEstateFields control={form.control} />
-            ) : isPreSelectedStockMode && preSelectedSecurityDetails ? (
+            ) : isDedicatedSecuritiesMode && selectedSecurity ? (
               <MemoizedRenderStockFields
                 control={form.control}
-                preSelectedSecurityDetails={preSelectedSecurityDetails}
+                preSelectedSecurityDetails={selectedSecurity}
               />
             ) : (
-              <div>Cannot determine investment type</div>
+              <div>{t("cannot_determine_investment_type")}</div>
             )}
             <Button
               type="submit"
               className="w-full md:w-auto"
               data-testid="submit-investment-button"
-              disabled={
-                form.formState.isSubmitting ||
-                (isPreSelectedStockMode &&
-                  (isLoadingListedSecurities ||
-                    !!listedSecuritiesError ||
-                    !form.getValues("selectedSecurityId") ||
-                    !preSelectedSecurityDetails))
-              }
+              disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting && (
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />

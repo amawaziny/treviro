@@ -4,12 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
@@ -31,7 +26,8 @@ import useFinancialRecords from "@/hooks/use-financial-records";
 
 export default function FixedEstimatesPage() {
   const { t } = useLanguage();
-  const { fixedEstimates, isLoading, deleteFixedEstimate } = useFinancialRecords();
+  const { fixedEstimates, isLoading, deleteFixedEstimate } =
+    useFinancialRecords();
   const { language } = useLanguage();
   const isMobile = useIsMobile();
 
