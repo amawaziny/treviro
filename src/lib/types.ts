@@ -1,3 +1,5 @@
+import { isStockRelatedFund } from "./utils";
+
 export type CurrencyCode = "EGP" | "USD";
 
 export type InvestmentType =
@@ -140,6 +142,15 @@ export function isSecurityInvestment(
   investment: Investment,
 ): investment is SecurityInvestment {
   return investment.type === "Securities";
+}
+
+export function isStockInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    (!investment.fundType || isStockRelatedFund(investment.fundType))
+  );
 }
 
 export function isGoldInvestment(

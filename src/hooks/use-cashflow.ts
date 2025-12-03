@@ -14,6 +14,8 @@ import {
   type Transaction,
   isRealEstateInvestment,
   isDebtInstrumentInvestment,
+  isStockInvestment,
+  SecurityInvestment,
 } from "@/lib/types";
 import {
   isCurrencyRelatedFund,
@@ -338,7 +340,7 @@ export function useCashflow({
     const stockInvestmentTrxs = investmentTrxs.filter(
       (tx) =>
         tx.securityId &&
-        (!tx.metadata.fundType || isStockRelatedFund(tx.metadata.fundType)),
+        isStockInvestment(tx.metadata as unknown as SecurityInvestment),
     );
     setStockInvestmentTrxs(stockInvestmentTrxs);
 

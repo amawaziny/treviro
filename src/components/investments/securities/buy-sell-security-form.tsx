@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/numeric-input";
-import { BuySellSecuritySchema, type BuySellSecurityFormValues } from "@/lib/schemas";
+import {
+  BuySellSecuritySchema,
+  type BuySellSecurityFormValues,
+} from "@/lib/schemas";
 import { useInvestments } from "@/hooks/use-investments";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
@@ -36,13 +39,20 @@ export function BuySellSecurityForm({
   mode,
 }: BuySellSecurityFormProps) {
   const { t, language } = useLanguage();
-  const { getInvestmentBySecurityId, sell, buy, isLoading: isLoadingInvestmentsContext } = useInvestments();
-  const { getSecurityById, isLoading: isLoadingSecurities } = useListedSecurities();
+  const {
+    getInvestmentBySecurityId,
+    sell,
+    buy,
+    isLoading: isLoadingInvestmentsContext,
+  } = useInvestments();
+  const { getSecurityById, isLoading: isLoadingSecurities } =
+    useListedSecurities();
   const { toast } = useToast();
   const router = useRouter();
 
   const [security, setSecurity] = useState<ListedSecurity | null>(null);
-  const [securityInvestment, setSecurityInvestment] = useState<SecurityInvestment | null>(null);
+  const [securityInvestment, setSecurityInvestment] =
+    useState<SecurityInvestment | null>(null);
   const [maxSharesToSell, setMaxSharesToSell] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,14 +75,13 @@ export function BuySellSecurityForm({
 
       if (listedSecurityData) {
         const userOwnedForThisSymbol = getInvestmentBySecurityId(securityId);
-        setSecurityInvestment(userOwnedForThisSymbol as SecurityInvestment || null);
+        setSecurityInvestment(
+          (userOwnedForThisSymbol as SecurityInvestment) || null,
+        );
 
         const totalOwned = userOwnedForThisSymbol?.totalShares || 0;
         setMaxSharesToSell(totalOwned);
-        if (
-          listedSecurityData.price &&
-          form.getValues("pricePerShare") === 0
-        ) {
+        if (listedSecurityData.price && form.getValues("pricePerShare") === 0) {
           form.setValue("pricePerShare", listedSecurityData.price);
         }
       }
@@ -223,9 +232,7 @@ export function BuySellSecurityForm({
             name="numberOfShares"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  {`${t("number_of")} ${securityLabel[0]}`}
-                </FormLabel>
+                <FormLabel>{`${t("number_of")} ${securityLabel[0]}`}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder={`e.g., 50 or 10`}
@@ -248,9 +255,7 @@ export function BuySellSecurityForm({
             name="pricePerShare"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  {`${t("price_per")} ${securityLabel[1]}`}
-                </FormLabel>
+                <FormLabel>{`${t("price_per")} ${securityLabel[1]}`}</FormLabel>
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 160.25"

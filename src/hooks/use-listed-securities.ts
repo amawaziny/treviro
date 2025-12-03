@@ -14,7 +14,8 @@ export const useListedSecurities = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    const securitiesCollectionRef = masterDataService.getSecurityCollectionRef();
+    const securitiesCollectionRef =
+      masterDataService.getSecurityCollectionRef();
     const q = query(securitiesCollectionRef);
 
     const unsubscribe = onSnapshot(
@@ -39,12 +40,15 @@ export const useListedSecurities = () => {
     return () => unsubscribe();
   }, []);
 
-  const getSecurityById = useCallback((id: string): ListedSecurity | undefined => {
-    const existingSecurity = listedSecurities.find((sec) => sec.id === id);
-    if (existingSecurity) {
-      return existingSecurity;
-    }
-  }, [listedSecurities]);
+  const getSecurityById = useCallback(
+    (id: string): ListedSecurity | undefined => {
+      const existingSecurity = listedSecurities.find((sec) => sec.id === id);
+      if (existingSecurity) {
+        return existingSecurity;
+      }
+    },
+    [listedSecurities],
+  );
 
   return { listedSecurities, isLoading, error, getSecurityById };
 };

@@ -12,13 +12,16 @@ import { InvestmentService } from "@/lib/services/investment-service";
 import {
   CurrencyInvestment,
   DebtInstrumentInvestment,
+  GoldInvestment,
   Investment,
   InvestmentData,
   InvestmentType,
   isCurrencyInvestment,
   isDebtInstrumentInvestment,
+  isGoldInvestment,
   isRealEstateInvestment,
   isSecurityInvestment,
+  isStockInvestment,
   RealEstateInvestment,
   SecurityInvestment,
 } from "@/lib/types";
@@ -31,6 +34,12 @@ export interface InvestmentContextType {
   debtInvestments: DebtInstrumentInvestment[];
   realEstateInvestments: RealEstateInvestment[];
   currencyInvestments: CurrencyInvestment[];
+  goldInvestments: GoldInvestment[];
+  stockInvestments: SecurityInvestment[];
+  unrealizedPnLStocks: number;
+  unrealizedPnLCurrency: number;
+  unrealizedPnLGold: number;
+  unrealizedPnLTotal: number;
   isLoading: boolean;
   getInvestmentsByType: (type: string) => Investment[];
   getInvestmentById: (id: string) => Investment | undefined;
@@ -89,15 +98,23 @@ export const InvestmentProvider = ({
   const [securityInvestments, setSecurityInvestments] = useState<
     SecurityInvestment[]
   >([]);
+  const [stockInvestments, setStockInvestments] = useState<
+    SecurityInvestment[]
+  >([]);
   const [debtInvestments, setDebtInvestments] = useState<
     DebtInstrumentInvestment[]
   >([]);
+  const [goldInvestments, setGoldInvestments] = useState<GoldInvestment[]>([]);
   const [realEstateInvestments, setRealEstateInvestments] = useState<
     RealEstateInvestment[]
   >([]);
   const [currencyInvestments, setCurrencyInvestments] = useState<
     CurrencyInvestment[]
   >([]);
+  const [unrealizedPnLStocks, setUnrealizedPnLStocks] = useState<number>(0);
+  const [unrealizedPnLCurrency, setUnrealizedPnLCurrency] = useState<number>(0);
+  const [unrealizedPnLGold, setUnrealizedPnLGold] = useState<number>(0);
+  const [unrealizedPnLTotal, setUnrealizedPnLTotal] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [investmentService, setInvestmentService] =
     useState<InvestmentService | null>(null);
@@ -127,6 +144,11 @@ export const InvestmentProvider = ({
     try {
       setIsLoading(true);
       await fetchInvestments(investmentService);
+      const unrealizedPnL = await investmentService.calculateUnrealizedPnL();
+      setUnrealizedPnLTotal(unrealizedPnL.total);
+      setUnrealizedPnLStocks(unrealizedPnL.stocks);
+      setUnrealizedPnLCurrency(unrealizedPnL.currency);
+      setUnrealizedPnLGold(unrealizedPnL.gold);
     } catch (error) {
       console.error("Error loading investments:", error);
     } finally {
@@ -138,6 +160,8 @@ export const InvestmentProvider = ({
     const investments = await service.getOpenedInvestments();
     setInvestments(investments);
     setSecurityInvestments(investments.filter(isSecurityInvestment));
+    setStockInvestments(investments.filter(isStockInvestment));
+    setGoldInvestments(investments.filter(isGoldInvestment));
     setDebtInvestments(investments.filter(isDebtInstrumentInvestment));
     setRealEstateInvestments(investments.filter(isRealEstateInvestment));
     setCurrencyInvestments(investments.filter(isCurrencyInvestment));
@@ -269,8 +293,12 @@ export const InvestmentProvider = ({
     return investments.find((inv) => inv.id === id);
   };
 
-  const getInvestmentBySecurityId = (securityId: string): Investment | undefined => {
-    return investments.filter(isSecurityInvestment).find((inv) => inv.securityId === securityId);
+  const getInvestmentBySecurityId = (
+    securityId: string,
+  ): Investment | undefined => {
+    return investments
+      .filter(isSecurityInvestment)
+      .find((inv) => inv.securityId === securityId);
   };
 
   const contextValue: InvestmentContextType = {
@@ -279,6 +307,12 @@ export const InvestmentProvider = ({
     debtInvestments,
     realEstateInvestments,
     currencyInvestments,
+    goldInvestments,
+    stockInvestments,
+    unrealizedPnLStocks,
+    unrealizedPnLCurrency,
+    unrealizedPnLGold,
+    unrealizedPnLTotal,
     isLoading,
     getInvestmentsByType,
     getInvestmentById,

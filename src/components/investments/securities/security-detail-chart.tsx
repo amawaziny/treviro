@@ -13,7 +13,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import type { SecurityChartDataPoint, SecurityChartTimeRange as SecurityChartTimeRange } from "@/lib/types";
+import type {
+  SecurityChartDataPoint,
+  SecurityChartTimeRange as SecurityChartTimeRange,
+} from "@/lib/types";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -62,7 +65,8 @@ export function SecurityDetailChart({
   currency,
 }: SecurityDetailChartProps) {
   const { t, language } = useLanguage();
-  const [selectedRange, setSelectedRange] = useState<SecurityChartTimeRange>("1W");
+  const [selectedRange, setSelectedRange] =
+    useState<SecurityChartTimeRange>("1W");
   const [chartData, setChartData] = useState<SecurityChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

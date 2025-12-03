@@ -356,9 +356,9 @@ export class InvestmentService {
               ...installment,
               ...(installment.number === transactionData.installmentNumber
                 ? {
-                    status: "Paid",
-                    paymentDate: now,
-                  }
+                  status: "Paid",
+                  paymentDate: now,
+                }
                 : {}),
             }),
           );
@@ -572,33 +572,51 @@ export class InvestmentService {
    * then subtract total invested
    * @returns Promise that resolves with the total unrealized profit or loss
    */
-  async calculateUnrealizedPnL(): Promise<number> {
+  async calculateUnrealizedPnL(): Promise<{ [key: string]: number }> {
     const investments = await this.getOpenedInvestments();
     let totalUnrealizedPnL = 0;
+    let unrealizedPnLStocks = 0;
+    let unrealizedPnLCurrency = 0;
+    let unrealizedPnLGold = 0;
     investments.forEach(async (investment: Investment) => {
       let currentMarketPrice = investment.averagePurchasePrice;
+      const totalShares = investment.totalShares;
+      const totalInvested = investment.totalInvested;
       if (isGoldInvestment(investment)) {
         const goldMarketPrices = await masterDataService.getGoldMarketPrices();
         currentMarketPrice =
           goldMarketPrices[investment.goldType] ??
           investment.averagePurchasePrice;
+
+        const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
+        unrealizedPnLGold += unrealizedPnL;
+        totalUnrealizedPnL += unrealizedPnL;
       } else if (isSecurityInvestment(investment)) {
         const security = await masterDataService.getSecurity(
           investment.securityId,
         );
         currentMarketPrice = security.price;
+
+        const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
+        unrealizedPnLStocks += unrealizedPnL;
+        totalUnrealizedPnL += unrealizedPnL;
       } else if (isCurrencyInvestment(investment)) {
         currentMarketPrice = await masterDataService.getExchangeRate(
           investment.currencyCode,
           investment.currency,
         );
+
+        const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
+        unrealizedPnLCurrency += unrealizedPnL;
+        totalUnrealizedPnL += unrealizedPnL;
       }
-      const totalShares = investment.totalShares;
-      const totalInvested = investment.totalInvested;
-      const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
-      totalUnrealizedPnL += unrealizedPnL;
     });
-    return totalUnrealizedPnL;
+    return {
+      totalUnrealizedPnL,
+      unrealizedPnLStocks,
+      unrealizedPnLCurrency,
+      unrealizedPnLGold,
+    };
   }
 
   async handleMaturedDebtInstruments(): Promise<void> {

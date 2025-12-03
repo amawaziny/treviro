@@ -70,8 +70,8 @@ const realEstateAmountInvested = z.preprocess(
 const stringToOptionalPositiveNumberCoerced = z.preprocess(
   (val) =>
     (typeof val === "string" && val.trim() === "") ||
-      val === null ||
-      val === undefined
+    val === null ||
+    val === undefined
       ? undefined
       : Number(val),
   z
