@@ -555,7 +555,7 @@ export default function MyDebtInstrumentsPage() {
         </CardContent>
       </Card>
 
-      <Link href="/investments/add?type=Debt Instruments" passHref>
+      <Link href="/investments/buy-new?type=Debt Instruments" passHref>
         <Button
           variant="default"
           size="icon"

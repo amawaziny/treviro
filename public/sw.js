@@ -231,7 +231,7 @@ define(["./workbox-e9849328"], function (e) {
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {
-          url: "/_next/static/chunks/app/(app)/investments/add/page-a4e052a400263af8.js",
+          url: "/_next/static/chunks/app/(app)/investments/buy-new/page-a4e052a400263af8.js",
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {

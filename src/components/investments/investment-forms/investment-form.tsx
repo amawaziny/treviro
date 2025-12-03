@@ -92,14 +92,14 @@ function getInitialFormValues(type: InvestmentType): InvestmentFormValues {
 // 1. modes buy, buyNew, edit, sell
 // 2. check parameters for each mode .. current parameters are for buyNew and it could be used for edit and i think we could create a new form (transaction-form) for buy, sell, and edit transactions
 interface InvestmentFormProps {
-  mode?: "add" | "edit";
+  mode?: "buyNew" | "edit";
   initialValues?: Partial<InvestmentFormValues>;
   initialType?: string;
   securityId?: string;
 }
 
 export function InvestmentForm({
-  mode = "add",
+  mode,
   initialValues,
   initialType,
   securityId,

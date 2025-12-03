@@ -123,7 +123,6 @@
   "cheque_number": "رقم الشيك",
   "choose_the_month_your_financial_year_begins": "اختر الشهر الذي تبدأ فيه سنتك المالية.",
   "company_logo": "شعار الشركة",
-  "componentsinvestmentsaddaddinvestmentform": "@/components/investments/add/add-investment-form",
   "configure_your_financial_year_preferences": "قم بتكوين تفضيﻻت السنة المالية الخاصة بك.",
   "could_not_delete_the_transaction": "تعذر حذف المعاملة.",
   "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore": "تعذر تحميل أسعار الصرف الحالية. قد تكون حسابات الربح/الخسارة غير متوفرة أو غير دقيقة. يرجى التأكد من إعداد مستند 'exchangeRates/current' بشكل صحيح في Firestore.",

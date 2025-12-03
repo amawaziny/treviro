@@ -376,7 +376,7 @@ export default function MyGoldPage() {
         </CardContent>
       </Card>
 
-      <Link href="/investments/add?type=Gold" passHref>
+      <Link href="/investments/buy-new?type=Gold" passHref>
         <Button
           variant="default"
           size="icon"

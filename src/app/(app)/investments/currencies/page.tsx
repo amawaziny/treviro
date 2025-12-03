@@ -238,7 +238,7 @@ export default function MyCurrenciesPage() {
         </Card>
       )}
 
-      <Link href="/investments/add?type=Currencies" passHref>
+      <Link href="/investments/buy-new?type=Currencies" passHref>
         <Button
           variant="default"
           size="icon"

@@ -139,7 +139,6 @@
   "cheque_number": "Cheque Number",
   "choose_the_month_your_financial_year_begins": "Choose the month your financial year begins.",
   "company_logo": "company logo",
-  "componentsinvestmentsaddaddinvestmentform": "@/components/investments/add/add-investment-form",
   "configure_your_financial_year_preferences": "Configure your financial year preferences.",
   "could_not_delete_the_transaction": "Could not delete the transaction.",
   "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore": "Could not load current exchange rates. P/L calculations might be\n            unavailable or inaccurate. Please ensure the 'exchangeRates/current'\n            document is correctly set up in Firestore.",

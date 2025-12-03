@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"; // Import hook
 import { useForm } from "@/contexts/form-context";
 import { InvestmentForm } from "@/components/investments/investment-forms/investment-form";
 
-export default function AddInvestmentPage() {
+export default function BuyNewInvestmentPage() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -15,7 +15,7 @@ export default function AddInvestmentPage() {
 
     const securityId = searchParams.get("securityId");
     const investmentType =
-      searchParams.get("type") || (securityId ? "Buy Security" : "investment");
+      searchParams.get("type") || (securityId ? "Securities" : "investment");
 
     const typeConfigs = {
       funds: {
@@ -43,7 +43,7 @@ export default function AddInvestmentPage() {
         backHref: "/investments/currencies",
         backLabel: t("back_to_currencies"),
       },
-      ["buy-security"]: {
+      ["securities"]: {
         title: `${t("buy")} ${securityId}`,
         backHref: `/securities/${securityId}`,
         backLabel: t("back_to_buy_security"),
@@ -53,7 +53,7 @@ export default function AddInvestmentPage() {
     // Get the config for the current type or use a default
     const normalizedType = investmentType.toLowerCase().replace(/\s+/g, "-");
     const config = typeConfigs[normalizedType as keyof typeof typeConfigs] || {
-      title: `Add ${investmentType}`,
+      title: `Buy new ${investmentType}`,
       backHref: "/investments",
       backLabel: t("back_to_investments"),
     };
@@ -79,8 +79,9 @@ export default function AddInvestmentPage() {
     <div className="flex flex-col">
       <div className="container mx-auto flex-1">
         <InvestmentForm
-          initialType={searchParams.get("type") || "Stocks"}
+          initialType={searchParams.get("type") || "Securities"}
           securityId={securityId || undefined}
+          mode={"buyNew"}
         />
       </div>
     </div>
