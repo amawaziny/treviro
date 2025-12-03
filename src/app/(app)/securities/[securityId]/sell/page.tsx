@@ -32,7 +32,7 @@ export default function SellSecurityPage() {
 
       setHeaderProps({
         showBackButton: true,
-        backHref: `/securities/details/${securityId}`,
+        backHref: `/securities/${securityId}`,
         backLabel: t("back_to_security_details"),
         title: pageTitle,
         showNavControls: false,
@@ -70,7 +70,7 @@ export default function SellSecurityPage() {
           )}
         </CardHeader>
         <CardContent>
-          <BuySellSecurityForm securityId={security.id} />
+          <BuySellSecurityForm securityId={security.id} mode="sell" />
         </CardContent>
       </Card>
     </div>

@@ -45,7 +45,7 @@ export default function AddInvestmentPage() {
       },
       ["buy-security"]: {
         title: `${t("buy")} ${securityId}`,
-        backHref: `/securities/details/${securityId}`,
+        backHref: `/securities/${securityId}`,
         backLabel: t("back_to_buy_security"),
       },
     };

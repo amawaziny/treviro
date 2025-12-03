@@ -61,7 +61,7 @@ export function InvestmentSecurityCard({
 
     return security.symbol;
   };
-  const detailPageLink = `/securities/details/${security.id}?fromMyStocks=true`;
+  const detailPageLink = `/securities/${security.id}?fromMyStocks=true`;
 
   return (
     <Card

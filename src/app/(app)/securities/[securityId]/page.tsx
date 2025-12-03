@@ -255,14 +255,14 @@ export default function SecurityDetailPage() {
         </CardHeader>
         {/* Desktop Buttons */}
         <CardContent className="hidden md:flex justify-end gap-2 pb-4">
-          <Link href={`/investments/add?securityId=${security.id}`} passHref>
+          <Link href={`/securities/${security.id}/buy`} passHref>
             <Button variant="default" data-testid="buy-security-button">
               <ShoppingCart className="h-4 w-4" /> {t("buy")}
             </Button>
           </Link>
           {hasPosition && (
             <>
-              <Link href={`/securities/sell/${security.id}`} passHref>
+              <Link href={`/securities/${security.id}/sell`} passHref>
                 <Button variant="outline">
                   <DollarSign className="h-4 w-4" /> {t("sell")}
                 </Button>
@@ -286,7 +286,7 @@ export default function SecurityDetailPage() {
         {/* Mobile Fixed Action Bar */}
         <div className="fixed bottom-0 left-0 w-full bg-background/95 backdrop-blur-sm border-t z-50 flex md:hidden px-4 py-3 gap-2 justify-between safe-bottom">
           <Link
-            href={`/investments/add?securityId=${security.id}`}
+            href={`/securities/${security.id}/buy`}
             passHref
             className="flex-1"
           >
@@ -297,7 +297,7 @@ export default function SecurityDetailPage() {
           {hasPosition && (
             <>
               <Link
-                href={`/securities/sell/${security.id}`}
+                href={`/securities/${security.id}/sell`}
                 passHref
                 className="flex-1"
               >

@@ -26,7 +26,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
   const isMobile = useIsMobile();
   const securityName = security[language === "ar" ? "name_ar" : "name"];
 
-  const detailPageLink = `/securities/details/${security.id}?previousTab=${currentTab}`;
+  const detailPageLink = `/securities/${security.id}?previousTab=${currentTab}`;
 
   const formattedPrice = formatNumberForMobile(
     isMobile,

@@ -115,8 +115,8 @@ test.describe("Stocks & Equity Funds Page", () => {
       await firstCard.click();
 
       // Verify navigation to security details
-      await page.waitForURL(/\/securities\/details/);
-      await expect(page).toHaveURL(/\/securities\/details/);
+      await page.waitForURL(/\/securities/);
+      await expect(page).toHaveURL(/\/securities/);
     } else {
       test.skip(count === 0, "No investments available to test navigation");
     }

@@ -143,7 +143,7 @@ export function BuySellSecurityForm({
           description: `${t("Successfully recorded purchase of")} ${values.numberOfShares} ${securityLabel} ${t("of")} ${security[language === "ar" ? "name_ar" : "name"]}.`,
         });
       }
-      router.push(`/securities/details/${securityId}`);
+      router.push(`/securities/${securityId}`);
     } catch (error: any) {
       console.error(t("error_recording_sale"), error);
       toast({
