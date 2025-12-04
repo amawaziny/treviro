@@ -348,6 +348,7 @@ export default function SecurityDetailPage() {
           <TabsTrigger
             value="transactions"
             className="flex text-xs md:text-base w-full"
+            disabled={!hasPosition}
           >
             {t("transactions")}
           </TabsTrigger>

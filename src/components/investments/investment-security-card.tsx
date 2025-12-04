@@ -8,22 +8,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ListedSecurity, SecurityInvestment } from "@/lib/types";
+import { SecurityInvestment } from "@/lib/types";
 import FundTypeIcon from "../ui/fund-type-icon";
 import { calcProfit } from "@/lib/financial-utils";
+import { masterDataService } from "@/lib/services/master-data-service";
+import React from "react";
 
 export type InvestmentSecurityCardProps = {
-  security: ListedSecurity;
   investment: SecurityInvestment;
 };
 
 export function InvestmentSecurityCard({
-  security,
   investment,
 }: InvestmentSecurityCardProps) {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
-
+  const security = React.use(masterDataService.getSecurity(investment.securityId));
   // Calculate profit/loss
   const {
     isProfitable,
@@ -32,9 +32,9 @@ export function InvestmentSecurityCard({
     profitLossPercent,
     totalCurrentValue,
   } = calcProfit(
-    investment.numberOfShares!,
-    investment.purchasePricePerShare!,
-    security.price!,
+    investment.totalShares,
+    investment.averagePurchasePrice,
+    security.price,
   );
 
   const securityName = security[language === "ar" ? "name_ar" : "name"];
@@ -100,13 +100,7 @@ export function InvestmentSecurityCard({
                   {security.market.toUpperCase()}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {`${t(getQuantityLabel())}: ${investment.numberOfShares!.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2,
-                    },
-                  )}`}
+                  {`${t(getQuantityLabel())}: ${investment.totalShares}`}
                 </p>
               </div>
             </div>
@@ -151,10 +145,7 @@ export function InvestmentSecurityCard({
             <p>
               {`${t("avg_cost")}: `}
               <span className="font-medium text-foreground">
-                {formatNumberForMobile(
-                  isMobile,
-                  investment.purchasePricePerShare,
-                )}
+                {formatNumberForMobile(isMobile, investment.averagePurchasePrice)}
               </span>
             </p>
             <p className="text-end">

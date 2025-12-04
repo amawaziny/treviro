@@ -3,13 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Plus, TrendingUp, TrendingDown, LineChart } from "lucide-react"; // Added icons
+import { Plus, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
-import React from "react"; // Added React for useMemo
-import { useInvestments } from "@/hooks/use-investments"; // To calculate total P/L
-import { useListedSecurities } from "@/hooks/use-listed-securities"; // For current prices
-import { cn, formatNumberForMobile } from "@/lib/utils"; // For styling and formatting
+import React from "react";
+import { useInvestments } from "@/hooks/use-investments";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
@@ -18,13 +17,7 @@ export default function MyStocksPage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
 
-  const { stockInvestments, unrealizedPnLStocks, isLoading: isLoadingInvestments } =
-    useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } =
-    useListedSecurities();
-
-  // Update loading state to consider both hooks
-  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
+  const { stockInvestments, unrealizedPnLStocks, isLoading } = useInvestments();
 
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
@@ -119,19 +112,10 @@ export default function MyStocksPage() {
       ) : (
         <div className="space-y-4" data-testid="investments-list">
           {stockInvestments.map((investment) => {
-            if (!investment.securityId) return null;
-
-            const listedSecurity = listedSecurities.find(
-              (ls) => ls.id === investment.securityId,
-            );
-
-            if (!listedSecurity) return null;
-
             return (
               <InvestmentSecurityCard
                 data-testid={`investment-card-${investment.id}`}
                 key={`${investment.id}-${investment.securityId}`}
-                security={listedSecurity}
                 investment={investment}
               />
             );
