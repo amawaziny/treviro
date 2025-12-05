@@ -240,7 +240,7 @@ export interface ListedSecurity {
   currency: CurrencyCode;
   changePercent: number;
   market: string;
-  securityType?: "Stock" | "Fund";
+  securityType: "Stock" | "Fund";
   fundType?: InvestmentType;
   description?: string;
   isin: string;

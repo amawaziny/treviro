@@ -311,11 +311,11 @@ define(["./workbox-e9849328"], function (e) {
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {
-          url: "/_next/static/chunks/app/api/scrape-stock-orchestrator/route-687294e2418f3892.js",
+          url: "/_next/static/chunks/app/api/scan-stock-orchestrator/route-687294e2418f3892.js",
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {
-          url: "/_next/static/chunks/app/api/scrape-stock/route-56ca388ae42a849e.js",
+          url: "/_next/static/chunks/app/api/scan-stock/route-56ca388ae42a849e.js",
           revision: "tmpDi-Qm3o2EXOgHbNpKo",
         },
         {

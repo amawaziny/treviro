@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Number of companies and batch size must match your scrape-stock logic
+// Number of companies and batch size must match your scan-stock logic
 const TOTAL_COMPANIES = 235;
 const BATCH_SIZE = 20;
 
@@ -13,7 +13,7 @@ export async function GET() {
   const batchCount = Math.ceil(TOTAL_COMPANIES / BATCH_SIZE);
   const batchPromises = Array.from({ length: batchCount }, (_, i) => {
     const offset = i * BATCH_SIZE;
-    const url = `${baseUrl}/api/scrape-stock?offset=${offset}&limit=${BATCH_SIZE}`;
+    const url = `${baseUrl}/api/scan-stock?offset=${offset}&limit=${BATCH_SIZE}`;
     return fetch(url)
       .then(async (res) => {
         const data = await res.json();

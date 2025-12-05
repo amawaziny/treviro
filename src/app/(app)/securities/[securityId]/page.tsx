@@ -44,6 +44,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
 import { useTransactions } from "@/hooks/use-transactions";
+import SecurityChart from "@/components/investments/securities/security-chart";
 
 export default function SecurityDetailPage() {
   const { t, language, dir } = useLanguage();
@@ -360,10 +361,7 @@ export default function SecurityDetailPage() {
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <SecurityDetailChart
-                securityId={security.id}
-                currency={displayCurrency}
-              />
+              <SecurityChart symbol={security.symbol} />
             </CardContent>
           </Card>
 
