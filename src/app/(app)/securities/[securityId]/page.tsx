@@ -361,7 +361,9 @@ export default function SecurityDetailPage() {
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              <SecurityChart symbol={security.symbol} />
+              {security.securityType !== "Fund" && (
+                <SecurityChart symbol={security.symbol} />
+              )}
             </CardContent>
           </Card>
 
@@ -372,7 +374,10 @@ export default function SecurityDetailPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Basic Information */}
-              <div className="space-y-4">
+              <div
+                hidden={security.securityType === "Fund"}
+                className="space-y-4"
+              >
                 <h3 className="text-sm font-medium">
                   {t("basic_information")}
                 </h3>
@@ -417,7 +422,10 @@ export default function SecurityDetailPage() {
               </div>
 
               {/* Market Data */}
-              <div className="pt-4 border-t space-y-4">
+              <div
+                hidden={security.securityType === "Fund"}
+                className="pt-4 border-t space-y-4"
+              >
                 <h3 className="text-sm font-medium">{t("market_data")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
@@ -468,7 +476,10 @@ export default function SecurityDetailPage() {
               </div>
 
               {/* Financial Metrics */}
-              <div className="pt-4 border-t space-y-4">
+              <div
+                hidden={security.securityType === "Fund"}
+                className="pt-4 border-t space-y-4"
+              >
                 <h3 className="text-sm font-medium">
                   {t("financial_metrics")}
                 </h3>
@@ -509,7 +520,10 @@ export default function SecurityDetailPage() {
               </div>
 
               {/* Dividend */}
-              <div className="pt-4 border-t space-y-4">
+              <div
+                hidden={security.securityType === "Fund"}
+                className="pt-4 border-t space-y-4"
+              >
                 <h3 className="text-sm font-medium">{t("dividend")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">

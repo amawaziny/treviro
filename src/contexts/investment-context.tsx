@@ -36,10 +36,10 @@ export interface InvestmentContextType {
   currencyInvestments: CurrencyInvestment[];
   goldInvestments: GoldInvestment[];
   stockInvestments: SecurityInvestment[];
-  unrealizedPnLStocks: number;
-  unrealizedPnLCurrency: number;
-  unrealizedPnLGold: number;
-  unrealizedPnLTotal: number;
+  totalStocks: { [key: string]: number };
+  totalCurrency: { [key: string]: number };
+  totalGold: { [key: string]: number };
+  totalProtfolio: { [key: string]: number };
   isLoading: boolean;
   getInvestmentsByType: (type: string) => Investment[];
   getInvestmentById: (id: string) => Investment | undefined;
@@ -111,10 +111,14 @@ export const InvestmentProvider = ({
   const [currencyInvestments, setCurrencyInvestments] = useState<
     CurrencyInvestment[]
   >([]);
-  const [unrealizedPnLStocks, setUnrealizedPnLStocks] = useState<number>(0);
-  const [unrealizedPnLCurrency, setUnrealizedPnLCurrency] = useState<number>(0);
-  const [unrealizedPnLGold, setUnrealizedPnLGold] = useState<number>(0);
-  const [unrealizedPnLTotal, setUnrealizedPnLTotal] = useState<number>(0);
+  const [totalStocks, setTotalStocks] = useState<{ [key: string]: number }>({});
+  const [totalCurrency, setTotalCurrency] = useState<{ [key: string]: number }>(
+    {},
+  );
+  const [totalGold, setTotalGold] = useState<{ [key: string]: number }>({});
+  const [totalProtfolio, setTotalProtfolio] = useState<{
+    [key: string]: number;
+  }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [investmentService, setInvestmentService] =
     useState<InvestmentService | null>(null);
@@ -145,10 +149,10 @@ export const InvestmentProvider = ({
       setIsLoading(true);
       await fetchInvestments(investmentService);
       const unrealizedPnL = await investmentService.calculateUnrealizedPnL();
-      setUnrealizedPnLTotal(unrealizedPnL.total);
-      setUnrealizedPnLStocks(unrealizedPnL.stocks);
-      setUnrealizedPnLCurrency(unrealizedPnL.currency);
-      setUnrealizedPnLGold(unrealizedPnL.gold);
+      setTotalProtfolio(unrealizedPnL.protfolio);
+      setTotalStocks(unrealizedPnL.stocks);
+      setTotalCurrency(unrealizedPnL.currencies);
+      setTotalGold(unrealizedPnL.gold);
     } catch (error) {
       console.error("Error loading investments:", error);
     } finally {
@@ -309,10 +313,10 @@ export const InvestmentProvider = ({
     currencyInvestments,
     goldInvestments,
     stockInvestments,
-    unrealizedPnLStocks,
-    unrealizedPnLCurrency,
-    unrealizedPnLGold,
-    unrealizedPnLTotal,
+    totalStocks,
+    totalCurrency,
+    totalGold,
+    totalProtfolio,
     isLoading,
     getInvestmentsByType,
     getInvestmentById,

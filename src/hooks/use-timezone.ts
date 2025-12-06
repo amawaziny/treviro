@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function useTimeZone() {
-  const [timeZone, setTimeZone] = useState<string>('Africa/Cairo');
+  const [timeZone, setTimeZone] = useState<string>("Africa/Cairo");
 
   useEffect(() => {
     try {
@@ -9,8 +9,8 @@ export function useTimeZone() {
       const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       setTimeZone(detectedTimeZone);
     } catch (error) {
-      console.warn('Could not detect timezone, falling back to Africa/Cairo');
-      setTimeZone('Africa/Cairo');
+      console.warn("Could not detect timezone, falling back to Africa/Cairo");
+      setTimeZone("Africa/Cairo");
     }
   }, []);
 

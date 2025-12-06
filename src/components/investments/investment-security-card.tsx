@@ -23,7 +23,9 @@ export function InvestmentSecurityCard({
 }: InvestmentSecurityCardProps) {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
-  const security = React.use(masterDataService.getSecurity(investment.securityId));
+  const security = React.use(
+    masterDataService.getSecurity(investment.securityId),
+  );
   // Calculate profit/loss
   const {
     isProfitable,
@@ -145,7 +147,10 @@ export function InvestmentSecurityCard({
             <p>
               {`${t("avg_cost")}: `}
               <span className="font-medium text-foreground">
-                {formatNumberForMobile(isMobile, investment.averagePurchasePrice)}
+                {formatNumberForMobile(
+                  isMobile,
+                  investment.averagePurchasePrice,
+                )}
               </span>
             </p>
             <p className="text-end">

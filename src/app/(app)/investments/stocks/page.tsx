@@ -17,7 +17,7 @@ export default function MyStocksPage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
 
-  const { stockInvestments, unrealizedPnLStocks, isLoading } = useInvestments();
+  const { stockInvestments, totalStocks, isLoading } = useInvestments();
 
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
@@ -52,7 +52,7 @@ export default function MyStocksPage() {
             <CardTitle className="text-sm font-medium" data-testid="pl-title">
               {t("total_stocks_equity_funds_pl")}
             </CardTitle>
-            {unrealizedPnLStocks >= 0 ? (
+            {totalStocks.totalUnrealizedPnL >= 0 ? (
               <TrendingUp
                 className="h-4 w-4 text-accent"
                 data-testid="trend-up-icon"
@@ -68,18 +68,26 @@ export default function MyStocksPage() {
             <div
               className={cn(
                 "text-xl font-bold",
-                unrealizedPnLStocks >= 0 ? "text-accent" : "text-destructive",
+                totalStocks.unrealizedPnLStocks >= 0
+                  ? "text-accent"
+                  : "text-destructive",
               )}
             >
               <span data-testid="total-pl-amount">
-                {formatNumberForMobile(isMobile, unrealizedPnLStocks)}
+                {formatNumberForMobile(
+                  isMobile,
+                  totalStocks.unrealizedPnLStocks,
+                )}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
               {`${
-                unrealizedPnLStocks === Infinity
+                totalStocks.unrealizedPnLStocks === Infinity
                   ? "∞"
-                  : unrealizedPnLStocks.toFixed(2)
+                  : (
+                      totalStocks.unrealizedPnLStocks /
+                      totalStocks.totalInvested
+                    ).toFixed(2)
               }% ${t("overall_pl")}`}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
@@ -88,7 +96,7 @@ export default function MyStocksPage() {
                 className="font-medium text-foreground"
                 data-testid="total-invested-amount"
               >
-                {formatNumberForMobile(isMobile, unrealizedPnLStocks)}
+                {formatNumberForMobile(isMobile, totalStocks.totalInvested)}
               </span>
             </p>
           </CardContent>

@@ -37,40 +37,38 @@ export async function GET(req: NextRequest) {
     let q = query(
       collection(db, LISTED_SECURITIES_COLLECTION),
       orderBy("id"),
-      where("securityType", "==", "Stock")
+      where("securityType", "==", "Stock"),
     );
 
-    if(all && all.toLowerCase() !== "true") {
-      const cursorSnapDocs = await getDocs(query(collection(db, LISTED_SECURITIES_COLLECTION)
-        ,orderBy("id")
-        ,limit(searchOffset)
-      ));
+    if (all && all.toLowerCase() !== "true") {
+      const cursorSnapDocs = await getDocs(
+        query(
+          collection(db, LISTED_SECURITIES_COLLECTION),
+          orderBy("id"),
+          limit(searchOffset),
+        ),
+      );
 
       const cursor = cursorSnapDocs.docs[cursorSnapDocs.docs.length - 1];
 
-      q = query(
-        q,
-        limit(searchLimit),
-        orderBy("id"),
-        startAfter(cursor)
-      );
+      q = query(q, limit(searchLimit), orderBy("id"), startAfter(cursor));
     }
 
     const snapshot = await getDocs(q);
     const batchDocs = snapshot.docs;
-    
+
     const updates: Array<Promise<any>> = [];
     for (const stockDoc of batchDocs) {
       const symbol = stockDoc.get("symbol");
       if (!symbol) continue;
-      
+
       const code = symbol;
       const url = `https://scanner.tradingview.com/egypt/scan`;
-      
+
       try {
         const payload = {
           symbols: { tickers: ["EGX:" + code.toUpperCase()] },
-          columns: ["close", "open", "high", "low", "volume", "change"]
+          columns: ["close", "open", "high", "low", "volume", "change"],
         };
 
         const options = {
@@ -79,8 +77,8 @@ export async function GET(req: NextRequest) {
           payload: JSON.stringify(payload),
           muteHttpExceptions: true,
           headers: {
-            "User-Agent": "Mozilla/5.0"
-          }
+            "User-Agent": "Mozilla/5.0",
+          },
         };
 
         const res = await axios.post(url, options);
@@ -98,9 +96,16 @@ export async function GET(req: NextRequest) {
           updates.push(
             (async () => {
               // Update the price in listedSecurities
-              await updateDoc(doc(db, LISTED_SECURITIES_COLLECTION, stockDoc.id), {
-                price: row[0], changePercent: row[5], high: row[2], low: row[3], volume: row[4]
-              });              
+              await updateDoc(
+                doc(db, LISTED_SECURITIES_COLLECTION, stockDoc.id),
+                {
+                  price: row[0],
+                  changePercent: row[5],
+                  high: row[2],
+                  low: row[3],
+                  volume: row[4],
+                },
+              );
             })(),
           );
           console.log(`Updated: ${code}`);

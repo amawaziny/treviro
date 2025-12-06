@@ -194,16 +194,17 @@ export class DashboardService {
         data.totalInvested ?? defaultDashboardSummaries.totalInvested;
       const totalCashBalance =
         data.totalCashBalance ?? defaultDashboardSummaries.totalCashBalance;
-      const totalUnrealizedPnL =
+      const unrealizedPnL =
         await this.investmentService.calculateUnrealizedPnL();
-      const marketTotalInvested = totalInvested + totalUnrealizedPnL.total;
+      const marketTotalInvested =
+        totalInvested + unrealizedPnL.portfolio.totalUnrealizedPnL;
       const totalPortfolio = marketTotalInvested + totalCashBalance;
       return {
         totalInvested,
         totalRealizedPnL:
           data.totalRealizedPnL ?? defaultDashboardSummaries.totalRealizedPnL,
         totalCashBalance,
-        totalUnrealizedPnL: totalUnrealizedPnL.total,
+        totalUnrealizedPnL: unrealizedPnL.portfolio.totalUnrealizedPnL,
         marketTotalInvested,
         totalPortfolio,
         updatedAt: data.updatedAt ?? defaultDashboardSummaries.updatedAt,

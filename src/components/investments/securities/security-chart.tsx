@@ -14,7 +14,11 @@ interface SecurityChartProps {
  * SecurityChart Component
  * Wraps TradingView AdvancedChart widget with dynamic symbol
  */
-const SecurityChart: React.FC<SecurityChartProps> = ({ symbol, width = "100%", height = "100%" }) => {
+const SecurityChart: React.FC<SecurityChartProps> = ({
+  symbol,
+  width = "100%",
+  height = "100%",
+}) => {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const timeZone = useTimeZone();

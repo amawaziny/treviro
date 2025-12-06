@@ -239,6 +239,9 @@ export interface ListedSecurity {
   price: number;
   currency: CurrencyCode;
   changePercent: number;
+  high: number;
+  low: number;
+  volume: number;
   market: string;
   securityType: "Stock" | "Fund";
   fundType?: InvestmentType;
