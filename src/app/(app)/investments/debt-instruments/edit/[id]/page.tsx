@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function EditDebtInstrumentPage() {
   const { t } = useLanguage();
   const params = useParams();
-  const { investments, isLoading } = useInvestments();
+  const { debtInvestments, isLoading } = useInvestments();
   const { setHeaderProps, openForm, closeForm } = useForm();
   const [investment, setInvestment] = useState<DebtInstrumentInvestment | null>(
     null,
@@ -21,13 +21,11 @@ export default function EditDebtInstrumentPage() {
 
   useEffect(() => {
     if (!params?.id) return;
-    const found = investments.find(
-      (inv) => inv.type === "Debt Instruments" && inv.id === params.id,
-    ) as DebtInstrumentInvestment | undefined;
+    const found = debtInvestments.find((inv) => inv.id === params.id)
     if (found) {
       setInvestment(found);
     }
-  }, [params?.id, investments]);
+  }, [params?.id, debtInvestments]);
 
   useEffect(() => {
     openForm();
