@@ -41,15 +41,6 @@ export default function MyCurrenciesPage() {
 
   const isMobile = useIsMobile();
 
-  const totalProfitLossPercent =
-    totalCurrency.totalInvested > 0
-      ? (totalCurrency.unrealizedPnLCurrency / totalCurrency.totalInvested) *
-        100
-      : totalCurrency.totalCurrentValueEGP > 0
-        ? Infinity
-        : 0;
-  const isTotalProfitable = totalCurrency.totalProfitLossEGP >= 0;
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -99,7 +90,7 @@ export default function MyCurrenciesPage() {
           <CardTitle className="text-sm font-medium">
             {t("total_currencies_pl_vs_egp")}
           </CardTitle>
-          {isTotalProfitable ? (
+          {totalCurrency.unrealizedPnL >= 0 ? (
             <TrendingUp className="h-4 w-4 text-accent" />
           ) : (
             <TrendingDown className="h-4 w-4 text-destructive" />
@@ -109,20 +100,27 @@ export default function MyCurrenciesPage() {
           <div
             className={cn(
               "text-xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive",
+              totalCurrency.unrealizedPnL >= 0
+                ? "text-accent"
+                : "text-destructive",
             )}
           >
             {formatNumberForMobile(
               isMobile,
-              totalCurrency.unrealizedPnLCurrency,
+              totalCurrency.unrealizedPnL,
               "EGP",
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            {totalProfitLossPercent === Infinity
-              ? "∞"
-              : totalProfitLossPercent.toFixed(2)}
-            {t("overall_pl")}
+            {`${
+              totalCurrency.unrealizedPnL === Infinity
+                ? "∞"
+                : (
+                    (totalCurrency.unrealizedPnL /
+                      totalCurrency.totalInvested) *
+                    100
+                  ).toFixed(2)
+            }% ${t("overall_pl")}`}
           </p>
         </CardContent>
       </Card>

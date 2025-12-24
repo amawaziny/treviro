@@ -17,6 +17,7 @@ import {
   InvestmentData,
   InvestmentType,
   isCurrencyInvestment,
+  isDebtFundInvestment,
   isDebtInstrumentInvestment,
   isGoldInvestment,
   isRealEstateInvestment,
@@ -32,6 +33,7 @@ export interface InvestmentContextType {
   investments: Investment[];
   securityInvestments: SecurityInvestment[];
   debtInvestments: DebtInstrumentInvestment[];
+  debtFundInvestments: SecurityInvestment[];
   realEstateInvestments: RealEstateInvestment[];
   currencyInvestments: CurrencyInvestment[];
   goldInvestments: GoldInvestment[];
@@ -39,7 +41,9 @@ export interface InvestmentContextType {
   totalStocks: { [key: string]: number };
   totalCurrency: { [key: string]: number };
   totalGold: { [key: string]: number };
-  totalProtfolio: { [key: string]: number };
+  totalDebt: { [key: string]: number };
+  totalRealEstate: { [key: string]: number };
+  totalPortfolio: { [key: string]: number };
   isLoading: boolean;
   getInvestmentsByType: (type: string) => Investment[];
   getInvestmentById: (id: string) => Investment | undefined;
@@ -104,6 +108,9 @@ export const InvestmentProvider = ({
   const [debtInvestments, setDebtInvestments] = useState<
     DebtInstrumentInvestment[]
   >([]);
+  const [debtFundInvestments, setDebtFundInvestments] = useState<
+    SecurityInvestment[]
+  >([]);
   const [goldInvestments, setGoldInvestments] = useState<GoldInvestment[]>([]);
   const [realEstateInvestments, setRealEstateInvestments] = useState<
     RealEstateInvestment[]
@@ -115,8 +122,12 @@ export const InvestmentProvider = ({
   const [totalCurrency, setTotalCurrency] = useState<{ [key: string]: number }>(
     {},
   );
+  const [totalRealEstate, setTotalRealEstate] = useState<{
+    [key: string]: number;
+  }>({});
+  const [totalDebt, setTotalDebt] = useState<{ [key: string]: number }>({});
   const [totalGold, setTotalGold] = useState<{ [key: string]: number }>({});
-  const [totalProtfolio, setTotalProtfolio] = useState<{
+  const [totalPortfolio, setTotalPortfolio] = useState<{
     [key: string]: number;
   }>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -149,10 +160,12 @@ export const InvestmentProvider = ({
       setIsLoading(true);
       await fetchInvestments(investmentService);
       const unrealizedPnL = await investmentService.calculateUnrealizedPnL();
-      setTotalProtfolio(unrealizedPnL.protfolio);
+      setTotalPortfolio(unrealizedPnL.portfolio);
       setTotalStocks(unrealizedPnL.stocks);
       setTotalCurrency(unrealizedPnL.currencies);
       setTotalGold(unrealizedPnL.gold);
+      setTotalRealEstate(unrealizedPnL.realEstate);
+      setTotalDebt(unrealizedPnL.debt);
     } catch (error) {
       console.error("Error loading investments:", error);
     } finally {
@@ -167,6 +180,7 @@ export const InvestmentProvider = ({
     setStockInvestments(investments.filter(isStockInvestment));
     setGoldInvestments(investments.filter(isGoldInvestment));
     setDebtInvestments(investments.filter(isDebtInstrumentInvestment));
+    setDebtFundInvestments(investments.filter(isDebtFundInvestment));
     setRealEstateInvestments(investments.filter(isRealEstateInvestment));
     setCurrencyInvestments(investments.filter(isCurrencyInvestment));
   };
@@ -309,6 +323,7 @@ export const InvestmentProvider = ({
     investments,
     securityInvestments,
     debtInvestments,
+    debtFundInvestments,
     realEstateInvestments,
     currencyInvestments,
     goldInvestments,
@@ -316,7 +331,9 @@ export const InvestmentProvider = ({
     totalStocks,
     totalCurrency,
     totalGold,
-    totalProtfolio,
+    totalDebt,
+    totalRealEstate,
+    totalPortfolio,
     isLoading,
     getInvestmentsByType,
     getInvestmentById,

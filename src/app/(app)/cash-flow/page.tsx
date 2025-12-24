@@ -62,7 +62,7 @@ export default function CashFlowPage() {
 
   const {
     totalIncome,
-    totalProjectedDebtInterest,
+    totalProjectedDebtMonthlyInterest,
     totalExpenses,
     incomeManualTrxs,
     expensesManualOtherTrxs,
@@ -137,7 +137,7 @@ export default function CashFlowPage() {
       <CashFlowSummaryCards
         totalIncome={totalIncome}
         totalFixedIncome={totalFixedIncome}
-        totalProjectedDebtInterest={totalProjectedDebtInterest}
+        totalProjectedDebtMonthlyInterest={totalProjectedDebtMonthlyInterest}
         incomeTillNow={incomeTillNow}
         totalExpenses={totalExpenses}
         totalFixedExpenses={totalFixedExpenses}
@@ -197,14 +197,17 @@ export default function CashFlowPage() {
                 <span>{formatNumberForMobile(isMobile, tx.amount)}</span>
               </div>
             ))}
-            {totalProjectedDebtInterest > 0 && (
+            {totalProjectedDebtMonthlyInterest > 0 && (
               <div className="flex justify-between text-xs">
                 <span>
                   <FileText className="inline me-2 h-4 w-4 text-green-600" />
                   {t("projected_debt_interest")}
                 </span>
                 <span>
-                  {formatNumberForMobile(isMobile, totalProjectedDebtInterest)}
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalProjectedDebtMonthlyInterest,
+                  )}
                 </span>
               </div>
             )}

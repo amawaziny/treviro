@@ -1,3 +1,5 @@
+import { DebtInstrumentInvestment } from "./types";
+
 export function calcProfit(
   invNumberOfShares: number,
   invPurchasePricePerShare: number,
@@ -28,4 +30,13 @@ export function calcProfit(
     profitLossPercent,
     totalCurrentValue,
   };
+}
+
+export function calcDebtMonthlyInterest(
+  ...debtInvestments: DebtInstrumentInvestment[]
+) {
+  return debtInvestments.reduce(
+    (sum, debtInv) => sum + debtInv.monthlyInterestAmount,
+    0,
+  );
 }

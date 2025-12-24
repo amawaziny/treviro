@@ -52,7 +52,7 @@ export default function MyStocksPage() {
             <CardTitle className="text-sm font-medium" data-testid="pl-title">
               {t("total_stocks_equity_funds_pl")}
             </CardTitle>
-            {totalStocks.totalUnrealizedPnL >= 0 ? (
+            {totalStocks.unrealizedPnL >= 0 ? (
               <TrendingUp
                 className="h-4 w-4 text-accent"
                 data-testid="trend-up-icon"
@@ -68,25 +68,22 @@ export default function MyStocksPage() {
             <div
               className={cn(
                 "text-xl font-bold",
-                totalStocks.unrealizedPnLStocks >= 0
+                totalStocks.unrealizedPnL >= 0
                   ? "text-accent"
                   : "text-destructive",
               )}
             >
               <span data-testid="total-pl-amount">
-                {formatNumberForMobile(
-                  isMobile,
-                  totalStocks.unrealizedPnLStocks,
-                )}
+                {formatNumberForMobile(isMobile, totalStocks.unrealizedPnL)}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
               {`${
-                totalStocks.unrealizedPnLStocks === Infinity
+                totalStocks.unrealizedPnL === Infinity
                   ? "∞"
                   : (
-                      totalStocks.unrealizedPnLStocks /
-                      totalStocks.totalInvested
+                      (totalStocks.unrealizedPnL / totalStocks.totalInvested) *
+                      100
                     ).toFixed(2)
               }% ${t("overall_pl")}`}
             </p>

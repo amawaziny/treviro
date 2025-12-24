@@ -25,12 +25,17 @@ import {
   isSecurityInvestment,
   isCurrencyInvestment,
   InvestmentData,
+  isStockInvestment,
+  isDebtFundInvestment,
+  isCurrencyFundInvestment,
+  isRealEstateFundInvestment,
 } from "@/lib/types";
 import { eventBus } from "./events";
 
 import { INVESTMENTS_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 import { masterDataService } from "./master-data-service";
+import { calcDebtMonthlyInterest } from "../financial-utils";
 
 type InvestmentUpdate = {
   totalShares: number;
@@ -584,6 +589,13 @@ export class InvestmentService {
     let unrealizedPnLStocks = 0;
     let totalInvestedStocks = 0;
 
+    let unrealizedPnLDebt = 0;
+    let totalInvestedDebt = 0;
+    let totalProjectedDebtMonthlyInterest = 0;
+
+    let unrealizedPnLRealEstate = 0;
+    let totalInvestedRealEstate = 0;
+
     let unrealizedPnLCurrency = 0;
     let totalInvestedCurrency = 0;
 
@@ -591,6 +603,7 @@ export class InvestmentService {
     let totalInvestedGold = 0;
     investments.forEach(async (investment: Investment) => {
       let currentMarketPrice = investment.averagePurchasePrice;
+      let unrealizedPnL = 0;
       const totalShares = investment.totalShares;
       const totalInvested = investment.totalInvested;
 
@@ -599,40 +612,77 @@ export class InvestmentService {
           goldMarketPrices[investment.goldType] ??
           investment.averagePurchasePrice;
 
-        const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
-        totalInvestedGold += totalInvested;
+        unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
         unrealizedPnLGold += unrealizedPnL;
-        totalUnrealizedPnL += unrealizedPnL;
-        totalsInvested += totalInvested;
-      } else if (isSecurityInvestment(investment)) {
-        const security = await masterDataService.getSecurity(
-          investment.securityId,
-        );
-        currentMarketPrice = security.price;
-
-        const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
-        totalInvestedStocks += totalInvested;
-        unrealizedPnLStocks += unrealizedPnL;
-        totalUnrealizedPnL += unrealizedPnL;
-        totalsInvested += totalInvested;
+        totalInvestedGold += totalInvested;
       } else if (isCurrencyInvestment(investment)) {
         currentMarketPrice = await masterDataService.getExchangeRate(
           investment.currencyCode,
           investment.currency,
         );
 
-        const unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
-        totalInvestedCurrency += totalInvested;
+        unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
         unrealizedPnLCurrency += unrealizedPnL;
-        totalUnrealizedPnL += unrealizedPnL;
-        totalsInvested += totalInvested;
+        totalInvestedCurrency += totalInvested;
+      } else if (isRealEstateInvestment(investment)) {
+        totalInvestedRealEstate += totalInvested;
+      } else if (isDebtInstrumentInvestment(investment)) {
+        totalInvestedDebt += totalInvested;
+        totalProjectedDebtMonthlyInterest +=
+          calcDebtMonthlyInterest(investment);
+      } else if (isSecurityInvestment(investment)) {
+        const security = await masterDataService.getSecurity(
+          investment.securityId,
+        );
+        currentMarketPrice = security.price;
+
+        unrealizedPnL = currentMarketPrice * totalShares - totalInvested;
+        if (isStockInvestment(investment)) {
+          unrealizedPnLStocks += unrealizedPnL;
+          totalInvestedStocks += totalInvested;
+        } else if (isDebtFundInvestment(investment)) {
+          unrealizedPnLDebt += unrealizedPnL;
+          totalInvestedDebt += totalInvested;
+        } else if (isCurrencyFundInvestment(investment)) {
+          unrealizedPnLCurrency += unrealizedPnL;
+          totalInvestedCurrency += totalInvested;
+        } else if (isRealEstateFundInvestment(investment)) {
+          unrealizedPnLRealEstate += unrealizedPnL;
+          totalInvestedRealEstate += totalInvested;
+        }
       }
+
+      totalUnrealizedPnL += unrealizedPnL;
+      totalsInvested += totalInvested;
     });
     return {
-      protfolio: { totalUnrealizedPnL, totalsInvested },
-      stocks: { unrealizedPnLStocks, totalInvestedStocks },
-      currencies: { unrealizedPnLCurrency, totalInvestedCurrency },
-      gold: { unrealizedPnLGold, totalInvestedGold },
+      portfolio: {
+        unrealizedPnL: totalUnrealizedPnL,
+        totalInvested: totalsInvested,
+      },
+      stocks: {
+        unrealizedPnL: unrealizedPnLStocks,
+        totalInvested: totalInvestedStocks,
+      },
+      currencies: {
+        unrealizedPnL: unrealizedPnLCurrency,
+        totalInvested: totalInvestedCurrency,
+      },
+      gold: {
+        unrealizedPnL: unrealizedPnLGold,
+        totalInvested: totalInvestedGold,
+      },
+      debt: {
+        unrealizedPnL: unrealizedPnLDebt,
+        totalInvested: totalInvestedDebt,
+        totalProjectedDebtMonthlyInterest: totalProjectedDebtMonthlyInterest,
+        totalProjectedDebtAnnualInterest:
+          totalProjectedDebtMonthlyInterest * 12,
+      },
+      realEstate: {
+        unrealizedPnL: unrealizedPnLRealEstate,
+        totalInvested: totalInvestedRealEstate,
+      },
     };
   }
 

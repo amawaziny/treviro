@@ -1,4 +1,10 @@
-import { isStockRelatedFund } from "./utils";
+import {
+  isCurrencyRelatedFund,
+  isDebtRelatedFund,
+  isGoldRelatedFund,
+  isRealEstateRelatedFund,
+  isStockRelatedFund,
+} from "./utils";
 
 export type CurrencyCode = "EGP" | "USD";
 
@@ -149,7 +155,48 @@ export function isStockInvestment(
 ): investment is SecurityInvestment {
   return (
     investment.type === "Securities" &&
-    (!investment.fundType || isStockRelatedFund(investment.fundType))
+    (investment.fundType === undefined ||
+      isStockRelatedFund(investment.fundType))
+  );
+}
+
+export function isGoldFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    investment.fundType !== undefined &&
+    isGoldRelatedFund(investment.fundType)
+  );
+}
+
+export function isDebtFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    investment.fundType !== undefined &&
+    isDebtRelatedFund(investment.fundType)
+  );
+}
+
+export function isRealEstateFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    investment.fundType !== undefined &&
+    isRealEstateRelatedFund(investment.fundType)
+  );
+}
+
+export function isCurrencyFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    investment.fundType !== undefined &&
+    isCurrencyRelatedFund(investment.fundType)
   );
 }
 
@@ -385,37 +432,6 @@ export interface AggregatedCurrencyHolding {
   currentValueInEGP?: number;
   profitOrLossInEGP?: number;
   profitOrLossPercentage?: number;
-}
-
-export interface AggregatedDebtHolding {
-  id: string;
-  itemType: "direct" | "fund";
-  displayName: string;
-
-  debtSubType?: DebtSubType;
-  issuer?: string;
-  interestRate?: number;
-  maturityDate?: string;
-  amountInvested?: number;
-  purchaseDate?: string;
-  maturityDay?: string;
-  maturityMonth?: string;
-  maturityYear?: string;
-  projectedMonthlyInterest?: number;
-  projectedAnnualInterest?: number;
-
-  totalUnits?: number;
-  averagePurchasePrice?: number;
-  totalCost?: number;
-  currentMarketPrice?: number;
-  currentValue?: number;
-  profitLoss?: number;
-  profitLossPercent?: number;
-  currency?: string;
-  logoUrl?: string;
-
-  fundDetails?: ListedSecurity;
-  fundInvestment?: SecurityInvestment;
 }
 
 export type InvestmentTypePercentage = Record<InvestmentType, number>;

@@ -25,6 +25,7 @@ import {
   parseDateString,
 } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { calcDebtMonthlyInterest as calcProjectedDebtMonthlyInterest } from "@/lib/financial-utils";
 
 export interface CashFlowSummaryArgs {
   expensesManualCreditCard: ExpenseRecord[];
@@ -57,8 +58,10 @@ export function useCashflow({
   );
   const [investmentTrxs, setInvestmentTrxs] = useState<Transaction[]>([]);
   const [totalFixedIncome, setTotalFixedIncome] = useState<number>(0);
-  const [totalProjectedDebtInterest, setTotalProjectedDebtInterest] =
-    useState<number>(0);
+  const [
+    totalProjectedDebtMonthlyInterest,
+    setTotalProjectedDebtMonthlyInterest,
+  ] = useState<number>(0);
   const [incomeTillNow, setIncomeTillNow] = useState<number>(0);
   const [totalInterestAndFixedIncome, setTotalInterestAndFixedIncome] =
     useState<number>(0);
@@ -119,7 +122,7 @@ export function useCashflow({
     setCurrentMonthEnd(endOfMonth(month));
     fetchInvestmentTransactions();
     calculateTotalFixedIncome();
-    calculateTotalProjectedDebtInterest();
+    calculateTotalProjectedDebtMonthlyInterest();
     calculateIncomeTillNow();
     calculateTotalInterestAndFixedIncome();
     calculateTotalFixedExpenses();
@@ -151,14 +154,11 @@ export function useCashflow({
     setTotalFixedIncome(fixedIncomes.reduce((sum, fe) => sum + fe.amount, 0));
   }, [fixedEstimates]);
 
-  const calculateTotalProjectedDebtInterest = useCallback(() => {
+  const calculateTotalProjectedDebtMonthlyInterest = useCallback(() => {
     const debtInvestments = investments.filter(isDebtInstrumentInvestment);
     setDebtInvestments(debtInvestments);
-    setTotalProjectedDebtInterest(
-      debtInvestments.reduce(
-        (sum, debtInv) => sum + debtInv.monthlyInterestAmount,
-        0,
-      ),
+    setTotalProjectedDebtMonthlyInterest(
+      calcProjectedDebtMonthlyInterest(...debtInvestments),
     );
   }, [investments]);
 
@@ -407,13 +407,13 @@ export function useCashflow({
   const calculateTotalIncome = useCallback(() => {
     setTotalIncome(
       totalFixedIncome +
-        totalProjectedDebtInterest +
+        totalProjectedDebtMonthlyInterest +
         incomeTillNow -
         totalInterestAndFixedIncome,
     );
   }, [
     totalFixedIncome,
-    totalProjectedDebtInterest,
+    totalProjectedDebtMonthlyInterest,
     incomeTillNow,
     totalInterestAndFixedIncome,
   ]);
@@ -447,7 +447,7 @@ export function useCashflow({
     interestAndFixedIncomeTrxs,
     totalIncome,
     totalFixedIncome,
-    totalProjectedDebtInterest,
+    totalProjectedDebtMonthlyInterest,
     incomeTillNow,
 
     // Expenses

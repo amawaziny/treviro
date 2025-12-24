@@ -7,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface CashFlowSummaryCardsProps {
   totalIncome: number;
   totalFixedIncome: number;
-  totalProjectedDebtInterest: number;
+  totalProjectedDebtMonthlyInterest: number;
   incomeTillNow: number;
   totalExpenses: number;
   totalFixedExpenses: number;
@@ -22,7 +22,7 @@ interface CashFlowSummaryCardsProps {
 export function CashFlowSummaryCards({
   totalIncome,
   totalFixedIncome,
-  totalProjectedDebtInterest,
+  totalProjectedDebtMonthlyInterest,
   incomeTillNow,
   totalExpenses,
   totalFixedExpenses,
@@ -88,13 +88,13 @@ export function CashFlowSummaryCards({
                   </span>
                 </div>
               )}
-              {totalProjectedDebtInterest > 0 && (
+              {totalProjectedDebtMonthlyInterest > 0 && (
                 <div className="flex justify-between">
                   <span>{t("projected_debt_interest")}</span>
                   <span>
                     {formatNumberForMobile(
                       isMobile,
-                      totalProjectedDebtInterest,
+                      totalProjectedDebtMonthlyInterest,
                     )}
                   </span>
                 </div>

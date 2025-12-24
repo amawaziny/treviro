@@ -2,7 +2,9 @@
 import { useLanguage } from "@/contexts/language-context";
 import { useCallback, useState } from "react";
 
-import type { AggregatedDebtHolding } from "@/lib/types";
+import type {
+  DebtInstrumentInvestment,
+} from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,13 +24,16 @@ import { useInvestments } from "@/hooks/use-investments";
 import Link from "next/link";
 
 interface DirectDebtListItemProps {
-  holding: AggregatedDebtHolding;
+  investment: DebtInstrumentInvestment;
+  removeDirectDebtInvestment: (id: string) => Promise<void>;
 }
 
-export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
+export function DirectDebtListItem({
+  investment,
+  removeDirectDebtInvestment,
+}: DirectDebtListItemProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { removeDirectDebtInvestment } = useInvestments();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -40,24 +45,23 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
   const handleConfirmDelete = useCallback(async () => {
     try {
       setIsDeleting(true);
-      await removeDirectDebtInvestment(holding.id);
+      await removeDirectDebtInvestment(investment.id);
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);
     }
-  }, [holding.id, removeDirectDebtInvestment]);
+  }, [investment.id, removeDirectDebtInvestment]);
 
   const {
-    displayName,
+    name,
     currency,
-    amountInvested,
+    totalInvested,
     debtSubType,
     issuer,
     interestRate,
     maturityDate,
-    projectedMonthlyInterest,
-    projectedAnnualInterest,
-  } = holding;
+    monthlyInterestAmount,
+  } = investment;
 
   // Render direct debt instrument (bonds, certificates, etc.)
   return (
@@ -73,14 +77,11 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
                 <Building className="h-4 w-4" />
               </div>
               <div data-testid="certificate-details">
-                <p
-                  className="text-sm font-semibold sm:truncate"
-                  title={displayName}
-                >
-                  {displayName
-                    ? isMobile && displayName.length > 15
-                      ? displayName.slice(0, 15) + "…"
-                      : displayName
+                <p className="text-sm font-semibold sm:truncate" title={name}>
+                  {name
+                    ? isMobile && name.length > 15
+                      ? name.slice(0, 15) + "…"
+                      : name
                     : t("debt_item")}
                 </p>
                 <p className="text-xs text-muted-foreground sm:truncate">
@@ -89,9 +90,9 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
               </div>
             </div>
             <div className="text-end flex-shrink-0">
-              {typeof amountInvested === "number" ? (
+              {typeof totalInvested === "number" ? (
                 <p className="text-md font-bold">
-                  {formatNumberForMobile(isMobile, amountInvested, currency)}
+                  {formatNumberForMobile(isMobile, totalInvested, currency)}
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">{t("na")}</p>
@@ -116,7 +117,7 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
               <span className="font-medium text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  projectedMonthlyInterest,
+                  monthlyInterestAmount,
                   currency,
                 )}
               </span>
@@ -126,21 +127,21 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
               <span className="font-medium text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  projectedAnnualInterest,
+                  monthlyInterestAmount * 12,
                   currency,
                 )}
               </span>
             </p>
             <p className="flex gap-2 col-span-2 justify-end items-end">
               <Link
-                href={`/investments/debt-instruments/edit/${holding.id}`}
+                href={`/investments/debt-instruments/edit/${investment.id}`}
                 passHref
                 legacyBehavior
               >
                 <Button
                   variant="ghost"
                   size="icon"
-                  data-testid={`edit-debt-${holding.id}`}
+                  data-testid={`edit-debt-${investment.id}`}
                   aria-label="Edit"
                 >
                   <Pencil className="h-4 w-4" />
@@ -152,7 +153,7 @@ export function DirectDebtListItem({ holding }: DirectDebtListItemProps) {
                 size="icon"
                 className="text-muted-foreground hover:text-destructive"
                 aria-label="Delete"
-                data-testid={`delete-debt-${holding.id}`}
+                data-testid={`delete-debt-${investment.id}`}
                 onClick={handleDeleteClick}
                 disabled={isDeleting}
               >

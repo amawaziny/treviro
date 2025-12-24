@@ -320,7 +320,7 @@ export default function DashboardPage() {
           <CashFlowSummaryCards
             totalIncome={totalIncome}
             totalFixedIncome={totalFixedIncome}
-            totalProjectedDebtInterest={totalProjectedDebtInterest}
+            totalProjectedDebtMonthlyInterest={totalProjectedDebtInterest}
             incomeTillNow={incomeTillNow}
             totalExpenses={totalExpenses}
             totalFixedExpenses={totalFixedExpenses}

@@ -23,17 +23,17 @@ export function MyCurrencyListItem({
   const { t } = useLanguage();
   const isMobile = useIsMobile();
 
-    const {
-      isProfitable,
-      profitLoss,
-      totalCost,
-      profitLossPercent,
-      totalCurrentValue,
-    } = calcProfit(
-      holding.totalShares,
-      holding.averagePurchasePrice,
-      currentMarketRate || 0,
-    );
+  const {
+    isProfitable,
+    profitLoss,
+    totalCost,
+    profitLossPercent,
+    totalCurrentValue,
+  } = calcProfit(
+    holding.totalShares,
+    holding.averagePurchasePrice,
+    currentMarketRate || 0,
+  );
 
   const formatRate = (value: number | undefined) => {
     if (value === undefined || value === null || Number.isNaN(value))
@@ -41,8 +41,9 @@ export function MyCurrencyListItem({
     return value.toFixed(4);
   };
 
-  const hasMarketRate = currentMarketRate !== undefined && currentMarketRate !== 0;
-  
+  const hasMarketRate =
+    currentMarketRate !== undefined && currentMarketRate !== 0;
+
   const displayProfitLossPercent =
     profitLossPercent === Infinity
       ? "∞"
@@ -59,7 +60,9 @@ export function MyCurrencyListItem({
               <DollarSign className="h-4 w-4" />
             </div>
             <div className="truncate">
-              <p className="text-sm font-semibold truncate">{holding.currencyCode}</p>
+              <p className="text-sm font-semibold truncate">
+                {holding.currencyCode}
+              </p>
               <p className="text-xs text-muted-foreground truncate">
                 {`${t("held")}: ${formatNumberForMobile(isMobile, holding.totalInvested || 0, holding.currency)}`}
               </p>
@@ -120,9 +123,7 @@ export function MyCurrencyListItem({
           <p className="text-end">
             {`${t("market_rate")}: `}
             <span className="font-medium text-foreground">
-              {hasMarketRate
-                ? `${formatRate(currentMarketRate)} EGP`
-                : t("na")}
+              {hasMarketRate ? `${formatRate(currentMarketRate)} EGP` : t("na")}
             </span>
           </p>
         </div>
