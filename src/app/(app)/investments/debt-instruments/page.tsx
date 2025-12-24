@@ -2,9 +2,7 @@
 
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import {
-  formatNumberForMobile,
-} from "@/lib/utils";
+import { formatNumberForMobile } from "@/lib/utils";
 import {
   Card,
   CardContent,

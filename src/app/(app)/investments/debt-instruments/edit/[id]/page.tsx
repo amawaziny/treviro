@@ -21,7 +21,7 @@ export default function EditDebtInstrumentPage() {
 
   useEffect(() => {
     if (!params?.id) return;
-    const found = debtInvestments.find((inv) => inv.id === params.id)
+    const found = debtInvestments.find((inv) => inv.id === params.id);
     if (found) {
       setInvestment(found);
     }

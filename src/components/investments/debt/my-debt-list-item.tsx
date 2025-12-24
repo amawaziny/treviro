@@ -2,9 +2,7 @@
 import { useLanguage } from "@/contexts/language-context";
 import { useCallback, useState } from "react";
 
-import type {
-  DebtInstrumentInvestment,
-} from "@/lib/types";
+import type { DebtInstrumentInvestment } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
