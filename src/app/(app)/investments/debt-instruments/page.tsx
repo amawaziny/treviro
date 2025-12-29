@@ -177,13 +177,19 @@ export default function MyDebtInstrumentsPage() {
               <span>
                 {`${t("direct")}: `}
                 <span className="font-medium text-foreground">
-                  {formatNumberForMobile(isMobile, totalDebt.totalDirectDebtInvested)}
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalDebt.totalDirectDebtInvested,
+                  )}
                 </span>
               </span>
               <span>
                 {`${t("funds")}: `}
                 <span className="font-medium text-foreground">
-                  {formatNumberForMobile(isMobile, totalDebt.totalFundDebtInvested)}
+                  {formatNumberForMobile(
+                    isMobile,
+                    totalDebt.totalFundDebtInvested,
+                  )}
                 </span>
               </span>
             </div>

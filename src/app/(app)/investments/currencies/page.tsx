@@ -3,20 +3,10 @@
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Plus,
-  Coins,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { Plus, Coins, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MyCurrencyListItem } from "@/components/investments/currencies/my-currency-list-item";
