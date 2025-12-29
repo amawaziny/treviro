@@ -25,7 +25,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { SecurityDetailChart } from "@/components/investments/securities/security-detail-chart";
 import { useInvestments } from "@/hooks/use-investments";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";

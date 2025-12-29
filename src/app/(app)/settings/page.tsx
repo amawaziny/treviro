@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
-import React, { useEffect, useState, useCallback } from "react";
-import { useInvestments } from "@/hooks/use-investments";
+import React, { useEffect, useState } from "react";
 import type {
   InvestmentType,
   AppSettings,
@@ -27,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Minus } from "lucide-react";
+import { useAppSettings } from "@/hooks/use-app-settings";
 
 export default function SettingsPage() {
   const { t, dir } = useLanguage();
@@ -34,7 +34,7 @@ export default function SettingsPage() {
     appSettings,
     updateAppSettings,
     isLoading: isLoadingContext,
-  } = useInvestments();
+  } = useAppSettings();
   const { toast } = useToast();
   const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
     undefined,
@@ -47,7 +47,6 @@ export default function SettingsPage() {
       "Debt Instruments": 20,
       Currencies: 10,
       Gold: 15,
-      Stocks: 25,
     });
   const [totalPercentage, setTotalPercentage] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
@@ -122,7 +121,6 @@ export default function SettingsPage() {
         investmentTypePercentages: {
           "Real Estate": investmentPercentages["Real Estate"] || 0,
           Gold: investmentPercentages["Gold"] || 0,
-          Stocks: investmentPercentages["Stocks"] || 0,
           Securities: investmentPercentages["Securities"] || 0,
           "Debt Instruments": investmentPercentages["Debt Instruments"] || 0,
           Currencies: investmentPercentages["Currencies"] || 0,

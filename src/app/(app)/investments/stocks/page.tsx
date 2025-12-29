@@ -79,12 +79,9 @@ export default function MyStocksPage() {
             </div>
             <p className="text-xs text-muted-foreground">
               {`${
-                totalStocks.unrealizedPnL === Infinity
+                totalStocks.unrealizedPnLPercent === Infinity
                   ? "∞"
-                  : (
-                      (totalStocks.unrealizedPnL / totalStocks.totalInvested) *
-                      100
-                    ).toFixed(2)
+                  : totalStocks.unrealizedPnLPercent.toFixed(2)
               }% ${t("overall_pl")}`}
             </p>
             <p className="text-xs text-muted-foreground mt-1">

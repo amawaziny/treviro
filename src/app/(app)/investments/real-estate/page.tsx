@@ -102,7 +102,7 @@ export default function MyRealEstatePage() {
             {totalRealEstate.unrealizedPnLPercent === Infinity
               ? "∞"
               : totalRealEstate.unrealizedPnLPercent.toFixed(2)}
-            {t("overall_pl_from_funds")}
+            {t("overall_pl")}
           </p>
           <div className="mt-2 pt-2 border-t">
             <div className="flex items-center justify-between text-sm">
