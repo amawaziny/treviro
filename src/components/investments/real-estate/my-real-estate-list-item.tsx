@@ -7,7 +7,7 @@ import { Home, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useInvestments } from "@/hooks/use-investments";
 import { useToast } from "@/hooks/use-toast";
-import { formatNumberForMobile } from "@/lib/utils";
+import { formatDateDisplay, formatNumberForMobile } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -22,17 +22,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { RealEstateInvestment } from "@/lib/types";
 
 interface MyRealEstateListItemProps {
-  investment: any;
+  investment: RealEstateInvestment;
+  removeRealEstateInvestment: (id: string) => Promise<void>;
 }
 
 export function MyRealEstateListItem({
   investment,
+  removeRealEstateInvestment,
 }: MyRealEstateListItemProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { removeRealEstateInvestment } = useInvestments();
   const { toast } = useToast();
   const router = useRouter();
   const [isAlertDialogOpen, setIsAlertDialogOpen] = React.useState(false);
@@ -95,7 +97,7 @@ export function MyRealEstateListItem({
             <div className="font-bold text-lg flex flex-row items-center">
               {formatNumberForMobile(
                 isMobile,
-                investment.amountInvested,
+                investment.totalInvested,
                 investment.currency,
               )}
             </div>
@@ -158,17 +160,17 @@ export function MyRealEstateListItem({
             }`}
           </p>
           <p className="text-end">
-            {`${t("frequency")}: ${t(investment.installmentFrequency) || t("na")}`}
+            {`${t("frequency")}: ${t(investment.installmentFrequency || "na")}`}
           </p>
           <p>
             {`${t("total_price")}: ${
-              investment.totalInstallmentPrice
-                ? `${formatNumberForMobile(isMobile, investment.totalInstallmentPrice, investment.currency)}`
+              investment.totalPrice
+                ? `${formatNumberForMobile(isMobile, investment.totalPrice, investment.currency)}`
                 : t("na")
             }`}
           </p>
           <p className="text-end">
-            {`${t("end_date")}: ${investment.installmentEndDate || t("na")}`}
+            {`${t("end_date")}: ${investment.lastInstallmentDate ? formatDateDisplay(investment.lastInstallmentDate) : t("na")}`}
           </p>
         </div>
       </CardContent>

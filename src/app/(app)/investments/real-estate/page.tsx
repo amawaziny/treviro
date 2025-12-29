@@ -2,18 +2,8 @@
 
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
-import type {
-  RealEstateInvestment,
-  SecurityInvestment,
-  ListedSecurity,
-} from "@/lib/types";
-import {
-  formatCurrencyWithCommas,
-  formatNumberForMobile,
-  isRealEstateRelatedFund,
-} from "@/lib/utils";
+import { formatNumberForMobile } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -21,14 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Home, Building, Plus, TrendingUp, TrendingDown } from "lucide-react";
@@ -41,104 +23,14 @@ import { MyRealEstateListItem } from "@/components/investments/real-estate/my-re
 
 export default function MyRealEstatePage() {
   const { t, language } = useLanguage();
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } =
-    useListedSecurities();
+  const {
+    realEstateInvestments,
+    realEstateFundInvestments,
+    totalRealEstate,
+    deleteInvestment,
+    isLoading,
+  } = useInvestments();
   const isMobile = useIsMobile();
-
-  const directRealEstateHoldings = React.useMemo(() => {
-    return investments.filter(
-      (inv) => inv.type === "Real Estate",
-    ) as RealEstateInvestment[];
-  }, [investments]);
-
-  const realEstateFundHoldings = React.useMemo(() => {
-    if (isLoadingInvestments || isLoadingListedSecurities) return [];
-
-    const stockInvestments = investments.filter(
-      (inv) => inv.type === "Stocks",
-    ) as SecurityInvestment[];
-
-    return stockInvestments
-      .map((stockInv) => {
-        const security = listedSecurities.find(
-          (ls) => ls.symbol === stockInv.tickerSymbol,
-        );
-        if (
-          security &&
-          security.securityType === "Fund" &&
-          isRealEstateRelatedFund(security.fundType)
-        ) {
-          const totalCost =
-            (stockInv.numberOfShares || 0) *
-            (stockInv.purchasePricePerShare || 0);
-          const currentValue =
-            (stockInv.numberOfShares || 0) * (security.price || 0);
-          const profitLoss = currentValue - totalCost;
-          const profitLossPercent =
-            totalCost > 0
-              ? (profitLoss / totalCost) * 100
-              : currentValue > 0
-                ? Infinity
-                : 0;
-          return {
-            ...stockInv,
-            fundDetails: security,
-            totalCost,
-            currentValue,
-            profitLoss,
-            profitLossPercent,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean) as (SecurityInvestment & {
-      fundDetails: ListedSecurity;
-      totalCost: number;
-      currentValue: number;
-      profitLoss: number;
-      profitLossPercent: number;
-    })[];
-  }, [
-    investments,
-    listedSecurities,
-    isLoadingInvestments,
-    isLoadingListedSecurities,
-  ]);
-
-  const totalFundPnL = React.useMemo(() => {
-    return realEstateFundHoldings.reduce(
-      (sum, fund) => sum + (fund.profitLoss || 0),
-      0,
-    );
-  }, [realEstateFundHoldings]);
-
-  const totalFundCost = React.useMemo(() => {
-    return realEstateFundHoldings.reduce(
-      (sum, fund) => sum + (fund.totalCost || 0),
-      0,
-    );
-  }, [realEstateFundHoldings]);
-
-  const totalFundPnLPercent =
-    totalFundCost > 0
-      ? (totalFundPnL / totalFundCost) * 100
-      : totalFundPnL !== 0
-        ? Infinity
-        : 0;
-  const isTotalFundProfitable = totalFundPnL >= 0;
-
-  const totalDirectRealEstateInvested = React.useMemo(() => {
-    return directRealEstateHoldings.reduce(
-      (sum, item) => sum + (item.amountInvested || 0),
-      0,
-    );
-  }, [directRealEstateHoldings]);
-
-  const totalInvestedInRealEstate =
-    totalDirectRealEstateInvested + totalFundCost;
-
-  const isLoading = isLoadingInvestments || isLoadingListedSecurities;
 
   if (isLoading) {
     return (
@@ -189,7 +81,7 @@ export default function MyRealEstatePage() {
           <CardTitle className="text-sm font-medium">
             {t("total_real_estate_pl_funds")}
           </CardTitle>
-          {isTotalFundProfitable ? (
+          {totalRealEstate.unrealizedPnL >= 0 ? (
             <TrendingUp className="h-4 w-4 text-accent" />
           ) : (
             <TrendingDown className="h-4 w-4 text-destructive" />
@@ -199,19 +91,17 @@ export default function MyRealEstatePage() {
           <div
             className={cn(
               "text-xl font-bold",
-              isTotalFundProfitable ? "text-accent" : "text-destructive",
+              totalRealEstate.unrealizedPnL >= 0
+                ? "text-accent"
+                : "text-destructive",
             )}
           >
-            {formatNumberForMobile(
-              isMobile,
-              totalFundPnL,
-              realEstateFundHoldings[0]?.fundDetails.currency,
-            )}
+            {formatNumberForMobile(isMobile, totalRealEstate.unrealizedPnL)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {totalFundPnLPercent === Infinity
+            {totalRealEstate.unrealizedPnLPercent === Infinity
               ? "∞"
-              : totalFundPnLPercent.toFixed(2)}
+              : totalRealEstate.unrealizedPnLPercent.toFixed(2)}
             {t("overall_pl_from_funds")}
           </p>
           <div className="mt-2 pt-2 border-t">
@@ -220,19 +110,7 @@ export default function MyRealEstatePage() {
                 {t("total_invested_in_real_estate")}
               </span>
               <span className="font-semibold">
-                {formatNumberForMobile(
-                  isMobile,
-                  totalInvestedInRealEstate,
-                  realEstateFundHoldings[0]?.fundDetails.currency,
-                )}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                {`${t("direct")} ${formatNumberForMobile(isMobile, totalDirectRealEstateInvested, realEstateFundHoldings[0]?.fundDetails.currency)}`}
-              </span>
-              <span>
-                {`${t("funds")} ${formatNumberForMobile(isMobile, totalFundCost, realEstateFundHoldings[0]?.fundDetails.currency)}`}
+                {formatNumberForMobile(isMobile, totalRealEstate.totalInvested)}
               </span>
             </div>
           </div>
@@ -250,12 +128,13 @@ export default function MyRealEstatePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {directRealEstateHoldings.length > 0 ? (
+          {realEstateInvestments.length > 0 ? (
             <div className="space-y-4">
-              {directRealEstateHoldings.map((investment) => (
+              {realEstateInvestments.map((investment) => (
                 <MyRealEstateListItem
                   key={investment.id}
                   investment={investment}
+                  removeRealEstateInvestment={deleteInvestment}
                 />
               ))}
             </div>
@@ -278,13 +157,12 @@ export default function MyRealEstatePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {realEstateFundHoldings.length > 0 ? (
+          {realEstateFundInvestments.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {realEstateFundHoldings.map((fundInv) => {
+              {realEstateFundInvestments.map((fundInv) => {
                 return (
                   <InvestmentSecurityCard
                     key={fundInv.id}
-                    security={fundInv.fundDetails}
                     investment={fundInv}
                   />
                 );

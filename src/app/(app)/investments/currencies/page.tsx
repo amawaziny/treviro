@@ -3,31 +3,22 @@
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
-import type {
-  CurrencyInvestment,
-  AggregatedCurrencyHolding,
-} from "@/lib/types";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  DollarSign,
-  AlertCircle,
   Plus,
   Coins,
   TrendingUp,
   TrendingDown,
-  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { MyCurrencyListItem } from "@/components/investments/currencies/my-currency-list-item";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -105,22 +96,13 @@ export default function MyCurrenciesPage() {
                 : "text-destructive",
             )}
           >
-            {formatNumberForMobile(
-              isMobile,
-              totalCurrency.unrealizedPnL,
-              "EGP",
-            )}
+            {formatNumberForMobile(isMobile, totalCurrency.unrealizedPnL)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {`${
-              totalCurrency.unrealizedPnL === Infinity
-                ? "∞"
-                : (
-                    (totalCurrency.unrealizedPnL /
-                      totalCurrency.totalInvested) *
-                    100
-                  ).toFixed(2)
-            }% ${t("overall_pl")}`}
+            {totalCurrency.unrealizedPnLPercent === Infinity
+              ? "∞"
+              : totalCurrency.unrealizedPnLPercent.toFixed(2)}
+            {t("overall_pl")}
           </p>
         </CardContent>
       </Card>

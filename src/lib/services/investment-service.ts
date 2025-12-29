@@ -591,6 +591,8 @@ export class InvestmentService {
 
     let unrealizedPnLDebt = 0;
     let totalInvestedDebt = 0;
+    let totalDirectDebtInvested = 0;
+    let totalFundDebtInvested = 0;
     let totalProjectedDebtMonthlyInterest = 0;
 
     let unrealizedPnLRealEstate = 0;
@@ -630,6 +632,7 @@ export class InvestmentService {
         totalInvestedDebt += totalInvested;
         totalProjectedDebtMonthlyInterest +=
           calcDebtMonthlyInterest(investment);
+        totalDirectDebtInvested += totalInvested;
       } else if (isSecurityInvestment(investment)) {
         const security = await masterDataService.getSecurity(
           investment.securityId,
@@ -643,6 +646,7 @@ export class InvestmentService {
         } else if (isDebtFundInvestment(investment)) {
           unrealizedPnLDebt += unrealizedPnL;
           totalInvestedDebt += totalInvested;
+          totalFundDebtInvested += totalInvested;
         } else if (isCurrencyFundInvestment(investment)) {
           unrealizedPnLCurrency += unrealizedPnL;
           totalInvestedCurrency += totalInvested;
@@ -659,29 +663,37 @@ export class InvestmentService {
       portfolio: {
         unrealizedPnL: totalUnrealizedPnL,
         totalInvested: totalsInvested,
+        unrealizedPnLPercent: totalUnrealizedPnL / totalsInvested,
       },
       stocks: {
         unrealizedPnL: unrealizedPnLStocks,
         totalInvested: totalInvestedStocks,
+        unrealizedPnLPercent: unrealizedPnLStocks / totalInvestedStocks,
       },
       currencies: {
         unrealizedPnL: unrealizedPnLCurrency,
         totalInvested: totalInvestedCurrency,
+        unrealizedPnLPercent: unrealizedPnLCurrency / totalInvestedCurrency,
       },
       gold: {
         unrealizedPnL: unrealizedPnLGold,
         totalInvested: totalInvestedGold,
+        unrealizedPnLPercent: unrealizedPnLGold / totalInvestedGold,
       },
       debt: {
         unrealizedPnL: unrealizedPnLDebt,
         totalInvested: totalInvestedDebt,
+        totalDirectInvested: totalDirectDebtInvested,
+        totalFundInvested: totalFundDebtInvested,
         totalProjectedDebtMonthlyInterest: totalProjectedDebtMonthlyInterest,
         totalProjectedDebtAnnualInterest:
           totalProjectedDebtMonthlyInterest * 12,
+        unrealizedPnLPercent: unrealizedPnLDebt / totalFundDebtInvested,
       },
       realEstate: {
         unrealizedPnL: unrealizedPnLRealEstate,
         totalInvested: totalInvestedRealEstate,
+        unrealizedPnLPercent: unrealizedPnLRealEstate / totalInvestedRealEstate,
       },
     };
   }

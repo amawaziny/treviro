@@ -21,6 +21,7 @@ import {
   isDebtInstrumentInvestment,
   isGoldFundInvestment,
   isGoldInvestment,
+  isRealEstateFundInvestment,
   isRealEstateInvestment,
   isSecurityInvestment,
   isStockInvestment,
@@ -36,6 +37,7 @@ export interface InvestmentContextType {
   debtInvestments: DebtInstrumentInvestment[];
   debtFundInvestments: SecurityInvestment[];
   realEstateInvestments: RealEstateInvestment[];
+  realEstateFundInvestments: SecurityInvestment[];
   currencyInvestments: CurrencyInvestment[];
   goldInvestments: GoldInvestment[];
   goldFundInvestments: SecurityInvestment[];
@@ -120,6 +122,9 @@ export const InvestmentProvider = ({
   const [realEstateInvestments, setRealEstateInvestments] = useState<
     RealEstateInvestment[]
   >([]);
+  const [realEstateFundInvestments, setRealEstateFundInvestments] = useState<
+    SecurityInvestment[]
+  >([]);
   const [currencyInvestments, setCurrencyInvestments] = useState<
     CurrencyInvestment[]
   >([]);
@@ -188,6 +193,9 @@ export const InvestmentProvider = ({
     setDebtInvestments(investments.filter(isDebtInstrumentInvestment));
     setDebtFundInvestments(investments.filter(isDebtFundInvestment));
     setRealEstateInvestments(investments.filter(isRealEstateInvestment));
+    setRealEstateFundInvestments(
+      investments.filter(isRealEstateFundInvestment),
+    );
     setCurrencyInvestments(investments.filter(isCurrencyInvestment));
   };
 
@@ -331,6 +339,7 @@ export const InvestmentProvider = ({
     debtInvestments,
     debtFundInvestments,
     realEstateInvestments,
+    realEstateFundInvestments,
     currencyInvestments,
     goldInvestments,
     goldFundInvestments,

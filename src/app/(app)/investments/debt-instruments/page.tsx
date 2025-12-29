@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useInvestments } from "@/hooks/use-investments";
-import { formatNumberForMobile } from "@/lib/utils";
+import { cn, formatNumberForMobile } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Building, Landmark } from "lucide-react";
+import {
+  Plus,
+  Building,
+  Landmark,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DirectDebtListItem } from "@/components/investments/debt/my-debt-list-item";
@@ -137,21 +143,26 @@ export default function MyDebtInstrumentsPage() {
           <CardTitle className="text-sm font-medium">
             {t("total_debt_instruments_pl_funds")}
           </CardTitle>
+          {totalDebt.unrealizedPnL >= 0 ? (
+            <TrendingUp className="h-4 w-4 text-accent" />
+          ) : (
+            <TrendingDown className="h-4 w-4 text-destructive" />
+          )}
         </CardHeader>
         <CardContent>
-          <div className="text-xl font-bold text-accent">
+          <div
+            className={cn(
+              "text-xl font-bold",
+              totalDebt.unrealizedPnL >= 0 ? "text-accent" : "text-destructive",
+            )}
+          >
             {formatNumberForMobile(isMobile, totalDebt.unrealizedPnL)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {totalDebt.totalInvested > 0
-              ? (
-                  (totalDebt.unrealizedPnL / totalDebt.totalInvested) *
-                  100
-                ).toFixed(2)
-              : totalDebt.unrealizedPnL > 0
-                ? "∞"
-                : "0.00"}
-            {t("overall_pl_from_funds")}
+            {totalDebt.unrealizedPnLPercent === Infinity
+              ? "∞"
+              : totalDebt.unrealizedPnLPercent.toFixed(2)}
+            {t("overall_pl")}
           </p>
           <div className="mt-2 pt-2 border-t">
             <div className="flex items-center justify-between text-sm">
@@ -166,13 +177,13 @@ export default function MyDebtInstrumentsPage() {
               <span>
                 {`${t("direct")}: `}
                 <span className="font-medium text-foreground">
-                  {formatNumberForMobile(isMobile, totalDebt.totalInvested)}
+                  {formatNumberForMobile(isMobile, totalDebt.totalDirectDebtInvested)}
                 </span>
               </span>
               <span>
                 {`${t("funds")}: `}
                 <span className="font-medium text-foreground">
-                  {formatNumberForMobile(isMobile, totalDebt.totalInvested)}
+                  {formatNumberForMobile(isMobile, totalDebt.totalFundDebtInvested)}
                 </span>
               </span>
             </div>
