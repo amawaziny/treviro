@@ -149,7 +149,7 @@ export const formatDateDisplay = (dateString?: string) => {
 };
 
 export const formatDateISO = (date: Date) => {
-  return format(date, "YYYY-MM-DD");
+  return format(date, "yyyy-MM-dd");
 };
 
 export const formatDateTimeDisplay = (dateString?: string) => {

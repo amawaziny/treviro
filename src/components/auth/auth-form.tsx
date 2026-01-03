@@ -25,22 +25,6 @@ function getPasswordStrength(password: string) {
   return score;
 }
 
-function getPasswordStrengthLabel(score: number) {
-  switch (score) {
-    case 0:
-    case 1:
-      return "Weak";
-    case 2:
-      return "Fair";
-    case 3:
-      return "Good";
-    case 4:
-      return "Strong";
-    default:
-      return "";
-  }
-}
-
 function getPasswordStrengthPercent(score: number) {
   return Math.min(100, Math.round((score / 4) * 100));
 }
@@ -65,9 +49,7 @@ export function AuthForm() {
   const {
     login,
     signInWithEmailAndPassword,
-    signUpWithEmailAndPassword,
-    isLoading,
-    isProcessingLogin,
+    signUpWithEmailAndPassword
   } = useAuth();
 
   const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot-password">(
@@ -78,7 +60,7 @@ export function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [showSpinner, setShowSpinner] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
 
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,7 +89,7 @@ export function AuthForm() {
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-background">
+    <div dir={dir} className="fixed inset-0 flex items-center justify-center bg-background">
       <Card className="w-full max-w-md shadow-xl mx-4">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">

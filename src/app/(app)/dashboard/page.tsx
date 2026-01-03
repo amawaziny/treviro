@@ -16,7 +16,6 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Wallet,
   Coins,
   Briefcase,
   ArrowRight,
@@ -25,8 +24,8 @@ import {
   Building,
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
-import React, { useMemo } from "react";
-import { defaultAppSettings } from "@/lib/types";
+import React from "react";
+import { DashboardSummaries, defaultAppSettings, defaultDashboardSummaries, defaultDashboardSummary, Investment } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -44,19 +43,29 @@ export default function DashboardPage() {
   const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
 
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  // const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  let investments: [] = [];
+  const isLoadingInvestments = false
 
-  const {
-    dashboardSummary,
-    isLoading: isLoadingDashboard,
-    refreshDashboard,
-  } = useDashboard();
+  // const {
+  //   dashboardSummary,
+  //   isLoading: isLoadingDashboard,
+  //   refreshDashboard,
+  // } = useDashboard();
 
-  const {
-    expensesManualCreditCard,
-    fixedEstimates,
-    isLoading: isLoadingFinancialRecords,
-  } = useFinancialRecords();
+let dashboardSummary = defaultDashboardSummaries;
+let isLoadingDashboard = false;
+let refreshDashboard = async (): Promise<DashboardSummaries> => defaultDashboardSummaries;
+
+  // const {
+  //   expensesManualCreditCard,
+  //   fixedEstimates,
+  //   isLoading: isLoadingFinancialRecords,
+  // } = useFinancialRecords();
+
+  let expensesManualCreditCard: [] = [];
+  let fixedEstimates: [] = [];
+  let isLoadingFinancialRecords = false;
 
   const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
 
@@ -79,7 +88,7 @@ export default function DashboardPage() {
 
   const {
     totalIncome,
-    totalProjectedDebtInterest,
+    totalProjectedDebtMonthlyInterest,
     totalExpenses,
     incomeTillNow,
     totalFixedIncome,
@@ -320,7 +329,7 @@ export default function DashboardPage() {
           <CashFlowSummaryCards
             totalIncome={totalIncome}
             totalFixedIncome={totalFixedIncome}
-            totalProjectedDebtMonthlyInterest={totalProjectedDebtInterest}
+            totalProjectedDebtMonthlyInterest={totalProjectedDebtMonthlyInterest}
             incomeTillNow={incomeTillNow}
             totalExpenses={totalExpenses}
             totalFixedExpenses={totalFixedExpenses}
