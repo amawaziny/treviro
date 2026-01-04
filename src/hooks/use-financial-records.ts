@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { formatDateISO } from "@/lib/utils";
-import { endOfMonth, startOfMonth } from "date-fns";
 
 export const useFinancialRecords = (
   startDateParam?: Date,
@@ -26,8 +25,6 @@ export const useFinancialRecords = (
   const [incomesFixed, setIncomesFixed] = useState<FixedEstimateRecord[]>([]);
   const [expensesFixed, setExpensesFixed] = useState<FixedEstimateRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [startDate, setStartDate] = useState<string>();
-  const [endDate, setEndDate] = useState<string>();
 
   // Initialize service when user is authenticated
   // Initialize records service
@@ -36,16 +33,16 @@ export const useFinancialRecords = (
     return new FinancialRecordsService(user.uid);
   }, [user?.uid]);
 
-  const fetchFinancialRecords = useCallback(async () => {
+  const fetchFinancialRecords = useCallback(async (startDate: string, endDate: string) => {
     if (!recordsService)
       throw new Error("Financial records service not initialized");
 
     try {
       setIsLoading(true);
       await Promise.all([
-        fetchIncomes(recordsService, startDate!, endDate!),
-        fetchExpensesManualOther(recordsService, startDate!, endDate!),
-        fetchExpensesManual(recordsService, startDate!, endDate!),
+        fetchIncomes(recordsService, startDate, endDate),
+        fetchExpensesManualOther(recordsService, startDate, endDate),
+        fetchExpensesManual(recordsService, startDate, endDate),
         fetchExpensesManualCreditCard(recordsService),
         fetchFixedEstimates(recordsService),
       ]);
@@ -54,14 +51,14 @@ export const useFinancialRecords = (
     } finally {
       setIsLoading(false);
     }
-  }, [recordsService, startDate, endDate]);
+  }, [recordsService]);
 
   // Initial fetch
   useEffect(() => {
-    setStartDate(formatDateISO(startDateParam || startOfMonth(new Date())));
-    setEndDate(formatDateISO(endDateParam || endOfMonth(new Date())));
-    fetchFinancialRecords();
-  }, [fetchFinancialRecords]);
+    if(!startDateParam || !endDateParam) return;
+
+    fetchFinancialRecords(formatDateISO(startDateParam), formatDateISO(endDateParam));
+  }, [startDateParam, endDateParam, fetchFinancialRecords]);
 
   // Income operations
   const fetchIncomes = async (
@@ -350,24 +347,6 @@ export const useFinancialRecords = (
     [recordsService],
   );
 
-  // Refresh all data
-  const refreshAll = useCallback(async () => {
-    if (!recordsService) return;
-
-    try {
-      setIsLoading(true);
-      await Promise.all([
-        fetchIncomes(recordsService, startDate!, endDate!),
-        fetchExpensesManualOther(recordsService, startDate!, endDate!),
-        fetchFixedEstimates(recordsService),
-      ]);
-    } catch (error) {
-      console.error("Error refreshing financial records:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [recordsService]);
-
   return {
     // State
     incomesManual,
@@ -395,9 +374,6 @@ export const useFinancialRecords = (
     addFixedEstimate,
     updateFixedEstimate,
     deleteFixedEstimate,
-
-    // Utility methods
-    refreshAll,
   };
 };
 

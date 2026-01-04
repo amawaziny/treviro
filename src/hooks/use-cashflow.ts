@@ -48,14 +48,10 @@ export function useCashflow({
   investments = [],
   fixedEstimates = [],
   transactions = [],
-  month = new Date(),
+  month,
 }: CashFlowSummaryArgs) {
-  const [currentMonthStart, setCurrentMonthStart] = useState<Date>(
-    startOfMonth(month),
-  );
-  const [currentMonthEnd, setCurrentMonthEnd] = useState<Date>(
-    endOfMonth(month),
-  );
+  const [currentMonthStart, setCurrentMonthStart] = useState<Date>( );
+  const [currentMonthEnd, setCurrentMonthEnd] = useState<Date>();
   const [investmentTrxs, setInvestmentTrxs] = useState<Transaction[]>([]);
   const [totalFixedIncome, setTotalFixedIncome] = useState<number>(0);
   const [
@@ -118,6 +114,7 @@ export function useCashflow({
   >([]);
 
   useEffect(() => {
+    if (!month) return;
     setCurrentMonthStart(startOfMonth(month));
     setCurrentMonthEnd(endOfMonth(month));
     fetchInvestmentTransactions();
@@ -223,6 +220,7 @@ export function useCashflow({
   }, [transactions]);
 
   const calculateTotalExpensesManualCreditCard = useCallback(() => {
+    if (!currentMonthStart) return;
     setTotalExpensesManualCreditCard(
       expensesManualCreditCard.reduce((sum, record) => {
         const startDate = parseDateString(record.date);
@@ -244,9 +242,10 @@ export function useCashflow({
         return sum;
       }, 0),
     );
-  }, [expensesManualCreditCard]);
+  }, [expensesManualCreditCard, currentMonthStart]);
 
   const calculateTotalRealEstateInstallments = useCallback(() => {
+    if (!currentMonthStart || !currentMonthEnd) return;
     const realEstateInvestments = new Map<string, RealEstateInvestment>();
 
     setTotalRealEstateInstallments(
@@ -323,7 +322,7 @@ export function useCashflow({
         }, 0),
     );
     setRealEstateInvestments(Array.from(realEstateInvestments.values()));
-  }, [investments]);
+  }, [investments, currentMonthStart, currentMonthEnd]);
 
   const calculateTotalSecuritiesInvestments = useCallback(() => {
     const securitiesInvestments = investmentTrxs.filter(

@@ -24,7 +24,7 @@ import {
   Building,
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
-import React from "react";
+import React, { useMemo } from "react";
 import { DashboardSummaries, defaultAppSettings, defaultDashboardSummaries, defaultDashboardSummary, Investment } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -38,38 +38,35 @@ import { useDashboard } from "@/hooks/use-dashboard";
 import useFinancialRecords from "@/hooks/use-financial-records";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useCashflow } from "@/hooks/use-cashflow";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(new Date()), []);
+  const endMonth = useMemo(() => endOfMonth(new Date()), []);
 
-  // const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  let investments: [] = [];
-  const isLoadingInvestments = false
+  const { investments, isLoading: isLoadingInvestments } = useInvestments();
 
-  // const {
-  //   dashboardSummary,
-  //   isLoading: isLoadingDashboard,
-  //   refreshDashboard,
-  // } = useDashboard();
+  const {
+    dashboardSummary,
+    isLoading: isLoadingDashboard,
+    refreshDashboard,
+  } = useDashboard();
 
-let dashboardSummary = defaultDashboardSummaries;
-let isLoadingDashboard = false;
-let refreshDashboard = async (): Promise<DashboardSummaries> => defaultDashboardSummaries;
-
-  // const {
-  //   expensesManualCreditCard,
-  //   fixedEstimates,
-  //   isLoading: isLoadingFinancialRecords,
-  // } = useFinancialRecords();
-
-  let expensesManualCreditCard: [] = [];
-  let fixedEstimates: [] = [];
-  let isLoadingFinancialRecords = false;
+  const {
+    expensesManualCreditCard,
+    fixedEstimates,
+    isLoading: isLoadingFinancialRecords,
+  } = useFinancialRecords(startMonth, endMonth);
 
   const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
 
-  const { transactions, isLoading: isLoadingTransactions } = useTransactions();
+  // const { transactions, isLoading: isLoadingTransactions } = useTransactions();
+
+  let transactions: [] = [];
+  let isLoadingTransactions = false;
 
   const isLoading =
     isLoadingDashboard ||
@@ -105,6 +102,7 @@ let refreshDashboard = async (): Promise<DashboardSummaries> => defaultDashboard
     investments,
     fixedEstimates,
     transactions,
+    month
   });
 
   return (
