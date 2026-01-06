@@ -43,6 +43,7 @@ import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
+  
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(new Date()), []);
   const endMonth = useMemo(() => endOfMonth(new Date()), []);
@@ -63,10 +64,10 @@ export default function DashboardPage() {
 
   const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
 
-  // const { transactions, isLoading: isLoadingTransactions } = useTransactions();
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions(startMonth, endMonth);
 
-  let transactions: [] = [];
-  let isLoadingTransactions = false;
+  // let transactions: [] = [];
+  // let isLoadingTransactions = false;
 
   const isLoading =
     isLoadingDashboard ||

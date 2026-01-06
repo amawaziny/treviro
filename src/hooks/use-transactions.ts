@@ -20,7 +20,7 @@ import { endOfMonth, startOfMonth } from "date-fns";
  * @returns An object containing transactions, loading state, error, and transaction management methods
  */
 
-export const useTransactions = (startDate?: Date, endDate?: Date) => {
+export const useTransactions = (startDate: Date, endDate: Date) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeFixedTrxs, setIncomeFixedTrxs] = useState<Transaction[]>([]);
   const [incomeManualTrxs, setIncomeManualTrxs] = useState<Transaction[]>([]);
@@ -67,8 +67,8 @@ export const useTransactions = (startDate?: Date, endDate?: Date) => {
     setError(null);
 
     try {
-      const start = formatDateISO(startDate || startOfMonth(new Date()));
-      const end = formatDateISO(endDate || endOfMonth(new Date()));
+      const start = formatDateISO(startDate);
+      const end = formatDateISO(endDate);
 
       const fetchedTransactions =
         await transactionService.getTransactionsWithin(start, end);
@@ -303,16 +303,6 @@ export const useTransactions = (startDate?: Date, endDate?: Date) => {
     fetchRealEstateInvestmentTransactions();
   }, [
     fetchTransactions,
-    fetchIncomeFixedEstimateTransactions,
-    fetchIncomeManualTransactions,
-    fetchDividendTransactions,
-    fetchExpenseFixedEstimateTransactions,
-    fetchExpenseManualTransactions,
-    fetchStockInvestmentTransactions,
-    fetchDebtInvestmentTransactions,
-    fetchGoldInvestmentTransactions,
-    fetchCurrencyInvestmentTransactions,
-    fetchRealEstateInvestmentTransactions,
   ]);
 
   // Refresh function
@@ -330,16 +320,6 @@ export const useTransactions = (startDate?: Date, endDate?: Date) => {
     await fetchRealEstateInvestmentTransactions();
   }, [
     fetchTransactions,
-    fetchIncomeFixedEstimateTransactions,
-    fetchIncomeManualTransactions,
-    fetchDividendTransactions,
-    fetchExpenseFixedEstimateTransactions,
-    fetchExpenseManualTransactions,
-    fetchStockInvestmentTransactions,
-    fetchDebtInvestmentTransactions,
-    fetchGoldInvestmentTransactions,
-    fetchCurrencyInvestmentTransactions,
-    fetchRealEstateInvestmentTransactions,
   ]);
 
   return {
