@@ -46,11 +46,8 @@ function getPasswordStrengthColor(score: number) {
 }
 
 export function AuthForm() {
-  const {
-    login,
-    signInWithEmailAndPassword,
-    signUpWithEmailAndPassword
-  } = useAuth();
+  const { login, signInWithEmailAndPassword, signUpWithEmailAndPassword } =
+    useAuth();
 
   const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot-password">(
     "sign-in",
@@ -89,7 +86,10 @@ export function AuthForm() {
   );
 
   return (
-    <div dir={dir} className="fixed inset-0 flex items-center justify-center bg-background">
+    <div
+      dir={dir}
+      className="fixed inset-0 flex items-center justify-center bg-background"
+    >
       <Card className="w-full max-w-md shadow-xl mx-4">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">

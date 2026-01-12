@@ -50,7 +50,7 @@ export function useCashflow({
   transactions = [],
   month,
 }: CashFlowSummaryArgs) {
-  const [currentMonthStart, setCurrentMonthStart] = useState<Date>( );
+  const [currentMonthStart, setCurrentMonthStart] = useState<Date>();
   const [currentMonthEnd, setCurrentMonthEnd] = useState<Date>();
   const [investmentTrxs, setInvestmentTrxs] = useState<Transaction[]>([]);
   const [totalFixedIncome, setTotalFixedIncome] = useState<number>(0);

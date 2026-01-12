@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { startOfMonth, endOfMonth } from "date-fns";
 import {
   formatDateDisplay,
   formatMonthYear,
@@ -40,9 +40,16 @@ export default function IncomePage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
   // UI state for filters
-  const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
+  const [showAll, setShowAll] = useState(false); // false = this month, true = all
 
-  const { incomesManual, isLoading, deleteIncome } = useFinancialRecords();
+  const month = useMemo(() => new Date(), []);
+  const startDate = useMemo(() => startOfMonth(month), []);
+  const endDate = useMemo(() => endOfMonth(month), []);
+
+  const { incomesManual, isLoading, deleteIncome } = useFinancialRecords(
+    startDate,
+    endDate,
+  );
 
   if (isLoading) {
     return (

@@ -78,6 +78,21 @@ export function isCurrencyRelatedFund(fundType?: string | null): boolean {
   return currencyKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
+// Helper function to identify stock-related funds
+export function isStockRelatedFund(fundType?: string | null): boolean {
+  if (!fundType) return false;
+  const lowerFundType = fundType.toLowerCase();
+  const stockKeywords = [
+    "stock",
+    "equity",
+    "index",
+    "growth",
+    "value",
+    "dividend",
+  ]; // Add more keywords as needed
+  return stockKeywords.some((keyword) => lowerFundType.includes(keyword));
+}
+
 export function formatNumberForMobile(
   isMobile: boolean = false,
   num: number | undefined,
@@ -133,7 +148,7 @@ export function formatMonthYear(
   return format(d, "MMMM yyyy", { locale: language == "ar" ? ar : enUS });
 }
 
-export const formatDateDisplay = (dateString?: string) => {
+export const formatDateDisplay = (dateString?: string | Date) => {
   if (!dateString) return "N/A";
   try {
     const date = new Date(dateString);
@@ -141,15 +156,15 @@ export const formatDateDisplay = (dateString?: string) => {
     // Firestore serverTimestamp might initially be null before server populates it,
     // or client-set dates could be in various formats.
     // For robustness, ensure it's a valid date.
-    if (isNaN(date.getTime())) return dateString; // Or 'Invalid Date'
-    return format(date, "dd-MM-yyyy");
+    if (isNaN(date.getTime())) return dateString.toString(); // Or 'Invalid Date'
+    return format(date, "yyyy-MM-dd");
   } catch (e) {
-    return dateString; // Or 'Error formatting date'
+    return dateString.toString(); // Or 'Error formatting date'
   }
 };
 
-export const formatDateISO = (date: Date) => {
-  return format(date, "yyyy-MM-dd");
+export const formatDateISO = (date?: Date) => {
+  return formatDateDisplay(date?.toISOString());
 };
 
 export const formatDateTimeDisplay = (dateString?: string) => {
@@ -161,7 +176,7 @@ export const formatDateTimeDisplay = (dateString?: string) => {
     // or client-set dates could be in various formats.
     // For robustness, ensure it's a valid date.
     if (isNaN(date.getTime())) return dateString; // Or 'Invalid Date'
-    return format(date, "dd-MM-yyyy hh:mm:ss a");
+    return format(date, "yyyy-MM-dd hh:mm:ss a");
   } catch (e) {
     return dateString; // Or 'Error formatting date'
   }
@@ -201,21 +216,6 @@ export function formatCurrencyWithCommas(
     maximumFractionDigits: digitsOverride ?? 3,
     signDisplay: signDisplay,
   }).format(num);
-}
-
-// Helper function to identify stock-related funds
-export function isStockRelatedFund(fundType?: string | null): boolean {
-  if (!fundType) return false;
-  const lowerFundType = fundType.toLowerCase();
-  const stockKeywords = [
-    "stock",
-    "equity",
-    "index",
-    "growth",
-    "value",
-    "dividend",
-  ]; // Add more keywords as needed
-  return stockKeywords.some((keyword) => lowerFundType.includes(keyword));
 }
 
 export const parseDateString = (dateStr?: string): Date | null => {

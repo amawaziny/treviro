@@ -25,7 +25,13 @@ import {
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
-import { DashboardSummaries, defaultAppSettings, defaultDashboardSummaries, defaultDashboardSummary, Investment } from "@/lib/types";
+import {
+  DashboardSummaries,
+  defaultAppSettings,
+  defaultDashboardSummaries,
+  defaultDashboardSummary,
+  Investment,
+} from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -43,7 +49,7 @@ import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
-  
+
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(new Date()), []);
   const endMonth = useMemo(() => endOfMonth(new Date()), []);
@@ -64,7 +70,10 @@ export default function DashboardPage() {
 
   const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
 
-  const { transactions, isLoading: isLoadingTransactions } = useTransactions(startMonth, endMonth);
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions(
+    startMonth,
+    endMonth,
+  );
 
   // let transactions: [] = [];
   // let isLoadingTransactions = false;
@@ -103,7 +112,7 @@ export default function DashboardPage() {
     investments,
     fixedEstimates,
     transactions,
-    month
+    month,
   });
 
   return (
@@ -328,7 +337,9 @@ export default function DashboardPage() {
           <CashFlowSummaryCards
             totalIncome={totalIncome}
             totalFixedIncome={totalFixedIncome}
-            totalProjectedDebtMonthlyInterest={totalProjectedDebtMonthlyInterest}
+            totalProjectedDebtMonthlyInterest={
+              totalProjectedDebtMonthlyInterest
+            }
             incomeTillNow={incomeTillNow}
             totalExpenses={totalExpenses}
             totalFixedExpenses={totalFixedExpenses}

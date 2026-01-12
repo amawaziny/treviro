@@ -301,9 +301,7 @@ export const useTransactions = (startDate: Date, endDate: Date) => {
     fetchGoldInvestmentTransactions();
     fetchCurrencyInvestmentTransactions();
     fetchRealEstateInvestmentTransactions();
-  }, [
-    fetchTransactions,
-  ]);
+  }, [fetchTransactions]);
 
   // Refresh function
   const refresh = useCallback(async () => {
@@ -318,9 +316,7 @@ export const useTransactions = (startDate: Date, endDate: Date) => {
     await fetchGoldInvestmentTransactions();
     await fetchCurrencyInvestmentTransactions();
     await fetchRealEstateInvestmentTransactions();
-  }, [
-    fetchTransactions,
-  ]);
+  }, [fetchTransactions]);
 
   return {
     transactions,

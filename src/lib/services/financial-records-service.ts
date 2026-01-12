@@ -13,6 +13,7 @@ import {
   DocumentReference,
   orderBy,
   CollectionReference,
+  Timestamp,
 } from "firebase/firestore";
 import { eventBus } from "./events";
 import { v4 as uuidv4 } from "uuid";
@@ -88,7 +89,7 @@ export class FinancialRecordsService {
   ): Promise<T> {
     try {
       const id = uuidv4();
-      const now = new Date().toISOString();
+      const now = new Date();
       const recordData = {
         ...data,
         id,
@@ -218,13 +219,14 @@ export class FinancialRecordsService {
       }
 
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          }) as T,
-      );
+      return querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date?.toDate(),
+        } as T;
+      });
     } catch (error) {
       console.error(`Error getting ${collectionName} records:`, error);
       throw error;
@@ -241,29 +243,30 @@ export class FinancialRecordsService {
       (record) =>
         ({
           ...record,
-          createdAt: record.createdAt || new Date().toISOString(),
-          updatedAt: record.updatedAt || new Date().toISOString(),
+          createdAt: record.createdAt || new Date(),
+          updatedAt: record.updatedAt || new Date(),
         }) as IncomeRecord,
     );
   }
 
-  async getIncomesWithin(start: string, end: string): Promise<IncomeRecord[]> {
+  async getIncomesWithin(start: Date, end: Date): Promise<IncomeRecord[]> {
     const q = query(
       this.getCollectionRef(FINANCIAL_COLLECTIONS.INCOMES),
-      where("date", ">=", start),
-      where("date", "<=", end),
+      where("date", ">=", Timestamp.fromDate(start)),
+      where("date", "<=", Timestamp.fromDate(end)),
+      orderBy("date", "desc"),
     );
     const querySnapshot = await getDocs(q);
 
-    const records = querySnapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          createdAt: doc.data().createdAt || new Date().toISOString(),
-          updatedAt: doc.data().updatedAt || new Date().toISOString(),
-        }) as IncomeRecord,
-    );
-    return records;
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        date: data.date?.toDate(),
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as IncomeRecord;
+    });
   }
 
   async addIncome(
@@ -319,25 +322,24 @@ export class FinancialRecordsService {
   }
 
   // Expense Records
-  async getExpensesWithin(
-    start: string,
-    end: string,
-  ): Promise<ExpenseRecord[]> {
+  async getExpensesWithin(start: Date, end: Date): Promise<ExpenseRecord[]> {
     const q = query(
       this.getCollectionRef(FINANCIAL_COLLECTIONS.EXPENSES),
-      where("date", ">=", start),
-      where("date", "<=", end),
+      where("date", ">=", Timestamp.fromDate(start)),
+      where("date", "<=", Timestamp.fromDate(end)),
+      orderBy("date", "desc"),
     );
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          createdAt: doc.data().createdAt || new Date().toISOString(),
-          updatedAt: doc.data().updatedAt || new Date().toISOString(),
-        }) as ExpenseRecord,
-    );
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        ...data,
+        date: data.date?.toDate(),
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as ExpenseRecord;
+    });
   }
 
   async addExpense(
@@ -376,8 +378,8 @@ export class FinancialRecordsService {
       (record) =>
         ({
           ...record,
-          createdAt: record.createdAt || new Date().toISOString(),
-          updatedAt: record.updatedAt || new Date().toISOString(),
+          createdAt: record.createdAt || new Date(),
+          updatedAt: record.updatedAt || new Date(),
         }) as FixedEstimateRecord,
     );
   }

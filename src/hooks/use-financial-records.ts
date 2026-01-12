@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
-import { formatDateISO } from "@/lib/utils";
 
 export const useFinancialRecords = (
-  startDateParam?: Date,
-  endDateParam?: Date,
+  startDateParam: Date,
+  endDateParam: Date,
 ) => {
   const { user } = useAuth();
   const [incomesManual, setIncomesManual] = useState<IncomeRecord[]>([]);
@@ -33,38 +32,39 @@ export const useFinancialRecords = (
     return new FinancialRecordsService(user.uid);
   }, [user?.uid]);
 
-  const fetchFinancialRecords = useCallback(async (startDate: string, endDate: string) => {
-    if (!recordsService)
-      throw new Error("Financial records service not initialized");
+  const fetchFinancialRecords = useCallback(
+    async (startDate: Date, endDate: Date) => {
+      if (!recordsService)
+        throw new Error("Financial records service not initialized");
 
-    try {
-      setIsLoading(true);
-      await Promise.all([
-        fetchIncomes(recordsService, startDate, endDate),
-        fetchExpensesManualOther(recordsService, startDate, endDate),
-        fetchExpensesManual(recordsService, startDate, endDate),
-        fetchExpensesManualCreditCard(recordsService),
-        fetchFixedEstimates(recordsService),
-      ]);
-    } catch (error) {
-      console.error("Error loading financial records:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [recordsService]);
+      try {
+        setIsLoading(true);
+        await Promise.all([
+          fetchIncomes(recordsService, startDate, endDate),
+          fetchExpensesManualOther(recordsService, startDate, endDate),
+          fetchExpensesManual(recordsService, startDate, endDate),
+          fetchExpensesManualCreditCard(recordsService),
+          fetchFixedEstimates(recordsService),
+        ]);
+      } catch (error) {
+        console.error("Error loading financial records:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [recordsService],
+  );
 
   // Initial fetch
   useEffect(() => {
-    if(!startDateParam || !endDateParam) return;
-
-    fetchFinancialRecords(formatDateISO(startDateParam), formatDateISO(endDateParam));
+    fetchFinancialRecords(startDateParam, endDateParam);
   }, [startDateParam, endDateParam, fetchFinancialRecords]);
 
   // Income operations
   const fetchIncomes = async (
     service: FinancialRecordsService,
-    start: string,
-    end: string,
+    start: Date,
+    end: Date,
   ) => {
     try {
       const records = await service.getIncomesWithin(start, end);
@@ -148,8 +148,8 @@ export const useFinancialRecords = (
 
   const fetchExpensesManual = async (
     service: FinancialRecordsService,
-    start: string,
-    end: string,
+    start: Date,
+    end: Date,
   ) => {
     try {
       const records = await service.getExpensesWithin(start, end);
@@ -165,8 +165,8 @@ export const useFinancialRecords = (
   // Expense operations
   const fetchExpensesManualOther = async (
     service: FinancialRecordsService,
-    start: string,
-    end: string,
+    start: Date,
+    end: Date,
   ) => {
     try {
       const records = await service.getExpensesWithin(start, end);

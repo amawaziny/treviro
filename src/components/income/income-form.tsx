@@ -30,17 +30,8 @@ import {
 import { Loader2 } from "lucide-react";
 import { getCurrentDate } from "@/lib/utils";
 
-const initialFormValues: IncomeFormValues = {
-  type: "Profit Share",
-  source: "",
-  //@ts-expect-error
-  amount: "",
-  date: getCurrentDate(),
-  description: "",
-};
-
 type IncomeFormProps = {
-  initialValues?: Partial<IncomeFormValues>;
+  initialValues: Partial<IncomeFormValues>;
   onSubmit: (values: IncomeFormValues) => void | Promise<void>;
   isEditMode?: boolean;
 };
@@ -54,7 +45,7 @@ export function IncomeForm({
 
   const form = useForm<IncomeFormValues>({
     resolver: zodResolver(IncomeSchema),
-    defaultValues: initialValues ?? initialFormValues,
+    defaultValues: initialValues,
   });
 
   return (

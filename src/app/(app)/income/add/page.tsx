@@ -9,13 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { IncomeRecord } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { getCurrentDate } from "@/lib/utils";
 
 const initialFormValues: IncomeFormValues = {
@@ -30,7 +31,11 @@ export default function AddIncomePage() {
   const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const { addIncome } = useFinancialRecords();
+  const month = useMemo(() => new Date(), []);
+  const startDate = useMemo(() => startOfMonth(month), []);
+  const endDate = useMemo(() => endOfMonth(month), []);
+
+  const { addIncome } = useFinancialRecords(startDate, endDate);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -42,7 +47,7 @@ export default function AddIncomePage() {
       > = {
         type: values.type!, // Zod ensures type is valid and present
         amount: values.amount, // Zod has coerced this to number
-        date: values.date, // Zod ensures date is valid
+        date: new Date(values.date), // Zod ensures date is valid
       };
 
       if (values.source && values.source.trim() !== "") {

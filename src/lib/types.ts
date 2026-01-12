@@ -232,13 +232,13 @@ export type FinancialRecord =
 // Base interface that enforces common fields across all record types
 export interface BaseRecord {
   recordType: "Income" | "Expense" | "Fixed Estimate";
-  date?: string;
+  date?: Date;
   type: IncomeType | ExpenseType | FixedEstimateType;
   id: string;
   amount: number;
   description?: string;
-  createdAt: string;
-  updatedAt?: string;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 // Extend the record interfaces to include BaseRecord
