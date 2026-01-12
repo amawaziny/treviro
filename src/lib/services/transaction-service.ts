@@ -259,12 +259,12 @@ export class TransactionService {
     type: TransactionType,
   ) {
     try {
-      const now = new Date().toISOString();
+      const now = new Date();
 
       let transactionId = uuidv4();
-      const transaction = await this.getTransactionsBySourceId(record.id);
-      if (transaction) {
-        transactionId = transaction[0].id;
+      const transactions = await this.getTransactionsBySourceId(record.id);
+      if (transactions && transactions.length > 0) {
+        transactionId = transactions[0].id;
       }
 
       const newTransaction: Transaction = {
@@ -332,9 +332,6 @@ export class TransactionService {
     if (!transactionData.sourceId) {
       throw new Error("sourceId is required");
     }
-    if (!transactionData.securityId && transactionData.type !== "PAYMENT") {
-      throw new Error("securityId is required for non-payment transactions");
-    }
     if (
       (transactionData.quantity === undefined ||
         transactionData.quantity === null) &&
@@ -356,7 +353,7 @@ export class TransactionService {
       db,
       async (firestoreTransaction: FirestoreTransaction) => {
         const transactionId = transactionData.id || uuidv4();
-        const now = new Date().toISOString();
+        const now = new Date();
         let {
           pricePerUnit = 0,
           profitOrLoss = 0,

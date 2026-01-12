@@ -425,7 +425,7 @@ export class InvestmentService {
     quantity: number,
     pricePerUnit: number,
     fees: number,
-    date: string,
+    date: Date,
   ): Promise<Investment> {
     const amount = quantity * pricePerUnit + fees;
 
@@ -469,7 +469,7 @@ export class InvestmentService {
     quantity: number,
     pricePerUnit: number,
     fees: number,
-    date: string,
+    date: Date,
   ): Promise<Investment> {
     const amount = quantity * pricePerUnit - fees;
 
@@ -509,7 +509,7 @@ export class InvestmentService {
     investmentType: InvestmentType,
     installmentNumber: number,
     amount: number,
-    date: string,
+    date: Date,
   ): Promise<Investment> {
     return this.updateInvestment({
       sourceId: investmentId,
@@ -546,7 +546,7 @@ export class InvestmentService {
     securityId: string,
     investmentType: InvestmentType,
     amount: number,
-    date: string,
+    date: Date,
   ): Promise<Investment> {
     return this.updateInvestment({
       sourceId: investmentId,
@@ -706,13 +706,13 @@ export class InvestmentService {
         const today = new Date();
         if (maturityDate <= today) {
           investment.isClosed = true;
-          investment.maturedOn = maturityDate.toISOString();
+          investment.maturedOn = maturityDate;
           //TODO: could be converted to batch update
           await this.updateInvestment({
             sourceId: investment.id,
             investmentType: investment.type,
             type: "MATURED_DEBT",
-            date: maturityDate.toISOString(),
+            date: maturityDate,
             amount: investment.totalInvested,
             quantity: investment.totalShares,
             pricePerUnit: investment.averagePurchasePrice,

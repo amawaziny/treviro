@@ -133,7 +133,7 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   interestFrequency: Frequency;
   interestAmount: number; // projected interest amount
   monthlyInterestAmount: number; // projected monthly interest amount
-  maturedOn?: string; // Date when the instrument matured (YYYY-MM-DD)
+  maturedOn?: Date; // Date when the instrument matured (YYYY-MM-DD)
 }
 
 export type Investment =
@@ -336,7 +336,7 @@ export interface Transaction {
   securityId?: string;
   installmentNumber?: number;
   type: TransactionType;
-  date: string; // ISO date string
+  date: Date; // ISO date string
   amount: number; // Total transaction amount (signed: positive for in, negative for out)
   quantity: number; // Number of shares/units (signed: positive for buy, negative for sell)
   pricePerUnit: number; // Price per share/unit
@@ -350,7 +350,7 @@ export interface Transaction {
     // Additional type-specific data
     [key: string]: any; // Allow other metadata
   };
-  createdAt: string; // ISO timestamp
+  createdAt: Date; // ISO timestamp
 }
 
 export interface DashboardSummary {
