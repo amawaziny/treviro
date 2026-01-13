@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
+import { useAppServices } from "@/contexts/app-services-context";
 
 export const useFinancialRecords = (
   startDateParam: Date,
   endDateParam: Date,
 ) => {
-  const { user } = useAuth();
+  const { financialRecordsService: recordsService } = useAppServices();
   const [incomesManual, setIncomesManual] = useState<IncomeRecord[]>([]);
   const [expensesManual, setExpensesManual] = useState<ExpenseRecord[]>([]);
   const [expensesManualOther, setExpensesManualOther] = useState<
@@ -24,13 +24,6 @@ export const useFinancialRecords = (
   const [incomesFixed, setIncomesFixed] = useState<FixedEstimateRecord[]>([]);
   const [expensesFixed, setExpensesFixed] = useState<FixedEstimateRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Initialize service when user is authenticated
-  // Initialize records service
-  const recordsService = useMemo(() => {
-    if (!user?.uid) return null;
-    return new FinancialRecordsService(user.uid);
-  }, [user?.uid]);
 
   const fetchFinancialRecords = useCallback(
     async (startDate: Date, endDate: Date) => {

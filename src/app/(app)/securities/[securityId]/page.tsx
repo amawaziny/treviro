@@ -25,7 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { cn, formatCurrencyWithCommas, formatDateDisplay } from "@/lib/utils";

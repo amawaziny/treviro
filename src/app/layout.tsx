@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/language-context";
 import { LanguageInitializer } from "@/components/layout/language-initializer";
 import PageViewTrackerWrapper from "@/components/analytics/PageViewTrackerWrapper";
 import OfflineIndicatorWrapper from "@/components/common/OfflineIndicatorWrapper";
+import { AppServicesProvider } from "@/contexts/app-services-context";
 
 // Define metadata type to avoid TypeScript errors
 type Metadata = {
@@ -104,16 +105,18 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <InvestmentProvider>
-              <LanguageProvider>
-                <LanguageInitializer />
-                <PageViewTrackerWrapper />
-                <SidebarProvider defaultOpen={true}>
-                  <FirebaseIntegrations>{children}</FirebaseIntegrations>
-                </SidebarProvider>
-              </LanguageProvider>
-              <Toaster />
-            </InvestmentProvider>
+            <AppServicesProvider>
+              <InvestmentProvider>
+                <LanguageProvider>
+                  <LanguageInitializer />
+                  <PageViewTrackerWrapper />
+                  <SidebarProvider defaultOpen={true}>
+                    <FirebaseIntegrations>{children}</FirebaseIntegrations>
+                  </SidebarProvider>
+                </LanguageProvider>
+                <Toaster />
+              </InvestmentProvider>
+            </AppServicesProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

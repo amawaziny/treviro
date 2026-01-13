@@ -47,10 +47,9 @@ export class DashboardService {
     }
     this.investmentService = investmentService;
     this.transactionService = transactionService;
-    this.setupEventSubscriptions();
   }
 
-  private setupEventSubscriptions() {
+  setupEventSubscriptions() {
     const transactionCreatedUnsubscribe = eventBus.subscribe(
       "transaction:created",
       async (event: TransactionEvent) => {

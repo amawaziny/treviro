@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { InvestmentService } from "@/lib/services/investment-service";
 import {
@@ -67,7 +61,7 @@ export interface InvestmentContextType {
     quantity: number,
     pricePerUnit: number,
     fees: number,
-    date: string,
+    date: Date,
   ) => Promise<void>;
   sell: (
     investmentId: string,
@@ -76,19 +70,19 @@ export interface InvestmentContextType {
     quantity: number,
     pricePerUnit: number,
     fees: number,
-    date: string,
+    date: Date,
   ) => Promise<void>;
   pay: (
     investmentId: string,
     installmentNumber: number,
     amount: number,
-    date: string,
+    date: Date,
   ) => Promise<void>;
   addDividend: (
     investmentId: string,
     securityId: string,
     amount: number,
-    date: string,
+    date: Date,
   ) => Promise<void>;
 }
 
@@ -237,7 +231,7 @@ export const InvestmentProvider = ({
     quantity: number,
     pricePerUnit: number,
     fees: number,
-    date: string,
+    date: Date,
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
@@ -262,7 +256,7 @@ export const InvestmentProvider = ({
     quantity: number,
     pricePerUnit: number,
     fees: number,
-    date: string,
+    date: Date,
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
@@ -284,7 +278,7 @@ export const InvestmentProvider = ({
     investmentId: string,
     installmentNumber: number,
     amount: number,
-    date: string,
+    date: Date,
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
@@ -304,7 +298,7 @@ export const InvestmentProvider = ({
     investmentId: string,
     securityId: string,
     amount: number,
-    date: string,
+    date: Date,
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
@@ -370,10 +364,10 @@ export const InvestmentProvider = ({
   );
 };
 
-export const useInvestment = (): InvestmentContextType => {
+export const useInvestments = (): InvestmentContextType => {
   const context = useContext(InvestmentContext);
   if (!context) {
-    throw new Error("useInvestment must be used within an InvestmentProvider");
+    throw new Error("useInvestments must be used within an InvestmentProvider");
   }
   return context;
 };

@@ -54,17 +54,14 @@ export class TransactionService {
       throw new Error("User ID is required to initialize TransactionService");
     }
     this.userId = userId;
-    this.setupEventSubscriptions();
   }
 
   /**
    * Sets up event subscriptions for transaction-related operations.
    * Subscribes to various financial events to automatically create/update/delete
    * transactions when related entities change.
-   *
-   * @private
    */
-  private setupEventSubscriptions() {
+  setupEventSubscriptions() {
     const incomeAddedUnsubscribe = eventBus.subscribe(
       "income:added",
       async (event: FinancialRecordEvent) => {

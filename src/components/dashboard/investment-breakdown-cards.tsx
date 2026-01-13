@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/language-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { formatNumberForMobile, parseDateString } from "@/lib/utils";
 import {
   TrendingUp,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
 import { formatNumberForMobile } from "@/lib/utils";
 import {

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatNumberForMobile } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import Link from "next/link";
 
 interface DirectDebtListItemProps {

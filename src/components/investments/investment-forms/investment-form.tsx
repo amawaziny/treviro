@@ -31,7 +31,7 @@ import { MemoizedRenderDebtFields } from "./debt-fields-form";
 import { MemoizedRenderRealEstateFields } from "./real-estate-fields-form";
 import { getCurrentDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 
 // Initial values for each investment type
 const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {

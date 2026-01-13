@@ -2,7 +2,7 @@
 import { useLanguage } from "@/contexts/language-context";
 
 import React from "react";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import {
   Card,
   CardContent,

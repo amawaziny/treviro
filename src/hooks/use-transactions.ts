@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Transaction } from "@/lib/types";
-import { TransactionService } from "@/lib/services/transaction-service";
 import { useAuth } from "@/contexts/auth-context";
 import {
   formatDateISO,
@@ -10,7 +9,7 @@ import {
   isRealEstateRelatedFund,
   isStockRelatedFund,
 } from "@/lib/utils";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { useAppServices } from "@/contexts/app-services-context";
 
 /**
  * Custom hook to manage transactions including CRUD operations
@@ -21,6 +20,7 @@ import { endOfMonth, startOfMonth } from "date-fns";
  */
 
 export const useTransactions = (startDate: Date, endDate: Date) => {
+  const { transactionService } = useAppServices();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeFixedTrxs, setIncomeFixedTrxs] = useState<Transaction[]>([]);
   const [incomeManualTrxs, setIncomeManualTrxs] = useState<Transaction[]>([]);
@@ -51,12 +51,6 @@ export const useTransactions = (startDate: Date, endDate: Date) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-
-  // Initialize transaction service
-  const transactionService = useMemo(() => {
-    if (!user?.uid) return null;
-    return new TransactionService(user.uid);
-  }, [user?.uid]);
 
   // Fetch transactions within date range
   const fetchTransactions = useCallback(async () => {

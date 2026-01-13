@@ -19,7 +19,7 @@ import {
   BuySellSecuritySchema,
   type BuySellSecurityFormValues,
 } from "@/lib/schemas";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";

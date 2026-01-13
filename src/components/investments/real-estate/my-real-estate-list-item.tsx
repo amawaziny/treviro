@@ -5,7 +5,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Home, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { useToast } from "@/hooks/use-toast";
 import { formatDateDisplay, formatNumberForMobile } from "@/lib/utils";
 import { useRouter } from "next/navigation";
