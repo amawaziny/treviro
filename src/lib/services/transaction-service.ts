@@ -264,7 +264,7 @@ export class TransactionService {
         transactionId = transactions[0].id;
       }
 
-      const newTransaction: Transaction = {
+      const newTransaction: Omit<Transaction, "createdAt"> = {
         id: transactionId,
         sourceId: record.id,
         sourceType: record.recordType,
@@ -276,7 +276,6 @@ export class TransactionService {
         quantity: 0,
         pricePerUnit: 0,
         fees: 0,
-        createdAt: now,
         averagePurchasePrice: 0,
         profitOrLoss: 0,
         metadata: {
@@ -379,17 +378,19 @@ export class TransactionService {
           },
         };
 
-        // Add the transaction
-        firestoreTransaction.set(
-          this.getTransactionRef(transactionId),
-          newTransaction,
-        );
+        const transactionDocRef = this.getTransactionRef(transactionId);
+        const isNewTransaction = !(
+          await firestoreTransaction.get(transactionDocRef)
+        ).exists();
 
-        // Publish the transaction:created event after successful transaction creation
+        // Add the transaction
+        firestoreTransaction.set(transactionDocRef, newTransaction);
+
+        // Publish the transaction:created/updated event after successful transaction set
         await eventBus.publish({
-          type: transactionData.id
-            ? "transaction:updated"
-            : "transaction:created",
+          type: isNewTransaction
+            ? "transaction:created"
+            : "transaction:updated",
           transaction: newTransaction,
         });
 

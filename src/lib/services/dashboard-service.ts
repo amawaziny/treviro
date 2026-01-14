@@ -98,7 +98,7 @@ export class DashboardService {
           : defaultDashboardSummary;
 
         const updates: Partial<DashboardSummary> = {
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         };
 
         const amount = transaction.amount || 0;
@@ -136,17 +136,20 @@ export class DashboardService {
 
           case "DIVIDEND":
           case "INTEREST":
+          case "INCOME":
             updates.totalCashBalance =
               (currentData.totalCashBalance || 0) + amount;
             break;
 
-          case "MATURED_DEBT":
+          case "MATURED_DEBT": {
             updates.totalInvested = Math.max(
               0,
               (currentData.totalInvested || 0) - amount,
             );
             updates.totalCashBalance =
               (currentData.totalCashBalance || 0) + amount;
+            break;
+          }
         }
 
         // Apply updates to the dashboard
@@ -176,7 +179,7 @@ export class DashboardService {
     const newData: DashboardSummary = {
       ...currentData,
       ...updates,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     };
 
     await setDoc(dashboardRef, newData, { merge: true });

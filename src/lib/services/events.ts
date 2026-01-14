@@ -66,6 +66,18 @@ export class EventBus {
       }),
     );
   }
+
+  publishAsync<T extends EventType>(event: T): void {
+    const handlers = this.handlers.get(event.type) || [];
+    // Fire and forget - don't await the handlers
+    Promise.all(
+      Array.from(handlers).map((handler) =>
+        Promise.resolve(handler(event)).catch((error) =>
+          console.error(`Error in event handler for ${event.type}:`, error),
+        ),
+      ),
+    ).catch(console.error); // Handle any uncaught errors in the promise chain
+  }
 }
 
 export const eventBus = EventBus.getInstance();

@@ -24,9 +24,23 @@ const AppServicesContext = createContext<AppServices>({
   userId: undefined,
 });
 
-export const AppServicesProvider = ({ children }: { children: React.ReactNode }) => {
+export const AppServicesProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { user } = useAuth();
   const servicesRef = useRef<AppServices | null>(null);
+
+  // Helper function to clean up services
+  const cleanupServices = (services: AppServices) => {
+    if (services.dashboardService?.cleanup) {
+      services.dashboardService.cleanup();
+    }
+    if (services.transactionService?.cleanup) {
+      services.transactionService.cleanup();
+    }
+  };
 
   // Initialize services when user logs in
   const services = useMemo(() => {
@@ -53,7 +67,7 @@ export const AppServicesProvider = ({ children }: { children: React.ReactNode })
       const dashboardService = new DashboardService(
         user.uid,
         investmentService,
-        transactionService
+        transactionService,
       );
 
       // Store in ref to prevent recreation
@@ -83,29 +97,23 @@ export const AppServicesProvider = ({ children }: { children: React.ReactNode })
     };
   }, []); // Empty dependency array means this runs on unmount only
 
-  // Helper function to clean up services
-  const cleanupServices = (services: AppServices) => {
-    if (services.dashboardService?.cleanup) {
-      services.dashboardService.cleanup();
-    }
-    if (services.transactionService?.cleanup) {
-      services.transactionService.cleanup();
-    }
-  };
-
   // Only render children when services are ready
   if (!services && user?.uid) {
     return <div>Loading services...</div>; // Or a loading spinner
   }
 
   return (
-    <AppServicesContext.Provider value={services || {
-      dashboardService: null,
-      investmentService: null,
-      transactionService: null,
-      financialRecordsService: null,
-      userId: undefined,
-    }}>
+    <AppServicesContext.Provider
+      value={
+        services || {
+          dashboardService: null,
+          investmentService: null,
+          transactionService: null,
+          financialRecordsService: null,
+          userId: undefined,
+        }
+      }
+    >
       {children}
     </AppServicesContext.Provider>
   );

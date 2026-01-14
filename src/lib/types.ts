@@ -357,7 +357,7 @@ export interface DashboardSummary {
   totalInvested: number;
   totalRealizedPnL: number;
   totalCashBalance: number;
-  updatedAt?: string;
+  updatedAt?: Date;
 }
 
 export interface DashboardSummaries extends DashboardSummary {
@@ -370,7 +370,7 @@ export const defaultDashboardSummary: DashboardSummary = {
   totalInvested: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0,
-  updatedAt: new Date().toISOString(),
+  updatedAt: new Date(),
 };
 
 export const defaultDashboardSummaries: DashboardSummaries = {
