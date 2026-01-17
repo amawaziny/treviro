@@ -7,9 +7,7 @@ import {
   where,
   getDocs,
   Transaction as FirestoreTransaction,
-  setDoc,
   writeBatch,
-  updateDoc,
   deleteDoc,
   orderBy,
 } from "firebase/firestore";
