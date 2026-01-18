@@ -76,6 +76,7 @@ export const useFinancialRecords = (
         throw new Error("Financial records service not initialized");
 
       try {
+        console.log(`fetchIncomeById: ${id}`);
         return await recordsService.findIncomeById(id);
       } catch (error) {
         console.error("Error fetching income record:", error);
@@ -129,11 +130,14 @@ export const useFinancialRecords = (
         throw new Error("Financial records service not initialized");
       }
       try {
+        setIsLoading(true);
         await recordsService.deleteIncome(id);
         setIncomesManual((prev) => prev.filter((record) => record.id !== id));
       } catch (error) {
         console.error("Error deleting income record:", error);
         throw error;
+      } finally {
+        setIsLoading(false);
       }
     },
     [recordsService],

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { IncomeForm } from "@/components/income/income-form";
@@ -15,6 +15,8 @@ import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
+import { startOfMonth, endOfMonth } from "date-fns";
+import { IncomeRecord } from "@/lib/types";
 
 export default function EditIncomePage({
   params,
@@ -22,18 +24,15 @@ export default function EditIncomePage({
   params: Promise<{ id: string }>;
 }) {
   const { t } = useLanguage();
-  const { updateIncome, fetchIncomeById } = useFinancialRecords();
   const router = useRouter();
   const { id: incomeId } = React.use(params);
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const income = React.use(fetchIncomeById(incomeId));
+  const month = useMemo(() => new Date(), []);
+  const startDate = useMemo(() => startOfMonth(month), []);
+  const endDate = useMemo(() => endOfMonth(month), []);
 
-  if (!income) {
-    return notFound();
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     // Open form when component mounts
     openForm();
 
@@ -54,6 +53,23 @@ export default function EditIncomePage({
     };
   }, [setHeaderProps, closeForm, openForm]);
 
+  const { updateIncome, fetchIncomeById } = useFinancialRecords(startDate, endDate);
+
+  const [income, setIncome] = useState<IncomeRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchIncomeById(incomeId).then(result => {
+      if (!cancelled) setIncome(result);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [fetchIncomeById, incomeId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!income) return notFound();
+
   return (
     <div className="container mx-auto py-4 space-y-6">
       <Card>
@@ -72,12 +88,13 @@ export default function EditIncomePage({
               source: income.source,
               description: income.description ?? "",
               amount: income.amount,
-              date: income.date,
+              date: income.date?.toISOString() || new Date().toISOString(),
             }}
             onSubmit={async (values: IncomeFormValues) => {
               await updateIncome(incomeId, {
                 ...values,
                 amount: Number(values.amount),
+                date: new Date(values.date),
               });
               router.push("/income");
             }}

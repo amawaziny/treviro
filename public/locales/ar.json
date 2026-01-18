@@ -794,5 +794,6 @@
   "record_purchase": "تسجيل شراء",
   "price_per": "السعر لكل",
   "date": "التاريخ",
-  "buying": "جاري الشراء"
+  "buying": "جاري الشراء",
+  "Income record deleted successfully": "تم حذف سجل الدخل بنجاح"
 }

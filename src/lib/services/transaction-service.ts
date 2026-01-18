@@ -299,6 +299,9 @@ export class TransactionService {
         });
         await batch.commit();
 
+        // We publish just one event with any transaction record because:
+        // currently the only consumer is the dashboard and it just recalculates the dashboard
+        // we don't want to publish an event for each transaction deletion
         await eventBus.publish({
           type: "transaction:deleted",
           transaction: transactions[0],

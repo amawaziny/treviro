@@ -35,6 +35,7 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "@/hooks/use-toast";
 
 export default function IncomePage() {
   const { t, language } = useLanguage();
@@ -189,6 +190,10 @@ export default function IncomePage() {
                                 onClick={async () => {
                                   try {
                                     await deleteIncome(record.id);
+                                    toast({
+                                      title: t("success"),
+                                      description: t("Income record deleted successfully"),
+                                    });
                                   } catch (e) {
                                     console.error(
                                       t("error_deleting_income_record"),
