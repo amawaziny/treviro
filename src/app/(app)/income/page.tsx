@@ -192,7 +192,9 @@ export default function IncomePage() {
                                     await deleteIncome(record.id);
                                     toast({
                                       title: t("success"),
-                                      description: t("Income record deleted successfully"),
+                                      description: t(
+                                        "Income record deleted successfully",
+                                      ),
                                     });
                                   } catch (e) {
                                     console.error(

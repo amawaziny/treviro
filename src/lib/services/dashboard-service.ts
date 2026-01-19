@@ -27,8 +27,8 @@ import { formatPath } from "@/lib/utils";
  * 8. we could disable some fields in edit mode of investment form
  * 9. refactor investment-form to be each form has its own submit button and logic
  * 10. check if we need context for investment, transaction, expense, income, fixed estimate
- * 11. remove useEffect from hooks and use React.use to call the functions
- * 12. dashboard is not refreshed automaticly
+ * 11. dashboard is not refreshed automaticly
+ * 12. income:updated event not updating dashboard ... check transaction:updated as well
  */
 
 export class DashboardService {

@@ -76,11 +76,13 @@ export const useFinancialRecords = (
         throw new Error("Financial records service not initialized");
 
       try {
-        console.log(`fetchIncomeById: ${id}`);
+        setIsLoading(true);
         return await recordsService.findIncomeById(id);
       } catch (error) {
         console.error("Error fetching income record:", error);
         return null;
+      } finally {
+        setIsLoading(false);
       }
     },
     [recordsService],

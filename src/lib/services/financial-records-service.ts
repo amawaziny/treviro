@@ -139,7 +139,7 @@ export class FinancialRecordsService {
       const updatedData = {
         ...currentData,
         ...data,
-        updatedAt: new Date().toISOString(),
+        updatedAt: Timestamp.fromDate(new Date()),
         recordType: this.getRecordType(collectionName),
       } as T;
 

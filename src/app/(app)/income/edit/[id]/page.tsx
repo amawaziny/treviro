@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { Skeleton } from "@/components/ui/skeleton";
 import { IncomeForm } from "@/components/income/income-form";
 import {
   Card,
@@ -15,8 +16,9 @@ import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 import { IncomeRecord } from "@/lib/types";
+import { formatDateISO } from "@/lib/utils";
 
 export default function EditIncomePage({
   params,
@@ -26,12 +28,13 @@ export default function EditIncomePage({
   const { t } = useLanguage();
   const router = useRouter();
   const { id: incomeId } = React.use(params);
-  const { setHeaderProps, openForm, closeForm } = useForm();
 
   const month = useMemo(() => new Date(), []);
   const startDate = useMemo(() => startOfMonth(month), []);
   const endDate = useMemo(() => endOfMonth(month), []);
+  const [income, setIncome] = useState<IncomeRecord | null>(null);
 
+  const { setHeaderProps, openForm, closeForm } = useForm();
   useEffect(() => {
     // Open form when component mounts
     openForm();
@@ -53,22 +56,15 @@ export default function EditIncomePage({
     };
   }, [setHeaderProps, closeForm, openForm]);
 
-  const { updateIncome, fetchIncomeById } = useFinancialRecords(startDate, endDate);
-
-  const [income, setIncome] = useState<IncomeRecord | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { updateIncome, fetchIncomeById, isLoading } = useFinancialRecords(
+    startDate,
+    endDate,
+  );
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetchIncomeById(incomeId).then(result => {
-      if (!cancelled) setIncome(result);
-      setLoading(false);
-    });
-    return () => { cancelled = true; };
+    fetchIncomeById(incomeId).then(setIncome);
   }, [fetchIncomeById, incomeId]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!income) return notFound();
+  if (!isLoading && !income) return notFound();
 
   return (
     <div className="container mx-auto py-4 space-y-6">
@@ -82,24 +78,30 @@ export default function EditIncomePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <IncomeForm
-            initialValues={{
-              type: income.type,
-              source: income.source,
-              description: income.description ?? "",
-              amount: income.amount,
-              date: income.date?.toISOString() || new Date().toISOString(),
-            }}
-            onSubmit={async (values: IncomeFormValues) => {
-              await updateIncome(incomeId, {
-                ...values,
-                amount: Number(values.amount),
-                date: new Date(values.date),
-              });
-              router.push("/income");
-            }}
-            isEditMode
-          />
+          {isLoading ? (
+            <div className="space-y-6">
+              <Skeleton className="h-96 w-full rounded" />
+            </div>
+          ) : (
+            <IncomeForm
+              initialValues={{
+                type: income?.type,
+                source: income?.source,
+                description: income?.description ?? "",
+                amount: income?.amount,
+                date: formatDateISO(income?.date || new Date()),
+              }}
+              onSubmit={async (values: IncomeFormValues) => {
+                await updateIncome(incomeId, {
+                  ...values,
+                  amount: Number(values.amount),
+                  date: new Date(values.date),
+                });
+                router.push("/income");
+              }}
+              isEditMode
+            />
+          )}
         </CardContent>
       </Card>
     </div>
