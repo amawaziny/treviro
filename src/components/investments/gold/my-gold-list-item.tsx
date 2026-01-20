@@ -1,6 +1,6 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
-import type { AggregatedGoldHolding, GoldInvestment } from "@/lib/types";
+import type { GoldInvestment } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gem, TrendingUp, TrendingDown } from "lucide-react";

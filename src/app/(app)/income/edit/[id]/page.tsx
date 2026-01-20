@@ -16,7 +16,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, endOfMonth } from "date-fns";
 import { IncomeRecord } from "@/lib/types";
 import { formatDateISO } from "@/lib/utils";
 
@@ -56,15 +56,13 @@ export default function EditIncomePage({
     };
   }, [setHeaderProps, closeForm, openForm]);
 
-  const { updateIncome, fetchIncomeById, isLoading } = useFinancialRecords(
+  const { updateIncome, fetchIncomeById } = useFinancialRecords(
     startDate,
     endDate,
   );
   useEffect(() => {
     fetchIncomeById(incomeId).then(setIncome);
   }, [fetchIncomeById, incomeId]);
-
-  if (!isLoading && !income) return notFound();
 
   return (
     <div className="container mx-auto py-4 space-y-6">
@@ -78,7 +76,7 @@ export default function EditIncomePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {!income ? (
             <div className="space-y-6">
               <Skeleton className="h-96 w-full rounded" />
             </div>

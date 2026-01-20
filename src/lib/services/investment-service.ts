@@ -2,8 +2,6 @@ import { db } from "@/lib/firebase";
 import {
   doc,
   getDoc,
-  runTransaction as runFirestoreTransaction,
-  Transaction as FirestoreTransaction,
   query,
   collection,
   getDocs,
@@ -178,70 +176,65 @@ export class InvestmentService {
       throw new Error("securityId is required for stock and fund investments");
     }
 
-    return runFirestoreTransaction(
-      db,
-      async (firestoreTransaction: FirestoreTransaction) => {
-        const now = new Date().toISOString();
-        let investment: any;
-        let investmentId = uuidv4();
+    const now = new Date();
+    let investment: any;
+    let investmentId = uuidv4();
 
-        // Create base investment with required fields
-        investment = {
-          ...investmentData,
-          id: investmentId,
-          securityId: securityId || "",
-          currency,
-          firstPurchaseDate,
-          lastUpdated: now,
-          totalShares: quantity,
-          totalInvested: amount,
-          averagePurchasePrice: quantity > 0 ? amount / quantity : 0,
-          isClosed: false,
-          metadata: {
-            ...(investmentData.metadata || {}),
-          },
-        };
-
-        // Handle type-specific fields
-        if (isRealEstateInvestment(investment)) {
-          // Handle real estate specific fields if needed
-          if (investment.installmentFrequency) {
-            const {
-              generateInstallmentSchedule,
-            } = require("@/lib/installment-utils");
-            const installments = generateInstallmentSchedule(investment, []);
-            if (installments?.length > 0) {
-              investment.installments = installments;
-            }
-          }
-        }
-
-        // Save the new investment
-        const investmentRef = this.getInvestmentRef(investmentId);
-        firestoreTransaction.set(investmentRef, investment);
-        await eventBus.publish({
-          type: "investment:added",
-          transaction: {
-            sourceId: investmentId,
-            sourceType: "Investment",
-            securityId,
-            type: "BUY",
-            date: investment.firstPurchaseDate,
-            amount,
-            quantity,
-            pricePerUnit,
-            fees,
-            currency,
-            metadata: {
-              sourceSubType: investment.type,
-              ...investment,
-            },
-          } as Transaction,
-        });
-
-        return investment as T & { id: string };
+    // Create base investment with required fields
+    investment = {
+      ...investmentData,
+      id: investmentId,
+      securityId: securityId || "",
+      currency,
+      firstPurchaseDate,
+      lastUpdated: now,
+      totalShares: quantity,
+      totalInvested: amount,
+      averagePurchasePrice: quantity > 0 ? amount / quantity : 0,
+      isClosed: false,
+      metadata: {
+        ...(investmentData.metadata || {}),
       },
-    );
+    };
+
+    // Handle type-specific fields
+    if (isRealEstateInvestment(investment)) {
+      // Handle real estate specific fields if needed
+      if (investment.installmentFrequency) {
+        const {
+          generateInstallmentSchedule,
+        } = require("@/lib/installment-utils");
+        const installments = generateInstallmentSchedule(investment, []);
+        if (installments?.length > 0) {
+          investment.installments = installments;
+        }
+      }
+    }
+
+    // Save the new investment
+    const investmentRef = this.getInvestmentRef(investmentId);
+    await setDoc(investmentRef, investment);
+    await eventBus.publish({
+      type: "investment:added",
+      transaction: {
+        sourceId: investmentId,
+        sourceType: "Investment",
+        securityId,
+        type: "BUY",
+        date: investment.firstPurchaseDate,
+        amount,
+        quantity,
+        pricePerUnit,
+        fees,
+        currency,
+        metadata: {
+          sourceSubType: investment.type,
+          ...investment,
+        },
+      } as Transaction,
+    });
+
+    return investment as T & { id: string };
   }
 
   /**
@@ -314,88 +307,87 @@ export class InvestmentService {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
     const now = new Date().toISOString();
 
-    return runFirestoreTransaction(db, async (firestoreTransaction) => {
-      const investmentDoc = await firestoreTransaction.get(investmentRef);
+    const investmentDoc = await getDoc(investmentRef);
 
-      if (!investmentDoc.exists()) {
-        throw new Error("Investment not found");
+    if (!investmentDoc.exists()) {
+      throw new Error("Investment not found");
+    }
+
+    const investment = investmentDoc.data() as any;
+    const update = this.calculateInvestmentUpdate(
+      {
+        totalShares: investment.totalShares || 0,
+        totalInvested: investment.totalInvested || 0,
+        averagePurchasePrice: investment.averagePurchasePrice || 0,
+      },
+      {
+        type: transactionData.type,
+        quantity: transactionData.quantity || 0,
+        amount: transactionData.amount || 0,
+        pricePerUnit: transactionData.pricePerUnit || 0,
+        fees: transactionData.fees || 0,
+        investmentType: investment.type,
+        installmentNumber: transactionData.installmentNumber,
+      },
+    );
+
+    // Prepare update data
+    const updateData: any = {
+      totalShares: update.totalShares,
+      totalInvested: update.totalInvested,
+      averagePurchasePrice: update.averagePurchasePrice,
+      isClosed: update.isClosed,
+      lastUpdated: now,
+    };
+
+    // If this is a payment for a real estate installment, mark it as paid
+    if (
+      transactionData.type === "PAYMENT" &&
+      transactionData.investmentType === "Real Estate" &&
+      transactionData.installmentNumber !== undefined
+    ) {
+      const realEstateInvestment = investment as RealEstateInvestment;
+      if (realEstateInvestment.installments) {
+        const updatedInstallments = realEstateInvestment.installments.map(
+          (installment) => ({
+            ...installment,
+            ...(installment.number === transactionData.installmentNumber
+              ? {
+                  status: "Paid",
+                  paymentDate: now,
+                }
+              : {}),
+          }),
+        );
+
+        updateData.installments = updatedInstallments;
       }
+    }
 
-      const investment = investmentDoc.data() as any;
-      const update = this.calculateInvestmentUpdate(
-        {
-          totalShares: investment.totalShares || 0,
-          totalInvested: investment.totalInvested || 0,
-          averagePurchasePrice: investment.averagePurchasePrice || 0,
-        },
-        {
-          type: transactionData.type,
-          quantity: transactionData.quantity || 0,
-          amount: transactionData.amount || 0,
-          pricePerUnit: transactionData.pricePerUnit || 0,
-          fees: transactionData.fees || 0,
-          investmentType: investment.type,
-          installmentNumber: transactionData.installmentNumber,
-        },
-      );
+    // Update the investment
+    await updateDoc(investmentRef, updateData);
 
-      // Prepare update data
-      const updateData: any = {
-        totalShares: update.totalShares,
-        totalInvested: update.totalInvested,
+    const updatedInvestment = {
+      ...investment,
+      ...updateData,
+    };
+
+    const { investmentType, ...restTransactionData } = transactionData;
+    
+    await eventBus.publish({
+      type: "investment:updated",
+      transaction: {
+        ...restTransactionData,
+        sourceType: "Investment",
         averagePurchasePrice: update.averagePurchasePrice,
-        isClosed: update.isClosed,
-        lastUpdated: now,
-      };
-
-      // If this is a payment for a real estate installment, mark it as paid
-      if (
-        transactionData.type === "PAYMENT" &&
-        transactionData.investmentType === "Real Estate" &&
-        transactionData.installmentNumber !== undefined
-      ) {
-        const realEstateInvestment = investment as RealEstateInvestment;
-        if (realEstateInvestment.installments) {
-          const updatedInstallments = realEstateInvestment.installments.map(
-            (installment) => ({
-              ...installment,
-              ...(installment.number === transactionData.installmentNumber
-                ? {
-                    status: "Paid",
-                    paymentDate: now,
-                  }
-                : {}),
-            }),
-          );
-
-          updateData.installments = updatedInstallments;
-        }
-      }
-
-      // Update the investment
-      firestoreTransaction.update(investmentRef, updateData);
-
-      const updatedInvestment = {
-        ...investment,
-        ...updateData,
-      };
-
-      const { investmentType, ...restTransactionData } = transactionData;
-      await eventBus.publish({
-        type: "investment:updated",
-        transaction: {
-          ...restTransactionData,
-          sourceType: "Investment",
-          averagePurchasePrice: update.averagePurchasePrice,
-          metadata: {
-            sourceSubType: investmentType,
-            ...updatedInvestment,
-          },
-        } as Transaction,
-      });
-
-      return updatedInvestment;
+        metadata: {
+          sourceSubType: investmentType,
+          ...updatedInvestment,
+        },
+      } as Transaction,
     });
+
+    return updatedInvestment;
   }
 
   // Helper methods for specific transaction types

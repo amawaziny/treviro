@@ -2,14 +2,14 @@ import { db } from "@/lib/firebase";
 import {
   collection,
   doc,
-  runTransaction as runFirestoreTransaction,
   query,
   where,
   getDocs,
-  Transaction as FirestoreTransaction,
   writeBatch,
   deleteDoc,
   orderBy,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -346,58 +346,51 @@ export class TransactionService {
       throw new Error("type is required");
     }
 
-    return runFirestoreTransaction(
-      db,
-      async (firestoreTransaction: FirestoreTransaction) => {
-        const transactionId = transactionData.id || uuidv4();
-        const now = new Date();
-        let {
-          pricePerUnit = 0,
-          profitOrLoss = 0,
-          fees = 0,
-          quantity = 0,
-        } = transactionData;
+    const transactionId = transactionData.id || uuidv4();
+    const now = new Date();
+    let {
+      pricePerUnit = 0,
+      profitOrLoss = 0,
+      fees = 0,
+      quantity = 0,
+    } = transactionData;
 
-        if (transactionData.type === "SELL") {
-          profitOrLoss =
-            quantity * transactionData.averagePurchasePrice -
-            transactionData.amount;
-        }
-        // Create the transaction with all required fields
-        const newTransaction: Transaction = {
-          ...transactionData,
-          id: transactionId,
-          createdAt: now,
-          pricePerUnit: pricePerUnit,
-          fees: fees,
-          quantity: quantity,
-          profitOrLoss: profitOrLoss,
-          currency: transactionData.currency || ("EGP" as CurrencyCode),
-          description: transactionData.description || "",
-          metadata: {
-            ...(transactionData.metadata || {}),
-          },
-        };
-
-        const transactionDocRef = this.getTransactionRef(transactionId);
-        const isNewTransaction = !(
-          await firestoreTransaction.get(transactionDocRef)
-        ).exists();
-
-        // Add the transaction
-        firestoreTransaction.set(transactionDocRef, newTransaction);
-
-        // Publish the transaction:created/updated event after successful transaction set
-        await eventBus.publish({
-          type: isNewTransaction
-            ? "transaction:created"
-            : "transaction:updated",
-          transaction: newTransaction,
-        });
-
-        return newTransaction;
+    if (transactionData.type === "SELL") {
+      profitOrLoss =
+        quantity * transactionData.averagePurchasePrice -
+        transactionData.amount;
+    }
+    // Create the transaction with all required fields
+    const newTransaction : Transaction = {
+      ...transactionData,
+      id: transactionId,
+      createdAt: now,
+      pricePerUnit: pricePerUnit,
+      fees: fees,
+      quantity: quantity,
+      profitOrLoss: profitOrLoss,
+      currency: transactionData.currency || ("EGP" as CurrencyCode),
+      description: transactionData.description || "",
+      metadata: {
+        ...(transactionData.metadata || {}),
       },
-    );
+    };
+
+    const transactionDocRef = this.getTransactionRef(transactionId);
+    const isNewTransaction = !(await getDoc(transactionDocRef)).exists();
+
+    // Add the transaction
+    await setDoc(transactionDocRef, newTransaction);
+
+    // Publish the transaction:created/updated event after successful transaction set
+    await eventBus.publish({
+      type: isNewTransaction
+        ? "transaction:created"
+        : "transaction:updated",
+      transaction: newTransaction,
+    });
+
+    return newTransaction;
   }
 
   async updateTransaction(id: string, data: Partial<Transaction>) {

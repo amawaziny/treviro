@@ -1,4 +1,4 @@
-import { doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
@@ -28,7 +28,6 @@ import { formatPath } from "@/lib/utils";
  * 9. refactor investment-form to be each form has its own submit button and logic
  * 10. check if we need context for investment, transaction, expense, income, fixed estimate
  * 11. dashboard is not refreshed automaticly
- * 12. income:updated event not updating dashboard ... check transaction:updated as well
  */
 
 export class DashboardService {
@@ -92,74 +91,72 @@ export class DashboardService {
     if (!dashboardRef) return;
 
     try {
-      await runTransaction(db, async (firestoreTransaction) => {
-        const dashboardDoc = await firestoreTransaction.get(dashboardRef);
-        const currentData = dashboardDoc.exists()
-          ? (dashboardDoc.data() as DashboardSummary)
-          : defaultDashboardSummary;
+      const dashboardDoc = await getDoc(dashboardRef);
+      const currentData = dashboardDoc.exists()
+        ? (dashboardDoc.data() as DashboardSummary)
+        : defaultDashboardSummary;
 
-        const updates: Partial<DashboardSummary> = {
-          updatedAt: new Date(),
-        };
+      const updates: Partial<DashboardSummary> = {
+        updatedAt: new Date(),
+      };
 
-        const amount = transaction.amount || 0;
-        const quantity = transaction.quantity || 0;
-        const averagePurchasePrice = transaction.averagePurchasePrice || 0;
-        const profitOrLoss = transaction.profitOrLoss || 0;
+      const amount = transaction.amount || 0;
+      const quantity = transaction.quantity || 0;
+      const averagePurchasePrice = transaction.averagePurchasePrice || 0;
+      const profitOrLoss = transaction.profitOrLoss || 0;
 
-        switch (transaction.type) {
-          case "BUY":
-          case "PAYMENT":
-            updates.totalInvested = (currentData.totalInvested || 0) + amount;
-            updates.totalCashBalance =
-              (currentData.totalCashBalance || 0) - amount;
-            break;
+      switch (transaction.type) {
+        case "BUY":
+        case "PAYMENT":
+          updates.totalInvested = (currentData.totalInvested || 0) + amount;
+          updates.totalCashBalance =
+            (currentData.totalCashBalance || 0) - amount;
+          break;
 
-          case "EXPENSE":
-            updates.totalCashBalance =
-              (currentData.totalCashBalance || 0) - amount;
-            break;
+        case "EXPENSE":
+          updates.totalCashBalance =
+            (currentData.totalCashBalance || 0) - amount;
+          break;
 
-          case "SELL": {
-            const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
+        case "SELL": {
+          const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
 
-            updates.totalInvested = Math.max(
-              0,
-              (currentData.totalInvested || 0) - costBasis,
-            );
-            updates.totalCashBalance =
-              (currentData.totalCashBalance || 0) + amount;
+          updates.totalInvested = Math.max(
+            0,
+            (currentData.totalInvested || 0) - costBasis,
+          );
+          updates.totalCashBalance =
+            (currentData.totalCashBalance || 0) + amount;
 
-            updates.totalRealizedPnL =
-              (currentData.totalRealizedPnL || 0) + profitOrLoss;
-            break;
-          }
-
-          case "DIVIDEND":
-          case "INTEREST":
-          case "INCOME":
-            updates.totalCashBalance =
-              (currentData.totalCashBalance || 0) + amount;
-            break;
-
-          case "MATURED_DEBT": {
-            updates.totalInvested = Math.max(
-              0,
-              (currentData.totalInvested || 0) - amount,
-            );
-            updates.totalCashBalance =
-              (currentData.totalCashBalance || 0) + amount;
-            break;
-          }
+          updates.totalRealizedPnL =
+            (currentData.totalRealizedPnL || 0) + profitOrLoss;
+          break;
         }
 
-        // Apply updates to the dashboard
-        firestoreTransaction.set(
-          dashboardRef,
-          { ...currentData, ...updates },
-          { merge: true },
-        );
-      });
+        case "DIVIDEND":
+        case "INTEREST":
+        case "INCOME":
+          updates.totalCashBalance =
+            (currentData.totalCashBalance || 0) + amount;
+          break;
+
+        case "MATURED_DEBT": {
+          updates.totalInvested = Math.max(
+            0,
+            (currentData.totalInvested || 0) - amount,
+          );
+          updates.totalCashBalance =
+            (currentData.totalCashBalance || 0) + amount;
+          break;
+        }
+      }
+
+      // Apply updates to the dashboard
+      await setDoc(
+        dashboardRef,
+        { ...currentData, ...updates },
+        { merge: true },
+      );
     } catch (error) {
       console.error("Error in partialUpdateDashboardSummary:", error);
       throw error;

@@ -63,8 +63,8 @@ export interface BaseInvestment {
   totalShares: number; // Current number of shares/units held
   totalInvested: number; // Total amount invested (cost basis)
   averagePurchasePrice: number; // Weighted average purchase price
-  firstPurchaseDate: string; // First purchase date (YYYY-MM-DD)
-  lastUpdated: string; // Last update timestamp
+  firstPurchaseDate: Date; // First purchase date (YYYY-MM-DD)
+  lastUpdated: Date; // Last update timestamp
   currency: CurrencyCode;
   fundType?: FundType;
   isClosed: boolean;
@@ -98,7 +98,7 @@ export interface Installment {
   number: number;
   chequeNumber?: string;
   amount: number;
-  dueDate: string;
+  dueDate: Date;
   status: "Paid" | "Unpaid";
   description?: string;
   isMaintenance?: boolean;
@@ -114,11 +114,11 @@ export interface RealEstateInvestment extends BaseInvestment {
   hasGarden?: boolean; // Whether the property has a garden
   downPayment?: number;
   maintenanceAmount?: number;
-  maintenancePaymentDate?: string;
+  maintenancePaymentDate?: Date;
   installmentFrequency?: Frequency;
   installmentAmount?: number;
-  firstInstallmentDate: string;
-  lastInstallmentDate: string;
+  firstInstallmentDate: Date;
+  lastInstallmentDate: Date;
   installments?: Array<Installment>;
 }
 
@@ -129,7 +129,7 @@ export interface DebtInstrumentInvestment extends BaseInvestment {
   debtSubType: DebtSubType;
   issuer: string;
   interestRate: number;
-  maturityDate: string;
+  maturityDate: Date;
   interestFrequency: Frequency;
   interestAmount: number; // projected interest amount
   monthlyInterestAmount: number; // projected monthly interest amount
@@ -406,32 +406,6 @@ export interface GoldMarketPrices {
 
 export interface ExchangeRates {
   [key: string]: number;
-}
-
-export type AggregatedGoldHolding = {
-  id: string;
-  displayName: string;
-  itemType: "physical" | "fund";
-  logoUrl?: string;
-  totalQuantity: number;
-  averagePurchasePrice: number;
-  totalCost: number;
-  currentMarketPrice?: number;
-  currency: CurrencyCode;
-  fundDetails?: ListedSecurity;
-  // fundInvestment?: SecurityInvestment;
-  physicalGoldType?: GoldType;
-};
-
-export interface AggregatedCurrencyHolding {
-  currencyCode: string;
-  totalForeignAmount: number;
-  totalCostInEGP: number;
-  averagePurchaseRateToEGP: number;
-  currentMarketRateToEGP?: number;
-  currentValueInEGP?: number;
-  profitOrLossInEGP?: number;
-  profitOrLossPercentage?: number;
 }
 
 export type InvestmentTypePercentage = Record<InvestmentType, number>;

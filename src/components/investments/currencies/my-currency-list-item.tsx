@@ -1,16 +1,14 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 
-import type {
-  AggregatedCurrencyHolding,
-  CurrencyInvestment,
-} from "@/lib/types";
+import type { CurrencyInvestment } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Info } from "lucide-react"; // Using DollarSign as a generic currency icon
 import { cn, formatNumberForMobile } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { calcProfit } from "@/lib/financial-utils";
+
 interface MyCurrencyListItemProps {
   holding: CurrencyInvestment;
   currentMarketRate: number | undefined;
