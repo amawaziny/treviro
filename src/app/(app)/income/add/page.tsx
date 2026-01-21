@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { IncomeRecord } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import { getCurrentDate } from "@/lib/utils";
 
 const initialFormValues: IncomeFormValues = {
@@ -31,11 +31,11 @@ export default function AddIncomePage() {
   const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const month = useMemo(() => new Date(), []);
-  const startDate = useMemo(() => startOfMonth(month), []);
-  const endDate = useMemo(() => endOfMonth(month), []);
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
 
-  const { addIncome } = useFinancialRecords(startDate, endDate);
+  const { addIncome } = useFinancialRecords(startMonth, endMonth);
   const { toast } = useToast();
   const router = useRouter();
 

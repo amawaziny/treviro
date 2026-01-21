@@ -32,7 +32,8 @@ export interface CashFlowSummaryArgs {
   investments: Investment[];
   fixedEstimates: FixedEstimateRecord[];
   transactions: Transaction[];
-  month?: Date;
+  startMonth: Date;
+  endMonth: Date;
 }
 
 /**
@@ -48,10 +49,9 @@ export function useCashflow({
   investments = [],
   fixedEstimates = [],
   transactions = [],
-  month,
+  startMonth,
+  endMonth,
 }: CashFlowSummaryArgs) {
-  const [currentMonthStart, setCurrentMonthStart] = useState<Date>();
-  const [currentMonthEnd, setCurrentMonthEnd] = useState<Date>();
   const [investmentTrxs, setInvestmentTrxs] = useState<Transaction[]>([]);
   const [totalFixedIncome, setTotalFixedIncome] = useState<number>(0);
   const [
@@ -112,31 +112,6 @@ export function useCashflow({
   const [currencyInvestmentTrxs, setCurrencyInvestmentTrxs] = useState<
     Transaction[]
   >([]);
-
-  useEffect(() => {
-    if (!month) return;
-    setCurrentMonthStart(startOfMonth(month));
-    setCurrentMonthEnd(endOfMonth(month));
-    fetchInvestmentTransactions();
-    calculateTotalFixedIncome();
-    calculateTotalProjectedDebtMonthlyInterest();
-    calculateIncomeTillNow();
-    calculateTotalInterestAndFixedIncome();
-    calculateTotalFixedExpenses();
-    calculateTotalExpensesManualOther();
-    calculateTotalExpensesManualCreditCard();
-    calculateTotalRealEstateInstallments();
-    calculateTotalSecuritiesInvestments();
-    calculateTotalStockInvestments();
-    calculateTotalDebtInvestments();
-    calculateTotalGoldInvestments();
-    calculateTotalCurrencyInvestments();
-    calculateTotalInvestments();
-    calculateTotalIncome();
-    calculateTotalExpenses();
-    calculateNetCashFlow();
-    calculateNetTillNowCashFlow();
-  }, [month]);
 
   const fetchInvestmentTransactions = useCallback(async () => {
     const investmentTrxs = transactions.filter(
@@ -220,19 +195,18 @@ export function useCashflow({
   }, [transactions]);
 
   const calculateTotalExpensesManualCreditCard = useCallback(() => {
-    if (!currentMonthStart) return;
     setTotalExpensesManualCreditCard(
       expensesManualCreditCard.reduce((sum, record) => {
-        const startDate = parseDateString(record.date);
-        if (!startDate) return sum;
+        const recordDate = record.date;
+        if (!recordDate) return sum;
 
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const currentMonth = currentMonthStart.getMonth();
-        const currentYear = currentMonthStart.getFullYear();
+        const recordMonth = recordDate.getMonth();
+        const recordYear = recordDate.getFullYear();
+        const month = startMonth.getMonth();
+        const year = startMonth.getFullYear();
 
         const monthsSinceStart =
-          (currentYear - startYear) * 12 + (currentMonth - startMonth);
+          (year - recordYear) * 12 + (month - recordMonth);
 
         const numberOfInstallments = (record.numberOfInstallments ?? 0) || 1;
 
@@ -242,10 +216,9 @@ export function useCashflow({
         return sum;
       }, 0),
     );
-  }, [expensesManualCreditCard, currentMonthStart]);
+  }, [expensesManualCreditCard, startMonth]);
 
   const calculateTotalRealEstateInstallments = useCallback(() => {
-    if (!currentMonthStart || !currentMonthEnd) return;
     const realEstateInvestments = new Map<string, RealEstateInvestment>();
 
     setTotalRealEstateInstallments(
@@ -254,9 +227,8 @@ export function useCashflow({
           return (
             isRealEstateInvestment(inv) &&
             Boolean(
-              differenceInMonths(
-                parseDateString(inv.lastInstallmentDate)!,
-                currentMonthStart,
+              differenceInMonths(inv.lastInstallmentDate!,
+                startMonth,
               ) > 1 &&
                 inv.installmentAmount &&
                 inv.installmentFrequency,
@@ -264,8 +236,7 @@ export function useCashflow({
           );
         })
         .reduce((sum, reInv) => {
-          const startDate = parseDateString(reInv.firstInstallmentDate)!;
-          const monthsDiff = differenceInMonths(currentMonthStart, startDate);
+          const monthsDiff = differenceInMonths(startMonth, reInv.firstInstallmentDate);
           let shouldIncludeInstallment = false;
 
           switch (reInv.installmentFrequency) {
@@ -301,14 +272,12 @@ export function useCashflow({
             reInv.maintenanceAmount > 0 &&
             reInv.maintenancePaymentDate
           ) {
-            const maintenanceDate = parseDateString(
-              reInv.maintenancePaymentDate,
-            );
+            const maintenanceDate = reInv.maintenancePaymentDate;
             if (
               maintenanceDate &&
               isWithinInterval(maintenanceDate, {
-                start: currentMonthStart,
-                end: currentMonthEnd,
+                start: startMonth,
+                end: endMonth,
               })
             ) {
               sum += reInv.maintenanceAmount;
@@ -322,7 +291,7 @@ export function useCashflow({
         }, 0),
     );
     setRealEstateInvestments(Array.from(realEstateInvestments.values()));
-  }, [investments, currentMonthStart, currentMonthEnd]);
+  }, [investments, startMonth, endMonth]);
 
   const calculateTotalSecuritiesInvestments = useCallback(() => {
     const securitiesInvestments = investmentTrxs.filter(
@@ -436,6 +405,48 @@ export function useCashflow({
   const calculateNetTillNowCashFlow = useCallback(() => {
     setNetTillNowCashFlow(incomeTillNow - totalExpenses - totalInvestments);
   }, [incomeTillNow, totalExpenses, totalInvestments]);
+
+   useEffect(() => {
+    fetchInvestmentTransactions();
+    calculateTotalFixedIncome();
+    calculateTotalProjectedDebtMonthlyInterest();
+    calculateIncomeTillNow();
+    calculateTotalInterestAndFixedIncome();
+    calculateTotalFixedExpenses();
+    calculateTotalExpensesManualOther();
+    calculateTotalExpensesManualCreditCard();
+    calculateTotalRealEstateInstallments();
+    calculateTotalSecuritiesInvestments();
+    calculateTotalStockInvestments();
+    calculateTotalDebtInvestments();
+    calculateTotalGoldInvestments();
+    calculateTotalCurrencyInvestments();
+    calculateTotalInvestments();
+    calculateTotalIncome();
+    calculateTotalExpenses();
+    calculateNetCashFlow();
+    calculateNetTillNowCashFlow();
+  }, [startMonth, endMonth,
+    fetchInvestmentTransactions,
+    calculateTotalFixedIncome,
+    calculateTotalProjectedDebtMonthlyInterest,
+    calculateIncomeTillNow,
+    calculateTotalInterestAndFixedIncome,
+    calculateTotalFixedExpenses,
+    calculateTotalExpensesManualOther,
+    calculateTotalExpensesManualCreditCard,
+    calculateTotalRealEstateInstallments,
+    calculateTotalSecuritiesInvestments,
+    calculateTotalStockInvestments,
+    calculateTotalDebtInvestments,
+    calculateTotalGoldInvestments,
+    calculateTotalCurrencyInvestments,
+    calculateTotalInvestments,
+    calculateTotalIncome,
+    calculateTotalExpenses,
+    calculateNetCashFlow,
+    calculateNetTillNowCashFlow,
+  ]);
 
   return {
     // Income

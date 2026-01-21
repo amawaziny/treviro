@@ -51,8 +51,8 @@ export default function DashboardPage() {
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
 
   const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(new Date()), []);
-  const endMonth = useMemo(() => endOfMonth(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), []);
+  const endMonth = useMemo(() => endOfMonth(month), []);
 
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
 
@@ -74,9 +74,6 @@ export default function DashboardPage() {
     startMonth,
     endMonth,
   );
-
-  // let transactions: [] = [];
-  // let isLoadingTransactions = false;
 
   const isLoading =
     isLoadingDashboard ||

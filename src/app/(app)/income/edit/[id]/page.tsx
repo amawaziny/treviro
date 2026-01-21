@@ -16,7 +16,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import { IncomeRecord } from "@/lib/types";
 import { formatDateISO } from "@/lib/utils";
 
@@ -29,9 +29,9 @@ export default function EditIncomePage({
   const router = useRouter();
   const { id: incomeId } = React.use(params);
 
-  const month = useMemo(() => new Date(), []);
-  const startDate = useMemo(() => startOfMonth(month), []);
-  const endDate = useMemo(() => endOfMonth(month), []);
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
   const [income, setIncome] = useState<IncomeRecord | null>(null);
 
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -57,8 +57,8 @@ export default function EditIncomePage({
   }, [setHeaderProps, closeForm, openForm]);
 
   const { updateIncome, fetchIncomeById } = useFinancialRecords(
-    startDate,
-    endDate,
+    startMonth,
+    endMonth,
   );
   useEffect(() => {
     fetchIncomeById(incomeId).then(setIncome);

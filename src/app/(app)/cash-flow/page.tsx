@@ -1,7 +1,7 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useInvestments } from "@/contexts/investment-context";
 import {
   Card,
@@ -28,7 +28,7 @@ import {
   parseDateString,
   formatNumberForMobile,
 } from "@/lib/utils";
-import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { startOfMonth, endOfMonth, isWithinInterval, startOfDay } from "date-fns";
 import {
   IncomeRecord,
   Transaction,
@@ -44,8 +44,12 @@ import { useCashflow } from "@/hooks/use-cashflow";
 
 export default function CashFlowPage() {
   const { t, language } = useLanguage();
-  const monthYear = formatMonthYear(new Date(), language);
   const isMobile = useIsMobile();
+
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
+  const monthYear = useMemo(() => formatMonthYear(month, language), [month, language]);
 
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
 
@@ -53,9 +57,12 @@ export default function CashFlowPage() {
     expensesManualCreditCard,
     fixedEstimates,
     isLoading: isLoadingFinancialRecords,
-  } = useFinancialRecords();
+  } = useFinancialRecords(startMonth, endMonth);
 
-  const { transactions, isLoading: isLoadingTransactions } = useTransactions();
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions(
+    startMonth,
+    endMonth,
+  );
 
   const isLoading =
     isLoadingFinancialRecords || isLoadingTransactions || isLoadingInvestments;
@@ -87,6 +94,8 @@ export default function CashFlowPage() {
     investments,
     fixedEstimates,
     transactions,
+    startMonth,
+    endMonth,
   });
 
   if (isLoading) {

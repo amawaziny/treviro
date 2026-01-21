@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import {
   formatDateDisplay,
   formatMonthYear,
@@ -42,14 +42,14 @@ export default function IncomePage() {
   const isMobile = useIsMobile();
   // UI state for filters
   const [showAll, setShowAll] = useState(false); // false = this month, true = all
-
-  const month = useMemo(() => new Date(), []);
-  const startDate = useMemo(() => startOfMonth(month), []);
-  const endDate = useMemo(() => endOfMonth(month), []);
+  
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
 
   const { incomesManual, isLoading, deleteIncome } = useFinancialRecords(
-    startDate,
-    endDate,
+    startMonth,
+    endMonth,
   );
 
   if (isLoading) {
