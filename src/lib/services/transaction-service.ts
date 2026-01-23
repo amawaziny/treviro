@@ -167,8 +167,8 @@ export class TransactionService {
    * const transactions = await transactionService.getTransactionsWithin('2025-01-01', '2025-12-31');
    */
   async getTransactionsWithin(
-    startDate: string,
-    endDate: string,
+    startDate: Date,
+    endDate: Date,
   ): Promise<Transaction[]> {
     const q = query(
       this.getTransactionsCollection(),

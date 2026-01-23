@@ -406,8 +406,28 @@ export function useCashflow({
     setNetTillNowCashFlow(incomeTillNow - totalExpenses - totalInvestments);
   }, [incomeTillNow, totalExpenses, totalInvestments]);
 
-   useEffect(() => {
+  // First effect: Process investment transactions
+  useEffect(() => {
     fetchInvestmentTransactions();
+  }, [fetchInvestmentTransactions]);
+
+  // Second effect: Calculate investments based on processed investment transactions
+  useEffect(() => {
+    calculateTotalSecuritiesInvestments();
+    calculateTotalStockInvestments();
+    calculateTotalDebtInvestments();
+    calculateTotalGoldInvestments();
+    calculateTotalCurrencyInvestments();
+  }, [
+    calculateTotalSecuritiesInvestments,
+    calculateTotalStockInvestments,
+    calculateTotalDebtInvestments,
+    calculateTotalGoldInvestments,
+    calculateTotalCurrencyInvestments,
+  ]);
+
+  // Main effect: Calculate all other values
+  useEffect(() => {
     calculateTotalFixedIncome();
     calculateTotalProjectedDebtMonthlyInterest();
     calculateIncomeTillNow();
@@ -416,18 +436,18 @@ export function useCashflow({
     calculateTotalExpensesManualOther();
     calculateTotalExpensesManualCreditCard();
     calculateTotalRealEstateInstallments();
-    calculateTotalSecuritiesInvestments();
-    calculateTotalStockInvestments();
-    calculateTotalDebtInvestments();
-    calculateTotalGoldInvestments();
-    calculateTotalCurrencyInvestments();
     calculateTotalInvestments();
     calculateTotalIncome();
     calculateTotalExpenses();
     calculateNetCashFlow();
     calculateNetTillNowCashFlow();
-  }, [startMonth, endMonth,
-    fetchInvestmentTransactions,
+  }, [
+    expensesManualCreditCard,
+    investments,
+    fixedEstimates,
+    transactions,
+    startMonth,
+    endMonth,
     calculateTotalFixedIncome,
     calculateTotalProjectedDebtMonthlyInterest,
     calculateIncomeTillNow,
@@ -436,11 +456,6 @@ export function useCashflow({
     calculateTotalExpensesManualOther,
     calculateTotalExpensesManualCreditCard,
     calculateTotalRealEstateInstallments,
-    calculateTotalSecuritiesInvestments,
-    calculateTotalStockInvestments,
-    calculateTotalDebtInvestments,
-    calculateTotalGoldInvestments,
-    calculateTotalCurrencyInvestments,
     calculateTotalInvestments,
     calculateTotalIncome,
     calculateTotalExpenses,

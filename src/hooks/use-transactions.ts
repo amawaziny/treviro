@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Transaction } from "@/lib/types";
-import { useAuth } from "@/contexts/auth-context";
 import {
-  formatDateISO,
   isCurrencyRelatedFund,
   isDebtRelatedFund,
   isGoldRelatedFund,
@@ -50,7 +48,6 @@ export const useTransactions = (startDate: Date, endDate: Date) => {
   >([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const { user } = useAuth();
 
   // Fetch transactions within date range
   const fetchTransactions = useCallback(async () => {
@@ -61,11 +58,8 @@ export const useTransactions = (startDate: Date, endDate: Date) => {
     setError(null);
 
     try {
-      const start = formatDateISO(startDate);
-      const end = formatDateISO(endDate);
-
       const fetchedTransactions =
-        await transactionService.getTransactionsWithin(start, end);
+        await transactionService.getTransactionsWithin(startDate, endDate);
       setTransactions(fetchedTransactions);
 
       const investmentTrxs = fetchedTransactions.filter(
