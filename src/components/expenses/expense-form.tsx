@@ -200,7 +200,6 @@ export function ExpenseForm({
             control={form.control}
             name="date"
             render={({ field }) => {
-              // Convert YYYY-MM-DD to DD-MM-YYYY for display
               return (
                 <FormItem
                   className="flex flex-col"

@@ -33,7 +33,6 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       disabled = false,
       fromYear = 1900,
       toYear = new Date().getFullYear() + 10,
-      disableFuture = true,
       dateFormat = "PPP",
       dir = "ltr",
       language = "en",
@@ -97,7 +96,6 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             value={date}
             locale={language}
             dir={dir}
-            disableFuture={disableFuture}
             dateFormat={dateFormat}
             mobile={mobile}
             {...props}

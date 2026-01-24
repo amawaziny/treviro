@@ -399,11 +399,11 @@ export function useCashflow({
   ]);
 
   const calculateNetCashFlow = useCallback(() => {
-    setNetCashFlow(totalIncome - totalExpenses - totalInvestments);
+    setNetCashFlow(totalIncome + totalExpenses - totalInvestments);
   }, [totalIncome, totalExpenses, totalInvestments]);
 
   const calculateNetTillNowCashFlow = useCallback(() => {
-    setNetTillNowCashFlow(incomeTillNow - totalExpenses - totalInvestments);
+    setNetTillNowCashFlow(incomeTillNow + totalExpenses - totalInvestments);
   }, [incomeTillNow, totalExpenses, totalInvestments]);
 
   // First effect: Process investment transactions

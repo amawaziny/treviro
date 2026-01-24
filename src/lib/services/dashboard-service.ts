@@ -234,7 +234,7 @@ export class DashboardService {
 
     // Process all transactions
     for (const txn of transactions) {
-      const amount = txn.amount || 0;
+      const amount = txn.amount;
 
       // Add to cash flow calculations
       switch (txn.type) {
@@ -252,7 +252,7 @@ export class DashboardService {
         case "MATURED_DEBT":
           cashFlow.income += amount;
           totalMaturedDebt += amount;
-          totalInvested -= txn.sourceType === "Investment" ? amount : 0;
+          totalInvested -= amount;
           break;
 
         case "EXPENSE":
@@ -272,7 +272,7 @@ export class DashboardService {
       }
     }
 
-    const totalCashBalance = cashFlow.income - cashFlow.expense;
+    const totalCashBalance = cashFlow.income + cashFlow.expense;
 
     const summary: DashboardSummary = {
       totalInvested,

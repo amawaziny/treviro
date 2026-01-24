@@ -12,10 +12,16 @@ import { useLanguage } from "@/contexts/language-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import { ExpenseRecord } from "@/lib/types";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
+import { useMemo } from "react";
 
 export default function AddExpensePage() {
   const { t } = useLanguage();
-  const { addExpense } = useFinancialRecords();
+
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
+  const { addExpense } = useFinancialRecords(startMonth, endMonth);
 
   async function onSubmit(values: ExpenseFormValues) {
     // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
@@ -25,8 +31,8 @@ export default function AddExpensePage() {
       "id" | "createdAt" | "recordType"
     > = {
       type: values.category!,
-      amount: values.amount, // Zod has coerced this to number
-      date: values.date,
+      amount: -values.amount, // Zod has coerced this to number
+      date: new Date(values.date),
     };
 
     if (values.description && values.description.trim() !== "") {

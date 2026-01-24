@@ -13,29 +13,17 @@ import {
 import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCards";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  TrendingDown,
   Landmark,
   FileText,
   Wallet,
-  Gift,
-  HandHeart,
   Coins,
-  Briefcase,
 } from "lucide-react";
 import {
   formatMonthYear,
   formatDateDisplay,
-  parseDateString,
   formatNumberForMobile,
 } from "@/lib/utils";
-import { startOfMonth, endOfMonth, isWithinInterval, startOfDay } from "date-fns";
-import {
-  IncomeRecord,
-  Transaction,
-  RealEstateInvestment,
-  SecurityInvestment,
-  Installment,
-} from "@/lib/types";
+import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import { useTransactions } from "@/hooks/use-transactions";
@@ -89,6 +77,7 @@ export default function CashFlowPage() {
     debtInvestmentTrxs,
     goldInvestmentTrxs,
     realEstateInvestments,
+    netCashFlow,
   } = useCashflow({
     expensesManualCreditCard,
     investments,
@@ -156,6 +145,7 @@ export default function CashFlowPage() {
         totalGoldInvestments={totalGoldInvestments}
         totalInvestments={totalInvestments}
         totalExpensesManualCreditCard={totalExpensesManualCreditCard}
+        netCashFlow={netCashFlow}
       />
 
       {/* Details Section: 3 Columns */}
@@ -240,7 +230,6 @@ export default function CashFlowPage() {
               <div key={`fixed-expense-${idx}`} className="flex flex-col">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-2">
-                    <Wallet className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium">{expense.type}</span>
                   </div>
                   <span className="text-sm">
@@ -255,8 +244,8 @@ export default function CashFlowPage() {
                 className="flex justify-between text-xs"
               >
                 <span>
-                  {expense.metadata.sourceSubType
-                    ? expense.metadata.sourceSubType
+                  {expense.metadata.description
+                    ? expense.metadata.description
                     : formatDateDisplay(expense.date)}
                 </span>
                 <span>{formatNumberForMobile(isMobile, expense.amount)}</span>

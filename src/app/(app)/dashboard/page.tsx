@@ -104,12 +104,14 @@ export default function DashboardPage() {
     totalInvestments,
     totalExpensesManualCreditCard,
     totalCurrencyInvestments,
+    netCashFlow,
   } = useCashflow({
     expensesManualCreditCard,
     investments,
     fixedEstimates,
     transactions,
-    month,
+    startMonth,
+    endMonth,
   });
 
   return (
@@ -346,6 +348,7 @@ export default function DashboardPage() {
             totalDebtInvestments={totalDebtInvestments}
             totalGoldInvestments={totalGoldInvestments}
             totalInvestments={totalInvestments}
+            netCashFlow={netCashFlow}
           />
         </CardContent>
       </Card>

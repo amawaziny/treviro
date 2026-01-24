@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import {
 } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useFinancialRecords from "@/hooks/use-financial-records";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 
 export default function ExpensesPage() {
   const { t, language } = useLanguage();
@@ -42,14 +43,18 @@ export default function ExpensesPage() {
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
   const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
-  const now = new Date();
+  
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
+  const monthYear = useMemo(() => formatMonthYear(month, language), [month, language]);
 
   const {
     expensesManualOther,
     expensesManualCreditCard,
     isLoading,
     deleteExpense,
-  } = useFinancialRecords(); // Removed monthlySettings
+  } = useFinancialRecords(startMonth, endMonth);
 
   if (isLoading) {
     return (
@@ -137,7 +142,7 @@ export default function ExpensesPage() {
                   ? t(
                       "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments",
                     )
-                  : `${t("see_and_manage_all_expenses_required_for")} ${formatMonthYear(now, language)}, ${t("including_current_installments_and_one_time_payments")}`}
+                  : `${t("see_and_manage_all_expenses_required_for")} ${monthYear}, ${t("including_current_installments_and_one_time_payments")}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -283,7 +288,7 @@ export default function ExpensesPage() {
               data-testid="no-expenses-message"
               className="text-muted-foreground py-4 text-center"
             >
-              {`${t("you_havent_added_any_itemized_expenses_for")} ${formatMonthYear(now, language)} ${t("yet")}`}
+              {`${t("you_havent_added_any_itemized_expenses_for")} ${monthYear} ${t("yet")}`}
             </p>
           </CardContent>
         </Card>

@@ -268,7 +268,7 @@ export class TransactionService {
         sourceType: record.recordType,
         type: type,
         date: record.date || now,
-        amount: type === "EXPENSE" ? -record.amount : record.amount,
+        amount: record.amount,
         description: record.description,
         currency: "EGP",
         quantity: 0,
