@@ -17,6 +17,8 @@ import {
   FileText,
   Wallet,
   Coins,
+  CreditCard,
+  Banknote
 } from "lucide-react";
 import {
   formatMonthYear,
@@ -243,11 +245,14 @@ export default function CashFlowPage() {
                 key={`manual-expense-${idx}`}
                 className="flex justify-between text-xs"
               >
-                <span>
-                  {expense.metadata.description
-                    ? expense.metadata.description
-                    : formatDateDisplay(expense.date)}
-                </span>
+                <div className="flex items-center">
+                  <Banknote className="h-4 w-4 me-1" />
+                  <span>
+                    {expense.metadata.description
+                      ? expense.metadata.description
+                      : formatDateDisplay(expense.date)}
+                  </span>
+                </div>
                 <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
               </div>
             ))}
@@ -256,11 +261,14 @@ export default function CashFlowPage() {
                 key={`credit-card-expense-${idx}`}
                 className="flex justify-between text-xs"
               >
-                <span>
-                  {expense.description
-                    ? expense.description
-                    : formatDateDisplay(expense.date)}
-                </span>
+                <div className="flex items-center">
+                  <CreditCard className="h-4 w-4 me-1" />                
+                  <span>
+                    {expense.description
+                      ? expense.description
+                      : formatDateDisplay(expense.date)}
+                  </span>
+                </div>
                 <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
               </div>
             ))}
