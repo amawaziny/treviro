@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";

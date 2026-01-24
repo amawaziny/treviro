@@ -50,8 +50,7 @@ export default function ExpensesPage() {
   const monthYear = useMemo(() => formatMonthYear(month, language), [month, language]);
 
   const {
-    expensesManualOther,
-    expensesManualCreditCard,
+    expensesManual,
     isLoading,
     deleteExpense,
   } = useFinancialRecords(startMonth, endMonth);
@@ -128,7 +127,7 @@ export default function ExpensesPage() {
 
       {/* Removed the Card for Monthly Fixed Estimates that rendered FinancialSettingsForm */}
 
-      {expensesManualOther.length > 0 ? (
+      {expensesManual.length > 0 ? (
         <>
           {/* Summary Card */}
           <Card className="mt-6">
@@ -149,7 +148,7 @@ export default function ExpensesPage() {
               <span className="text-xl font-bold text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  expensesManualOther.reduce(
+                  expensesManual.reduce(
                     (sum, r) => sum + (r._requiredAmount || r.amount),
                     0,
                   ),
@@ -159,12 +158,10 @@ export default function ExpensesPage() {
           </Card>
 
           <div className="grid gap-4 mt-8" data-testid="expenses-list">
-            {expensesManualCreditCard.map((record) => (
+            {expensesManual.map((record) => (
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
-                className={cn(
-                  "border-yellow-300",
-                  record.isClosed ? "opacity-50" : "",
+                className={cn(record.isClosed ? "opacity-50" : "",
                   "last:mb-24",
                 )}
                 data-testid={`expense-card-${record.id}`}
@@ -198,7 +195,7 @@ export default function ExpensesPage() {
                       <span className="text-xl font-bold">
                         {formatNumberForMobile(
                           isMobile,
-                          record._requiredAmount,
+                          record.isInstallment ? record._requiredAmount : record.amount,
                         )}
                       </span>
                       <div className="flex items-center gap-2">
