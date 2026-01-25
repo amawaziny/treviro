@@ -361,7 +361,7 @@ export class TransactionService {
         transactionData.amount;
     }
     // Create the transaction with all required fields
-    const newTransaction : Transaction = {
+    const newTransaction: Transaction = {
       ...transactionData,
       id: transactionId,
       createdAt: now,
@@ -384,9 +384,7 @@ export class TransactionService {
 
     // Publish the transaction:created/updated event after successful transaction set
     await eventBus.publish({
-      type: isNewTransaction
-        ? "transaction:created"
-        : "transaction:updated",
+      type: isNewTransaction ? "transaction:created" : "transaction:updated",
       transaction: newTransaction,
     });
 

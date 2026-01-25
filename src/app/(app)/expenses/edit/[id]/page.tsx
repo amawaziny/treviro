@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
@@ -11,10 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import useFinancialRecords from "@/hooks/use-financial-records";
+import { ExpenseRecord } from "@/lib/types";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDateISO } from "@/lib/utils";
 
 export default function EditExpensePage({
   params,
@@ -22,18 +25,16 @@ export default function EditExpensePage({
   params: Promise<{ id: string }>;
 }) {
   const { t } = useLanguage();
-  const { findExpenseById, updateExpense } = useFinancialRecords();
   const router = useRouter();
   const { id: expenseId } = React.use(params);
+
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), [month]);
+  const endMonth = useMemo(() => endOfMonth(month), [month]);
+  const [expense, setExpense] = useState<ExpenseRecord | null>(null);
+
   const { setHeaderProps, openForm, closeForm } = useForm();
-
-  const expense = React.use(findExpenseById(expenseId));
-
-  if (!expense) {
-    return notFound();
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     // Open form when component mounts
     openForm();
 
@@ -55,6 +56,14 @@ export default function EditExpensePage({
     };
   }, [setHeaderProps, closeForm, openForm]);
 
+  const { findExpenseById, updateExpense } = useFinancialRecords(
+    startMonth,
+    endMonth,
+  );
+  useEffect(() => {
+    findExpenseById(expenseId).then(setExpense);
+  }, [expenseId, findExpenseById]);
+
   return (
     <div
       className="container mx-auto py-4 space-y-6"
@@ -72,25 +81,32 @@ export default function EditExpensePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseForm
-            initialValues={{
-              category: expense.type,
-              description: expense.description ?? "",
-              amount: expense.amount,
-              date: expense.date,
-              isInstallment: expense.isInstallment ?? false,
-              numberOfInstallments: expense.numberOfInstallments,
-            }}
-            onSubmit={async (values: ExpenseFormValues) => {
-              await updateExpense(expenseId, {
-                ...values,
-                amount: values.amount,
-                numberOfInstallments: values.numberOfInstallments,
-              });
-              router.push("/expenses");
-            }}
-            isEditMode={true}
-          />
+          {!expense ? (
+            <div className="space-y-6">
+              <Skeleton className="h-96 w-full rounded" />
+            </div>
+          ) : (
+            <ExpenseForm
+              initialValues={{
+                category: expense.type,
+                description: expense.description ?? "",
+                amount: expense.amount * -1,
+                date: formatDateISO(expense.date || new Date()),
+                isInstallment: expense.isInstallment ?? false,
+                numberOfInstallments: expense.numberOfInstallments,
+              }}
+              onSubmit={async (values: ExpenseFormValues) => {
+                await updateExpense(expenseId, {
+                  ...values,
+                  date: new Date(values.date),
+                  amount: -values.amount,
+                  numberOfInstallments: values.numberOfInstallments || 0,
+                });
+                router.push("/expenses");
+              }}
+              isEditMode={true}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

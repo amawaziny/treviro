@@ -341,21 +341,12 @@ export const ExpenseFormSchema = z
               invalid_type_error:
                 "Number of months must be a valid whole number.",
             })
-            .int({ message: "Number of months must be a whole number." })
-            .positive({
-              message: "Number of months must be a positive whole number.",
-            })
-            .min(1, { message: "Number of months must be greater than 0." })
             .optional(),
         ),
     ),
   })
   .superRefine((data, ctx) => {
-    if (
-      data.category === "Credit Card" &&
-      data.isInstallment &&
-      data.numberOfInstallments === undefined
-    ) {
+    if (data.isInstallment && data.numberOfInstallments === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Number of months is required for installment plans.",
@@ -363,7 +354,6 @@ export const ExpenseFormSchema = z
       });
     }
     if (
-      data.category === "Credit Card" &&
       data.isInstallment &&
       data.numberOfInstallments !== undefined &&
       data.numberOfInstallments <= 0

@@ -227,16 +227,17 @@ export function useCashflow({
           return (
             isRealEstateInvestment(inv) &&
             Boolean(
-              differenceInMonths(inv.lastInstallmentDate!,
-                startMonth,
-              ) > 1 &&
+              differenceInMonths(inv.lastInstallmentDate!, startMonth) > 1 &&
                 inv.installmentAmount &&
                 inv.installmentFrequency,
             )
           );
         })
         .reduce((sum, reInv) => {
-          const monthsDiff = differenceInMonths(startMonth, reInv.firstInstallmentDate);
+          const monthsDiff = differenceInMonths(
+            startMonth,
+            reInv.firstInstallmentDate,
+          );
           let shouldIncludeInstallment = false;
 
           switch (reInv.installmentFrequency) {

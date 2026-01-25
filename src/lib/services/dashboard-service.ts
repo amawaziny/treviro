@@ -28,6 +28,7 @@ import { formatPath } from "@/lib/utils";
  * 9. refactor investment-form to be each form has its own submit button and logic
  * 10. check if we need context for investment, transaction, expense, income, fixed estimate
  * 11. dashboard is not refreshed automaticly
+ * 12. Expenses page needs to differentiate between credit card expenses and other expenses
  */
 
 export class DashboardService {

@@ -35,17 +35,10 @@ export default function AddExpensePage() {
       date: new Date(values.date),
     };
 
-    if (values.description && values.description.trim() !== "") {
-      expenseDataToSave.description = values.description;
-    }
+    expenseDataToSave.description = values.description || "";
 
-    if (values.category === "Credit Card") {
-      expenseDataToSave.isInstallment = values.isInstallment;
-      if (values.isInstallment && values.numberOfInstallments) {
-        // Zod ensures values.numberOfInstallments is a number here if isInstallment is true
-        expenseDataToSave.numberOfInstallments = values.numberOfInstallments;
-      }
-    }
+    expenseDataToSave.isInstallment = values.isInstallment;
+    expenseDataToSave.numberOfInstallments = values.numberOfInstallments || 0;
 
     await addExpense(expenseDataToSave);
   }

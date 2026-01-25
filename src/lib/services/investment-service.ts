@@ -373,7 +373,7 @@ export class InvestmentService {
     };
 
     const { investmentType, ...restTransactionData } = transactionData;
-    
+
     await eventBus.publish({
       type: "investment:updated",
       transaction: {

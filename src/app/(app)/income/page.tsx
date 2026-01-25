@@ -42,7 +42,7 @@ export default function IncomePage() {
   const isMobile = useIsMobile();
   // UI state for filters
   const [showAll, setShowAll] = useState(false); // false = this month, true = all
-  
+
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
   const endMonth = useMemo(() => endOfMonth(month), [month]);

@@ -18,7 +18,7 @@ import {
   Wallet,
   Coins,
   CreditCard,
-  Banknote
+  Banknote,
 } from "lucide-react";
 import {
   formatMonthYear,
@@ -39,7 +39,10 @@ export default function CashFlowPage() {
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
   const endMonth = useMemo(() => endOfMonth(month), [month]);
-  const monthYear = useMemo(() => formatMonthYear(month, language), [month, language]);
+  const monthYear = useMemo(
+    () => formatMonthYear(month, language),
+    [month, language],
+  );
 
   const { investments, isLoading: isLoadingInvestments } = useInvestments();
 
@@ -262,7 +265,7 @@ export default function CashFlowPage() {
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">
-                  <CreditCard className="h-4 w-4 me-1" />                
+                  <CreditCard className="h-4 w-4 me-1" />
                   <span>
                     {expense.description
                       ? expense.description

@@ -43,17 +43,19 @@ export default function ExpensesPage() {
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
   const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
-  
+
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
   const endMonth = useMemo(() => endOfMonth(month), [month]);
-  const monthYear = useMemo(() => formatMonthYear(month, language), [month, language]);
+  const monthYear = useMemo(
+    () => formatMonthYear(month, language),
+    [month, language],
+  );
 
-  const {
-    expensesManual,
-    isLoading,
-    deleteExpense,
-  } = useFinancialRecords(startMonth, endMonth);
+  const { expensesManual, isLoading, deleteExpense } = useFinancialRecords(
+    startMonth,
+    endMonth,
+  );
 
   if (isLoading) {
     return (
@@ -161,7 +163,8 @@ export default function ExpensesPage() {
             {expensesManual.map((record) => (
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
-                className={cn(record.isClosed ? "opacity-50" : "",
+                className={cn(
+                  record.isClosed ? "opacity-50" : "",
                   "last:mb-24",
                 )}
                 data-testid={`expense-card-${record.id}`}
@@ -195,7 +198,9 @@ export default function ExpensesPage() {
                       <span className="text-xl font-bold">
                         {formatNumberForMobile(
                           isMobile,
-                          record.isInstallment ? record._requiredAmount : record.amount,
+                          record.isInstallment
+                            ? record._requiredAmount
+                            : record.amount,
                         )}
                       </span>
                       <div className="flex items-center gap-2">
