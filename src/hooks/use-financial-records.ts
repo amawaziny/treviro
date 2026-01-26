@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { startOfMonth, differenceInCalendarMonths } from "date-fns";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";
@@ -35,8 +36,7 @@ export const useFinancialRecords = (
         await Promise.all([
           fetchIncomes(recordsService, startDate, endDate),
           fetchExpensesManualOther(recordsService, startDate, endDate),
-          fetchExpensesManual(recordsService, startDate, endDate),
-          fetchExpensesManualCreditCard(recordsService),
+          fetchExpensesManualCreditCard(recordsService, endDate),
           fetchFixedEstimates(recordsService),
         ]);
       } catch (error) {
@@ -52,6 +52,11 @@ export const useFinancialRecords = (
   useEffect(() => {
     fetchFinancialRecords(startDateParam, endDateParam);
   }, [startDateParam, endDateParam, fetchFinancialRecords]);
+
+  useEffect(() => {
+    const records = [...expensesManualOther, ...expensesManualCreditCard];
+    setExpensesManual(records);
+  }, [expensesManualOther, expensesManualCreditCard]);
 
   // Income operations
   const fetchIncomes = async (
@@ -142,22 +147,6 @@ export const useFinancialRecords = (
     [recordsService],
   );
 
-  const fetchExpensesManual = async (
-    service: FinancialRecordsService,
-    start: Date,
-    end: Date,
-  ) => {
-    try {
-      const records = await service.getExpensesWithin(start, end);
-      setExpensesManual(records);
-      return records;
-    } catch (error) {
-      console.error("Error fetching expense records:", error);
-      setExpensesManual([]);
-      return [];
-    }
-  };
-
   // Expense operations
   const fetchExpensesManualOther = async (
     service: FinancialRecordsService,
@@ -179,14 +168,40 @@ export const useFinancialRecords = (
 
   const fetchExpensesManualCreditCard = async (
     service: FinancialRecordsService,
+    endDate: Date,
   ) => {
     try {
       const records = await service.getExpenses({
         type: "Credit Card",
         isClosed: false,
       });
-      setExpensesManualCreditCard(records);
-      return records;
+
+      // Helper to calculate months difference once per record
+      const getMonthsDiff = (record: ExpenseRecord) => {
+        if (!record.date) return null;
+        return differenceInCalendarMonths(endDate, startOfMonth(record.date));
+      };
+
+      const computed = records
+        .map((record) => {
+          const monthsDiff = getMonthsDiff(record);
+          // Filter out records with purchase date after endDate
+          if (monthsDiff === null || monthsDiff < 0) return null;
+
+          const copy = { ...record } as typeof record;
+
+          if (copy.isInstallment && copy.numberOfInstallments) {
+            // installment index is 1-based
+            if (monthsDiff < copy.numberOfInstallments) {
+              copy.installmentMonthIndex = monthsDiff + 1;
+            }
+          }
+          return copy;
+        })
+        .filter((record): record is ExpenseRecord => record !== null);
+
+      setExpensesManualCreditCard(computed);
+      return computed;
     } catch (error) {
       console.error("Error fetching expense records:", error);
       setExpensesManualCreditCard([]);

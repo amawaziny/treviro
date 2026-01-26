@@ -29,6 +29,7 @@ import { formatPath } from "@/lib/utils";
  * 10. check if we need context for investment, transaction, expense, income, fixed estimate
  * 11. dashboard is not refreshed automaticly
  * 12. Expenses page needs to differentiate between credit card expenses and other expenses
+ * 13. Expenses event and dashboard calculation
  */
 
 export class DashboardService {

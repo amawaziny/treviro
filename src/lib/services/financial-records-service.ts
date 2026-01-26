@@ -348,6 +348,11 @@ export class FinancialRecordsService {
       "id" | "createdAt" | "updatedAt" | "recordType"
     >,
   ): Promise<ExpenseRecord> {
+    if (expenseData.isInstallment) {
+      expenseData._requiredAmount =
+        expenseData.amount / (expenseData.numberOfInstallments || 1);
+      expenseData.isClosed = false;
+    }
     return this.addRecord(FINANCIAL_COLLECTIONS.EXPENSES, expenseData);
   }
 
@@ -355,6 +360,11 @@ export class FinancialRecordsService {
     id: string,
     data: Partial<ExpenseRecord>,
   ): Promise<ExpenseRecord> {
+    if (data.isInstallment && data.amount) {
+      data._requiredAmount =
+        data.amount / (data.numberOfInstallments || 1);
+      data.isClosed = false;
+    }
     return this.updateRecord<ExpenseRecord>(
       FINANCIAL_COLLECTIONS.EXPENSES,
       id,

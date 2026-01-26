@@ -42,7 +42,6 @@ export default function ExpensesPage() {
   const isMobile = useIsMobile();
   // UI state for filters
   const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
-  const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
 
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
@@ -113,17 +112,6 @@ export default function ExpensesPage() {
           />
 
           <span>{t("show_all_expenses")}</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
-            dir="auto"
-            checked={showEnded}
-            onCheckedChange={setShowEnded}
-            id="show-ended-switch"
-            data-testid="show-ended-toggle"
-          />
-
-          <span>{t("show_endedold_expenses")}</span>
         </label>
       </div>
 

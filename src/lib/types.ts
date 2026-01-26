@@ -256,7 +256,6 @@ export interface ExpenseRecord extends BaseRecord {
   isInstallment?: boolean;
   isClosed?: boolean; //if the expense is of type credit card then isClosed is false until the user confirm the payment else true
   numberOfInstallments?: number;
-  _originalAmount?: number;
   _requiredAmount?: number;
   installmentMonthIndex?: number;
 }
