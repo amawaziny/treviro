@@ -20,16 +20,14 @@ import { formatPath } from "@/lib/utils";
  *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
  * 2. FixedEstimates we can implement confirmation then user confirm it
  * 3. Expense of type credit card should have isClosed property and it should be false until the user confirm the payment of last installment
- * 4. Expense of type credit card should be splited into expenses records on monthly basis
- * 5. Expenses and incomes page show calendar to select the month and year to show the expenses for that month and year
- * 6. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
- * 7. always compose the description of the transaction and description of expense, income, fixed estimate
- * 8. we could disable some fields in edit mode of investment form
- * 9. refactor investment-form to be each form has its own submit button and logic
- * 10. check if we need context for investment, transaction, expense, income, fixed estimate
- * 11. dashboard is not refreshed automaticly
- * 12. Expenses page needs to differentiate between credit card expenses and other expenses
- * 13. Expenses event and dashboard calculation
+ * 4. Transaction page show calendar to select the month and year to show the expenses for that month and year
+ * 5. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
+ * 6. we could disable some fields in edit mode of investment form
+ * 7. refactor investment-form to be each form has its own submit button and logic
+ * 8. check if we need context for investment, transaction, expense, income, fixed estimate
+ * 9. dashboard is not refreshed automaticly
+ * 11. Expenses event and dashboard calculation
+ * 12. Expenses details in cashflow page needs to show _requiredAmount if expenses of type credit card
  */
 
 export class DashboardService {

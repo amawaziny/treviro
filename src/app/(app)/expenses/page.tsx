@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Banknote, CreditCard, Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -40,8 +40,6 @@ import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 export default function ExpensesPage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
-  // UI state for filters
-  const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
 
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
@@ -100,23 +98,6 @@ export default function ExpensesPage() {
       </div>
       <Separator />
 
-      {/* Filter Controls */}
-      <div className="flex flex-wrap gap-4 items-center mb-6">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
-            dir="auto"
-            checked={showAll}
-            onCheckedChange={setShowAll}
-            id="show-all-switch"
-            data-testid="show-all-toggle"
-          />
-
-          <span>{t("show_all_expenses")}</span>
-        </label>
-      </div>
-
-      {/* Removed the Card for Monthly Fixed Estimates that rendered FinancialSettingsForm */}
-
       {expensesManual.length > 0 ? (
         <>
           {/* Summary Card */}
@@ -124,14 +105,10 @@ export default function ExpensesPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingDown className="me-2 h-4 w-4 text-primary" />
-                {showAll ? t("total_spent_all") : t("total_spent_this_month")}
+                {t("total_spent_this_month")}
               </CardTitle>
               <CardDescription>
-                {showAll
-                  ? t(
-                      "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments",
-                    )
-                  : `${t("see_and_manage_all_expenses_required_for")} ${monthYear}, ${t("including_current_installments_and_one_time_payments")}`}
+                {`${t("see_and_manage_all_expenses_required_for")} ${monthYear}, ${t("including_current_installments_and_one_time_payments")}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -162,24 +139,27 @@ export default function ExpensesPage() {
                   <div className="flex-1 min-w-0">
                     {/* Top Row: Title, Date, Installment Badge */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
+                      {record.type === "Credit Card" ? (
+                        <CreditCard className="h-4 w-4 me-1" />
+                      ) : (
+                        <Banknote className="h-4 w-4 me-1" />
+                      )}
                       <span className="font-semibold truncate text-base">
                         {record.description || t(record.type)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDateDisplay(record.date)}
                       </span>
-                      {record.isInstallment &&
-                        record.numberOfInstallments &&
-                        record.type === "Credit Card" && (
-                          <div className="flex items-center gap-2">
-                            <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
-                              {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
-                            </span>
-                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
-                              {t("required_this_month")}
-                            </span>
-                          </div>
-                        )}
+                      {record.isInstallment && (
+                        <div className="flex items-center gap-2">
+                          <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
+                            {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
+                            {t("required_this_month")}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">

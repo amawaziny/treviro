@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { startOfMonth, differenceInCalendarMonths } from "date-fns";
+import {
+  startOfMonth,
+  differenceInCalendarMonths,
+  differenceInSeconds,
+} from "date-fns";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";
@@ -54,7 +58,9 @@ export const useFinancialRecords = (
   }, [startDateParam, endDateParam, fetchFinancialRecords]);
 
   useEffect(() => {
-    const records = [...expensesManualOther, ...expensesManualCreditCard];
+    const records = [...expensesManualOther, ...expensesManualCreditCard].sort(
+      (a, b) => differenceInSeconds(b.date!, a.date!),
+    );
     setExpensesManual(records);
   }, [expensesManualOther, expensesManualCreditCard]);
 
@@ -166,6 +172,30 @@ export const useFinancialRecords = (
     }
   };
 
+  /**
+   * Fetches credit card expenses and calculates installment month indices.
+   *
+   * DESIGN NOTE: This implementation calculates installments on-the-fly rather than
+   * storing each installment as a separate expense record. While this approach is
+   * efficient for data fetching and avoids duplicating installment data, it has
+   * significant tradeoffs:
+   *
+   * ADVANTAGES:
+   * - Single source of truth: One record per credit card purchase
+   * - Efficient fetching: No need to query multiple installment records
+   *
+   * DISADVANTAGES:
+   * - Edit operations are complex: Changing installment details requires recalculating
+   *   and updating the parent record
+   * - Transaction history updates are difficult: Can't independently modify historical
+   *   installment records in the transaction table
+   * - Selective updates are challenging: Cannot update only future installments without
+   *   affecting the parent record and recalculating all installment data
+   *
+   * ALTERNATIVE: Storing each installment as a separate expense record would simplify
+   * editing and updates, but would require managing multiple related records and would
+   * increase data duplication and query complexity.
+   */
   const fetchExpensesManualCreditCard = async (
     service: FinancialRecordsService,
     endDate: Date,
@@ -268,13 +298,16 @@ export const useFinancialRecords = (
         throw new Error("Financial records service not initialized");
       }
       try {
+        setIsLoading(true);
         await recordsService.deleteExpense(id);
-        setExpensesManualOther((prev) =>
+        setExpensesManual((prev) =>
           prev.filter((record) => record.id !== id),
         );
       } catch (error) {
         console.error("Error deleting expense record:", error);
         throw error;
+      } finally {
+        setIsLoading(false);
       }
     },
     [recordsService],

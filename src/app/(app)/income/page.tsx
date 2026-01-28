@@ -40,12 +40,14 @@ import { toast } from "@/hooks/use-toast";
 export default function IncomePage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
-  // UI state for filters
-  const [showAll, setShowAll] = useState(false); // false = this month, true = all
 
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
   const endMonth = useMemo(() => endOfMonth(month), [month]);
+  const monthYear = useMemo(
+    () => formatMonthYear(month, language),
+    [month, language],
+  );
 
   const { incomesManual, isLoading, deleteIncome } = useFinancialRecords(
     startMonth,
@@ -86,20 +88,6 @@ export default function IncomePage() {
       </div>
       <Separator />
 
-      {/* Filter Controls */}
-      <div className="flex flex-wrap gap-4 items-center mb-6">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
-            dir="auto"
-            checked={showAll}
-            onCheckedChange={setShowAll}
-            id="show-all-switch"
-          />
-
-          <span>{t("show_all_income")}</span>
-        </label>
-      </div>
-
       {incomesManual.length > 0 ? (
         <>
           {/* Summary Card */}
@@ -107,12 +95,10 @@ export default function IncomePage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <PiggyBank className="me-2 h-4 w-4 text-primary" />
-                {showAll ? t("total_income_all") : t("total_income_this_month")}
+                {t("total_income_this_month")}
               </CardTitle>
               <CardDescription>
-                {showAll
-                  ? t("view_and_manage_all_your_recorded_income_sources")
-                  : `${t("see_and_manage_all_income_received_in")} ${formatMonthYear(new Date(), language)}.`}
+                {`${t("see_and_manage_all_income_received_in")} ${monthYear}.`}
               </CardDescription>
             </CardHeader>
             <CardContent>
