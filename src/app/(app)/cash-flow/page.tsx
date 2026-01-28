@@ -287,7 +287,7 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("investments_details")}</CardTitle>
             <CardDescription>
-              {`${t("new_investments_made_in")} ${monthYear}`}
+              {`${t("new_investments_made_in")} ${monthYear}.`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
