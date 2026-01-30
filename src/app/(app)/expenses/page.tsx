@@ -23,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
@@ -36,10 +35,12 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import useFinancialRecords from "@/hooks/use-financial-records";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ExpensesPage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
+  const {toast} = useToast();
 
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
@@ -216,8 +217,12 @@ export default function ExpensesPage() {
                                 onClick={async () => {
                                   try {
                                     await deleteExpense(record.id);
-                                  } catch (e) {
-                                    // Optionally show toast or ignore
+                                  } catch (e: any) {
+                                    toast({
+                                      title: t("failed_to_delete_expense"),
+                                      description: e.message || t("could_not_delete_the_expense_record"),
+                                      variant: "destructive",
+                                    });
                                   }
                                 }}
                               >
