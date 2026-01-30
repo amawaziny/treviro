@@ -177,7 +177,14 @@ export class TransactionService {
       orderBy("date", "desc"),
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => doc.data() as Transaction);
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        date: data.date?.toDate(),
+      } as Transaction;
+    });
   }
 
   /**

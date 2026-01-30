@@ -109,7 +109,7 @@ export class FinancialRecordsService {
           type: "income:added",
           record: recordData as unknown as IncomeRecord,
         });
-      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES) {
+      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES && recordData.type !== "Credit Card") {
         await eventBus.publish({
           type: "expense:added",
           record: recordData as unknown as ExpenseRecord,
@@ -151,7 +151,7 @@ export class FinancialRecordsService {
           type: "income:updated",
           record: updatedData as unknown as IncomeRecord,
         });
-      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES) {
+      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES && updatedData.type !== "Credit Card") {
         await eventBus.publish({
           type: "expense:updated",
           record: updatedData as unknown as ExpenseRecord,

@@ -202,8 +202,8 @@ export function useCashflow({
 
         const recordMonth = recordDate.getMonth();
         const recordYear = recordDate.getFullYear();
-        const month = startMonth.getMonth();
-        const year = startMonth.getFullYear();
+        const month = endMonth.getMonth();
+        const year = endMonth.getFullYear();
 
         const monthsSinceStart =
           (year - recordYear) * 12 + (month - recordMonth);
@@ -211,12 +211,12 @@ export function useCashflow({
         const numberOfInstallments = (record.numberOfInstallments ?? 0) || 1;
 
         if (monthsSinceStart >= 0 && monthsSinceStart < numberOfInstallments) {
-          return sum + record.amount / numberOfInstallments;
+          return sum + (record._requiredAmount ?? record.amount);
         }
         return sum;
       }, 0),
     );
-  }, [expensesManualCreditCard, startMonth]);
+  }, [expensesManualCreditCard, endMonth]);
 
   const calculateTotalRealEstateInstallments = useCallback(() => {
     const realEstateInvestments = new Map<string, RealEstateInvestment>();

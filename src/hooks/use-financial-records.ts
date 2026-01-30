@@ -261,7 +261,7 @@ export const useFinancialRecords = (
       }
       try {
         const newRecord = await recordsService.addExpense(data);
-        setExpensesManualOther((prev) => [newRecord, ...prev]);
+        setExpensesManual((prev) => [newRecord, ...prev]);
         return newRecord;
       } catch (error) {
         console.error("Error adding expense record:", error);

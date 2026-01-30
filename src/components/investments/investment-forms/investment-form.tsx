@@ -88,9 +88,6 @@ function getInitialFormValues(type: InvestmentType): InvestmentFormValues {
   return { ...initialFormValuesByType[type] };
 }
 
-//TODO:
-// 1. modes buy, buyNew, edit, sell
-// 2. check parameters for each mode .. current parameters are for buyNew and it could be used for edit and i think we could create a new form (transaction-form) for buy, sell, and edit transactions
 interface InvestmentFormProps {
   mode?: "buyNew" | "edit";
   initialValues?: Partial<InvestmentFormValues>;
@@ -155,7 +152,7 @@ export function InvestmentForm({
 
   // onSubmit handler
   async function onSubmit(values: InvestmentFormValues) {
-    const now = new Date().toISOString();
+    const now = new Date();
     if (
       form.formState.errors &&
       Object.keys(form.formState.errors).length > 0
@@ -181,7 +178,7 @@ export function InvestmentForm({
 
     const newInvestmentBase = {
       type: watchedType,
-      firstPurchaseDate: values.purchaseDate || now,
+      firstPurchaseDate: new Date(values.purchaseDate || now),
       currency: "EGP" as const,
     };
 
@@ -224,7 +221,7 @@ export function InvestmentForm({
         pricePerUnit: values.amountInvested,
         issuer: values.issuer || "",
         interestRate: values.interestRate,
-        maturityDate: values.maturityDate!,
+        maturityDate: new Date(values.maturityDate!),
         debtSubType: values.debtSubType!,
         interestFrequency: values.interestFrequency || "Monthly",
         interestAmount:
@@ -281,11 +278,11 @@ export function InvestmentForm({
         hasGarden: values.hasGarden,
         downPayment: values.downPayment,
         maintenanceAmount: values.maintenanceAmount,
-        maintenancePaymentDate: values.maintenancePaymentDate,
+        maintenancePaymentDate: values.maintenancePaymentDate ? new Date(values.maintenancePaymentDate) : undefined,
         installmentFrequency: values.installmentFrequency,
         installmentAmount: values.installmentAmount,
-        firstInstallmentDate: values.installmentStartDate!,
-        lastInstallmentDate: values.installmentEndDate!,
+        firstInstallmentDate: new Date(values.installmentStartDate!),
+        lastInstallmentDate: new Date(values.installmentEndDate!),
       };
 
       newInvestment = realEstateInvestment;

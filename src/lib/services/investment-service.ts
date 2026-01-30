@@ -699,7 +699,6 @@ export class InvestmentService {
         if (maturityDate <= today) {
           investment.isClosed = true;
           investment.maturedOn = maturityDate;
-          //TODO: could be converted to batch update
           await this.updateInvestment({
             sourceId: investment.id,
             investmentType: investment.type,

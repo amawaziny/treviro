@@ -26,8 +26,6 @@ import { formatPath } from "@/lib/utils";
  * 7. refactor investment-form to be each form has its own submit button and logic
  * 8. check if we need context for investment, transaction, expense, income, fixed estimate
  * 9. dashboard is not refreshed automaticly
- * 11. Expenses event and dashboard calculation
- * 12. Expenses details in cashflow page needs to show _requiredAmount if expenses of type credit card
  */
 
 export class DashboardService {
@@ -100,9 +98,9 @@ export class DashboardService {
         updatedAt: new Date(),
       };
 
-      const amount = transaction.amount || 0;
-      const quantity = transaction.quantity || 0;
-      const averagePurchasePrice = transaction.averagePurchasePrice || 0;
+      const amount = transaction.amount;
+      const quantity = transaction.quantity;
+      const averagePurchasePrice = transaction.averagePurchasePrice;
       const profitOrLoss = transaction.profitOrLoss || 0;
 
       switch (transaction.type) {
@@ -115,7 +113,7 @@ export class DashboardService {
 
         case "EXPENSE":
           updates.totalCashBalance =
-            (currentData.totalCashBalance || 0) - amount;
+            (currentData.totalCashBalance || 0) + amount;
           break;
 
         case "SELL": {

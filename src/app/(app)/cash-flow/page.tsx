@@ -160,7 +160,7 @@ export default function CashFlowPage() {
           <CardHeader>
             <CardTitle>{t("income_details")}</CardTitle>
             <CardDescription>
-              {`${t("breakdown_of_income_for")} ${formatMonthYear(new Date(), language)}`}
+              {`${t("breakdown_of_income_for")} ${monthYear}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -169,7 +169,7 @@ export default function CashFlowPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-2">
                     <Wallet className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">{income.type}</span>
+                    <span className="text-sm font-medium">{t(income.type)}</span>
                   </div>
                   <span className="text-sm">
                     {formatNumberForMobile(isMobile, income.amount)}
@@ -183,9 +183,9 @@ export default function CashFlowPage() {
                 className="flex justify-between text-xs"
               >
                 <span>
-                  {income.metadata.sourceSubType
-                    ? income.metadata.sourceSubType
-                    : formatDateDisplay(income.date)}
+                  {income.metadata.description
+                    ? income.metadata.description
+                    : t(income.metadata.sourceSubType)}
                 </span>
                 <span>{formatNumberForMobile(isMobile, income.amount)}</span>
               </div>
@@ -272,7 +272,7 @@ export default function CashFlowPage() {
                       : formatDateDisplay(expense.date)}
                   </span>
                 </div>
-                <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
+                <span>{formatNumberForMobile(isMobile, expense._requiredAmount)}</span>
               </div>
             ))}
             <Separator className="my-2" />
