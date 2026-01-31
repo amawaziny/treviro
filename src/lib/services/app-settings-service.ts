@@ -3,6 +3,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { defaultAppSettings, type AppSettings } from "@/lib/types";
 import { SETTINGS_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
+import { dateConverter } from "@/lib/firestore-converters";
 
 export class AppSettingsService {
   private userId: string;
@@ -15,7 +16,7 @@ export class AppSettingsService {
     return doc(
       db,
       formatPath(SETTINGS_COLLECTION_PATH, { userId: this.userId }),
-    );
+    ).withConverter(dateConverter);
   }
 
   /**

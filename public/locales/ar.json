@@ -274,7 +274,7 @@
   "installment": "القسط",
   "installment_amount": "مبلغ القسط",
   "installment_details": "تفاصيل القسط",
-  "installment_egp": "القسط: جنيه مصري",
+  "installment_egp": "القسط",
   "installment_end_date": "تاريخ انتهاء اﻷقساط",
   "installment_frequency": "تكرار اﻷقساط",
   "installment_start_date": "تاريخ بداية اﻷقساط",
@@ -797,5 +797,14 @@
   "buying": "جاري الشراء",
   "Income record deleted successfully": "تم حذف سجل الدخل بنجاح",
   "failed_to_delete_expense": "فشل في حذف المصروف",
-  "could_not_delete_the_expense_record": "تعذر حذف سجل المصروفات"
+  "could_not_delete_the_expense_record": "تعذر حذف سجل المصروفات",
+  "pay_installment": "دفع القسط",
+  "enter_the_payment_date_for_this_installment": "أدخل تاريخ الدفع لهذا القسط",
+  "pay_date": "تاريخ الدفع",
+  "pay": "دفع",
+  "installment_paid": "تم دفع القسط",
+  "the_installment_has_been_successfully_paid": "تم دفع القسط بنجاح",
+  "failed_to_pay_installment": "فشل في دفع القسط",
+  "could_not_process_the_installment_payment": " تعذر معالجة دفع القسط ",
+  "paying": "دفع"
 }

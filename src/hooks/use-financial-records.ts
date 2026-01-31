@@ -9,6 +9,7 @@ import {
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";
+import { formatDateDisplay } from "@/lib/utils";
 
 export const useFinancialRecords = (
   startDateParam: Date,
@@ -219,6 +220,7 @@ export const useFinancialRecords = (
           if (monthsDiff === null || monthsDiff < 0) return null;
 
           const copy = { ...record } as typeof record;
+          copy.installmentMonthIndex = copy.numberOfInstallments;
 
           if (copy.isInstallment && copy.numberOfInstallments) {
             // installment index is 1-based
@@ -278,7 +280,7 @@ export const useFinancialRecords = (
       }
       try {
         const updatedRecord = await recordsService.updateExpense(id, data);
-        setExpensesManualOther((prev) =>
+        setExpensesManual((prev) =>
           prev.map((record) =>
             record.id === id ? { ...record, ...updatedRecord } : record,
           ),
@@ -286,6 +288,30 @@ export const useFinancialRecords = (
         return updatedRecord;
       } catch (error) {
         console.error("Error updating expense record:", error);
+        throw error;
+      }
+    },
+    [recordsService],
+  );
+
+  const payCreditCardExpense = useCallback(
+    async (expense: ExpenseRecord, payDate: Date) => {
+      if (!recordsService) {
+        throw new Error("Financial records service not initialized");
+      }
+      try {
+        const updatedRecord = await recordsService.payCreditCardExpense(
+          expense,
+          payDate,
+        );
+        setExpensesManual((prev) =>
+          prev.map((record) =>
+            record.id === expense.id ? { ...record, ...updatedRecord } : record,
+          ),
+        );
+        return updatedRecord;
+      } catch (error) {
+        console.error("Error paying credit card expense record:", error);
         throw error;
       }
     },
@@ -300,9 +326,7 @@ export const useFinancialRecords = (
       try {
         setIsLoading(true);
         await recordsService.deleteExpense(id);
-        setExpensesManual((prev) =>
-          prev.filter((record) => record.id !== id),
-        );
+        setExpensesManual((prev) => prev.filter((record) => record.id !== id));
       } catch (error) {
         console.error("Error deleting expense record:", error);
         throw error;
@@ -413,6 +437,7 @@ export const useFinancialRecords = (
     addExpense,
     updateExpense,
     deleteExpense,
+    payCreditCardExpense,
 
     // Fixed Estimate methods
     addFixedEstimate,

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Settings, PiggyBank, Pencil, Trash2 } from "lucide-react";
+import { Plus, PiggyBank, Pencil, Trash2, Wallet2, TrendingDown } from "lucide-react";
 import { cn, formatNumberForMobile } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 import {
@@ -103,7 +103,7 @@ export default function FixedEstimatesPage() {
                 <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">
                   {t("total_fixed_expenses")}
                 </CardTitle>
-                <Settings className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-bold text-red-700 dark:text-red-300">
@@ -231,7 +231,7 @@ export default function FixedEstimatesPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Settings className="me-2 h-4 w-4 text-primary" />
+              <Wallet2 className="me-2 h-4 w-4 text-primary" />
               {t("no_fixed_estimates_set")}
             </CardTitle>
           </CardHeader>

@@ -169,7 +169,9 @@ export default function CashFlowPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-2">
                     <Wallet className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">{t(income.type)}</span>
+                    <span className="text-sm font-medium">
+                      {t(income.type)}
+                    </span>
                   </div>
                   <span className="text-sm">
                     {formatNumberForMobile(isMobile, income.amount)}
@@ -272,7 +274,9 @@ export default function CashFlowPage() {
                       : formatDateDisplay(expense.date)}
                   </span>
                 </div>
-                <span>{formatNumberForMobile(isMobile, expense._requiredAmount)}</span>
+                <span>
+                  {formatNumberForMobile(isMobile, expense._requiredAmount)}
+                </span>
               </div>
             ))}
             <Separator className="my-2" />

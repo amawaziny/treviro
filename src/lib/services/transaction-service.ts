@@ -17,6 +17,7 @@ import type {
   TransactionType,
   CurrencyCode,
   BaseRecord,
+  ExpenseRecord,
 } from "@/lib/types";
 import {
   eventBus,
@@ -25,7 +26,8 @@ import {
 } from "@/lib/services/events";
 
 import { TRANSACTIONS_COLLECTION_PATH } from "@/lib/constants";
-import { formatPath } from "../utils";
+import { formatPath } from "@/lib/utils";
+import { dateConverter } from "@/lib/firestore-converters";
 
 /**
  * Service for managing financial transactions in Firestore.
@@ -63,7 +65,7 @@ export class TransactionService {
     const incomeAddedUnsubscribe = eventBus.subscribe(
       "income:added",
       async (event: FinancialRecordEvent) => {
-        await this.setFinancialRecordTransaction(event.record, "INCOME");
+        await this.setFinancialRecordTransaction(event.record, "INCOME", true);
       },
     );
     this.unsubscribeCallbacks.push(incomeAddedUnsubscribe);
@@ -71,7 +73,7 @@ export class TransactionService {
     const incomeUpdatedUnsubscribe = eventBus.subscribe(
       "income:updated",
       async (event: FinancialRecordEvent) => {
-        await this.setFinancialRecordTransaction(event.record, "INCOME");
+        await this.setFinancialRecordTransaction(event.record, "INCOME", false);
       },
     );
     this.unsubscribeCallbacks.push(incomeUpdatedUnsubscribe);
@@ -79,7 +81,7 @@ export class TransactionService {
     const expenseAddedUnsubscribe = eventBus.subscribe(
       "expense:added",
       async (event: FinancialRecordEvent) => {
-        await this.setFinancialRecordTransaction(event.record, "EXPENSE");
+        await this.setFinancialRecordTransaction(event.record, "EXPENSE", true);
       },
     );
     this.unsubscribeCallbacks.push(expenseAddedUnsubscribe);
@@ -87,7 +89,7 @@ export class TransactionService {
     const expenseUpdatedUnsubscribe = eventBus.subscribe(
       "expense:updated",
       async (event: FinancialRecordEvent) => {
-        await this.setFinancialRecordTransaction(event.record, "EXPENSE");
+        await this.setFinancialRecordTransaction(event.record, "EXPENSE", false);
       },
     );
     this.unsubscribeCallbacks.push(expenseUpdatedUnsubscribe);
@@ -141,7 +143,7 @@ export class TransactionService {
     return collection(
       db,
       formatPath(TRANSACTIONS_COLLECTION_PATH, { userId: this.userId }),
-    );
+    ).withConverter(dateConverter);
   }
 
   /**
@@ -182,7 +184,6 @@ export class TransactionService {
       return {
         id: doc.id,
         ...data,
-        date: data.date?.toDate(),
       } as Transaction;
     });
   }
@@ -259,14 +260,17 @@ export class TransactionService {
   private async setFinancialRecordTransaction(
     record: BaseRecord,
     type: TransactionType,
+    isNew: boolean
   ) {
     try {
       const now = new Date();
 
       let transactionId = uuidv4();
-      const transactions = await this.getTransactionsBySourceId(record.id);
-      if (transactions && transactions.length > 0) {
-        transactionId = transactions[0].id;
+      if(!isNew){
+        const transactions = await this.getTransactionsBySourceId(record.id);
+        if (transactions && transactions.length > 0) {
+          transactionId = transactions[0].id;
+        }
       }
 
       const newTransaction: Omit<Transaction, "createdAt"> = {
@@ -275,7 +279,10 @@ export class TransactionService {
         sourceType: record.recordType,
         type: type,
         date: record.date || now,
-        amount: record.amount,
+        amount:
+          record.type === "Credit Card"
+            ? (record as ExpenseRecord)._requiredAmount!
+            : record.amount,
         description: record.description,
         currency: "EGP",
         quantity: 0,

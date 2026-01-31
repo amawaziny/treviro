@@ -34,6 +34,7 @@ import { INVESTMENTS_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
 import { masterDataService } from "./master-data-service";
 import { calcDebtMonthlyInterest } from "../financial-utils";
+import { dateConverter } from "@/lib/firestore-converters";
 
 type InvestmentUpdate = {
   totalShares: number;
@@ -83,7 +84,7 @@ export class InvestmentService {
     return doc(
       db,
       `${formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId })}/${investmentId}`,
-    );
+    ).withConverter(dateConverter);
   }
 
   /**
@@ -94,7 +95,7 @@ export class InvestmentService {
     return collection(
       db,
       formatPath(INVESTMENTS_COLLECTION_PATH, { userId: this.userId }),
-    );
+    ).withConverter(dateConverter);
   }
 
   /**

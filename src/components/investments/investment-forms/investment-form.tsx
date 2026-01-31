@@ -278,7 +278,9 @@ export function InvestmentForm({
         hasGarden: values.hasGarden,
         downPayment: values.downPayment,
         maintenanceAmount: values.maintenanceAmount,
-        maintenancePaymentDate: values.maintenancePaymentDate ? new Date(values.maintenancePaymentDate) : undefined,
+        maintenancePaymentDate: values.maintenancePaymentDate
+          ? new Date(values.maintenancePaymentDate)
+          : undefined,
         installmentFrequency: values.installmentFrequency,
         installmentAmount: values.installmentAmount,
         firstInstallmentDate: new Date(values.installmentStartDate!),

@@ -258,6 +258,7 @@ export interface ExpenseRecord extends BaseRecord {
   numberOfInstallments?: number;
   _requiredAmount?: number;
   installmentMonthIndex?: number;
+  lastPaidInstallmentIndex?: number;
 }
 
 export interface FixedEstimateRecord extends BaseRecord {

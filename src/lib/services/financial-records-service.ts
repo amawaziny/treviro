@@ -29,7 +29,8 @@ import {
   FINANCIAL_COLLECTIONS_PATH,
   FINANCIAL_COLLECTIONS,
 } from "@/lib/constants";
-import { formatPath } from "../utils";
+import { formatPath } from "@/lib/utils";
+import { dateConverter } from "@/lib/firestore-converters";
 
 type CollectionType =
   (typeof FINANCIAL_COLLECTIONS)[keyof typeof FINANCIAL_COLLECTIONS];
@@ -52,7 +53,7 @@ export class FinancialRecordsService {
         userId: this.userId,
         collectionName,
       }),
-    ) as CollectionReference<T>;
+    ).withConverter(dateConverter) as CollectionReference<T>;
   }
 
   // Generic helper to get document reference with user path
@@ -68,7 +69,7 @@ export class FinancialRecordsService {
         collectionName,
       }),
       id,
-    );
+    ).withConverter(dateConverter);
   }
 
   private getRecordType(collectionName: CollectionType): string {
@@ -109,7 +110,10 @@ export class FinancialRecordsService {
           type: "income:added",
           record: recordData as unknown as IncomeRecord,
         });
-      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES && recordData.type !== "Credit Card") {
+      } else if (
+        collectionName === FINANCIAL_COLLECTIONS.EXPENSES &&
+        recordData.type !== "Credit Card"
+      ) {
         await eventBus.publish({
           type: "expense:added",
           record: recordData as unknown as ExpenseRecord,
@@ -151,12 +155,16 @@ export class FinancialRecordsService {
           type: "income:updated",
           record: updatedData as unknown as IncomeRecord,
         });
-      } else if (collectionName === FINANCIAL_COLLECTIONS.EXPENSES && updatedData.type !== "Credit Card") {
+      } else if (
+        collectionName === FINANCIAL_COLLECTIONS.EXPENSES &&
+        updatedData.type !== "Credit Card"
+      ) {
         await eventBus.publish({
           type: "expense:updated",
           record: updatedData as unknown as ExpenseRecord,
         });
       }
+
 
       return updatedData;
     } catch (error) {
@@ -224,7 +232,6 @@ export class FinancialRecordsService {
         return {
           id: doc.id,
           ...data,
-          date: data.date?.toDate(),
         } as T;
       });
     } catch (error) {
@@ -239,14 +246,7 @@ export class FinancialRecordsService {
       FINANCIAL_COLLECTIONS.INCOMES,
       filters,
     );
-    return records.map(
-      (record) =>
-        ({
-          ...record,
-          createdAt: record.createdAt || new Date(),
-          updatedAt: record.updatedAt || new Date(),
-        }) as IncomeRecord,
-    );
+    return records;
   }
 
   async getIncomesWithin(start: Date, end: Date): Promise<IncomeRecord[]> {
@@ -258,15 +258,13 @@ export class FinancialRecordsService {
     );
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        ...data,
-        date: data.date?.toDate(),
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
-      } as IncomeRecord;
-    });
+    return querySnapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as IncomeRecord
+    );
   }
 
   async addIncome(
@@ -311,14 +309,7 @@ export class FinancialRecordsService {
       FINANCIAL_COLLECTIONS.EXPENSES,
       filters,
     );
-    return records.map(
-      (record) =>
-        ({
-          ...record,
-          createdAt: record.createdAt || new Date().toISOString(),
-          updatedAt: record.updatedAt || new Date().toISOString(),
-        }) as ExpenseRecord,
-    );
+    return records;
   }
 
   // Expense Records
@@ -331,15 +322,13 @@ export class FinancialRecordsService {
     );
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        ...data,
-        date: data.date?.toDate(),
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
-      } as ExpenseRecord;
-    });
+    return querySnapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as ExpenseRecord
+      );
   }
 
   async addExpense(
@@ -352,6 +341,8 @@ export class FinancialRecordsService {
       expenseData._requiredAmount =
         expenseData.amount / (expenseData.numberOfInstallments || 1);
       expenseData.isClosed = false;
+      expenseData.lastPaidInstallmentIndex =
+        expenseData.lastPaidInstallmentIndex || 0;
     }
     return this.addRecord(FINANCIAL_COLLECTIONS.EXPENSES, expenseData);
   }
@@ -370,6 +361,31 @@ export class FinancialRecordsService {
     );
   }
 
+  async payCreditCardExpense(
+    expense: ExpenseRecord,
+    payDate: Date,
+  ): Promise<ExpenseRecord> {
+    const lastPaidInstallmentIndex =
+      (expense.lastPaidInstallmentIndex || 0) + 1;
+
+    const updatedExpense = await this.updateRecord<ExpenseRecord>(
+      FINANCIAL_COLLECTIONS.EXPENSES,
+      expense.id,
+      {
+        lastPaidInstallmentIndex: lastPaidInstallmentIndex,
+        isClosed:
+          lastPaidInstallmentIndex >= (expense.numberOfInstallments || 1),
+      },
+    );
+
+    await eventBus.publish({
+      type: "expense:added",
+      record: { ...updatedExpense, date: payDate } as unknown as ExpenseRecord,
+    });
+
+    return updatedExpense;
+  }
+
   async deleteExpense(id: string): Promise<void> {
     return this.deleteRecord(FINANCIAL_COLLECTIONS.EXPENSES, id);
   }
@@ -382,14 +398,7 @@ export class FinancialRecordsService {
       FINANCIAL_COLLECTIONS.FIXED_ESTIMATES,
       filters,
     );
-    return records.map(
-      (record) =>
-        ({
-          ...record,
-          createdAt: record.createdAt || new Date(),
-          updatedAt: record.updatedAt || new Date(),
-        }) as FixedEstimateRecord,
-    );
+    return records;
   }
 
   async addFixedEstimate(

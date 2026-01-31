@@ -1,10 +1,17 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
-import { Banknote, CreditCard, Pencil, Trash2 } from "lucide-react";
+import {
+  Banknote,
+  CreditCard,
+  Pencil,
+  Trash2,
+  DollarSign,
+  Loader2,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -27,8 +34,19 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   cn,
   formatDateDisplay,
+  formatDateISO,
   formatMonthYear,
   formatNumberForMobile,
 } from "@/lib/utils";
@@ -36,11 +54,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import useFinancialRecords from "@/hooks/use-financial-records";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { ExpenseRecord } from "@/lib/types";
 
 export default function ExpensesPage() {
-  const { t, language } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const isMobile = useIsMobile();
-  const {toast} = useToast();
+  const { toast } = useToast();
+
+  const [showPaySheet, setShowPaySheet] = useState(false);
+  const [payDate, setPayDate] = useState(new Date());
+  const [isPaying, setIsPaying] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseRecord | null>(
+    null,
+  );
 
   const month = useMemo(() => startOfDay(new Date()), []);
   const startMonth = useMemo(() => startOfMonth(month), [month]);
@@ -50,10 +76,30 @@ export default function ExpensesPage() {
     [month, language],
   );
 
-  const { expensesManual, isLoading, deleteExpense } = useFinancialRecords(
-    startMonth,
-    endMonth,
-  );
+  const { expensesManual, isLoading, deleteExpense, payCreditCardExpense } =
+    useFinancialRecords(startMonth, endMonth);
+
+  const payInstallmentSubmit = async () => {
+    if (!selectedExpense) return;
+    try {
+      setIsPaying(true);
+      await payCreditCardExpense(selectedExpense, payDate);
+      setShowPaySheet(false);
+      toast({
+        title: t("installment_paid"),
+        description: t("the_installment_has_been_successfully_paid"),
+        variant: "default",
+      });
+    } catch (e: any) {
+      toast({
+        title: t("failed_to_pay_installment"),
+        description: e.message || t("failed_to_pay_installment"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsPaying(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -154,11 +200,14 @@ export default function ExpensesPage() {
                       {record.isInstallment && (
                         <div className="flex items-center gap-2">
                           <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
-                            {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
+                            {`${t("installment")}: ${record.lastPaidInstallmentIndex! + 1} ${t("of")} ${record.numberOfInstallments}`}
                           </span>
-                          <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
-                            {t("required_this_month")}
-                          </span>
+                          {record.lastPaidInstallmentIndex! <
+                            record.installmentMonthIndex! && (
+                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
+                              {t("required_this_month")}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
@@ -173,6 +222,20 @@ export default function ExpensesPage() {
                         )}
                       </span>
                       <div className="flex items-center gap-2">
+                        {record.isInstallment && (
+                          <Button
+                            title={t("pay_installment")}
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Pay"
+                            onClick={() => {
+                              setSelectedExpense(record);
+                              setShowPaySheet(true);
+                            }}
+                          >
+                            <DollarSign className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Link
                           href={`/expenses/edit/${record.id}`}
                           passHref
@@ -220,7 +283,9 @@ export default function ExpensesPage() {
                                   } catch (e: any) {
                                     toast({
                                       title: t("failed_to_delete_expense"),
-                                      description: e.message || t("could_not_delete_the_expense_record"),
+                                      description: t(
+                                        "could_not_delete_the_expense_record",
+                                      ),
                                       variant: "destructive",
                                     });
                                   }
@@ -233,17 +298,6 @@ export default function ExpensesPage() {
                         </AlertDialog>
                       </div>
                     </div>
-                    {/* Installment Details */}
-                    {record.isInstallment &&
-                      record.numberOfInstallments &&
-                      record.type === t("credit_card") && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {`${t("installment_egp")} ${formatNumberForMobile(
-                            isMobile,
-                            record.amount / record.numberOfInstallments,
-                          )} x ${record.numberOfInstallments} ${t("months")}`}
-                        </div>
-                      )}
                   </div>
                 </CardContent>
               </Card>
@@ -280,6 +334,51 @@ export default function ExpensesPage() {
           <Plus className="h-7 w-7" />
         </Button>
       </Link>
+
+      <Sheet open={showPaySheet} onOpenChange={setShowPaySheet}>
+        <SheetContent dir={dir} side="bottom">
+          <SheetHeader>
+            <SheetTitle>{t("pay_installment")}</SheetTitle>
+            <SheetDescription>
+              {t("enter_the_payment_date_for_this_installment")}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="grid gap-2 py-4">
+            <Label htmlFor="payDate">{t("pay_date")}</Label>
+            <Input
+              id="payDate"
+              type="date"
+              value={formatDateISO(payDate)}
+              onChange={(e) => {
+                const date = e.target.value
+                  ? new Date(e.target.value)
+                  : new Date();
+                setPayDate(date);
+              }}
+            />
+          </div>
+          <SheetFooter>
+            <div className="flex flex-row-reverse gap-2">
+              <Button variant="outline" disabled={isPaying} onClick={() => setShowPaySheet(false)}>
+                {t("cancel")}
+              </Button>
+              <Button
+                disabled={isPaying}
+                onClick={() => payInstallmentSubmit()}
+              >
+                {isPaying ? (
+                  <>
+                    <Loader2 className="ms-2 h-4 w-4 animate-spin" />
+                    {t("paying")}
+                  </>
+                ) : (
+                  t("pay")
+                )}
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

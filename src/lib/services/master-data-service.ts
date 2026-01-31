@@ -6,6 +6,7 @@ import {
   LISTED_SECURITIES_COLLECTION,
   EXCHANGE_RATES_PATH,
 } from "@/lib/constants";
+import { dateConverter } from "@/lib/firestore-converters";
 
 export class MasterDataService {
   private static instance: MasterDataService;
@@ -20,15 +21,15 @@ export class MasterDataService {
   }
 
   getExchangeRateRef() {
-    return doc(db, EXCHANGE_RATES_PATH);
+    return doc(db, EXCHANGE_RATES_PATH).withConverter(dateConverter);
   }
 
   getGoldMarketPricesRef() {
-    return doc(db, GOLD_MARKET_PRICES_PATH);
+    return doc(db, GOLD_MARKET_PRICES_PATH).withConverter(dateConverter);
   }
 
   getSecurityCollectionRef() {
-    return collection(db, LISTED_SECURITIES_COLLECTION);
+    return collection(db, LISTED_SECURITIES_COLLECTION).withConverter(dateConverter);
   }
 
   /**

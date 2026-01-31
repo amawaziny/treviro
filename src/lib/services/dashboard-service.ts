@@ -12,6 +12,7 @@ import {
 } from "@/lib/types";
 import { DASHBOARD_COLLECTION_PATH } from "@/lib/constants";
 import { formatPath } from "@/lib/utils";
+import { dateConverter } from "@/lib/firestore-converters";
 
 /**
  * TODO:
@@ -77,7 +78,7 @@ export class DashboardService {
     return doc(
       db,
       formatPath(DASHBOARD_COLLECTION_PATH, { userId: this.userId }),
-    );
+    ).withConverter(dateConverter);
   }
 
   /**

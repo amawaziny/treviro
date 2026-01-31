@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import {
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, PiggyBank } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -32,8 +31,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Pencil, Trash2, Plus, PiggyBank  } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 

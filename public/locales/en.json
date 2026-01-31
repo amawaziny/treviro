@@ -760,5 +760,14 @@
   "buying": "Buying",
   "Income record deleted successfully": "Income record deleted successfully",
   "failed_to_delete_expense": "Failed to delete expense",
-  "could_not_delete_the_expense_record": "Could not delete the expense record"
+  "could_not_delete_the_expense_record": "Could not delete the expense record",
+  "pay_installment": "Pay Installment",
+  "enter_the_payment_date_for_this_installment": "Enter the payment date for this installment",
+  "pay_date": "Payment Date",
+  "pay": "Pay",
+  "installment_paid": "Installment Paid",
+  "the_installment_has_been_successfully_paid": "The installment has been successfully paid",
+  "failed_to_pay_installment": "Failed to pay installment",
+  "could_not_process_the_installment_payment": "Could not process the installment payment",
+  "paying": "Paying"
 }
