@@ -165,7 +165,6 @@ export class FinancialRecordsService {
         });
       }
 
-
       return updatedData;
     } catch (error) {
       console.error(`Error updating ${collectionName} record:`, error);
@@ -263,7 +262,7 @@ export class FinancialRecordsService {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as IncomeRecord
+        }) as IncomeRecord,
     );
   }
 
@@ -327,8 +326,8 @@ export class FinancialRecordsService {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as ExpenseRecord
-      );
+        }) as ExpenseRecord,
+    );
   }
 
   async addExpense(

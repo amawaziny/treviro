@@ -31,7 +31,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Plus, PiggyBank  } from "lucide-react";
+import { Pencil, Trash2, Plus, PiggyBank } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 

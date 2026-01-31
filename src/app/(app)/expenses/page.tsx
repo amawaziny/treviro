@@ -359,7 +359,11 @@ export default function ExpensesPage() {
           </div>
           <SheetFooter>
             <div className="flex flex-row-reverse gap-2">
-              <Button variant="outline" disabled={isPaying} onClick={() => setShowPaySheet(false)}>
+              <Button
+                variant="outline"
+                disabled={isPaying}
+                onClick={() => setShowPaySheet(false)}
+              >
                 {t("cancel")}
               </Button>
               <Button

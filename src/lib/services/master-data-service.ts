@@ -29,7 +29,9 @@ export class MasterDataService {
   }
 
   getSecurityCollectionRef() {
-    return collection(db, LISTED_SECURITIES_COLLECTION).withConverter(dateConverter);
+    return collection(db, LISTED_SECURITIES_COLLECTION).withConverter(
+      dateConverter,
+    );
   }
 
   /**

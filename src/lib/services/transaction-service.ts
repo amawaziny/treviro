@@ -89,7 +89,11 @@ export class TransactionService {
     const expenseUpdatedUnsubscribe = eventBus.subscribe(
       "expense:updated",
       async (event: FinancialRecordEvent) => {
-        await this.setFinancialRecordTransaction(event.record, "EXPENSE", false);
+        await this.setFinancialRecordTransaction(
+          event.record,
+          "EXPENSE",
+          false,
+        );
       },
     );
     this.unsubscribeCallbacks.push(expenseUpdatedUnsubscribe);
@@ -260,13 +264,13 @@ export class TransactionService {
   private async setFinancialRecordTransaction(
     record: BaseRecord,
     type: TransactionType,
-    isNew: boolean
+    isNew: boolean,
   ) {
     try {
       const now = new Date();
 
       let transactionId = uuidv4();
-      if(!isNew){
+      if (!isNew) {
         const transactions = await this.getTransactionsBySourceId(record.id);
         if (transactions && transactions.length > 0) {
           transactionId = transactions[0].id;

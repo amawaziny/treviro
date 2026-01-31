@@ -1,10 +1,5 @@
 import { useCallback, useMemo } from "react";
-import {
-  startOfMonth,
-  endOfMonth,
-  isWithinInterval,
-  differenceInMonths,
-} from "date-fns";
+import { isWithinInterval, differenceInMonths } from "date-fns";
 import {
   type ExpenseRecord,
   type Investment,
@@ -199,7 +194,7 @@ export function useCashflow({
         tx.sourceType === "Expense" &&
         tx.metadata.sourceSubType === "Credit Card",
     );
-    
+
     const unpaidExpensesManualCreditCard = expensesManualCreditCard.filter(
       (expense) => {
         return !expensesManualCreditCardTrx.find(
@@ -207,33 +202,31 @@ export function useCashflow({
         );
       },
     );
-    
+
     // Calculate total from transactions first
     let totalTrx = expensesManualCreditCardTrx.reduce(
       (sum, tx) => sum + tx.amount,
       0,
     );
 
-    const totalUnpaid = 
-      unpaidExpensesManualCreditCard.reduce((sum, record) => {
-        const recordDate = record.date;
-        if (!recordDate) return sum;
+    const totalUnpaid = unpaidExpensesManualCreditCard.reduce((sum, record) => {
+      const recordDate = record.date;
+      if (!recordDate) return sum;
 
-        const recordMonth = recordDate.getMonth();
-        const recordYear = recordDate.getFullYear();
-        const month = endMonth.getMonth();
-        const year = endMonth.getFullYear();
+      const recordMonth = recordDate.getMonth();
+      const recordYear = recordDate.getFullYear();
+      const month = endMonth.getMonth();
+      const year = endMonth.getFullYear();
 
-        const monthsSinceStart =
-          (year - recordYear) * 12 + (month - recordMonth);
+      const monthsSinceStart = (year - recordYear) * 12 + (month - recordMonth);
 
-        const numberOfInstallments = (record.numberOfInstallments ?? 0) || 1;
+      const numberOfInstallments = (record.numberOfInstallments ?? 0) || 1;
 
-        if (monthsSinceStart >= 0 && monthsSinceStart < numberOfInstallments) {
-          return sum + (record._requiredAmount ?? record.amount);
-        }
-        return sum;
-      }, 0);
+      if (monthsSinceStart >= 0 && monthsSinceStart < numberOfInstallments) {
+        return sum + (record._requiredAmount ?? record.amount);
+      }
+      return sum;
+    }, 0);
 
     setTotalExpensesManualCreditCard(totalTrx + totalUnpaid);
   }, [expensesManualCreditCard, endMonth]);

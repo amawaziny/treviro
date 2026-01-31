@@ -1,5 +1,9 @@
 import { Timestamp } from "firebase/firestore";
-import { FirestoreDataConverter, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import {
+  FirestoreDataConverter,
+  DocumentData,
+  QueryDocumentSnapshot,
+} from "firebase/firestore";
 
 // Recursively convert Timestamp fields to Date
 export function convertTimestampsToDates(obj: any): any {

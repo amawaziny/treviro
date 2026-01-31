@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, PiggyBank, Pencil, Trash2, Wallet2, TrendingDown } from "lucide-react";
+import {
+  Plus,
+  PiggyBank,
+  Pencil,
+  Trash2,
+  Wallet2,
+  TrendingDown,
+} from "lucide-react";
 import { cn, formatNumberForMobile } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 import {
