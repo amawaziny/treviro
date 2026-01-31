@@ -21,8 +21,6 @@ import {
   isCurrencyRelatedFund,
   isDebtRelatedFund,
   isGoldRelatedFund,
-  isStockRelatedFund,
-  parseDateString,
 } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { calcDebtMonthlyInterest as calcProjectedDebtMonthlyInterest } from "@/lib/financial-utils";
@@ -195,8 +193,29 @@ export function useCashflow({
   }, [transactions]);
 
   const calculateTotalExpensesManualCreditCard = useCallback(() => {
-    setTotalExpensesManualCreditCard(
-      expensesManualCreditCard.reduce((sum, record) => {
+    const expensesManualCreditCardTrx = transactions.filter(
+      (tx) =>
+        tx.type === "EXPENSE" &&
+        tx.sourceType === "Expense" &&
+        tx.metadata.sourceSubType === "Credit Card",
+    );
+    
+    const unpaidExpensesManualCreditCard = expensesManualCreditCard.filter(
+      (expense) => {
+        return !expensesManualCreditCardTrx.find(
+          (tx) => tx.sourceId === expense.id,
+        );
+      },
+    );
+    
+    // Calculate total from transactions first
+    let totalTrx = expensesManualCreditCardTrx.reduce(
+      (sum, tx) => sum + tx.amount,
+      0,
+    );
+
+    const totalUnpaid = 
+      unpaidExpensesManualCreditCard.reduce((sum, record) => {
         const recordDate = record.date;
         if (!recordDate) return sum;
 
@@ -214,8 +233,9 @@ export function useCashflow({
           return sum + (record._requiredAmount ?? record.amount);
         }
         return sum;
-      }, 0),
-    );
+      }, 0);
+
+    setTotalExpensesManualCreditCard(totalTrx + totalUnpaid);
   }, [expensesManualCreditCard, endMonth]);
 
   const calculateTotalRealEstateInstallments = useCallback(() => {
