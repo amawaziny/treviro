@@ -25,7 +25,7 @@ import {
   formatDateDisplay,
   formatNumberForMobile,
 } from "@/lib/utils";
-import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
+import { startOfMonth, endOfMonth, startOfDay, subMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import { useTransactions } from "@/hooks/use-transactions";
@@ -66,6 +66,8 @@ export default function CashFlowPage() {
     totalExpenses,
     incomeManualTrxs,
     expensesManualOtherTrxs,
+    expensesManualCreditCardTrxs,
+    expensesManualCreditCardUnpaid,
     dividendTrxs,
     incomesFixed,
     expensesFixed,
@@ -261,9 +263,25 @@ export default function CashFlowPage() {
                 <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
               </div>
             ))}
-            {expensesManualCreditCard.map((expense, idx) => (
+            {expensesManualCreditCardTrxs.map((expense, idx) => (
               <div
                 key={`credit-card-expense-${idx}`}
+                className="flex justify-between text-xs"
+              >
+                <div className="flex items-center">
+                  <CreditCard className="h-4 w-4 me-1" />
+                  <span>
+                    {expense.metadata.description
+                      ? expense.metadata.description
+                      : formatDateDisplay(expense.date)}
+                  </span>
+                </div>
+                <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
+              </div>
+            ))}
+            {expensesManualCreditCardUnpaid.map((expense, idx) => (
+              <div
+                key={`credit-card-expense-unpaid-${idx}`}
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">
