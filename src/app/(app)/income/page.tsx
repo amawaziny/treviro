@@ -40,17 +40,12 @@ export default function IncomePage() {
   const isMobile = useIsMobile();
 
   const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(month), [month]);
-  const endMonth = useMemo(() => endOfMonth(month), [month]);
   const monthYear = useMemo(
     () => formatMonthYear(month, language),
     [month, language],
   );
 
-  const { incomesManual, isLoading, deleteIncome } = useFinancialRecords(
-    startMonth,
-    endMonth,
-  );
+  const { incomesManual, isLoading, deleteIncome } = useFinancialRecords();
 
   if (isLoading) {
     return (

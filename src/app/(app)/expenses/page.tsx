@@ -69,15 +69,12 @@ export default function ExpensesPage() {
   );
 
   const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(month), [month]);
-  const endMonth = useMemo(() => endOfMonth(month), [month]);
   const monthYear = useMemo(
     () => formatMonthYear(month, language),
     [month, language],
   );
 
-  const { expensesManual, isLoading, deleteExpense, payCreditCardExpense } =
-    useFinancialRecords(startMonth, endMonth);
+  const { expensesManual, isLoading, deleteExpense, payCreditCardExpense } = useFinancialRecords();
 
   const payInstallmentSubmit = async () => {
     if (!selectedExpense) return;

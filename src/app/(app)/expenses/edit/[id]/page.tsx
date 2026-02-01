@@ -15,7 +15,6 @@ import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import useFinancialRecords from "@/hooks/use-financial-records";
 import { ExpenseRecord } from "@/lib/types";
-import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateISO } from "@/lib/utils";
 
@@ -28,9 +27,6 @@ export default function EditExpensePage({
   const router = useRouter();
   const { id: expenseId } = React.use(params);
 
-  const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(month), [month]);
-  const endMonth = useMemo(() => endOfMonth(month), [month]);
   const [expense, setExpense] = useState<ExpenseRecord | null>(null);
 
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -56,10 +52,7 @@ export default function EditExpensePage({
     };
   }, [setHeaderProps, closeForm, openForm]);
 
-  const { findExpenseById, updateExpense } = useFinancialRecords(
-    startMonth,
-    endMonth,
-  );
+  const { findExpenseById, updateExpense } = useFinancialRecords();
   useEffect(() => {
     findExpenseById(expenseId).then(setExpense);
   }, [expenseId, findExpenseById]);

@@ -31,11 +31,7 @@ export default function AddIncomePage() {
   const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
 
-  const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(month), [month]);
-  const endMonth = useMemo(() => endOfMonth(month), [month]);
-
-  const { addIncome } = useFinancialRecords(startMonth, endMonth);
+  const { addIncome } = useFinancialRecords();
   const { toast } = useToast();
   const router = useRouter();
 

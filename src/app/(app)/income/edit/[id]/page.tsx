@@ -29,9 +29,6 @@ export default function EditIncomePage({
   const router = useRouter();
   const { id: incomeId } = React.use(params);
 
-  const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(month), [month]);
-  const endMonth = useMemo(() => endOfMonth(month), [month]);
   const [income, setIncome] = useState<IncomeRecord | null>(null);
 
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -56,10 +53,7 @@ export default function EditIncomePage({
     };
   }, [setHeaderProps, closeForm, openForm]);
 
-  const { updateIncome, fetchIncomeById } = useFinancialRecords(
-    startMonth,
-    endMonth,
-  );
+  const { updateIncome, fetchIncomeById } = useFinancialRecords();
   useEffect(() => {
     fetchIncomeById(incomeId).then(setIncome);
   }, [fetchIncomeById, incomeId]);

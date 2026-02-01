@@ -1,21 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   startOfMonth,
   differenceInCalendarMonths,
   differenceInSeconds,
+  endOfMonth,
 } from "date-fns";
 import { FinancialRecordsService } from "@/lib/services/financial-records-service";
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";
-import { formatDateDisplay } from "@/lib/utils";
 
 export const useFinancialRecords = (
-  startDateParam: Date,
-  endDateParam: Date,
+  startDateParam?: Date,
+  endDateParam?: Date,
 ) => {
   const { financialRecordsService: recordsService } = useAppServices();
+
+  const { startDate, endDate } = useMemo(() => {
+    const now = new Date();
+    const defaultEnd = endOfMonth(now);
+    const defaultStart = startOfMonth(now);
+    const s = startDateParam ? startDateParam : defaultStart;
+    const e = endDateParam ? endDateParam : defaultEnd;
+    return { startDate: s, endDate: e };
+  }, [startDateParam, endDateParam]);
+
   const [incomesManual, setIncomesManual] = useState<IncomeRecord[]>([]);
   const [expensesManual, setExpensesManual] = useState<ExpenseRecord[]>([]);
   const [expensesManualOther, setExpensesManualOther] = useState<
@@ -55,8 +65,8 @@ export const useFinancialRecords = (
 
   // Initial fetch
   useEffect(() => {
-    fetchFinancialRecords(startDateParam, endDateParam);
-  }, [startDateParam, endDateParam, fetchFinancialRecords]);
+    fetchFinancialRecords(startDate, endDate);
+  }, [startDate, endDate, fetchFinancialRecords]);
 
   useEffect(() => {
     const records = [...expensesManualOther, ...expensesManualCreditCard].sort(

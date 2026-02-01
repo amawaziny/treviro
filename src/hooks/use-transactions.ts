@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Transaction } from "@/lib/types";
 import {
   isCurrencyRelatedFund,
@@ -8,6 +8,7 @@ import {
   isStockRelatedFund,
 } from "@/lib/utils";
 import { useAppServices } from "@/contexts/app-services-context";
+import { endOfMonth, startOfMonth } from "date-fns";
 
 /**
  * Custom hook to manage transactions including CRUD operations
@@ -17,8 +18,18 @@ import { useAppServices } from "@/contexts/app-services-context";
  * @returns An object containing transactions, loading state, error, and transaction management methods
  */
 
-export const useTransactions = (startDate: Date, endDate: Date) => {
+export const useTransactions = (startDateParam?: Date, endDateParam?: Date) => {
   const { transactionService } = useAppServices();
+
+  const { startDate, endDate } = useMemo(() => {
+    const now = new Date();
+    const defaultEnd = endOfMonth(now);
+    const defaultStart = startOfMonth(now);
+    const s = startDateParam ? startDateParam : defaultStart;
+    const e = endDateParam ? endDateParam : defaultEnd;
+    return { startDate: s, endDate: e };
+  }, [startDateParam, endDateParam]);
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomeFixedTrxs, setIncomeFixedTrxs] = useState<Transaction[]>([]);
   const [incomeManualTrxs, setIncomeManualTrxs] = useState<Transaction[]>([]);

@@ -18,10 +18,7 @@ import { useMemo } from "react";
 export default function AddExpensePage() {
   const { t } = useLanguage();
 
-  const month = useMemo(() => startOfDay(new Date()), []);
-  const startMonth = useMemo(() => startOfMonth(month), [month]);
-  const endMonth = useMemo(() => endOfMonth(month), [month]);
-  const { addExpense } = useFinancialRecords(startMonth, endMonth);
+  const { addExpense } = useFinancialRecords();
 
   async function onSubmit(values: ExpenseFormValues) {
     // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.

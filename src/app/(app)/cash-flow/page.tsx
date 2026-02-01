@@ -25,7 +25,7 @@ import {
   formatDateDisplay,
   formatNumberForMobile,
 } from "@/lib/utils";
-import { startOfMonth, endOfMonth, startOfDay, subMonths } from "date-fns";
+import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import { useTransactions } from "@/hooks/use-transactions";
