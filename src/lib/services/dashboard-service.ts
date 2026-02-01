@@ -26,7 +26,6 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 6. refactor investment-form to be each form has its own submit button and logic
  * 7. check if we need context for investment, transaction, expense, income, fixed estimate
  * 8. dashboard is not refreshed automaticly
- * 9. fix expenses details in cashflow
  * 10. we could list all installements during adding expenses of type credit card
  */
 

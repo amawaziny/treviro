@@ -87,12 +87,10 @@ export function useCashflow({
   const [expensesManualOtherTrxs, setExpensesManualOtherTrxs] = useState<
     Transaction[]
   >([]);
-  const [expensesManualCreditCardTrxs, setExpensesManualCreditCardTrxs] = useState<
-    Transaction[]
-  >([]);
-    const [expensesManualCreditCardUnpaid, setExpensesManualCreditCardUnpaid] = useState<
-    ExpenseRecord[]
-  >([]);
+  const [expensesManualCreditCardTrxs, setExpensesManualCreditCardTrxs] =
+    useState<Transaction[]>([]);
+  const [expensesManualCreditCardUnpaid, setExpensesManualCreditCardUnpaid] =
+    useState<ExpenseRecord[]>([]);
   const [realEstateInvestments, setRealEstateInvestments] = useState<
     RealEstateInvestment[]
   >([]);
@@ -204,32 +202,30 @@ export function useCashflow({
     // Group by sourceId, sum amounts, keep the latest transaction
     const groupedBySourceId = expensesManualCreditCardTrx
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .reduce((acc, tx) => {
-        if (!acc[tx.sourceId]) {
-          acc[tx.sourceId] = { ...tx };
-        } else {
-          acc[tx.sourceId].amount += tx.amount;
-        }
-        return acc;
-      }, {} as Record<string, Transaction>);
+      .reduce(
+        (acc, tx) => {
+          if (!acc[tx.sourceId]) {
+            acc[tx.sourceId] = { ...tx };
+          } else {
+            acc[tx.sourceId].amount += tx.amount;
+          }
+          return acc;
+        },
+        {} as Record<string, Transaction>,
+      );
 
     const groupedBySourcIdTrxs = Object.values(groupedBySourceId);
     setExpensesManualCreditCardTrxs(groupedBySourcIdTrxs);
 
     const expensesManualCreditCardUnpaid = expensesManualCreditCard.filter(
       (expense) => {
-        return !groupedBySourcIdTrxs.find(
-          (tx) => tx.sourceId === expense.id,
-        );
+        return !groupedBySourcIdTrxs.find((tx) => tx.sourceId === expense.id);
       },
     );
     setExpensesManualCreditCardUnpaid(expensesManualCreditCardUnpaid);
 
     // Calculate total from transactions first
-    let totalTrx = groupedBySourcIdTrxs.reduce(
-      (sum, tx) => sum + tx.amount,
-      0,
-    );
+    let totalTrx = groupedBySourcIdTrxs.reduce((sum, tx) => sum + tx.amount, 0);
 
     const totalUnpaid = expensesManualCreditCardUnpaid.reduce((sum, record) => {
       const recordDate = record.date;
