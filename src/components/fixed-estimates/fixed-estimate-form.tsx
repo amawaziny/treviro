@@ -36,9 +36,19 @@ import { Loader2 } from "lucide-react";
 import type { FixedEstimateRecord, FixedEstimateType } from "@/lib/types";
 import React, { useEffect } from "react";
 
-interface AddEditFixedEstimateFormProps {
+interface FixedEstimateFormProps {
   mode: "add" | "edit";
   estimate?: FixedEstimateRecord; // Provided in 'edit' mode
+  updateFixedEstimate?: (
+    id: string,
+    data: Partial<FixedEstimateRecord>,
+  ) => Promise<FixedEstimateRecord>;
+  addFixedEstimate?: (
+    data: Omit<
+      FixedEstimateRecord,
+      "id" | "createdAt" | "updatedAt" | "recordType"
+    >,
+  ) => Promise<FixedEstimateRecord>;
 }
 
 const initialFormValues: FixedEstimateFormValues = {
@@ -49,12 +59,13 @@ const initialFormValues: FixedEstimateFormValues = {
   isExpense: false,
 };
 
-export function AddEditFixedEstimateForm({
+export function FixedEstimateForm({
   mode,
   estimate,
-}: AddEditFixedEstimateFormProps) {
+  updateFixedEstimate,
+  addFixedEstimate,
+}: FixedEstimateFormProps) {
   const { t, dir } = useLanguage();
-  const { addFixedEstimate, updateFixedEstimate } = useFinancialRecords(); // Add updateFixedEstimate later
   const { toast } = useToast();
   const router = useRouter();
 
@@ -65,7 +76,7 @@ export function AddEditFixedEstimateForm({
         ? {
             type: estimate.type,
             name: estimate.name ?? "",
-            amount: estimate.amount,
+            amount: estimate.isExpense ? estimate.amount * -1 : estimate.amount,
             period: estimate.period,
             isExpense: estimate.isExpense,
           }
@@ -79,14 +90,13 @@ export function AddEditFixedEstimateForm({
       form.setValue("name", ""); // Clear name if type is not 'Other'
       if (watchedType === "Salary") {
         form.setValue("isExpense", false);
-      } else if (watchedType === "Zakat" || watchedType === "Charity") {
+      } else if (
+        watchedType === "Zakat" ||
+        watchedType === "Charity" ||
+        watchedType === "Living Expenses"
+      ) {
         form.setValue("isExpense", true);
       }
-    } else if (
-      watchedType === "Other" &&
-      form.getValues("isExpense") === false
-    ) {
-      // For 'Other', don't automatically set isExpense, let user choose
     }
   }, [watchedType, form]);
 
@@ -97,7 +107,7 @@ export function AddEditFixedEstimateForm({
         "id" | "createdAt" | "updatedAt" | "recordType"
       > = {
         type: values.type!,
-        amount: values.amount,
+        amount: values.isExpense ? -values.amount : values.amount,
         period: values.period!,
         isExpense:
           values.type === "Salary"
@@ -109,18 +119,18 @@ export function AddEditFixedEstimateForm({
 
       if (values.type === "Other" && values.name) {
         dataToSave.name = values.name;
-      } else if (values.type !== "Other") {
-        dataToSave.name = values.type; // Use type as name for Salary, Zakat, Charity
+      } else {
+        dataToSave.name = values.type;
       }
 
-      if (mode === "add") {
+      if (mode === "add" && addFixedEstimate) {
         await addFixedEstimate(dataToSave);
         toast({
           title: t("fixed_estimate_added"),
           description: `${t(dataToSave.name || dataToSave.type)} ${t("estimate recorded successfully")}.`,
           testId: "success-toast",
         });
-      } else if (mode === "edit" && estimate) {
+      } else if (mode === "edit" && estimate && updateFixedEstimate) {
         await updateFixedEstimate(estimate.id, dataToSave);
         toast({
           title: t("fixed_estimate_updated"),

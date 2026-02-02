@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, TrendingDown, Briefcase, Wallet } from "lucide-react";
+import { PiggyBank, TrendingDown, Briefcase, Wallet } from "lucide-react";
 import { formatNumberForMobile } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -50,7 +50,7 @@ export function CashFlowSummaryCards({
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
               {t("total_current_income_this_month")}
             </CardTitle>
-            <Coins
+            <PiggyBank
               className="h-4 w-4 text-green-600 dark:text-green-400"
               data-testid="current-income-icon"
             />
@@ -72,7 +72,7 @@ export function CashFlowSummaryCards({
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
               {t("total_income_this_month")}
             </CardTitle>
-            <Coins
+            <PiggyBank
               className="h-4 w-4 text-green-600 dark:text-green-400"
               data-testid="total-income-icon"
             />
@@ -84,7 +84,7 @@ export function CashFlowSummaryCards({
             <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
               {totalFixedIncome > 0 && (
                 <div className="flex justify-between">
-                  <span>{t("other_fixed_income")}</span>
+                  <span>{t("fixed_income")}</span>
                   <span>
                     {formatNumberForMobile(isMobile, totalFixedIncome)}
                   </span>
@@ -125,33 +125,21 @@ export function CashFlowSummaryCards({
               {formatNumberForMobile(isMobile, totalExpenses)}
             </p>
             <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
-              {totalExpensesManualCreditCard > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("itemized_logged_expenses")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      totalExpensesManualCreditCard,
-                    )}
-                  </span>
-                </div>
-              )}
-              {totalFixedExpenses > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("other_fixed_expenses")}</span>
-                  <span>
-                    {formatNumberForMobile(isMobile, totalFixedExpenses)}
-                  </span>
-                </div>
-              )}
-              {totalRealEstateInstallments > 0 && (
-                <p>
-                  {`${t("real_estate_installments")}: ${formatNumberForMobile(
+              <div className="flex justify-between">
+                <span>{t("itemized_logged_expenses")}</span>
+                <span>
+                  {formatNumberForMobile(
                     isMobile,
-                    totalRealEstateInstallments,
-                  )}`}
-                </p>
-              )}
+                    totalExpensesManualCreditCard,
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>{t("fixed_expenses")}</span>
+                <span>
+                  {formatNumberForMobile(isMobile, totalFixedExpenses)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

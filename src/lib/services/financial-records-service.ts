@@ -13,7 +13,6 @@ import {
   DocumentReference,
   orderBy,
   CollectionReference,
-  Timestamp,
 } from "firebase/firestore";
 import { eventBus } from "./events";
 import { v4 as uuidv4 } from "uuid";
@@ -143,7 +142,7 @@ export class FinancialRecordsService {
       const updatedData = {
         ...currentData,
         ...data,
-        updatedAt: Timestamp.fromDate(new Date()),
+        updatedAt: new Date(),
         recordType: this.getRecordType(collectionName),
       } as T;
 
@@ -209,11 +208,12 @@ export class FinancialRecordsService {
   private async getRecords<T extends BaseRecord>(
     collectionName: CollectionType,
     filters?: Partial<T>,
+    orderByColumn: string | null = "date",
   ): Promise<T[]> {
     try {
       let q = query(
         this.getCollectionRef(collectionName),
-        orderBy("date", "desc"),
+        orderByColumn ? orderBy(orderByColumn, "desc") : null,
       );
 
       // Apply additional filters if provided
@@ -251,8 +251,8 @@ export class FinancialRecordsService {
   async getIncomesWithin(start: Date, end: Date): Promise<IncomeRecord[]> {
     const q = query(
       this.getCollectionRef(FINANCIAL_COLLECTIONS.INCOMES),
-      where("date", ">=", Timestamp.fromDate(start)),
-      where("date", "<=", Timestamp.fromDate(end)),
+      where("date", ">=", start),
+      where("date", "<=", end),
       orderBy("date", "desc"),
     );
     const querySnapshot = await getDocs(q);
@@ -315,8 +315,8 @@ export class FinancialRecordsService {
   async getExpensesWithin(start: Date, end: Date): Promise<ExpenseRecord[]> {
     const q = query(
       this.getCollectionRef(FINANCIAL_COLLECTIONS.EXPENSES),
-      where("date", ">=", Timestamp.fromDate(start)),
-      where("date", "<=", Timestamp.fromDate(end)),
+      where("date", ">=", start),
+      where("date", "<=", end),
       orderBy("date", "desc"),
     );
     const querySnapshot = await getDocs(q);
@@ -396,6 +396,7 @@ export class FinancialRecordsService {
     const records = await this.getRecords<FixedEstimateRecord>(
       FINANCIAL_COLLECTIONS.FIXED_ESTIMATES,
       filters,
+      "createdAt",
     );
     return records;
   }

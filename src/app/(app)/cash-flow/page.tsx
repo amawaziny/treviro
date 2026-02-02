@@ -14,11 +14,13 @@ import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCard
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Landmark,
-  FileText,
   Wallet,
   Coins,
   CreditCard,
   Banknote,
+  PiggyBank,
+  ScrollText,
+  HandCoins,
 } from "lucide-react";
 import {
   formatMonthYear,
@@ -167,18 +169,15 @@ export default function CashFlowPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {incomesFixed.map((income, idx) => (
-              <div key={`fixed-income-${idx}`} className="flex flex-col">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-2">
-                    <Wallet className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">
-                      {t(income.type)}
-                    </span>
-                  </div>
-                  <span className="text-sm">
-                    {formatNumberForMobile(isMobile, income.amount)}
-                  </span>
+              <div
+                key={`fixed-income-${idx}`}
+                className="flex justify-between text-xs"
+              >
+                <div className="flex items-center">
+                  <Wallet className="h-4 w-4 me-1" />
+                  <span>{t(income.type)}</span>
                 </div>
+                <span>{formatNumberForMobile(isMobile, income.amount)}</span>
               </div>
             ))}
             {incomeManualTrxs.map((income, idx) => (
@@ -186,11 +185,14 @@ export default function CashFlowPage() {
                 key={`manual-income-${idx}`}
                 className="flex justify-between text-xs"
               >
-                <span>
-                  {income.metadata.description
-                    ? income.metadata.description
-                    : t(income.metadata.sourceSubType)}
-                </span>
+                <div className="flex items-center">
+                  <PiggyBank className="h-4 w-4 me-1" />
+                  <span>
+                    {income.metadata.description
+                      ? income.metadata.description
+                      : t(income.metadata.sourceSubType)}
+                  </span>
+                </div>
                 <span>{formatNumberForMobile(isMobile, income.amount)}</span>
               </div>
             ))}
@@ -199,26 +201,28 @@ export default function CashFlowPage() {
                 key={`dividend-income-${idx}`}
                 className="flex justify-between text-xs"
               >
-                <span>
-                  {`${t("dividend")} ${tx.securityId ? `(${tx.securityId})` : ""}`}
-                </span>
+                <div className="flex items-center">
+                  <HandCoins className="h-4 w-4 me-1" />
+                  <span>
+                    {`${t("dividend")} ${tx.securityId ? `(${tx.securityId})` : ""}`}
+                  </span>
+                </div>
                 <span>{formatNumberForMobile(isMobile, tx.amount)}</span>
               </div>
             ))}
-            {totalProjectedDebtMonthlyInterest > 0 && (
-              <div className="flex justify-between text-xs">
-                <span>
-                  <FileText className="inline me-2 h-4 w-4 text-green-600" />
-                  {t("projected_debt_interest")}
-                </span>
-                <span>
-                  {formatNumberForMobile(
-                    isMobile,
-                    totalProjectedDebtMonthlyInterest,
-                  )}
-                </span>
+
+            <div className="flex justify-between text-xs">
+              <div className="flex items-center">
+                <ScrollText className="h-4 w-4 me-1" />
+                <span>{t("projected_debt_interest")}</span>
               </div>
-            )}
+              <span>
+                {formatNumberForMobile(
+                  isMobile,
+                  totalProjectedDebtMonthlyInterest,
+                )}
+              </span>
+            </div>
             <Separator className="my-2" />
             <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_projected_income")}</span>
@@ -236,15 +240,15 @@ export default function CashFlowPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {expensesFixed.map((expense, idx) => (
-              <div key={`fixed-expense-${idx}`} className="flex flex-col">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium">{expense.type}</span>
-                  </div>
-                  <span className="text-sm">
-                    {formatNumberForMobile(isMobile, expense.amount)}
-                  </span>
+              <div
+                key={`fixed-expense-${idx}`}
+                className="flex justify-between text-xs"
+              >
+                <div className="flex items-center">
+                  <Banknote className="h-4 w-4 me-1" />
+                  <span>{t(expense.name || expense.type)}</span>
                 </div>
+                <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
               </div>
             ))}
             {expensesManualOtherTrxs.map((expense, idx) => (
@@ -313,85 +317,74 @@ export default function CashFlowPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div>
-              {/* Total Stock Investment */}
-              <div className="flex justify-between items-center text-blue-600 font-semibold text-xs mb-2">
-                <span className="flex items-center gap-2">
-                  {t("total_stock")}
-                </span>
-                <span>
-                  {formatNumberForMobile(isMobile, totalStockInvestments)}
-                </span>
+            {/* Securities */}
+            {stockInvestmentTrxs.length > 0 && (
+              <div className="mb-2">
+                <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2"></div>
+                <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
+                  {stockInvestmentTrxs.map((inv) => {
+                    return (
+                      <li
+                        key={inv.id}
+                        className="flex justify-between items-center text-xs"
+                      >
+                        <span>
+                          {inv.securityId || inv.id || t("unnamed_stock")}
+                        </span>
+                        <span>
+                          {formatNumberForMobile(isMobile, inv.amount || 0)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-              {/* Securities */}
-              {stockInvestmentTrxs.length > 0 && (
-                <div className="mb-2">
-                  <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2"></div>
-                  <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
-                    {stockInvestmentTrxs.map((inv) => {
-                      return (
-                        <li
-                          key={inv.id}
-                          className="flex justify-between items-center text-xs"
-                        >
-                          <span>
-                            {inv.securityId || inv.id || t("unnamed_stock")}
-                          </span>
-                          <span>
-                            {formatNumberForMobile(isMobile, inv.amount || 0)}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+            )}
+            {/* Debt Instruments */}
+            {debtInvestmentTrxs.length > 0 && (
+              <div className="mb-2">
+                <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                  <Wallet className="h-4 w-4" />
+                  {t("debt_instruments_purchased")}
                 </div>
-              )}
-              {/* Debt Instruments */}
-              {debtInvestmentTrxs.length > 0 && (
-                <div className="mb-2">
-                  <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
-                    <Wallet className="h-4 w-4" />
-                    {t("debt_instruments_purchased")}
-                  </div>
-                  <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
-                    {debtInvestmentTrxs.map((inv) => (
-                      <li
-                        key={inv.id}
-                        className="flex justify-between items-center text-xs"
-                      >
-                        <span>{inv.description || t("unnamed_debt")}</span>
-                        <span>
-                          {formatNumberForMobile(isMobile, inv.amount || 0)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
+                  {debtInvestmentTrxs.map((inv) => (
+                    <li
+                      key={inv.id}
+                      className="flex justify-between items-center text-xs"
+                    >
+                      <span>{inv.description || t("unnamed_debt")}</span>
+                      <span>
+                        {formatNumberForMobile(isMobile, inv.amount || 0)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* Gold */}
+            {goldInvestmentTrxs.length > 0 && (
+              <div className="mb-2">
+                <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                  <Coins className="h-4 w-4" />
+                  {t("gold_purchased")}
                 </div>
-              )}
-              {/* Gold */}
-              {goldInvestmentTrxs.length > 0 && (
-                <div className="mb-2">
-                  <div className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
-                    <Coins className="h-4 w-4" />
-                    {t("gold_purchased")}
-                  </div>
-                  <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
-                    {goldInvestmentTrxs.map((inv) => (
-                      <li
-                        key={inv.id}
-                        className="flex justify-between items-center text-xs"
-                      >
-                        <span>{inv.description || t("unnamed_gold")}</span>
-                        <span>
-                          {formatNumberForMobile(isMobile, inv.amount || 0)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
+                <ul className="space-y-1 pl-4 border-l-2 border-blue-100 dark:border-blue-700">
+                  {goldInvestmentTrxs.map((inv) => (
+                    <li
+                      key={inv.id}
+                      className="flex justify-between items-center text-xs"
+                    >
+                      <span>{inv.description || t("unnamed_gold")}</span>
+                      <span>
+                        {formatNumberForMobile(isMobile, inv.amount || 0)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* RealEstate */}
             {realEstateInvestments.length > 0 && (
               <div className="mt-2">
                 <div className="flex justify-between text-blue-700 pt-2 border-t border-blue-100 dark:border-blue-900 mt-2 font-semibold text-sm">
@@ -424,7 +417,6 @@ export default function CashFlowPage() {
                 </ul>
               </div>
             )}
-
             <Separator className="my-2" />
             <div className="flex justify-between font-semibold text-sm">
               <span>{t("total_investments")}</span>

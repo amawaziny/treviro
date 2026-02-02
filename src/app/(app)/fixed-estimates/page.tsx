@@ -140,7 +140,7 @@ export default function FixedEstimatesPage() {
                       <span className="font-semibold truncate text-base">
                         {t(record.type)}
                       </span>
-                      {record.name && (
+                      {record.name && record.type === "Other" && (
                         <span className="text-sm text-muted-foreground">
                           ({t(record.name)})
                         </span>
