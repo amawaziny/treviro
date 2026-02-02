@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
+import { startOfDay } from "date-fns";
 import {
   formatDateDisplay,
   formatMonthYear,

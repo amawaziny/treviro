@@ -16,7 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { IncomeRecord } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
-import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import { getCurrentDate } from "@/lib/utils";
 
 const initialFormValues: IncomeFormValues = {

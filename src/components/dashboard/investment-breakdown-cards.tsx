@@ -11,7 +11,6 @@ import {
   LineChart,
   FileText,
   CircleDollarSign,
-  Plus,
 } from "lucide-react";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";

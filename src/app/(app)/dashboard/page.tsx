@@ -25,13 +25,7 @@ import {
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
-import {
-  DashboardSummaries,
-  defaultAppSettings,
-  defaultDashboardSummaries,
-  defaultDashboardSummary,
-  Investment,
-} from "@/lib/types";
+import { defaultAppSettings } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";

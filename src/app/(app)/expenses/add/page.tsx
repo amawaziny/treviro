@@ -12,8 +12,6 @@ import { useLanguage } from "@/contexts/language-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import { ExpenseRecord } from "@/lib/types";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
-import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
-import { useMemo } from "react";
 
 export default function AddExpensePage() {
   const { t } = useLanguage();

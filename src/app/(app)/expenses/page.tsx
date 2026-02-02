@@ -52,7 +52,7 @@ import {
 } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useFinancialRecords from "@/hooks/use-financial-records";
-import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
+import { startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { ExpenseRecord } from "@/lib/types";
 
@@ -74,7 +74,8 @@ export default function ExpensesPage() {
     [month, language],
   );
 
-  const { expensesManual, isLoading, deleteExpense, payCreditCardExpense } = useFinancialRecords();
+  const { expensesManual, isLoading, deleteExpense, payCreditCardExpense } =
+    useFinancialRecords();
 
   const payInstallmentSubmit = async () => {
     if (!selectedExpense) return;

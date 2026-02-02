@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,10 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
-import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import { IncomeRecord } from "@/lib/types";
 import { formatDateISO } from "@/lib/utils";
 
