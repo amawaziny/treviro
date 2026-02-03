@@ -18,6 +18,7 @@ import type {
   CurrencyCode,
   BaseRecord,
   ExpenseRecord,
+  FixedEstimateRecord,
 } from "@/lib/types";
 import {
   eventBus,
@@ -113,6 +114,19 @@ export class TransactionService {
       },
     );
     this.unsubscribeCallbacks.push(expenseDeletedUnsubscribe);
+
+    const fixedEstimateConfirmedUnsubscribe = eventBus.subscribe(
+      "fixedEstimate:confirmed",
+      async (event: FinancialRecordEvent) => {
+        const fixedEstimate = event.record as FixedEstimateRecord;
+        await this.setFinancialRecordTransaction(
+          event.record,
+          fixedEstimate.isExpense ? "EXPENSE" : "INCOME",
+          true,
+        );
+      },
+    );
+    this.unsubscribeCallbacks.push(fixedEstimateConfirmedUnsubscribe);
 
     const investmentAddedUnsubscribe = eventBus.subscribe(
       "investment:added",

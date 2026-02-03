@@ -769,5 +769,9 @@
   "the_installment_has_been_successfully_paid": "The installment has been successfully paid",
   "failed_to_pay_installment": "Failed to pay installment",
   "could_not_process_the_installment_payment": "Could not process the installment payment",
-  "paying": "Paying"
+  "paying": "Paying",
+  "confirm": "Confirm",
+  "confirm_this_fixed_estimate": "Confirm this fixed estimate",
+  "confirm_date": "Confirm Date",
+  "confirming": "Confirming"
 }

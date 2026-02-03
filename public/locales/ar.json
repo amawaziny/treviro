@@ -806,5 +806,9 @@
   "the_installment_has_been_successfully_paid": "تم دفع القسط بنجاح",
   "failed_to_pay_installment": "فشل في دفع القسط",
   "could_not_process_the_installment_payment": " تعذر معالجة دفع القسط ",
-  "paying": "دفع"
+  "paying": "دفع",
+  "confirm": "تأكيد",
+  "confirm_this_fixed_estimate": "تأكيد هذا التقدير الثابت",
+  "confirm_date": "تأكيد التاريخ",
+  "confirming": "تأكيد"
 }

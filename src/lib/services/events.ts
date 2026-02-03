@@ -1,4 +1,9 @@
-import type { IncomeRecord, ExpenseRecord, Transaction } from "@/lib/types";
+import type {
+  IncomeRecord,
+  ExpenseRecord,
+  Transaction,
+  FixedEstimateRecord,
+} from "@/lib/types";
 
 export type FinancialRecordEvent =
   | { type: "income:added"; record: IncomeRecord }
@@ -6,7 +11,8 @@ export type FinancialRecordEvent =
   | { type: "income:deleted"; record: IncomeRecord }
   | { type: "expense:added"; record: ExpenseRecord }
   | { type: "expense:updated"; record: ExpenseRecord }
-  | { type: "expense:deleted"; record: ExpenseRecord };
+  | { type: "expense:deleted"; record: ExpenseRecord }
+  | { type: "fixedEstimate:confirmed"; record: FixedEstimateRecord };
 
 export type InvestmentEvent =
   | { type: "investment:added"; transaction: Transaction }

@@ -328,6 +328,30 @@ export const useFinancialRecords = (
     [recordsService],
   );
 
+  const confirmFixedEstimate = useCallback(
+    async (fixedEstimate: FixedEstimateRecord, confirmDate: Date) => {
+      if (!recordsService) {
+        throw new Error("Financial records service not initialized");
+      }
+      try {
+        const updatedRecord = await recordsService.confirmFixedEstimate(
+          fixedEstimate,
+          confirmDate,
+        );
+        setFixedEstimates((prev) =>
+          prev.map((record) =>
+            record.id === fixedEstimate.id ? updatedRecord : record,
+          ),
+        );
+        return updatedRecord;
+      } catch (error) {
+        console.error("Error confirming fixed estimate:", error);
+        throw error;
+      }
+    },
+    [recordsService],
+  );
+
   const deleteExpense = useCallback(
     async (id: string) => {
       if (!recordsService) {
@@ -453,6 +477,7 @@ export const useFinancialRecords = (
     addFixedEstimate,
     updateFixedEstimate,
     deleteFixedEstimate,
+    confirmFixedEstimate,
   };
 };
 

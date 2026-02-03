@@ -26,7 +26,8 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 6. refactor investment-form to be each form has its own submit button and logic
  * 7. check if we need context for investment, transaction, expense, income, fixed estimate
  * 8. dashboard is not refreshed automaticly
- * 10. we could list all installements during adding expenses of type credit card
+ * 9. we could list all installements during adding expenses of type credit card
+ * 10. fix message of confirm fixed estimate
  */
 
 export class DashboardService {

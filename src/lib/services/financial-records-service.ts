@@ -211,10 +211,9 @@ export class FinancialRecordsService {
     orderByColumn: string | null = "date",
   ): Promise<T[]> {
     try {
-      let q = query(
-        this.getCollectionRef(collectionName),
-        orderByColumn ? orderBy(orderByColumn, "desc") : null,
-      );
+      let q = query(this.getCollectionRef(collectionName));
+
+      if (orderByColumn) q = query(q, orderBy(orderByColumn, "desc"));
 
       // Apply additional filters if provided
       if (filters) {
@@ -367,15 +366,10 @@ export class FinancialRecordsService {
     const lastPaidInstallmentIndex =
       (expense.lastPaidInstallmentIndex || 0) + 1;
 
-    const updatedExpense = await this.updateRecord<ExpenseRecord>(
-      FINANCIAL_COLLECTIONS.EXPENSES,
-      expense.id,
-      {
-        lastPaidInstallmentIndex: lastPaidInstallmentIndex,
-        isClosed:
-          lastPaidInstallmentIndex >= (expense.numberOfInstallments || 1),
-      },
-    );
+    const updatedExpense = await this.updateExpense(expense.id, {
+      lastPaidInstallmentIndex: lastPaidInstallmentIndex,
+      isClosed: lastPaidInstallmentIndex >= (expense.numberOfInstallments || 1),
+    });
 
     await eventBus.publish({
       type: "expense:added",
@@ -421,6 +415,25 @@ export class FinancialRecordsService {
       id,
       data,
     );
+  }
+
+  async confirmFixedEstimate(
+    fixedEstimate: FixedEstimateRecord,
+    confirmDate: Date,
+  ): Promise<FixedEstimateRecord> {
+    const updatedFixedEstimate = await this.updateFixedEstimate(
+      fixedEstimate.id,
+      {
+        date: confirmDate,
+      },
+    );
+
+    await eventBus.publish({
+      type: "fixedEstimate:confirmed",
+      record: updatedFixedEstimate,
+    });
+
+    return updatedFixedEstimate;
   }
 
   async deleteFixedEstimate(id: string): Promise<void> {

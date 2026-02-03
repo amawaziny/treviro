@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,10 @@ import {
   Trash2,
   Wallet2,
   TrendingDown,
+  CheckCircle,
+  Loader2,
 } from "lucide-react";
-import { cn, formatNumberForMobile } from "@/lib/utils";
+import { cn, formatDateISO, formatNumberForMobile } from "@/lib/utils";
 import type { FixedEstimateRecord } from "@/lib/types";
 import {
   AlertDialog,
@@ -28,15 +30,37 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useFinancialRecords from "@/hooks/use-financial-records";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 export default function FixedEstimatesPage() {
-  const { t } = useLanguage();
-  const { fixedEstimates, isLoading, deleteFixedEstimate } =
-    useFinancialRecords();
-  const { language } = useLanguage();
+  const { t, dir, language } = useLanguage();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+
+  const [showConfirmSheet, setShowConfirmSheet] = useState(false);
+  const [confirmDate, setConfirmDate] = useState(new Date());
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [selectedFixedEstimate, setSelectedFixedEstimate] =
+    useState<FixedEstimateRecord | null>(null);
+
+  const {
+    fixedEstimates,
+    isLoading,
+    deleteFixedEstimate,
+    confirmFixedEstimate,
+  } = useFinancialRecords();
 
   if (isLoading) {
     return (
@@ -66,6 +90,28 @@ export default function FixedEstimatesPage() {
   const totalExpenses = fixedEstimates
     .filter((record) => record.isExpense)
     .reduce((sum, record) => sum + record.amount, 0);
+
+  const onConfirmFixedEstimateSubmit = async () => {
+    if (!selectedFixedEstimate) return;
+    try {
+      setIsConfirming(true);
+      await confirmFixedEstimate(selectedFixedEstimate, confirmDate);
+      setShowConfirmSheet(false);
+      toast({
+        title: t("installment_paid"),
+        description: t("the_installment_has_been_successfully_paid"),
+        variant: "default",
+      });
+    } catch (e: any) {
+      toast({
+        title: t("failed_to_pay_installment"),
+        description: e.message || t("failed_to_pay_installment"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
@@ -169,6 +215,18 @@ export default function FixedEstimatesPage() {
                     </div>
                     {/* Actions */}
                     <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Confirm"
+                        title={t("confirm")}
+                        onClick={() => {
+                          setSelectedFixedEstimate(record);
+                          setShowConfirmSheet(true);
+                        }}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
                       <Link
                         href={`/fixed-estimates/edit/${record.id}`}
                         passHref
@@ -261,6 +319,54 @@ export default function FixedEstimatesPage() {
           <Plus className="h-7 w-7" />
         </Button>
       </Link>
+
+      <Sheet open={showConfirmSheet} onOpenChange={setShowConfirmSheet}>
+        <SheetContent dir={dir} side="bottom">
+          <SheetHeader>
+            <SheetTitle>{t("confirm")}</SheetTitle>
+            <SheetDescription>
+              {t("confirm_this_fixed_estimate")}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="grid gap-2 py-4">
+            <Label htmlFor="confirmDate">{t("confirm_date")}</Label>
+            <Input
+              id="confirmDate"
+              type="date"
+              value={formatDateISO(confirmDate)}
+              onChange={(e) => {
+                const date = e.target.value
+                  ? new Date(e.target.value)
+                  : new Date();
+                setConfirmDate(date);
+              }}
+            />
+          </div>
+          <SheetFooter>
+            <div className="flex flex-row-reverse gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmSheet(false)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                onClick={() => onConfirmFixedEstimateSubmit()}
+                disabled={isConfirming}
+              >
+                {isConfirming ? (
+                  <>
+                    <Loader2 className="ms-2 h-4 w-4 animate-spin" />
+                    {t("confirming")}
+                  </>
+                ) : (
+                  t("confirm")
+                )}
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
