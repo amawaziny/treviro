@@ -31,7 +31,7 @@ import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import { useTransactions } from "@/contexts/transactions-context";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { useCashflow } from "@/hooks/use-cashflow";
 
 export default function CashFlowPage() {
@@ -52,7 +52,7 @@ export default function CashFlowPage() {
     expensesManualCreditCard,
     fixedEstimates,
     isLoading: isLoadingFinancialRecords,
-  } = useFinancialRecords(startMonth, endMonth);
+  } = useFinancialRecords();
 
   const { transactions, isLoading: isLoadingTransactions } = useTransactions();
 

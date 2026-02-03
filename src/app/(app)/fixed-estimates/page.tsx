@@ -39,7 +39,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";

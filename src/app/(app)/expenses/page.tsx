@@ -51,7 +51,7 @@ import {
   formatNumberForMobile,
 } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { ExpenseRecord } from "@/lib/types";

@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   startOfMonth,
   differenceInCalendarMonths,
@@ -11,20 +18,85 @@ import { FinancialRecordsService } from "@/lib/services/financial-records-servic
 import { IncomeRecord, ExpenseRecord, FixedEstimateRecord } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";
 
-export const useFinancialRecords = (
-  startDateParam?: Date,
-  endDateParam?: Date,
-) => {
+export interface FinancialRecordsContextType {
+  // Default data (current month)
+  incomesManual: IncomeRecord[];
+  expensesManual: ExpenseRecord[];
+  expensesManualOther: ExpenseRecord[];
+  expensesManualCreditCard: ExpenseRecord[];
+  fixedEstimates: FixedEstimateRecord[];
+  incomesFixed: FixedEstimateRecord[];
+  expensesFixed: FixedEstimateRecord[];
+  isLoading: boolean;
+
+  // Methods
+  fetchFinancialRecordsForRange: (
+    startDate: Date,
+    endDate: Date,
+  ) => Promise<{
+    incomesManual: IncomeRecord[];
+    expensesManual: ExpenseRecord[];
+    expensesManualOther: ExpenseRecord[];
+    expensesManualCreditCard: ExpenseRecord[];
+    fixedEstimates: FixedEstimateRecord[];
+    incomesFixed: FixedEstimateRecord[];
+    expensesFixed: FixedEstimateRecord[];
+  }>;
+  fetchIncomeById: (id: string) => Promise<IncomeRecord | null>;
+  addIncome: (
+    data: Omit<IncomeRecord, "id" | "createdAt" | "recordType">,
+  ) => Promise<IncomeRecord>;
+  updateIncome: (
+    id: string,
+    data: Partial<IncomeRecord>,
+  ) => Promise<IncomeRecord>;
+  deleteIncome: (id: string) => Promise<void>;
+  findExpenseById: (id: string) => Promise<ExpenseRecord | null>;
+  addExpense: (
+    data: Omit<ExpenseRecord, "id" | "createdAt" | "recordType">,
+  ) => Promise<ExpenseRecord>;
+  updateExpense: (
+    id: string,
+    data: Partial<ExpenseRecord>,
+  ) => Promise<ExpenseRecord>;
+  deleteExpense: (id: string) => Promise<void>;
+  payCreditCardExpense: (
+    expense: ExpenseRecord,
+    payDate: Date,
+  ) => Promise<ExpenseRecord>;
+  addFixedEstimate: (
+    data: Omit<FixedEstimateRecord, "id" | "createdAt" | "recordType">,
+  ) => Promise<FixedEstimateRecord>;
+  updateFixedEstimate: (
+    id: string,
+    data: Partial<FixedEstimateRecord>,
+  ) => Promise<FixedEstimateRecord>;
+  deleteFixedEstimate: (id: string) => Promise<void>;
+  confirmFixedEstimate: (
+    fixedEstimate: FixedEstimateRecord,
+    confirmDate: Date,
+  ) => Promise<FixedEstimateRecord>;
+}
+
+export const FinancialRecordsContext = createContext<
+  FinancialRecordsContextType | undefined
+>(undefined);
+
+export const FinancialRecordsProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { financialRecordsService: recordsService } = useAppServices();
 
-  const { startDate, endDate } = useMemo(() => {
+  // Default date range (current month)
+  const { defaultStartDate, defaultEndDate } = useMemo(() => {
     const now = new Date();
-    const defaultEnd = endOfMonth(now);
-    const defaultStart = startOfMonth(now);
-    const s = startDateParam ? startDateParam : defaultStart;
-    const e = endDateParam ? endDateParam : defaultEnd;
-    return { startDate: s, endDate: e };
-  }, [startDateParam, endDateParam]);
+    return {
+      defaultStartDate: startOfMonth(now),
+      defaultEndDate: endOfMonth(now),
+    };
+  }, []);
 
   const [incomesManual, setIncomesManual] = useState<IncomeRecord[]>([]);
   const [expensesManual, setExpensesManual] = useState<ExpenseRecord[]>([]);
@@ -65,8 +137,10 @@ export const useFinancialRecords = (
 
   // Initial fetch
   useEffect(() => {
-    fetchFinancialRecords(startDate, endDate);
-  }, [startDate, endDate, fetchFinancialRecords]);
+    if (recordsService) {
+      fetchFinancialRecords(defaultStartDate, defaultEndDate);
+    }
+  }, [recordsService, defaultStartDate, defaultEndDate, fetchFinancialRecords]);
 
   useEffect(() => {
     const records = [...expensesManualOther, ...expensesManualCreditCard].sort(
@@ -183,30 +257,6 @@ export const useFinancialRecords = (
     }
   };
 
-  /**
-   * Fetches credit card expenses and calculates installment month indices.
-   *
-   * DESIGN NOTE: This implementation calculates installments on-the-fly rather than
-   * storing each installment as a separate expense record. While this approach is
-   * efficient for data fetching and avoids duplicating installment data, it has
-   * significant tradeoffs:
-   *
-   * ADVANTAGES:
-   * - Single source of truth: One record per credit card purchase
-   * - Efficient fetching: No need to query multiple installment records
-   *
-   * DISADVANTAGES:
-   * - Edit operations are complex: Changing installment details requires recalculating
-   *   and updating the parent record
-   * - Transaction history updates are difficult: Can't independently modify historical
-   *   installment records in the transaction table
-   * - Selective updates are challenging: Cannot update only future installments without
-   *   affecting the parent record and recalculating all installment data
-   *
-   * ALTERNATIVE: Storing each installment as a separate expense record would simplify
-   * editing and updates, but would require managing multiple related records and would
-   * increase data duplication and query complexity.
-   */
   const fetchExpensesManualCreditCard = async (
     service: FinancialRecordsService,
     endDate: Date,
@@ -449,8 +499,72 @@ export const useFinancialRecords = (
     [recordsService],
   );
 
-  return {
-    // State
+  // Fetch for custom range
+  const fetchFinancialRecordsForRange = useCallback(
+    async (startDate: Date, endDate: Date) => {
+      if (!recordsService)
+        throw new Error("Financial records service not initialized");
+
+      const [incomes, expensesOther, expensesCreditCard, estimates] =
+        await Promise.all([
+          recordsService.getIncomesWithin(startDate, endDate),
+          (async () => {
+            const records = await recordsService.getExpensesWithin(
+              startDate,
+              endDate,
+            );
+            return records.filter((record) => record.type === "Other");
+          })(),
+          (async () => {
+            const records = await recordsService.getExpenses({
+              type: "Credit Card",
+              isClosed: false,
+            });
+            const getMonthsDiff = (record: ExpenseRecord) => {
+              if (!record.date) return null;
+              return differenceInCalendarMonths(
+                endDate,
+                startOfMonth(record.date),
+              );
+            };
+            return records
+              .map((record) => {
+                const monthsDiff = getMonthsDiff(record);
+                if (monthsDiff === null || monthsDiff < 0) return null;
+                const copy = { ...record };
+                copy.installmentMonthIndex = copy.numberOfInstallments;
+                if (copy.isInstallment && copy.numberOfInstallments) {
+                  if (monthsDiff < copy.numberOfInstallments) {
+                    copy.installmentMonthIndex = monthsDiff + 1;
+                  }
+                }
+                return copy;
+              })
+              .filter((record): record is ExpenseRecord => record !== null);
+          })(),
+          recordsService.getFixedEstimates(),
+        ]);
+
+      const expensesManual = [...expensesOther, ...expensesCreditCard].sort(
+        (a, b) => differenceInSeconds(b.date!, a.date!),
+      );
+      const incomesFixed = estimates.filter((estimate) => !estimate.isExpense);
+      const expensesFixed = estimates.filter((estimate) => estimate.isExpense);
+
+      return {
+        incomesManual: incomes,
+        expensesManual,
+        expensesManualOther: expensesOther,
+        expensesManualCreditCard: expensesCreditCard,
+        fixedEstimates: estimates,
+        incomesFixed,
+        expensesFixed,
+      };
+    },
+    [recordsService],
+  );
+
+  const value: FinancialRecordsContextType = {
     incomesManual,
     expensesManual,
     expensesManualOther,
@@ -459,26 +573,35 @@ export const useFinancialRecords = (
     incomesFixed,
     expensesFixed,
     isLoading,
-
-    // Income methods
+    fetchFinancialRecordsForRange,
     fetchIncomeById,
     addIncome,
     updateIncome,
     deleteIncome,
-
-    // Expense methods
     findExpenseById,
     addExpense,
     updateExpense,
     deleteExpense,
     payCreditCardExpense,
-
-    // Fixed Estimate methods
     addFixedEstimate,
     updateFixedEstimate,
     deleteFixedEstimate,
     confirmFixedEstimate,
   };
+
+  return (
+    <FinancialRecordsContext.Provider value={value}>
+      {children}
+    </FinancialRecordsContext.Provider>
+  );
 };
 
-export default useFinancialRecords;
+export const useFinancialRecords = () => {
+  const context = useContext(FinancialRecordsContext);
+  if (!context) {
+    throw new Error(
+      "useFinancialRecords must be used within a FinancialRecordsProvider",
+    );
+  }
+  return context;
+};

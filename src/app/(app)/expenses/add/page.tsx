@@ -11,7 +11,7 @@ import {
 import { useLanguage } from "@/contexts/language-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import { ExpenseRecord } from "@/lib/types";
-import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 
 export default function AddExpensePage() {
   const { t } = useLanguage();

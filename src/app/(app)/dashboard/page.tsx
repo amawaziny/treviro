@@ -35,7 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
 import { useTransactions } from "@/contexts/transactions-context";
 import { useDashboard } from "@/hooks/use-dashboard";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useCashflow } from "@/hooks/use-cashflow";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
@@ -60,7 +60,7 @@ export default function DashboardPage() {
     expensesManualCreditCard,
     fixedEstimates,
     isLoading: isLoadingFinancialRecords,
-  } = useFinancialRecords(startMonth, endMonth);
+  } = useFinancialRecords();
 
   const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
 

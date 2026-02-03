@@ -15,7 +15,7 @@ import { IncomeFormValues } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { IncomeRecord } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { getCurrentDate } from "@/lib/utils";
 
 const initialFormValues: IncomeFormValues = {

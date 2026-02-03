@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IncomeForm } from "@/components/income/income-form";
 import {

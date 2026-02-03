@@ -13,7 +13,7 @@ import {
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { ExpenseRecord } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateISO } from "@/lib/utils";

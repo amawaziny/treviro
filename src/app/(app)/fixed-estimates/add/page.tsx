@@ -5,7 +5,7 @@ import { FixedEstimateForm } from "@/components/fixed-estimates/fixed-estimate-f
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 
 export default function AddFixedEstimatePage() {
   const { t } = useLanguage();

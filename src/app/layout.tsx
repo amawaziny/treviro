@@ -12,6 +12,7 @@ import PageViewTrackerWrapper from "@/components/analytics/PageViewTrackerWrappe
 import OfflineIndicatorWrapper from "@/components/common/OfflineIndicatorWrapper";
 import { AppServicesProvider } from "@/contexts/app-services-context";
 import { TransactionsProvider } from "@/contexts/transactions-context";
+import { FinancialRecordsProvider } from "@/contexts/financial-records-context";
 
 // Define metadata type to avoid TypeScript errors
 type Metadata = {
@@ -108,16 +109,18 @@ export default function RootLayout({
           <AuthProvider>
             <AppServicesProvider>
               <TransactionsProvider>
-                <InvestmentProvider>
-                  <LanguageProvider>
-                    <LanguageInitializer />
-                    <PageViewTrackerWrapper />
-                    <SidebarProvider defaultOpen={true}>
-                      <FirebaseIntegrations>{children}</FirebaseIntegrations>
-                    </SidebarProvider>
-                  </LanguageProvider>
-                  <Toaster />
-                </InvestmentProvider>
+                <FinancialRecordsProvider>
+                  <InvestmentProvider>
+                    <LanguageProvider>
+                      <LanguageInitializer />
+                      <PageViewTrackerWrapper />
+                      <SidebarProvider defaultOpen={true}>
+                        <FirebaseIntegrations>{children}</FirebaseIntegrations>
+                      </SidebarProvider>
+                    </LanguageProvider>
+                    <Toaster />
+                  </InvestmentProvider>
+                </FinancialRecordsProvider>
               </TransactionsProvider>
             </AppServicesProvider>
           </AuthProvider>

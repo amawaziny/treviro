@@ -8,7 +8,7 @@ import {
   formatMonthYear,
   formatNumberForMobile,
 } from "@/lib/utils";
-import { useFinancialRecords } from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {

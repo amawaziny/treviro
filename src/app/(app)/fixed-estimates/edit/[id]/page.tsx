@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import useFinancialRecords from "@/hooks/use-financial-records";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 
 export default function EditFixedEstimatePage() {
   const { t } = useLanguage();
