@@ -19,7 +19,6 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 1. revisit delete transaction and investment service should subscribe to transaction delete event (start with assuming deleting the last transaction)
  *  a. fire event transaction:deleted with the deleted transaction and investment service needs to listen to it and update the investment average purchase price with the "last transaction"
  *  b. fire event transaction:updated with the updated transaction and investment service needs to listen to it and update the investment average purchase price with the updated transaction
- * 2. FixedEstimates we can implement confirmation then user confirm it
  * 3. Transaction page show calendar to select the month and year to show the expenses for that month and year
  * 4. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
  * 5. we could disable some fields in edit mode of investment form
@@ -27,7 +26,6 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 7. check if we need context for investment, transaction, expense, income, fixed estimate
  * 8. dashboard is not refreshed automaticly
  * 9. we could list all installements during adding expenses of type credit card
- * 10. fix message of confirm fixed estimate
  */
 
 export class DashboardService {

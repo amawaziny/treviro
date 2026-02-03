@@ -68,7 +68,7 @@
   "add_your_first_transaction_to_get_started": "أضف معاملتك اﻷولى للبدء",
   "adding": "جاري الإضافة...",
   "address": "العنوان",
-  "adjust_your_financial_settings_such_as_your_financial_year_start_month_and_other_preferences": "قم بضبط إعداداتك المالية، مثل شهر بداية السنة المالية والتفضيﻻت اﻷخرى.",
+  "adjust_your_financial_settings_such_as_your_financial_year_start_month_and_other_preferences": "قم بضبط إعداداتك المالية، مثل شهر بداية السنة المالية والتفضيلات اﻷخرى.",
   "ai_analysis_failed": "فشل التحليل الذكي",
   "all_buy_sell_and_dividend_records_for": "جميع سجلات الشراء والبيع واﻷرباح لـ",
   "already_have_account": "هل لديك حساب بالفعل؟",
@@ -123,7 +123,7 @@
   "cheque_number": "رقم الشيك",
   "choose_the_month_your_financial_year_begins": "اختر الشهر الذي تبدأ فيه سنتك المالية.",
   "company_logo": "شعار الشركة",
-  "configure_your_financial_year_preferences": "قم بتكوين تفضيﻻت السنة المالية الخاصة بك.",
+  "configure_your_financial_year_preferences": "قم بتكوين تفضيلات السنة المالية الخاصة بك.",
   "could_not_delete_the_transaction": "تعذر حذف المعاملة.",
   "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore": "تعذر تحميل أسعار الصرف الحالية. قد تكون حسابات الربح/الخسارة غير متوفرة أو غير دقيقة. يرجى التأكد من إعداد مستند 'exchangeRates/current' بشكل صحيح في Firestore.",
   "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore": "تعذر تحميل أسعار السوق الحالية للذهب المادي. قد تكون حسابات الربح/الخسارة للذهب المادي غير متوفرة أو غير دقيقة. يرجى التأكد من إعداد مستند 'goldMarketPrices/current' بشكل صحيح في Firestore.",
@@ -810,5 +810,9 @@
   "confirm": "تأكيد",
   "confirm_this_fixed_estimate": "تأكيد هذا التقدير الثابت",
   "confirm_date": "تأكيد التاريخ",
-  "confirming": "تأكيد"
+  "confirming": "تأكيد",
+  "confirmation_successful": "تم التأكيد بنجاح",
+  "the_fixed_estimate_has_been_confirmed_successfully": "تم تأكيد التقدير الثابت بنجاح",
+  "failed_to_confirm_fixed_estimate": "فشل في تأكيد التقدير الثابت",
+  "could_not_confirm_the_fixed_estimate": "تعذر تأكيد التقدير الثابت"
 }

@@ -98,14 +98,14 @@ export default function FixedEstimatesPage() {
       await confirmFixedEstimate(selectedFixedEstimate, confirmDate);
       setShowConfirmSheet(false);
       toast({
-        title: t("installment_paid"),
-        description: t("the_installment_has_been_successfully_paid"),
+        title: t("confirmation_successful"),
+        description: t("the_fixed_estimate_has_been_confirmed_successfully"),
         variant: "default",
       });
     } catch (e: any) {
       toast({
-        title: t("failed_to_pay_installment"),
-        description: e.message || t("failed_to_pay_installment"),
+        title: t("failed_to_confirm_fixed_estimate"),
+        description: e.message || t("could_not_confirm_the_fixed_estimate"),
         variant: "destructive",
       });
     } finally {
