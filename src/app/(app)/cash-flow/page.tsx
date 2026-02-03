@@ -30,7 +30,7 @@ import {
 import { startOfMonth, endOfMonth, startOfDay } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
-import { useTransactions } from "@/hooks/use-transactions";
+import { useTransactions } from "@/contexts/transactions-context";
 import useFinancialRecords from "@/hooks/use-financial-records";
 import { useCashflow } from "@/hooks/use-cashflow";
 
@@ -54,10 +54,7 @@ export default function CashFlowPage() {
     isLoading: isLoadingFinancialRecords,
   } = useFinancialRecords(startMonth, endMonth);
 
-  const { transactions, isLoading: isLoadingTransactions } = useTransactions(
-    startMonth,
-    endMonth,
-  );
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions();
 
   const isLoading =
     isLoadingFinancialRecords || isLoadingTransactions || isLoadingInvestments;

@@ -33,7 +33,7 @@ import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCard
 import { formatMonthYear, formatNumberForMobile } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
-import { useTransactions } from "@/hooks/use-transactions";
+import { useTransactions } from "@/contexts/transactions-context";
 import { useDashboard } from "@/hooks/use-dashboard";
 import useFinancialRecords from "@/hooks/use-financial-records";
 import { useAppSettings } from "@/hooks/use-app-settings";
@@ -64,10 +64,7 @@ export default function DashboardPage() {
 
   const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
 
-  const { transactions, isLoading: isLoadingTransactions } = useTransactions(
-    startMonth,
-    endMonth,
-  );
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions();
 
   const isLoading =
     isLoadingDashboard ||

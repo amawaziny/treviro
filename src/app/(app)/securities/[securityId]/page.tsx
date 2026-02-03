@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
-import { useTransactions } from "@/hooks/use-transactions";
+import { useTransactions } from "@/contexts/transactions-context";
 import SecurityChart from "@/components/investments/securities/security-chart";
 
 export default function SecurityDetailPage() {
