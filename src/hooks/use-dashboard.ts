@@ -12,56 +12,34 @@ export const useDashboard = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch dashboard summary
-  const fetchDashboardSummary = useCallback(async () => {
-    if (!dashboardService) {
-      throw new Error("Dashboard service not initialized");
-    }
+  const setupSubscription = useCallback(() => {
+    if (!dashboardService) return;
 
     setIsLoading(true);
-    setError(null);
+    
+    const unsubscribe = dashboardService.subscribeToDashboardSummary(
+      (summary) => {
+        setDashboardSummary(summary);
+      },
+    );
 
-    try {
-      const summary = await dashboardService.getDashboardSummary();
-      setDashboardSummary(summary);
-      return summary;
-    } catch (err) {
-      console.error("Failed to fetch dashboard summary:", err);
-      setError(
-        err instanceof Error
-          ? err
-          : new Error("Failed to fetch dashboard summary"),
-      );
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
+
+    return unsubscribe;
   }, [dashboardService]);
 
   // Refresh dashboard data
   const refreshDashboard = useCallback(async () => {
-    if (!dashboardService) {
-      throw new Error("Dashboard service not initialized");
-    }
+    if (!dashboardService) throw new Error("Dashboard service not initialized");
 
-    try {
-      await dashboardService.recalculateDashboardSummary();
-      return await fetchDashboardSummary();
-    } catch (err) {
-      console.error("Failed to refresh dashboard:", err);
-      setError(
-        err instanceof Error ? err : new Error("Failed to refresh dashboard"),
-      );
-      throw err;
-    }
-  }, [dashboardService, fetchDashboardSummary]);
+    await dashboardService.recalculateDashboardSummary();
+  }, [dashboardService]);
 
-  // Initial fetch
+  // Initial subscription
   useEffect(() => {
-    if (dashboardService) {
-      fetchDashboardSummary();
-    }
-  }, [dashboardService, fetchDashboardSummary]);
+    const unsubscribe = setupSubscription();
+    return unsubscribe;
+  }, [setupSubscription]);
 
   return {
     // State
@@ -71,7 +49,6 @@ export const useDashboard = () => {
 
     // Methods
     refreshDashboard,
-    getDashboardSummary: fetchDashboardSummary,
   };
 };
 

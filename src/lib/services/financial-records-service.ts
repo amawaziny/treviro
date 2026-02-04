@@ -13,6 +13,7 @@ import {
   DocumentReference,
   orderBy,
   CollectionReference,
+  onSnapshot,
 } from "firebase/firestore";
 import { eventBus } from "./events";
 import { v4 as uuidv4 } from "uuid";
@@ -238,6 +239,43 @@ export class FinancialRecordsService {
     }
   }
 
+  private subscribeToRecords<T extends BaseRecord>(
+    collectionName: CollectionType,
+    callback: (records: T[]) => void,
+    filters?: Partial<T>,
+    orderByColumn: string | null = "date",
+  ): () => void {
+    try {
+      let q = query(this.getCollectionRef(collectionName));
+
+      if (orderByColumn) q = query(q, orderBy(orderByColumn, "desc"));
+
+      // Apply additional filters if provided
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined) {
+            q = query(q, where(key, "==", value));
+          }
+        });
+      }
+
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const records = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+          } as T;
+        });
+        callback(records);
+      });
+      return unsubscribe;
+    } catch (error) {
+      console.error(`Error subscribing to ${collectionName} records:`, error);
+      throw error;
+    }
+  }
+
   // Income Records
   async getIncomes(filters?: Partial<IncomeRecord>): Promise<IncomeRecord[]> {
     const records = await this.getRecords<IncomeRecord>(
@@ -263,6 +301,30 @@ export class FinancialRecordsService {
           ...doc.data(),
         }) as IncomeRecord,
     );
+  }
+
+  subscribeToIncomesWithin(
+    start: Date,
+    end: Date,
+    callback: (records: IncomeRecord[]) => void,
+  ): () => void {
+    const q = query(
+      this.getCollectionRef(FINANCIAL_COLLECTIONS.INCOMES),
+      where("date", ">=", start),
+      where("date", "<=", end),
+      orderBy("date", "desc"),
+    );
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const records = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as IncomeRecord,
+      );
+      callback(records);
+    });
+    return unsubscribe;
   }
 
   async addIncome(
@@ -310,6 +372,17 @@ export class FinancialRecordsService {
     return records;
   }
 
+  subscribeToExpenses(
+    callback: (records: ExpenseRecord[]) => void,
+    filters?: Partial<ExpenseRecord>,
+  ): () => void {
+    return this.subscribeToRecords<ExpenseRecord>(
+      FINANCIAL_COLLECTIONS.EXPENSES,
+      callback,
+      filters,
+    );
+  }
+
   // Expense Records
   async getExpensesWithin(start: Date, end: Date): Promise<ExpenseRecord[]> {
     const q = query(
@@ -327,6 +400,30 @@ export class FinancialRecordsService {
           ...doc.data(),
         }) as ExpenseRecord,
     );
+  }
+
+  subscribeToExpensesWithin(
+    start: Date,
+    end: Date,
+    callback: (records: ExpenseRecord[]) => void,
+  ): () => void {
+    const q = query(
+      this.getCollectionRef(FINANCIAL_COLLECTIONS.EXPENSES),
+      where("date", ">=", start),
+      where("date", "<=", end),
+      orderBy("date", "desc"),
+    );
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const records = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as ExpenseRecord,
+      );
+      callback(records);
+    });
+    return unsubscribe;
   }
 
   async addExpense(
@@ -393,6 +490,17 @@ export class FinancialRecordsService {
       "createdAt",
     );
     return records;
+  }
+
+  subscribeToFixedEstimates(
+    callback: (records: FixedEstimateRecord[]) => void,
+  ): () => void {
+    return this.subscribeToRecords<FixedEstimateRecord>(
+      FINANCIAL_COLLECTIONS.FIXED_ESTIMATES,
+      callback,
+      undefined,
+      "createdAt",
+    );
   }
 
   async addFixedEstimate(

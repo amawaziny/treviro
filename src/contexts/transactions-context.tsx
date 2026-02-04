@@ -69,36 +69,28 @@ export const TransactionsProvider = ({
       defaultStartDate: startOfMonth(now),
       defaultEndDate: endOfMonth(now),
     };
-  }, []); // Empty dependency array to compute once per component lifecycle
+  }, []);
 
-  // State for default data
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch default transactions (current month)
-  const fetchDefaultTransactions = useCallback(async () => {
-    if (!transactionService)
-      throw new Error("Transaction service not initialized");
+  const setupDefaultSubscription = useCallback(() => {
+    if (!transactionService) return;
 
     setIsLoading(true);
-    setError(null);
+    
+    const unsubscribe = transactionService.subscribeToTransactionsWithin(
+      defaultStartDate,
+      defaultEndDate,
+      (fetchedTransactions) => {
+        setTransactions(fetchedTransactions);
+      },
+    );
+    
+    setIsLoading(false);
 
-    try {
-      const fetchedTransactions =
-        await transactionService.getTransactionsWithin(
-          defaultStartDate,
-          defaultEndDate,
-        );
-      setTransactions(fetchedTransactions);
-    } catch (err) {
-      console.error("Failed to fetch transactions:", err);
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch transactions"),
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    return unsubscribe;
   }, [transactionService, defaultStartDate, defaultEndDate]);
 
   // Fetch transactions for custom range (returns data without updating global state)
@@ -218,11 +210,8 @@ export const TransactionsProvider = ({
       if (!transactionService)
         throw new Error("Transaction service not initialized");
       await transactionService.updateTransaction(id, data);
-      setTransactions((prev) =>
-        prev.map((trx) => (trx.id === id ? { ...trx, ...data } : trx)),
-      );
     },
-    [transactionService, fetchDefaultTransactions],
+    [transactionService],
   );
 
   const deleteTransaction = useCallback(
@@ -230,17 +219,15 @@ export const TransactionsProvider = ({
       if (!transactionService)
         throw new Error("Transaction service not initialized");
       await transactionService.deleteTransaction(id);
-      setTransactions((prev) => prev.filter((trx) => trx.id !== id));
     },
-    [transactionService, fetchDefaultTransactions],
+    [transactionService],
   );
 
-  // Initial fetch
+  // Initial subscription
   useEffect(() => {
-    if (transactionService) {
-      fetchDefaultTransactions();
-    }
-  }, [transactionService, fetchDefaultTransactions]);
+    const unsubscribe = setupDefaultSubscription();
+    return unsubscribe;
+  }, [setupDefaultSubscription]);
 
   const value: TransactionsContextType = {
     transactions,

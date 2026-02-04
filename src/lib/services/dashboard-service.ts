@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
@@ -209,6 +209,45 @@ export class DashboardService {
     }
 
     return defaultDashboardSummaries;
+  }
+
+  /**
+   * Subscribes to real-time updates for the dashboard summary
+   * @param callback - Callback function called with updated summary
+   * @returns Unsubscribe function
+   */
+  subscribeToDashboardSummary(
+    callback: (summary: DashboardSummaries) => void,
+  ): () => void {
+    const dashboardRef = this.getDashboardDocRef();
+    const unsubscribe = onSnapshot(dashboardRef, async (doc) => {
+      if (doc.exists()) {
+        const data = doc.data() as Partial<DashboardSummary>;
+        const totalInvested =
+          data.totalInvested ?? defaultDashboardSummaries.totalInvested;
+        const totalCashBalance =
+          data.totalCashBalance ?? defaultDashboardSummaries.totalCashBalance;
+        const unrealizedPnL =
+          await this.investmentService.calculateUnrealizedPnL();
+        const marketTotalInvested =
+          totalInvested + unrealizedPnL.portfolio.unrealizedPnL;
+        const totalPortfolio = marketTotalInvested + totalCashBalance;
+        const summary = {
+          totalInvested,
+          totalRealizedPnL:
+            data.totalRealizedPnL ?? defaultDashboardSummaries.totalRealizedPnL,
+          totalCashBalance,
+          totalUnrealizedPnL: unrealizedPnL.portfolio.unrealizedPnL,
+          marketTotalInvested,
+          totalPortfolio,
+          updatedAt: data.updatedAt ?? defaultDashboardSummaries.updatedAt,
+        };
+        callback(summary);
+      } else {
+        callback(defaultDashboardSummaries);
+      }
+    });
+    return unsubscribe;
   }
 
   /**

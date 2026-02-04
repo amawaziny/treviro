@@ -10,6 +10,7 @@ import {
   orderBy,
   getDoc,
   setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -204,6 +205,37 @@ export class TransactionService {
         ...data,
       } as Transaction;
     });
+  }
+
+  /**
+   * Subscribes to real-time updates for transactions within a date range
+   * @param startDate - Start date for filtering
+   * @param endDate - End date for filtering
+   * @param callback - Callback function called with updated transactions
+   * @returns Unsubscribe function
+   */
+  subscribeToTransactionsWithin(
+    startDate: Date,
+    endDate: Date,
+    callback: (transactions: Transaction[]) => void,
+  ): () => void {
+    const q = query(
+      this.getTransactionsCollection(),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate),
+      orderBy("date", "desc"),
+    );
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const transactions = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+        } as Transaction;
+      });
+      callback(transactions);
+    });
+    return unsubscribe;
   }
 
   /**
