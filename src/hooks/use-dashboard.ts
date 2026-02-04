@@ -16,7 +16,7 @@ export const useDashboard = () => {
     if (!dashboardService) return;
 
     setIsLoading(true);
-    
+
     const unsubscribe = dashboardService.subscribeToDashboardSummary(
       (summary) => {
         setDashboardSummary(summary);

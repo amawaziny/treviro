@@ -79,7 +79,7 @@ export const TransactionsProvider = ({
     if (!transactionService) return;
 
     setIsLoading(true);
-    
+
     const unsubscribe = transactionService.subscribeToTransactionsWithin(
       defaultStartDate,
       defaultEndDate,
@@ -87,7 +87,7 @@ export const TransactionsProvider = ({
         setTransactions(fetchedTransactions);
       },
     );
-    
+
     setIsLoading(false);
 
     return unsubscribe;
