@@ -23,8 +23,8 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 3. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
  * 4. we could disable some fields in edit mode of investment form
  * 5. refactor investment-form to be each form has its own submit button and logic
- * 6. dashboard is not refreshed automaticly
- * 7. we could list all installements during adding expenses of type credit card
+ * 6. we could list all installements during adding expenses of type credit card
+ * 7. investment context need to be real time with subscription on firestore
  */
 
 export class DashboardService {

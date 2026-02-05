@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IncomeForm } from "@/components/income/income-form";
@@ -15,19 +15,17 @@ import {
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
-import { IncomeRecord } from "@/lib/types";
 import { formatDateISO } from "@/lib/utils";
 
-export default function EditIncomePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditIncomePage() {
   const { t } = useLanguage();
   const router = useRouter();
-  const { id: incomeId } = React.use(params);
+  const params = useParams();
+  const incomeId = params.id as string;
 
-  const [income, setIncome] = useState<IncomeRecord | null>(null);
+  const { updateIncome, incomesManual } = useFinancialRecords();
+
+  const income = incomesManual.find((i) => i.id === incomeId) || null;
 
   const { setHeaderProps, openForm, closeForm } = useForm();
   useEffect(() => {
@@ -50,11 +48,6 @@ export default function EditIncomePage({
       closeForm();
     };
   }, [setHeaderProps, closeForm, openForm]);
-
-  const { updateIncome, fetchIncomeById } = useFinancialRecords();
-  useEffect(() => {
-    fetchIncomeById(incomeId).then(setIncome);
-  }, [fetchIncomeById, incomeId]);
 
   return (
     <div className="container mx-auto py-4 space-y-6">

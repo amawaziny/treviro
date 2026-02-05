@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
   Card,
@@ -14,20 +14,18 @@ import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
 import { useFinancialRecords } from "@/contexts/financial-records-context";
-import { ExpenseRecord } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateISO } from "@/lib/utils";
 
-export default function EditExpensePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditExpensePage() {
   const { t } = useLanguage();
   const router = useRouter();
-  const { id: expenseId } = React.use(params);
+  const params = useParams();
+  const expenseId = params.id as string;
 
-  const [expense, setExpense] = useState<ExpenseRecord | null>(null);
+  const { expensesManual, updateExpense } = useFinancialRecords();
+
+  const expense = expensesManual.find((e) => e.id === expenseId) || null;
 
   const { setHeaderProps, openForm, closeForm } = useForm();
   useEffect(() => {
@@ -51,11 +49,6 @@ export default function EditExpensePage({
       closeForm();
     };
   }, [setHeaderProps, closeForm, openForm]);
-
-  const { findExpenseById, updateExpense } = useFinancialRecords();
-  useEffect(() => {
-    findExpenseById(expenseId).then(setExpense);
-  }, [expenseId, findExpenseById]);
 
   return (
     <div

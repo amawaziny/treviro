@@ -351,12 +351,12 @@ export class FinancialRecordsService {
     return this.deleteRecord(FINANCIAL_COLLECTIONS.INCOMES, id);
   }
 
-  async findExpenseById(id: string): Promise<ExpenseRecord | null> {
+  async fetchExpenseById(id: string): Promise<ExpenseRecord | null> {
     const records = await this.getExpenses({ id });
     return records[0] || null;
   }
 
-  async findIncomeById(id: string): Promise<IncomeRecord | null> {
+  async fetchIncomeById(id: string): Promise<IncomeRecord | null> {
     const records = await this.getIncomes({ id });
     return records[0] || null;
   }

@@ -85,10 +85,9 @@ export const TransactionsProvider = ({
       defaultEndDate,
       (fetchedTransactions) => {
         setTransactions(fetchedTransactions);
+        setIsLoading(false);
       },
     );
-
-    setIsLoading(false);
 
     return unsubscribe;
   }, [transactionService, defaultStartDate, defaultEndDate]);

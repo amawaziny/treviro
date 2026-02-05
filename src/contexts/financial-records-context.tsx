@@ -39,7 +39,7 @@ export interface FinancialRecordsContextType {
     data: Partial<IncomeRecord>,
   ) => Promise<IncomeRecord>;
   deleteIncome: (id: string) => Promise<void>;
-  findExpenseById: (id: string) => Promise<ExpenseRecord | null>;
+  fetchExpenseById: (id: string) => Promise<ExpenseRecord | null>;
   addExpense: (
     data: Omit<ExpenseRecord, "id" | "createdAt" | "recordType">,
   ) => Promise<ExpenseRecord>;
@@ -147,7 +147,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      return await recordsService.findIncomeById(id);
+      return await recordsService.fetchIncomeById(id);
     },
     [recordsService],
   );
@@ -236,12 +236,12 @@ export const FinancialRecordsProvider = ({
     );
   };
 
-  const findExpenseById = useCallback(
+  const fetchExpenseById = useCallback(
     async (id: string) => {
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      return await recordsService.findExpenseById(id);
+      return await recordsService.fetchExpenseById(id);
     },
     [recordsService],
   );
@@ -393,7 +393,7 @@ export const FinancialRecordsProvider = ({
     addIncome,
     updateIncome,
     deleteIncome,
-    findExpenseById,
+    fetchExpenseById,
     addExpense,
     updateExpense,
     deleteExpense,

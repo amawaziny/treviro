@@ -20,10 +20,9 @@ export const useDashboard = () => {
     const unsubscribe = dashboardService.subscribeToDashboardSummary(
       (summary) => {
         setDashboardSummary(summary);
+        setIsLoading(false);
       },
     );
-
-    setIsLoading(false);
 
     return unsubscribe;
   }, [dashboardService]);
