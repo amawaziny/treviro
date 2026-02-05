@@ -4,9 +4,7 @@ import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
 import {
-  DashboardSummaries,
   DashboardSummary,
-  defaultDashboardSummaries,
   defaultDashboardSummary,
   Transaction,
 } from "@/lib/types";
@@ -24,25 +22,19 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 4. we could disable some fields in edit mode of investment form
  * 5. refactor investment-form to be each form has its own submit button and logic
  * 6. we could list all installements during adding expenses of type credit card
- * 7. investment context need to be real time with subscription on firestore
+ * 7. check calculatePnL is used in subscribe dashaboard and also in subscribe investment, we need one of them
  */
 
 export class DashboardService {
   private userId: string;
-  private investmentService: InvestmentService;
   private transactionService: TransactionService;
   private unsubscribeCallbacks: (() => void)[] = [];
 
-  constructor(
-    userId: string,
-    investmentService: InvestmentService,
-    transactionService: TransactionService,
-  ) {
+  constructor(userId: string, transactionService: TransactionService) {
     this.userId = userId;
     if (!userId) {
       throw new Error("User ID is required for DashboardService");
     }
-    this.investmentService = investmentService;
     this.transactionService = transactionService;
   }
 
@@ -88,14 +80,9 @@ export class DashboardService {
     if (!dashboardRef) return;
 
     try {
-      const dashboardDoc = await getDoc(dashboardRef);
-      const currentData = dashboardDoc.exists()
-        ? (dashboardDoc.data() as DashboardSummary)
-        : defaultDashboardSummary;
+      const currentData = await this.getDashboardSummary();
 
-      const updates: Partial<DashboardSummary> = {
-        updatedAt: new Date(),
-      };
+      const updates: DashboardSummary = { ...defaultDashboardSummary, ...currentData };
 
       const amount = transaction.amount;
       const quantity = transaction.quantity;
@@ -105,55 +92,38 @@ export class DashboardService {
       switch (transaction.type) {
         case "BUY":
         case "PAYMENT":
-          updates.totalInvested = (currentData.totalInvested || 0) + amount;
-          updates.totalCashBalance =
-            (currentData.totalCashBalance || 0) - amount;
+          updates.totalInvested += amount;
+          updates.totalCashBalance -= amount;
           break;
 
         case "EXPENSE":
-          updates.totalCashBalance =
-            (currentData.totalCashBalance || 0) + amount;
+          updates.totalCashBalance += amount;
           break;
 
         case "SELL": {
           const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
-
-          updates.totalInvested = Math.max(
-            0,
-            (currentData.totalInvested || 0) - costBasis,
-          );
-          updates.totalCashBalance =
-            (currentData.totalCashBalance || 0) + amount;
-
-          updates.totalRealizedPnL =
-            (currentData.totalRealizedPnL || 0) + profitOrLoss;
+          updates.totalInvested = Math.max(0, currentData.totalInvested - costBasis);
+          updates.totalCashBalance += amount;
+          updates.totalRealizedPnL += profitOrLoss;
           break;
         }
 
         case "DIVIDEND":
         case "INTEREST":
         case "INCOME":
-          updates.totalCashBalance =
-            (currentData.totalCashBalance || 0) + amount;
+          updates.totalCashBalance += amount;
           break;
 
         case "MATURED_DEBT": {
-          updates.totalInvested = Math.max(
-            0,
-            (currentData.totalInvested || 0) - amount,
-          );
-          updates.totalCashBalance =
-            (currentData.totalCashBalance || 0) + amount;
+          updates.totalInvested = Math.max(0, currentData.totalInvested - amount);
+          updates.totalCashBalance += amount;
           break;
         }
       }
 
       // Apply updates to the dashboard
-      await setDoc(
-        dashboardRef,
-        { ...currentData, ...updates },
-        { merge: true },
-      );
+      // await setDoc(dashboardRef, { totalInvested: increment(amount), updatedAt: new Date() }, { merge: true });
+      await this.updateDashboardSummary(updates);
     } catch (error) {
       console.error("Error in partialUpdateDashboardSummary:", error);
       throw error;
@@ -165,14 +135,12 @@ export class DashboardService {
    * @param updates Partial DashboardSummary with fields to update
    */
   async updateDashboardSummary(
-    updates: Partial<DashboardSummary>,
+    updates: DashboardSummary,
   ): Promise<DashboardSummary> {
     const dashboardRef = this.getDashboardDocRef();
-    const currentData = await this.getDashboardSummary();
 
     // Merge updates with current data
     const newData: DashboardSummary = {
-      ...currentData,
       ...updates,
       updatedAt: new Date(),
     };
@@ -181,34 +149,11 @@ export class DashboardService {
     return newData;
   }
 
-  async getDashboardSummary(): Promise<DashboardSummaries> {
-    const dashboardRef = this.getDashboardDocRef();
-    const dashboardSnap = await getDoc(dashboardRef);
-
-    if (dashboardSnap.exists()) {
-      const data = dashboardSnap.data() as Partial<DashboardSummary>;
-      const totalInvested =
-        data.totalInvested ?? defaultDashboardSummaries.totalInvested;
-      const totalCashBalance =
-        data.totalCashBalance ?? defaultDashboardSummaries.totalCashBalance;
-      const unrealizedPnL =
-        await this.investmentService.calculateUnrealizedPnL();
-      const marketTotalInvested =
-        totalInvested + unrealizedPnL.portfolio.unrealizedPnL;
-      const totalPortfolio = marketTotalInvested + totalCashBalance;
-      return {
-        totalInvested,
-        totalRealizedPnL:
-          data.totalRealizedPnL ?? defaultDashboardSummaries.totalRealizedPnL,
-        totalCashBalance,
-        totalUnrealizedPnL: unrealizedPnL.portfolio.unrealizedPnL,
-        marketTotalInvested,
-        totalPortfolio,
-        updatedAt: data.updatedAt ?? defaultDashboardSummaries.updatedAt,
-      };
-    }
-
-    return defaultDashboardSummaries;
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    const dashboardDoc = await getDoc(this.getDashboardDocRef());
+    return dashboardDoc.exists()
+      ? (dashboardDoc.data() as DashboardSummary)
+      : defaultDashboardSummary;
   }
 
   /**
@@ -217,34 +162,15 @@ export class DashboardService {
    * @returns Unsubscribe function
    */
   subscribeToDashboardSummary(
-    callback: (summary: DashboardSummaries) => void,
+    callback: (summary: DashboardSummary) => void,
   ): () => void {
     const dashboardRef = this.getDashboardDocRef();
-    const unsubscribe = onSnapshot(dashboardRef, async (doc) => {
+    const unsubscribe = onSnapshot(dashboardRef, (doc) => {
       if (doc.exists()) {
-        const data = doc.data() as Partial<DashboardSummary>;
-        const totalInvested =
-          data.totalInvested ?? defaultDashboardSummaries.totalInvested;
-        const totalCashBalance =
-          data.totalCashBalance ?? defaultDashboardSummaries.totalCashBalance;
-        const unrealizedPnL =
-          await this.investmentService.calculateUnrealizedPnL();
-        const marketTotalInvested =
-          totalInvested + unrealizedPnL.portfolio.unrealizedPnL;
-        const totalPortfolio = marketTotalInvested + totalCashBalance;
-        const summary = {
-          totalInvested,
-          totalRealizedPnL:
-            data.totalRealizedPnL ?? defaultDashboardSummaries.totalRealizedPnL,
-          totalCashBalance,
-          totalUnrealizedPnL: unrealizedPnL.portfolio.unrealizedPnL,
-          marketTotalInvested,
-          totalPortfolio,
-          updatedAt: data.updatedAt ?? defaultDashboardSummaries.updatedAt,
-        };
+        const summary = doc.data() as DashboardSummary;
         callback(summary);
       } else {
-        callback(defaultDashboardSummaries);
+        callback(defaultDashboardSummary);
       }
     });
     return unsubscribe;

@@ -33,37 +33,37 @@ export interface FinancialRecordsContextType {
   fetchIncomeById: (id: string) => Promise<IncomeRecord | null>;
   addIncome: (
     data: Omit<IncomeRecord, "id" | "createdAt" | "recordType">,
-  ) => Promise<IncomeRecord>;
+  ) => Promise<void>;
   updateIncome: (
     id: string,
     data: Partial<IncomeRecord>,
-  ) => Promise<IncomeRecord>;
+  ) => Promise<void>;
   deleteIncome: (id: string) => Promise<void>;
   fetchExpenseById: (id: string) => Promise<ExpenseRecord | null>;
   addExpense: (
     data: Omit<ExpenseRecord, "id" | "createdAt" | "recordType">,
-  ) => Promise<ExpenseRecord>;
+  ) => Promise<void>;
   updateExpense: (
     id: string,
     data: Partial<ExpenseRecord>,
-  ) => Promise<ExpenseRecord>;
+  ) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   payCreditCardExpense: (
     expense: ExpenseRecord,
     payDate: Date,
-  ) => Promise<ExpenseRecord>;
+  ) => Promise<void>;
   addFixedEstimate: (
     data: Omit<FixedEstimateRecord, "id" | "createdAt" | "recordType">,
-  ) => Promise<FixedEstimateRecord>;
+  ) => Promise<void>;
   updateFixedEstimate: (
     id: string,
     data: Partial<FixedEstimateRecord>,
-  ) => Promise<FixedEstimateRecord>;
+  ) => Promise<void>;
   deleteFixedEstimate: (id: string) => Promise<void>;
   confirmFixedEstimate: (
     fixedEstimate: FixedEstimateRecord,
     confirmDate: Date,
-  ) => Promise<FixedEstimateRecord>;
+  ) => Promise<void>;
 }
 
 export const FinancialRecordsContext = createContext<
@@ -157,9 +157,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const newRecord = await recordsService.addIncome(data);
-      setIncomesManual((prev) => [newRecord, ...prev]);
-      return newRecord;
+      await recordsService.addIncome(data);
     },
     [recordsService],
   );
@@ -169,13 +167,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const updatedRecord = await recordsService.updateIncome(id, data);
-      setIncomesManual((prev) =>
-        prev.map((record) =>
-          record.id === id ? { ...record, ...updatedRecord } : record,
-        ),
-      );
-      return updatedRecord;
+      await recordsService.updateIncome(id, data);
     },
     [recordsService],
   );
@@ -187,7 +179,6 @@ export const FinancialRecordsProvider = ({
 
       setIsLoading(true);
       await recordsService.deleteIncome(id);
-      setIncomesManual((prev) => prev.filter((record) => record.id !== id));
       setIsLoading(false);
     },
     [recordsService],
@@ -251,9 +242,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const newRecord = await recordsService.addExpense(data);
-      setExpensesManual((prev) => [newRecord, ...prev]);
-      return newRecord;
+      await recordsService.addExpense(data);
     },
     [recordsService],
   );
@@ -263,13 +252,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const updatedRecord = await recordsService.updateExpense(id, data);
-      setExpensesManual((prev) =>
-        prev.map((record) =>
-          record.id === id ? { ...record, ...updatedRecord } : record,
-        ),
-      );
-      return updatedRecord;
+      await recordsService.updateExpense(id, data);
     },
     [recordsService],
   );
@@ -279,16 +262,10 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const updatedRecord = await recordsService.payCreditCardExpense(
+      await recordsService.payCreditCardExpense(
         expense,
         payDate,
       );
-      setExpensesManual((prev) =>
-        prev.map((record) =>
-          record.id === expense.id ? { ...record, ...updatedRecord } : record,
-        ),
-      );
-      return updatedRecord;
     },
     [recordsService],
   );
@@ -298,16 +275,10 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const updatedRecord = await recordsService.confirmFixedEstimate(
+      await recordsService.confirmFixedEstimate(
         fixedEstimate,
         confirmDate,
       );
-      setFixedEstimates((prev) =>
-        prev.map((record) =>
-          record.id === fixedEstimate.id ? updatedRecord : record,
-        ),
-      );
-      return updatedRecord;
     },
     [recordsService],
   );
@@ -319,7 +290,6 @@ export const FinancialRecordsProvider = ({
 
       setIsLoading(true);
       await recordsService.deleteExpense(id);
-      setExpensesManual((prev) => prev.filter((record) => record.id !== id));
       setIsLoading(false);
     },
     [recordsService],
@@ -341,9 +311,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const newEstimate = await recordsService.addFixedEstimate(data);
-      setFixedEstimates((prev) => [newEstimate, ...prev]);
-      return newEstimate;
+      await recordsService.addFixedEstimate(data);
     },
     [recordsService],
   );
@@ -353,16 +321,10 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      const updatedEstimate = await recordsService.updateFixedEstimate(
+      await recordsService.updateFixedEstimate(
         id,
         data,
       );
-      setFixedEstimates((prev) =>
-        prev.map((estimate) =>
-          estimate.id === id ? { ...estimate, ...updatedEstimate } : estimate,
-        ),
-      );
-      return updatedEstimate;
     },
     [recordsService],
   );
@@ -372,10 +334,9 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
+      setIsLoading(true);
       await recordsService.deleteFixedEstimate(id);
-      setFixedEstimates((prev) =>
-        prev.filter((estimate) => estimate.id !== id),
-      );
+      setIsLoading(false);
     },
     [recordsService],
   );

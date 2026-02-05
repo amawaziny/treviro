@@ -48,7 +48,11 @@ export default function DashboardPage() {
   const startMonth = useMemo(() => startOfMonth(month), []);
   const endMonth = useMemo(() => endOfMonth(month), []);
 
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
+  const {
+    investments,
+    totalPortfolio,
+    isLoading: isLoadingInvestments,
+  } = useInvestments();
 
   const {
     dashboardSummary,
@@ -79,7 +83,7 @@ export default function DashboardPage() {
   const totalInvested = dashboardSummary?.totalInvested ?? 0;
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
-  const totalCurrentPortfolioPnL = dashboardSummary?.totalUnrealizedPnL ?? 0;
+  const totalCurrentPortfolioPnL = totalPortfolio?.unrealizedPnL ?? 0;
 
   const {
     totalIncome,

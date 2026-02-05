@@ -45,7 +45,7 @@ export interface TransactionsContextType {
     goldInvestmentTrxs: Transaction[];
     currencyInvestmentTrxs: Transaction[];
   }>;
-  getTransactionsBySourceId: (sourceId: string) => Promise<Transaction[]>;
+  getTransactionsBySourceId: (sourceId: string) => Transaction[];
   getTransactionsBySecurityId: (securityId: string) => Promise<Transaction[]>;
   updateTransaction: (id: string, data: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
@@ -187,19 +187,17 @@ export const TransactionsProvider = ({
 
   // CRUD methods
   const getTransactionsBySourceId = useCallback(
-    async (sourceId: string): Promise<Transaction[]> => {
-      if (!transactionService)
-        throw new Error("Transaction service not initialized");
-      return await transactionService.getTransactionsBySourceId(sourceId);
+    (sourceId: string): Transaction[] => {
+      return transactions.filter((trx) => trx.sourceId === sourceId);
     },
-    [transactionService],
+    [transactions],
   );
 
   const getTransactionsBySecurityId = useCallback(
     async (securityId: string): Promise<Transaction[]> => {
       if (!transactionService)
         throw new Error("Transaction service not initialized");
-      return await transactionService.getTransactionsBySecurityId(securityId);
+      return transactionService.getTransactionsBySecurityId(securityId);
     },
     [transactionService],
   );
@@ -217,7 +215,10 @@ export const TransactionsProvider = ({
     async (id: string): Promise<void> => {
       if (!transactionService)
         throw new Error("Transaction service not initialized");
+
+      setIsLoading(true);
       await transactionService.deleteTransaction(id);
+      setIsLoading(false);
     },
     [transactionService],
   );

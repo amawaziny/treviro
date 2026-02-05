@@ -9,6 +9,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  onSnapshot,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -565,15 +566,37 @@ export class InvestmentService {
   }
 
   /**
+   * Subscribes to opened investments (`isClosed == false`) and returns
+   * an unsubscribe function. The callback receives the current list of
+   * investments on any change.
+   */
+  subscribeToOpenedInvestments(
+    callback: (investments: Investment[]) => void,
+  ): () => void {
+    const q = query(
+      this.getInvestmentsCollection(),
+      where("isClosed", "==", false),
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
+      const investments = querySnapshot.docs.map(
+        (doc: any) => doc.data() as Investment,
+      );
+      callback(investments);
+    });
+
+    return unsubscribe;
+  }
+
+  /**
    * Calculates the total unrealized profit or loss for all investments
    * by get current market price of each investment (if gold get from goldMarketPrices collection and if securities get from listedSecurities collection and if currencies get from exchangeRates collection) and multiply it with shares count
    * then subtract total invested
    * @returns Promise that resolves with the total unrealized profit or loss
    */
-  async calculateUnrealizedPnL(): Promise<{
+  async calculateUnrealizedPnL(investments: Investment[]): Promise<{
     [key: string]: { [key: string]: number };
   }> {
-    const investments = await this.getOpenedInvestments();
     const goldMarketPrices = await masterDataService.getGoldMarketPrices();
 
     let totalUnrealizedPnL = 0;

@@ -1,8 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { InvestmentService } from "@/lib/services/investment-service";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   CurrencyInvestment,
   DebtInstrumentInvestment,
@@ -23,6 +27,7 @@ import {
   SecurityInvestment,
 } from "@/lib/types";
 import { hoursToMilliseconds } from "date-fns";
+import { useAppServices } from "./app-services-context";
 
 export interface InvestmentContextType {
   // Investments
@@ -95,7 +100,7 @@ export const InvestmentProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { user } = useAuth();
+  const { investmentService } = useAppServices();
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [securityInvestments, setSecurityInvestments] = useState<
     SecurityInvestment[]
@@ -135,17 +140,6 @@ export const InvestmentProvider = ({
     [key: string]: number;
   }>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [investmentService, setInvestmentService] =
-    useState<InvestmentService | null>(null);
-
-  // Initialize services when user is authenticated
-  useEffect(() => {
-    if (user?.uid) {
-      const investmentService = new InvestmentService(user.uid);
-      setInvestmentService(investmentService);
-      loadInitialData(investmentService);
-    }
-  }, [user?.uid]);
 
   // Check for matured debt instruments on initial load and periodically
   useEffect(() => {
@@ -159,157 +153,163 @@ export const InvestmentProvider = ({
     return () => clearInterval(checkMaturedDebtInterval);
   }, [investmentService]);
 
-  const loadInitialData = async (investmentService: InvestmentService) => {
-    try {
-      setIsLoading(true);
-      await fetchInvestments(investmentService);
-      const unrealizedPnL = await investmentService.calculateUnrealizedPnL();
-      setTotalPortfolio(unrealizedPnL.portfolio);
-      setTotalStocks(unrealizedPnL.stocks);
-      setTotalCurrency(unrealizedPnL.currencies);
-      setTotalGold(unrealizedPnL.gold);
-      setTotalRealEstate(unrealizedPnL.realEstate);
-      setTotalDebt(unrealizedPnL.debt);
-    } catch (error) {
-      console.error("Error loading investments:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Subscribe to opened investments for real-time updates
+  useEffect(() => {
+    if (!investmentService) return;
 
-  const fetchInvestments = async (service: InvestmentService) => {
-    const investments = await service.getOpenedInvestments();
-    setInvestments(investments);
-    setSecurityInvestments(investments.filter(isSecurityInvestment));
-    setStockInvestments(investments.filter(isStockInvestment));
-    setGoldInvestments(investments.filter(isGoldInvestment));
-    setGoldFundInvestments(investments.filter(isGoldFundInvestment));
-    setDebtInvestments(investments.filter(isDebtInstrumentInvestment));
-    setDebtFundInvestments(investments.filter(isDebtFundInvestment));
-    setRealEstateInvestments(investments.filter(isRealEstateInvestment));
-    setRealEstateFundInvestments(
-      investments.filter(isRealEstateFundInvestment),
+    setIsLoading(true);
+    const unsubscribe = investmentService.subscribeToOpenedInvestments(
+      async (investments) => {
+        setInvestments(investments);
+        setSecurityInvestments(investments.filter(isSecurityInvestment));
+        setStockInvestments(investments.filter(isStockInvestment));
+        setGoldInvestments(investments.filter(isGoldInvestment));
+        setGoldFundInvestments(investments.filter(isGoldFundInvestment));
+        setDebtInvestments(investments.filter(isDebtInstrumentInvestment));
+        setDebtFundInvestments(investments.filter(isDebtFundInvestment));
+        setRealEstateInvestments(investments.filter(isRealEstateInvestment));
+        setRealEstateFundInvestments(
+          investments.filter(isRealEstateFundInvestment),
+        );
+        setCurrencyInvestments(investments.filter(isCurrencyInvestment));
+
+        // Recalculate totals on updates
+        const unrealizedPnL =
+          await investmentService.calculateUnrealizedPnL(investments);
+        setTotalPortfolio(unrealizedPnL.portfolio);
+        setTotalStocks(unrealizedPnL.stocks);
+        setTotalCurrency(unrealizedPnL.currencies);
+        setTotalGold(unrealizedPnL.gold);
+        setTotalRealEstate(unrealizedPnL.realEstate);
+        setTotalDebt(unrealizedPnL.debt);
+      },
     );
-    setCurrencyInvestments(investments.filter(isCurrencyInvestment));
-  };
+    setIsLoading(false);
+
+    return () => unsubscribe();
+  }, [investmentService]);
 
   const buyNew = async <T extends Investment>(
     investmentData: InvestmentData<T>,
   ) => {
     if (!investmentService)
       throw new Error("Investment service not initialized");
-    const investment = await investmentService.buyNew(investmentData);
-    setInvestments((prev) => [investment, ...prev]);
+    await investmentService.buyNew(investmentData);
   };
 
-  const deleteInvestment = async (id: string) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    await investmentService.deleteInvestment(id);
-    setInvestments((prev) => prev.filter((inv) => inv.id !== id));
-  };
+  const deleteInvestment = useCallback(
+    async (id: string) => {
+      if (!investmentService)
+        throw new Error("Investment service not initialized");
 
-  const editInvestment = async (
-    id: string,
-    investmentData: Partial<Investment>,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    const investment = await investmentService.editInvestment(
-      id,
-      investmentData,
-    );
-    setInvestments((prev) =>
-      prev.map((inv) => (inv.id === id ? investment : inv)),
-    );
-  };
+      setIsLoading(true);
+      await investmentService.deleteInvestment(id);
+      setIsLoading(false);
+    },
+    [investmentService],
+  );
 
-  const buy = async (
-    investmentId: string,
-    securityId: string,
-    investmentType: InvestmentType,
-    quantity: number,
-    pricePerUnit: number,
-    fees: number,
-    date: Date,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    const investment = await investmentService.buy(
-      investmentId,
-      securityId,
-      investmentType,
-      quantity,
-      pricePerUnit,
-      fees,
-      date,
-    );
-    setInvestments((prev) =>
-      prev.map((inv) => (inv.id === investmentId ? investment : inv)),
-    );
-  };
+  const editInvestment = useCallback(
+    async (id: string, investmentData: Partial<Investment>) => {
+      if (!investmentService)
+        throw new Error("Investment service not initialized");
+      await investmentService.editInvestment(
+        id,
+        investmentData,
+      );
+    },
+    [investmentService],
+  );
 
-  const sell = async (
-    investmentId: string,
-    securityId: string,
-    investmentType: InvestmentType,
-    quantity: number,
-    pricePerUnit: number,
-    fees: number,
-    date: Date,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    const investment = await investmentService.sell(
-      investmentId,
-      securityId,
-      investmentType,
-      quantity,
-      pricePerUnit,
-      fees,
-      date,
-    );
-    setInvestments((prev) =>
-      prev.map((inv) => (inv.id === investmentId ? investment : inv)),
-    );
-  };
+  const buy = useCallback(
+    async (
+      investmentId: string,
+      securityId: string,
+      investmentType: InvestmentType,
+      quantity: number,
+      pricePerUnit: number,
+      fees: number,
+      date: Date,
+    ) => {
+      if (!investmentService)
+        throw new Error("Investment service not initialized");
+      await investmentService.buy(
+        investmentId,
+        securityId,
+        investmentType,
+        quantity,
+        pricePerUnit,
+        fees,
+        date,
+      );
+    },
+    [investmentService],
+  );
 
-  const pay = async (
-    investmentId: string,
-    installmentNumber: number,
-    amount: number,
-    date: Date,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    const investment = await investmentService.pay(
-      investmentId,
-      "Real Estate",
-      installmentNumber,
-      amount,
-      date,
-    );
-    setInvestments((prev) =>
-      prev.map((inv) => (inv.id === investmentId ? investment : inv)),
-    );
-  };
+  const sell = useCallback(
+    async (
+      investmentId: string,
+      securityId: string,
+      investmentType: InvestmentType,
+      quantity: number,
+      pricePerUnit: number,
+      fees: number,
+      date: Date,
+    ) => {
+      if (!investmentService)
+        throw new Error("Investment service not initialized");
+      await investmentService.sell(
+        investmentId,
+        securityId,
+        investmentType,
+        quantity,
+        pricePerUnit,
+        fees,
+        date,
+      );
+    },
+    [investmentService],
+  );
 
-  const addDividend = async (
-    investmentId: string,
-    securityId: string,
-    amount: number,
-    date: Date,
-  ) => {
-    if (!investmentService)
-      throw new Error("Investment service not initialized");
-    await investmentService.addDividend(
-      investmentId,
-      securityId,
-      "Securities",
-      amount,
-      date,
-    );
-  };
+  const pay = useCallback(
+    async (
+      investmentId: string,
+      installmentNumber: number,
+      amount: number,
+      date: Date,
+    ) => {
+      if (!investmentService)
+        throw new Error("Investment service not initialized");
+      await investmentService.pay(
+        investmentId,
+        "Real Estate",
+        installmentNumber,
+        amount,
+        date,
+      );
+    },
+    [investmentService],
+  );
+
+  const addDividend = useCallback(
+    async (
+      investmentId: string,
+      securityId: string,
+      amount: number,
+      date: Date,
+    ) => {
+      if (!investmentService)
+        throw new Error("Investment service not initialized");
+      await investmentService.addDividend(
+        investmentId,
+        securityId,
+        "Securities",
+        amount,
+        date,
+      );
+    },
+    [investmentService],
+  );
 
   const getInvestmentsByType = (type: string): Investment[] => {
     return investments.filter((inv) => inv.type === type);
@@ -322,9 +322,7 @@ export const InvestmentProvider = ({
   const getInvestmentBySecurityId = (
     securityId: string,
   ): Investment | undefined => {
-    return investments
-      .filter(isSecurityInvestment)
-      .find((inv) => inv.securityId === securityId);
+    return securityInvestments.find((inv) => inv.securityId === securityId);
   };
 
   const contextValue: InvestmentContextType = {

@@ -66,7 +66,6 @@ export const AppServicesProvider = ({
       const transactionService = new TransactionService(user.uid);
       const dashboardService = new DashboardService(
         user.uid,
-        investmentService,
         transactionService,
       );
 

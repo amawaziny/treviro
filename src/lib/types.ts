@@ -360,24 +360,11 @@ export interface DashboardSummary {
   updatedAt?: Date;
 }
 
-export interface DashboardSummaries extends DashboardSummary {
-  totalUnrealizedPnL: number;
-  marketTotalInvested: number;
-  totalPortfolio: number;
-}
-
 export const defaultDashboardSummary: DashboardSummary = {
   totalInvested: 0,
   totalRealizedPnL: 0,
   totalCashBalance: 0,
   updatedAt: new Date(),
-};
-
-export const defaultDashboardSummaries: DashboardSummaries = {
-  ...defaultDashboardSummary,
-  totalUnrealizedPnL: 0,
-  marketTotalInvested: 0,
-  totalPortfolio: 0,
 };
 
 export interface GoldMarketPrices {

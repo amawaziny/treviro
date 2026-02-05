@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { DashboardSummaries, defaultDashboardSummaries } from "@/lib/types";
+import { DashboardSummary, defaultDashboardSummary } from "@/lib/types";
 import { useAppServices } from "@/contexts/app-services-context";
 
 export const useDashboard = () => {
   const { dashboardService } = useAppServices();
-  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummaries>({
-    ...defaultDashboardSummaries,
+  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary>({
+    ...defaultDashboardSummary,
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
