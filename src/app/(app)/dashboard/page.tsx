@@ -88,16 +88,17 @@ export default function DashboardPage() {
   const {
     totalIncome,
     totalProjectedDebtMonthlyInterest,
-    totalExpenses,
     incomeTillNow,
     totalFixedIncome,
+    totalExpenses,
     totalFixedExpenses,
+    totalExpensesManualCreditCard,
+    totalExpensesManualOther,
     totalRealEstateInstallments,
     totalSecuritiesInvestments,
     totalDebtInvestments,
     totalGoldInvestments,
     totalInvestments,
-    totalExpensesManualCreditCard,
     totalCurrencyInvestments,
     netCashFlow,
   } = useCashflow({
@@ -337,7 +338,8 @@ export default function DashboardPage() {
             incomeTillNow={incomeTillNow}
             totalExpenses={totalExpenses}
             totalFixedExpenses={totalFixedExpenses}
-            totalExpensesManualCreditCard={totalExpensesManualCreditCard}
+            totalExpensesManualCreditCard={totalExpensesManualCreditCard} 
+            totalExpensesManualOther={totalExpensesManualOther}
             totalRealEstateInstallments={totalRealEstateInstallments}
             totalStockInvestments={totalSecuritiesInvestments}
             totalDebtInvestments={totalDebtInvestments}

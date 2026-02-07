@@ -79,6 +79,7 @@ export default function CashFlowPage() {
     totalGoldInvestments,
     totalInvestments,
     totalExpensesManualCreditCard,
+    totalExpensesManualOther,
     stockInvestmentTrxs,
     debtInvestmentTrxs,
     goldInvestmentTrxs,
@@ -145,12 +146,13 @@ export default function CashFlowPage() {
         incomeTillNow={incomeTillNow}
         totalExpenses={totalExpenses}
         totalFixedExpenses={totalFixedExpenses}
+        totalExpensesManualCreditCard={totalExpensesManualCreditCard}
+        totalExpensesManualOther={totalExpensesManualOther}
         totalRealEstateInstallments={totalRealEstateInstallments}
         totalStockInvestments={totalStockInvestments}
         totalDebtInvestments={totalDebtInvestments}
         totalGoldInvestments={totalGoldInvestments}
         totalInvestments={totalInvestments}
-        totalExpensesManualCreditCard={totalExpensesManualCreditCard}
         netCashFlow={netCashFlow}
       />
 

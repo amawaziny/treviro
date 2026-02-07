@@ -34,19 +34,13 @@ export interface FinancialRecordsContextType {
   addIncome: (
     data: Omit<IncomeRecord, "id" | "createdAt" | "recordType">,
   ) => Promise<void>;
-  updateIncome: (
-    id: string,
-    data: Partial<IncomeRecord>,
-  ) => Promise<void>;
+  updateIncome: (id: string, data: Partial<IncomeRecord>) => Promise<void>;
   deleteIncome: (id: string) => Promise<void>;
   fetchExpenseById: (id: string) => Promise<ExpenseRecord | null>;
   addExpense: (
     data: Omit<ExpenseRecord, "id" | "createdAt" | "recordType">,
   ) => Promise<void>;
-  updateExpense: (
-    id: string,
-    data: Partial<ExpenseRecord>,
-  ) => Promise<void>;
+  updateExpense: (id: string, data: Partial<ExpenseRecord>) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   payCreditCardExpense: (
     expense: ExpenseRecord,
@@ -262,10 +256,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      await recordsService.payCreditCardExpense(
-        expense,
-        payDate,
-      );
+      await recordsService.payCreditCardExpense(expense, payDate);
     },
     [recordsService],
   );
@@ -275,10 +266,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      await recordsService.confirmFixedEstimate(
-        fixedEstimate,
-        confirmDate,
-      );
+      await recordsService.confirmFixedEstimate(fixedEstimate, confirmDate);
     },
     [recordsService],
   );
@@ -321,10 +309,7 @@ export const FinancialRecordsProvider = ({
       if (!recordsService)
         throw new Error("Financial records service not initialized");
 
-      await recordsService.updateFixedEstimate(
-        id,
-        data,
-      );
+      await recordsService.updateFixedEstimate(id, data);
     },
     [recordsService],
   );

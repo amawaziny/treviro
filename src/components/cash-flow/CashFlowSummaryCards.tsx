@@ -11,12 +11,13 @@ interface CashFlowSummaryCardsProps {
   incomeTillNow: number;
   totalExpenses: number;
   totalFixedExpenses: number;
+  totalExpensesManualCreditCard: number;
+  totalExpensesManualOther: number;
   totalRealEstateInstallments: number;
   totalStockInvestments: number;
   totalDebtInvestments: number;
   totalGoldInvestments: number;
   totalInvestments: number;
-  totalExpensesManualCreditCard: number;
   netCashFlow: number;
 }
 
@@ -27,12 +28,13 @@ export function CashFlowSummaryCards({
   incomeTillNow,
   totalExpenses,
   totalFixedExpenses,
+  totalExpensesManualCreditCard,
+  totalExpensesManualOther,
   totalRealEstateInstallments,
   totalStockInvestments,
   totalDebtInvestments,
   totalGoldInvestments,
   totalInvestments,
-  totalExpensesManualCreditCard,
   netCashFlow,
 }: CashFlowSummaryCardsProps) {
   const { t } = useLanguage();
@@ -130,7 +132,7 @@ export function CashFlowSummaryCards({
                 <span>
                   {formatNumberForMobile(
                     isMobile,
-                    totalExpensesManualCreditCard,
+                    totalExpensesManualCreditCard + totalExpensesManualOther,
                   )}
                 </span>
               </div>

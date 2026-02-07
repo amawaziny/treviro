@@ -213,10 +213,8 @@ export const InvestmentProvider = ({
     async (id: string, investmentData: Partial<Investment>) => {
       if (!investmentService)
         throw new Error("Investment service not initialized");
-      await investmentService.editInvestment(
-        id,
-        investmentData,
-      );
+
+      await investmentService.editInvestment(id, investmentData);
     },
     [investmentService],
   );

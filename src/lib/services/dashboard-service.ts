@@ -1,6 +1,12 @@
-import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot,
+  increment,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { InvestmentService } from "./investment-service";
 import { TransactionService } from "./transaction-service";
 import { eventBus, TransactionEvent } from "@/lib/services/events";
 import {
@@ -22,7 +28,7 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 4. we could disable some fields in edit mode of investment form
  * 5. refactor investment-form to be each form has its own submit button and logic
  * 6. we could list all installements during adding expenses of type credit card
- * 7. check calculatePnL is used in subscribe dashaboard and also in subscribe investment, we need one of them
+ * 7. demo account with some transactions and investments to show the features of the app
  */
 
 export class DashboardService {
@@ -65,10 +71,14 @@ export class DashboardService {
   }
 
   private getDashboardDocRef() {
+    return this.getDashboardDocRefRaw().withConverter(dateConverter);
+  }
+
+  private getDashboardDocRefRaw() {
     return doc(
       db,
       formatPath(DASHBOARD_COLLECTION_PATH, { userId: this.userId }),
-    ).withConverter(dateConverter);
+    );
   }
 
   /**
@@ -76,54 +86,62 @@ export class DashboardService {
    * @param transaction The transaction to process
    */
   async partialUpdateDashboardSummary(transaction: Transaction): Promise<void> {
-    const dashboardRef = this.getDashboardDocRef();
+    const dashboardRef = this.getDashboardDocRefRaw();
     if (!dashboardRef) return;
 
     try {
-      const currentData = await this.getDashboardSummary();
-
-      const updates: DashboardSummary = { ...defaultDashboardSummary, ...currentData };
-
       const amount = transaction.amount;
       const quantity = transaction.quantity;
       const averagePurchasePrice = transaction.averagePurchasePrice;
       const profitOrLoss = transaction.profitOrLoss || 0;
 
+      // Build Firestore atomic updates using increment where possible. For reductions that
+      // could go below zero we explicitly set to 0 when needed.
+      const firestoreUpdates: Partial<Record<string, any>> = {
+        updatedAt: Timestamp.fromDate(new Date()),
+      };
+
       switch (transaction.type) {
         case "BUY":
         case "PAYMENT":
-          updates.totalInvested += amount;
-          updates.totalCashBalance -= amount;
+          firestoreUpdates.totalInvested = increment(amount);
+          firestoreUpdates.totalCashBalance = increment(-amount);
           break;
 
         case "EXPENSE":
-          updates.totalCashBalance += amount;
+          firestoreUpdates.totalCashBalance = increment(amount);
           break;
 
         case "SELL": {
           const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
-          updates.totalInvested = Math.max(0, currentData.totalInvested - costBasis);
-          updates.totalCashBalance += amount;
-          updates.totalRealizedPnL += profitOrLoss;
+
+          firestoreUpdates.totalInvested = increment(-costBasis);
+
+          firestoreUpdates.totalCashBalance = increment(amount);
+
+          if (typeof profitOrLoss === "number" && profitOrLoss !== 0) {
+            firestoreUpdates.totalRealizedPnL = increment(profitOrLoss);
+          }
+
           break;
         }
 
         case "DIVIDEND":
         case "INTEREST":
         case "INCOME":
-          updates.totalCashBalance += amount;
+          firestoreUpdates.totalCashBalance = increment(amount);
           break;
 
         case "MATURED_DEBT": {
-          updates.totalInvested = Math.max(0, currentData.totalInvested - amount);
-          updates.totalCashBalance += amount;
+          firestoreUpdates.totalInvested = increment(-amount);
+
+          firestoreUpdates.totalCashBalance = increment(amount);
           break;
         }
       }
 
-      // Apply updates to the dashboard
-      // await setDoc(dashboardRef, { totalInvested: increment(amount), updatedAt: new Date() }, { merge: true });
-      await this.updateDashboardSummary(updates);
+      // Apply updates to the dashboard atomically using Firestore increments when possible
+      await setDoc(dashboardRef, firestoreUpdates, { merge: true });
     } catch (error) {
       console.error("Error in partialUpdateDashboardSummary:", error);
       throw error;
