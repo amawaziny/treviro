@@ -45,7 +45,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
           {/* Logo */}
           <Image
             src={security.logoUrl || "https://placehold.co/40x40.png"}
-            alt={`${securityName} logo`}
+            alt={`${security.symbol} logo`}
             width={32}
             height={32}
             className="rounded-full object-cover flex-shrink-0 mt-1"

@@ -29,6 +29,8 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 5. refactor investment-form to be each form has its own submit button and logic
  * 6. we could list all installements during adding expenses of type credit card
  * 7. demo account with some transactions and investments to show the features of the app
+ * 8. work offline support and caching for transactions and dashboard summary and securities
+ * 9. cache stock and gold prices and currency exchange rates and update them if user click update or endofday
  */
 
 export class DashboardService {
