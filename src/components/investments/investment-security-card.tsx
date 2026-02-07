@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SecurityInvestment } from "@/lib/types";
+import { ListedSecurity, SecurityInvestment } from "@/lib/types";
 import FundTypeIcon from "../ui/fund-type-icon";
 import { calcProfit } from "@/lib/financial-utils";
 import { masterDataService } from "@/lib/services/master-data-service";
@@ -16,16 +16,17 @@ import React from "react";
 
 export type InvestmentSecurityCardProps = {
   investment: SecurityInvestment;
+  security: ListedSecurity;
 };
 
 export function InvestmentSecurityCard({
   investment,
+  security,
 }: InvestmentSecurityCardProps) {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
-  const security = React.use(
-    masterDataService.getSecurity(investment.securityId),
-  );
+  const securityName = security[language === "ar" ? "name_ar" : "name"];
+
   // Calculate profit/loss
   const {
     isProfitable,
@@ -38,8 +39,6 @@ export function InvestmentSecurityCard({
     investment.averagePurchasePrice,
     security.price,
   );
-
-  const securityName = security[language === "ar" ? "name_ar" : "name"];
 
   // Determine quantity label
   const getQuantityLabel = () => {

@@ -197,7 +197,11 @@ export const TransactionsProvider = ({
     async (securityId: string): Promise<Transaction[]> => {
       if (!transactionService)
         throw new Error("Transaction service not initialized");
-      return transactionService.getTransactionsBySecurityId(securityId);
+      setIsLoading(true);
+      const result =
+        await transactionService.getTransactionsBySecurityId(securityId);
+      setIsLoading(false);
+      return result;
     },
     [transactionService],
   );

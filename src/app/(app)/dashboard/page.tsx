@@ -338,7 +338,7 @@ export default function DashboardPage() {
             incomeTillNow={incomeTillNow}
             totalExpenses={totalExpenses}
             totalFixedExpenses={totalFixedExpenses}
-            totalExpensesManualCreditCard={totalExpensesManualCreditCard} 
+            totalExpensesManualCreditCard={totalExpensesManualCreditCard}
             totalExpensesManualOther={totalExpensesManualOther}
             totalRealEstateInstallments={totalRealEstateInstallments}
             totalStockInvestments={totalSecuritiesInvestments}

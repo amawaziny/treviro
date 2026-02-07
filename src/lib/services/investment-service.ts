@@ -194,9 +194,7 @@ export class InvestmentService {
       totalInvested: amount,
       averagePurchasePrice: quantity > 0 ? amount / quantity : 0,
       isClosed: false,
-      metadata: {
-        ...(investmentData.metadata || {}),
-      },
+      fundType: investmentData.fundType?.trim() || null,
     };
 
     // Handle type-specific fields
@@ -619,7 +617,9 @@ export class InvestmentService {
 
     let unrealizedPnLGold = 0;
     let totalInvestedGold = 0;
-    investments.forEach(async (investment: Investment) => {
+
+    // Use a for..of loop so we can await async operations for each investment
+    for (const investment of investments) {
       let currentMarketPrice = investment.averagePurchasePrice;
       let unrealizedPnL = 0;
       const totalShares = investment.totalShares;
@@ -674,27 +674,39 @@ export class InvestmentService {
 
       totalUnrealizedPnL += unrealizedPnL;
       totalsInvested += totalInvested;
-    });
+    }
     return {
       portfolio: {
         unrealizedPnL: totalUnrealizedPnL,
         totalInvested: totalsInvested,
-        unrealizedPnLPercent: totalUnrealizedPnL / totalsInvested,
+        unrealizedPnLPercent:
+          totalsInvested === 0
+            ? 0
+            : (totalUnrealizedPnL / totalsInvested) * 100,
       },
       stocks: {
         unrealizedPnL: unrealizedPnLStocks,
         totalInvested: totalInvestedStocks,
-        unrealizedPnLPercent: unrealizedPnLStocks / totalInvestedStocks,
+        unrealizedPnLPercent:
+          totalInvestedStocks === 0
+            ? 0
+            : (unrealizedPnLStocks / totalInvestedStocks) * 100,
       },
       currencies: {
         unrealizedPnL: unrealizedPnLCurrency,
         totalInvested: totalInvestedCurrency,
-        unrealizedPnLPercent: unrealizedPnLCurrency / totalInvestedCurrency,
+        unrealizedPnLPercent:
+          totalInvestedCurrency === 0
+            ? 0
+            : (unrealizedPnLCurrency / totalInvestedCurrency) * 100,
       },
       gold: {
         unrealizedPnL: unrealizedPnLGold,
         totalInvested: totalInvestedGold,
-        unrealizedPnLPercent: unrealizedPnLGold / totalInvestedGold,
+        unrealizedPnLPercent:
+          totalInvestedGold === 0
+            ? 0
+            : (unrealizedPnLGold / totalInvestedGold) * 100,
       },
       debt: {
         unrealizedPnL: unrealizedPnLDebt,

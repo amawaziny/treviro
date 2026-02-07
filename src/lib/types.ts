@@ -68,10 +68,6 @@ export interface BaseInvestment {
   currency: CurrencyCode;
   fundType?: FundType;
   isClosed: boolean;
-  metadata?: {
-    // Type-specific metadata
-    [key: string]: any;
-  };
 }
 
 export interface SecurityInvestment extends BaseInvestment {
@@ -155,8 +151,7 @@ export function isStockInvestment(
 ): investment is SecurityInvestment {
   return (
     investment.type === "Securities" &&
-    (investment.fundType === undefined ||
-      isStockRelatedFund(investment.fundType))
+    (!investment.fundType || isStockRelatedFund(investment.fundType))
   );
 }
 
@@ -165,7 +160,7 @@ export function isGoldFundInvestment(
 ): investment is SecurityInvestment {
   return (
     investment.type === "Securities" &&
-    investment.fundType !== undefined &&
+    !!investment.fundType &&
     isGoldRelatedFund(investment.fundType)
   );
 }
@@ -175,7 +170,7 @@ export function isDebtFundInvestment(
 ): investment is SecurityInvestment {
   return (
     investment.type === "Securities" &&
-    investment.fundType !== undefined &&
+    !!investment.fundType &&
     isDebtRelatedFund(investment.fundType)
   );
 }
@@ -185,7 +180,7 @@ export function isRealEstateFundInvestment(
 ): investment is SecurityInvestment {
   return (
     investment.type === "Securities" &&
-    investment.fundType !== undefined &&
+    !!investment.fundType &&
     isRealEstateRelatedFund(investment.fundType)
   );
 }
@@ -195,7 +190,7 @@ export function isCurrencyFundInvestment(
 ): investment is SecurityInvestment {
   return (
     investment.type === "Securities" &&
-    investment.fundType !== undefined &&
+    !!investment.fundType &&
     isCurrencyRelatedFund(investment.fundType)
   );
 }

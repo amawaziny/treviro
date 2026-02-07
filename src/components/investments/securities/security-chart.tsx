@@ -28,12 +28,13 @@ const SecurityChart: React.FC<SecurityChartProps> = ({
       <AdvancedChart
         widgetProps={{
           symbol: symbol,
-          theme: theme || "dark",
+          theme: theme === "light" ? "light" : "dark",
           autosize: true,
           height: height,
           width: width,
           locale: language,
-          // interval: "D",
+          range: "1D",
+          // interval: "1D",
           timezone: timeZone,
         }}
       />

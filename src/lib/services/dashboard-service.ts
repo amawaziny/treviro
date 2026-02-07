@@ -27,10 +27,18 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 3. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
  * 4. we could disable some fields in edit mode of investment form
  * 5. refactor investment-form to be each form has its own submit button and logic
- * 6. we could list all installements during adding expenses of type credit card
- * 7. demo account with some transactions and investments to show the features of the app
- * 8. work offline support and caching for transactions and dashboard summary and securities
- * 9. cache stock and gold prices and currency exchange rates and update them if user click update or endofday
+ * 6. investment after submit shows blank screen with fail to detect investment type
+ * 7. we could list all installements during adding expenses of type credit card
+ * 8. demo account with some transactions and investments to show the features of the app
+ * 9. work offline support and caching for transactions and dashboard summary and securities
+ * 10. cache stock and gold prices and currency exchange rates and update them if user click update or endofday
+ * 11. sell for currecies
+ * 12. sell for gold
+ * 13. sell for realestate
+ * 14. meter price for realestate
+ * 15. remove price history collection no need any more with the integration of tradingview widget and we can get the price history from the widget and we will only keep the current price in the securities collection
+ * 16. fix investment distribution
+ * 17. fix investment breakdown by type in dashboard
  */
 
 export class DashboardService {

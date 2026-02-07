@@ -182,9 +182,9 @@ export const InvestmentProvider = ({
         setTotalGold(unrealizedPnL.gold);
         setTotalRealEstate(unrealizedPnL.realEstate);
         setTotalDebt(unrealizedPnL.debt);
+        setIsLoading(false);
       },
     );
-    setIsLoading(false);
 
     return () => unsubscribe();
   }, [investmentService]);

@@ -12,12 +12,21 @@ import { cn, formatNumberForMobile } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvestmentSecurityCard } from "@/components/investments/investment-security-card";
+import { useListedSecurities } from "@/hooks/use-listed-securities";
 
 export default function MyStocksPage() {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
 
-  const { stockInvestments, totalStocks, isLoading } = useInvestments();
+  const {
+    stockInvestments,
+    totalStocks,
+    isLoading: isInvestmentsLoading,
+  } = useInvestments();
+  const { getSecurityById, isLoading: isListedSecuritiesLoading } =
+    useListedSecurities();
+
+  const isLoading = isInvestmentsLoading || isListedSecuritiesLoading;
 
   return (
     <div className="space-y-8 relative min-h-[calc(100vh-10rem)]">
@@ -81,7 +90,7 @@ export default function MyStocksPage() {
               {`${
                 totalStocks.unrealizedPnLPercent === Infinity
                   ? "∞"
-                  : totalStocks.unrealizedPnLPercent.toFixed(2)
+                  : totalStocks.unrealizedPnLPercent?.toFixed(2)
               }% ${t("overall_pl")}`}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
@@ -119,6 +128,7 @@ export default function MyStocksPage() {
                 data-testid={`investment-card-${investment.id}`}
                 key={`${investment.id}-${investment.securityId}`}
                 investment={investment}
+                security={getSecurityById(investment.securityId)!}
               />
             );
           })}

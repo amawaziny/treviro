@@ -74,7 +74,7 @@ export function MonthlyInvestmentDistributionChart({
     data.push({
       id: "Expenses",
       label: t("expenses"),
-      value: totalExpenses,
+      value: Math.abs(totalExpenses),
       color: resolvedTheme === "dark" ? "#9ca3af" : "#6b7280",
     });
 
@@ -96,7 +96,7 @@ export function MonthlyInvestmentDistributionChart({
       title={t("Monthly Cash Flow Distribution")}
       chartData={chartData}
       allChartData={chartData}
-      total={chartData.reduce((total, item) => total + item.value, 0)}
+      total={chartData.reduce((total, item) => total + Math.abs(item.value), 0)}
       isEmpty={isLoading}
     />
   );

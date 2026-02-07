@@ -52,6 +52,8 @@ export default function SecurityDetailPage() {
   const securityId = params.securityId as string;
   const { toast } = useToast();
 
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
   const { getSecurityById, isLoading: isLoadingSecurities } =
     useListedSecurities();
   const security = getSecurityById(securityId);
@@ -61,12 +63,16 @@ export default function SecurityDetailPage() {
     addDividend,
     getInvestmentBySecurityId,
   } = useInvestments();
+
   const {
     isLoading: isLoadingTransactions,
     deleteTransaction,
     getTransactionsBySecurityId,
   } = useTransactions();
-  const transactions = React.use(getTransactionsBySecurityId(securityId));
+
+  useEffect(() => {
+    getTransactionsBySecurityId(securityId).then(setTransactions);
+  }, [securityId, getTransactionsBySecurityId]);
 
   const { setHeaderProps } = useForm();
   const previousTab = searchParams.get("previousTab");
@@ -121,7 +127,12 @@ export default function SecurityDetailPage() {
   // Add Dividend Handler
   const handleAddDividend = async (amount: number, date: string) => {
     try {
-      await addDividend(userOwnedSecurities!.id, securityId, amount, date);
+      await addDividend(
+        userOwnedSecurities!.id,
+        securityId,
+        amount,
+        new Date(date),
+      );
       setDividendSheetOpen(false);
     } catch (err: any) {
       toast({
