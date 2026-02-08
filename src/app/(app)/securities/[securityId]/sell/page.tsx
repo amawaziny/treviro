@@ -9,19 +9,30 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useParams } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
-import type { ListedSecurity } from "@/lib/types";
+import type { SecurityInvestment } from "@/lib/types";
+import { useInvestments } from "@/contexts/investment-context";
 
 export default function SellSecurityPage() {
   const { t, language } = useLanguage();
   const params = useParams();
   const securityId = params.securityId as string;
-  const { listedSecurities, isLoading } = useListedSecurities();
-  const [security, setSecurity] = useState<ListedSecurity | null>(null);
+  const { getSecurityById, isLoading: isLoadingSecurities } =
+    useListedSecurities();
+  const {
+    sell,
+    getInvestmentBySecurityId,
+    isLoading: isLoadingInvestments,
+  } = useInvestments();
   const { setHeaderProps, openForm, closeForm } = useForm();
+
+  const security = getSecurityById(securityId);
+  const securityInvestment = getInvestmentBySecurityId(
+    securityId,
+  ) as SecurityInvestment;
 
   // Set up header props when component mounts and when security is loaded
   useEffect(() => {
@@ -45,15 +56,9 @@ export default function SellSecurityPage() {
     };
   }, [security, securityId, setHeaderProps, openForm, closeForm]);
 
-  // Fetch security data
-  useEffect(() => {
-    if (listedSecurities.length > 0) {
-      const foundSecurity = listedSecurities.find((s) => s.id === securityId);
-      setSecurity(foundSecurity || null);
-    }
-  }, [listedSecurities, securityId]);
+  const isLoading = isLoadingSecurities || isLoadingInvestments;
 
-  if (isLoading || !security) {
+  if (isLoading || !security || !securityInvestment) {
     return (
       <div className="container mx-auto py-8 px-4 flex items-center justify-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -70,7 +75,12 @@ export default function SellSecurityPage() {
           )}
         </CardHeader>
         <CardContent>
-          <BuySellSecurityForm securityId={security.id} mode="sell" />
+          <BuySellSecurityForm
+            security={security}
+            securityInvestment={securityInvestment}
+            submitTrx={sell}
+            mode="sell"
+          />
         </CardContent>
       </Card>
     </div>

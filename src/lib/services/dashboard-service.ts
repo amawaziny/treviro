@@ -39,8 +39,10 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 15. remove price history collection no need any more with the integration of tradingview widget and we can get the price history from the widget and we will only keep the current price in the securities collection
  * 16. fix investment distribution
  * 17. fix investment breakdown by type in dashboard
- * 18. security details page, tab transactions
  * 19. add noshares field for dividends and its default value is the current no of shares for the security
+ * 19. avarage purchase in buyNew
+ * 20. investment name? do we need it?
+ * 21. sell and buy should it be -/+ in transactions then check the formula +/- totalInvested
  */
 
 export class DashboardService {

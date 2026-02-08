@@ -660,7 +660,9 @@ export default function SecurityDetailPage() {
                               className="h-6 w-6"
                               asChild
                             >
-                              <Link href={`/investments/security/edit/${tx.id}`}>
+                              <Link
+                                href={`/investments/security/edit/${tx.id}`}
+                              >
                                 <Edit3 className="h-3.5 w-3.5" />
                                 <span className="sr-only">{t("Edit")}</span>
                               </Link>
@@ -714,9 +716,7 @@ export default function SecurityDetailPage() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-muted-foreground">
-                              {t("fees")}
-                            </p>
+                            <p className="text-muted-foreground">{t("fees")}</p>
                             <p className="font-medium">
                               {formatCurrencyWithCommas(
                                 tx.fees,

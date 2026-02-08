@@ -24,42 +24,46 @@ import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import type { ListedSecurity, SecurityInvestment } from "@/lib/types";
+import type {
+  InvestmentType,
+  ListedSecurity,
+  SecurityInvestment,
+} from "@/lib/types";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getCurrentDate } from "@/lib/utils";
 
 interface BuySellSecurityFormProps {
-  securityId: string;
+  security: ListedSecurity;
+  securityInvestment: SecurityInvestment;
   mode: "buy" | "sell";
+  submitTrx: (
+    investmentId: string,
+    securityId: string,
+    investmentType: InvestmentType,
+    quantity: number,
+    pricePerUnit: number,
+    fees: number,
+    date: Date,
+  ) => Promise<void>;
 }
 
 export function BuySellSecurityForm({
-  securityId: securityId,
+  security,
+  securityInvestment,
   mode,
+  submitTrx,
 }: BuySellSecurityFormProps) {
   const { t, language } = useLanguage();
-  const {
-    getInvestmentBySecurityId,
-    sell,
-    buy,
-    isLoading: isLoadingInvestmentsContext,
-  } = useInvestments();
-  const { getSecurityById, isLoading: isLoadingSecurities } =
-    useListedSecurities();
   const { toast } = useToast();
   const router = useRouter();
 
-  const [security, setSecurity] = useState<ListedSecurity | null>(null);
-  const [securityInvestment, setSecurityInvestment] =
-    useState<SecurityInvestment | null>(null);
-  const [maxSharesToSell, setMaxSharesToSell] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const maxSharesToSell = securityInvestment?.totalShares || 0;
 
   const form = useForm<BuySellSecurityFormValues>({
     resolver: zodResolver(BuySellSecuritySchema),
     defaultValues: {
-      securityId: securityId,
+      securityId: security.id,
       numberOfShares: 0,
       pricePerShare: 0,
       date: getCurrentDate(),
@@ -68,37 +72,12 @@ export function BuySellSecurityForm({
   });
 
   useEffect(() => {
-    setIsLoading(true);
-    async function fetchData() {
-      const listedSecurityData = getSecurityById(securityId);
-      setSecurity(listedSecurityData || null);
-
-      if (listedSecurityData) {
-        const userOwnedForThisSymbol = getInvestmentBySecurityId(securityId);
-        setSecurityInvestment(
-          (userOwnedForThisSymbol as SecurityInvestment) || null,
-        );
-
-        const totalOwned = userOwnedForThisSymbol?.totalShares || 0;
-        setMaxSharesToSell(totalOwned);
-        if (listedSecurityData.price && form.getValues("pricePerShare") === 0) {
-          form.setValue("pricePerShare", listedSecurityData.price);
-        }
+    if (security && securityInvestment) {
+      if (security.price && form.getValues("pricePerShare") === 0) {
+        form.setValue("pricePerShare", security.price);
       }
-      setIsLoading(false);
     }
-    if (securityId && !isLoadingInvestmentsContext) {
-      fetchData();
-    } else if (!isLoadingInvestmentsContext) {
-      setIsLoading(false);
-    }
-  }, [
-    securityId,
-    getSecurityById,
-    getInvestmentBySecurityId,
-    isLoadingInvestmentsContext,
-    form,
-  ]);
+  }, [security, form]);
 
   async function onSubmit(values: BuySellSecurityFormValues) {
     if (!security) {
@@ -120,39 +99,30 @@ export function BuySellSecurityForm({
       return;
     }
 
+    await submitTrx(
+      securityInvestment!.id,
+      security.id,
+      "Securities",
+      numberOfShares,
+      values.pricePerShare,
+      values.fees ?? 0,
+      new Date(values.date),
+    );
+
     try {
       if (mode === "sell") {
-        await sell(
-          securityInvestment!.id,
-          securityId,
-          "Securities",
-          numberOfShares,
-          values.pricePerShare,
-          values.fees ?? 0,
-          values.date,
-        );
-
         toast({
           title: t("sale_recorded"),
           description: `${t("Successfully recorded sale of")} ${values.numberOfShares} ${securityLabel} ${t("of")} ${security[language === "ar" ? "name_ar" : "name"]}.`,
         });
       } else {
-        await buy(
-          securityInvestment!.id,
-          securityId,
-          "Securities",
-          numberOfShares,
-          values.pricePerShare,
-          values.fees ?? 0,
-          values.date,
-        );
-
         toast({
           title: t("purchase_recorded"),
           description: `${t("Successfully recorded purchase of")} ${values.numberOfShares} ${securityLabel} ${t("of")} ${security[language === "ar" ? "name_ar" : "name"]}.`,
         });
       }
-      router.push(`/securities/${securityId}`);
+
+      router.push(`/securities/${security.id}`);
     } catch (error: any) {
       console.error(t("error_recording_sale"), error);
       toast({
@@ -162,15 +132,6 @@ export function BuySellSecurityForm({
         variant: "destructive",
       });
     }
-  }
-
-  if (isLoading || isLoadingSecurities || isLoadingInvestmentsContext) {
-    return (
-      <div className="flex items-center justify-center py-10">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        {t("loading_sale_information")}
-      </div>
-    );
   }
 
   if (!security) {
@@ -192,7 +153,7 @@ export function BuySellSecurityForm({
       ? [t("units"), t("unit")]
       : [t("shares"), t("share")];
 
-  if (mode === "sell" && maxSharesToSell === 0 && !isLoading) {
+  if (mode === "sell" && maxSharesToSell === 0) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
@@ -210,7 +171,7 @@ export function BuySellSecurityForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="p-4 border rounded-md bg-muted/50">
           <h3 className="text-lg font-medium">
-            {`${mode === "buy" ? t("buying") : t("selling")} ${security.name} (${security.symbol})`}
+            {`${mode === "buy" ? t("buying") : t("selling")} ${security[language === "ar" ? "name_ar" : "name"]} (${security.symbol})`}
           </h3>
           <p className="text-sm text-muted-foreground">
             {`${t("you_currently_own")} ${maxSharesToSell} ${securityLabel[0]}.`}
@@ -259,8 +220,13 @@ export function BuySellSecurityForm({
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 160.25"
-                    value={field.value?.toString() || ""}
-                    onChange={(value) => field.onChange(Number(value))}
+                    value={
+                      field.value === undefined || field.value === null
+                        ? ""
+                        : String(field.value)
+                    }
+                    onChange={field.onChange}
+                    allowDecimal={false}
                   />
                 </FormControl>
                 <FormMessage />
@@ -295,8 +261,13 @@ export function BuySellSecurityForm({
                 <FormControl>
                   <NumericInput
                     placeholder="e.g., 5.00"
-                    value={field.value?.toString() || ""}
-                    onChange={(value) => field.onChange(Number(value))}
+                    value={
+                      field.value === undefined || field.value === null
+                        ? ""
+                        : String(field.value)
+                    } // ensure value is always a string
+                    onChange={field.onChange} // RHF onChange expects string or number
+                    allowDecimal={true}
                   />
                 </FormControl>
                 <FormDescription>
