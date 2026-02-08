@@ -28,7 +28,7 @@ import {
 import { useInvestments } from "@/contexts/investment-context";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { cn, formatCurrencyWithCommas, formatDateDisplay } from "@/lib/utils";
+import { cn, formatCurrencyWithCommas, formatDateDisplay, formatDateISO } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -44,37 +44,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
 import { useTransactions } from "@/contexts/transactions-context";
 import SecurityChart from "@/components/investments/securities/security-chart";
+import { calcProfit } from "@/lib/financial-utils";
 
 export default function SecurityDetailPage() {
   const { t, language, dir } = useLanguage();
   const params = useParams();
   const searchParams = useSearchParams();
   const securityId = params.securityId as string;
-  const { toast } = useToast();
-
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-  const { getSecurityById, isLoading: isLoadingSecurities } =
-    useListedSecurities();
-  const security = getSecurityById(securityId);
-
-  const {
-    isLoading: isLoadingInvestments,
-    addDividend,
-    getInvestmentBySecurityId,
-  } = useInvestments();
-
-  const {
-    isLoading: isLoadingTransactions,
-    deleteTransaction,
-    getTransactionsBySecurityId,
-  } = useTransactions();
-
-  useEffect(() => {
-    getTransactionsBySecurityId(securityId).then(setTransactions);
-  }, [securityId, getTransactionsBySecurityId]);
-
-  const { setHeaderProps } = useForm();
   const previousTab = searchParams.get("previousTab");
   const fromMyStocks = searchParams.get("fromMyStocks") === "true";
   const backLinkHref = fromMyStocks
@@ -83,7 +59,18 @@ export default function SecurityDetailPage() {
       ? `/securities?tab=${previousTab}`
       : "/securities";
 
+  const { setHeaderProps } = useForm();
+  const { toast } = useToast();
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [dividendSheetOpen, setDividendSheetOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] =
+    useState<Transaction | null>(null);
+
+  const { getSecurityById, isLoading: isLoadingSecurities } =
+    useListedSecurities();
+  const security = getSecurityById(securityId);
 
   const securityName = security?.[language === "ar" ? "name_ar" : "name"];
   // Set up header props after security data is loaded
@@ -109,20 +96,23 @@ export default function SecurityDetailPage() {
     };
   }, [security, backLinkHref, setHeaderProps]);
 
-  const [transactionToDelete, setTransactionToDelete] =
-    useState<Transaction | null>(null);
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const {
+    isLoading: isLoadingInvestments,
+    addDividend,
+    getInvestmentBySecurityId,
+  } = useInvestments();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const {
+    isLoading: isLoadingTransactions,
+    deleteTransaction,
+    getTransactionsBySecurityId,
+  } = useTransactions();
+
+  useEffect(() => {
+    getTransactionsBySecurityId(securityId).then(setTransactions);
+  }, [securityId, getTransactionsBySecurityId]);
 
   const userOwnedSecurities = getInvestmentBySecurityId(securityId);
-
-  const totalSharesOwned = userOwnedSecurities?.totalShares || 0;
-
-  const averagePurchasePrice = userOwnedSecurities?.averagePurchasePrice || 0;
-
-  const hasPosition = totalSharesOwned > 0;
 
   // Add Dividend Handler
   const handleAddDividend = async (amount: number, date: string) => {
@@ -143,17 +133,6 @@ export default function SecurityDetailPage() {
     }
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = transactions.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [securityId, transactions.length]);
-
   const handleDeleteSellTransaction = () => {
     deleteTransaction(transactionToDelete!.id);
     setIsDeleteAlertOpen(false);
@@ -169,8 +148,7 @@ export default function SecurityDetailPage() {
     isLoadingSecurities ||
     isLoadingInvestments ||
     isLoadingTransactions ||
-    security === undefined ||
-    security == null
+    !security
   ) {
     return (
       <div className="flex h-[calc(100vh-8rem)] w-full items-center justify-center">
@@ -182,41 +160,20 @@ export default function SecurityDetailPage() {
     );
   }
 
-  // if (!security) {
-  //   console.log("security not found")
-  //   return (
-  //     <div className="container mx-auto py-8 text-center">
-  //       <h1 className="text-xl font-bold text-destructive mb-4">
-  //         {t("security_not_found")}
-  //       </h1>
-  //       <p className="text-muted-foreground mb-6">
-  //         {t("the_security_you_are_looking_for_could_not_be_found")}
-  //       </p>
-  //       <Button onClick={() => router.push(backLinkHref)}>
-  //         {language === "ar" ? (
-  //           <ArrowRight className="ml-2 h-4 w-4" />
-  //         ) : (
-  //           <ArrowLeft className="mr-2 h-4 w-4" />
-  //         )}
-  //         {t("go_back")}
-  //       </Button>
-  //     </div>
-  //   );
-  // }
-
-  const currentMarketPrice = security.price;
-  const totalInvestmentValue = totalSharesOwned * currentMarketPrice;
-  const totalCostBasis = userOwnedSecurities?.totalInvested || 0;
-  const PnL = totalInvestmentValue - totalCostBasis;
-  const PnLPercentage =
-    totalCostBasis > 0
-      ? (PnL / totalCostBasis) * 100
-      : totalInvestmentValue > 0
-        ? Infinity
-        : 0;
-  const isProfitable = PnL >= 0;
-
+  const totalSharesOwned = userOwnedSecurities?.totalShares || 0;
+  const averagePurchasePrice = userOwnedSecurities?.averagePurchasePrice || 0;
+  const hasPosition = totalSharesOwned > 0;
+  const currentMarketPrice = security.price || 0;
   const displayCurrency = security.currency || "EGP"; // Default to EGP if currency not specified
+
+  // Calculate profit/loss
+  const {
+    isProfitable,
+    profitLoss: PnL,
+    totalCost: totalCostBasis,
+    profitLossPercent: PnLPercentage,
+    totalCurrentValue: totalInvestmentValue,
+  } = calcProfit(totalSharesOwned, averagePurchasePrice, currentMarketPrice);
 
   return (
     <div className="md:pb-6 space-y-6">
@@ -226,7 +183,7 @@ export default function SecurityDetailPage() {
             <Avatar className="h-10 w-10 md:h-12 md:w-12">
               <AvatarImage
                 src={security.logoUrl}
-                alt={securityName}
+                alt={security.symbol}
                 data-ai-hint={
                   security.securityType === "Fund"
                     ? t("logo_fund")
@@ -295,7 +252,7 @@ export default function SecurityDetailPage() {
                 open={dividendSheetOpen}
                 onOpenChange={setDividendSheetOpen}
                 onSubmit={handleAddDividend}
-                defaultDate={new Date().toISOString().slice(0, 10)}
+                defaultDate={formatDateISO(new Date())}
               />
             </>
           )}
@@ -334,7 +291,7 @@ export default function SecurityDetailPage() {
                 open={dividendSheetOpen}
                 onOpenChange={setDividendSheetOpen}
                 onSubmit={handleAddDividend}
-                defaultDate={new Date().toISOString().slice(0, 10)}
+                defaultDate={formatDateISO(new Date())}
               />
             </>
           )}
@@ -676,20 +633,7 @@ export default function SecurityDetailPage() {
             <CardContent className="p-0">
               {transactions.length > 0 ? (
                 <div className="divide-y">
-                  {currentTransactions.map((tx) => {
-                    const isDividend = tx.type === "DIVIDEND";
-                    const isBuy = tx.type === "BUY";
-                    const isSell = tx.type === "SELL";
-                    const shares = isDividend
-                      ? (tx as any).shares
-                      : (tx as any).shares || (tx as any).numberOfShares || 0;
-                    const price = isDividend
-                      ? 0
-                      : (tx as any).price || (tx as any).pricePerShare || 0;
-                    const amount = isDividend
-                      ? (tx as any).amount || (tx as any).totalAmount || 0
-                      : (tx as any).totalAmount || 0;
-
+                  {transactions.map((tx) => {
                     return (
                       <div key={tx.id}>
                         {/* Transaction content */}
@@ -701,69 +645,41 @@ export default function SecurityDetailPage() {
                           <div className="flex justify-between items-start">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <Badge
-                                  variant={
-                                    isBuy
-                                      ? "secondary"
-                                      : isSell
-                                        ? "destructive"
-                                        : "default"
-                                  }
-                                  className={cn(
-                                    isSell &&
-                                      "bg-destructive/10 text-destructive hover:bg-destructive/20",
-
-                                    "text-xs",
-                                  )}
-                                >
+                                <Badge variant="secondary" className="text-xs">
                                   {t(tx.type)}
                                 </Badge>
                                 <span className="text-sm text-muted-foreground">
-                                  {formatDateDisplay(tx.date ?? "")}
+                                  {formatDateDisplay(tx.date)}
                                 </span>
                               </div>
                               <div className="text-sm font-medium">
-                                {`${shares.toLocaleString()} ${security.securityType === "Fund" ? t("units") : t("shares")}`}
+                                {`${tx.quantity.toLocaleString()} ${security.securityType === "Fund" ? t("units") : t("shares")}`}
                               </div>
                             </div>
                             <div className="text-end">
-                              <div
-                                className={cn(
-                                  "text-xs font-medium",
-                                  isBuy
-                                    ? "text-foreground"
-                                    : isSell
-                                      ? "text-destructive"
-                                      : "text-accent",
-                                )}
-                              >
-                                {isBuy ? "-" : ""}
+                              <div className="text-xs font-medium text-foreground">
                                 {formatCurrencyWithCommas(
-                                  amount,
+                                  tx.amount,
                                   displayCurrency,
                                 )}
                               </div>
-                              {!isDividend && (
-                                <div className="text-xs text-muted-foreground">
-                                  {formatCurrencyWithCommas(
-                                    price,
-                                    displayCurrency,
-                                  )}
-                                </div>
-                              )}
+                              <div className="text-xs text-muted-foreground">
+                                {formatCurrencyWithCommas(
+                                  tx.amount / (tx.quantity || 1),
+                                  displayCurrency,
+                                )}
+                              </div>
                             </div>
                           </div>
 
                           <div className="mt-2 flex justify-between items-center text-xs text-muted-foreground">
                             <div>
-                              {!isDividend && (
-                                <span>
-                                  {`${t("fees")}: ${formatCurrencyWithCommas(
-                                    (tx as any).fees || 0,
-                                    displayCurrency,
-                                  )}`}
-                                </span>
-                              )}
+                              <span>
+                                {`${t("fees")}: ${formatCurrencyWithCommas(
+                                  tx.fees || 0,
+                                  displayCurrency,
+                                )}`}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <div>
@@ -810,48 +726,6 @@ export default function SecurityDetailPage() {
                   <p className="text-sm text-muted-foreground mt-1">
                     {t("add_your_first_transaction_to_get_started")}
                   </p>
-                </div>
-              )}
-
-              {/* Pagination */}
-              {transactions.length > itemsPerPage && (
-                <div className="flex justify-between items-center px-4 py-3 border-t">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(1, prev - 1))
-                    }
-                    disabled={currentPage === 1}
-                    className="gap-1"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span>{t("previous")}</span>
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    Page {currentPage} of{" "}
-                    {Math.ceil(transactions.length / itemsPerPage)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((prev) =>
-                        Math.min(
-                          Math.ceil(transactions.length / itemsPerPage),
-                          prev + 1,
-                        ),
-                      )
-                    }
-                    disabled={
-                      currentPage >=
-                      Math.ceil(transactions.length / itemsPerPage)
-                    }
-                    className="gap-1"
-                  >
-                    <span>{t("next")}</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
                 </div>
               )}
             </CardContent>
