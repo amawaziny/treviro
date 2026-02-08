@@ -637,100 +637,104 @@ export default function SecurityDetailPage() {
             </CardHeader>
             <CardContent className="p-0">
               {transactions.length > 0 ? (
-                <div className="divide-y">
+                <div>
                   {transactions.map((tx) => {
                     return (
-                      <div key={tx.id}>
-                        {/* Transaction content */}
-                        <div
-                          className={cn(
-                            "p-4 hover:bg-muted/50 transition-transform duration-300 bg-background relative z-0",
-                          )}
-                        >
-                          <div className="flex justify-between items-end text-sm font-medium mb-1">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="text-xs">
-                                  {t(tx.type)}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatDateDisplay(tx.date)}
-                                </span>
-                              </div>
-                              <div>
-                                {`${security.securityType === "Fund" ? t("units") : t("shares")}`}
-                              </div>
-                            </div>
-                            <div>
-                              {`${tx.quantity.toLocaleString()}@${formatCurrencyWithCommas(
+                      <div
+                        key={tx.id}
+                        className="p-4 hover:bg-muted/50 transition-colors border-b last:border-b-0"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {t(tx.type)}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDateDisplay(tx.date)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              asChild
+                            >
+                              <Link href={`/investments/security/edit/${tx.id}`}>
+                                <Edit3 className="h-3.5 w-3.5" />
+                                <span className="sr-only">{t("Edit")}</span>
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive/70 hover:text-destructive"
+                              onClick={() =>
+                                handleDeleteConfirmation(
+                                  tx as unknown as Transaction,
+                                )
+                              }
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span className="sr-only">{t("Delete")}</span>
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-xs ">
+                          <div>
+                            <p className="text-muted-foreground">
+                              {`${security.securityType === "Fund" ? t("units") : t("shares")}`}
+                            </p>
+                            <p className="font-medium">
+                              {tx.quantity.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-muted-foreground">
+                              {t("avg_cost")}
+                            </p>
+                            <p className="font-medium">
+                              {formatCurrencyWithCommas(
                                 tx.averagePurchasePrice,
                                 displayCurrency,
-                              )}`}
-                            </div>
-                          </div>
-
-                          <div className="flex justify-between items-end text-sm text-muted-foreground  mb-1">
-                            <div>{t("fees")}</div>
-                            <div>
-                              {formatCurrencyWithCommas(
-                                tx.fees,
-                                displayCurrency,
                               )}
-                            </div>
+                            </p>
                           </div>
 
-                          <div className="flex justify-between items-end text-sm text-muted-foreground mb-1">
-                            <div>{t("price_per_unit")}</div>
-                            <div>
+                          <div>
+                            <p className="text-muted-foreground">
+                              {t("price_per_unit")}
+                            </p>
+                            <p className="font-medium">
                               {formatCurrencyWithCommas(
                                 tx.pricePerUnit,
                                 displayCurrency,
                               )}
-                            </div>
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-muted-foreground">
+                              {t("fees")}
+                            </p>
+                            <p className="font-medium">
+                              {formatCurrencyWithCommas(
+                                tx.fees,
+                                displayCurrency,
+                              )}
+                            </p>
                           </div>
 
-                          <div className="flex justify-between items-end text-sm  mb-2">
-                            <div>{t("total_cost")}</div>
-                            <div>
+                          <div className="col-span-2 border-t pt-2 mt-2">
+                            <p className="text-muted-foreground">
+                              {t("total_amount")}
+                            </p>
+                            <p className="text-sm font-medium">
                               {formatCurrencyWithCommas(
                                 tx.amount,
                                 displayCurrency,
                               )}
-                            </div>
-                          </div>
-
-                          <div className="flex justify-between items-center text-sm text-muted-foreground">
-                            <div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-4 w-4"
-                                  asChild
-                                >
-                                  <Link
-                                    href={`/investments/security/edit/${tx.id}`}
-                                  >
-                                    <Edit3 className="h-3.5 w-3.5" />
-                                    <span className="sr-only">{t("Edit")}</span>
-                                  </Link>
-                                </Button>
-
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-4 w-4 text-destructive/70 hover:text-destructive"
-                                  onClick={() =>
-                                    handleDeleteConfirmation(
-                                      tx as unknown as Transaction,
-                                    )
-                                  }
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                  <span className="sr-only">{t("Delete")}</span>
-                                </Button>
-                            </div>
+                            </p>
                           </div>
                         </div>
                       </div>
