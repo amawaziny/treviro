@@ -795,6 +795,7 @@
   "Successfully recorded purchase of": "تم تسجيل الشراء بنجاح",
   "record_purchase": "تسجيل شراء",
   "price_per": "السعر لكل",
+  "price_per_unit": "سعر الوحدة",
   "date": "التاريخ",
   "buying": "جاري الشراء",
   "Income record deleted successfully": "تم حذف سجل الدخل بنجاح",

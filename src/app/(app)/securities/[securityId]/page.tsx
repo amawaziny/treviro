@@ -28,7 +28,12 @@ import {
 import { useInvestments } from "@/contexts/investment-context";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { cn, formatCurrencyWithCommas, formatDateDisplay, formatDateISO } from "@/lib/utils";
+import {
+  cn,
+  formatCurrencyWithCommas,
+  formatDateDisplay,
+  formatDateISO,
+} from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -642,47 +647,62 @@ export default function SecurityDetailPage() {
                             "p-4 hover:bg-muted/50 transition-transform duration-300 bg-background relative z-0",
                           )}
                         >
-                          <div className="flex justify-between items-start">
+                          <div className="flex justify-between items-end text-sm font-medium mb-1">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary" className="text-xs">
                                   {t(tx.type)}
                                 </Badge>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-xs text-muted-foreground">
                                   {formatDateDisplay(tx.date)}
                                 </span>
                               </div>
-                              <div className="text-sm font-medium">
-                                {`${tx.quantity.toLocaleString()} ${security.securityType === "Fund" ? t("units") : t("shares")}`}
+                              <div>
+                                {`${security.securityType === "Fund" ? t("units") : t("shares")}`}
                               </div>
                             </div>
-                            <div className="text-end">
-                              <div className="text-xs font-medium text-foreground">
-                                {formatCurrencyWithCommas(
-                                  tx.amount,
-                                  displayCurrency,
-                                )}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {formatCurrencyWithCommas(
-                                  tx.amount / (tx.quantity || 1),
-                                  displayCurrency,
-                                )}
-                              </div>
+                            <div>
+                              {`${tx.quantity.toLocaleString()}@${formatCurrencyWithCommas(
+                                tx.averagePurchasePrice,
+                                displayCurrency,
+                              )}`}
                             </div>
                           </div>
 
-                          <div className="mt-2 flex justify-between items-center text-xs text-muted-foreground">
+                          <div className="flex justify-between items-end text-sm text-muted-foreground  mb-1">
+                            <div>{t("fees")}</div>
                             <div>
-                              <span>
-                                {`${t("fees")}: ${formatCurrencyWithCommas(
-                                  tx.fees || 0,
-                                  displayCurrency,
-                                )}`}
-                              </span>
+                              {formatCurrencyWithCommas(
+                                tx.fees,
+                                displayCurrency,
+                              )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div>
+                          </div>
+
+                          <div className="flex justify-between items-end text-sm text-muted-foreground mb-1">
+                            <div>{t("price_per_unit")}</div>
+                            <div>
+                              {formatCurrencyWithCommas(
+                                tx.pricePerUnit,
+                                displayCurrency,
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-end text-sm  mb-2">
+                            <div>{t("total_cost")}</div>
+                            <div>
+                              {formatCurrencyWithCommas(
+                                tx.amount,
+                                displayCurrency,
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center text-sm text-muted-foreground">
+                            <div>
+                            </div>
+                            <div className="flex items-center gap-4">
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -710,7 +730,6 @@ export default function SecurityDetailPage() {
                                   <Trash2 className="h-3.5 w-3.5" />
                                   <span className="sr-only">{t("Delete")}</span>
                                 </Button>
-                              </div>
                             </div>
                           </div>
                         </div>

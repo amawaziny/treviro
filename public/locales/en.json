@@ -759,6 +759,7 @@
   "record_purchase": "Record Purchase",
   "date": "Date",
   "price_per": "Price per",
+  "price_per_unit": "Unit Price",
   "buying": "Buying",
   "Income record deleted successfully": "Income record deleted successfully",
   "failed_to_delete_expense": "Failed to delete expense",
