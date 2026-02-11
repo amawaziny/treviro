@@ -225,6 +225,7 @@ export class InvestmentService {
         amount,
         quantity,
         pricePerUnit,
+        averagePurchasePrice: investment.averagePurchasePrice,
         fees,
         currency,
         metadata: {
@@ -273,10 +274,11 @@ export class InvestmentService {
         if (quantity > current.totalShares) {
           throw new Error("Not enough shares to sell");
         }
-        totalShares -= quantity;
+        //in Sell transactions the qauntity is nagative value so we used +
+        totalShares += quantity;
         // For real estate, we don't reduce totalInvested when selling
         if (investmentType !== "Real Estate") {
-          totalInvested -= current.averagePurchasePrice * quantity;
+          totalInvested += current.averagePurchasePrice * quantity;
         }
         break;
 
@@ -305,7 +307,7 @@ export class InvestmentService {
     > & { investmentType: InvestmentType },
   ): Promise<Investment> {
     const investmentRef = this.getInvestmentRef(transactionData.sourceId);
-    const now = new Date().toISOString();
+    const now = new Date();
 
     const investmentDoc = await getDoc(investmentRef);
 

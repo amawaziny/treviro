@@ -39,10 +39,10 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 15. remove price history collection no need any more with the integration of tradingview widget and we can get the price history from the widget and we will only keep the current price in the securities collection
  * 16. fix investment distribution
  * 17. fix investment breakdown by type in dashboard
- * 19. add noshares field for dividends and its default value is the current no of shares for the security
- * 19. avarage purchase in buyNew
- * 20. investment name? do we need it?
- * 21. sell and buy should it be -/+ in transactions then check the formula +/- totalInvested
+ * 18. add noshares field for dividends and its default value is the current no of shares for the security
+ * 20. sucess message after buyNew check translation
+ * 21. navigation from stock details to my stock or securities explore
+ * 22. fix fixed estimates if it more than one in this month
  */
 
 export class DashboardService {
@@ -96,73 +96,6 @@ export class DashboardService {
   }
 
   /**
-   * Partially updates the dashboard summary based on a single transaction
-   * @param transaction The transaction to process
-   */
-  async partialUpdateDashboardSummary(transaction: Transaction): Promise<void> {
-    const dashboardRef = this.getDashboardDocRefRaw();
-    if (!dashboardRef) return;
-
-    try {
-      const amount = transaction.amount;
-      const quantity = transaction.quantity;
-      const averagePurchasePrice = transaction.averagePurchasePrice;
-      const profitOrLoss = transaction.profitOrLoss || 0;
-
-      // Build Firestore atomic updates using increment where possible. For reductions that
-      // could go below zero we explicitly set to 0 when needed.
-      const firestoreUpdates: Partial<Record<string, any>> = {
-        updatedAt: Timestamp.fromDate(new Date()),
-      };
-
-      switch (transaction.type) {
-        case "BUY":
-        case "PAYMENT":
-          firestoreUpdates.totalInvested = increment(amount);
-          firestoreUpdates.totalCashBalance = increment(-amount);
-          break;
-
-        case "EXPENSE":
-          firestoreUpdates.totalCashBalance = increment(amount);
-          break;
-
-        case "SELL": {
-          const costBasis = averagePurchasePrice * Math.abs(quantity); // Use absolute value for quantity
-
-          firestoreUpdates.totalInvested = increment(-costBasis);
-
-          firestoreUpdates.totalCashBalance = increment(amount);
-
-          if (typeof profitOrLoss === "number" && profitOrLoss !== 0) {
-            firestoreUpdates.totalRealizedPnL = increment(profitOrLoss);
-          }
-
-          break;
-        }
-
-        case "DIVIDEND":
-        case "INTEREST":
-        case "INCOME":
-          firestoreUpdates.totalCashBalance = increment(amount);
-          break;
-
-        case "MATURED_DEBT": {
-          firestoreUpdates.totalInvested = increment(-amount);
-
-          firestoreUpdates.totalCashBalance = increment(amount);
-          break;
-        }
-      }
-
-      // Apply updates to the dashboard atomically using Firestore increments when possible
-      await setDoc(dashboardRef, firestoreUpdates, { merge: true });
-    } catch (error) {
-      console.error("Error in partialUpdateDashboardSummary:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Updates the dashboard summary with the provided fields using a transaction
    * @param updates Partial DashboardSummary with fields to update
    */
@@ -209,64 +142,90 @@ export class DashboardService {
   }
 
   /**
-   * Calculates and updates the dashboard summary based on transactions and investments
+   * Partially updates the dashboard summary based on a single transaction
+   * @param transaction The transaction to process
+   */
+  async partialUpdateDashboardSummary(transaction: Transaction): Promise<void> {
+    const dashboardRef = this.getDashboardDocRefRaw();
+    if (!dashboardRef) return;
+
+    try {
+      const amount = transaction.amount;
+      const quantity = transaction.quantity;
+      const averagePurchasePrice = transaction.averagePurchasePrice;
+      const profitOrLoss = transaction.profitOrLoss || 0;
+
+      // Build Firestore atomic updates using increment where possible. For reductions that
+      // could go below zero we explicitly set to 0 when needed.
+      const firestoreUpdates: Partial<Record<string, any>> = {
+        updatedAt: Timestamp.fromDate(new Date()),
+      };
+
+      firestoreUpdates.totalCashBalance = increment(amount);
+
+      switch (transaction.type) {
+        case "SELL": {
+          const costBasis = averagePurchasePrice * Math.abs(quantity);
+          firestoreUpdates.totalInvested = increment(costBasis);
+
+          if (typeof profitOrLoss === "number" && profitOrLoss !== 0) {
+            firestoreUpdates.totalRealizedPnL = increment(profitOrLoss);
+          }
+
+          break;
+        }
+
+        case "BUY":
+        case "PAYMENT":
+        case "MATURED_DEBT":
+          firestoreUpdates.totalInvested = increment(amount);
+          break;
+      }
+
+      // Apply updates to the dashboard atomically using Firestore increments when possible
+      await setDoc(dashboardRef, firestoreUpdates, { merge: true });
+    } catch (error) {
+      console.error("Error in partialUpdateDashboardSummary:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculates and updates the dashboard summary based on transactions
+   * transaction collection/table is designed to sum amount in all transactions to get cashbalance
+   * and sum all transaction types related to investment to get totalInvested
    * @returns Promise that resolves with the updated DashboardSummary
    */
   async recalculateDashboardSummary(): Promise<DashboardSummary> {
-    // 1. Calculate totalCashBalance
-    const cashFlow = {
-      income: 0,
-      expense: 0,
-    };
-
-    // 4. Calculate totalRealizedPnL (sum of all profitOrLoss from transactions)
     let totalRealizedPnL = 0;
-    let totalMaturedDebt = 0;
+    let totalCashBalance = 0;
     let totalInvested = 0;
 
     const transactions = await this.transactionService.getTransactions();
 
-    // Process all transactions
     for (const txn of transactions) {
       const amount = txn.amount;
 
-      // Add to cash flow calculations
+      totalCashBalance += amount;
+
       switch (txn.type) {
-        case "INCOME":
-        case "DIVIDEND":
-        case "INTEREST":
-          cashFlow.income += amount;
-          break;
+        case "SELL": {
+          const costBasis = txn.averagePurchasePrice * Math.abs(txn.quantity);
+          totalInvested += costBasis;
 
-        case "SELL":
-          cashFlow.income += amount;
-          totalInvested -= txn.sourceType === "Investment" ? amount : 0;
+          if (typeof txn.profitOrLoss === "number") {
+            totalRealizedPnL += txn.profitOrLoss;
+          }
           break;
+        }
 
-        case "MATURED_DEBT":
-          cashFlow.income += amount;
-          totalMaturedDebt += amount;
-          totalInvested -= amount;
-          break;
-
-        case "EXPENSE":
-          cashFlow.expense += amount;
-          break;
-
-        case "PAYMENT":
         case "BUY":
-          cashFlow.expense += amount;
-          totalInvested += txn.sourceType === "Investment" ? amount : 0;
+        case "PAYMENT":
+        case "MATURED_DEBT":
+          totalInvested += amount;
           break;
-      }
-
-      // Sum up realized P&L from transactions
-      if (typeof txn.profitOrLoss === "number") {
-        totalRealizedPnL += txn.profitOrLoss;
       }
     }
-
-    const totalCashBalance = cashFlow.income + cashFlow.expense;
 
     const summary: DashboardSummary = {
       totalInvested,

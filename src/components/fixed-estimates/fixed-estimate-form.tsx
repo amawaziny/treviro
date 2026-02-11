@@ -29,7 +29,6 @@ import {
   fixedEstimateTypes,
   fixedEstimatePeriods,
 } from "@/lib/schemas";
-import { useFinancialRecords } from "@/hooks/use-financial-records";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -76,7 +75,7 @@ export function FixedEstimateForm({
         ? {
             type: estimate.type,
             name: estimate.name ?? "",
-            amount: estimate.isExpense ? estimate.amount * -1 : estimate.amount,
+            amount: Math.abs(estimate.amount),
             period: estimate.period,
             isExpense: estimate.isExpense,
           }

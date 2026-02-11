@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
@@ -76,7 +76,7 @@ export default function EditExpensePage() {
               initialValues={{
                 category: expense.type,
                 description: expense.description ?? "",
-                amount: expense.amount * -1,
+                amount: Math.abs(expense.amount),
                 date: formatDateISO(expense.date || new Date()),
                 isInstallment: expense.isInstallment ?? false,
                 numberOfInstallments: expense.numberOfInstallments,

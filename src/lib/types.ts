@@ -59,7 +59,7 @@ export type InvestmentData<T extends Investment = Investment> = Omit<
 export interface BaseInvestment {
   id: string;
   type: InvestmentType;
-  name: string;
+  // name: string;
   totalShares: number; // Current number of shares/units held
   totalInvested: number; // Total amount invested (cost basis)
   averagePurchasePrice: number; // Weighted average purchase price
@@ -314,15 +314,18 @@ export interface SecurityChartDataPoint {
 
 export type SecurityChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 
-export type TransactionType =
-  | "BUY" // For purchasing any asset (stocks, gold, currency, etc.)
-  | "PAYMENT" // For installments, fees, or other payments
-  | "EXPENSE" // For expenses
-  | "SELL" // For selling any asset
-  | "DIVIDEND" // For dividend income
-  | "INCOME" // For receiving income;
-  | "INTEREST" // For interest income
-  | "MATURED_DEBT"; // For matured debt
+export const TRANSACTION_TYPE_META = {
+  BUY: { sign: -1, income: false },
+  PAYMENT: { sign: -1, income: false },
+  EXPENSE: { sign: 1, income: false }, // Expenses already sent as negative value
+  SELL: { sign: 1, income: true },
+  DIVIDEND: { sign: 1, income: true },
+  INCOME: { sign: 1, income: true },
+  INTEREST: { sign: 1, income: true },
+  MATURED_DEBT: { sign: 1, income: true },
+} as const;
+
+export type TransactionType = keyof typeof TRANSACTION_TYPE_META;
 
 export interface Transaction {
   id: string;

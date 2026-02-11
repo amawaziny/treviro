@@ -42,7 +42,6 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     purchasePricePerShare: 0,
     purchaseFees: 0,
     purchaseDate: getCurrentDate(),
-    name: "",
   },
   Gold: {
     type: "Gold",
@@ -50,7 +49,6 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     quantityInGrams: 1,
     amountInvested: 0,
     purchaseDate: getCurrentDate(),
-    name: "",
   },
   Currencies: {
     type: "Currencies",
@@ -58,7 +56,6 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     foreignCurrencyAmount: 1,
     exchangeRateAtPurchase: 1,
     purchaseDate: getCurrentDate(),
-    name: "",
   },
   "Real Estate": {
     type: "Real Estate",
@@ -68,7 +65,6 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     installmentFrequency: "Monthly",
     installmentAmount: 0,
     purchaseDate: getCurrentDate(),
-    name: "",
   },
   "Debt Instruments": {
     type: "Debt Instruments",
@@ -79,7 +75,6 @@ const initialFormValuesByType: Record<InvestmentType, InvestmentFormValues> = {
     interestFrequency: "Monthly",
     amountInvested: 0,
     purchaseDate: getCurrentDate(),
-    name: "",
   },
 };
 
@@ -165,7 +160,7 @@ export function InvestmentForm({
       return;
     }
 
-    let investmentName = values.name || "";
+    let investmentName = "";
 
     if (!watchedType) {
       toast({
@@ -200,7 +195,6 @@ export function InvestmentForm({
         ...newInvestmentBase,
         type: values.type,
         securityId: selectedSecurity.id,
-        name: investmentName,
         quantity: values.numberOfShares,
         pricePerUnit: values.purchasePricePerShare,
         fees: values.purchaseFees,
@@ -216,7 +210,6 @@ export function InvestmentForm({
       const debtInvestment: InvestmentData<DebtInstrumentInvestment> = {
         ...newInvestmentBase,
         type: values.type,
-        name: investmentName,
         quantity: 1,
         pricePerUnit: values.amountInvested,
         issuer: values.issuer || "",
@@ -236,13 +229,11 @@ export function InvestmentForm({
 
       newInvestment = debtInvestment;
     } else if (isDedicatedGoldMode && values.type == "Gold") {
-      investmentName =
-        values.name || `${t("gold")} (${values.goldType || t("na")})`;
+      investmentName = `${t("gold")} (${values.goldType || t("na")})`;
 
       const goldInvestment: InvestmentData<GoldInvestment> = {
         ...newInvestmentBase,
         type: values.type,
-        name: investmentName,
         quantity: values.quantityInGrams,
         pricePerUnit: values.amountInvested / values.quantityInGrams,
         goldType: values.goldType!,
@@ -250,13 +241,11 @@ export function InvestmentForm({
 
       newInvestment = goldInvestment;
     } else if (isDedicatedCurrencyMode && values.type == "Currencies") {
-      investmentName =
-        values.name || `${t("currency")} (${values.currencyCode || t("na")})`;
+      investmentName = `${t("currency")} (${values.currencyCode || t("na")})`;
 
       const currencyInvestment: InvestmentData<CurrencyInvestment> = {
         ...newInvestmentBase,
         type: values.type,
-        name: investmentName,
         quantity: values.foreignCurrencyAmount,
         pricePerUnit: values.exchangeRateAtPurchase,
         currencyCode: values.currencyCode!,
@@ -264,13 +253,11 @@ export function InvestmentForm({
 
       newInvestment = currencyInvestment;
     } else if (isDedicatedRealEstateMode && values.type == "Real Estate") {
-      investmentName =
-        values.name || `${t("real_estate")} (${values.propertyAddress || ""})`;
+      investmentName = `${t("real_estate")} (${values.propertyAddress || ""})`;
 
       const realEstateInvestment: InvestmentData<RealEstateInvestment> = {
         ...newInvestmentBase,
         type: values.type,
-        name: investmentName,
         propertyType: values.propertyType,
         propertyAddress: values.propertyAddress,
         totalPrice: values.totalInstallmentPrice,
@@ -306,14 +293,14 @@ export function InvestmentForm({
       await editInvestment(initialValues["id"] as string, newInvestment);
       toast({
         title: t("investment_edited"),
-        description: `${t(watchedType)}: ${newInvestment.name} ${t("has_been_successfully_edited")}.`,
+        description: `${t(watchedType)}: ${investmentName} ${t("has_been_successfully_edited")}.`,
         testId: "investment-edited-toast",
       });
     } else {
       await buyNew(newInvestment);
       toast({
         title: t("investment_added"),
-        description: `${t(watchedType)}: ${newInvestment.name} ${t("has_been_successfully_added")}.`,
+        description: `${t(watchedType)}: ${investmentName} ${t("has_been_successfully_added")}.`,
         testId: "investment-added-toast",
       });
     }

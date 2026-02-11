@@ -161,6 +161,25 @@ export function InvestmentSecurityCard({
               </span>
             </p>
           </div>
+          <div className="mt-1 text-xs text-muted-foreground grid grid-cols-2 gap-2">
+            <p>
+              {`${t("total_cost")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(isMobile, investment.totalInvested)}
+              </span>
+            </p>
+            <p className="text-end">
+              {`${t("market_value")}: `}
+              <span className="font-medium text-foreground">
+                {security.price !== undefined
+                  ? formatNumberForMobile(
+                      isMobile,
+                      investment.totalShares * security.price,
+                    )
+                  : t("na")}
+              </span>
+            </p>
+          </div>
         </CardContent>
       </Link>
     </Card>

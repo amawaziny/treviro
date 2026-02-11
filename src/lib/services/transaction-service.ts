@@ -13,13 +13,14 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import type {
-  Transaction,
-  TransactionType,
-  CurrencyCode,
-  BaseRecord,
-  ExpenseRecord,
-  FixedEstimateRecord,
+import {
+  type Transaction,
+  type TransactionType,
+  type CurrencyCode,
+  type BaseRecord,
+  type ExpenseRecord,
+  type FixedEstimateRecord,
+  TRANSACTION_TYPE_META,
 } from "@/lib/types";
 import {
   eventBus,
@@ -380,6 +381,8 @@ export class TransactionService {
   /**
    * Records a transaction and updates the associated investment.
    * This is the main method for recording any type of transaction.
+   * Any transaction is effecting cash balance account so sell investment is something incrementing cache balance regardless is it profit or loss
+   * and sell is negative for investment account
    *
    * @param transactionData - The transaction data (excluding auto-generated fields)
    * @returns The created transaction with all fields populated
@@ -417,22 +420,26 @@ export class TransactionService {
       profitOrLoss = 0,
       fees = 0,
       quantity = 0,
+      amount = 0,
     } = transactionData;
+
+    const sign = TRANSACTION_TYPE_META[transactionData.type].sign;
+    amount *= sign;
 
     if (transactionData.type === "SELL") {
       profitOrLoss =
-        quantity * transactionData.averagePurchasePrice -
-        transactionData.amount;
+        amount - Math.abs(quantity) * transactionData.averagePurchasePrice;
     }
     // Create the transaction with all required fields
     const newTransaction: Transaction = {
       ...transactionData,
       id: transactionId,
       createdAt: now,
-      pricePerUnit: pricePerUnit,
-      fees: fees,
-      quantity: quantity,
-      profitOrLoss: profitOrLoss,
+      pricePerUnit,
+      fees,
+      quantity,
+      amount,
+      profitOrLoss,
       currency: transactionData.currency || ("EGP" as CurrencyCode),
       description: transactionData.description || "",
       metadata: {
