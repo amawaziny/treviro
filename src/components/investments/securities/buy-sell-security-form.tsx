@@ -202,7 +202,7 @@ export function BuySellSecurityForm({
                     allowDecimal={false}
                   />
                 </FormControl>
-                <FormDescription>
+                <FormDescription hidden={mode == "buy"}>
                   {t("max")}
                   {maxSharesToSell}
                 </FormDescription>

@@ -317,7 +317,7 @@ export type SecurityChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 export const TRANSACTION_TYPE_META = {
   BUY: { sign: -1, income: false },
   PAYMENT: { sign: -1, income: false },
-  EXPENSE: { sign: 1, income: false }, // Expenses already sent as negative value
+  EXPENSE: { sign: -1, income: false },
   SELL: { sign: 1, income: true },
   DIVIDEND: { sign: 1, income: true },
   INCOME: { sign: 1, income: true },

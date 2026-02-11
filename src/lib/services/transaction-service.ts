@@ -424,7 +424,7 @@ export class TransactionService {
     } = transactionData;
 
     const sign = TRANSACTION_TYPE_META[transactionData.type].sign;
-    amount *= sign;
+    amount = Math.abs(amount) * sign;
 
     if (transactionData.type === "SELL") {
       profitOrLoss =
