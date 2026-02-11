@@ -80,7 +80,7 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const totalInvested = dashboardSummary?.totalInvested ?? 0;
+  const totalInvested = Math.abs(dashboardSummary?.totalInvested ?? 0);
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
   const totalCurrentPortfolioPnL = totalPortfolio?.unrealizedPnL ?? 0;

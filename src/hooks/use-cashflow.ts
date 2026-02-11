@@ -332,7 +332,9 @@ export function useCashflow({
     setSecuritiesInvestmentTrxs(securitiesInvestments);
 
     setTotalSecuritiesInvestments(
-      securitiesInvestments.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      Math.abs(
+        securitiesInvestments.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      ),
     );
   }, [investmentTrxs]);
 
@@ -345,7 +347,9 @@ export function useCashflow({
     setStockInvestmentTrxs(stockInvestmentTrxs);
 
     setTotalStockInvestments(
-      stockInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      Math.abs(
+        stockInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      ),
     );
   }, [investmentTrxs]);
 
@@ -358,7 +362,9 @@ export function useCashflow({
     setDebtInvestmentTrxs(debtInvestmentTrxs);
 
     setTotalDebtInvestments(
-      debtInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      Math.abs(
+        debtInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      ),
     );
   }, [investmentTrxs]);
 
@@ -371,7 +377,9 @@ export function useCashflow({
     setGoldInvestmentTrxs(goldInvestmentTrxs);
 
     setTotalGoldInvestments(
-      goldInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      Math.abs(
+        goldInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      ),
     );
   }, [investmentTrxs]);
 
@@ -384,7 +392,9 @@ export function useCashflow({
     setCurrencyInvestmentTrxs(currencyInvestmentTrxs);
 
     setTotalCurrencyInvestments(
-      currencyInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      Math.abs(
+        currencyInvestmentTrxs.reduce((sum, tx) => sum + (tx.amount || 0), 0),
+      ),
     );
   }, [investmentTrxs]);
 

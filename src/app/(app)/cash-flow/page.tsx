@@ -331,7 +331,10 @@ export default function CashFlowPage() {
                           {inv.securityId || inv.id || t("unnamed_stock")}
                         </span>
                         <span>
-                          {formatNumberForMobile(isMobile, inv.amount || 0)}
+                          {formatNumberForMobile(
+                            isMobile,
+                            Math.abs(inv.amount),
+                          )}
                         </span>
                       </li>
                     );
@@ -354,7 +357,7 @@ export default function CashFlowPage() {
                     >
                       <span>{inv.description || t("unnamed_debt")}</span>
                       <span>
-                        {formatNumberForMobile(isMobile, inv.amount || 0)}
+                        {formatNumberForMobile(isMobile, Math.abs(inv.amount))}
                       </span>
                     </li>
                   ))}
@@ -376,7 +379,7 @@ export default function CashFlowPage() {
                     >
                       <span>{inv.description || t("unnamed_gold")}</span>
                       <span>
-                        {formatNumberForMobile(isMobile, inv.amount || 0)}
+                        {formatNumberForMobile(isMobile, Math.abs(inv.amount))}
                       </span>
                     </li>
                   ))}
@@ -403,7 +406,9 @@ export default function CashFlowPage() {
                     >
                       <span className="flex items-center gap-2 text-xs">
                         <Landmark className="h-4 w-4 text-blue-500" />
-                        <span className="whitespace-pre-line">{inv.name}</span>
+                        <span className="whitespace-pre-line">
+                          {inv.propertyAddress ?? inv.propertyType}
+                        </span>
                       </span>
                       <span className="text-end text-xs">
                         {formatNumberForMobile(

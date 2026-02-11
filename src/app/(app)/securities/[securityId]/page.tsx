@@ -689,7 +689,7 @@ export default function SecurityDetailPage() {
                               {`${security.securityType === "Fund" ? t("units") : t("shares")}`}
                             </p>
                             <p className="font-medium">
-                              {tx.quantity.toLocaleString()}
+                              {Math.abs(tx.quantity).toLocaleString()}
                             </p>
                           </div>
                           <div className="text-right">
@@ -731,7 +731,7 @@ export default function SecurityDetailPage() {
                             </p>
                             <p className="text-sm font-medium">
                               {formatCurrencyWithCommas(
-                                tx.amount,
+                                Math.abs(tx.amount),
                                 displayCurrency,
                               )}
                             </p>

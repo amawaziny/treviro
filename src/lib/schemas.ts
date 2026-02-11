@@ -107,7 +107,6 @@ const stringToRequiredPositiveIntegerCoerced = z.preprocess(
 // Discriminated union for AddInvestmentSchema
 const SecuritiesInvestmentSchema = z.object({
   type: z.literal("Securities"),
-  name: z.string().optional(),
   selectedSecurityId: z
     .string({ required_error: "Please select a security." })
     .min(1, "Please select a security."),
@@ -127,7 +126,6 @@ const SecuritiesInvestmentSchema = z.object({
 
 const GoldInvestmentSchema = z.object({
   type: z.literal("Gold"),
-  name: z.string().optional(),
   goldType: z.enum(goldTypes, { required_error: "Gold type is required." }),
   quantityInGrams: stringToRequiredNonNegativeNumberCoerced,
   amountInvested: stringToRequiredNonNegativeNumberCoerced,
@@ -141,7 +139,6 @@ const GoldInvestmentSchema = z.object({
 
 const CurrencyInvestmentSchema = z.object({
   type: z.literal("Currencies"),
-  name: z.string().optional(),
   currencyCode: z
     .string()
     .min(1, { message: "Transaction currency code is required." }),
@@ -158,7 +155,6 @@ const CurrencyInvestmentSchema = z.object({
 
 const RealEstateInvestmentSchema = z.object({
   type: z.literal("Real Estate"),
-  name: z.string().optional(),
   propertyAddress: z
     .string()
     .min(1, { message: "Property address is required." }),
@@ -201,7 +197,6 @@ const RealEstateInvestmentSchema = z.object({
 
 const DebtInstrumentInvestmentSchema = z.object({
   type: z.literal("Debt Instruments"),
-  name: z.string().optional(),
   debtSubType: z.enum(debtSubTypes, {
     required_error: "Specific debt type is required.",
   }),
