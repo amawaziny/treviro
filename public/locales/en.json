@@ -780,5 +780,12 @@
   "confirmation_successful": "Confirmation Successful",
   "the_fixed_estimate_has_been_confirmed_successfully": "The fixed estimate has been confirmed successfully",
   "failed_to_confirm_fixed_estimate": "Failed to confirm fixed estimate",
-  "could_not_confirm_the_fixed_estimate": "Could not confirm the fixed estimate"
+  "could_not_confirm_the_fixed_estimate": "Could not confirm the fixed estimate",
+  "INCOME": "Income",
+  "Securities": "Securities",
+  "EXPENSE": "Expenses",
+  "PAYMENT": "Payment",
+  "DIVIDEND": "Dividend",
+  "INTEREST": "Interset",
+  "MATURED_DEBT": "Matured Debt"
 }

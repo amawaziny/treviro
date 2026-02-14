@@ -6,13 +6,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CashFlowSummaryCardsProps {
   totalIncome: number;
-  totalFixedIncome: number;
-  totalProjectedDebtMonthlyInterest: number;
   incomeTillNow: number;
   totalExpenses: number;
-  totalFixedExpenses: number;
-  totalExpensesManualCreditCard: number;
-  totalExpensesManualOther: number;
   totalRealEstateInstallments: number;
   totalStockInvestments: number;
   totalDebtInvestments: number;
@@ -23,13 +18,8 @@ interface CashFlowSummaryCardsProps {
 
 export function CashFlowSummaryCards({
   totalIncome,
-  totalFixedIncome,
-  totalProjectedDebtMonthlyInterest,
   incomeTillNow,
   totalExpenses,
-  totalFixedExpenses,
-  totalExpensesManualCreditCard,
-  totalExpensesManualOther,
   totalRealEstateInstallments,
   totalStockInvestments,
   totalDebtInvestments,
@@ -83,27 +73,6 @@ export function CashFlowSummaryCards({
             <p className="text-xl font-medium text-green-700 dark:text-green-300">
               {formatNumberForMobile(isMobile, totalIncome)}
             </p>
-            <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
-              {totalFixedIncome > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("fixed_income")}</span>
-                  <span>
-                    {formatNumberForMobile(isMobile, totalFixedIncome)}
-                  </span>
-                </div>
-              )}
-              {totalProjectedDebtMonthlyInterest > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("projected_debt_interest")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      totalProjectedDebtMonthlyInterest,
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -126,23 +95,6 @@ export function CashFlowSummaryCards({
             <p className="text-xl font-medium text-red-700 dark:text-red-300">
               {formatNumberForMobile(isMobile, totalExpenses)}
             </p>
-            <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
-              <div className="flex justify-between">
-                <span>{t("itemized_logged_expenses")}</span>
-                <span>
-                  {formatNumberForMobile(
-                    isMobile,
-                    totalExpensesManualCreditCard + totalExpensesManualOther,
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>{t("fixed_expenses")}</span>
-                <span>
-                  {formatNumberForMobile(isMobile, totalFixedExpenses)}
-                </span>
-              </div>
-            </div>
           </CardContent>
         </Card>
         <Card

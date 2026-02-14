@@ -63,23 +63,17 @@ export default function CashFlowPage() {
     totalIncome,
     totalProjectedDebtMonthlyInterest,
     totalExpenses,
-    incomeManualTrxs,
-    expensesManualOtherTrxs,
-    expensesManualCreditCardTrxs,
-    expensesManualCreditCardUnpaid,
-    dividendTrxs,
-    incomesFixed,
-    expensesFixed,
+    incomesTrxs,
+    expensesTrxs,
+    expensesManualCreditCardPlanned,
+    incomesFixedPlanned,
+    expensesFixedPlanned,
     incomeTillNow,
-    totalFixedIncome,
-    totalFixedExpenses,
     totalRealEstateInstallments,
     totalStockInvestments,
     totalDebtInvestments,
     totalGoldInvestments,
     totalInvestments,
-    totalExpensesManualCreditCard,
-    totalExpensesManualOther,
     stockInvestmentTrxs,
     debtInvestmentTrxs,
     goldInvestmentTrxs,
@@ -141,13 +135,8 @@ export default function CashFlowPage() {
 
       <CashFlowSummaryCards
         totalIncome={totalIncome}
-        totalFixedIncome={totalFixedIncome}
-        totalProjectedDebtMonthlyInterest={totalProjectedDebtMonthlyInterest}
         incomeTillNow={incomeTillNow}
         totalExpenses={totalExpenses}
-        totalFixedExpenses={totalFixedExpenses}
-        totalExpensesManualCreditCard={totalExpensesManualCreditCard}
-        totalExpensesManualOther={totalExpensesManualOther}
         totalRealEstateInstallments={totalRealEstateInstallments}
         totalStockInvestments={totalStockInvestments}
         totalDebtInvestments={totalDebtInvestments}
@@ -167,9 +156,26 @@ export default function CashFlowPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {incomesFixed.map((income, idx) => (
+            {incomesTrxs.map(({ metadata: src, amount, ...trx }, idx) => (
               <div
-                key={`fixed-income-${idx}`}
+                key={`manual-income-${idx}`}
+                className="flex justify-between text-xs"
+              >
+                <div className="flex items-center">
+                  <PiggyBank className="h-4 w-4 me-1" />
+                  <span>
+                    {src.description
+                      ? src.description
+                      : `${t(trx.type)} ${t(src.sourceSubType)} ${trx.securityId ? `(${trx.securityId})` : ""}`}
+                  </span>
+                </div>
+                <span>{formatNumberForMobile(isMobile, amount)}</span>
+              </div>
+            ))}
+            <Separator className="my-2" />
+            {incomesFixedPlanned.map((income, idx) => (
+              <div
+                key={`fixed-income-planned-${idx}`}
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">
@@ -179,37 +185,6 @@ export default function CashFlowPage() {
                 <span>{formatNumberForMobile(isMobile, income.amount)}</span>
               </div>
             ))}
-            {incomeManualTrxs.map((income, idx) => (
-              <div
-                key={`manual-income-${idx}`}
-                className="flex justify-between text-xs"
-              >
-                <div className="flex items-center">
-                  <PiggyBank className="h-4 w-4 me-1" />
-                  <span>
-                    {income.metadata.description
-                      ? income.metadata.description
-                      : t(income.metadata.sourceSubType)}
-                  </span>
-                </div>
-                <span>{formatNumberForMobile(isMobile, income.amount)}</span>
-              </div>
-            ))}
-            {dividendTrxs.map((tx, idx) => (
-              <div
-                key={`dividend-income-${idx}`}
-                className="flex justify-between text-xs"
-              >
-                <div className="flex items-center">
-                  <HandCoins className="h-4 w-4 me-1" />
-                  <span>
-                    {`${t("dividend")} ${tx.securityId ? `(${tx.securityId})` : ""}`}
-                  </span>
-                </div>
-                <span>{formatNumberForMobile(isMobile, tx.amount)}</span>
-              </div>
-            ))}
-
             <div className="flex justify-between text-xs">
               <div className="flex items-center">
                 <ScrollText className="h-4 w-4 me-1" />
@@ -238,9 +213,29 @@ export default function CashFlowPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            {expensesFixed.map((expense, idx) => (
+            {expensesTrxs.map(({ metadata: src, amount, ...trx }, idx) => (
               <div
-                key={`fixed-expense-${idx}`}
+                key={`manual-expense-${idx}`}
+                className="flex justify-between text-xs"
+              >
+                <div className="flex items-center">
+                  <Banknote className="h-4 w-4 me-1" />
+                  <span>
+                    {src.description
+                      ? src.description
+                      : `${t(trx.type)} ${t(src.sourceSubType)}`}
+                  </span>
+                </div>
+                <span>{formatNumberForMobile(isMobile, amount)}</span>
+              </div>
+            ))}
+            {(expensesFixedPlanned.length > 0 ||
+              expensesManualCreditCardPlanned.length > 0) && (
+              <Separator className="my-2" />
+            )}
+            {expensesFixedPlanned.map((expense, idx) => (
+              <div
+                key={`fixed-expense-planned-${idx}`}
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">
@@ -250,41 +245,9 @@ export default function CashFlowPage() {
                 <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
               </div>
             ))}
-            {expensesManualOtherTrxs.map((expense, idx) => (
+            {expensesManualCreditCardPlanned.map((expense, idx) => (
               <div
-                key={`manual-expense-${idx}`}
-                className="flex justify-between text-xs"
-              >
-                <div className="flex items-center">
-                  <Banknote className="h-4 w-4 me-1" />
-                  <span>
-                    {expense.metadata.description
-                      ? expense.metadata.description
-                      : formatDateDisplay(expense.date)}
-                  </span>
-                </div>
-                <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
-              </div>
-            ))}
-            {expensesManualCreditCardTrxs.map((expense, idx) => (
-              <div
-                key={`credit-card-expense-${idx}`}
-                className="flex justify-between text-xs"
-              >
-                <div className="flex items-center">
-                  <CreditCard className="h-4 w-4 me-1" />
-                  <span>
-                    {expense.metadata.description
-                      ? expense.metadata.description
-                      : formatDateDisplay(expense.date)}
-                  </span>
-                </div>
-                <span>{formatNumberForMobile(isMobile, expense.amount)}</span>
-              </div>
-            ))}
-            {expensesManualCreditCardUnpaid.map((expense, idx) => (
-              <div
-                key={`credit-card-expense-unpaid-${idx}`}
+                key={`credit-card-expense-planned-${idx}`}
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">

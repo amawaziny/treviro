@@ -43,6 +43,7 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 20. sucess message after buyNew check translation
  * 21. navigation from stock details to my stock or securities explore
  * 22. fix fixed estimates if it more than one in this month
+ * 23. cashflow income details use incomeTypesTrx
  */
 
 export class DashboardService {

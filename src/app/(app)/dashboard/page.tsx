@@ -87,13 +87,8 @@ export default function DashboardPage() {
 
   const {
     totalIncome,
-    totalProjectedDebtMonthlyInterest,
     incomeTillNow,
-    totalFixedIncome,
     totalExpenses,
-    totalFixedExpenses,
-    totalExpensesManualCreditCard,
-    totalExpensesManualOther,
     totalRealEstateInstallments,
     totalSecuritiesInvestments,
     totalDebtInvestments,
@@ -331,15 +326,8 @@ export default function DashboardPage() {
         <CardContent>
           <CashFlowSummaryCards
             totalIncome={totalIncome}
-            totalFixedIncome={totalFixedIncome}
-            totalProjectedDebtMonthlyInterest={
-              totalProjectedDebtMonthlyInterest
-            }
             incomeTillNow={incomeTillNow}
             totalExpenses={totalExpenses}
-            totalFixedExpenses={totalFixedExpenses}
-            totalExpensesManualCreditCard={totalExpensesManualCreditCard}
-            totalExpensesManualOther={totalExpensesManualOther}
             totalRealEstateInstallments={totalRealEstateInstallments}
             totalStockInvestments={totalSecuritiesInvestments}
             totalDebtInvestments={totalDebtInvestments}

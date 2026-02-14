@@ -817,5 +817,12 @@
   "confirmation_successful": "تم التأكيد بنجاح",
   "the_fixed_estimate_has_been_confirmed_successfully": "تم تأكيد التقدير الثابت بنجاح",
   "failed_to_confirm_fixed_estimate": "فشل في تأكيد التقدير الثابت",
-  "could_not_confirm_the_fixed_estimate": "تعذر تأكيد التقدير الثابت"
+  "could_not_confirm_the_fixed_estimate": "تعذر تأكيد التقدير الثابت",
+  "INCOME": "دخل",
+  "Securities": "اوراق مالية",
+  "EXPENSE": "مصروفات",
+  "PAYMENT": "مدفوعات",
+  "DIVIDEND": "ارباح",
+  "INTEREST": "عائد",
+  "MATURED_DEBT": "شهادات منتهية"
 }

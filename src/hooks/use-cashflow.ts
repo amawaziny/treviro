@@ -46,19 +46,12 @@ export function useCashflow({
   endMonth,
 }: CashFlowSummaryArgs) {
   const [investmentTrxs, setInvestmentTrxs] = useState<Transaction[]>([]);
-  const [totalFixedIncome, setTotalFixedIncome] = useState<number>(0);
   const [
     totalProjectedDebtMonthlyInterest,
     setTotalProjectedDebtMonthlyInterest,
   ] = useState<number>(0);
   const [incomeTillNow, setIncomeTillNow] = useState<number>(0);
-  const [totalInterestAndFixedIncome, setTotalInterestAndFixedIncome] =
-    useState<number>(0);
-  const [totalFixedExpenses, setTotalFixedExpenses] = useState<number>(0);
-  const [totalExpensesManualOther, setTotalExpensesManualOther] =
-    useState<number>(0);
-  const [totalExpensesManualCreditCard, setTotalExpensesManualCreditCard] =
-    useState<number>(0);
+  const [totalExpensesTrxs, setTotalExpensesTrxs] = useState<number>(0);
   const [totalRealEstateInstallments, setTotalRealEstateInstallments] =
     useState<number>(0);
   const [totalSecuritiesInvestments, setTotalSecuritiesInvestments] =
@@ -70,26 +63,29 @@ export function useCashflow({
     useState<number>(0);
   const [totalInvestments, setTotalInvestments] = useState<number>(0);
   const [totalIncome, setTotalIncome] = useState<number>(0);
+  const [totalIncomesFixedPlanned, setTotalIncomesFixedPlanned] =
+    useState<number>(0);
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
+  const [totalFixedExpensesPlanned, setTotalFixedExpensesPlanned] =
+    useState<number>(0);
+  const [
+    totalExpensesManualCreditCardPlanned,
+    setTotalExpensesManualCreditCardPlanned,
+  ] = useState<number>(0);
   const [netCashFlow, setNetCashFlow] = useState<number>(0);
   const [netTillNowCashFlow, setNetTillNowCashFlow] = useState<number>(0);
-  const [incomesFixed, setIncomesFixed] = useState<FixedEstimateRecord[]>([]);
+  const [incomesFixedPlanned, setIncomesFixedPlanned] = useState<
+    FixedEstimateRecord[]
+  >([]);
   const [debtInvestments, setDebtInvestments] = useState<
     DebtInstrumentInvestment[]
   >([]);
-  const [incomeTypesTrxs, setIncomeTypesTrxs] = useState<Transaction[]>([]);
-  const [incomeManualTrxs, setIncomeManualTrxs] = useState<Transaction[]>([]);
-  const [dividendTrxs, setDividendTrxs] = useState<Transaction[]>([]);
-  const [interestAndFixedIncomeTrxs, setInterestAndFixedIncomeTrxs] = useState<
-    Transaction[]
+  const [incomesTrxs, setIncomesTrxs] = useState<Transaction[]>([]);
+  const [expensesFixedPlanned, setExpensesFixedPlanned] = useState<
+    FixedEstimateRecord[]
   >([]);
-  const [expensesFixed, setExpensesFixed] = useState<FixedEstimateRecord[]>([]);
-  const [expensesManualOtherTrxs, setExpensesManualOtherTrxs] = useState<
-    Transaction[]
-  >([]);
-  const [expensesManualCreditCardTrxs, setExpensesManualCreditCardTrxs] =
-    useState<Transaction[]>([]);
-  const [expensesManualCreditCardUnpaid, setExpensesManualCreditCardUnpaid] =
+  const [expensesTrxs, setExpensesTrxs] = useState<Transaction[]>([]);
+  const [expensesManualCreditCardPlanned, setExpensesManualCreditCardPlanned] =
     useState<ExpenseRecord[]>([]);
   const [realEstateInvestments, setRealEstateInvestments] = useState<
     RealEstateInvestment[]
@@ -117,11 +113,16 @@ export function useCashflow({
     setInvestmentTrxs(investmentTrxs);
   }, [transactions]);
 
-  const calculateTotalFixedIncome = useCallback(() => {
+  const calculateTotalFixedIncomePlanned = useCallback(() => {
     const fixedIncomes = fixedEstimates.filter((fe) => !fe.isExpense);
-    setIncomesFixed(fixedIncomes);
-    setTotalFixedIncome(fixedIncomes.reduce((sum, fe) => sum + fe.amount, 0));
-  }, [fixedEstimates]);
+    const incomesPlanned = fixedIncomes.filter(
+      (income) => !incomesTrxs.find((trx) => trx.sourceId === income.id),
+    );
+    setIncomesFixedPlanned(incomesPlanned);
+    setTotalIncomesFixedPlanned(
+      incomesPlanned.reduce((sum, tx) => sum + tx.amount, 0),
+    );
+  }, [fixedEstimates, incomesTrxs]);
 
   const calculateTotalProjectedDebtMonthlyInterest = useCallback(() => {
     const debtInvestments = investments.filter(isDebtInstrumentInvestment);
@@ -132,9 +133,8 @@ export function useCashflow({
   }, [investments]);
 
   const calculateIncomeTillNow = useCallback(() => {
-    const incomeTypesTrxs = transactions.filter((tx) => {
+    const incomesTrxs = transactions.filter((tx) => {
       const isIncomeType = [
-        "INTEREST",
         "DIVIDEND",
         "INCOME",
         "SELL",
@@ -142,112 +142,72 @@ export function useCashflow({
       ].includes(tx.type);
       return isIncomeType;
     });
-    setIncomeTypesTrxs(incomeTypesTrxs);
 
-    setIncomeManualTrxs(
-      incomeTypesTrxs.filter((tx) => {
-        return tx.type === "INCOME" && tx.sourceType !== "Fixed Estimate";
-      }),
-    );
+    // Group by sourceId, sum amounts, keep the latest transaction
+    const incomesGroupedBySourcIdTrxs =
+      groupTransactionsBySourceId(incomesTrxs);
+    setIncomesTrxs(incomesGroupedBySourcIdTrxs);
 
-    setDividendTrxs(incomeTypesTrxs.filter((tx) => tx.type === "DIVIDEND"));
-
-    setIncomeTillNow(incomeTypesTrxs.reduce((sum, tx) => sum + tx.amount, 0));
-  }, [transactions]);
-
-  const calculateTotalInterestAndFixedIncome = useCallback(() => {
-    const interestAndFixedIncomeTrxs = transactions.filter(
-      (tx) =>
-        tx.type === "INTEREST" ||
-        (tx.type === "INCOME" && tx.sourceType === "Fixed Estimate"),
-    );
-    setInterestAndFixedIncomeTrxs(interestAndFixedIncomeTrxs);
-
-    setTotalInterestAndFixedIncome(
-      interestAndFixedIncomeTrxs.reduce((sum, tx) => sum + tx.amount, 0),
-    );
+    setIncomeTillNow(incomesTrxs.reduce((sum, tx) => sum + tx.amount, 0));
   }, [transactions]);
 
   const calculateTotalFixedExpenses = useCallback(() => {
     const fixedExpenses = fixedEstimates.filter((fe) => fe.isExpense);
-    setExpensesFixed(fixedExpenses);
 
-    setTotalFixedExpenses(
-      fixedExpenses.reduce((sum, fe) => sum + fe.amount, 0),
+    const expensesFixedPlanned = fixedExpenses.filter(
+      (expense) => !expensesTrxs.find((trx) => trx.sourceId === expense.id),
     );
-  }, [fixedEstimates]);
+    setExpensesFixedPlanned(expensesFixedPlanned);
 
-  const calculateTotalExpensesManualOther = useCallback(() => {
-    const expensesManualOther = transactions.filter(
-      (tx) =>
-        tx.type === "EXPENSE" &&
-        tx.sourceType === "Expense" &&
-        tx.metadata.sourceSubType === "Other",
+    const totalExpensesFixedPlanned = expensesFixedPlanned.reduce(
+      (sum, fe) => sum + fe.amount,
+      0,
     );
-    setExpensesManualOtherTrxs(expensesManualOther);
+    setTotalFixedExpensesPlanned(totalExpensesFixedPlanned);
+  }, [fixedEstimates, expensesTrxs]);
 
-    setTotalExpensesManualOther(
-      expensesManualOther.reduce((sum, tx) => sum + tx.amount, 0),
-    );
+  const calculateTotalExpensesTrxs = useCallback(() => {
+    const expenses = transactions.filter((tx) => tx.type === "EXPENSE");
+    setExpensesTrxs(groupTransactionsBySourceId(expenses));
+
+    setTotalExpensesTrxs(expenses.reduce((sum, tx) => sum + tx.amount, 0));
   }, [transactions]);
 
   const calculateTotalExpensesManualCreditCard = useCallback(() => {
-    const expensesManualCreditCardTrx = transactions.filter(
-      (tx) =>
-        tx.type === "EXPENSE" &&
-        tx.sourceType === "Expense" &&
-        tx.metadata.sourceSubType === "Credit Card",
-    );
-
-    // Group by sourceId, sum amounts, keep the latest transaction
-    const groupedBySourceId = expensesManualCreditCardTrx
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .reduce(
-        (acc, tx) => {
-          if (!acc[tx.sourceId]) {
-            acc[tx.sourceId] = { ...tx };
-          } else {
-            acc[tx.sourceId].amount += tx.amount;
-          }
-          return acc;
-        },
-        {} as Record<string, Transaction>,
-      );
-
-    const groupedBySourcIdTrxs = Object.values(groupedBySourceId);
-    setExpensesManualCreditCardTrxs(groupedBySourcIdTrxs);
-
-    const expensesManualCreditCardUnpaid = expensesManualCreditCard.filter(
+    const expensesManualCreditCardPlanned = expensesManualCreditCard.filter(
       (expense) => {
-        return !groupedBySourcIdTrxs.find((tx) => tx.sourceId === expense.id);
+        const notFound = !expensesTrxs.find((tx) => tx.sourceId === expense.id);
+        if (notFound) {
+          const recordDate = expense.date!;
+
+          const recordMonth = recordDate.getMonth();
+          const recordYear = recordDate.getFullYear();
+          const month = endMonth.getMonth();
+          const year = endMonth.getFullYear();
+
+          const monthsSinceStart =
+            (year - recordYear) * 12 + (month - recordMonth);
+
+          const numberOfInstallments = (expense.numberOfInstallments ?? 0) || 1;
+
+          if (
+            monthsSinceStart >= 0 &&
+            monthsSinceStart < numberOfInstallments
+          ) {
+            return expense;
+          }
+        }
       },
     );
-    setExpensesManualCreditCardUnpaid(expensesManualCreditCardUnpaid);
+    setExpensesManualCreditCardPlanned(expensesManualCreditCardPlanned);
 
-    // Calculate total from transactions first
-    let totalTrx = groupedBySourcIdTrxs.reduce((sum, tx) => sum + tx.amount, 0);
-
-    const totalUnpaid = expensesManualCreditCardUnpaid.reduce((sum, record) => {
-      const recordDate = record.date;
-      if (!recordDate) return sum;
-
-      const recordMonth = recordDate.getMonth();
-      const recordYear = recordDate.getFullYear();
-      const month = endMonth.getMonth();
-      const year = endMonth.getFullYear();
-
-      const monthsSinceStart = (year - recordYear) * 12 + (month - recordMonth);
-
-      const numberOfInstallments = (record.numberOfInstallments ?? 0) || 1;
-
-      if (monthsSinceStart >= 0 && monthsSinceStart < numberOfInstallments) {
-        return sum + (record._requiredAmount ?? record.amount);
-      }
-      return sum;
-    }, 0);
-
-    setTotalExpensesManualCreditCard(totalTrx + totalUnpaid);
-  }, [expensesManualCreditCard, transactions, endMonth]);
+    setTotalExpensesManualCreditCardPlanned(
+      expensesManualCreditCardPlanned.reduce(
+        (sum, record) => sum + (record._requiredAmount ?? record.amount),
+        0,
+      ),
+    );
+  }, [expensesManualCreditCard, expensesTrxs, endMonth]);
 
   const calculateTotalRealEstateInstallments = useCallback(() => {
     const realEstateInvestments = new Map<string, RealEstateInvestment>();
@@ -416,28 +376,26 @@ export function useCashflow({
 
   const calculateTotalIncome = useCallback(() => {
     setTotalIncome(
-      totalFixedIncome +
+      totalIncomesFixedPlanned +
         totalProjectedDebtMonthlyInterest +
-        incomeTillNow -
-        totalInterestAndFixedIncome,
+        incomeTillNow,
     );
   }, [
-    totalFixedIncome,
     totalProjectedDebtMonthlyInterest,
     incomeTillNow,
-    totalInterestAndFixedIncome,
+    totalIncomesFixedPlanned,
   ]);
 
   const calculateTotalExpenses = useCallback(() => {
     setTotalExpenses(
-      totalFixedExpenses +
-        totalExpensesManualCreditCard +
-        totalExpensesManualOther,
+      totalFixedExpensesPlanned +
+        totalExpensesManualCreditCardPlanned +
+        totalExpensesTrxs,
     );
   }, [
-    totalFixedExpenses,
-    totalExpensesManualCreditCard,
-    totalExpensesManualOther,
+    totalFixedExpensesPlanned,
+    totalExpensesManualCreditCardPlanned,
+    totalExpensesTrxs,
   ]);
 
   const calculateNetCashFlow = useCallback(() => {
@@ -470,12 +428,11 @@ export function useCashflow({
 
   // Main effect: Calculate all other values
   useEffect(() => {
-    calculateTotalFixedIncome();
+    calculateTotalFixedIncomePlanned();
     calculateTotalProjectedDebtMonthlyInterest();
     calculateIncomeTillNow();
-    calculateTotalInterestAndFixedIncome();
     calculateTotalFixedExpenses();
-    calculateTotalExpensesManualOther();
+    calculateTotalExpensesTrxs();
     calculateTotalExpensesManualCreditCard();
     calculateTotalRealEstateInstallments();
     calculateTotalInvestments();
@@ -490,13 +447,9 @@ export function useCashflow({
     transactions,
     startMonth,
     endMonth,
-    calculateTotalFixedIncome,
     calculateTotalProjectedDebtMonthlyInterest,
     calculateIncomeTillNow,
-    calculateTotalInterestAndFixedIncome,
-    calculateTotalFixedExpenses,
-    calculateTotalExpensesManualOther,
-    calculateTotalExpensesManualCreditCard,
+    calculateTotalExpensesTrxs,
     calculateTotalRealEstateInstallments,
     calculateTotalInvestments,
     calculateTotalIncome,
@@ -507,26 +460,18 @@ export function useCashflow({
 
   return {
     // Income
-    incomesFixed,
-    incomeTypesTrxs,
-    incomeManualTrxs,
-    dividendTrxs,
-    interestAndFixedIncomeTrxs,
+    incomesFixedPlanned,
+    incomesTrxs,
     totalIncome,
-    totalFixedIncome,
     totalProjectedDebtMonthlyInterest,
     incomeTillNow,
 
     // Expenses
-    expensesFixed,
-    totalFixedExpenses,
-    expensesManualOtherTrxs,
-    expensesManualCreditCardTrxs,
-    expensesManualCreditCardUnpaid,
+    expensesFixedPlanned,
+    expensesTrxs,
+    expensesManualCreditCardPlanned,
     totalExpenses,
-    totalExpensesManualCreditCard,
-    totalExpensesManualOther,
-    totalRealEstateInstallments,
+    totalExpensesTrxs,
 
     // Investments
     stockInvestmentTrxs,
@@ -542,9 +487,28 @@ export function useCashflow({
     totalDebtInvestments,
     totalGoldInvestments,
     totalCurrencyInvestments,
+    totalRealEstateInstallments,
 
     // Summary
     netCashFlow,
     netTillNowCashFlow,
   };
+
+  function groupTransactionsBySourceId(incomeTypesTrxs: Transaction[]) {
+    const groupedBySourceId = incomeTypesTrxs
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .reduce(
+        (acc, tx) => {
+          if (!acc[tx.sourceId]) {
+            acc[tx.sourceId] = { ...tx };
+          } else {
+            acc[tx.sourceId].amount += tx.amount;
+          }
+          return acc;
+        },
+        {} as Record<string, Transaction>,
+      );
+
+    return Object.values(groupedBySourceId);
+  }
 }
