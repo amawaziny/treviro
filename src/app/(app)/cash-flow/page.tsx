@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TransactionTypeIcon } from "@/components/ui/transaction-type-icon";
 import {
   Landmark,
   Wallet,
@@ -162,11 +163,11 @@ export default function CashFlowPage() {
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">
-                  <PiggyBank className="h-4 w-4 me-1" />
+                  <TransactionTypeIcon transactionType={trx.type} className="h-4 w-4 me-1" />
                   <span>
                     {src.description
                       ? src.description
-                      : `${t(trx.type)} ${t(src.sourceSubType)} ${trx.securityId ? `(${trx.securityId})` : ""}`}
+                      : `${t(src.sourceSubType)} ${trx.securityId ? `(${trx.securityId})` : ""}`}
                   </span>
                 </div>
                 <span>{formatNumberForMobile(isMobile, amount)}</span>
@@ -218,12 +219,12 @@ export default function CashFlowPage() {
                 key={`manual-expense-${idx}`}
                 className="flex justify-between text-xs"
               >
-                <div className="flex items-center">
-                  <Banknote className="h-4 w-4 me-1" />
+                <div className="flex items-center">                  
+                  <TransactionTypeIcon transactionType={trx.type} className="h-4 w-4 me-1" />
                   <span>
                     {src.description
                       ? src.description
-                      : `${t(trx.type)} ${t(src.sourceSubType)}`}
+                      : t(src.sourceSubType)}
                   </span>
                 </div>
                 <span>{formatNumberForMobile(isMobile, amount)}</span>

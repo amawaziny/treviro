@@ -39,7 +39,6 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 15. fix investment distribution
  * 16. fix investment breakdown by type in dashboard
  * 17. navigation from stock details to my stock or securities explore
- * 18. cashflow icons based on transaction type
  * 19. test update securities price api then merge to main
  */
 
