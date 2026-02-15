@@ -103,7 +103,7 @@ export function AddDividendSheet({
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="dividend-quantity" className="font-medium">
-              {`${t("number_of")} ${t('units')}`}
+              {`${t("number_of")} ${t("units")}`}
             </label>
             <NumericInput
               placeholder={`e.g., 50 or 10`}

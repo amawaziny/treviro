@@ -114,14 +114,18 @@ export default function SecurityDetailPage() {
   } = useTransactions();
 
   useEffect(() => {
-    if(!dividendSheetOpen)
+    if (!dividendSheetOpen)
       getTransactionsBySecurityId(securityId).then(setTransactions);
   }, [securityId, getTransactionsBySecurityId, dividendSheetOpen]);
 
   const userOwnedSecurities = getInvestmentBySecurityId(securityId);
 
   // Add Dividend Handler
-  const handleAddDividend = async (amount: number, quantity: number, date: string) => {
+  const handleAddDividend = async (
+    amount: number,
+    quantity: number,
+    date: string,
+  ) => {
     try {
       await addDividend(
         userOwnedSecurities!.id,

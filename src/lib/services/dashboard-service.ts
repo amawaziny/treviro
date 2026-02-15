@@ -27,22 +27,20 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 3. Debt interest should effect the cash balance automatically (scheduler or same useEffect for handleMaturedDebtInstruments)
  * 4. we could disable some fields in edit mode of investment form
  * 5. refactor investment-form to be each form has its own submit button and logic
- * 6. investment after submit shows blank screen with fail to detect investment type
- * 7. we could list all installements during adding expenses of type credit card
- * 8. demo account with some transactions and investments to show the features of the app
- * 9. work offline support and caching for transactions and dashboard summary and securities
- * 10. cache stock and gold prices and currency exchange rates and update them if user click update or endofday
- * 11. sell for currecies
- * 12. sell for gold
- * 13. sell for realestate
- * 14. meter price for realestate
- * 15. remove price history collection no need any more with the integration of tradingview widget and we can get the price history from the widget and we will only keep the current price in the securities collection
- * 16. fix investment distribution
- * 17. fix investment breakdown by type in dashboard
- * 18. add noshares field for dividends and its default value is the current no of shares for the security
- * 20. sucess message after buyNew check translation
- * 21. navigation from stock details to my stock or securities explore
- * 22. cashflow icons based on transaction type
+ * 6. we could list all installements during adding expenses of type credit card
+ * 7. demo account with some transactions and investments to show the features of the app
+ * 8. work offline support and caching for transactions and dashboard summary and securities
+ * 9. cache stock and gold prices and currency exchange rates and update them if user click update or endofday
+ * 10. sell for currecies
+ * 11. sell for gold
+ * 12. sell for realestate
+ * 13. meter price for realestate
+ * 14. remove price history collection no need any more with the integration of tradingview widget and we can get the price history from the widget and we will only keep the current price in the securities collection
+ * 15. fix investment distribution
+ * 16. fix investment breakdown by type in dashboard
+ * 17. navigation from stock details to my stock or securities explore
+ * 18. cashflow icons based on transaction type
+ * 19. test update securities price api then merge to main
  */
 
 export class DashboardService {

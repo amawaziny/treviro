@@ -305,7 +305,11 @@ export function InvestmentForm({
       });
     }
 
-    form.reset(getInitialFormValues(watchedType as InvestmentType));
+    let resetValues = getInitialFormValues(watchedType as InvestmentType);
+    if (securityId && resetValues.type === "Securities") {
+      resetValues = { ...resetValues, selectedSecurityId: securityId };
+    }
+    form.reset(resetValues);
   }
 
   return (

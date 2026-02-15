@@ -494,15 +494,16 @@ export function useCashflow({
     netTillNowCashFlow,
   };
 
-  function groupTransactionsBySourceId(incomeTypesTrxs: Transaction[]) {
-    const groupedBySourceId = incomeTypesTrxs
+  function groupTransactionsBySourceId(transactions: Transaction[]) {
+    const groupedBySourceId = transactions
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .reduce(
         (acc, tx) => {
-          if (!acc[tx.sourceId]) {
-            acc[tx.sourceId] = { ...tx };
+          const key = tx.sourceId + tx.type;
+          if (!acc[key]) {
+            acc[key] = { ...tx };
           } else {
-            acc[tx.sourceId].amount += tx.amount;
+            acc[key].amount += tx.amount;
           }
           return acc;
         },
