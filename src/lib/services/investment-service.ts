@@ -540,6 +540,7 @@ export class InvestmentService {
     securityId: string,
     investmentType: InvestmentType,
     amount: number,
+    quantity: number,
     date: Date,
   ): Promise<Investment> {
     return this.updateInvestment({
@@ -549,7 +550,7 @@ export class InvestmentService {
       type: "DIVIDEND",
       date,
       amount,
-      quantity: 0, // No change in share count
+      quantity,
       pricePerUnit: 0,
       fees: 0,
       currency: "EGP",

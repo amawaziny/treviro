@@ -87,6 +87,7 @@ export interface InvestmentContextType {
     investmentId: string,
     securityId: string,
     amount: number,
+    quantity: number,
     date: Date,
   ) => Promise<void>;
 }
@@ -294,6 +295,7 @@ export const InvestmentProvider = ({
       investmentId: string,
       securityId: string,
       amount: number,
+      quantity: number,
       date: Date,
     ) => {
       if (!investmentService)
@@ -303,6 +305,7 @@ export const InvestmentProvider = ({
         securityId,
         "Securities",
         amount,
+        quantity,
         date,
       );
     },
