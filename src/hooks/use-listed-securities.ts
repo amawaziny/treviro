@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { collection, onSnapshot, query, doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { onSnapshot, query } from "firebase/firestore";
 import type { ListedSecurity } from "@/lib/types";
+import { masterDataService } from "@/lib/services/master-data-service";
 
 export const useListedSecurities = () => {
   const [listedSecurities, setListedSecurities] = useState<ListedSecurity[]>(
@@ -14,7 +14,8 @@ export const useListedSecurities = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    const securitiesCollectionRef = collection(db, "listedSecurities");
+    const securitiesCollectionRef =
+      masterDataService.getSecurityCollectionRef();
     const q = query(securitiesCollectionRef);
 
     const unsubscribe = onSnapshot(
@@ -39,32 +40,15 @@ export const useListedSecurities = () => {
     return () => unsubscribe();
   }, []);
 
-  const getListedSecurityById = useCallback(
-    async (id: string): Promise<ListedSecurity | undefined> => {
+  const getSecurityById = useCallback(
+    (id: string): ListedSecurity | undefined => {
       const existingSecurity = listedSecurities.find((sec) => sec.id === id);
       if (existingSecurity) {
         return existingSecurity;
-      }
-      // If not in cache, fetch from Firestore
-      try {
-        const securityDocRef = doc(db, "listedSecurities", id);
-        const securityDocSnap = await getDoc(securityDocRef);
-        if (securityDocSnap.exists()) {
-          return {
-            id: securityDocSnap.id,
-            ...securityDocSnap.data(),
-          } as ListedSecurity;
-        }
-        return undefined;
-      } catch (err) {
-        console.error(`Error fetching security by ID ${id}:`, err);
-        // Optionally set error state here if desired, though it might be better to handle errors at the call site
-        // setError(err as Error);
-        return undefined;
       }
     },
     [listedSecurities],
   );
 
-  return { listedSecurities, isLoading, error, getListedSecurityById };
+  return { listedSecurities, isLoading, error, getSecurityById };
 };

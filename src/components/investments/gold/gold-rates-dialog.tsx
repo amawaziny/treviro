@@ -27,98 +27,98 @@ export function GoldRatesDialog() {
     // Gram prices
     {
       name: t("24_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK24,
+      value: goldMarketPrices?.K24,
       currency: "EGP",
     },
     {
       name: t("22_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK22,
+      value: goldMarketPrices?.K22,
       currency: "EGP",
     },
     {
       name: t("21_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK21,
+      value: goldMarketPrices?.K21,
       currency: "EGP",
     },
     {
       name: t("18_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK18,
+      value: goldMarketPrices?.K18,
       currency: "EGP",
     },
     {
       name: t("14_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK14,
+      value: goldMarketPrices?.K14,
       currency: "EGP",
     },
     {
       name: t("12_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK12,
+      value: goldMarketPrices?.K12,
       currency: "EGP",
     },
     {
       name: t("10_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK10,
+      value: goldMarketPrices?.K10,
       currency: "EGP",
     },
     {
       name: t("9_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK9,
+      value: goldMarketPrices?.K9,
       currency: "EGP",
     },
     {
       name: t("8_karat_gram"),
-      value: goldMarketPrices?.pricePerGramK8,
+      value: goldMarketPrices?.K8,
       currency: "EGP",
     },
     {
       name: t("gold_pound"),
-      value: goldMarketPrices?.pricePerGoldPound,
+      value: goldMarketPrices?.Pound,
       currency: "EGP",
     },
     // Ounce prices
     {
       name: t("24_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK24,
+      value: goldMarketPrices?.Ounce,
       currency: "EGP",
     },
     {
       name: t("22_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK22,
+      value: goldMarketPrices?.OunceK22,
       currency: "EGP",
     },
     {
       name: t("21_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK21,
+      value: goldMarketPrices?.OunceK21,
       currency: "EGP",
     },
     {
       name: t("18_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK18,
+      value: goldMarketPrices?.OunceK18,
       currency: "EGP",
     },
     {
       name: t("14_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK14,
+      value: goldMarketPrices?.OunceK14,
       currency: "EGP",
     },
     {
       name: t("12_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK12,
+      value: goldMarketPrices?.OunceK12,
       currency: "EGP",
     },
     {
       name: t("10_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK10,
+      value: goldMarketPrices?.OunceK10,
       currency: "EGP",
     },
     {
       name: t("9_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK9,
+      value: goldMarketPrices?.OunceK9,
       currency: "EGP",
     },
     {
       name: t("8_karat_ounce"),
-      value: goldMarketPrices?.pricePerOunceK8,
+      value: goldMarketPrices?.OunceK8,
       currency: "EGP",
     },
   ].filter((rate) => rate.value !== undefined);

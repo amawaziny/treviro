@@ -1,6 +1,6 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
-import type { AggregatedGoldHolding } from "@/lib/types";
+import type { GoldInvestment } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gem, TrendingUp, TrendingDown } from "lucide-react";
@@ -8,9 +8,10 @@ import { cn, formatNumberForMobile } from "@/lib/utils";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { calcProfit } from "@/lib/financial-utils";
+import { masterDataService } from "@/lib/services/master-data-service";
 
 interface PhysicalGoldListItemProps {
-  holding: AggregatedGoldHolding;
+  holding: GoldInvestment;
 }
 
 export function PhysicalGoldListItem({ holding }: PhysicalGoldListItemProps) {
@@ -18,13 +19,15 @@ export function PhysicalGoldListItem({ holding }: PhysicalGoldListItemProps) {
   const isMobile = useIsMobile();
 
   const {
-    displayName,
-    totalQuantity,
+    name: displayName,
+    totalShares: totalQuantity,
     averagePurchasePrice,
-    currentMarketPrice,
     currency,
-    physicalGoldType,
+    goldType: physicalGoldType,
   } = holding;
+
+  const goldMarketPrices = React.use(masterDataService.getGoldMarketPrices());
+  const currentMarketPrice = goldMarketPrices[physicalGoldType];
 
   // Calculate profit/loss
   const {

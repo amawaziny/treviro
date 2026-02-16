@@ -11,12 +11,11 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Wallet,
   Coins,
   Briefcase,
   ArrowRight,
@@ -26,132 +25,85 @@ import {
 } from "lucide-react"; // Coins will be used as IncomeIcon replacement
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
-import type {
-  SecurityInvestment,
-  GoldInvestment,
-  CurrencyInvestment,
-} from "@/lib/types";
+import { defaultAppSettings } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCards";
 import { formatMonthYear, formatNumberForMobile } from "@/lib/utils";
-import { calculateMonthlyCashFlowSummary } from "@/lib/financial-utils";
 import { useToast } from "@/hooks/use-toast";
 import { InvestmentBreakdownCards } from "@/components/dashboard/investment-breakdown-cards";
-import { useListedSecurities } from "@/hooks/use-listed-securities";
-import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
-import { useExchangeRates } from "@/hooks/use-exchange-rates";
+import { useTransactions } from "@/contexts/transactions-context";
+import { useDashboard } from "@/hooks/use-dashboard";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
+import { useAppSettings } from "@/hooks/use-app-settings";
+import { useCashflow } from "@/hooks/use-cashflow";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const ForwardArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
 
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const startMonth = useMemo(() => startOfMonth(month), []);
+  const endMonth = useMemo(() => endOfMonth(month), []);
+
+  const {
+    investments,
+    totalPortfolio,
+    isLoading: isLoadingInvestments,
+  } = useInvestments();
+
   const {
     dashboardSummary,
-    isLoading: isLoadingDashboardSummaryContext,
-    incomeRecords,
-    expenseRecords,
+    isLoading: isLoadingDashboard,
+    refreshDashboard,
+  } = useDashboard();
+
+  const {
+    expensesManualCreditCard,
     fixedEstimates,
-    investments,
-    transactions,
-    isLoading: isLoadingContext,
-    recalculateDashboardSummary,
-    appSettings,
-  } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } =
-    useListedSecurities();
-  const { goldMarketPrices, isLoading: isLoadingGoldPrices } =
-    useGoldMarketPrices();
-  const { exchangeRates, isLoading: isLoadingExchangeRates } =
-    useExchangeRates();
+    isLoading: isLoadingFinancialRecords,
+  } = useFinancialRecords();
+
+  const { appSettings, isLoading: isLoadingAppSettings } = useAppSettings();
+
+  const { transactions, isLoading: isLoadingTransactions } = useTransactions();
+
+  const isLoading =
+    isLoadingDashboard ||
+    isLoadingFinancialRecords ||
+    isLoadingAppSettings ||
+    isLoadingTransactions ||
+    isLoadingInvestments;
 
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const isLoading =
-    isLoadingDashboardSummaryContext ||
-    isLoadingContext ||
-    isLoadingListedSecurities ||
-    isLoadingGoldPrices ||
-    isLoadingExchangeRates;
-
-  const totalInvested = dashboardSummary?.totalInvestedAcrossAllAssets ?? 0;
+  const totalInvested = Math.abs(dashboardSummary?.totalInvested ?? 0);
   const totalRealizedPnL = dashboardSummary?.totalRealizedPnL ?? 0;
   const totalCashBalance = dashboardSummary?.totalCashBalance ?? 0;
+  const totalCurrentPortfolioPnL = totalPortfolio?.unrealizedPnL ?? 0;
 
-  const cashFlowSummary = useMemo(() => {
-    return calculateMonthlyCashFlowSummary({
-      incomeRecords: incomeRecords || [],
-      expenseRecords: expenseRecords || [],
-      investments: investments || [],
-      fixedEstimates: fixedEstimates || [],
-      transactions: transactions || [],
-    });
-  }, [incomeRecords, expenseRecords, investments, fixedEstimates]);
-
-  const { totalCurrentPortfolioValue, totalPortfolioCostBasis } =
-    useMemo(() => {
-      if (isLoading)
-        return { totalCurrentPortfolioValue: 0, totalPortfolioCostBasis: 0 };
-
-      let currentValueSum = 0;
-      let costBasisSum = 0;
-
-      (investments || []).forEach((inv) => {
-        costBasisSum += inv.amountInvested || 0;
-        let currentVal = inv.amountInvested || 0; // Default to cost if no market price
-
-        if (inv.type === "Stocks" || inv.fundType) {
-          const stockInv = inv as SecurityInvestment;
-          const security = listedSecurities.find(
-            (ls) => ls.symbol === stockInv.tickerSymbol,
-          );
-          if (security && security.price && stockInv.numberOfShares) {
-            currentVal = security.price * stockInv.numberOfShares;
-          }
-        } else if (inv.type === "Gold") {
-          const goldInv = inv as GoldInvestment;
-          if (goldMarketPrices && goldInv.quantityInGrams) {
-            let pricePerUnit: number | undefined;
-            if (goldInv.goldType === "K24")
-              pricePerUnit = goldMarketPrices.pricePerGramK24;
-            else if (goldInv.goldType === "K21")
-              pricePerUnit = goldMarketPrices.pricePerGramK21;
-            else if (goldInv.goldType === "Pound")
-              pricePerUnit = goldMarketPrices.pricePerGoldPound;
-            else if (goldInv.goldType === "Ounce")
-              pricePerUnit = goldMarketPrices.pricePerOunceK24;
-            if (pricePerUnit)
-              currentVal = pricePerUnit * goldInv.quantityInGrams;
-          }
-        } else if (inv.type === "Currencies") {
-          const currInv = inv as CurrencyInvestment;
-          const rateKey = `${currInv.currencyCode.toUpperCase()}_EGP`;
-          if (
-            exchangeRates &&
-            exchangeRates[rateKey] &&
-            currInv.foreignCurrencyAmount
-          ) {
-            currentVal = exchangeRates[rateKey] * currInv.foreignCurrencyAmount;
-          }
-        }
-        currentValueSum += currentVal;
-      });
-      return {
-        totalCurrentPortfolioValue: currentValueSum,
-        totalPortfolioCostBasis: costBasisSum,
-      };
-    }, [
-      investments,
-      listedSecurities,
-      goldMarketPrices,
-      exchangeRates,
-      isLoading,
-    ]);
-
-  const totalCurrentPortfolioPnL =
-    totalCurrentPortfolioValue - totalPortfolioCostBasis;
+  const {
+    totalIncome,
+    incomeTillNow,
+    totalExpenses,
+    totalRealEstateInstallments,
+    totalSecuritiesInvestments,
+    totalDebtInvestments,
+    totalGoldInvestments,
+    totalInvestments,
+    totalCurrencyInvestments,
+    netCashFlow,
+  } = useCashflow({
+    expensesManualCreditCard,
+    investments,
+    fixedEstimates,
+    transactions,
+    startMonth,
+    endMonth,
+  });
 
   return (
     <div className="space-y-8" data-testid="dashboard-page">
@@ -171,7 +123,7 @@ export default function DashboardPage() {
           size="sm"
           data-testid="recalculate-summary-button"
           onClick={async () => {
-            await recalculateDashboardSummary();
+            await refreshDashboard();
             toast({
               title: t("summary_recalculated"),
               description: t("dashboard_summary_values_have_been_updated"),
@@ -372,15 +324,36 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <CashFlowSummaryCards cashFlowSummary={cashFlowSummary} />
+          <CashFlowSummaryCards
+            totalIncome={totalIncome}
+            incomeTillNow={incomeTillNow}
+            totalExpenses={totalExpenses}
+            totalRealEstateInstallments={totalRealEstateInstallments}
+            totalStockInvestments={totalSecuritiesInvestments}
+            totalDebtInvestments={totalDebtInvestments}
+            totalGoldInvestments={totalGoldInvestments}
+            totalInvestments={totalInvestments}
+            netCashFlow={netCashFlow}
+          />
         </CardContent>
       </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <div data-testid="investment-distribution-chart">
-          <InvestmentDistributionChart />
+          <InvestmentDistributionChart
+            investments={investments}
+            isLoading={isLoading}
+          />
         </div>
         <div data-testid="monthly-investment-distribution-chart">
-          <MonthlyInvestmentDistributionChart />
+          <MonthlyInvestmentDistributionChart
+            totalSecuritiesInvestments={totalSecuritiesInvestments}
+            totalGoldInvestments={totalGoldInvestments}
+            totalDebtInvestments={totalDebtInvestments}
+            totalRealEstateInstallments={totalRealEstateInstallments}
+            totalExpenses={totalExpenses}
+            totalCurrencyInvestments={totalCurrencyInvestments}
+            isLoading={isLoading}
+          />
         </div>
       </div>
       <div className="lg:col-span-3" data-testid="investment-breakdown-section">
@@ -389,13 +362,8 @@ export default function DashboardPage() {
             dashboardSummary={dashboardSummary}
             appSettings={{
               investmentTypePercentages:
-                appSettings?.investmentTypePercentages || {
-                  "Real Estate": 30,
-                  Stocks: 25,
-                  "Debt Instruments": 20,
-                  Currencies: 10,
-                  Gold: 15,
-                },
+                appSettings?.investmentTypePercentages ||
+                defaultAppSettings.investmentTypePercentages,
             }}
           />
         )}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { onSnapshot } from "firebase/firestore";
 import type { ExchangeRates } from "@/lib/types";
+import { masterDataService } from "@/lib/services/master-data-service";
 
 export const useExchangeRates = () => {
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(
@@ -17,7 +17,7 @@ export const useExchangeRates = () => {
     setIsLoading(true);
     setError(null);
 
-    const ratesDocRef = doc(db, "exchangeRates", "current");
+    const ratesDocRef = masterDataService.getExchangeRateRef();
 
     const unsubscribe = onSnapshot(
       ratesDocRef,

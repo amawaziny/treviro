@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/language-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { formatNumberForMobile, parseDateString } from "@/lib/utils";
 import {
   TrendingUp,
@@ -11,7 +11,6 @@ import {
   LineChart,
   FileText,
   CircleDollarSign,
-  Plus,
 } from "lucide-react";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -36,6 +35,7 @@ const investmentTypeColors = {
 };
 
 import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { InvestmentTypePercentage } from "@/lib/types";
 
 interface InvestmentBreakdownCardsProps {
   dashboardSummary?: {
@@ -43,7 +43,7 @@ interface InvestmentBreakdownCardsProps {
     // Add other properties from dashboardSummary that you need
   };
   appSettings?: {
-    investmentTypePercentages: Record<string, number>;
+    investmentTypePercentages: InvestmentTypePercentage;
     // Add other settings you need
   };
 }
@@ -99,7 +99,7 @@ export function InvestmentBreakdownCards({
     if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
       return sum;
     }
-    return sum + (inv.amountInvested || 0);
+    return sum + (inv.totalInvested || 0);
   }, 0);
 
   return (
@@ -132,7 +132,7 @@ export function InvestmentBreakdownCards({
             if (inv.type === "Debt Instruments" && (inv as any).isMatured) {
               return sum;
             }
-            return sum + (inv.amountInvested || 0);
+            return sum + (inv.totalInvested || 0);
           }, 0);
         }
         const current = invs.reduce((sum, inv) => {
@@ -141,7 +141,7 @@ export function InvestmentBreakdownCards({
             return sum;
           }
 
-          if (inv.type === "Stocks" && "securityId" in inv) {
+          if (inv.type === "Securities" && "securityId" in inv) {
             const stockInv = inv as any;
             const security = listedSecurities.find(
               (sec) => sec.id === stockInv.securityId,
@@ -161,13 +161,13 @@ export function InvestmentBreakdownCards({
 
               if (goldMarketPrices) {
                 if (goldInv.goldType === "K24") {
-                  currentPricePerGram = goldMarketPrices.pricePerGramK24 || 0;
+                  currentPricePerGram = goldMarketPrices.K24 || 0;
                 } else if (goldInv.goldType === "K21") {
-                  currentPricePerGram = goldMarketPrices.pricePerGramK21 || 0;
+                  currentPricePerGram = goldMarketPrices.K21 || 0;
                 } else if (goldInv.goldType === "Pound") {
-                  currentPricePerGram = goldMarketPrices.pricePerGoldPound || 0;
+                  currentPricePerGram = goldMarketPrices.Pound || 0;
                 } else if (goldInv.goldType === "Ounce") {
-                  currentPricePerGram = goldMarketPrices.pricePerOunceK24 || 0;
+                  currentPricePerGram = goldMarketPrices.Ounce || 0;
                 }
               }
 
@@ -203,7 +203,7 @@ export function InvestmentBreakdownCards({
           }
 
           // For other types, use currentValue if available, otherwise fall back to amountInvested
-          return sum + (inv.currentValue || inv.amountInvested || 0);
+          return sum + (inv.totalInvested || 0);
         }, 0);
         const percent =
           totalInvested > 0 ? (invested / totalInvested) * 100 : 0;

@@ -11,6 +11,8 @@ import {
   TrendingUp,
   LineChart as CashFlowIcon,
   Settings,
+  Wallet,
+  Wallet2,
 } from "lucide-react";
 
 export interface NavItem {
@@ -44,7 +46,7 @@ export const navItems: NavItem[] = [
 
   { title: "Cash Flow", href: "/cash-flow", icon: CashFlowIcon },
   { title: "Expenses", href: "/expenses", icon: TrendingDown },
-  { title: "Income", href: "/income", icon: DollarSign },
-  { title: "Fixed Estimates", href: "/fixed-estimates", icon: PiggyBank },
+  { title: "Income", href: "/income", icon: PiggyBank },
+  { title: "Fixed Estimates", href: "/fixed-estimates", icon: Wallet2 },
   { title: "Settings", href: "/settings", icon: Settings },
 ];

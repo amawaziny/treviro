@@ -1,10 +1,12 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
-import React, { useEffect, useState, useCallback } from "react";
-import { useInvestments } from "@/hooks/use-investments";
-import type { InvestmentType, AppSettings } from "@/lib/types";
+import React, { useEffect, useState } from "react";
+import type {
+  InvestmentType,
+  AppSettings,
+  InvestmentTypePercentage,
+} from "@/lib/types";
 
-type InvestmentPercentage = Record<InvestmentType, number>;
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Minus } from "lucide-react";
+import { useAppSettings } from "@/hooks/use-app-settings";
 
 export default function SettingsPage() {
   const { t, dir } = useLanguage();
@@ -31,16 +34,16 @@ export default function SettingsPage() {
     appSettings,
     updateAppSettings,
     isLoading: isLoadingContext,
-  } = useInvestments();
+  } = useAppSettings();
   const { toast } = useToast();
   const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
     undefined,
   );
   const [isSaving, setIsSaving] = useState(false);
   const [investmentPercentages, setInvestmentPercentages] =
-    useState<InvestmentPercentage>({
+    useState<InvestmentTypePercentage>({
       "Real Estate": 30,
-      Stocks: 25,
+      Securities: 25,
       "Debt Instruments": 20,
       Currencies: 10,
       Gold: 15,
@@ -118,7 +121,7 @@ export default function SettingsPage() {
         investmentTypePercentages: {
           "Real Estate": investmentPercentages["Real Estate"] || 0,
           Gold: investmentPercentages["Gold"] || 0,
-          Stocks: investmentPercentages["Stocks"] || 0,
+          Securities: investmentPercentages["Securities"] || 0,
           "Debt Instruments": investmentPercentages["Debt Instruments"] || 0,
           Currencies: investmentPercentages["Currencies"] || 0,
         },

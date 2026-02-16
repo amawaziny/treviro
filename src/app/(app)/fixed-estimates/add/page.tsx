@@ -1,20 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { AddEditFixedEstimateForm } from "@/components/fixed-estimates/add-edit-fixed-estimate-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { FixedEstimateForm } from "@/components/fixed-estimates/fixed-estimate-form";
+import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 
 export default function AddFixedEstimatePage() {
   const { t } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
+  const { addFixedEstimate } = useFinancialRecords();
 
   useEffect(() => {
     openForm();
@@ -39,7 +35,7 @@ export default function AddFixedEstimatePage() {
     <div className="container mx-auto py-4">
       <Card>
         <CardContent className="pt-6">
-          <AddEditFixedEstimateForm mode="add" />
+          <FixedEstimateForm mode="add" addFixedEstimate={addFixedEstimate} />
         </CardContent>
       </Card>
     </div>

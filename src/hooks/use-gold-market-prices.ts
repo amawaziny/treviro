@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { doc, onSnapshot, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { onSnapshot, Timestamp } from "firebase/firestore";
 import type { GoldMarketPrices } from "@/lib/types";
+import { masterDataService } from "@/lib/services/master-data-service";
 
 export const useGoldMarketPrices = () => {
   const [goldMarketPrices, setGoldMarketPrices] =
@@ -13,17 +13,10 @@ export const useGoldMarketPrices = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchRates = useCallback(() => {
-    if (!db) {
-      setError(new Error("Firestore is not initialized."));
-      setIsLoading(false);
-      setGoldMarketPrices(null);
-      return () => {};
-    }
-
     setIsLoading(true);
     setError(null);
 
-    const pricesDocRef = doc(db, "goldMarketPrices", "current");
+    const pricesDocRef = masterDataService.getGoldMarketPricesRef();
 
     const unsubscribe = onSnapshot(
       pricesDocRef,

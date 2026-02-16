@@ -1,7 +1,6 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 import { useForm } from "@/contexts/form-context";
-import { format } from "date-fns";
 import { DateInput } from "@/components/ui/date-input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,12 +31,7 @@ import {
 } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
+import { Loader2 } from "lucide-react";
 import { getCurrentDate } from "@/lib/utils";
 import { useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -200,7 +194,6 @@ export function ExpenseForm({
             control={form.control}
             name="date"
             render={({ field }) => {
-              // Convert YYYY-MM-DD to DD-MM-YYYY for display
               return (
                 <FormItem
                   className="flex flex-col"

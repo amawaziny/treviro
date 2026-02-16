@@ -15,6 +15,7 @@ import { cn, formatNumberForMobile } from "@/lib/utils";
 import { DollarSign, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyCode } from "@/lib/types";
 
 export function CurrencyRatesDialog() {
   const { t, dir } = useLanguage();
@@ -130,20 +131,35 @@ export function CurrencyRatesDialog() {
                         {from} / {to}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {t("rate")}: {formatNumberForMobile(isMobile, rate, to)}
+                        {t("rate")}:{" "}
+                        {formatNumberForMobile(
+                          isMobile,
+                          rate,
+                          to as CurrencyCode,
+                        )}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">1 {from}</p>
                     <p className="text-sm text-muted-foreground">
-                      = {formatNumberForMobile(isMobile, rate, to)}
+                      ={" "}
+                      {formatNumberForMobile(
+                        isMobile,
+                        rate,
+                        to as CurrencyCode,
+                      )}
                     </p>
                   </div>
                 </div>
                 <div className="mt-2 pt-2 border-t">
                   <p className="text-sm text-muted-foreground">
-                    1 {to} = {formatNumberForMobile(isMobile, 1 / rate, from)}
+                    1 {to} ={" "}
+                    {formatNumberForMobile(
+                      isMobile,
+                      1 / rate,
+                      from as CurrencyCode,
+                    )}
                   </p>
                 </div>
               </div>

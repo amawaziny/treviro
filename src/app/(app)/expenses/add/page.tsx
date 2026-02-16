@@ -9,39 +9,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { useInvestments } from "@/hooks/use-investments";
 import { ExpenseFormValues } from "@/lib/schemas";
 import { ExpenseRecord } from "@/lib/types";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
 
 export default function AddExpensePage() {
   const { t } = useLanguage();
-  const { addExpenseRecord } = useInvestments();
+
+  const { addExpense } = useFinancialRecords();
 
   async function onSubmit(values: ExpenseFormValues) {
     // Zod schema already coerces amount and numberOfInstallments to numbers or undefined if empty.
     // It also ensures numberOfInstallments is a positive int if isInstallment is true.
     const expenseDataToSave: Omit<
       ExpenseRecord,
-      "id" | "createdAt" | "userId"
+      "id" | "createdAt" | "recordType"
     > = {
-      category: values.category!,
-      amount: values.amount, // Zod has coerced this to number
-      date: values.date,
+      type: values.category!,
+      amount: -values.amount, // Zod has coerced this to number
+      date: new Date(values.date),
     };
 
-    if (values.description && values.description.trim() !== "") {
-      expenseDataToSave.description = values.description;
-    }
+    expenseDataToSave.description = values.description || "";
 
-    if (values.category === "Credit Card") {
-      expenseDataToSave.isInstallment = values.isInstallment;
-      if (values.isInstallment && values.numberOfInstallments) {
-        // Zod ensures values.numberOfInstallments is a number here if isInstallment is true
-        expenseDataToSave.numberOfInstallments = values.numberOfInstallments;
-      }
-    }
+    expenseDataToSave.isInstallment = values.isInstallment;
+    expenseDataToSave.numberOfInstallments = values.numberOfInstallments || 0;
 
-    await addExpenseRecord(expenseDataToSave);
+    await addExpense(expenseDataToSave);
   }
 
   return (

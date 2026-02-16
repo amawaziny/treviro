@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { InvestmentForm } from "@/components/investments/investment-forms/investment-form";
@@ -13,7 +13,7 @@ import { useForm } from "@/contexts/form-context";
 export default function EditRealEstateInvestmentPage() {
   const { t } = useLanguage();
   const params = useParams();
-  const { investments, isLoading } = useInvestments();
+  const { realEstateInvestments, isLoading } = useInvestments();
   const { setHeaderProps, openForm, closeForm } = useForm();
   const [investment, setInvestment] = useState<RealEstateInvestment | null>(
     null,
@@ -21,13 +21,11 @@ export default function EditRealEstateInvestmentPage() {
 
   useEffect(() => {
     if (!params?.id) return;
-    const found = investments.find(
-      (inv) => inv.type === "Real Estate" && inv.id === params.id,
-    ) as RealEstateInvestment | undefined;
+    const found = realEstateInvestments.find((inv) => inv.id === params.id);
     if (found) {
       setInvestment(found);
     }
-  }, [params?.id, investments]);
+  }, [params?.id, realEstateInvestments]);
 
   useEffect(() => {
     openForm();

@@ -105,9 +105,8 @@ const stringToRequiredPositiveIntegerCoerced = z.preprocess(
 );
 
 // Discriminated union for AddInvestmentSchema
-const StockInvestmentSchema = z.object({
-  type: z.literal("Stocks"),
-  name: z.string().optional(),
+const SecuritiesInvestmentSchema = z.object({
+  type: z.literal("Securities"),
   selectedSecurityId: z
     .string({ required_error: "Please select a security." })
     .min(1, "Please select a security."),
@@ -127,7 +126,6 @@ const StockInvestmentSchema = z.object({
 
 const GoldInvestmentSchema = z.object({
   type: z.literal("Gold"),
-  name: z.string().optional(),
   goldType: z.enum(goldTypes, { required_error: "Gold type is required." }),
   quantityInGrams: stringToRequiredNonNegativeNumberCoerced,
   amountInvested: stringToRequiredNonNegativeNumberCoerced,
@@ -141,7 +139,6 @@ const GoldInvestmentSchema = z.object({
 
 const CurrencyInvestmentSchema = z.object({
   type: z.literal("Currencies"),
-  name: z.string().optional(),
   currencyCode: z
     .string()
     .min(1, { message: "Transaction currency code is required." }),
@@ -158,7 +155,6 @@ const CurrencyInvestmentSchema = z.object({
 
 const RealEstateInvestmentSchema = z.object({
   type: z.literal("Real Estate"),
-  name: z.string().optional(),
   propertyAddress: z
     .string()
     .min(1, { message: "Property address is required." }),
@@ -195,11 +191,12 @@ const RealEstateInvestmentSchema = z.object({
     .refine((date) => !date || date.trim() === "" || !isNaN(Date.parse(date)), {
       message: "Invalid date format.",
     }),
+  builtUpArea: stringToOptionalPositiveNumberCoerced,
+  hasGarden: z.boolean().optional(),
 });
 
 const DebtInstrumentInvestmentSchema = z.object({
   type: z.literal("Debt Instruments"),
-  name: z.string().optional(),
   debtSubType: z.enum(debtSubTypes, {
     required_error: "Specific debt type is required.",
   }),
@@ -217,7 +214,7 @@ const DebtInstrumentInvestmentSchema = z.object({
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid maturity date format.",
     }),
-  certificateInterestFrequency: z
+  interestFrequency: z
     .enum(["Monthly", "Quarterly", "Yearly"])
     .default("Monthly")
     .optional(),
@@ -236,7 +233,7 @@ const DebtInstrumentInvestmentSchema = z.object({
 
 export const InvestmentSchema = z
   .discriminatedUnion("type", [
-    StockInvestmentSchema,
+    SecuritiesInvestmentSchema,
     GoldInvestmentSchema,
     CurrencyInvestmentSchema,
     RealEstateInvestmentSchema,
@@ -262,11 +259,11 @@ export const InvestmentSchema = z
 
 export type InvestmentFormValues = z.infer<typeof InvestmentSchema>;
 
-export const SellStockSchema = z.object({
+export const BuySellSecuritySchema = z.object({
   securityId: z.string(),
-  numberOfSharesToSell: stringToRequiredPositiveIntegerCoerced,
-  sellPricePerShare: stringToRequiredNonNegativeNumberCoerced,
-  sellDate: z
+  numberOfShares: stringToRequiredPositiveIntegerCoerced,
+  pricePerShare: stringToRequiredNonNegativeNumberCoerced,
+  date: z
     .string()
     .min(1, { message: "Date is required." })
     .refine((date) => !isNaN(Date.parse(date)), {
@@ -277,7 +274,7 @@ export const SellStockSchema = z.object({
     .transform((v) => parseFloat(String(v) || "0")),
 });
 
-export type SellStockFormValues = z.infer<typeof SellStockSchema>;
+export type BuySellSecurityFormValues = z.infer<typeof BuySellSecuritySchema>;
 
 export const EditStockInvestmentSchema = z.object({
   purchaseDate: z
@@ -339,21 +336,12 @@ export const ExpenseFormSchema = z
               invalid_type_error:
                 "Number of months must be a valid whole number.",
             })
-            .int({ message: "Number of months must be a whole number." })
-            .positive({
-              message: "Number of months must be a positive whole number.",
-            })
-            .min(1, { message: "Number of months must be greater than 0." })
             .optional(),
         ),
     ),
   })
   .superRefine((data, ctx) => {
-    if (
-      data.category === "Credit Card" &&
-      data.isInstallment &&
-      data.numberOfInstallments === undefined
-    ) {
+    if (data.isInstallment && data.numberOfInstallments === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Number of months is required for installment plans.",
@@ -361,7 +349,6 @@ export const ExpenseFormSchema = z
       });
     }
     if (
-      data.category === "Credit Card" &&
       data.isInstallment &&
       data.numberOfInstallments !== undefined &&
       data.numberOfInstallments <= 0

@@ -2,6 +2,7 @@
 import { InvestmentFormValues } from "./schemas";
 import { openDB, STORE_NAME } from "./offline-db";
 
+//TODO: convert investmentFormValues to investment before save to database
 export async function getAllOfflineInvestments(): Promise<
   (InvestmentFormValues & { id: string })[]
 > {

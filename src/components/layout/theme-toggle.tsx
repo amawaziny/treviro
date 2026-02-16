@@ -15,7 +15,7 @@ import {
 
 export function ThemeToggle() {
   const { t, dir } = useLanguage();
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
 
   return (
     <DropdownMenu dir={dir}>
@@ -31,7 +31,7 @@ export function ThemeToggle() {
           {t("light")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")}>
-          {t("dark")}
+          {theme}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")}>
           {t("system")}

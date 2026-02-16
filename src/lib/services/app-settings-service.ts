@@ -1,0 +1,79 @@
+import { db } from "@/lib/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { defaultAppSettings, type AppSettings } from "@/lib/types";
+import { SETTINGS_COLLECTION_PATH } from "@/lib/constants";
+import { formatPath } from "@/lib/utils";
+import { dateConverter } from "@/lib/firestore-converters";
+
+export class AppSettingsService {
+  private userId: string;
+
+  constructor(userId: string) {
+    this.userId = userId;
+  }
+
+  private getSettingsDocRef() {
+    return doc(
+      db,
+      formatPath(SETTINGS_COLLECTION_PATH, { userId: this.userId }),
+    ).withConverter(dateConverter);
+  }
+
+  /**
+   * Fetches the user's app settings from Firestore
+   * @returns AppSettings object or null if not found
+   */
+  async getAppSettings(): Promise<AppSettings | null> {
+    try {
+      const docRef = this.getSettingsDocRef();
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return docSnap.data() as AppSettings;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error getting app settings:", error);
+      throw new Error("Failed to fetch app settings");
+    }
+  }
+
+  /**
+   * Updates the user's app settings in Firestore
+   * @param settings Partial settings to update
+   * @returns The updated settings
+   */
+  async updateAppSettings(
+    settings: Partial<AppSettings>,
+  ): Promise<AppSettings> {
+    try {
+      const docRef = this.getSettingsDocRef();
+      const currentSettings = await this.getAppSettings();
+
+      const updatedSettings = {
+        ...currentSettings,
+        ...settings,
+        updatedAt: serverTimestamp(),
+      };
+
+      await setDoc(docRef, updatedSettings, { merge: true });
+
+      return updatedSettings as AppSettings;
+    } catch (error) {
+      console.error("Error updating app settings:", error);
+      throw new Error("Failed to update app settings");
+    }
+  }
+
+  /**
+   * Initializes default settings for a new user
+   * @returns The default settings
+   */
+  async initializeDefaultSettings(): Promise<AppSettings> {
+    const docRef = this.getSettingsDocRef();
+    await setDoc(docRef, defaultAppSettings);
+
+    return defaultAppSettings;
+  }
+}

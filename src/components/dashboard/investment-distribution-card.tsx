@@ -10,7 +10,7 @@ import { formatNumberWithSuffix } from "@/lib/utils";
 const INVESTMENT_ORDER = [
   "Real Estate",
   "Gold",
-  "Stocks",
+  "Securities",
   "Debt Instruments",
   "Currencies",
 ];

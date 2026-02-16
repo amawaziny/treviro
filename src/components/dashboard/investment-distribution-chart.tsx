@@ -2,13 +2,20 @@
 import { useLanguage } from "@/contexts/language-context";
 
 import * as React from "react";
-import { useInvestments } from "@/hooks/use-investments";
 import { InvestmentDistributionCard } from "./investment-distribution-card";
 import { useTheme } from "next-themes";
+import { Investment } from "@/lib/types";
 
-export function InvestmentDistributionChart() {
+interface InvestmentDistributionChartProps {
+  investments: Investment[];
+  isLoading: boolean;
+}
+
+export function InvestmentDistributionChart({
+  investments,
+  isLoading,
+}: InvestmentDistributionChartProps) {
   const { t } = useLanguage();
-  const { investments, isLoading } = useInvestments();
   const { resolvedTheme } = useTheme();
 
   const chartData = React.useMemo(() => {
@@ -22,7 +29,7 @@ export function InvestmentDistributionChart() {
     const distribution: { [key: string]: number } = {};
     investments.forEach((inv) => {
       distribution[inv.type] =
-        (distribution[inv.type] || 0) + inv.amountInvested;
+        (distribution[inv.type] || 0) + inv.totalInvested;
     });
 
     Object.entries(distribution).forEach(([type, value]) => {

@@ -1,32 +1,37 @@
 "use client";
 import { useLanguage } from "@/contexts/language-context";
 
-import type { AggregatedCurrencyHolding } from "@/lib/types";
+import type { CurrencyInvestment } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Info } from "lucide-react"; // Using DollarSign as a generic currency icon
 import { cn, formatNumberForMobile } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { calcProfit } from "@/lib/financial-utils";
+
 interface MyCurrencyListItemProps {
-  holding: AggregatedCurrencyHolding;
+  holding: CurrencyInvestment;
+  currentMarketRate: number | undefined;
 }
 
-export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
+export function MyCurrencyListItem({
+  holding,
+  currentMarketRate,
+}: MyCurrencyListItemProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const {
-    currencyCode,
-    totalForeignAmount,
-    averagePurchaseRateToEGP,
-    currentMarketRateToEGP,
-    profitOrLossInEGP,
-    profitOrLossPercentage,
-  } = holding;
 
-  const isProfitable =
-    profitOrLossInEGP !== undefined && profitOrLossInEGP >= 0;
-  const hasMarketRate =
-    currentMarketRateToEGP !== undefined && currentMarketRateToEGP !== null;
+  const {
+    isProfitable,
+    profitLoss,
+    totalCost,
+    profitLossPercent,
+    totalCurrentValue,
+  } = calcProfit(
+    holding.totalShares,
+    holding.averagePurchasePrice,
+    currentMarketRate || 0,
+  );
 
   const formatRate = (value: number | undefined) => {
     if (value === undefined || value === null || Number.isNaN(value))
@@ -34,15 +39,14 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
     return value.toFixed(4);
   };
 
-  const formattedProfitLoss = formatNumberForMobile(
-    isMobile,
-    profitOrLossInEGP,
-  );
+  const hasMarketRate =
+    currentMarketRate !== undefined && currentMarketRate !== 0;
+
   const displayProfitLossPercent =
-    profitOrLossPercentage === Infinity
+    profitLossPercent === Infinity
       ? "∞"
-      : profitOrLossPercentage !== undefined
-        ? profitOrLossPercentage.toFixed(2) + "%"
+      : profitLossPercent !== undefined
+        ? profitLossPercent.toFixed(2) + "%"
         : t("na");
 
   return (
@@ -54,15 +58,17 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
               <DollarSign className="h-4 w-4" />
             </div>
             <div className="truncate">
-              <p className="text-sm font-semibold truncate">{currencyCode}</p>
+              <p className="text-sm font-semibold truncate">
+                {holding.currencyCode}
+              </p>
               <p className="text-xs text-muted-foreground truncate">
-                {`${t("held")}: ${formatNumberForMobile(isMobile, totalForeignAmount || 0, currencyCode)}`}
+                {`${t("held")}: ${formatNumberForMobile(isMobile, holding.totalInvested || 0, holding.currency)}`}
               </p>
             </div>
           </div>
 
           <div className="text-end pl-2">
-            {hasMarketRate && profitOrLossInEGP !== undefined ? (
+            {hasMarketRate && profitLoss !== undefined ? (
               <>
                 <p
                   className={cn(
@@ -74,7 +80,7 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
                     className="hidden md:inline"
                     data-ai-hint="Display profit/loss for larger screens"
                   >
-                    {formatNumberForMobile(isMobile, profitOrLossInEGP)}
+                    {formatNumberForMobile(isMobile, profitLoss)}
                   </span>
                 </p>
                 <Badge
@@ -109,15 +115,13 @@ export function MyCurrencyListItem({ holding }: MyCurrencyListItemProps) {
           <p className="text-start">
             {`${t("avg_buy_rate")}: `}
             <span className="font-medium text-foreground">
-              {`${formatRate(averagePurchaseRateToEGP)} EGP`}
+              {`${formatRate(holding.averagePurchasePrice)} EGP`}
             </span>
           </p>
           <p className="text-end">
             {`${t("market_rate")}: `}
             <span className="font-medium text-foreground">
-              {hasMarketRate
-                ? `${formatRate(currentMarketRateToEGP)} EGP`
-                : t("na")}
+              {hasMarketRate ? `${formatRate(currentMarketRate)} EGP` : t("na")}
             </span>
           </p>
         </div>

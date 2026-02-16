@@ -1,16 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, TrendingDown, Briefcase, Wallet } from "lucide-react";
+import { PiggyBank, TrendingDown, Briefcase, Wallet } from "lucide-react";
 import { formatNumberForMobile } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
-import { CashFlowSummaryResult } from "@/lib/financial-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CashFlowSummaryCardsProps {
-  cashFlowSummary: CashFlowSummaryResult;
+  totalIncome: number;
+  incomeTillNow: number;
+  totalExpenses: number;
+  totalRealEstateInstallments: number;
+  totalStockInvestments: number;
+  totalDebtInvestments: number;
+  totalGoldInvestments: number;
+  totalInvestments: number;
+  netCashFlow: number;
 }
 
 export function CashFlowSummaryCards({
-  cashFlowSummary,
+  totalIncome,
+  incomeTillNow,
+  totalExpenses,
+  totalRealEstateInstallments,
+  totalStockInvestments,
+  totalDebtInvestments,
+  totalGoldInvestments,
+  totalInvestments,
+  netCashFlow,
 }: CashFlowSummaryCardsProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
@@ -27,17 +42,14 @@ export function CashFlowSummaryCards({
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
               {t("total_current_income_this_month")}
             </CardTitle>
-            <Coins
+            <PiggyBank
               className="h-4 w-4 text-green-600 dark:text-green-400"
               data-testid="current-income-icon"
             />
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-green-700 dark:text-green-300">
-              {formatNumberForMobile(
-                isMobile,
-                cashFlowSummary.currentMonthIncome,
-              )}
+              {formatNumberForMobile(isMobile, incomeTillNow)}
             </p>
             <p className="text-xs text-green-600 dark:text-green-400 mt-1">
               {t("income_paid_out_by_today")}
@@ -52,62 +64,15 @@ export function CashFlowSummaryCards({
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
               {t("total_income_this_month")}
             </CardTitle>
-            <Coins
+            <PiggyBank
               className="h-4 w-4 text-green-600 dark:text-green-400"
               data-testid="total-income-icon"
             />
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-green-700 dark:text-green-300">
-              {formatNumberForMobile(isMobile, cashFlowSummary.totalIncome)}
+              {formatNumberForMobile(isMobile, totalIncome)}
             </p>
-            <div className="text-xs text-green-600 dark:text-green-400 mt-1 space-y-0.5">
-              {cashFlowSummary.monthlySalary > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("monthly_salary_fixed")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.monthlySalary,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.otherFixedIncomeMonthly > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("other_fixed_income")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.otherFixedIncomeMonthly,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.totalManualIncomeThisMonth > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("other_logged_income_incl_sales_profit")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.totalManualIncomeThisMonth,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.totalProjectedCertificateInterestThisMonth >
-                0 && (
-                <div className="flex justify-between">
-                  <span>{t("projected_debt_interest")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.totalProjectedCertificateInterestThisMonth,
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -128,76 +93,8 @@ export function CashFlowSummaryCards({
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-red-700 dark:text-red-300">
-              {formatNumberForMobile(
-                isMobile,
-                cashFlowSummary.totalExpensesOnly,
-              )}
+              {formatNumberForMobile(isMobile, totalExpenses)}
             </p>
-            <div className="text-xs text-red-600 dark:text-red-400 mt-1 space-y-0.5">
-              {cashFlowSummary.totalItemizedExpensesThisMonth > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("itemized_logged_expenses")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.totalItemizedExpensesThisMonth,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.zakatFixedMonthly > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("zakat_fixed")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.zakatFixedMonthly,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.charityFixedMonthly > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("charity_fixed")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.charityFixedMonthly,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.livingExpensesMonthly > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("living_expenses")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.livingExpensesMonthly,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.otherFixedExpensesMonthly > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("other_fixed_expenses")}</span>
-                  <span>
-                    {formatNumberForMobile(
-                      isMobile,
-                      cashFlowSummary.otherFixedExpensesMonthly,
-                    )}
-                  </span>
-                </div>
-              )}
-              {cashFlowSummary.realEstateInstallmentsMonthly > 0 && (
-                <p>
-                  {`${t("real_estate_installments")}: ${formatNumberForMobile(
-                    isMobile,
-                    cashFlowSummary.realEstateInstallmentsMonthly,
-                  )}`}
-                </p>
-              )}
-            </div>
           </CardContent>
         </Card>
         <Card
@@ -219,10 +116,7 @@ export function CashFlowSummaryCards({
                 {t("stocks")}
               </span>
               <span className="text-sm">
-                {formatNumberForMobile(
-                  isMobile,
-                  cashFlowSummary.totalStockInvestmentThisMonth,
-                )}
+                {formatNumberForMobile(isMobile, totalStockInvestments)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -230,10 +124,7 @@ export function CashFlowSummaryCards({
                 {t("real_estate")}
               </span>
               <span className="text-sm">
-                {formatNumberForMobile(
-                  isMobile,
-                  cashFlowSummary.realEstateInstallmentsMonthly,
-                )}
+                {formatNumberForMobile(isMobile, totalRealEstateInstallments)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -241,10 +132,7 @@ export function CashFlowSummaryCards({
                 {t("debts")}
               </span>
               <span className="text-sm">
-                {formatNumberForMobile(
-                  isMobile,
-                  cashFlowSummary.totalDebtInvestmentThisMonth,
-                )}
+                {formatNumberForMobile(isMobile, totalDebtInvestments)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -252,21 +140,13 @@ export function CashFlowSummaryCards({
                 {t("gold")}
               </span>
               <span className="text-sm">
-                {formatNumberForMobile(
-                  isMobile,
-                  cashFlowSummary.totalGoldInvestmentThisMonth,
-                )}
+                {formatNumberForMobile(isMobile, totalGoldInvestments)}
               </span>
             </div>
             <div className="pt-2 mt-2 border-t border-blue-100 dark:border-blue-800">
               <div className="flex justify-between items-center font-semibold text-sm">
                 <span>{t("total")}</span>
-                <span>
-                  {formatNumberForMobile(
-                    isMobile,
-                    cashFlowSummary.totalInvestmentsThisMonth,
-                  )}
-                </span>
+                <span>{formatNumberForMobile(isMobile, totalInvestments)}</span>
               </div>
             </div>
           </CardContent>
@@ -286,12 +166,7 @@ export function CashFlowSummaryCards({
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-gray-700 dark:text-gray-300">
-              {formatNumberForMobile(
-                isMobile,
-                cashFlowSummary.totalIncome -
-                  cashFlowSummary.totalExpensesOnly -
-                  cashFlowSummary.totalInvestmentsThisMonth,
-              )}
+              {formatNumberForMobile(isMobile, netCashFlow)}
             </p>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {t("remaining_total_income_total_expenses_total_investments")}

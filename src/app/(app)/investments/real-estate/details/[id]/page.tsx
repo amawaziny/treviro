@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { useForm } from "@/contexts/form-context";
 import {
   Card,
@@ -13,7 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import { formatDateDisplay, formatNumberForMobile } from "@/lib/utils";
+import {
+  formatDateDisplay,
+  formatDateISO,
+  formatNumberForMobile,
+} from "@/lib/utils";
 import { Loader2, ArrowLeft, Plus } from "lucide-react";
 import { InstallmentTable } from "@/components/investments/real-estate/installment-table";
 import { Input } from "@/components/ui/input";
@@ -37,8 +41,11 @@ export default function RealEstateDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { setHeaderProps, closeForm, openForm } = useForm();
-  const { investments, isLoading, updateRealEstateInvestment } =
-    useInvestments();
+  const {
+    realEstateInvestments,
+    isLoading,
+    editInvestment: updateRealEstateInvestment,
+  } = useInvestments();
   const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
   const [newPayment, setNewPayment] = useState({
     dueDate: new Date(),
@@ -50,10 +57,8 @@ export default function RealEstateDetailPage() {
 
   const investment = useMemo(() => {
     if (!params?.id) return null;
-    return investments.find(
-      (inv) => inv.type === "Real Estate" && inv.id === params.id,
-    ) as RealEstateInvestment | undefined;
-  }, [params?.id, investments]);
+    return realEstateInvestments.find((inv) => inv.id === params.id);
+  }, [params?.id, realEstateInvestments]);
 
   useEffect(() => {
     // Open form when component mounts
@@ -128,7 +133,7 @@ export default function RealEstateDetailPage() {
 
       const newPaymentObj: Installment = {
         number: nextNumber,
-        dueDate: newPayment.dueDate?.toISOString().split("T")[0] || "", // Format as YYYY-MM-DD
+        dueDate: newPayment.dueDate ? formatDateISO(newPayment.dueDate) : "",
         amount: Number(newPayment.amount) || 0,
         status: "Unpaid",
         description: newPayment.description.trim() || undefined,
@@ -217,7 +222,7 @@ export default function RealEstateDetailPage() {
               {t("paid_towards_purchase")}
             </div>
             <div>
-              {formatNumberForMobile(isMobile, investment.amountInvested)}
+              {formatNumberForMobile(isMobile, investment.totalInvested)}
             </div>
             <div className="font-medium text-muted-foreground">
               {t("installment_amount")}
@@ -235,14 +240,11 @@ export default function RealEstateDetailPage() {
               {t("total_price_at_end")}
             </div>
             <div>
-              {investment.totalInstallmentPrice
-                ? formatNumberForMobile(
-                    isMobile,
-                    investment.totalInstallmentPrice,
-                  )
+              {investment.totalPrice
+                ? formatNumberForMobile(isMobile, investment.totalPrice)
                 : t("na")}
             </div>
-            {investment.builtUpArea && investment.totalInstallmentPrice && (
+            {investment.builtUpArea && investment.totalPrice && (
               <>
                 <div className="font-medium text-muted-foreground">
                   {t("price_per_sqm")}
@@ -250,7 +252,7 @@ export default function RealEstateDetailPage() {
                 <div>
                   {formatNumberForMobile(
                     isMobile,
-                    investment.totalInstallmentPrice / investment.builtUpArea,
+                    investment.totalPrice / investment.builtUpArea,
                   )}
                 </div>
               </>
@@ -258,7 +260,7 @@ export default function RealEstateDetailPage() {
             <div className="font-medium text-muted-foreground">
               {t("installment_end_date")}
             </div>
-            <div>{formatDateDisplay(investment.installmentEndDate)}</div>
+            <div>{formatDateDisplay(investment.lastInstallmentDate)}</div>
             {investment.maintenanceAmount &&
               investment.maintenancePaymentDate && (
                 <>

@@ -1,0 +1,89 @@
+import type {
+  IncomeRecord,
+  ExpenseRecord,
+  Transaction,
+  FixedEstimateRecord,
+} from "@/lib/types";
+
+export type FinancialRecordEvent =
+  | { type: "income:added"; record: IncomeRecord }
+  | { type: "income:updated"; record: IncomeRecord }
+  | { type: "income:deleted"; record: IncomeRecord }
+  | { type: "expense:added"; record: ExpenseRecord }
+  | { type: "expense:updated"; record: ExpenseRecord }
+  | { type: "expense:deleted"; record: ExpenseRecord }
+  | { type: "fixedEstimate:confirmed"; record: FixedEstimateRecord };
+
+export type InvestmentEvent =
+  | { type: "investment:added"; transaction: Transaction }
+  | { type: "investment:updated"; transaction: Transaction }
+  | { type: "investment:deleted"; transaction: Transaction };
+
+export type TransactionEvent =
+  | { type: "transaction:created"; transaction: Transaction }
+  | { type: "transaction:updated"; transaction: Transaction }
+  | { type: "transaction:deleted"; transaction: Transaction };
+
+type EventType = FinancialRecordEvent | InvestmentEvent | TransactionEvent;
+type EventHandler<T extends EventType> = (event: T) => Promise<void> | void;
+
+export class EventBus {
+  private static instance: EventBus;
+  private handlers: Map<string, Set<Function>> = new Map();
+
+  private constructor() {}
+
+  static getInstance(): EventBus {
+    if (!EventBus.instance) {
+      EventBus.instance = new EventBus();
+    }
+    return EventBus.instance;
+  }
+
+  subscribe<T extends EventType>(
+    eventType: T["type"],
+    handler: EventHandler<T>,
+  ): () => void {
+    console.log(`Subscribing to event: ${eventType} with handler: ${handler}`);
+    if (!this.handlers.has(eventType)) {
+      this.handlers.set(eventType, new Set());
+    }
+    const handlers = this.handlers.get(eventType)!;
+    handlers.add(handler);
+
+    return () => {
+      handlers.delete(handler);
+      if (handlers.size === 0) {
+        this.handlers.delete(eventType);
+      }
+    };
+  }
+
+  async publish<T extends EventType>(event: T): Promise<void> {
+    const handlers = this.handlers.get(event.type) || [];
+    await Promise.all(
+      Array.from(handlers).map((handler) => {
+        try {
+          return Promise.resolve(handler(event));
+        } catch (error) {
+          console.error(`Error in event handler for ${event.type}:`, error);
+          return Promise.resolve();
+        }
+      }),
+    );
+  }
+
+  publishAsync<T extends EventType>(event: T): void {
+    const handlers = this.handlers.get(event.type) || [];
+    // Fire and forget - don't await the handlers
+    Promise.all(
+      Array.from(handlers).map((handler) =>
+        Promise.resolve(handler(event)).catch((error) =>
+          console.error(`Error in event handler for ${event.type}:`, error),
+        ),
+      ),
+    ).catch(console.error); // Handle any uncaught errors in the promise chain
+  }
+}
+
+export const eventBus = EventBus.getInstance();

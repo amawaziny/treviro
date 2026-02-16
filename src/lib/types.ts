@@ -1,11 +1,19 @@
+import {
+  isCurrencyRelatedFund,
+  isDebtRelatedFund,
+  isGoldRelatedFund,
+  isRealEstateRelatedFund,
+  isStockRelatedFund,
+} from "./utils";
+
 export type CurrencyCode = "EGP" | "USD";
 
 export type InvestmentType =
   | "Real Estate"
   | "Gold"
-  | "Stocks"
   | "Debt Instruments"
-  | "Currencies";
+  | "Currencies"
+  | "Securities";
 export type IncomeType =
   | "Profit Share"
   | "Bonus"
@@ -13,7 +21,7 @@ export type IncomeType =
   | "Rental Income"
   | "Freelance"
   | "Other";
-export type ExpenseCategory = "Credit Card" | "Other";
+export type ExpenseType = "Credit Card" | "Other";
 export type FundType =
   | "Gold"
   | "Debt"
@@ -30,50 +38,63 @@ export type FundType =
   | "MM"
   | string;
 
+export type InvestmentData<T extends Investment = Investment> = Omit<
+  T,
+  | "id"
+  | "lastUpdated"
+  | "totalShares"
+  | "totalInvested"
+  | "averagePurchasePrice"
+  | "currency"
+  | "isClosed"
+> & {
+  type: InvestmentType;
+  securityId?: string;
+  currency?: CurrencyCode;
+  quantity?: number;
+  pricePerUnit?: number;
+  fees?: number;
+};
+
 export interface BaseInvestment {
   id: string;
-  name: string;
   type: InvestmentType;
-  amountInvested: number;
-  purchaseDate?: string;
-  currentValue?: number;
-  createdAt?: string;
-  securityId?: string;
-  fundType?: string | null;
+  // name: string;
+  totalShares: number; // Current number of shares/units held
+  totalInvested: number; // Total amount invested (cost basis)
+  averagePurchasePrice: number; // Weighted average purchase price
+  firstPurchaseDate: Date; // First purchase date (YYYY-MM-DD)
+  lastUpdated: Date; // Last update timestamp
+  currency: CurrencyCode;
+  fundType?: FundType;
+  isClosed: boolean;
 }
 
 export interface SecurityInvestment extends BaseInvestment {
-  type: InvestmentType | "Stocks";
-  actualStockName?: string;
-  tickerSymbol?: string;
-  numberOfShares?: number;
-  purchasePricePerShare?: number;
-  purchaseFees?: number;
+  type: "Securities";
+  securityId: string;
 }
 
 export type GoldType = "K24" | "K21" | "Pound" | "Ounce";
 export interface GoldInvestment extends BaseInvestment {
   type: "Gold";
   goldType: GoldType;
-  quantityInGrams: number; // Represents units for Pound/Ounce
 }
 
 export interface CurrencyInvestment extends BaseInvestment {
   type: "Currencies";
   currencyCode: string;
-  foreignCurrencyAmount: number;
-  exchangeRateAtPurchase: number;
 }
 
 export type PropertyType = "Residential" | "Touristic" | "Commercial" | "Land";
 
-export type InstallmentFrequency = "Monthly" | "Quarterly" | "Yearly";
+export type Frequency = "Monthly" | "Quarterly" | "Yearly";
 
 export interface Installment {
   number: number;
   chequeNumber?: string;
   amount: number;
-  dueDate: string;
+  dueDate: Date;
   status: "Paid" | "Unpaid";
   description?: string;
   isMaintenance?: boolean;
@@ -82,32 +103,33 @@ export interface Installment {
 
 export interface RealEstateInvestment extends BaseInvestment {
   type: "Real Estate";
+  propertyType: PropertyType;
   propertyAddress?: string;
-  propertyType?: PropertyType;
-  installmentFrequency?: "Monthly" | "Quarterly" | "Yearly";
-  installmentAmount?: number;
-  totalInstallmentPrice?: number; // New: total price at end of all installments
-  installmentStartDate?: string; // NEW FIELD
-  installmentEndDate?: string; // New: end date of all installments
-  downPayment?: number; // NEW FIELD
-  maintenanceAmount?: number; // NEW FIELD
-  maintenancePaymentDate?: string; // NEW FIELD
-  installments?: Array<Installment>;
+  totalPrice?: number; // total price at end of all installments
   builtUpArea?: number; // Area in square meters
   hasGarden?: boolean; // Whether the property has a garden
+  downPayment?: number;
+  maintenanceAmount?: number;
+  maintenancePaymentDate?: Date;
+  installmentFrequency?: Frequency;
+  installmentAmount?: number;
+  firstInstallmentDate: Date;
+  lastInstallmentDate: Date;
+  installments?: Array<Installment>;
 }
 
 export type DebtSubType = "Certificate" | "Treasury Bill" | "Bond" | "Other";
+
 export interface DebtInstrumentInvestment extends BaseInvestment {
   type: "Debt Instruments";
   debtSubType: DebtSubType;
   issuer: string;
   interestRate: number;
-  maturityDate: string; // YYYY-MM-DD
-  certificateInterestFrequency: "Monthly" | "Quarterly" | "Yearly";
-  interestAmount?: number; // Optional: actual or projected interest amount
-  isMatured?: boolean; // Indicates if the debt instrument has matured
-  maturedOn?: string; // Date when the instrument matured (YYYY-MM-DD)
+  maturityDate: Date;
+  interestFrequency: Frequency;
+  interestAmount: number; // projected interest amount
+  monthlyInterestAmount: number; // projected monthly interest amount
+  maturedOn?: Date; // Date when the instrument matured (YYYY-MM-DD)
 }
 
 export type Investment =
@@ -117,32 +139,129 @@ export type Investment =
   | RealEstateInvestment
   | DebtInstrumentInvestment;
 
-export interface IncomeRecord {
+// Type guards
+export function isSecurityInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return investment.type === "Securities";
+}
+
+export function isStockInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    (!investment.fundType || isStockRelatedFund(investment.fundType))
+  );
+}
+
+export function isGoldFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    !!investment.fundType &&
+    isGoldRelatedFund(investment.fundType)
+  );
+}
+
+export function isDebtFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    !!investment.fundType &&
+    isDebtRelatedFund(investment.fundType)
+  );
+}
+
+export function isRealEstateFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    !!investment.fundType &&
+    isRealEstateRelatedFund(investment.fundType)
+  );
+}
+
+export function isCurrencyFundInvestment(
+  investment: Investment,
+): investment is SecurityInvestment {
+  return (
+    investment.type === "Securities" &&
+    !!investment.fundType &&
+    isCurrencyRelatedFund(investment.fundType)
+  );
+}
+
+export function isGoldInvestment(
+  investment: Investment,
+): investment is GoldInvestment {
+  return investment.type === "Gold";
+}
+
+export function isCurrencyInvestment(
+  investment: Investment,
+): investment is CurrencyInvestment {
+  return investment.type === "Currencies";
+}
+
+export function isRealEstateInvestment(
+  investment: Investment,
+): investment is RealEstateInvestment {
+  return investment.type === "Real Estate";
+}
+
+export function isDebtInstrumentInvestment(
+  investment: Investment,
+): investment is DebtInstrumentInvestment {
+  return investment.type === "Debt Instruments";
+}
+
+export type FinancialRecord =
+  | IncomeRecord
+  | ExpenseRecord
+  | FixedEstimateRecord;
+
+// Base interface that enforces common fields across all record types
+export interface BaseRecord {
+  recordType: "Income" | "Expense" | "Fixed Estimate";
+  date?: Date;
+  type: IncomeType | ExpenseType | FixedEstimateType;
   id: string;
+  amount: number;
+  description?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// Extend the record interfaces to include BaseRecord
+export interface IncomeRecord extends BaseRecord {
+  recordType: "Income";
   type: IncomeType;
   source?: string;
-  amount: number;
-  date: string;
-  description?: string;
-  createdAt: string;
-  userId: string;
   isRecurring?: boolean;
   recurrencePeriod?: string;
 }
 
-export interface ExpenseRecord {
-  id: string;
-  userId: string;
-  description?: string;
-  amount: number;
-  date: string;
-  category: ExpenseCategory;
+export interface ExpenseRecord extends BaseRecord {
+  recordType: "Expense";
+  type: ExpenseType;
   isInstallment?: boolean;
+  isClosed?: boolean; //if the expense is of type credit card then isClosed is false until the user confirm the payment else true
   numberOfInstallments?: number;
-  createdAt?: string;
-  _originalAmount?: number;
   _requiredAmount?: number;
   installmentMonthIndex?: number;
+  lastPaidInstallmentIndex?: number;
+}
+
+export interface FixedEstimateRecord extends BaseRecord {
+  recordType: "Fixed Estimate";
+  type: FixedEstimateType;
+  name?: string;
+  period: FixedEstimatePeriod;
+  isExpense: boolean;
 }
 
 export type FixedEstimateType =
@@ -153,18 +272,6 @@ export type FixedEstimateType =
   | "Other";
 export type FixedEstimatePeriod = "Monthly" | "Quarterly" | "Yearly";
 
-export interface FixedEstimateRecord {
-  id: string;
-  userId: string;
-  type: FixedEstimateType;
-  name?: string; // Used if type is 'Other'
-  amount: number;
-  period: FixedEstimatePeriod;
-  isExpense: boolean; // True for Zakat, Charity, 'Other' expenses; False for Salary, 'Other' income
-  createdAt: string;
-  updatedAt?: string;
-}
-
 export interface ListedSecurity {
   id: string;
   name: string;
@@ -174,8 +281,11 @@ export interface ListedSecurity {
   price: number;
   currency: CurrencyCode;
   changePercent: number;
+  high: number;
+  low: number;
+  volume: number;
   market: string;
-  securityType?: "Stock" | "Fund";
+  securityType: "Stock" | "Fund";
   fundType?: InvestmentType;
   description?: string;
   isin: string;
@@ -197,59 +307,84 @@ export interface ListedSecurity {
   couponNo: number;
 }
 
-export interface StockChartDataPoint {
+export interface SecurityChartDataPoint {
   date: string;
   price: number;
 }
 
-export type StockChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
+export type SecurityChartTimeRange = "1W" | "1M" | "6M" | "1Y" | "5Y";
 
-export type TransactionType = "buy" | "sell" | "dividend" | "interest";
+export const TRANSACTION_TYPE_META = {
+  BUY: { sign: -1, income: false },
+  PAYMENT: { sign: -1, income: false },
+  EXPENSE: { sign: -1, income: false },
+  SELL: { sign: 1, income: true },
+  DIVIDEND: { sign: 1, income: true },
+  INCOME: { sign: 1, income: true },
+  INTEREST: { sign: 1, income: true },
+  MATURED_DEBT: { sign: 1, income: true },
+} as const;
+
+export type TransactionType = keyof typeof TRANSACTION_TYPE_META;
 
 export interface Transaction {
   id: string;
-  investmentId?: string;
+  sourceId: string;
+  sourceType: "Investment" | "Income" | "Expense" | "Fixed Estimate";
   securityId?: string;
-  tickerSymbol: string;
+  installmentNumber?: number;
   type: TransactionType;
-  date: string;
-  numberOfShares: number;
-  pricePerShare: number;
-  fees: number;
-  totalAmount: number;
-  profitOrLoss?: number;
-  createdAt: string;
-  isInvestmentRecord?: boolean;
-  amount?: number; // Optional, for dividend or other transactions
-  shares?: number; // Optional, for dividend or display-only transactions
+  date: Date; // ISO date string
+  amount: number; // Total transaction amount (signed: positive for in, negative for out)
+  quantity: number; // Number of shares/units (signed: positive for buy, negative for sell)
+  pricePerUnit: number; // Price per share/unit
+  averagePurchasePrice: number; // Average purchase price
+  profitOrLoss?: number; // Profit or loss from transaction
+  fees: number; // Transaction fees
+  currency: CurrencyCode;
+  description?: string;
+  metadata: {
+    sourceSubType: string;
+    // Additional type-specific data
+    [key: string]: any; // Allow other metadata
+  };
+  createdAt: Date; // ISO timestamp
 }
 
 export interface DashboardSummary {
-  totalInvestedAcrossAllAssets: number;
+  totalInvested: number;
   totalRealizedPnL: number;
-  totalCashBalance: number; // Added this field
+  totalCashBalance: number;
+  updatedAt?: Date;
 }
 
+export const defaultDashboardSummary: DashboardSummary = {
+  totalInvested: 0,
+  totalRealizedPnL: 0,
+  totalCashBalance: 0,
+  updatedAt: new Date(),
+};
+
 export interface GoldMarketPrices {
-  pricePerGramK24?: number;
-  pricePerGramK21?: number;
-  pricePerGramK22?: number;
-  pricePerGramK18?: number;
-  pricePerGramK14?: number;
-  pricePerGramK12?: number;
-  pricePerGramK10?: number;
-  pricePerGramK9?: number;
-  pricePerGramK8?: number;
-  pricePerGoldPound?: number;
-  pricePerOunceK24?: number;
-  pricePerOunceK21?: number;
-  pricePerOunceK22?: number;
-  pricePerOunceK18?: number;
-  pricePerOunceK14?: number;
-  pricePerOunceK12?: number;
-  pricePerOunceK10?: number;
-  pricePerOunceK9?: number;
-  pricePerOunceK8?: number;
+  K24?: number;
+  K21?: number;
+  K22?: number;
+  K18?: number;
+  K14?: number;
+  K12?: number;
+  K10?: number;
+  K9?: number;
+  K8?: number;
+  Pound?: number;
+  Ounce?: number;
+  OunceK21?: number;
+  OunceK22?: number;
+  OunceK18?: number;
+  OunceK14?: number;
+  OunceK12?: number;
+  OunceK10?: number;
+  OunceK9?: number;
+  OunceK8?: number;
   source?: string;
   lastUpdated?: any;
 }
@@ -258,77 +393,20 @@ export interface ExchangeRates {
   [key: string]: number;
 }
 
-// Placeholder for AppSettings. Update with real fields as needed.
+export type InvestmentTypePercentage = Record<InvestmentType, number>;
+
 export interface AppSettings {
-  // Example fields
-  theme?: string;
-  notificationsEnabled?: boolean;
-  financialYearStartMonth?: number;
-  // Add more fields as needed
+  financialYearStartMonth: number;
+  investmentTypePercentages: InvestmentTypePercentage;
 }
 
-export type AggregatedGoldHolding = {
-  id: string;
-  displayName: string;
-  itemType: "physical" | "fund";
-  logoUrl?: string;
-  totalQuantity: number;
-  averagePurchasePrice: number;
-  totalCost: number;
-  currentMarketPrice?: number;
-  currency: CurrencyCode;
-  fundDetails?: ListedSecurity;
-  // fundInvestment?: SecurityInvestment;
-  physicalGoldType?: GoldType;
+export const defaultAppSettings: AppSettings = {
+  financialYearStartMonth: 1, // January
+  investmentTypePercentages: {
+    "Real Estate": 30,
+    Securities: 25,
+    "Debt Instruments": 20,
+    Currencies: 10,
+    Gold: 15,
+  },
 };
-
-export interface AggregatedCurrencyHolding {
-  currencyCode: string;
-  totalForeignAmount: number;
-  totalCostInEGP: number;
-  averagePurchaseRateToEGP: number;
-  currentMarketRateToEGP?: number;
-  currentValueInEGP?: number;
-  profitOrLossInEGP?: number;
-  profitOrLossPercentage?: number;
-}
-
-export interface AggregatedDebtHolding {
-  id: string;
-  itemType: "direct" | "fund";
-  displayName: string;
-
-  debtSubType?: DebtSubType;
-  issuer?: string;
-  interestRate?: number;
-  maturityDate?: string;
-  amountInvested?: number;
-  purchaseDate?: string;
-  maturityDay?: string;
-  maturityMonth?: string;
-  maturityYear?: string;
-  projectedMonthlyInterest?: number;
-  projectedAnnualInterest?: number;
-
-  totalUnits?: number;
-  averagePurchasePrice?: number;
-  totalCost?: number;
-  currentMarketPrice?: number;
-  currentValue?: number;
-  profitLoss?: number;
-  profitLossPercent?: number;
-  currency?: string;
-  logoUrl?: string;
-
-  fundDetails?: ListedSecurity;
-  fundInvestment?: SecurityInvestment;
-}
-
-export interface InvestmentTypePercentages {
-  [key: string]: number; // Key is InvestmentType, value is percentage (0-100)
-}
-
-export interface AppSettings {
-  financialYearStartMonth?: number;
-  investmentTypePercentages?: InvestmentTypePercentages;
-}

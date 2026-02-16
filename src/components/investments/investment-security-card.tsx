@@ -11,18 +11,21 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ListedSecurity, SecurityInvestment } from "@/lib/types";
 import FundTypeIcon from "../ui/fund-type-icon";
 import { calcProfit } from "@/lib/financial-utils";
+import { masterDataService } from "@/lib/services/master-data-service";
+import React from "react";
 
 export type InvestmentSecurityCardProps = {
-  security: ListedSecurity;
   investment: SecurityInvestment;
+  security: ListedSecurity;
 };
 
 export function InvestmentSecurityCard({
-  security,
   investment,
+  security,
 }: InvestmentSecurityCardProps) {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
+  const securityName = security[language === "ar" ? "name_ar" : "name"];
 
   // Calculate profit/loss
   const {
@@ -32,12 +35,10 @@ export function InvestmentSecurityCard({
     profitLossPercent,
     totalCurrentValue,
   } = calcProfit(
-    investment.numberOfShares!,
-    investment.purchasePricePerShare!,
-    security.price!,
+    investment.totalShares,
+    investment.averagePurchasePrice,
+    security.price,
   );
-
-  const securityName = security[language === "ar" ? "name_ar" : "name"];
 
   // Determine quantity label
   const getQuantityLabel = () => {
@@ -61,7 +62,7 @@ export function InvestmentSecurityCard({
 
     return security.symbol;
   };
-  const detailPageLink = `/securities/details/${security.id}?fromMyStocks=true`;
+  const detailPageLink = `/securities/${security.id}?fromMyStocks=true`;
 
   return (
     <Card
@@ -100,13 +101,7 @@ export function InvestmentSecurityCard({
                   {security.market.toUpperCase()}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {`${t(getQuantityLabel())}: ${investment.numberOfShares!.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2,
-                    },
-                  )}`}
+                  {`${t(getQuantityLabel())}: ${investment.totalShares}`}
                 </p>
               </div>
             </div>
@@ -153,7 +148,7 @@ export function InvestmentSecurityCard({
               <span className="font-medium text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  investment.purchasePricePerShare,
+                  investment.averagePurchasePrice,
                 )}
               </span>
             </p>
@@ -162,6 +157,25 @@ export function InvestmentSecurityCard({
               <span className="font-medium text-foreground">
                 {security.price !== undefined
                   ? formatNumberForMobile(isMobile, security.price)
+                  : t("na")}
+              </span>
+            </p>
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground grid grid-cols-2 gap-2">
+            <p>
+              {`${t("total_cost")}: `}
+              <span className="font-medium text-foreground">
+                {formatNumberForMobile(isMobile, investment.totalInvested)}
+              </span>
+            </p>
+            <p className="text-end">
+              {`${t("market_value")}: `}
+              <span className="font-medium text-foreground">
+                {security.price !== undefined
+                  ? formatNumberForMobile(
+                      isMobile,
+                      investment.totalShares * security.price,
+                    )
                   : t("na")}
               </span>
             </p>

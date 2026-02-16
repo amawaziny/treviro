@@ -1,20 +1,8 @@
 "use client";
 
 import React from "react";
-import { useInvestments } from "@/hooks/use-investments";
-import { useListedSecurities } from "@/hooks/use-listed-securities";
-import { useGoldMarketPrices } from "@/hooks/use-gold-market-prices";
-import type {
-  GoldInvestment,
-  SecurityInvestment,
-  GoldType,
-  AggregatedGoldHolding,
-} from "@/lib/types";
-import {
-  formatCurrencyWithCommas,
-  formatNumberForMobile,
-  isGoldRelatedFund,
-} from "@/lib/utils";
+import { useInvestments } from "@/contexts/investment-context";
+import { formatNumberForMobile } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -24,12 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Gem, Plus, AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
+import { Gem, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PhysicalGoldListItem } from "@/components/investments/gold/my-gold-list-item";
 import { GoldRatesDialog } from "@/components/investments/gold/gold-rates-dialog";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -37,177 +24,10 @@ import { InvestmentSecurityCard } from "@/components/investments/investment-secu
 
 export default function MyGoldPage() {
   const { t, language } = useLanguage();
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  const { listedSecurities, isLoading: isLoadingListedSecurities } =
-    useListedSecurities();
-  const {
-    goldMarketPrices,
-    isLoading: isLoadingGoldPrices,
-    error: goldPricesError,
-  } = useGoldMarketPrices();
+  const { goldInvestments, goldFundInvestments, totalGold, isLoading } =
+    useInvestments();
+
   const isMobile = useIsMobile();
-
-  const aggregatedGoldHoldings = React.useMemo(() => {
-    if (isLoadingInvestments || isLoadingListedSecurities) return [];
-
-    const holdings: AggregatedGoldHolding[] = [];
-
-    const physicalGoldInvestments = investments.filter(
-      (inv) => inv.type === "Gold" && !inv.fundType,
-    ) as GoldInvestment[];
-    const physicalAggregated: {
-      [key in GoldType]?: {
-        totalQuantity: number;
-        totalCost: number;
-        count: number;
-        name: string;
-        investments: GoldInvestment[];
-      };
-    } = {};
-
-    physicalGoldInvestments.forEach((inv) => {
-      if (!physicalAggregated[inv.goldType]) {
-        physicalAggregated[inv.goldType] = {
-          totalQuantity: 0,
-          totalCost: 0,
-          count: 0,
-          name: inv.name,
-          investments: [],
-        };
-      }
-      physicalAggregated[inv.goldType]!.totalQuantity += inv.quantityInGrams;
-      physicalAggregated[inv.goldType]!.totalCost += inv.amountInvested;
-      physicalAggregated[inv.goldType]!.count++;
-      physicalAggregated[inv.goldType]!.investments.push(inv);
-    });
-
-    (Object.keys(physicalAggregated) as GoldType[]).forEach((goldType) => {
-      const data = physicalAggregated[goldType]!;
-      const avgPrice =
-        data.totalQuantity > 0 ? data.totalCost / data.totalQuantity : 0;
-      let currentMarketPrice: number | undefined;
-      if (goldMarketPrices) {
-        if (goldType === "K24")
-          currentMarketPrice = goldMarketPrices.pricePerGramK24;
-        else if (goldType === "K21")
-          currentMarketPrice = goldMarketPrices.pricePerGramK21;
-        else if (goldType === "Pound")
-          currentMarketPrice = goldMarketPrices.pricePerGoldPound;
-        else if (goldType === "Ounce")
-          currentMarketPrice = goldMarketPrices.pricePerOunceK24;
-      }
-
-      holdings.push({
-        id: goldType,
-        displayName: `Physical Gold - ${goldType === "K24" ? t("24_karat") : goldType === "K21" ? t("21_karat") : goldType}`,
-        itemType: "physical",
-        totalQuantity: data.totalQuantity,
-        averagePurchasePrice: avgPrice,
-        totalCost: data.totalCost,
-        currentMarketPrice: currentMarketPrice,
-        currency: "EGP",
-        physicalGoldType: goldType,
-      });
-    });
-
-    const stockInvestments = investments.filter(
-      (inv) => inv.type === "Gold" && inv.fundType,
-    ) as SecurityInvestment[];
-    stockInvestments.forEach((stockInv) => {
-      const security = listedSecurities.find(
-        (ls) => ls.id === stockInv.securityId,
-      );
-      if (
-        security &&
-        security.securityType === "Fund" &&
-        isGoldRelatedFund(security.fundType)
-      ) {
-        holdings.push({
-          id: security.id,
-          displayName: security[language === "ar" ? "name_ar" : "name"],
-          itemType: "fund",
-          logoUrl: security.logoUrl,
-          totalQuantity: stockInv.numberOfShares || 0,
-          averagePurchasePrice: stockInv.purchasePricePerShare || 0,
-          totalCost: stockInv.amountInvested || 0,
-          currentMarketPrice: security.price,
-          currency: security.currency,
-          fundDetails: security,
-        });
-      }
-    });
-
-    const finalFundHoldings: AggregatedGoldHolding[] = [];
-    const fundAggregationMap = new Map<string, AggregatedGoldHolding>();
-
-    holdings
-      .filter((h) => h.itemType === "fund")
-      .forEach((fundHolding) => {
-        const fundId = fundHolding.id;
-        if (fundAggregationMap.has(fundId)) {
-          const existing = fundAggregationMap.get(fundId)!;
-          existing.totalQuantity += fundHolding.totalQuantity;
-          existing.totalCost += fundHolding.totalCost;
-          if (existing.totalQuantity > 0) {
-            existing.averagePurchasePrice =
-              existing.totalCost / existing.totalQuantity;
-          }
-        } else {
-          const initialFundInvestment = stockInvestments.find(
-            (si) => si.securityId === fundId,
-          );
-          if (initialFundInvestment) {
-            fundHolding.averagePurchasePrice =
-              initialFundInvestment.purchasePricePerShare || 0;
-            fundHolding.totalCost = initialFundInvestment.amountInvested || 0;
-          }
-          fundAggregationMap.set(fundId, { ...fundHolding });
-        }
-      });
-
-    finalFundHoldings.push(...Array.from(fundAggregationMap.values()));
-
-    return [
-      ...holdings.filter((h) => h.itemType === "physical"),
-      ...finalFundHoldings,
-    ].sort((a, b) => a.displayName.localeCompare(b.displayName));
-  }, [
-    investments,
-    listedSecurities,
-    goldMarketPrices,
-    isLoadingInvestments,
-    isLoadingListedSecurities,
-  ]);
-
-  const { totalCurrentValue, totalCost, totalProfitLoss } =
-    React.useMemo(() => {
-      let currentValueSum = 0;
-      let costSum = 0;
-      aggregatedGoldHoldings.forEach((holding) => {
-        if (holding.currentMarketPrice && holding.totalQuantity > 0) {
-          currentValueSum += holding.currentMarketPrice * holding.totalQuantity;
-        } else {
-          currentValueSum += holding.totalCost; // Fallback to cost if market price N/A
-        }
-        costSum += holding.totalCost;
-      });
-      return {
-        totalCurrentValue: currentValueSum,
-        totalCost: costSum,
-        totalProfitLoss: currentValueSum - costSum,
-      };
-    }, [aggregatedGoldHoldings]);
-
-  const totalProfitLossPercent =
-    totalCost > 0
-      ? (totalProfitLoss / totalCost) * 100
-      : totalCurrentValue > 0
-        ? Infinity
-        : 0;
-  const isTotalProfitable = totalProfitLoss >= 0;
-
-  const isLoading =
-    isLoadingInvestments || isLoadingListedSecurities || isLoadingGoldPrices;
 
   if (isLoading) {
     return (
@@ -259,7 +79,7 @@ export default function MyGoldPage() {
           <CardTitle className="text-sm font-medium">
             {t("total_gold_pl")}
           </CardTitle>
-          {isTotalProfitable ? (
+          {totalGold.unrealizedPnL >= 0 ? (
             <TrendingUp className="h-4 w-4 text-accent" />
           ) : (
             <TrendingDown className="h-4 w-4 text-destructive" />
@@ -269,16 +89,16 @@ export default function MyGoldPage() {
           <div
             className={cn(
               "text-xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive",
+              totalGold.unrealizedPnL >= 0 ? "text-accent" : "text-destructive",
             )}
           >
-            {formatNumberForMobile(isMobile, totalProfitLoss)}
+            {formatNumberForMobile(isMobile, totalGold.unrealizedPnL)}
           </div>
           <p className="text-xs text-muted-foreground">
             {`${
-              totalProfitLossPercent === Infinity
+              totalGold.unrealizedPnLPercent === Infinity
                 ? "∞"
-                : totalProfitLossPercent.toFixed(2)
+                : totalGold.unrealizedPnLPercent.toFixed(2)
             }% ${t("overall_pl")}`}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
@@ -287,23 +107,11 @@ export default function MyGoldPage() {
               className="font-medium text-foreground"
               data-testid="total-invested-amount"
             >
-              {formatNumberForMobile(isMobile, totalCost)}
+              {formatNumberForMobile(isMobile, totalGold.totalInvested)}
             </span>
           </p>
         </CardContent>
       </Card>
-
-      {goldPricesError && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t("error_loading_gold_market_prices")}</AlertTitle>
-          <AlertDescription>
-            {t(
-              "could_not_load_current_market_prices_for_physical_gold_pl_calculations_for_physical_gold_may_be_unavailable_or_inaccurate_please_ensure_the_goldmarketpricescurrent_document_is_correctly_set_up_in_firestore",
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
 
       <Card className="mt-6">
         <CardHeader>
@@ -316,13 +124,11 @@ export default function MyGoldPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {aggregatedGoldHoldings.length > 0 ? (
+          {goldInvestments.length > 0 ? (
             <div className="space-y-4">
-              {aggregatedGoldHoldings
-                .filter((h) => h.itemType === "physical")
-                .map((holding) => (
-                  <PhysicalGoldListItem key={holding.id} holding={holding} />
-                ))}
+              {goldInvestments.map((inv) => (
+                <PhysicalGoldListItem key={inv.id} holding={inv} />
+              ))}
             </div>
           ) : (
             <p className="text-muted-foreground py-4 text-center">
@@ -343,32 +149,16 @@ export default function MyGoldPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {aggregatedGoldHoldings.length > 0 ? (
+          {goldFundInvestments.length > 0 ? (
             <div className="space-y-4">
-              {aggregatedGoldHoldings
-                .filter((h) => h.itemType === "fund")
-                .map((holding) => {
-                  // Map the holding to match the expected investment structure
-                  const investment: SecurityInvestment = {
-                    id: holding.id,
-                    name: holding.displayName,
-                    amountInvested: holding.totalCost,
-                    numberOfShares: holding.totalQuantity,
-                    purchasePricePerShare: holding.averagePurchasePrice,
-                    tickerSymbol: holding.fundDetails?.symbol || "",
-                    type: holding.fundDetails?.fundType || "Gold", // Using 'Stocks' as the type since it's a fund investment
-                    fundType: holding.fundDetails?.fundType,
-                    securityId: holding.id,
-                  };
-
-                  return (
-                    <InvestmentSecurityCard
-                      key={holding.id}
-                      security={holding.fundDetails!}
-                      investment={investment}
-                    />
-                  );
-                })}
+              {goldFundInvestments.map((holding) => {
+                return (
+                  <InvestmentSecurityCard
+                    key={holding.id}
+                    investment={holding}
+                  />
+                );
+              })}
             </div>
           ) : (
             <p className="text-muted-foreground py-4 text-center">
@@ -378,7 +168,7 @@ export default function MyGoldPage() {
         </CardContent>
       </Card>
 
-      <Link href="/investments/add?type=Gold" passHref>
+      <Link href="/investments/buy-new?type=Gold" passHref>
         <Button
           variant="default"
           size="icon"

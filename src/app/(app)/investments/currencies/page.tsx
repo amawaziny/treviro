@@ -1,33 +1,14 @@
 "use client";
 
 import React from "react";
-import { useInvestments } from "@/hooks/use-investments";
+import { useInvestments } from "@/contexts/investment-context";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
-import type {
-  CurrencyInvestment,
-  AggregatedCurrencyHolding,
-} from "@/lib/types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  DollarSign,
-  AlertCircle,
-  Plus,
-  Coins,
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-} from "lucide-react";
+import { Plus, Coins, TrendingUp, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { MyCurrencyListItem } from "@/components/investments/currencies/my-currency-list-item";
 import { useLanguage } from "@/contexts/language-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -35,99 +16,11 @@ import { cn, formatNumberForMobile } from "@/lib/utils";
 import { CurrencyRatesDialog } from "@/components/investments/currencies/currency-rates-dialog";
 
 export default function MyCurrenciesPage() {
-  const { t: t, language } = useLanguage();
-  const { investments, isLoading: isLoadingInvestments } = useInvestments();
-  const {
-    exchangeRates,
-    isLoading: isLoadingRates,
-    error: ratesError,
-  } = useExchangeRates();
+  const { t, language } = useLanguage();
+  const { currencyInvestments, totalCurrency, isLoading } = useInvestments();
+  const { exchangeRates } = useExchangeRates();
+
   const isMobile = useIsMobile();
-
-  const aggregatedCurrencyHoldings = React.useMemo(() => {
-    if (isLoadingInvestments || !investments.length) return [];
-
-    const currencyInvestments = investments.filter(
-      (inv) => inv.type === "Currencies",
-    ) as CurrencyInvestment[];
-    const holdings: {
-      [key: string]: {
-        totalForeign: number;
-        totalCostEGP: number;
-        count: number;
-      };
-    } = {};
-
-    currencyInvestments.forEach((inv) => {
-      if (!holdings[inv.currencyCode]) {
-        holdings[inv.currencyCode] = {
-          totalForeign: 0,
-          totalCostEGP: 0,
-          count: 0,
-        };
-      }
-      holdings[inv.currencyCode].totalForeign += inv.foreignCurrencyAmount;
-      holdings[inv.currencyCode].totalCostEGP += inv.amountInvested;
-      holdings[inv.currencyCode].count++;
-    });
-
-    return Object.entries(holdings)
-      .map(([code, data]): AggregatedCurrencyHolding => {
-        const avgPurchaseRate =
-          data.totalForeign > 0 ? data.totalCostEGP / data.totalForeign : 0;
-        const currentMarketRateKey = `${code.toUpperCase()}_EGP`;
-        const currentMarketRate = exchangeRates?.[currentMarketRateKey];
-
-        let currentValueEGP, profitLossEGP, profitLossPercent;
-        if (currentMarketRate !== undefined && currentMarketRate !== null) {
-          currentValueEGP = data.totalForeign * currentMarketRate;
-          profitLossEGP = currentValueEGP - data.totalCostEGP;
-          profitLossPercent =
-            data.totalCostEGP > 0
-              ? (profitLossEGP / data.totalCostEGP) * 100
-              : currentValueEGP > 0
-                ? Infinity
-                : 0;
-        }
-
-        return {
-          currencyCode: code,
-          totalForeignAmount: data.totalForeign,
-          totalCostInEGP: data.totalCostEGP,
-          averagePurchaseRateToEGP: avgPurchaseRate,
-          currentMarketRateToEGP: currentMarketRate,
-          currentValueInEGP: currentValueEGP,
-          profitOrLossInEGP: profitLossEGP,
-          profitOrLossPercentage: profitLossPercent,
-        };
-      })
-      .filter((h) => h.totalForeignAmount > 0);
-  }, [investments, isLoadingInvestments, exchangeRates]);
-
-  const { totalCurrentValueEGP, totalCostInEGP, totalProfitLossEGP } =
-    React.useMemo(() => {
-      let currentValueSum = 0;
-      let costSum = 0;
-      aggregatedCurrencyHoldings.forEach((holding) => {
-        currentValueSum += holding.currentValueInEGP ?? holding.totalCostInEGP; // Fallback to cost if current value N/A
-        costSum += holding.totalCostInEGP;
-      });
-      return {
-        totalCurrentValueEGP: currentValueSum,
-        totalCostInEGP: costSum,
-        totalProfitLossEGP: currentValueSum - costSum,
-      };
-    }, [aggregatedCurrencyHoldings]);
-
-  const totalProfitLossPercent =
-    totalCostInEGP > 0
-      ? (totalProfitLossEGP / totalCostInEGP) * 100
-      : totalCurrentValueEGP > 0
-        ? Infinity
-        : 0;
-  const isTotalProfitable = totalProfitLossEGP >= 0;
-
-  const isLoading = isLoadingInvestments || isLoadingRates;
 
   if (isLoading) {
     return (
@@ -178,7 +71,7 @@ export default function MyCurrenciesPage() {
           <CardTitle className="text-sm font-medium">
             {t("total_currencies_pl_vs_egp")}
           </CardTitle>
-          {isTotalProfitable ? (
+          {totalCurrency.unrealizedPnL >= 0 ? (
             <TrendingUp className="h-4 w-4 text-accent" />
           ) : (
             <TrendingDown className="h-4 w-4 text-destructive" />
@@ -188,36 +81,34 @@ export default function MyCurrenciesPage() {
           <div
             className={cn(
               "text-xl font-bold",
-              isTotalProfitable ? "text-accent" : "text-destructive",
+              totalCurrency.unrealizedPnL >= 0
+                ? "text-accent"
+                : "text-destructive",
             )}
           >
-            {formatNumberForMobile(isMobile, totalProfitLossEGP, "EGP")}
+            {formatNumberForMobile(isMobile, totalCurrency.unrealizedPnL)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {totalProfitLossPercent === Infinity
+            {totalCurrency.unrealizedPnLPercent === Infinity
               ? "∞"
-              : totalProfitLossPercent.toFixed(2)}
+              : totalCurrency.unrealizedPnLPercent.toFixed(2)}
             {t("overall_pl")}
           </p>
         </CardContent>
       </Card>
 
-      {ratesError && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t("error_loading_exchange_rates")}</AlertTitle>
-          <AlertDescription>
-            {t(
-              "could_not_load_current_exchange_rates_pl_calculations_might_be_unavailable_or_inaccurate_please_ensure_the_exchangeratescurrent_document_is_correctly_set_up_in_firestore",
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {aggregatedCurrencyHoldings.length > 0 ? (
+      {currencyInvestments.length > 0 ? (
         <div className="space-y-4" style={{ marginBottom: "96px" }}>
-          {aggregatedCurrencyHoldings.map((holding) => (
-            <MyCurrencyListItem key={holding.currencyCode} holding={holding} />
+          {currencyInvestments.map((inv) => (
+            <MyCurrencyListItem
+              key={inv.currencyCode}
+              holding={inv}
+              currentMarketRate={
+                exchangeRates?.[
+                  `${inv.currencyCode.toUpperCase()}_${inv.currency.toUpperCase()}`
+                ] ?? inv.averagePurchasePrice
+              }
+            />
           ))}
         </div>
       ) : (
@@ -238,7 +129,7 @@ export default function MyCurrenciesPage() {
         </Card>
       )}
 
-      <Link href="/investments/add?type=Currencies" passHref>
+      <Link href="/investments/buy-new?type=Currencies" passHref>
         <Button
           variant="default"
           size="icon"

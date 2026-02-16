@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
+import { Skeleton } from "@/components/ui/skeleton";
 import { IncomeForm } from "@/components/income/income-form";
 import {
   Card,
@@ -12,32 +13,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { IncomeFormValues } from "@/lib/schemas";
+import { formatDateISO } from "@/lib/utils";
 
-export default function EditIncomePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditIncomePage() {
   const { t } = useLanguage();
-  const { incomeRecords, updateIncomeRecord } = useInvestments();
   const router = useRouter();
-  const { id: incomeId } = React.use(params);
+  const params = useParams();
+  const incomeId = params.id as string;
+
+  const { updateIncome, incomesManual } = useFinancialRecords();
+
+  const income = incomesManual.find((i) => i.id === incomeId) || null;
+
   const { setHeaderProps, openForm, closeForm } = useForm();
-
-  // Find the income record by id
-  const income = React.useMemo(
-    () => incomeRecords.find((rec) => rec.id === incomeId),
-    [incomeRecords, incomeId],
-  );
-
-  if (!income) {
-    return notFound();
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     // Open form when component mounts
     openForm();
 
@@ -70,26 +61,30 @@ export default function EditIncomePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <IncomeForm
-            initialValues={{
-              type: income.type,
-              source: income.source,
-              description: income.description ?? "",
-              //@ts-expect-error
-              amount: income.amount?.toString() ?? "",
-              date: income.date,
-              isRecurring: income.isRecurring ?? false,
-              recurrencePeriod: income.recurrencePeriod ?? "",
-            }}
-            onSubmit={async (values: IncomeFormValues) => {
-              await updateIncomeRecord(incomeId, {
-                ...values,
-                amount: Number(values.amount),
-              });
-              router.push("/income");
-            }}
-            isEditMode
-          />
+          {!income ? (
+            <div className="space-y-6">
+              <Skeleton className="h-96 w-full rounded" />
+            </div>
+          ) : (
+            <IncomeForm
+              initialValues={{
+                type: income?.type,
+                source: income?.source,
+                description: income?.description ?? "",
+                amount: income?.amount,
+                date: formatDateISO(income?.date || new Date()),
+              }}
+              onSubmit={async (values: IncomeFormValues) => {
+                await updateIncome(incomeId, {
+                  ...values,
+                  amount: Number(values.amount),
+                  date: new Date(values.date),
+                });
+                router.push("/income");
+              }}
+              isEditMode
+            />
+          )}
         </CardContent>
       </Card>
     </div>

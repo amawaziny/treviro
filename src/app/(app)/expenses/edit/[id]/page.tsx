@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { useInvestments } from "@/hooks/use-investments";
+import React, { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import {
   Card,
@@ -12,32 +11,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { notFound } from "next/navigation";
 import { useForm } from "@/contexts/form-context";
 import { ExpenseFormValues } from "@/lib/schemas";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDateISO } from "@/lib/utils";
 
-export default function EditExpensePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditExpensePage() {
   const { t } = useLanguage();
-  const { expenseRecords, updateExpenseRecord } = useInvestments();
   const router = useRouter();
-  const { id: expenseId } = React.use(params);
+  const params = useParams();
+  const expenseId = params.id as string;
+
+  const { expensesManual, updateExpense } = useFinancialRecords();
+
+  const expense = expensesManual.find((e) => e.id === expenseId) || null;
+
   const { setHeaderProps, openForm, closeForm } = useForm();
-
-  // Find the expense record by id
-  const expense = React.useMemo(
-    () => expenseRecords.find((rec) => rec.id === expenseId),
-    [expenseRecords, expenseId],
-  );
-
-  if (!expense) {
-    return notFound();
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     // Open form when component mounts
     openForm();
 
@@ -76,31 +67,32 @@ export default function EditExpensePage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseForm
-            initialValues={{
-              category: expense.category,
-              description: expense.description ?? "",
-              //@ts-expect-error
-              amount: expense.amount?.toString() ?? "",
-              date: expense.date,
-              isInstallment: expense.isInstallment ?? false,
-              //@ts-expect-error
-              numberOfInstallments: expense.numberOfInstallments
-                ? expense.numberOfInstallments.toString()
-                : "",
-            }}
-            onSubmit={async (values: ExpenseFormValues) => {
-              await updateExpenseRecord(expenseId, {
-                ...values,
-                amount: Number(values.amount),
-                numberOfInstallments: values.numberOfInstallments
-                  ? Number(values.numberOfInstallments)
-                  : undefined,
-              });
-              router.push("/expenses");
-            }}
-            isEditMode={true}
-          />
+          {!expense ? (
+            <div className="space-y-6">
+              <Skeleton className="h-96 w-full rounded" />
+            </div>
+          ) : (
+            <ExpenseForm
+              initialValues={{
+                category: expense.type,
+                description: expense.description ?? "",
+                amount: Math.abs(expense.amount),
+                date: formatDateISO(expense.date || new Date()),
+                isInstallment: expense.isInstallment ?? false,
+                numberOfInstallments: expense.numberOfInstallments,
+              }}
+              onSubmit={async (values: ExpenseFormValues) => {
+                await updateExpense(expenseId, {
+                  ...values,
+                  date: new Date(values.date),
+                  amount: -values.amount,
+                  numberOfInstallments: values.numberOfInstallments || 0,
+                });
+                router.push("/expenses");
+              }}
+              isEditMode={true}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

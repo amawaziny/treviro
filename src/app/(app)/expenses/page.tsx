@@ -1,12 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
-import { useInvestments } from "@/hooks/use-investments";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import {
+  Banknote,
+  CreditCard,
+  Pencil,
+  Trash2,
+  DollarSign,
+  Loader2,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -25,146 +30,74 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, TrendingDown } from "lucide-react";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   cn,
   formatDateDisplay,
+  formatDateISO,
   formatMonthYear,
   formatNumberForMobile,
 } from "@/lib/utils";
-import type { ExpenseRecord } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useFinancialRecords } from "@/contexts/financial-records-context";
+import { startOfDay } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { ExpenseRecord } from "@/lib/types";
 
 export default function ExpensesPage() {
-  const { t, language } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const isMobile = useIsMobile();
-  // UI state for filters
-  const [showAll, setShowAll] = React.useState(false); // false = this month, true = all
-  const [showEnded, setShowEnded] = React.useState(false); // false = hide ended, true = show ended
+  const { toast } = useToast();
 
-  const { expenseRecords, isLoading, deleteExpenseRecord } = useInvestments(); // Removed monthlySettings
+  const [showPaySheet, setShowPaySheet] = useState(false);
+  const [payDate, setPayDate] = useState(new Date());
+  const [isPaying, setIsPaying] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseRecord | null>(
+    null,
+  );
 
-  const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const currentMonthEnd = endOfMonth(now);
+  const month = useMemo(() => startOfDay(new Date()), []);
+  const monthYear = useMemo(
+    () => formatMonthYear(month, language),
+    [month, language],
+  );
 
-  // Filtering logic for expenses
-  const filteredExpenses = React.useMemo(() => {
-    const recordsToFilter = expenseRecords || [];
-    const currentMonth = currentMonthStart.getMonth();
-    const currentYear = currentMonthStart.getFullYear();
+  const { expensesManual, isLoading, deleteExpense, payCreditCardExpense } =
+    useFinancialRecords();
 
-    // Helper: is record ended?
-    function isEnded(record: ExpenseRecord) {
-      if (record.isInstallment && record.numberOfInstallments && record.date) {
-        const startDate = new Date(record.date);
-        const endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + record.numberOfInstallments - 1);
-        return now > endDate;
-      }
-      return false;
+  const payInstallmentSubmit = async () => {
+    if (!selectedExpense) return;
+    try {
+      setIsPaying(true);
+      await payCreditCardExpense(selectedExpense, payDate);
+      setShowPaySheet(false);
+      toast({
+        title: t("installment_paid"),
+        description: t("the_installment_has_been_successfully_paid"),
+        variant: "default",
+      });
+    } catch (e: any) {
+      toast({
+        title: t("failed_to_pay_installment"),
+        description: e.message || t("failed_to_pay_installment"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsPaying(false);
     }
-
-    // Helper: is record required this month?
-    function isRequiredThisMonth(record: ExpenseRecord) {
-      if (
-        record.category === "Credit Card" &&
-        record.isInstallment &&
-        record.numberOfInstallments &&
-        record.date
-      ) {
-        const startDate = new Date(record.date);
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const installmentMonths = record.numberOfInstallments;
-        const monthsSinceStart =
-          (currentYear - startYear) * 12 + (currentMonth - startMonth);
-        return monthsSinceStart >= 0 && monthsSinceStart < installmentMonths;
-      } else if (record.date) {
-        return isWithinInterval(new Date(record.date), {
-          start: currentMonthStart,
-          end: currentMonthEnd,
-        });
-      }
-      return false;
-    }
-
-    let filtered = recordsToFilter.filter((record) => {
-      // Hide ended if not showing ended
-      if (!showEnded && isEnded(record)) return false;
-      // If not showAll, only show required this month
-      if (!showAll && !isRequiredThisMonth(record)) return false;
-      return true;
-    });
-
-    // For display, augment records as before
-    return filtered
-      .flatMap((record) => {
-        if (
-          record.category === "Credit Card" &&
-          record.isInstallment &&
-          record.numberOfInstallments &&
-          record.date
-        ) {
-          const startDate = new Date(record.date);
-          const startMonth = startDate.getMonth();
-          const startYear = startDate.getFullYear();
-          const installmentMonths = record.numberOfInstallments;
-          const monthsSinceStart =
-            (currentYear - startYear) * 12 + (currentMonth - startMonth);
-          if (monthsSinceStart >= 0 && monthsSinceStart < installmentMonths) {
-            return [
-              {
-                ...record,
-                _originalAmount: record.amount,
-                _requiredAmount: record.amount / record.numberOfInstallments,
-                installmentMonthIndex: monthsSinceStart + 1,
-                numberOfInstallments: installmentMonths,
-                installmentStartDate: startDate,
-                _isRequiredThisMonth: true,
-                _isEnded: isEnded(record),
-              },
-            ];
-          } else {
-            return [
-              {
-                ...record,
-                _isRequiredThisMonth: false,
-                _isEnded: isEnded(record),
-              },
-            ];
-          }
-        } else if (
-          record.date &&
-          isWithinInterval(new Date(record.date), {
-            start: currentMonthStart,
-            end: currentMonthEnd,
-          })
-        ) {
-          return [
-            {
-              ...record,
-              _originalAmount: record.amount,
-              _requiredAmount: record.amount,
-              _isRequiredThisMonth: true,
-              _isEnded: isEnded(record),
-            },
-          ];
-        } else {
-          return [
-            {
-              ...record,
-              _isRequiredThisMonth: false,
-              _isEnded: isEnded(record),
-            },
-          ];
-        }
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [expenseRecords, currentMonthStart, currentMonthEnd, showAll, showEnded]);
+  };
 
   if (isLoading) {
     return (
@@ -210,57 +143,25 @@ export default function ExpensesPage() {
       </div>
       <Separator />
 
-      {/* Filter Controls */}
-      <div className="flex flex-wrap gap-4 items-center mb-6">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
-            dir="auto"
-            checked={showAll}
-            onCheckedChange={setShowAll}
-            id="show-all-switch"
-            data-testid="show-all-toggle"
-          />
-
-          <span>{t("show_all_expenses")}</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Switch
-            dir="auto"
-            checked={showEnded}
-            onCheckedChange={setShowEnded}
-            id="show-ended-switch"
-            data-testid="show-ended-toggle"
-          />
-
-          <span>{t("show_endedold_expenses")}</span>
-        </label>
-      </div>
-
-      {/* Removed the Card for Monthly Fixed Estimates that rendered FinancialSettingsForm */}
-
-      {filteredExpenses.length > 0 ? (
+      {expensesManual.length > 0 ? (
         <>
           {/* Summary Card */}
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingDown className="me-2 h-4 w-4 text-primary" />
-                {showAll ? t("total_spent_all") : t("total_spent_this_month")}
+                {t("total_spent_this_month")}
               </CardTitle>
               <CardDescription>
-                {showAll
-                  ? t(
-                      "view_and_manage_all_your_recorded_expenses_including_installments_and_onetime_payments",
-                    )
-                  : `${t("see_and_manage_all_expenses_required_for")} ${formatMonthYear(now, language)}, ${t("including_current_installments_and_one_time_payments")}`}
+                {`${t("see_and_manage_all_expenses_required_for")} ${monthYear}, ${t("including_current_installments_and_one_time_payments")}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <span className="text-xl font-bold text-foreground">
                 {formatNumberForMobile(
                   isMobile,
-                  filteredExpenses.reduce(
-                    (sum, r) => sum + (r._requiredAmount || 0),
+                  expensesManual.reduce(
+                    (sum, r) => sum + (r._requiredAmount || r.amount),
                     0,
                   ),
                 )}
@@ -269,12 +170,11 @@ export default function ExpensesPage() {
           </Card>
 
           <div className="grid gap-4 mt-8" data-testid="expenses-list">
-            {filteredExpenses.map((record) => (
+            {expensesManual.map((record) => (
               <Card
                 key={record.id + (record.installmentMonthIndex || "")}
                 className={cn(
-                  record._isRequiredThisMonth ? "border-yellow-300" : "",
-                  record._isEnded ? "opacity-50" : "",
+                  record.isClosed ? "opacity-50" : "",
                   "last:mb-24",
                 )}
                 data-testid={`expense-card-${record.id}`}
@@ -284,36 +184,56 @@ export default function ExpensesPage() {
                   <div className="flex-1 min-w-0">
                     {/* Top Row: Title, Date, Installment Badge */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
+                      {record.type === "Credit Card" ? (
+                        <CreditCard className="h-4 w-4 me-1" />
+                      ) : (
+                        <Banknote className="h-4 w-4 me-1" />
+                      )}
                       <span className="font-semibold truncate text-base">
-                        {record.description || t(record.category)}
+                        {record.description || t(record.type)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDateDisplay(record.date)}
                       </span>
-                      {record.isInstallment &&
-                        record.numberOfInstallments &&
-                        record.category === "Credit Card" && (
-                          <div className="flex items-center gap-2">
-                            <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
-                              {`${t("installment")}: ${record.installmentMonthIndex} ${t("of")} ${record.numberOfInstallments}`}
+                      {record.isInstallment && (
+                        <div className="flex items-center gap-2">
+                          <span className="bg-muted px-2 py-0.5 rounded-full text-xs">
+                            {`${t("installment")}: ${record.lastPaidInstallmentIndex! + 1} ${t("of")} ${record.numberOfInstallments}`}
+                          </span>
+                          {record.lastPaidInstallmentIndex! <
+                            record.installmentMonthIndex! && (
+                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
+                              {t("required_this_month")}
                             </span>
-                            {record._isRequiredThisMonth && (
-                              <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-900 text-xs font-semibold">
-                                {t("required_this_month")}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                          )}
+                        </div>
+                      )}
                     </div>
                     {/* Amount and Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                       <span className="text-xl font-bold">
                         {formatNumberForMobile(
                           isMobile,
-                          record._requiredAmount,
+                          record.isInstallment
+                            ? record._requiredAmount
+                            : record.amount,
                         )}
                       </span>
                       <div className="flex items-center gap-2">
+                        {record.isInstallment && (
+                          <Button
+                            title={t("pay_installment")}
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Pay"
+                            onClick={() => {
+                              setSelectedExpense(record);
+                              setShowPaySheet(true);
+                            }}
+                          >
+                            <DollarSign className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Link
                           href={`/expenses/edit/${record.id}`}
                           passHref
@@ -334,7 +254,7 @@ export default function ExpensesPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                               <span className="sr-only">
-                                {`${t("Remove")} ${record.description || t(record.category)}`}
+                                {`${t("Remove")} ${record.description || t(record.type)}`}
                               </span>
                             </Button>
                           </AlertDialogTrigger>
@@ -357,9 +277,15 @@ export default function ExpensesPage() {
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
                                   try {
-                                    await deleteExpenseRecord(record.id);
-                                  } catch (e) {
-                                    // Optionally show toast or ignore
+                                    await deleteExpense(record.id);
+                                  } catch (e: any) {
+                                    toast({
+                                      title: t("failed_to_delete_expense"),
+                                      description: t(
+                                        "could_not_delete_the_expense_record",
+                                      ),
+                                      variant: "destructive",
+                                    });
                                   }
                                 }}
                               >
@@ -370,17 +296,6 @@ export default function ExpensesPage() {
                         </AlertDialog>
                       </div>
                     </div>
-                    {/* Installment Details */}
-                    {record.isInstallment &&
-                      record.numberOfInstallments &&
-                      record.category === t("credit_card") && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {`${t("installment_egp")} ${formatNumberForMobile(
-                            isMobile,
-                            record.amount / record.numberOfInstallments,
-                          )} x ${record.numberOfInstallments} ${t("months")}`}
-                        </div>
-                      )}
                   </div>
                 </CardContent>
               </Card>
@@ -400,7 +315,7 @@ export default function ExpensesPage() {
               data-testid="no-expenses-message"
               className="text-muted-foreground py-4 text-center"
             >
-              {`${t("you_havent_added_any_itemized_expenses_for")} ${formatMonthYear(now, language)} ${t("yet")}`}
+              {`${t("you_havent_added_any_itemized_expenses_for")} ${monthYear} ${t("yet")}`}
             </p>
           </CardContent>
         </Card>
@@ -417,6 +332,55 @@ export default function ExpensesPage() {
           <Plus className="h-7 w-7" />
         </Button>
       </Link>
+
+      <Sheet open={showPaySheet} onOpenChange={setShowPaySheet}>
+        <SheetContent dir={dir} side="bottom">
+          <SheetHeader>
+            <SheetTitle>{t("pay_installment")}</SheetTitle>
+            <SheetDescription>
+              {t("enter_the_payment_date_for_this_installment")}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="grid gap-2 py-4">
+            <Label htmlFor="payDate">{t("pay_date")}</Label>
+            <Input
+              id="payDate"
+              type="date"
+              value={formatDateISO(payDate)}
+              onChange={(e) => {
+                const date = e.target.value
+                  ? new Date(e.target.value)
+                  : new Date();
+                setPayDate(date);
+              }}
+            />
+          </div>
+          <SheetFooter>
+            <div className="flex flex-row-reverse gap-2">
+              <Button
+                variant="outline"
+                disabled={isPaying}
+                onClick={() => setShowPaySheet(false)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                disabled={isPaying}
+                onClick={() => payInstallmentSubmit()}
+              >
+                {isPaying ? (
+                  <>
+                    <Loader2 className="ms-2 h-4 w-4 animate-spin" />
+                    {t("paying")}
+                  </>
+                ) : (
+                  t("pay")
+                )}
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
