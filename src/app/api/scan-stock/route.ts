@@ -11,9 +11,36 @@ import {
   limit,
   startAfter,
   orderBy,
+  writeBatch,
 } from "firebase/firestore";
 import axios from "axios";
 import { LISTED_SECURITIES_COLLECTION } from "@/lib/constants";
+
+const deletePriceHistory = async (stockId: string) => {
+  const priceHistoryRef = collection(
+    db,
+    "listedSecurities",
+    stockId,
+    "priceHistory"
+  );
+
+  const snapshot = await getDocs(priceHistoryRef);
+
+  if (snapshot.empty) {
+    console.log("No price history to delete.");
+    return;
+  }
+
+  const batch = writeBatch(db);
+
+  snapshot.forEach((docSnap) => {
+    batch.delete(docSnap.ref);
+  });
+
+  await batch.commit();
+
+  console.log("Price history deleted successfully.");
+};
 
 export async function GET(req: NextRequest) {
   try {
@@ -71,27 +98,24 @@ export async function GET(req: NextRequest) {
           columns: ["close", "open", "high", "low", "volume", "change"],
         };
 
-        const options = {
-          method: "post",
-          contentType: "application/json",
-          payload: JSON.stringify(payload),
-          muteHttpExceptions: true,
+        const res = await axios.post(url, payload, {
           headers: {
+            contentType: "application/json",
             "User-Agent": "Mozilla/5.0",
           },
-        };
-
-        const res = await axios.post(url, options);
-        const data = JSON.parse(res.data);
+        });
+        
+        const data = res.data;
 
         if (!data.data || data.data.length === 0) {
           console.error("No price data", code);
+          continue;
         }
 
         const row = data.data[0].d;
 
-        console.log(`Parsing: ${code}, Response: ${row}`);
-        if (!isNaN(row)) {
+        console.log(`Parsing: ${code}, Response: ${row}, Price: ${row[0]}`);
+        if (row.length !== 0) {
           // 4. Update listedSecurities collection in firebase and set price column
           updates.push(
             (async () => {

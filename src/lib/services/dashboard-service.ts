@@ -35,11 +35,10 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 11. sell for gold
  * 12. sell for realestate
  * 13. meter price for realestate
- * 14. remove price history collection no need any more with the integration of tradingview widget and we can get the price history from the widget and we will only keep the current price in the securities collection
- * 15. fix investment distribution
- * 16. fix investment breakdown by type in dashboard
- * 17. navigation from stock details to my stock or securities explore
- * 19. test update securities price api then merge to main
+ * 14. fix investment distribution
+ * 15. fix investment breakdown by type in dashboard
+ * 16. navigation from stock details to my stock or securities explore
+ * 27. EGX30, EGX70, EGX100
  */
 
 export class DashboardService {
