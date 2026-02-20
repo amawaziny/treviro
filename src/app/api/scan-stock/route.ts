@@ -21,7 +21,7 @@ const deletePriceHistory = async (stockId: string) => {
     db,
     "listedSecurities",
     stockId,
-    "priceHistory"
+    "priceHistory",
   );
 
   const snapshot = await getDocs(priceHistoryRef);
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
             "User-Agent": "Mozilla/5.0",
           },
         });
-        
+
         const data = res.data;
 
         if (!data.data || data.data.length === 0) {

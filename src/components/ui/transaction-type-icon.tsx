@@ -8,7 +8,7 @@ import {
   PiggyBank,
   Banknote,
   ScrollText,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TransactionType } from "@/lib/types";

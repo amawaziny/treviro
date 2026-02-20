@@ -14,6 +14,7 @@ interface CashFlowSummaryCardsProps {
   totalGoldInvestments: number;
   totalInvestments: number;
   netCashFlow: number;
+  investmentToCash: number;
 }
 
 export function CashFlowSummaryCards({
@@ -26,6 +27,7 @@ export function CashFlowSummaryCards({
   totalGoldInvestments,
   totalInvestments,
   netCashFlow,
+  investmentToCash
 }: CashFlowSummaryCardsProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
@@ -166,7 +168,19 @@ export function CashFlowSummaryCards({
           </CardHeader>
           <CardContent>
             <p className="text-xl font-medium text-gray-700 dark:text-gray-300">
+              {formatNumberForMobile(isMobile, netCashFlow + investmentToCash)}
+            </p>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {t("remaining_total_income_total_expenses_total_investments")}
+            </div>
+            <p className="text-md font-medium text-gray-700 dark:text-gray-300">
               {formatNumberForMobile(isMobile, netCashFlow)}
+            </p>
+            <div className="text-md text-gray-600 dark:text-gray-400 mt-1">
+              {t("remaining_total_income_total_expenses_total_investments")}
+            </div>
+            <p className="text-md font-medium text-gray-700 dark:text-gray-300">
+              {formatNumberForMobile(isMobile, investmentToCash)}
             </p>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {t("remaining_total_income_total_expenses_total_investments")}
