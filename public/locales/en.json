@@ -441,7 +441,7 @@
   "recorded successfully": "recorded successfully",
   "remaining_amount": "Remaining Amount",
   "remaining_cash_after_expenses_investments": "Remaining Cash After Expenses & Investments",
-  "remaining_total_income_total_expenses_total_investments": "Remaining = Total Income - Total Expenses - Total Investments",
+  "remaining_total_income_total_expenses_total_investments": "Remaining = Total Income - Total Expenses - Total Investments + Total Principal Returned",
   "remove": "Remove",
   "required_this_month": "Required This Month",
   "reset_your_password": "Reset your password",

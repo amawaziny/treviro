@@ -80,7 +80,7 @@ export default function CashFlowPage() {
     goldInvestmentTrxs,
     realEstateInvestments,
     netCashFlow,
-    investmentToCash
+    principalReturned,
   } = useCashflow({
     expensesManualCreditCard,
     investments,
@@ -145,7 +145,7 @@ export default function CashFlowPage() {
         totalGoldInvestments={totalGoldInvestments}
         totalInvestments={totalInvestments}
         netCashFlow={netCashFlow}
-        investmentToCash={investmentToCash}
+        principalReturned={principalReturned}
       />
 
       {/* Details Section: 3 Columns */}

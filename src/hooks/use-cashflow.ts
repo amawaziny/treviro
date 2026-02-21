@@ -62,7 +62,7 @@ export function useCashflow({
   const [totalCurrencyInvestments, setTotalCurrencyInvestments] =
     useState<number>(0);
   const [totalInvestments, setTotalInvestments] = useState<number>(0);
-  const [investmentToCash, setInvestmentToCash] = useState<number>(0);
+  const [principalReturned, setPrincipalReturned] = useState<number>(0);
   const [totalIncome, setTotalIncome] = useState<number>(0);
   const [totalIncomesFixedPlanned, setTotalIncomesFixedPlanned] =
     useState<number>(0);
@@ -153,16 +153,17 @@ export function useCashflow({
       groupTransactionsBySourceIdAndTxType(incomesTrxs);
     setIncomesTrxs(incomesGroupedBySourcIdTrxs);
 
-    setInvestmentToCash(transactions.filter((tx) => {
-      const investToCash = [
-        "MATURED_DEBT",
-        "SELL",
-      ].includes(tx.type);
-      return investToCash;
-    }).reduce((sum, tx) =>  sum + tx.amount, 0))
+    setPrincipalReturned(
+      transactions
+        .filter((tx) => {
+          const investToCash = ["MATURED_DEBT", "SELL"].includes(tx.type);
+          return investToCash;
+        })
+        .reduce((sum, tx) => sum + tx.amount, 0),
+    );
 
     setIncomeTillNow(
-      incomesGroupedBySourcIdTrxs.reduce((sum, tx) =>  sum + tx.amount, 0),
+      incomesGroupedBySourcIdTrxs.reduce((sum, tx) => sum + tx.amount, 0),
     );
   }, [transactions]);
 
@@ -506,7 +507,7 @@ export function useCashflow({
 
     // Summary
     netCashFlow,
-    investmentToCash,
+    principalReturned,
     netTillNowCashFlow,
   };
 

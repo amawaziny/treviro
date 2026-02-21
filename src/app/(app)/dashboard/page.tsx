@@ -96,6 +96,7 @@ export default function DashboardPage() {
     totalInvestments,
     totalCurrencyInvestments,
     netCashFlow,
+    principalReturned
   } = useCashflow({
     expensesManualCreditCard,
     investments,
@@ -334,6 +335,7 @@ export default function DashboardPage() {
             totalGoldInvestments={totalGoldInvestments}
             totalInvestments={totalInvestments}
             netCashFlow={netCashFlow}
+            principalReturned={principalReturned}
           />
         </CardContent>
       </Card>

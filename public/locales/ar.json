@@ -459,7 +459,7 @@
   "recorded successfully": "تم التسجيل بنجاح",
   "remaining_amount": "المبلغ المتبقي",
   "remaining_cash_after_expenses_investments": "النقد المتبقي بعد النفقات واﻻستثمارات",
-  "remaining_total_income_total_expenses_total_investments": "المتبقي = إجمالي الدخل - إجمالي النفقات - إجمالي اﻻستثمارات",
+  "remaining_total_income_total_expenses_total_investments": "المتبقي = إجمالي الدخل - إجمالي النفقات - إجمالي اﻻستثمارات + إجمالي استرداد راس مال",
   "remove": "إزالة",
   "required_this_month": "مطلوب هذا الشهر",
   "reset_your_password": "إعادة تعيين كلمة المرور الخاصة بك",
