@@ -824,5 +824,7 @@
   "PAYMENT": "مدفوعات",
   "DIVIDEND": "ارباح",
   "INTEREST": "عائد",
-  "MATURED_DEBT": "شهادات منتهية"
+  "MATURED_DEBT": "شهادات منتهية",
+  "principal_returned": "اصول مستردة",
+  "cache": "نقدي"
 }

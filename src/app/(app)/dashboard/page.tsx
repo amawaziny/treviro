@@ -354,6 +354,8 @@ export default function DashboardPage() {
             totalRealEstateInstallments={totalRealEstateInstallments}
             totalExpenses={totalExpenses}
             totalCurrencyInvestments={totalCurrencyInvestments}
+            netCashFlow={netCashFlow}
+            principalReturned={principalReturned}
             isLoading={isLoading}
           />
         </div>

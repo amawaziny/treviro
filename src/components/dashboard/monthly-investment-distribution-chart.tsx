@@ -12,6 +12,8 @@ interface MonthlyInvestmentDistributionChartProps {
   totalRealEstateInstallments: number;
   totalExpenses: number;
   totalCurrencyInvestments: number;
+  principalReturned: number;
+  netCashFlow: number;
   isLoading: boolean;
 }
 
@@ -22,6 +24,8 @@ export function MonthlyInvestmentDistributionChart({
   totalRealEstateInstallments,
   totalExpenses,
   totalCurrencyInvestments,
+  principalReturned,
+  netCashFlow,
   isLoading,
 }: MonthlyInvestmentDistributionChartProps) {
   const { t } = useLanguage();
@@ -78,6 +82,20 @@ export function MonthlyInvestmentDistributionChart({
       color: resolvedTheme === "dark" ? "#9ca3af" : "#6b7280",
     });
 
+    data.push({
+      id: "principal_returned",
+      label: t("principal_returned"),
+      value: Math.abs(principalReturned),
+      color: resolvedTheme === "dark" ? "#0A5702" : "#0A5702",
+    });
+
+    data.push({
+      id: "cache",
+      label: t("cache"),
+      value: Math.abs(netCashFlow),
+      color: resolvedTheme === "dark" ? "#0A5702" : "#0A5702",
+    });
+
     return data;
   }, [
     totalSecuritiesInvestments,
@@ -86,6 +104,8 @@ export function MonthlyInvestmentDistributionChart({
     totalRealEstateInstallments,
     totalExpenses,
     totalCurrencyInvestments,
+    principalReturned,
+    netCashFlow,
     isLoading,
     resolvedTheme,
     t,

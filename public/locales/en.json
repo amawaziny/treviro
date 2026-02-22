@@ -787,5 +787,7 @@
   "PAYMENT": "Payment",
   "DIVIDEND": "Dividend",
   "INTEREST": "Interset",
-  "MATURED_DEBT": "Matured Debt"
+  "MATURED_DEBT": "Matured Debt",
+  "principal_returned": "Principal Returned",
+  "cache": "Cache"
 }

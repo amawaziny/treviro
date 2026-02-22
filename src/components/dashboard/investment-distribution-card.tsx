@@ -55,7 +55,7 @@ export function InvestmentDistributionCard({
   onCheckboxChange: onControlledCheckboxChange,
   isEmpty: controlledIsEmpty = false,
 }: InvestmentDistributionCardProps) {
-  const { t, language } = useLanguage();
+  const { t, dir } = useLanguage();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -89,7 +89,7 @@ export function InvestmentDistributionCard({
 
   // Filter chart data based on checked items
   const filteredChartData = chartData.filter(
-    (item) => checkedItems[item.id] !== false,
+    (item) => checkedItems[item.id] !== false && item.value > 0,
   );
 
   // Use allChartData for legend if provided, otherwise fall back to chartData
@@ -133,7 +133,7 @@ export function InvestmentDistributionCard({
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent dir={dir} >
         <div className="relative mx-auto h-[300px] max-w-full overflow-hidden">
           <ResponsivePie
             data={chartToRender}
@@ -155,7 +155,7 @@ export function InvestmentDistributionCard({
             arcLinkLabel={(d) =>
               `${d.label} ${((d.value / (isEmpty ? 1 : total)) * 100).toFixed(0)}%`
             }
-            arcLinkLabelsTextOffset={language == "ar" ? 60 : 2}
+            arcLinkLabelsTextOffset={dir == "rtl" ? 60 : 2}
             tooltip={({ datum }) => (
               <div
                 className="text-xs sm:text-[11px]"
