@@ -35,12 +35,8 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 11. sell for gold
  * 12. sell for realestate
  * 13. meter price for realestate
- * 14. recalculate percentage in monthly distribution and investment distribution
  * 15. fix investment breakdown by type in dashboard
- * 		1. all cards should be visiable not just that already has investment value
- * 		2. % from protofolio no need its already in the chart
- * 		3. change current to market value
- * 		4. we COULD have the realized pnl for each type
+ * 		4. we COULD have the realized pnl for each type, calculated in dashboard summary total for each type of investment
  * 16. EGX30, EGX70, EGX100
  * 17. projected interest should check if its quartarly or yearly (we could check for matured date and next interest date (new field should be updated with the scheduler or same useEffect for handlematureddebt))
  * 18. check if we can use IsDebtInvestment || IsDebtFundInvestment with transaction metadata

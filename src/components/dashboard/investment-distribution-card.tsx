@@ -153,7 +153,7 @@ export function InvestmentDistributionCard({
             arcLinkLabelsThickness={2}
             arcLinkLabelsColor={{ from: "color" }}
             arcLinkLabel={(d) =>
-              `${d.label} ${((d.value / (isEmpty ? 1 : total)) * 100).toFixed(0)}%`
+              `${d.label} ${((d.value / (isEmpty ? 1 : displayTotal)) * 100).toFixed(1)}%`
             }
             arcLinkLabelsTextOffset={dir == "rtl" ? 60 : 2}
             tooltip={({ datum }) => (

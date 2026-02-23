@@ -29,11 +29,15 @@ long_line_column=72
 [files]
 current_page=1
 FILE_NAME_0=13584;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fapp%2F%28app%29%2Fdashboard%2Fpage.tsx;0;4
-FILE_NAME_1=2025;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Fservices%2Fdashboard-service.ts;0;4
-FILE_NAME_2=1841;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-breakdown-cards.tsx;0;4
-FILE_NAME_3=22151;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Fservices%2Finvestment-service.ts;0;4
+FILE_NAME_1=1943;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Fservices%2Fdashboard-service.ts;0;4
+FILE_NAME_2=2654;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-breakdown-cards.tsx;0;4
+FILE_NAME_3=22770;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Fservices%2Finvestment-service.ts;0;4
 FILE_NAME_4=1339;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcontexts%2Finvestment-context.tsx;0;4
 FILE_NAME_5=9812;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Ftypes.ts;0;4
+FILE_NAME_6=26411;JSON;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fpublic%2Flocales%2Fen.json;0;4
+FILE_NAME_7=4569;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-distribution-card.tsx;0;4
+FILE_NAME_8=0;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Fmonthly-investment-distribution-chart.tsx;0;4
+FILE_NAME_9=364;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-distribution-chart.tsx;0;4
 
 [VTE]
 last_dir=/home/amawaziny/Projects/treviro

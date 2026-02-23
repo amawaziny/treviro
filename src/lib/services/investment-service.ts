@@ -719,7 +719,10 @@ export class InvestmentService {
         totalProjectedDebtMonthlyInterest: totalProjectedDebtMonthlyInterest,
         totalProjectedDebtAnnualInterest:
           totalProjectedDebtMonthlyInterest * 12,
-        unrealizedPnLPercent: unrealizedPnLDebt / totalFundDebtInvested,
+        unrealizedPnLPercent:
+          totalFundDebtInvested === 0
+            ? 0
+            : (unrealizedPnLDebt / totalFundDebtInvested) * 100,
       },
       realEstate: {
         unrealizedPnL: unrealizedPnLRealEstate,
