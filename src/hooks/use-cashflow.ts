@@ -62,6 +62,7 @@ export function useCashflow({
   const [totalCurrencyInvestments, setTotalCurrencyInvestments] =
     useState<number>(0);
   const [totalInvestments, setTotalInvestments] = useState<number>(0);
+  const [principalReturned, setPrincipalReturned] = useState<number>(0);
   const [totalIncome, setTotalIncome] = useState<number>(0);
   const [totalIncomesFixedPlanned, setTotalIncomesFixedPlanned] =
     useState<number>(0);
@@ -127,28 +128,43 @@ export function useCashflow({
   const calculateTotalProjectedDebtMonthlyInterest = useCallback(() => {
     const debtInvestments = investments.filter(isDebtInstrumentInvestment);
     setDebtInvestments(debtInvestments);
-    setTotalProjectedDebtMonthlyInterest(
-      calcProjectedDebtMonthlyInterest(...debtInvestments),
+
+    const interestTrxs = transactions.filter((tx) => tx.type === "INTEREST");
+    const debtInvestmentsPlanned = debtInvestments.filter(
+      (inv) => !interestTrxs.find((tx) => tx.sourceId === inv.id),
     );
-  }, [investments]);
+    setTotalProjectedDebtMonthlyInterest(
+      calcProjectedDebtMonthlyInterest(...debtInvestmentsPlanned),
+    );
+  }, [investments, transactions]);
 
   const calculateIncomeTillNow = useCallback(() => {
     const incomesTrxs = transactions.filter((tx) => {
       const isIncomeType = [
-        "DIVIDEND",
-        "INCOME",
-        "SELL",
-        "MATURED_DEBT",
+        "DIVIDEND", //Passive income
+        "INCOME", //Active income
+        "INTEREST", //Passive income
+        "SELL", //RealizedPnL - Passive income
       ].includes(tx.type);
       return isIncomeType;
     });
 
-    // Group by sourceId, sum amounts, keep the latest transaction
     const incomesGroupedBySourcIdTrxs =
-      groupTransactionsBySourceId(incomesTrxs);
+      groupTransactionsBySourceIdAndTxType(incomesTrxs);
     setIncomesTrxs(incomesGroupedBySourcIdTrxs);
 
-    setIncomeTillNow(incomesTrxs.reduce((sum, tx) => sum + tx.amount, 0));
+    setPrincipalReturned(
+      transactions
+        .filter((tx) => {
+          const investToCash = ["MATURED_DEBT", "SELL"].includes(tx.type);
+          return investToCash;
+        })
+        .reduce((sum, tx) => sum + tx.amount, 0),
+    );
+
+    setIncomeTillNow(
+      incomesGroupedBySourcIdTrxs.reduce((sum, tx) => sum + tx.amount, 0),
+    );
   }, [transactions]);
 
   const calculateTotalFixedExpenses = useCallback(() => {
@@ -168,7 +184,7 @@ export function useCashflow({
 
   const calculateTotalExpensesTrxs = useCallback(() => {
     const expenses = transactions.filter((tx) => tx.type === "EXPENSE");
-    setExpensesTrxs(groupTransactionsBySourceId(expenses));
+    setExpensesTrxs(groupTransactionsBySourceIdAndTxType(expenses));
 
     setTotalExpensesTrxs(expenses.reduce((sum, tx) => sum + tx.amount, 0));
   }, [transactions]);
@@ -491,19 +507,21 @@ export function useCashflow({
 
     // Summary
     netCashFlow,
+    principalReturned,
     netTillNowCashFlow,
   };
 
-  function groupTransactionsBySourceId(transactions: Transaction[]) {
+  function groupTransactionsBySourceIdAndTxType(transactions: Transaction[]) {
     const groupedBySourceId = transactions
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .reduce(
         (acc, tx) => {
           const key = tx.sourceId + tx.type;
+          const amount = tx.type === "SELL" ? tx.profitOrLoss || 0 : tx.amount;
           if (!acc[key]) {
-            acc[key] = { ...tx };
+            acc[key] = { ...tx, amount: amount };
           } else {
-            acc[key].amount += tx.amount;
+            acc[key].amount += amount;
           }
           return acc;
         },

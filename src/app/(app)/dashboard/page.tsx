@@ -51,6 +51,11 @@ export default function DashboardPage() {
   const {
     investments,
     totalPortfolio,
+    totalStocks,
+    totalCurrency,
+    totalGold,
+    totalDebt,
+    totalRealEstate,
     isLoading: isLoadingInvestments,
   } = useInvestments();
 
@@ -96,6 +101,7 @@ export default function DashboardPage() {
     totalInvestments,
     totalCurrencyInvestments,
     netCashFlow,
+    principalReturned,
   } = useCashflow({
     expensesManualCreditCard,
     investments,
@@ -334,6 +340,7 @@ export default function DashboardPage() {
             totalGoldInvestments={totalGoldInvestments}
             totalInvestments={totalInvestments}
             netCashFlow={netCashFlow}
+            principalReturned={principalReturned}
           />
         </CardContent>
       </Card>
@@ -352,19 +359,25 @@ export default function DashboardPage() {
             totalRealEstateInstallments={totalRealEstateInstallments}
             totalExpenses={totalExpenses}
             totalCurrencyInvestments={totalCurrencyInvestments}
+            netCashFlow={netCashFlow}
+            principalReturned={principalReturned}
             isLoading={isLoading}
           />
         </div>
       </div>
       <div className="lg:col-span-3" data-testid="investment-breakdown-section">
-        {dashboardSummary && (
+        {!isLoading && (
           <InvestmentBreakdownCards
             dashboardSummary={dashboardSummary}
-            appSettings={{
-              investmentTypePercentages:
-                appSettings?.investmentTypePercentages ||
-                defaultAppSettings.investmentTypePercentages,
-            }}
+            investmentTypePercentages={
+              appSettings?.investmentTypePercentages ||
+              defaultAppSettings.investmentTypePercentages
+            }
+            totalStocks={totalStocks}
+            totalCurrency={totalCurrency}
+            totalGold={totalGold}
+            totalDebt={totalDebt}
+            totalRealEstate={totalRealEstate}
           />
         )}
       </div>

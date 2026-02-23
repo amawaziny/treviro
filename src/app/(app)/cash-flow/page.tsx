@@ -80,6 +80,7 @@ export default function CashFlowPage() {
     goldInvestmentTrxs,
     realEstateInvestments,
     netCashFlow,
+    principalReturned,
   } = useCashflow({
     expensesManualCreditCard,
     investments,
@@ -144,6 +145,7 @@ export default function CashFlowPage() {
         totalGoldInvestments={totalGoldInvestments}
         totalInvestments={totalInvestments}
         netCashFlow={netCashFlow}
+        principalReturned={principalReturned}
       />
 
       {/* Details Section: 3 Columns */}
@@ -163,7 +165,10 @@ export default function CashFlowPage() {
                 className="flex justify-between text-xs"
               >
                 <div className="flex items-center">
-                  <TransactionTypeIcon transactionType={trx.type} className="h-4 w-4 me-1" />
+                  <TransactionTypeIcon
+                    transactionType={trx.type}
+                    className="h-4 w-4 me-1"
+                  />
                   <span>
                     {src.description
                       ? src.description
@@ -219,12 +224,13 @@ export default function CashFlowPage() {
                 key={`manual-expense-${idx}`}
                 className="flex justify-between text-xs"
               >
-                <div className="flex items-center">                  
-                  <TransactionTypeIcon transactionType={trx.type} className="h-4 w-4 me-1" />
+                <div className="flex items-center">
+                  <TransactionTypeIcon
+                    transactionType={trx.type}
+                    className="h-4 w-4 me-1"
+                  />
                   <span>
-                    {src.description
-                      ? src.description
-                      : t(src.sourceSubType)}
+                    {src.description ? src.description : t(src.sourceSubType)}
                   </span>
                 </div>
                 <span>{formatNumberForMobile(isMobile, amount)}</span>

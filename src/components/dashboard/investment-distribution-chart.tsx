@@ -34,10 +34,10 @@ export function InvestmentDistributionChart({
 
     Object.entries(distribution).forEach(([type, value]) => {
       // Add investment categories
-      if (type == "Stocks") {
+      if (type == "Securities") {
         data.push({
-          id: "Stocks",
-          label: t("stocks"),
+          id: "Securities",
+          label: t("securities"),
           value: value,
           color: resolvedTheme === "dark" ? "#ff7b6b" : "#e05a47",
         });
