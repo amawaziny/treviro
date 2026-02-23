@@ -724,7 +724,10 @@ export class InvestmentService {
       realEstate: {
         unrealizedPnL: unrealizedPnLRealEstate,
         totalInvested: totalInvestedRealEstate,
-        unrealizedPnLPercent: unrealizedPnLRealEstate / totalInvestedRealEstate,
+        unrealizedPnLPercent:
+          totalInvestedRealEstate === 0
+            ? 0
+            : (unrealizedPnLRealEstate / totalInvestedRealEstate) * 100,
       },
     };
   }

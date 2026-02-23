@@ -133,7 +133,7 @@ export function InvestmentDistributionCard({
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent dir={dir} >
+      <CardContent dir={dir}>
         <div className="relative mx-auto h-[300px] max-w-full overflow-hidden">
           <ResponsivePie
             data={chartToRender}
