@@ -55,7 +55,7 @@ function EGXIndexCards() {
           <Card key={sec.symbol} className="lg:col-span-1" data-testid={`egx-${sec.symbol.toLowerCase()}-card`}>
             <CardHeader className="justify-between pb-1">
               <CardTitle className="text-sm font-medium">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 justify-between w-full">
 					<span className="mt-1">
                   {sec.name}
                   </span>
