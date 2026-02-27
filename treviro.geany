@@ -27,23 +27,18 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=1
-FILE_NAME_0=13584;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fapp%2F%28app%29%2Fdashboard%2Fpage.tsx;0;4
-FILE_NAME_1=1943;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Fservices%2Fdashboard-service.ts;0;4
-FILE_NAME_2=2654;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-breakdown-cards.tsx;0;4
-FILE_NAME_3=22770;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Fservices%2Finvestment-service.ts;0;4
-FILE_NAME_4=1339;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcontexts%2Finvestment-context.tsx;0;4
-FILE_NAME_5=9812;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Flib%2Ftypes.ts;0;4
-FILE_NAME_6=26411;JSON;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fpublic%2Flocales%2Fen.json;0;4
-FILE_NAME_7=4569;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-distribution-card.tsx;0;4
-FILE_NAME_8=0;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Fmonthly-investment-distribution-chart.tsx;0;4
-FILE_NAME_9=364;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-distribution-chart.tsx;0;4
+current_page=3
+FILE_NAME_0=1903;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fapp%2Fapi%2Fscan-stock%2Froute.ts;0;4
+FILE_NAME_1=2209;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fapp%2F%28app%29%2Fsecurities%2Fpage.tsx;0;4
+FILE_NAME_2=0;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fexplore%2Fsecurity-list.tsx;0;4
+FILE_NAME_3=2293;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fapp%2F%28app%29%2Fdashboard%2Fpage.tsx;0;4
+FILE_NAME_4=2737;TypeScript;0;EUTF-8;1;1;0;%2Fhome%2Famawaziny%2FProjects%2Ftreviro%2Fsrc%2Fcomponents%2Fdashboard%2Finvestment-breakdown-cards.tsx;0;4
 
 [VTE]
 last_dir=/home/amawaziny/Projects/treviro
 
 [prjorg]
-expanded_paths=/home/amawaziny/Projects/treviro/public/locales;/home/amawaziny/Projects/treviro/src/app/(app)/cash-flow;/home/amawaziny/Projects/treviro/src/app/(app)/dashboard;/home/amawaziny/Projects/treviro/src/components/cash-flow;/home/amawaziny/Projects/treviro/src/components/dashboard;/home/amawaziny/Projects/treviro/src/contexts;/home/amawaziny/Projects/treviro/src/lib/services;
+expanded_paths=/home/amawaziny/Projects/treviro/src/app/(app)/dashboard;/home/amawaziny/Projects/treviro/src/app/(app)/securities;/home/amawaziny/Projects/treviro/src/app/api/scan-stock;/home/amawaziny/Projects/treviro/src/components/dashboard;/home/amawaziny/Projects/treviro/src/components/explore;
 source_patterns=*.c;*.C;*.cpp;*.cxx;*.c++;*.cc;*.m;
 header_patterns=*.h;*.H;*.hpp;*.hxx;*.h++;*.hh;
 ignored_dirs_patterns=.*;CVS;
