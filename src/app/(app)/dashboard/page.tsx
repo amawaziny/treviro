@@ -10,6 +10,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useInvestments } from "@/contexts/investment-context";
 import {
@@ -22,7 +23,7 @@ import {
   ArrowLeft,
   Banknote,
   Building,
-} from "lucide-react"; // Coins will be used as IncomeIcon replacement
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useMemo } from "react";
 import { defaultAppSettings } from "@/lib/types";
@@ -52,23 +53,30 @@ function EGXIndexCards() {
       {egxIndexes.map(sec => {
         return (
           <Card key={sec.symbol} className="lg:col-span-1" data-testid={`egx-${sec.symbol.toLowerCase()}-card`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="justify-between pb-1">
               <CardTitle className="text-sm font-medium">
-                {sec.name}
+                <div className="flex items-center gap-3">
+					<span className="mt-1">
+                  {sec.name}
+                  </span>
+                  <Badge dir="auto" className={`text-xs px-2 ${sec.changePercent >= 0 ? "bg-green-600" : "bg-red-600"} text-white`}>
+					  {sec.changePercent >= 0 ? (
+						<TrendingUp className="inline h-4 w-4 me-1" />
+					  ) : (
+						<TrendingDown className="inline h-4 w-4 me-1" />
+					  )}
+                     {sec.changePercent >= 0 ? "+" : ""}{sec.changePercent.toFixed(3)}%
+                  </Badge>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="h-8 w-3/4 mt-1 bg-muted animate-pulse rounded" />
               ) : sec ? (
-                <>
                   <p className="text-xl font-medium">
                     {sec.price}
                   </p>
-                  <p className={`text-xs font-semibold mt-1 ${sec.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {sec.changePercent >= 0 ? "+" : ""}{sec.changePercent.toFixed(3)}%
-                  </p>
-                </>
               ) : (
                 <p className="text-xs text-muted-foreground">{t("No data")}</p>
               )}
