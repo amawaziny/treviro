@@ -28,6 +28,7 @@ import React, { useMemo } from "react";
 import { defaultAppSettings } from "@/lib/types";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useListedSecurities } from "@/hooks/use-listed-securities";
 import { Button } from "@/components/ui/button";
 import { CashFlowSummaryCards } from "@/components/cash-flow/CashFlowSummaryCards";
 import { formatMonthYear, formatNumberForMobile } from "@/lib/utils";
@@ -39,6 +40,45 @@ import { useFinancialRecords } from "@/contexts/financial-records-context";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useCashflow } from "@/hooks/use-cashflow";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
+
+function EGXIndexCards() {
+  const { listedSecurities, isLoading } = useListedSecurities();
+  // IDs or symbols for EGX indexes (adjust if needed)
+  const egxSymbols = ["EGX30", "EGX70EWI", "EGX100EWI"];
+  const egxIndexes = listedSecurities.filter(sec => egxSymbols.includes(sec.symbol));
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3 mb-4">
+      {egxIndexes.map(sec => {
+        return (
+          <Card key={sec.symbol} className="lg:col-span-1" data-testid={`egx-${sec.symbol.toLowerCase()}-card`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {sec.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="h-8 w-3/4 mt-1 bg-muted animate-pulse rounded" />
+              ) : sec ? (
+                <>
+                  <p className="text-xl font-medium">
+                    {sec.price}
+                  </p>
+                  <p className={`text-xs font-semibold mt-1 ${sec.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                    {sec.changePercent >= 0 ? "+" : ""}{sec.changePercent.toFixed(3)}%
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">{t("No data")}</p>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { t, language } = useLanguage();
@@ -123,6 +163,9 @@ export default function DashboardPage() {
       </div>
       <Separator />
 
+      {/* EGX Index Cards */}
+      <EGXIndexCards />
+      
       <div className="flex justify-end mb-4">
         <Button
           variant="outline"

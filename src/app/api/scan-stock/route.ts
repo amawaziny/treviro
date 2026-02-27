@@ -59,12 +59,13 @@ export async function GET(req: NextRequest) {
     const all = searchParams.get("all");
     const searchOffset = parseInt(searchParams.get("offset") || "0", 10);
     const searchLimit = parseInt(searchParams.get("limit") || "20", 10);
+    const now = new Date().toISOString();
 
     // 1. Read the list of securities from collection listedSecurities in firebase and filter by securityType=Stock
     let q = query(
       collection(db, LISTED_SECURITIES_COLLECTION),
       orderBy("id"),
-      where("securityType", "==", "Stock"),
+      where("securityType", "in", ["Stock", "Index"]),
     );
 
     if (all && all.toLowerCase() !== "true") {
@@ -128,6 +129,8 @@ export async function GET(req: NextRequest) {
                   high: row[2],
                   low: row[3],
                   volume: row[4],
+                  updatedAt: now,
+                  lastUpdated: now
                 },
               );
             })(),
