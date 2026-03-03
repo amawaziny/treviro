@@ -30,6 +30,25 @@ export const incomeTypes = [
 ] as const;
 export const expenseCategories = ["Credit Card", "Other"] as const;
 
+// Constants for Listed Securities
+export const securityTypes = ["Stock", "Fund"] as const;
+export const fundTypes = [
+  "Gold",
+  "Debt",
+  "Real Estate",
+  "Stock",
+  "Equity",
+  "REIT",
+  "Money Market",
+  "Mixed",
+  "Other",
+  "Cash",
+  "Balanced",
+  "Fixed Income",
+  "MM",
+] as const;
+export const currencyTypes = ["EGP", "USD"] as const;
+
 // New constants for Fixed Estimates
 export const fixedEstimateTypes = [
   "Salary",
@@ -361,6 +380,90 @@ export const ExpenseFormSchema = z
     }
   });
 export type ExpenseFormValues = z.infer<typeof ExpenseFormSchema>;
+
+// Schema for Listed Securities (Master Data)
+export const ListedSecuritySchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { message: "Security name is required." })
+      .min(2, { message: "Security name must be at least 2 characters." }),
+    name_ar: z
+      .string()
+      .min(1, { message: "Arabic name is required." })
+      .min(2, { message: "Arabic name must be at least 2 characters." }),
+    symbol: z
+      .string()
+      .min(1, { message: "Symbol is required." })
+      .min(1, { message: "Symbol must be at least 1 character." })
+      .toUpperCase(),
+    price: z.preprocess(
+      (val) =>
+        typeof val === "string" && val.trim() !== "" ? Number(val) : val,
+      z
+        .number({ invalid_type_error: "Price must be a valid number." })
+        .positive({ message: "Price must be greater than 0." }),
+    ),
+    currency: z.enum(currencyTypes, {
+      required_error: "Currency is required.",
+    }),
+    securityType: z.enum(securityTypes, {
+      required_error: "Security type is required.",
+    }),
+    fundType: z
+      .enum(fundTypes, { required_error: "Fund type is required." })
+      .optional(),
+    isin: z.string().optional(),
+    market: z.string().optional(),
+    sector: z.string().optional(),
+    description: z.string().optional(),
+    // Optional market data fields
+    high: z.preprocess(
+      (val) =>
+        (typeof val === "string" && val.trim() === "") ||
+        val === null ||
+        val === undefined
+          ? undefined
+          : Number(val),
+      z
+        .number({ invalid_type_error: "Must be a valid number if provided." })
+        .optional(),
+    ),
+    low: z.preprocess(
+      (val) =>
+        (typeof val === "string" && val.trim() === "") ||
+        val === null ||
+        val === undefined
+          ? undefined
+          : Number(val),
+      z
+        .number({ invalid_type_error: "Must be a valid number if provided." })
+        .optional(),
+    ),
+    volume: z.preprocess(
+      (val) =>
+        (typeof val === "string" && val.trim() === "") ||
+        val === null ||
+        val === undefined
+          ? undefined
+          : Number(val),
+      z
+        .number({ invalid_type_error: "Must be a valid number if provided." })
+        .int({ message: "Volume must be a whole number if provided." })
+        .optional(),
+    ),
+  })
+  .superRefine((data, ctx) => {
+    if (data.securityType === "Fund" && !data.fundType) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Fund type is required for Fund securities.",
+        path: ["fundType"],
+      });
+    }
+  });
+
+export type ListedSecurityFormValues = z.infer<typeof ListedSecuritySchema>;
 
 // New Schema for Fixed Estimates
 export const FixedEstimateSchema = z

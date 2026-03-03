@@ -130,7 +130,7 @@ export async function GET(req: NextRequest) {
                   low: row[3],
                   volume: row[4],
                   updatedAt: now,
-                  lastUpdated: now
+                  lastUpdated: now,
                 },
               );
             })(),

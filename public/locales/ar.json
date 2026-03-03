@@ -826,5 +826,21 @@
   "INTEREST": "عائد",
   "MATURED_DEBT": "شهادات منتهية",
   "principal_returned": "اصول مستردة",
-  "cache": "نقدي"
+  "cache": "نقدي",
+  "security_name":"اسم الورقة المالية",
+  "security_name_in_arabic":"اسم الورقة المالية (بالعربية)",
+  "optional": "اختياري",
+  "select_currency": "اختر العملة",
+  "select_security_type": "اختر نوع الورقة المالية",
+  "select_fund_type": "اختر نوع الصندوق",
+  "high_price": "اعلى سعر",
+  "low_price": "اقل سعر",
+  "update_security": "تحديث الورقة المالية",
+  "add_security": "إضافة ورقة مالية",
+  "security_record_saved_successfully": "تم حفظ سجل الورقة المالية بنجاح",
+  "failed_to_save_security_record":"فشل في حفظ سجل الورقة المالية",
+  "edit_security_record":"تعديل سجل الورقة المالية",
+  "add_new_security":"إضافة ورقة مالية جديدة",
+  "add_security_details_to_explore_stocks_and_funds_from_different_markets":"أضف تفاصيل الورقة المالية لاستكشاف الأسهم والصناديق من أسواق مختلفة.",
+  "back_to_securities":"رجوع إلى الأوراق المالية"
 }
