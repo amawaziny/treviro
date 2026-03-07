@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { onSnapshot, query } from "firebase/firestore";
+import { onSnapshot, query, setDoc } from "firebase/firestore";
 import type { ListedSecurity } from "@/lib/types";
 import { masterDataService } from "@/lib/services/master-data-service";
+import { LISTED_SECURITIES_COLLECTION } from "@/lib/constants";
 
 export const useListedSecurities = () => {
   const [listedSecurities, setListedSecurities] = useState<ListedSecurity[]>(
@@ -50,5 +51,23 @@ export const useListedSecurities = () => {
     [listedSecurities],
   );
 
-  return { listedSecurities, isLoading, error, getSecurityById };
+  const createSecurity = useCallback(
+    async (securityData: Omit<ListedSecurity, "id">) => {
+      try {
+        setIsLoading(true);
+        const id = securityData.market + "-" + securityData.symbol; 
+        const securityDocRef = masterDataService.getDocRef(LISTED_SECURITIES_COLLECTION, id);
+        await setDoc(securityDocRef, securityData);
+        setListedSecurities((prev) => [...prev, { id, ...securityData } as ListedSecurity]);
+      } catch (err) {
+        console.error("Error creating listed security:", err);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
+  return { listedSecurities, isLoading, error, getSecurityById, createSecurity };
 };

@@ -58,7 +58,7 @@ const initialFormValues: ListedSecurityFormValues = {
 
 export interface ListedSecurityFormProps {
   initialValues?: Partial<ListedSecurityFormValues>;
-  onSubmit?: (values: ListedSecurityFormValues) => Promise<void>;
+  onSubmit: (values: ListedSecurityFormValues) => Promise<void>;
   isEditMode?: boolean;
 }
 
@@ -67,7 +67,7 @@ export function ListedSecurityForm({
   onSubmit,
   isEditMode,
 }: ListedSecurityFormProps) {
-  const { t, language, dir } = useLanguage();
+  const { t, dir } = useLanguage();
   const { toast } = useToast();
   const router = useRouter();
   const { setHeaderProps, openForm, closeForm } = useForm();
@@ -102,18 +102,14 @@ export function ListedSecurityForm({
 
   const handleInternalSubmit = async (values: ListedSecurityFormValues) => {
     try {
-      if (onSubmit) {
         await onSubmit(values);
-      } else {
-        // Default behavior: Create/update security in Firestore
-        // For now, just show a success message and redirect
+      
         toast({
           title: t("success"),
           description: t("security_record_saved_successfully"),
         });
 
         router.push("/securities");
-      }
     } catch (error) {
       toast({
         title: t("error"),
@@ -162,7 +158,6 @@ export function ListedSecurityForm({
                     placeholder={t("e.g., أوراسكوم تليكوم")}
                     {...field}
                     disabled={form.formState.isSubmitting}
-                    dir="rtl"
                   />
                 </FormControl>
                 <FormMessage />
@@ -242,6 +237,7 @@ export function ListedSecurityForm({
               <FormItem data-testid="currency-form-item">
                 <FormLabel>{t("currency")}</FormLabel>
                 <Select
+                  dir={dir}
                   value={field.value}
                   onValueChange={field.onChange}
                   disabled={form.formState.isSubmitting}
@@ -254,7 +250,7 @@ export function ListedSecurityForm({
                   <SelectContent>
                     {currencyTypes.map((currency) => (
                       <SelectItem key={currency} value={currency}>
-                        {currency}
+                        {t(currency)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -271,6 +267,7 @@ export function ListedSecurityForm({
               <FormItem data-testid="security-type-form-item">
                 <FormLabel>{t("security_type")}</FormLabel>
                 <Select
+                  dir={dir}
                   value={field.value}
                   onValueChange={field.onChange}
                   disabled={form.formState.isSubmitting}
@@ -283,7 +280,7 @@ export function ListedSecurityForm({
                   <SelectContent>
                     {securityTypes.map((type) => (
                       <SelectItem key={type} value={type}>
-                        {type}
+                        {t(type)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -301,6 +298,7 @@ export function ListedSecurityForm({
                 <FormItem data-testid="fund-type-form-item">
                   <FormLabel>{t("fund_type")}</FormLabel>
                   <Select
+                    dir={dir}
                     value={field.value || ""}
                     onValueChange={field.onChange}
                     disabled={form.formState.isSubmitting}
@@ -313,7 +311,7 @@ export function ListedSecurityForm({
                     <SelectContent>
                       {fundTypes.map((type) => (
                         <SelectItem key={type} value={type}>
-                          {type}
+                          {t(type)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -453,6 +451,31 @@ export function ListedSecurityForm({
                   <Textarea
                     data-testid="description-input"
                     placeholder={t("e.g., Description of the security")}
+                    {...field}
+                    value={field.value ?? ""}
+                    disabled={form.formState.isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="logoUrl"
+            render={({ field }) => (
+              <FormItem
+                className="md:col-span-2"
+                data-testid="logoUrl-form-item"
+              >
+                <FormLabel>
+                  {t("logo_url")} ({t("optional")})
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    data-testid="logoUrl-input"
+                    placeholder={t("e.g., https://example.com/logo.png")}
                     {...field}
                     value={field.value ?? ""}
                     disabled={form.formState.isSubmitting}

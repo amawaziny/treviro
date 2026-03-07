@@ -94,7 +94,7 @@ export const SecurityListItem = React.memo(function SecurityListItem({
                 "text-xs px-2 py-0.5 mt-1 whitespace-nowrap",
               )}
             >
-              {security.changePercent.toFixed(3)}%
+              {security.changePercent?.toFixed(3)}%
             </Badge>
           </div>
         </div>

@@ -414,9 +414,10 @@ export const ListedSecuritySchema = z
       .enum(fundTypes, { required_error: "Fund type is required." })
       .optional(),
     isin: z.string().optional(),
-    market: z.string().optional(),
+    market: z.string().min(1, { message: "Market is required." }),
     sector: z.string().optional(),
     description: z.string().optional(),
+    logoUrl: z.string().min(1, { message: "Logo URL is required." }),
     // Optional market data fields
     high: z.preprocess(
       (val) =>

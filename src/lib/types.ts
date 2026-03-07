@@ -25,17 +25,11 @@ export type ExpenseType = "Credit Card" | "Other";
 export type FundType =
   | "Gold"
   | "Debt"
-  | "Real Estate"
   | "Stock"
-  | "Equity"
   | "REIT"
   | "Money Market"
-  | "Mixed"
-  | "Other"
-  | "Cash"
   | "Balanced"
   | "Fixed Income"
-  | "MM"
   | string;
 
 export type InvestmentData<T extends Investment = Investment> = Omit<

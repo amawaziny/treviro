@@ -44,7 +44,6 @@ export class EventBus {
     eventType: T["type"],
     handler: EventHandler<T>,
   ): () => void {
-    console.log(`Subscribing to event: ${eventType} with handler: ${handler}`);
     if (!this.handlers.has(eventType)) {
       this.handlers.set(eventType, new Set());
     }

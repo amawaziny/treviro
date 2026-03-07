@@ -9,11 +9,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { useAdmin } from "@/hooks/use-admin";
 
 export default function SecuritiesPage() {
   const { t, dir, language } = useLanguage();
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
+  const { isAdmin, isLoading } = useAdmin();
 
   // Initialize activeTab from URL or default to 'stocks'
   const [activeTab, setActiveTab] = useState(urlTab || "stocks");
@@ -71,17 +73,19 @@ export default function SecuritiesPage() {
       </Tabs>
 
       <div style={{ marginBottom: "96px" }}></div>
-      <Link href="/securities/add" passHref>
-        <Button
-          data-testid="add-security-button"
-          variant="default"
-          size="icon"
-          className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
-          aria-label="Add new security"
-        >
-          <Plus className="h-7 w-7" />
-        </Button>
-      </Link>
+      {isAdmin && !isLoading && (
+        <Link href="/securities/add" passHref>
+          <Button
+            data-testid="add-security-button"
+            variant="default"
+            size="icon"
+            className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
+            aria-label="Add new security"
+          >
+            <Plus className="h-7 w-7" />
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }
