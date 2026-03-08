@@ -286,19 +286,19 @@ export interface ListedSecurity {
   sector: string;
   sectorAr: string;
   lastUpdated: string;
-  listingDate: string;
+  listingDate?: string;
   securityTypeAr: string;
-  listedShares: number;
-  tradedVolume: number;
-  tradedValue: number;
-  priceEarningRatio: number;
-  dividendYield: number;
-  cashDividends: string;
-  marketCap: number;
-  parValue: number;
+  listedShares?: number;
+  tradedVolume?: number;
+  tradedValue?: number;
+  priceEarningRatio?: number;
+  dividendYield?: number;
+  cashDividends?: string;
+  marketCap?: number;
+  parValue?: number;
   currencyAr: string;
-  couponPaymentDate: string;
-  couponNo: number;
+  couponPaymentDate?: string;
+  couponNo?: number;
 }
 
 export interface SecurityChartDataPoint {

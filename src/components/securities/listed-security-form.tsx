@@ -328,7 +328,7 @@ export function ListedSecurityForm({
             render={({ field }) => (
               <FormItem data-testid="market-form-item">
                 <FormLabel>
-                  {t("market")} ({t("optional")})
+                  {t("market")}
                 </FormLabel>
                 <FormControl>
                   <Input
