@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 // Format number with thousand separators
-const formatNumber = (value: string): string => {
+const formatNumber = (value: string, decimalScale: number): string => {
   if (!value) return "";
 
   // Remove all non-numeric characters except decimal point
@@ -22,7 +22,7 @@ const formatNumber = (value: string): string => {
 
   // Handle decimal part if present
   if (parts.length > 1) {
-    const decimalPart = parts[1].slice(0, 3); // Limit to 3 decimal places
+    const decimalPart = parts[1].slice(0, decimalScale); // Limit decimal places
     return `${formattedInteger}.${decimalPart}`;
   }
 
@@ -46,11 +46,12 @@ interface NumericInputProps
   allowDecimal?: boolean;
   min?: number;
   max?: number;
+  decimalScale?: number; // Optional prop to specify decimal places
 }
 
 const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
   (
-    { value, onChange, className, allowDecimal = true, min, max, ...props },
+    { value, onChange, className, allowDecimal = true, min, max, decimalScale = 3, ...props },
     ref,
   ) => {
     // Use the forwarded ref directly
@@ -81,7 +82,7 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
       }
 
       // Format the display value
-      const formattedValue = formatNumber(numericString);
+      const formattedValue = formatNumber(numericString, decimalScale);
 
       // Update the input value with formatted display
       if (inputRef.current) {
@@ -106,8 +107,8 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
     // Format the initial display value
     const displayValue = React.useMemo(() => {
       if (value === undefined || value === null) return "";
-      return formatNumber(String(value));
-    }, [value]);
+      return formatNumber(String(value), decimalScale);
+    }, [value, decimalScale]);
 
     return (
       <Input

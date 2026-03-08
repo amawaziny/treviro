@@ -7,6 +7,7 @@ import {
   type Analytics,
 } from "firebase/analytics";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { getRemoteConfig, RemoteConfig } from "firebase/remote-config";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,6 +22,7 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let db: Firestore;
 let storage: FirebaseStorage;
+let remoteConfig: RemoteConfig;
 
 // Ensure Firebase is initialized
 if (!getApps().length) {
@@ -55,6 +57,8 @@ if (
     try {
       db = getFirestore(app);
       auth = getAuth(app);
+      remoteConfig = getRemoteConfig(app);
+      remoteConfig.settings.minimumFetchIntervalMillis = 3600_000; // 1h
 
       if (typeof window !== "undefined") {
         isAnalyticsSupported()
@@ -88,4 +92,4 @@ if (
   );
 }
 
-export { app, db, auth, analytics, storage };
+export { app, db, auth, analytics, storage, remoteConfig };

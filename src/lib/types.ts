@@ -25,17 +25,11 @@ export type ExpenseType = "Credit Card" | "Other";
 export type FundType =
   | "Gold"
   | "Debt"
-  | "Real Estate"
   | "Stock"
-  | "Equity"
   | "REIT"
   | "Money Market"
-  | "Mixed"
-  | "Other"
-  | "Cash"
   | "Balanced"
   | "Fixed Income"
-  | "MM"
   | string;
 
 export type InvestmentData<T extends Investment = Investment> = Omit<
@@ -292,19 +286,19 @@ export interface ListedSecurity {
   sector: string;
   sectorAr: string;
   lastUpdated: string;
-  listingDate: string;
+  listingDate?: string;
   securityTypeAr: string;
-  listedShares: number;
-  tradedVolume: number;
-  tradedValue: number;
-  priceEarningRatio: number;
-  dividendYield: number;
-  cashDividends: string;
-  marketCap: number;
-  parValue: number;
+  listedShares?: number;
+  tradedVolume?: number;
+  tradedValue?: number;
+  priceEarningRatio?: number;
+  dividendYield?: number;
+  cashDividends?: string;
+  marketCap?: number;
+  parValue?: number;
   currencyAr: string;
-  couponPaymentDate: string;
-  couponNo: number;
+  couponPaymentDate?: string;
+  couponNo?: number;
 }
 
 export interface SecurityChartDataPoint {

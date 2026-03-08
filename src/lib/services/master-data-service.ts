@@ -34,6 +34,10 @@ export class MasterDataService {
     );
   }
 
+  getDocRef(collectionPath: string, docId: string) {
+    return doc(db, collectionPath, docId).withConverter(dateConverter);
+  }
+
   /**
    * Fetches current gold market prices
    */

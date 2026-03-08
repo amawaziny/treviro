@@ -46,26 +46,34 @@ function EGXIndexCards() {
   const { listedSecurities, isLoading } = useListedSecurities();
   // IDs or symbols for EGX indexes (adjust if needed)
   const egxSymbols = ["EGX30", "EGX70EWI", "EGX100EWI"];
-  const egxIndexes = listedSecurities.filter(sec => egxSymbols.includes(sec.symbol));
+  const egxIndexes = listedSecurities.filter((sec) =>
+    egxSymbols.includes(sec.symbol),
+  );
 
   return (
     <div className="grid gap-4 md:grid-cols-3 mb-4">
-      {egxIndexes.map(sec => {
+      {egxIndexes.map((sec) => {
         return (
-          <Card key={sec.symbol} className="lg:col-span-1" data-testid={`egx-${sec.symbol.toLowerCase()}-card`}>
+          <Card
+            key={sec.symbol}
+            className="lg:col-span-1"
+            data-testid={`egx-${sec.symbol.toLowerCase()}-card`}
+          >
             <CardHeader className="justify-between pb-1">
               <CardTitle className="text-sm font-medium">
                 <div className="flex items-center gap-3 justify-between w-full">
-					<span className="mt-1">
-                  {sec.name}
-                  </span>
-                  <Badge dir="auto" className={`text-xs px-2 ${sec.changePercent >= 0 ? "bg-green-600" : "bg-red-600"} text-white`}>
-					  {sec.changePercent >= 0 ? (
-						<TrendingUp className="inline h-4 w-4 me-1" />
-					  ) : (
-						<TrendingDown className="inline h-4 w-4 me-1" />
-					  )}
-                     {sec.changePercent >= 0 ? "+" : ""}{sec.changePercent.toFixed(3)}%
+                  <span className="mt-1">{sec.name}</span>
+                  <Badge
+                    dir="auto"
+                    className={`text-xs px-2 ${sec.changePercent >= 0 ? "bg-green-600" : "bg-red-600"} text-white`}
+                  >
+                    {sec.changePercent >= 0 ? (
+                      <TrendingUp className="inline h-4 w-4 me-1" />
+                    ) : (
+                      <TrendingDown className="inline h-4 w-4 me-1" />
+                    )}
+                    {sec.changePercent >= 0 ? "+" : ""}
+                    {sec.changePercent.toFixed(3)}%
                   </Badge>
                 </div>
               </CardTitle>
@@ -74,9 +82,7 @@ function EGXIndexCards() {
               {isLoading ? (
                 <div className="h-8 w-3/4 mt-1 bg-muted animate-pulse rounded" />
               ) : sec ? (
-                  <p className="text-xl font-medium">
-                    {sec.price}
-                  </p>
+                <p className="text-xl font-medium">{sec.price}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">{t("No data")}</p>
               )}
@@ -173,7 +179,7 @@ export default function DashboardPage() {
 
       {/* EGX Index Cards */}
       <EGXIndexCards />
-      
+
       <div className="flex justify-end mb-4">
         <Button
           variant="outline"
