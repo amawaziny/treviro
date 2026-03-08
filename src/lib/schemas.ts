@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FundType } from "./types";
 
 export const investmentTypes = [
   "Real Estate",
@@ -32,21 +33,7 @@ export const expenseCategories = ["Credit Card", "Other"] as const;
 
 // Constants for Listed Securities
 export const securityTypes = ["Stock", "Fund"] as const;
-export const fundTypes = [
-  "Gold",
-  "Debt",
-  "Real Estate",
-  "Stock",
-  "Equity",
-  "REIT",
-  "Money Market",
-  "Mixed",
-  "Other",
-  "Cash",
-  "Balanced",
-  "Fixed Income",
-  "MM",
-] as const;
+export const fundTypes = ["Gold", "Debt", "Stock", "REIT", "Money Market", "Balanced", "Fixed Income"] as const;
 export const currencyTypes = ["EGP", "USD"] as const;
 
 // New constants for Fixed Estimates

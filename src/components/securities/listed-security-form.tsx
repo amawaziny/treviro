@@ -217,6 +217,7 @@ export function ListedSecurityForm({
                 <FormLabel>{t("current_price")}</FormLabel>
                 <FormControl>
                   <NumericInput
+                    decimalScale={5}
                     data-testid="price-input"
                     placeholder={t("e.g., 500")}
                     value={String(field.value ?? "")}
