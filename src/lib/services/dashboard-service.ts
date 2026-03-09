@@ -35,12 +35,10 @@ import { dateConverter } from "@/lib/firestore-converters";
  * 11. sell for gold
  * 12. sell for realestate
  * 13. meter price for realestate
- * 15. investment breakdown by type in dashboard we COULD have the realized pnl for each type, calculated in dashboard summary total for each type of investment
- * 17. projected interest should check if its quartarly or yearly (we could check for matured date and next interest date (new field should be updated with the scheduler or same useEffect for handlematureddebt))
- * 18. check if we can use IsDebtInvestment || IsDebtFundInvestment with transaction metadata
- * 19. page for add new record to ListedSecurities collection
- * 20. page for adding price history for listed securities of type fund or has fund type
- * 21. check if security of type fund show old chart if not show tradingview chart
+ * 14. investment breakdown by type in dashboard we COULD have the realized pnl for each type, calculated in dashboard summary total for each type of investment
+ * 15. projected interest should check if its quartarly or yearly (we could check for matured date and next interest date (new field should be updated with the scheduler or same useEffect for handlematureddebt))
+ * 16. check if we can use IsDebtInvestment || IsDebtFundInvestment with transaction metadata
+ * 17. page for adding price history for listed securities of type fund or has fund type
  */
 
 export class DashboardService {

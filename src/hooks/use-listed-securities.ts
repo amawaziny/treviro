@@ -55,10 +55,16 @@ export const useListedSecurities = () => {
     async (securityData: Omit<ListedSecurity, "id">) => {
       try {
         setIsLoading(true);
-        const id = securityData.market + "-" + securityData.symbol; 
-        const securityDocRef = masterDataService.getDocRef(LISTED_SECURITIES_COLLECTION, id);
+        const id = securityData.market + "-" + securityData.symbol;
+        const securityDocRef = masterDataService.getDocRef(
+          LISTED_SECURITIES_COLLECTION,
+          id,
+        );
         await setDoc(securityDocRef, securityData);
-        setListedSecurities((prev) => [...prev, { id, ...securityData } as ListedSecurity]);
+        setListedSecurities((prev) => [
+          ...prev,
+          { id, ...securityData } as ListedSecurity,
+        ]);
       } catch (err) {
         console.error("Error creating listed security:", err);
         throw err;
@@ -69,5 +75,11 @@ export const useListedSecurities = () => {
     [],
   );
 
-  return { listedSecurities, isLoading, error, getSecurityById, createSecurity };
+  return {
+    listedSecurities,
+    isLoading,
+    error,
+    getSecurityById,
+    createSecurity,
+  };
 };

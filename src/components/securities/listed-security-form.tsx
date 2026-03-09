@@ -102,14 +102,14 @@ export function ListedSecurityForm({
 
   const handleInternalSubmit = async (values: ListedSecurityFormValues) => {
     try {
-        await onSubmit(values);
-      
-        toast({
-          title: t("success"),
-          description: t("security_record_saved_successfully"),
-        });
+      await onSubmit(values);
 
-        router.push("/securities");
+      toast({
+        title: t("success"),
+        description: t("security_record_saved_successfully"),
+      });
+
+      router.push("/securities");
     } catch (error) {
       toast({
         title: t("error"),
@@ -328,9 +328,7 @@ export function ListedSecurityForm({
             name="market"
             render={({ field }) => (
               <FormItem data-testid="market-form-item">
-                <FormLabel>
-                  {t("market")}
-                </FormLabel>
+                <FormLabel>{t("market")}</FormLabel>
                 <FormControl>
                   <Input
                     data-testid="market-input"
