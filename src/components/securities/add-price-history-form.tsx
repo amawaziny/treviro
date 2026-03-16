@@ -45,7 +45,6 @@ export function AddPriceHistoryForm({ onSubmit }: AddPriceHistoryFormProps) {
   const { t, dir } = useLanguage();
   const { setHeaderProps, openForm, closeForm } = useForm();
   const { listedSecurities } = useListedSecurities();
-  const [selectedSecurity, setSelectedSecurity] = useState<ListedSecurity | null>(null);
 
   // Get all funds
   const funds = listedSecurities.filter((security: ListedSecurity) => security.securityType === "Fund");
@@ -79,8 +78,6 @@ export function AddPriceHistoryForm({ onSubmit }: AddPriceHistoryFormProps) {
 
   const handleSecurityChange = (value: string) => {
     form.setValue("securityId", value);
-    const security = funds.find((s: ListedSecurity) => s.id === value);
-    setSelectedSecurity(security || null);
   };
 
   const handleInternalSubmit = async (values: AddPriceHistoryFormValues) => {
@@ -156,11 +153,17 @@ export function AddPriceHistoryForm({ onSubmit }: AddPriceHistoryFormProps) {
         <div className="pt-4">
           <Button
             type="submit"
-            disabled={true}
+            disabled={form.formState.isSubmitting}
             data-testid="submit-button"
-            className="opacity-50 cursor-not-allowed"
           >
-            {t("Save")}
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t("Saving")}
+              </>
+            ) : (
+              t("Save")
+            )}
           </Button>
         </div>
       </form>
