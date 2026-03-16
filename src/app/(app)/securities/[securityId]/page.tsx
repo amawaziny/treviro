@@ -50,6 +50,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useTransactions } from "@/contexts/transactions-context";
 import SecurityChart from "@/components/investments/securities/security-chart";
 import { calcProfit } from "@/lib/financial-utils";
+import { SecurityPriceHistoryChart } from "@/components/investments/securities/security-price-history-chart";
 
 export default function SecurityDetailPage() {
   const { t, language, dir } = useLanguage();
@@ -339,8 +340,13 @@ export default function SecurityDetailPage() {
               <CardTitle className="text-md">{t("price_history")}</CardTitle>
             </CardHeader>
             <CardContent className="h-[400px]">
-              {security.securityType !== "Fund" && (
+              {security.securityType !== "Fund" ? (
                 <SecurityChart symbol={security.symbol} />
+              ) : (
+                <SecurityPriceHistoryChart
+                  securityId={security.id}
+                  currency={security.currency}
+                />
               )}
             </CardContent>
           </Card>

@@ -60,7 +60,7 @@ const getNumPointsForRange = (range: SecurityChartTimeRange): number => {
   }
 };
 
-export function SecurityDetailChart({
+export function SecurityPriceHistoryChart({
   securityId,
   currency,
 }: SecurityDetailChartProps) {
@@ -139,16 +139,6 @@ export function SecurityDetailChart({
         setChartData(finalData);
       } catch (err: any) {
         console.error(t("error_fetching_price_history"), err);
-        if (
-          err.code === t("failedprecondition") &&
-          err.message.includes("index")
-        ) {
-          setError(
-            `Firestore index missing for price history. Please create it in Firebase console. Details: ${err.message}`,
-          );
-        } else {
-          setError(err.message || t("failed_to_load_chart_data"));
-        }
         setChartData([]);
       } finally {
         setIsLoading(false);

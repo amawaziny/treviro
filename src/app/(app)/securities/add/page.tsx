@@ -45,9 +45,17 @@ export default function AddSecurityPage() {
       isin: formValues.isin || "",
       sector: formValues.sector || "",
       sectorAr: "",
-      currencyAr: formValues.currency === "USD" ? "دولار أمريكي" : formValues.currency === "EGP" ? "ج.م" : formValues.currency,
+      currencyAr:
+        formValues.currency === "USD"
+          ? "دولار أمريكي"
+          : formValues.currency === "EGP"
+            ? "ج.م"
+            : formValues.currency,
       lastUpdated: new Date().toISOString(),
-      securityTypeAr: formValues.securityType === "Stock" ? "اوراق مالية مصرية - اسهم" : "صندوق",
+      securityTypeAr:
+        formValues.securityType === "Stock"
+          ? "اوراق مالية مصرية - اسهم"
+          : "صندوق",
     };
 
     await createSecurity(securityData);

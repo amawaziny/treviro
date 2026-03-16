@@ -51,7 +51,16 @@ interface NumericInputProps
 
 const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
   (
-    { value, onChange, className, allowDecimal = true, min, max, decimalScale = 3, ...props },
+    {
+      value,
+      onChange,
+      className,
+      allowDecimal = true,
+      min,
+      max,
+      decimalScale = 3,
+      ...props
+    },
     ref,
   ) => {
     // Use the forwarded ref directly
