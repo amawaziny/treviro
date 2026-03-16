@@ -42,7 +42,7 @@ const RenderStockFieldsComponent: React.FC<RenderStockFieldsProps> = ({
             {preSelectedSecurityDetails.securityType === "Fund" &&
               preSelectedSecurityDetails.fundType && (
                 <p className="text-xs text-muted-foreground">
-                  {`${t("type")}: ${preSelectedSecurityDetails.fundType}`}
+                  {`${t("type")}: ${t(preSelectedSecurityDetails.fundType)}`}
                 </p>
               )}
           </div>

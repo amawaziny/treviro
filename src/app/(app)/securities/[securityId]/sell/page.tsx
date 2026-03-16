@@ -39,7 +39,7 @@ export default function SellSecurityPage() {
     openForm();
 
     if (security) {
-      const pageTitle = `${t("Sell")}: ${security[language === "ar" ? "name_ar" : "name"]} ${security.securityType === "Fund" ? `(${security.fundType})` : ""}`;
+      const pageTitle = `${t("Sell")}: ${security[language === "ar" ? "name_ar" : "name"]} ${security.securityType === "Fund" ? `(${t(security.fundType!)})` : ""}`;
 
       setHeaderProps({
         showBackButton: true,

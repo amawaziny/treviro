@@ -280,7 +280,7 @@ export interface ListedSecurity {
   volume: number;
   market: string;
   securityType: "Stock" | "Fund";
-  fundType?: InvestmentType;
+  fundType?: FundType;
   description?: string;
   isin: string;
   sector: string;
