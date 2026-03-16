@@ -6,16 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/language-context";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import Link from "next/link";
 import { useAdmin } from "@/hooks/use-admin";
+import { useListedSecurities } from "@/hooks/use-listed-securities";
+import { SpeedDialFloatingButton } from "@/components/common/speed-dial-floating-button";
+import type { ListedSecurity } from "@/lib/types";
+import { Settings, TrendingUp } from "lucide-react";
 
 export default function SecuritiesPage() {
   const { t, dir, language } = useLanguage();
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
   const { isAdmin, isLoading } = useAdmin();
+  const { listedSecurities } = useListedSecurities();
 
   // Initialize activeTab from URL or default to 'stocks'
   const [activeTab, setActiveTab] = useState(urlTab || "stocks");
@@ -29,6 +31,9 @@ export default function SecuritiesPage() {
       setActiveTab(targetTab);
     }
   }, [searchParams]); // Only run when searchParams change (e.g. browser back/forward)
+
+  // Check if there are any funds available
+  const hasFunds = listedSecurities.some((security: ListedSecurity) => security.securityType === "Fund");
 
   // Handler to update state when user clicks a tab
   const handleTabChange = (newTab: string) => {
@@ -74,17 +79,25 @@ export default function SecuritiesPage() {
 
       <div style={{ marginBottom: "96px" }}></div>
       {isAdmin && !isLoading && (
-        <Link href="/securities/add" passHref>
-          <Button
-            data-testid="add-security-button"
-            variant="default"
-            size="icon"
-            className={`fixed z-50 h-14 w-14 rounded-full shadow-lg ${language === "ar" ? "left-8" : "right-8"} bottom-[88px] md:bottom-8`}
-            aria-label="Add new security"
-          >
-            <Plus className="h-7 w-7" />
-          </Button>
-        </Link>
+        <SpeedDialFloatingButton
+          actions={[
+            {
+              icon: <TrendingUp className="h-5 w-5" />,
+              label: t("add_price_history"),
+              href: "/securities/add-price-history",
+              disabled: !hasFunds,
+              title: hasFunds ? t("add_price_history") : t("no_funds_available"),
+              testId: "add-price-history-button",
+            },
+            {
+              icon: <Settings className="h-5 w-5" />,
+              label: t("add_new_security"),
+              href: "/securities/add",
+              testId: "add-new-security-button",
+            },
+          ]}
+          testId="securities-fab-menu"
+        />
       )}
     </div>
   );

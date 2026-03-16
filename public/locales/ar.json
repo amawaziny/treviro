@@ -841,6 +841,13 @@
   "failed_to_save_security_record": "فشل في حفظ سجل الورقة المالية",
   "edit_security_record": "تعديل سجل الورقة المالية",
   "add_new_security": "إضافة ورقة مالية جديدة",
+  "add_price_history": "إضافة سجل الأسعار",
+  "select_fund": "اختر صندوق",
+  "add_price_history_for_fund": "إضافة سجل الأسعار للصناديق",
+  "no_funds_available": "لا توجد صناديق متاحة",
+  "coming_soon": "قريباً",
+  "open_menu": "فتح القائمة",
+  "close_menu": "إغلاق القائمة",
   "add_security_details_to_explore_stocks_and_funds_from_different_markets": "أضف تفاصيل الورقة المالية لاستكشاف الأسهم والصناديق من أسواق مختلفة.",
   "back_to_securities": "رجوع إلى الأوراق المالية",
   "logo_url": "رابط الشعار",
@@ -855,5 +862,6 @@
   "RIET": "صناديق العقارات",
   "REIT": "صناديق العقارات",
   "Fixed Income": "الدخل الثابت",
-  "MM": "سوق المال"
+  "MM": "سوق المال",
+  "Save":"حفظ"
 }
