@@ -40,7 +40,7 @@ export default function AddSecurityPage() {
       volume: formValues.volume ?? 0,
       market: formValues.market,
       securityType: formValues.securityType,
-      fundType: getInvestmentType(formValues.fundType),
+      fundType: formValues.fundType,
       description: formValues.description,
       isin: formValues.isin || "",
       sector: formValues.sector || "",

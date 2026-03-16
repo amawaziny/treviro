@@ -236,24 +236,6 @@ export function BuySellSecurityForm({
 
           <FormField
             control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("date")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={field.value || getCurrentDate()}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="fees"
             render={({ field }) => (
               <FormItem>
@@ -273,6 +255,24 @@ export function BuySellSecurityForm({
                 <FormDescription>
                   {t("total_fees_for_this_transaction")}
                 </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("date")}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || getCurrentDate()}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

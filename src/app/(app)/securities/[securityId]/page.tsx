@@ -389,7 +389,7 @@ export default function SecurityDetailPage() {
                       <p className="text-sm font-medium text-muted-foreground">
                         {t("fund_type")}
                       </p>
-                      <p className="text-sm">{security.fundType}</p>
+                      <p className="text-sm">{t(security.fundType!)}</p>
                     </div>
                   )}
                   <div className="space-y-2">
